@@ -1,26 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Navbar } from "@/components/site/Navbar";
+import { FeaturedNews } from "@/components/site/FeaturedNews";
+import { Communities } from "@/components/site/Communities";
+import { Achievements } from "@/components/site/Achievements";
+import { Partners } from "@/components/site/Partners";
+import { Footer } from "@/components/site/Footer";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "SAAE — Syrian Association for AI & Entrepreneurship" },
+      {
+        name: "description",
+        content:
+          "The first official Syrian organization dedicated to artificial intelligence, innovation, and entrepreneurship — empowering Syrian youth and rebuilding technological capacity.",
+      },
+      { property: "og:title", content: "SAAE — Syrian Association for AI & Entrepreneurship" },
+      {
+        property: "og:description",
+        content: "Education, research, and entrepreneurship building Syria's AI future, line by line.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80",
+      },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div id="home" className="min-h-screen bg-background text-foreground">
+      <Navbar />
+      <main>
+        <FeaturedNews />
+        <Communities />
+        <Achievements />
+        <Partners />
+      </main>
+      <Footer />
     </div>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
