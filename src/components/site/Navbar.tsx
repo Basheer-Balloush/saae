@@ -36,9 +36,6 @@ export function Navbar() {
             src={lang === "ar" && theme === "dark" ? logoArDark : logo}
             alt="Syrian Association for AI & Entrepreneurship"
             className="h-10 w-auto sm:h-11"
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
           />
         </a>
 
