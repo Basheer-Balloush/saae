@@ -1,6 +1,30 @@
 export type Lang = "en" | "ar";
 
-export const translations = {
+type Dict = {
+  nav: { home: string; news: string; communities: string; achievements: string; partners: string; about: string; contact: string; cta: string; langToggle: string };
+  news: {
+    eyebrow: string; title: string; subtitle: string; readMore: string; viewAll: string;
+    categories: { workshop: string; partnership: string; research: string; education: string; community: string; event: string };
+    items: {
+      featured: { title: string; excerpt: string; date: string };
+      a: { title: string; date: string }; b: { title: string; date: string }; c: { title: string; date: string };
+      d: { title: string; date: string }; e: { title: string; date: string }; f: { title: string; date: string }; g: { title: string; date: string };
+    };
+  };
+  communities: {
+    eyebrow: string; title: string; subtitle: string; cta: string;
+    cards: Record<"women" | "health" | "education" | "research" | "entrepreneurship" | "robotics", { title: string; desc: string }>;
+  };
+  achievements: { eyebrow: string; title: string; body: string; stats: { value: string; label: string }[] };
+  partners: { eyebrow: string; title: string };
+  footer: {
+    mission: string; quickLinks: string; contact: string;
+    form: { name: string; email: string; message: string; send: string; sent: string };
+    hq: string; address: string; visit: string; rights: string; madeIn: string;
+  };
+};
+
+export const translations: Record<Lang, Dict> = {
   en: {
     nav: {
       home: "Home",
