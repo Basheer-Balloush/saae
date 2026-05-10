@@ -182,13 +182,13 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
-  [dir="rtl"] body {
-    font-family: "Cairo", system-ui, sans-serif;
+  [dir="rtl"] body,
+  [dir="rtl"] * {
+    font-family: "Cairo", "Noto Sans Arabic", "Segoe UI", system-ui, sans-serif;
   }
 
   .font-display {
