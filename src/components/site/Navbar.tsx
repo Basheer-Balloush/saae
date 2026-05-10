@@ -33,7 +33,7 @@ export function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3 lg:px-10">
         <a href="#home" className="flex items-center" aria-label="SAAIE — Syrian Association for AI & Entrepreneurship">
           <img
-            src={logo}
+            src={lang === "ar" && theme === "dark" ? logoArDark : logo}
             alt="Syrian Association for AI & Entrepreneurship"
             className="h-10 w-auto sm:h-11"
           />
