@@ -4,18 +4,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Brand fonts */
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&display=swap");
+
 /*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * SAAE Design System
+ * Primary: Teal Blue #048090
+ * Secondary: Asparagus Green #698F3F
+ * Support: Jet Black #2E2E2E
+ * All colors in oklch.
  */
 
 @theme inline {
@@ -26,6 +23,10 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  --font-sans: "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Fraunces", "Cairo", serif;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -46,6 +47,8 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-foreground: var(--surface-foreground);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -63,73 +66,98 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+
+  /* Backgrounds */
+  --background: oklch(0.995 0.002 95);          /* near-white, very subtle warm */
+  --foreground: oklch(0.235 0 0);               /* Jet Black #2E2E2E */
+  --surface: oklch(0.975 0.004 95);             /* off-white section bg */
+  --surface-foreground: oklch(0.235 0 0);
+
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.235 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.235 0 0);
+
+  /* Brand */
+  --primary: oklch(0.55 0.085 209);             /* Teal Blue #048090 */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.595 0.115 130);          /* Asparagus Green #698F3F */
+  --secondary-foreground: oklch(1 0 0);
+
+  --muted: oklch(0.965 0.003 95);
+  --muted-foreground: oklch(0.45 0.01 95);
+
+  --accent: oklch(0.95 0.02 209);               /* very light teal tint */
+  --accent-foreground: oklch(0.35 0.05 209);
+
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  --border: oklch(0.91 0.005 95);
+  --input: oklch(0.91 0.005 95);
+  --ring: oklch(0.55 0.085 209);
+
+  /* Brand gradient (subtle, sparing use only) */
+  --gradient-brand: linear-gradient(135deg, oklch(0.55 0.085 209) 0%, oklch(0.595 0.115 130) 100%);
+  --shadow-soft: 0 1px 2px rgba(46, 46, 46, 0.04), 0 8px 24px -12px rgba(46, 46, 46, 0.08);
+  --shadow-lift: 0 2px 4px rgba(46, 46, 46, 0.04), 0 16px 40px -16px rgba(46, 46, 46, 0.12);
+
+  --chart-1: oklch(0.55 0.085 209);
+  --chart-2: oklch(0.595 0.115 130);
+  --chart-3: oklch(0.45 0.05 209);
+  --chart-4: oklch(0.7 0.08 130);
+  --chart-5: oklch(0.235 0 0);
+
+  --sidebar: oklch(0.99 0.002 95);
+  --sidebar-foreground: oklch(0.235 0 0);
+  --sidebar-primary: oklch(0.55 0.085 209);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.95 0.02 209);
+  --sidebar-accent-foreground: oklch(0.35 0.05 209);
+  --sidebar-border: oklch(0.91 0.005 95);
+  --sidebar-ring: oklch(0.55 0.085 209);
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
+  --background: oklch(0.19 0 0);                /* near jet black */
+  --foreground: oklch(0.97 0.002 95);
+  --surface: oklch(0.235 0 0);                  /* Jet Black #2E2E2E */
+  --surface-foreground: oklch(0.97 0.002 95);
+
+  --card: oklch(0.235 0 0);
+  --card-foreground: oklch(0.97 0.002 95);
+  --popover: oklch(0.235 0 0);
+  --popover-foreground: oklch(0.97 0.002 95);
+
+  --primary: oklch(0.65 0.09 209);
+  --primary-foreground: oklch(0.15 0 0);
+  --secondary: oklch(0.68 0.115 130);
+  --secondary-foreground: oklch(0.15 0 0);
+
+  --muted: oklch(0.28 0 0);
+  --muted-foreground: oklch(0.72 0.01 95);
+
+  --accent: oklch(0.3 0.04 209);
+  --accent-foreground: oklch(0.9 0.05 209);
+
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
+
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --ring: oklch(0.65 0.09 209);
+
+  --shadow-soft: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.5);
+  --shadow-lift: 0 2px 4px rgba(0,0,0,0.4), 0 16px 40px -16px rgba(0,0,0,0.6);
+
+  --sidebar: oklch(0.235 0 0);
+  --sidebar-foreground: oklch(0.97 0.002 95);
+  --sidebar-primary: oklch(0.65 0.09 209);
+  --sidebar-primary-foreground: oklch(0.15 0 0);
+  --sidebar-accent: oklch(0.3 0.04 209);
+  --sidebar-accent-foreground: oklch(0.9 0.05 209);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --sidebar-ring: oklch(0.65 0.09 209);
 }
 
 @layer base {
@@ -137,8 +165,48 @@
     border-color: var(--color-border);
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  [dir="rtl"] body {
+    font-family: "Cairo", system-ui, sans-serif;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  [dir="rtl"] .font-display {
+    font-family: "Cairo", sans-serif;
+    font-weight: 900;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-brand {
+    background-image: var(--gradient-brand);
+  }
+  .text-gradient-brand {
+    background-image: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  .shadow-lift {
+    box-shadow: var(--shadow-lift);
   }
 }
