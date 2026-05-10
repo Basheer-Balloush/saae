@@ -82,10 +82,11 @@ export function Navbar() {
         <nav className="hidden items-center gap-7 lg:flex">
           {sections.map((s) => {
             const isActive = active === s;
+            const href = s === "contact" ? "#assistant" : `#${s}`;
             return (
               <a
                 key={s}
-                href={`#${s}`}
+                href={href}
                 className={cn(
                   "relative text-sm font-medium transition-colors",
                   isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
@@ -120,7 +121,7 @@ export function Navbar() {
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </button>
           <a
-            href="#contact"
+            href="#assistant"
             className="hidden rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:opacity-90 md:inline-flex"
           >
             {t.nav.cta}
@@ -141,7 +142,7 @@ export function Navbar() {
             {sections.map((s) => (
               <a
                 key={s}
-                href={`#${s}`}
+                href={s === "contact" ? "#assistant" : `#${s}`}
                 onClick={() => setOpen(false)}
                 className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
               >
@@ -163,7 +164,7 @@ export function Navbar() {
               </button>
             </div>
             <a
-              href="#contact"
+              href="#assistant"
               onClick={() => setOpen(false)}
               className="mt-2 rounded-full bg-primary px-5 py-2.5 text-center text-sm font-semibold text-primary-foreground"
             >
