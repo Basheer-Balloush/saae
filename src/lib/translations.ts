@@ -17,6 +17,15 @@ type Dict = {
   };
   achievements: { eyebrow: string; title: string; body: string; stats: { value: string; label: string }[] };
   partners: { eyebrow: string; title: string };
+  assistant: {
+    eyebrow: string; title: string; subtitle: string; cta: string; soon: string;
+    features: {
+      inquiries: { title: string; desc: string };
+      lead: { title: string; desc: string };
+      suggestions: { title: string; desc: string };
+    };
+    chat: { name: string; status: string; user: string; bot: string; typing: string };
+  };
   footer: {
     mission: string; quickLinks: string; contact: string;
     form: { name: string; email: string; message: string; send: string; sent: string };
@@ -137,6 +146,35 @@ export const translations: Record<Lang, Dict> = {
     partners: {
       eyebrow: "Partners",
       title: "Trusted by institutions driving innovation",
+    },
+    assistant: {
+      eyebrow: "SAAE Assistant",
+      title: "Meet your AI guide to the association",
+      subtitle:
+        "An intelligent assistant that answers your questions, captures your details, and recommends the right path — whether you are an individual learner or a company looking to partner.",
+      cta: "Chat with the assistant",
+      soon: "Launching soon",
+      features: {
+        inquiries: {
+          title: "Answers your questions",
+          desc: "Programs, communities, events, partnerships, training — instant, accurate responses around the clock.",
+        },
+        lead: {
+          title: "Connects you with us",
+          desc: "Captures your contact details and interests, then routes the right team to follow up personally.",
+        },
+        suggestions: {
+          title: "Tailored recommendations",
+          desc: "Suggests communities, courses, or partnership tracks based on your profile and goals.",
+        },
+      },
+      chat: {
+        name: "SAAE Assistant",
+        status: "Online — ready to help",
+        user: "How can my company partner with the association?",
+        bot: "Great question! I can connect you with our partnerships team. Could I get your company name and email?",
+        typing: "Assistant is typing…",
+      },
     },
     footer: {
       mission:
@@ -263,6 +301,35 @@ export const translations: Record<Lang, Dict> = {
     partners: {
       eyebrow: "الشركاء",
       title: "مؤسسات تقود الابتكار تثق بنا",
+    },
+    assistant: {
+      eyebrow: "مساعد الجمعية الذكي",
+      title: "تعرّف على دليلك الذكي للجمعية",
+      subtitle:
+        "مساعد ذكي يجيب عن استفساراتك، ويأخذ بياناتك للتواصل معك، ويقدّم لك اقتراحات مناسبة — سواء كنت فرداً يبحث عن التعلّم أو شركة تبحث عن شراكة.",
+      cta: "تحدث مع المساعد",
+      soon: "قريباً",
+      features: {
+        inquiries: {
+          title: "يجيب عن استفساراتك",
+          desc: "البرامج، المجتمعات، الفعاليات، الشراكات، التدريب — إجابات فورية ودقيقة على مدار الساعة.",
+        },
+        lead: {
+          title: "يوصلك بالجمعية",
+          desc: "يأخذ بيانات تواصلك واهتماماتك ويحوّلك إلى الفريق المختص لمتابعتك شخصياً.",
+        },
+        suggestions: {
+          title: "اقتراحات مخصصة لك",
+          desc: "يقترح المجتمعات أو الدورات أو مسارات الشراكة المناسبة حسب ملفك وأهدافك.",
+        },
+      },
+      chat: {
+        name: "مساعد الجمعية",
+        status: "متصل — جاهز لمساعدتك",
+        user: "كيف يمكن لشركتي أن تصبح شريكاً للجمعية؟",
+        bot: "سؤال ممتاز! يسعدني توصيلك بفريق الشراكات. هل يمكنني أخذ اسم شركتك وبريدك الإلكتروني؟",
+        typing: "المساعد يكتب…",
+      },
     },
     footer: {
       mission:
