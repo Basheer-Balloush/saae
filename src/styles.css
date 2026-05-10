@@ -4,8 +4,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Brand font — Cairo only (per SAAE brand kit) */
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap");
+/* Brand font — Cairo only (per SAAE brand kit). Loaded via <link> in __root.tsx for speed. */
 
 /*
  * SAAE Design System
