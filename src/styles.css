@@ -23,8 +23,8 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 
-  --font-sans: "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Cairo", system-ui, sans-serif;
+  --font-sans: "Cairo", "Noto Sans Arabic", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: "Cairo", "Noto Sans Arabic", system-ui, sans-serif;
 
   /* Type scale tokens — SAAE brand-kit hierarchy, fluid */
   --text-display-1: clamp(2.75rem, 6vw, 5.25rem);
