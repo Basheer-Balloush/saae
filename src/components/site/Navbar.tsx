@@ -4,6 +4,7 @@ import { useLang } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/saae-logo-horizontal.png";
+import logoArDark from "@/assets/saae-logo-ar-dark.png";
 
 const sections = ["home", "news", "communities", "achievements", "partners", "about", "contact"] as const;
 
