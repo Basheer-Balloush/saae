@@ -3,7 +3,7 @@ import { Menu, X, Moon, Sun, Globe } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/saae-logo.png";
+import logo from "@/assets/saae-logo-horizontal.png";
 
 const sections = ["home", "news", "communities", "achievements", "partners", "about", "contact"] as const;
 
@@ -30,14 +30,12 @@ export function Navbar() {
       )}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3 lg:px-10">
-        <a href="#home" className="flex items-center gap-3">
-          <img src={logo} alt="SAAE" className="h-10 w-auto" />
-          <span className="hidden flex-col leading-tight sm:flex">
-            <span className="text-[11px] font-semibold tracking-[0.18em] text-primary uppercase">SAAE</span>
-            <span className="text-[10px] text-muted-foreground max-w-[180px]">
-              {lang === "ar" ? "الجمعية السورية للذكاء الاصطناعي" : "Syrian Association for AI & Entrepreneurship"}
-            </span>
-          </span>
+        <a href="#home" className="flex items-center" aria-label="SAAIE — Syrian Association for AI & Entrepreneurship">
+          <img
+            src={logo}
+            alt="Syrian Association for AI & Entrepreneurship"
+            className="h-10 w-auto sm:h-11"
+          />
         </a>
 
         <nav className="hidden items-center gap-7 lg:flex">
