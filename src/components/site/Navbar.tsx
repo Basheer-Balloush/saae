@@ -121,12 +121,6 @@ export function Navbar() {
           >
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </button>
-          <a
-            href="#assistant"
-            className="hidden rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:opacity-90 md:inline-flex"
-          >
-            {t.nav.cta}
-          </a>
           <button
             onClick={() => setOpen((v) => !v)}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border lg:hidden"
@@ -164,13 +158,6 @@ export function Navbar() {
                 {theme === "light" ? "Dark" : "Light"}
               </button>
             </div>
-            <a
-              href="#assistant"
-              onClick={() => setOpen(false)}
-              className="mt-2 rounded-full bg-primary px-5 py-2.5 text-center text-sm font-semibold text-primary-foreground"
-            >
-              {t.nav.cta}
-            </a>
           </div>
         </div>
       )}
