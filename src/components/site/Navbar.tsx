@@ -39,6 +39,7 @@ export function Navbar() {
       { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
     );
     sections.forEach((id) => {
+      if (id === "news") return; // الأخبار قسم داخل الرئيسية — يبقى "home" هو الـ active
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
