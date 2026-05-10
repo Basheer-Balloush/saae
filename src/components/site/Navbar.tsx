@@ -1,0 +1,126 @@
+import { useEffect, useState } from "react";
+import { Menu, X, Moon, Sun, Globe } from "lucide-react";
+import { useLang } from "@/lib/i18n";
+import { useTheme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
+import logo from "@/assets/saae-logo.png";
+
+const sections = ["home", "news", "communities", "achievements", "partners", "about", "contact"] as const;
+
+export function Navbar() {
+  const { t, toggle: toggleLang, lang } = useLang();
+  const { theme, toggle: toggleTheme } = useTheme();
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <header
+      className={cn(
+        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
+        scrolled
+          ? "border-b border-border/60 bg-background/80 backdrop-blur-xl shadow-soft"
+          : "bg-transparent",
+      )}
+    >
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3 lg:px-10">
+        <a href="#home" className="flex items-center gap-3">
+          <img src={logo} alt="SAAE" className="h-10 w-auto" />
+          <span className="hidden flex-col leading-tight sm:flex">
+            <span className="text-[11px] font-semibold tracking-[0.18em] text-primary uppercase">SAAE</span>
+            <span className="text-[10px] text-muted-foreground max-w-[180px]">
+              {lang === "ar" ? "الجمعية السورية للذكاء الاصطناعي" : "Syrian Association for AI & Entrepreneurship"}
+            </span>
+          </span>
+        </a>
+
+        <nav className="hidden items-center gap-7 lg:flex">
+          {sections.map((s) => (
+            <a
+              key={s}
+              href={`#${s}`}
+              className="text-sm font-medium text-foreground/75 transition-colors hover:text-primary"
+            >
+              {t.nav[s]}
+            </a>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleLang}
+            className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary md:inline-flex"
+            aria-label="Toggle language"
+          >
+            <Globe className="h-3.5 w-3.5" />
+            {t.nav.langToggle}
+          </button>
+          <button
+            onClick={toggleTheme}
+            className="hidden h-9 w-9 items-center justify-center rounded-full border border-border text-foreground/70 transition-colors hover:border-primary hover:text-primary md:inline-flex"
+            aria-label="Toggle theme"
+          >
+            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          </button>
+          <a
+            href="#contact"
+            className="hidden rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:opacity-90 md:inline-flex"
+          >
+            {t.nav.cta}
+          </a>
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border lg:hidden"
+            aria-label="Menu"
+          >
+            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
+      </div>
+
+      {open && (
+        <div className="border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
+          <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
+            {sections.map((s) => (
+              <a
+                key={s}
+                href={`#${s}`}
+                onClick={() => setOpen(false)}
+                className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+              >
+                {t.nav[s]}
+              </a>
+            ))}
+            <div className="mt-3 flex items-center gap-2">
+              <button
+                onClick={toggleLang}
+                className="flex-1 rounded-full border border-border px-3 py-2 text-xs font-semibold"
+              >
+                {t.nav.langToggle}
+              </button>
+              <button
+                onClick={toggleTheme}
+                className="rounded-full border border-border px-3 py-2 text-xs font-semibold"
+              >
+                {theme === "light" ? "Dark" : "Light"}
+              </button>
+            </div>
+            <a
+              href="#contact"
+              onClick={() => setOpen(false)}
+              className="mt-2 rounded-full bg-primary px-5 py-2.5 text-center text-sm font-semibold text-primary-foreground"
+            >
+              {t.nav.cta}
+            </a>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}
