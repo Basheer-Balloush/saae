@@ -277,6 +277,6 @@ export const translations: Record<Lang, Dict> = {
       madeIn: "صُنع في دمشق",
     },
   },
-} as const;
+};
 
-export type Translations = typeof translations.en;
+export type Translations = Dict;
