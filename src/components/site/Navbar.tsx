@@ -81,7 +81,7 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-7 lg:flex">
           {sections.map((s) => {
-            const isActive = active === s;
+            const isActive = s === "contact" ? (active === "assistant" || active === "contact") : active === s;
             const href = s === "contact" ? "#assistant" : `#${s}`;
             return (
               <a
