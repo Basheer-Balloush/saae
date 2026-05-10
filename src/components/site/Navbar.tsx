@@ -40,7 +40,8 @@ export function Navbar() {
     );
     sections.forEach((id) => {
       if (id === "news") return; // الأخبار قسم داخل الرئيسية — يبقى "home" هو الـ active
-      const el = document.getElementById(id);
+      const targetId = id === "contact" ? "assistant" : id;
+      const el = document.getElementById(targetId);
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
