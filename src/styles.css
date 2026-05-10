@@ -4,8 +4,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Brand font — Cairo only (per SAAE brand kit) */
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap");
+/* Brand font — Cairo only (per SAAE brand kit). Loaded via <link> in __root.tsx for speed. */
 
 /*
  * SAAE Design System
@@ -24,8 +23,8 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 
-  --font-sans: "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Cairo", system-ui, sans-serif;
+  --font-sans: "Cairo", "Noto Sans Arabic", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: "Cairo", "Noto Sans Arabic", system-ui, sans-serif;
 
   /* Type scale tokens — SAAE brand-kit hierarchy, fluid */
   --text-display-1: clamp(2.75rem, 6vw, 5.25rem);
@@ -183,13 +182,13 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
-  [dir="rtl"] body {
-    font-family: "Cairo", system-ui, sans-serif;
+  [dir="rtl"] body,
+  [dir="rtl"] * {
+    font-family: "Cairo", "Noto Sans Arabic", "Segoe UI", system-ui, sans-serif;
   }
 
   .font-display {
