@@ -7,7 +7,7 @@ import logo from "@/assets/saae-logo-horizontal.png";
 import logoEnLight from "@/assets/saae-logo-en-light.png";
 import logoArDark from "@/assets/saae-logo-ar-dark.png";
 
-const sections = ["home", "communities", "achievements", "partners", "news", "about", "contact"] as const;
+const sections = ["home", "communities", "achievements", "partners", "contact", "news", "about"] as const;
 
 export function Navbar() {
   const { t, lang, toggle: toggleLang } = useLang();
