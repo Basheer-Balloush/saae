@@ -41,11 +41,11 @@ export function FeaturedNews() {
           className="mb-12 flex flex-col gap-4 lg:mb-16 lg:flex-row lg:items-end lg:justify-between"
         >
           <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">{t.news.eyebrow}</p>
-            <h1 className="mt-3 font-display text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+            <p className="text-caption text-primary">{t.news.eyebrow}</p>
+            <h1 className="mt-4 text-display-2 text-foreground">
               {t.news.title}
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground">{t.news.subtitle}</p>
+            <p className="mt-5 max-w-xl text-body text-muted-foreground">{t.news.subtitle}</p>
           </div>
         </motion.div>
 
@@ -74,10 +74,10 @@ export function FeaturedNews() {
                 </span>
                 <span className="text-muted-foreground">{items.featured.date}</span>
               </div>
-              <h2 className="mt-5 font-display text-2xl font-bold leading-tight text-foreground sm:text-3xl lg:text-[34px]">
+              <h2 className="mt-5 text-h1 text-foreground">
                 {items.featured.title}
               </h2>
-              <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">{items.featured.excerpt}</p>
+              <p className="mt-4 max-w-2xl text-body text-muted-foreground">{items.featured.excerpt}</p>
               <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
                 {t.news.readMore}
                 <ArrowUpRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />

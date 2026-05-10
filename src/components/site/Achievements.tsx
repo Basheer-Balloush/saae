@@ -14,11 +14,11 @@ export function Achievements() {
             transition={{ duration: 0.6 }}
             className="lg:col-span-6"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">{t.achievements.eyebrow}</p>
-            <h2 className="mt-3 font-display text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-[56px]">
+            <p className="text-caption text-primary">{t.achievements.eyebrow}</p>
+            <h2 className="mt-4 text-display-1 text-foreground">
               {t.achievements.title}
             </h2>
-            <p className="mt-6 max-w-lg text-base leading-relaxed text-muted-foreground">{t.achievements.body}</p>
+            <p className="mt-6 max-w-lg text-body text-muted-foreground">{t.achievements.body}</p>
             <div className="mt-8 h-[3px] w-20 bg-gradient-brand" />
           </motion.div>
 
@@ -36,7 +36,7 @@ export function Achievements() {
                     (i === 4 ? " col-span-2" : "")
                   }
                 >
-                  <div className="font-display text-4xl font-bold leading-none text-foreground sm:text-5xl">{s.value}</div>
+                  <div className="text-h1 font-black text-foreground" style={{ letterSpacing: "-0.03em" }}>{s.value}</div>
                   <div className="mt-3 h-px w-10 bg-primary/60 transition-all group-hover:w-16" />
                   <div className="mt-3 text-sm font-semibold text-muted-foreground">{s.label}</div>
                 </motion.div>

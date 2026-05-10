@@ -24,11 +24,11 @@ export function Communities() {
           transition={{ duration: 0.6 }}
           className="max-w-3xl"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">{t.communities.eyebrow}</p>
-          <h2 className="mt-3 font-display text-3xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+          <p className="text-caption text-primary">{t.communities.eyebrow}</p>
+          <h2 className="mt-4 text-display-2 text-foreground">
             {t.communities.title}
           </h2>
-          <p className="mt-5 text-base leading-relaxed text-muted-foreground">{t.communities.subtitle}</p>
+          <p className="mt-5 text-body text-muted-foreground">{t.communities.subtitle}</p>
         </motion.div>
 
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
