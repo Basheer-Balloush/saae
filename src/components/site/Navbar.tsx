@@ -31,11 +31,26 @@ export function Navbar() {
       )}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3 lg:px-10">
-        <a href="#home" className="flex items-center" aria-label="SAAIE — Syrian Association for AI & Entrepreneurship">
+        <a href="#home" className="relative flex items-center" aria-label="SAAIE — Syrian Association for AI & Entrepreneurship">
           <img
-            src={lang === "ar" && theme === "dark" ? logoArDark : logo}
+            src={logo}
             alt="Syrian Association for AI & Entrepreneurship"
-            className="h-10 w-auto sm:h-11"
+            className={cn(
+              "h-10 w-auto sm:h-11 transition-opacity duration-150",
+              lang === "ar" && theme === "dark" ? "opacity-0 absolute inset-0" : "opacity-100",
+            )}
+            fetchPriority="high"
+            decoding="async"
+          />
+          <img
+            src={logoArDark}
+            alt="الجمعية السورية للذكاء الاصطناعي وريادة الأعمال"
+            className={cn(
+              "h-10 w-auto sm:h-11 transition-opacity duration-150",
+              lang === "ar" && theme === "dark" ? "opacity-100" : "opacity-0 absolute inset-0",
+            )}
+            fetchPriority="high"
+            decoding="async"
           />
         </a>
 
