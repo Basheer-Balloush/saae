@@ -4,6 +4,7 @@ import { useLang } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/saae-logo-horizontal.png";
+import logoEnLight from "@/assets/saae-logo-en-light.png";
 import logoArDark from "@/assets/saae-logo-ar-dark.png";
 
 const sections = ["home", "news", "communities", "achievements", "partners", "about", "contact"] as const;
@@ -32,26 +33,26 @@ export function Navbar() {
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3 lg:px-10">
         <a href="#home" className="relative flex items-center" aria-label="SAAIE — Syrian Association for AI & Entrepreneurship">
-          <img
-            src={logo}
-            alt="Syrian Association for AI & Entrepreneurship"
-            className={cn(
-              "h-10 w-auto sm:h-11 transition-opacity duration-150",
-              lang === "ar" && theme === "dark" ? "opacity-0 absolute inset-0" : "opacity-100",
-            )}
-            fetchPriority="high"
-            decoding="async"
-          />
-          <img
-            src={logoArDark}
-            alt="الجمعية السورية للذكاء الاصطناعي وريادة الأعمال"
-            className={cn(
-              "h-10 w-auto sm:h-11 transition-opacity duration-150",
-              lang === "ar" && theme === "dark" ? "opacity-100" : "opacity-0 absolute inset-0",
-            )}
-            fetchPriority="high"
-            decoding="async"
-          />
+          {(() => {
+            const variants = [
+              { src: logoEnLight, show: lang === "en" && theme === "light", alt: "SAAIE — Syrian Association for AI & Entrepreneurship" },
+              { src: logoArDark, show: lang === "ar" && theme === "dark", alt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
+              { src: logo, show: !((lang === "en" && theme === "light") || (lang === "ar" && theme === "dark")), alt: "SAAIE" },
+            ];
+            return variants.map((v, i) => (
+              <img
+                key={i}
+                src={v.src}
+                alt={v.alt}
+                className={cn(
+                  "h-10 w-auto sm:h-11 transition-opacity duration-150",
+                  v.show ? "opacity-100" : "opacity-0 absolute inset-0 pointer-events-none",
+                )}
+                fetchPriority="high"
+                decoding="async"
+              />
+            ));
+          })()}
         </a>
 
         <nav className="hidden items-center gap-7 lg:flex">
