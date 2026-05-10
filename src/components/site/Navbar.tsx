@@ -79,15 +79,27 @@ export function Navbar() {
         </a>
 
         <nav className="hidden items-center gap-7 lg:flex">
-          {sections.map((s) => (
-            <a
-              key={s}
-              href={`#${s}`}
-              className="text-sm font-medium text-foreground/75 transition-colors hover:text-primary"
-            >
-              {t.nav[s]}
-            </a>
-          ))}
+          {sections.map((s) => {
+            const isActive = active === s;
+            return (
+              <a
+                key={s}
+                href={`#${s}`}
+                className={cn(
+                  "relative text-sm font-medium transition-colors",
+                  isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
+                )}
+              >
+                {t.nav[s]}
+                <span
+                  className={cn(
+                    "pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center rounded-full bg-secondary transition-transform duration-300",
+                    isActive ? "scale-x-100" : "scale-x-0",
+                  )}
+                />
+              </a>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2">
