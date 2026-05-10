@@ -194,16 +194,72 @@
 
   .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
-  }
-
-  [dir="rtl"] .font-display {
-    font-family: "Cairo", sans-serif;
     font-weight: 900;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
   }
 }
 
 @layer utilities {
+  .text-display-1 {
+    font-size: var(--text-display-1);
+    font-weight: 900;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .text-display-2 {
+    font-size: var(--text-display-2);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+  .text-h1 {
+    font-size: var(--text-h1);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .text-h2 {
+    font-size: var(--text-h2);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  .text-h3 {
+    font-size: var(--text-h3);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .text-body {
+    font-size: var(--text-body);
+    font-weight: 400;
+    line-height: 1.65;
+  }
+  .text-small {
+    font-size: var(--text-small);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .text-caption {
+    font-size: var(--text-caption);
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Arabic needs a little more vertical air on big display sizes */
+  [dir="rtl"] .text-display-1 { line-height: 1.18; letter-spacing: -0.01em; }
+  [dir="rtl"] .text-display-2 { line-height: 1.2; letter-spacing: -0.005em; }
+  [dir="rtl"] .text-h1 { line-height: 1.3; letter-spacing: 0; }
+  [dir="rtl"] .text-h2 { line-height: 1.35; letter-spacing: 0; }
+  [dir="rtl"] .text-h3 { line-height: 1.45; letter-spacing: 0; }
+  [dir="rtl"] .text-caption { letter-spacing: 0.08em; }
   .bg-gradient-brand {
     background-image: var(--gradient-brand);
   }
