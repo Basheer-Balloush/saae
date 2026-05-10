@@ -8,7 +8,7 @@ import logo from "@/assets/saae-logo-horizontal.png";
 const sections = ["home", "news", "communities", "achievements", "partners", "about", "contact"] as const;
 
 export function Navbar() {
-  const { t, toggle: toggleLang, lang } = useLang();
+  const { t, toggle: toggleLang } = useLang();
   const { theme, toggle: toggleTheme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
