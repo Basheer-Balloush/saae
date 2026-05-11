@@ -50,6 +50,7 @@ export function FeaturedNews() {
           setSlides(
             data.map((r) => ({
               key: r.id,
+              id: r.id,
               img: r.image_url || IMG.featured,
               cat: communityLabel(r.category, lang),
               title: r.title,
