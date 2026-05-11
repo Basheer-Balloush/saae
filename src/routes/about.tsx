@@ -70,7 +70,7 @@ function Hero({ Arrow }: { Arrow: typeof ArrowRight }) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,hsl(var(--background))_80%)]" />
       </div>
 
-      <div className="relative mx-auto max-w-5xl px-6 pb-20 pt-8 text-center lg:px-10 lg:pb-28 lg:pt-12">
+      <div className="relative mx-auto max-w-5xl px-6 pb-16 pt-0 text-center lg:px-10 lg:pb-24 lg:pt-0">
         <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
           من نحن
         </h1>
