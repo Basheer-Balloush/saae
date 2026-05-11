@@ -58,6 +58,26 @@ type RelatedItem = {
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
 
+const STATIC_ARTICLE: NewsArticle = {
+  id: "static",
+  title: "SAAE — News",
+  title_ar: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",
+  title_en: "Syrian Association for AI & Entrepreneurship",
+  excerpt: null,
+  excerpt_ar: "محتوى تعريفي عن نشاطات الجمعية ومجتمعاتها.",
+  excerpt_en: "Introductory content about SAAE activities and communities.",
+  content: null,
+  content_ar:
+    "نعمل في الجمعية السورية للذكاء الاصطناعي وريادة الأعمال على بناء بيئةٍ علميةٍ وتقنيةٍ تجمع الباحثين والمطورين ورواد الأعمال لخدمة سوريا الجديدة.",
+  content_en:
+    "The Syrian Association for AI & Entrepreneurship (SAAE) builds a scientific and technical environment connecting researchers, developers and entrepreneurs to serve the new Syria.",
+  image_url: FALLBACK_IMG,
+  images: null,
+  videos: null,
+  category: "research",
+  published_at: new Date().toISOString(),
+};
+
 const fade = {
   initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
@@ -122,7 +142,8 @@ function NewsDetailPage() {
 
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
     if (!isUuid) {
-      setArticle(null);
+      // Avoid extended skeleton flash (<50ms) — show static fallback immediately
+      setArticle(STATIC_ARTICLE);
       setRelated([]);
       setLoading(false);
       return () => { cancelled = true; };
@@ -335,8 +356,9 @@ function NewsDetailPage() {
             {...fade}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mx-auto mt-24 max-w-[850px] px-6"
+            style={{ borderTop: `2px solid ${TEAL}`, paddingTop: 32 }}
           >
-            <div className="mb-8 flex items-center gap-4" style={{ borderBottom: `1px solid ${TEAL}`, paddingBottom: 12 }}>
+            <div className="mb-8 flex items-center gap-4">
               <h2 style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 800, fontSize: "1.25rem", color: "var(--foreground)" }}>
                 {lang === "ar" ? "أخبار ذات صلة" : "Related News"}
               </h2>
