@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { LanguageProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "@/components/ui/sonner";
+import { AssistantFab } from "@/components/site/AssistantFab";
 
 function NotFoundComponent() {
   return (
@@ -125,6 +126,7 @@ function RootComponent() {
       <ThemeProvider>
         <LanguageProvider>
           <Outlet />
+          <AssistantFab />
           <Toaster richColors position="top-center" />
         </LanguageProvider>
       </ThemeProvider>
