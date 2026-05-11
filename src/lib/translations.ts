@@ -263,6 +263,7 @@ export const translations: Record<Lang, Dict> = {
       subtitle:
         "أنظمة تعاونية تربط الطلاب والمطورين والباحثين والمعلمين ورواد الأعمال في كل أنحاء البلاد.",
       cta: "استكشف المجتمعات",
+      discover: "اكتشف المجتمع",
       cards: {
         data: {
           title: "مجتمع البيانات",
