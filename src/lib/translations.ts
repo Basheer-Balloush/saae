@@ -51,7 +51,7 @@ export const translations: Record<Lang, Dict> = {
       title: "Featured news & recent activities",
       subtitle:
         "Stories, research, and milestones from across the Syrian Association for AI & Entrepreneurship.",
-      readMore: "Read story",
+      readMore: "Read more",
       viewAll: "View all news & activities",
       categories: {
         workshop: "Workshop",
@@ -210,7 +210,7 @@ export const translations: Record<Lang, Dict> = {
       title: "الأخبار البارزة والنشاطات الأخيرة",
       subtitle:
         "قصص وأبحاث ومحطات مهمة من الجمعية السورية للذكاء الاصطناعي وريادة الأعمال.",
-      readMore: "اكتشف المزيد",
+      readMore: "اقرأ المزيد",
       viewAll: "عرض جميع الأخبار والنشاطات",
       categories: {
         workshop: "ورشة عمل",
