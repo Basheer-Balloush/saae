@@ -86,8 +86,7 @@ export function Footer() {
 
           {/* Col 4 - HQ */}
           <div className="lg:col-span-3">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-footer-foreground">{t.footer.hq}</h4>
-            <div className="mt-5 overflow-hidden rounded-xl border border-footer-border bg-footer-foreground/5">
+            <div className="overflow-hidden rounded-xl border border-footer-border bg-footer-foreground/5">
               <a
                 href="https://www.google.com/maps?q=Damascus+University"
                 target="_blank"
