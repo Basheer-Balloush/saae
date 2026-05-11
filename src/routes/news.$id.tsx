@@ -290,7 +290,7 @@ function NewsDetailPage() {
                 />
               </div>
             ) : (
-              <Carousel opts={{ loop: true }} className="w-full">
+              <Carousel opts={{ loop: true, direction: isRtl ? "rtl" : "ltr" }} className="w-full">
                 <CarouselContent>
                   {carouselImages.map((url, i) => (
                     <CarouselItem key={url + i}>
