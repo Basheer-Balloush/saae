@@ -160,7 +160,7 @@ export function Footer() {
             </a>
             <div className="mt-5 space-y-3 text-sm">
               <div className="flex items-start gap-2.5">
-                <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
+                <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
                 <span style={{ color: INK }}>{t.footer.address}</span>
               </div>
               <a
@@ -168,7 +168,7 @@ export function Footer() {
                 className="flex items-center gap-2.5 transition-colors hover:text-white/80"
                 style={{ color: INK }}
               >
-                <Mail className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
+                <Mail className="h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
                 info@aisyria.org
               </a>
               <a
@@ -176,7 +176,7 @@ export function Footer() {
                 className="flex items-center gap-2.5 transition-colors hover:text-white/80"
                 style={{ color: INK }}
               >
-                <Phone className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
+                <Phone className="h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
                 <span dir="ltr">+963 930 763 547</span>
               </a>
               <a
