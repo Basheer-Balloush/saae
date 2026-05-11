@@ -70,8 +70,8 @@ function Hero({ Arrow }: { Arrow: typeof ArrowRight }) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,hsl(var(--background))_80%)]" />
       </div>
 
-      <div className="relative mx-auto max-w-5xl px-6 py-20 text-center lg:px-10 lg:py-28">
-        <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+      <div className="relative mx-auto max-w-5xl px-6 pb-20 pt-8 text-center lg:px-10 lg:pb-28 lg:pt-12">
+        <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
           من نحن
         </h1>
         <p className="mx-auto mt-6 max-w-3xl text-base leading-loose text-muted-foreground sm:text-lg">
