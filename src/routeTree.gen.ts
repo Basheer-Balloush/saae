@@ -13,6 +13,7 @@ import { Route as NewsRouteImport } from './routes/news'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
@@ -36,6 +37,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunitiesKeyRoute = CommunitiesKeyRouteImport.update({
+  id: '/communities/$key',
+  path: '/communities/$key',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/news': typeof NewsRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
+  '/communities/$key': typeof CommunitiesKeyRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/news': typeof NewsRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
+  '/communities/$key': typeof CommunitiesKeyRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -70,13 +78,28 @@ export interface FileRoutesById {
   '/news': typeof NewsRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
+  '/communities/$key': typeof CommunitiesKeyRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/news' | '/admin/login' | '/api/chat' | '/admin/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/news'
+    | '/admin/login'
+    | '/api/chat'
+    | '/communities/$key'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/news' | '/admin/login' | '/api/chat' | '/admin'
+  to:
+    | '/'
+    | '/about'
+    | '/news'
+    | '/admin/login'
+    | '/api/chat'
+    | '/communities/$key'
+    | '/admin'
   id:
     | '__root__'
     | '/'
@@ -84,6 +107,7 @@ export interface FileRouteTypes {
     | '/news'
     | '/admin/login'
     | '/api/chat'
+    | '/communities/$key'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -93,6 +117,7 @@ export interface RootRouteChildren {
   NewsRoute: typeof NewsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
+  CommunitiesKeyRoute: typeof CommunitiesKeyRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -126,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communities/$key': {
+      id: '/communities/$key'
+      path: '/communities/$key'
+      fullPath: '/communities/$key'
+      preLoaderRoute: typeof CommunitiesKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -149,8 +181,19 @@ const rootRouteChildren: RootRouteChildren = {
   NewsRoute: NewsRoute,
   AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,
+  CommunitiesKeyRoute: CommunitiesKeyRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
