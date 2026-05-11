@@ -183,6 +183,34 @@ function AmsDashboard() {
           ))}
         </div>
       )}
+      </div>
+
+      <AlertDialog open={!!deleting} onOpenChange={(o) => !o && !deletingBusy && setDeleting(null)}>
+        <AlertDialogContent dir={isRtl ? "rtl" : "ltr"}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tr.confirmDeleteCourse}</AlertDialogTitle>
+            {deleting && (
+              <AlertDialogDescription>
+                {lang === "ar" ? deleting.name_ar : deleting.name_en || deleting.name_ar}
+              </AlertDialogDescription>
+            )}
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingBusy}>{tr.cancel}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deletingBusy}
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDeleteCourse();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingBusy && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
+              {tr.delete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
