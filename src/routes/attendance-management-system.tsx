@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/attendance")({
+export const Route = createFileRoute("/attendance-management-system")({
   head: () => ({
     meta: [
       { title: "Attendance Management System" },

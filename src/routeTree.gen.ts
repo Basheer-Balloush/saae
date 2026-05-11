@@ -9,7 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AttendanceRouteImport } from './routes/attendance'
+import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
@@ -19,11 +19,12 @@ import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
-const AttendanceRoute = AttendanceRouteImport.update({
-  id: '/attendance',
-  path: '/attendance',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const AttendanceManagementSystemRoute =
+  AttendanceManagementSystemRouteImport.update({
+    id: '/attendance-management-system',
+    path: '/attendance-management-system',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -68,7 +69,7 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/attendance': typeof AttendanceRoute
+  '/attendance-management-system': typeof AttendanceManagementSystemRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -79,7 +80,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/attendance': typeof AttendanceRoute
+  '/attendance-management-system': typeof AttendanceManagementSystemRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -91,7 +92,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/attendance': typeof AttendanceRoute
+  '/attendance-management-system': typeof AttendanceManagementSystemRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -104,7 +105,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/attendance'
+    | '/attendance-management-system'
     | '/admin/login'
     | '/api/chat'
     | '/communities/$key'
@@ -115,7 +116,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/attendance'
+    | '/attendance-management-system'
     | '/admin/login'
     | '/api/chat'
     | '/communities/$key'
@@ -126,7 +127,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
-    | '/attendance'
+    | '/attendance-management-system'
     | '/admin/login'
     | '/api/chat'
     | '/communities/$key'
@@ -138,7 +139,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AttendanceRoute: typeof AttendanceRoute
+  AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRoute
   AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
@@ -149,11 +150,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/attendance': {
-      id: '/attendance'
-      path: '/attendance'
-      fullPath: '/attendance'
-      preLoaderRoute: typeof AttendanceRouteImport
+    '/attendance-management-system': {
+      id: '/attendance-management-system'
+      path: '/attendance-management-system'
+      fullPath: '/attendance-management-system'
+      preLoaderRoute: typeof AttendanceManagementSystemRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -218,7 +219,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AttendanceRoute: AttendanceRoute,
+  AttendanceManagementSystemRoute: AttendanceManagementSystemRoute,
   AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,
@@ -229,3 +230,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
