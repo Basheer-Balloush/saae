@@ -67,7 +67,7 @@ function NewsPage() {
             className="mb-14 max-w-2xl"
           >
             <p className="text-caption text-primary">{t.news.eyebrow}</p>
-            <h1 className="mt-4 text-display-2 leading-[1.4] text-foreground">{t.news.title}</h1>
+            <h1 className="mt-4 text-display-2 leading-[1.6] text-foreground">{t.news.title}</h1>
             <p className="mt-5 text-body text-muted-foreground">{t.news.subtitle}</p>
           </motion.div>
 
