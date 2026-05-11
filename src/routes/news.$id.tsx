@@ -423,11 +423,12 @@ function NewsDetailPage() {
         <div className="mx-auto mt-16 max-w-[850px] px-6 text-center">
           <Link
             to="/news"
+            onClick={handleBack}
             className="inline-flex items-center gap-2 rounded-full border px-7 py-3 text-sm font-semibold transition-colors hover:bg-primary hover:text-primary-foreground"
             style={{ borderColor: TEAL, color: TEAL }}
           >
             {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
-            {lang === "ar" ? "العودة للأخبار" : "Back to news"}
+            {lang === "ar" ? "رجوع" : "Back"}
           </Link>
         </div>
       </main>
