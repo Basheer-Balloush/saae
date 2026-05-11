@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Bot, MessageCircle, Sparkles, Users } from "lucide-react";
 import { useLang } from "@/lib/i18n";
+import { AssistantChatModal } from "./AssistantChatModal";
 
 export function Assistant() {
   const { t, dir } = useLang();
   const a = t.assistant;
+  const [open, setOpen] = useState(false);
 
   const features = [
     { icon: MessageCircle, ...a.features.inquiries },
@@ -52,13 +55,12 @@ export function Assistant() {
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                disabled
-                className="inline-flex cursor-not-allowed items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground opacity-90 shadow-soft"
+                onClick={() => setOpen(true)}
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-soft transition-transform hover:scale-[1.02] hover:opacity-95"
               >
                 <Bot className="h-4 w-4" />
                 {a.cta}
               </button>
-              <span className="text-xs font-medium text-muted-foreground">{a.soon}</span>
             </div>
           </motion.div>
 
@@ -69,7 +71,12 @@ export function Assistant() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="relative"
           >
-            <div className="relative rounded-3xl border border-border bg-card/80 p-6 shadow-soft backdrop-blur">
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="group relative block w-full rounded-3xl border border-border bg-card/80 p-6 text-start shadow-soft backdrop-blur transition-transform hover:scale-[1.01]"
+              aria-label={a.cta}
+            >
               <div className="flex items-center gap-3 border-b border-border pb-4">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
                   <Bot className="h-5 w-5" />
@@ -98,10 +105,12 @@ export function Assistant() {
                   </p>
                 </div>
               </div>
-            </div>
+            </button>
           </motion.div>
         </div>
       </div>
+
+      <AssistantChatModal open={open} onClose={() => setOpen(false)} />
     </section>
   );
 }
