@@ -546,14 +546,14 @@ function ImpactMatrix({ isRtl, lang, metrics }: { isRtl: boolean; lang: "ar" | "
               className="grid grid-cols-1 sm:grid-cols-2"
               style={{ columnGap: "32px", rowGap: "40px" }}
             >
-              {METRICS.map((m, i) => (
+              {metrics.map((m, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
                   transition={{ duration: 0.55, delay: i * 0.08 }}
-                  className={`group flex flex-col justify-center rounded-2xl bg-muted/40 ${heights[i]}`}
+                  className={`group flex flex-col justify-center rounded-2xl bg-muted/40 ${heights[i % heights.length]}`}
                   style={{ padding: "28px" }}
                 >
                   <div className={`flex flex-col ${isRtl ? "items-end text-right" : "items-start text-left"}`}>
