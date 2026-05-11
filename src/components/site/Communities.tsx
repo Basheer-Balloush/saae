@@ -1,18 +1,20 @@
 import { motion } from "framer-motion";
 import { Database, Building2, Stethoscope, Rocket, FlaskConical, Code2, TrendingUp, ArrowRight, ArrowUpRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
+import type { CommunityKey } from "@/lib/communityCategories";
 
 export function Communities() {
   const { t, dir, lang } = useLang();
   const c = t.communities.cards;
-  const cards = [
-    { icon: Database, ...c.data },
-    { icon: Building2, ...c.architecture },
-    { icon: Stethoscope, ...c.medical },
-    { icon: Rocket, ...c.entrepreneurship },
-    { icon: FlaskConical, ...c.research },
-    { icon: Code2, ...c.software },
-    { icon: TrendingUp, ...c.economy },
+  const cards: Array<{ icon: typeof Database; title: string; desc: string; key: CommunityKey }> = [
+    { icon: Database, ...c.data, key: "data" },
+    { icon: Building2, ...c.architecture, key: "architecture" },
+    { icon: Stethoscope, ...c.medical, key: "medical" },
+    { icon: Rocket, ...c.entrepreneurship, key: "entrepreneurship" },
+    { icon: FlaskConical, ...c.research, key: "research" },
+    { icon: Code2, ...c.software, key: "software" },
+    { icon: TrendingUp, ...c.economy, key: "economy" },
   ];
 
   const isRtl = dir === "rtl";
