@@ -53,7 +53,7 @@ function AboutPage() {
         <Goals />
         <Fields />
         <Values />
-        <JoinCTA Arrow={Arrow} />
+        
       </main>
       <Footer />
     </div>
@@ -286,47 +286,3 @@ function Values() {
   );
 }
 
-/* ---------- JOIN CTA ---------- */
-function JoinCTA({ Arrow }: { Arrow: typeof ArrowRight }) {
-  return (
-    <section id="join" className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
-      <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary to-secondary p-10 text-primary-foreground sm:p-16">
-        <div className="pointer-events-none absolute -end-10 -top-10 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-10 -start-10 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-
-        <div className="relative mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5" />
-            انضم إلينا
-          </span>
-          <h2 className="mt-6 text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
-            المستقبل يُصنع بالمعرفة والشغف
-          </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-loose text-primary-foreground/90 sm:text-lg">
-            في الجمعية السورية للذكاء الصنعي وريادة الأعمال نبني مجتمعاً من
-            المبدعين والقادة القادرين على إحداث أثر حقيقي في العالم الرقمي
-            وريادة الأعمال.
-          </p>
-
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/"
-              hash="assistant"
-              className="inline-flex items-center gap-2 rounded-full bg-background px-6 py-3 text-sm font-semibold text-foreground shadow-soft transition-transform hover:scale-[1.02]"
-            >
-              تواصل معنا
-              <Arrow className="h-4 w-4" />
-            </Link>
-            <Link
-              to="/"
-              hash="communities"
-              className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-primary-foreground backdrop-blur transition-colors hover:bg-white/20"
-            >
-              استكشف المجتمعات
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
