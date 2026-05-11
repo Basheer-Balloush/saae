@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X, Moon, Sun, Globe } from "lucide-react";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
