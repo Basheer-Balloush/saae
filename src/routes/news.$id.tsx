@@ -58,6 +58,26 @@ type RelatedItem = {
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
 
+const STATIC_ARTICLE: NewsArticle = {
+  id: "static",
+  title: "SAAE — News",
+  title_ar: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",
+  title_en: "Syrian Association for AI & Entrepreneurship",
+  excerpt: null,
+  excerpt_ar: "محتوى تعريفي عن نشاطات الجمعية ومجتمعاتها.",
+  excerpt_en: "Introductory content about SAAE activities and communities.",
+  content: null,
+  content_ar:
+    "نعمل في الجمعية السورية للذكاء الاصطناعي وريادة الأعمال على بناء بيئةٍ علميةٍ وتقنيةٍ تجمع الباحثين والمطورين ورواد الأعمال لخدمة سوريا الجديدة.",
+  content_en:
+    "The Syrian Association for AI & Entrepreneurship (SAAE) builds a scientific and technical environment connecting researchers, developers and entrepreneurs to serve the new Syria.",
+  image_url: FALLBACK_IMG,
+  images: null,
+  videos: null,
+  category: "research",
+  published_at: new Date().toISOString(),
+};
+
 const fade = {
   initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
