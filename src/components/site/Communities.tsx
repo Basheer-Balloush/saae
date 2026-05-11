@@ -1,18 +1,20 @@
 import { motion } from "framer-motion";
 import { Database, Building2, Stethoscope, Rocket, FlaskConical, Code2, TrendingUp, ArrowRight, ArrowUpRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
+import type { CommunityKey } from "@/lib/communityCategories";
 
 export function Communities() {
   const { t, dir, lang } = useLang();
   const c = t.communities.cards;
-  const cards = [
-    { icon: Database, ...c.data },
-    { icon: Building2, ...c.architecture },
-    { icon: Stethoscope, ...c.medical },
-    { icon: Rocket, ...c.entrepreneurship },
-    { icon: FlaskConical, ...c.research },
-    { icon: Code2, ...c.software },
-    { icon: TrendingUp, ...c.economy },
+  const cards: Array<{ icon: typeof Database; title: string; desc: string; key: CommunityKey }> = [
+    { icon: Database, ...c.data, key: "data" },
+    { icon: Building2, ...c.architecture, key: "architecture" },
+    { icon: Stethoscope, ...c.medical, key: "medical" },
+    { icon: Rocket, ...c.entrepreneurship, key: "entrepreneurship" },
+    { icon: FlaskConical, ...c.research, key: "research" },
+    { icon: Code2, ...c.software, key: "software" },
+    { icon: TrendingUp, ...c.economy, key: "economy" },
   ];
 
   const isRtl = dir === "rtl";
@@ -48,13 +50,16 @@ export function Communities() {
           {cards.map((card, i) => {
             const Icon = card.icon;
             return (
-              <motion.a
+              <motion.div
                 key={card.title}
-                href="#"
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.6, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+              >
+              <Link
+                to="/communities/$key"
+                params={{ key: card.key }}
                 className={`group relative block border-b border-border/60 transition-colors duration-500 hover:bg-[rgba(4,128,144,0.02)]`}
               >
                 <div className="grid grid-cols-1 gap-6 px-2 py-10 lg:grid-cols-[40px_350px_1fr] lg:gap-x-12 lg:py-14">
@@ -111,7 +116,8 @@ export function Communities() {
                     </span>
                   </div>
                 </div>
-              </motion.a>
+              </Link>
+              </motion.div>
             );
           })}
         </div>
