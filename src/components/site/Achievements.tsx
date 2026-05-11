@@ -122,16 +122,11 @@ function StatCard({
           {value}
         </span>
 
-        {/* Teal divider — exactly as wide as inner padding region */}
+        {/* Teal divider — spans the card's inner padding width */}
         <span
           aria-hidden
-          className="mt-5 block h-[2px]"
-          style={{
-            backgroundColor: "#048090",
-            width: `calc(100% + ${PADDING * 2}px)`,
-            marginLeft: isRtl ? undefined : `-${PADDING}px`,
-            marginRight: isRtl ? `-${PADDING}px` : undefined,
-          }}
+          className="mt-5 block h-[2px] w-full"
+          style={{ backgroundColor: "#048090" }}
         />
 
         <span
