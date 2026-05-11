@@ -282,9 +282,10 @@ function Prelude({
 }
 
 /* ---------- SECTION 3: Activity Feed (Editorial Index) ---------- */
-function ActivityFeed({ isRtl, lang, activities }: { isRtl: boolean; lang: "ar" | "en"; activities: ActivityItem[] }) {
+function ActivityFeed({ isRtl, lang, activities, loading }: { isRtl: boolean; lang: "ar" | "en"; activities: ActivityItem[]; loading: boolean }) {
   const heading = lang === "ar" ? "الأخبار والفعاليات" : "News & Events";
   const sub = lang === "ar" ? "أرشيفٌ زمنيٌّ لما يصنعه المجتمع: ورشات، أبحاث، لقاءات وشراكات." : "A chronological index of what the community makes: workshops, research, meetups and partnerships.";
+  const emptyMsg = lang === "ar" ? "لا توجد أخبار بعد لهذا المجتمع." : "No news yet for this community.";
 
   return (
     <section className="relative bg-surface py-24 lg:py-32">
@@ -311,55 +312,87 @@ function ActivityFeed({ isRtl, lang, activities }: { isRtl: boolean; lang: "ar" 
         </motion.div>
 
         <div className="mt-16" style={{ borderTop: `1px solid ${TEAL}` }}>
-          {activities.map((a, i) => (
-            <motion.article
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.55, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-              className="grid grid-cols-1 gap-4 py-10 lg:grid-cols-[30%_1fr] lg:gap-12 lg:py-12"
-              style={{ borderBottom: `1px solid ${TEAL}` }}
-            >
-              {/* Column 1: Date + Category (30%) */}
-              <div className={isRtl ? "text-right" : "text-left"}>
-                <div
-                  className="text-xs font-semibold uppercase tracking-[0.22em]"
-                  style={{ color: TEAL, fontFamily: '"Cairo", system-ui, sans-serif' }}
-                >
-                  {a.category[lang]}
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="grid grid-cols-1 gap-4 py-10 lg:grid-cols-[30%_1fr] lg:gap-12 lg:py-12"
+                style={{ borderBottom: `1px solid ${TEAL}` }}
+              >
+                <div className="space-y-3">
+                  <div className="h-3 w-24 animate-pulse rounded bg-muted/50" />
+                  <div className="h-3 w-32 animate-pulse rounded bg-muted/40" />
                 </div>
-                <div
-                  className="mt-3 text-sm"
-                  style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', letterSpacing: "0.04em" }}
-                  dir="ltr"
-                >
-                  {a.date}
+                <div className="space-y-3">
+                  <div className="h-5 w-3/4 animate-pulse rounded bg-muted/50" />
+                  <div className="h-4 w-full animate-pulse rounded bg-muted/40" />
                 </div>
               </div>
+            ))
+          ) : activities.length === 0 ? (
+            <div className="py-16 text-center" style={{ borderBottom: `1px solid ${TEAL}` }}>
+              <p className="text-base" style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif' }}>
+                {emptyMsg}
+              </p>
+            </div>
+          ) : (
+            activities.map((a, i) => (
+              <motion.div
+                key={a.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.55, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                style={{ borderBottom: `1px solid ${TEAL}` }}
+              >
+                <Link
+                  to="/news/$id"
+                  params={{ id: a.id }}
+                  className="grid grid-cols-1 gap-4 py-10 lg:grid-cols-[30%_1fr] lg:gap-12 lg:py-12 transition-opacity hover:opacity-80"
+                >
+                  {/* Column 1: Date + Category (30%) */}
+                  <div className={isRtl ? "text-right" : "text-left"}>
+                    <div
+                      className="text-xs font-semibold uppercase tracking-[0.22em]"
+                      style={{ color: TEAL, fontFamily: '"Cairo", system-ui, sans-serif' }}
+                    >
+                      {a.category}
+                    </div>
+                    <div
+                      className="mt-3 text-sm"
+                      style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', letterSpacing: "0.04em" }}
+                      dir="ltr"
+                    >
+                      {a.date}
+                    </div>
+                  </div>
 
-              {/* Column 2: Title + Description */}
-              <div className={isRtl ? "text-right" : "text-left"}>
-                <h3
-                  style={{
-                    fontFamily: '"Cairo", system-ui, sans-serif',
-                    fontWeight: 700,
-                    lineHeight: 1.3,
-                    fontSize: "clamp(1.25rem, 1.8vw, 1.625rem)",
-                    color: "var(--foreground)",
-                  }}
-                >
-                  {a.title[lang]}
-                </h3>
-                <p
-                  className="mt-3 line-clamp-2 text-base leading-[1.75]"
-                  style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 300 }}
-                >
-                  {a.desc[lang]}
-                </p>
-              </div>
-            </motion.article>
-          ))}
+                  {/* Column 2: Title + Description */}
+                  <div className={isRtl ? "text-right" : "text-left"}>
+                    <h3
+                      style={{
+                        fontFamily: '"Cairo", system-ui, sans-serif',
+                        fontWeight: 700,
+                        lineHeight: 1.3,
+                        fontSize: "clamp(1.25rem, 1.8vw, 1.625rem)",
+                        color: "var(--foreground)",
+                      }}
+                    >
+                      {a.title}
+                    </h3>
+                    {a.desc && (
+                      <p
+                        className="mt-3 line-clamp-2 text-base leading-[1.75]"
+                        style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 300 }}
+                      >
+                        {a.desc}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              </motion.div>
+            ))
+          )}
         </div>
       </div>
     </section>
