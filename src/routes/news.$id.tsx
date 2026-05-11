@@ -137,6 +137,9 @@ function NewsDetailPage() {
     if (canGoBack) {
       e.preventDefault();
       router.history.back();
+      // After the previous page restores, force scroll to top
+      window.setTimeout(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }), 0);
+      window.setTimeout(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }), 120);
     }
   };
 
