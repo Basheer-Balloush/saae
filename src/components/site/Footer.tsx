@@ -30,9 +30,9 @@ export function Footer() {
       id="contact"
       className="relative"
       style={{
-        backgroundColor: "#FFFFFF",
+        backgroundColor: TEAL,
         color: INK,
-        borderTop: `2px solid ${TEAL}`,
+        borderTop: `2px solid rgba(255,255,255,0.25)`,
         paddingTop: "120px",
         paddingBottom: "48px",
       }}
