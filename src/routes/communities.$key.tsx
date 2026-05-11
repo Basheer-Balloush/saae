@@ -10,6 +10,7 @@ import {
   COMMUNITY_KEYS,
   COMMUNITY_LABELS_AR,
   COMMUNITY_LABELS_EN,
+  communityLabel,
   type CommunityKey,
 } from "@/lib/communityCategories";
 
