@@ -76,7 +76,7 @@ export function AssistantFab() {
         </AnimatePresence>
       </motion.button>
 
-      <AssistantChatModal open={open} onClose={() => setOpen(false)} />
+      <AssistantChatModal open={open} onClose={() => { setOpen(false); setPrefill(null); }} prefill={prefill} onPrefillConsumed={() => setPrefill(null)} />
     </>
   );
 }
