@@ -122,8 +122,8 @@ export function Footer() {
               />
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: TEAL }}
+                className="inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-90"
+                style={{ backgroundColor: "#FFFFFF", color: TEAL }}
               >
                 {sent ? t.footer.form.sent : t.footer.form.send}
                 {!sent && <ArrowRight className={isRtl ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />}
