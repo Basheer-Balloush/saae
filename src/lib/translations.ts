@@ -104,6 +104,7 @@ export const translations: Record<Lang, Dict> = {
       subtitle:
         "Collaborative ecosystems connecting students, developers, researchers, educators, and entrepreneurs across the country.",
       cta: "Discover communities",
+      discover: "Discover community",
       cards: {
         data: {
           title: "Data Community",
