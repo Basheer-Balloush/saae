@@ -17,7 +17,7 @@ const IMG = {
   g: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=900&q=80",
 };
 
-type Slide = { key: string; img: string; cat: string; title: string; date: string };
+type Slide = { key: string; img: string; cat: string; title: string; date: string; id?: string };
 
 export function FeaturedNews() {
   const { t, dir, lang } = useLang();
