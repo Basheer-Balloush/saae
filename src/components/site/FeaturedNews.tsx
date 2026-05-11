@@ -35,22 +35,22 @@ export function FeaturedNews() {
       .order("created_at", { ascending: false })
       .limit(8)
       .then(({ data }) => {
-        if (data && data.length > 0) {
-          setSlides(
-            data.map((r: any) => ({
-              key: r.id,
-              id: r.id,
-              img: r.image_url || IMG.featured,
-              cat: communityLabel(r.category, lang),
-              title: (lang === "ar" ? (r.title_ar ?? r.title_en) : (r.title_en ?? r.title_ar)) ?? r.title,
-              date: r.published_at,
-            })),
-          );
-        }
+        const mapped: Slide[] = (data ?? []).map((r: any) => ({
+          key: r.id,
+          id: r.id,
+          img: r.image_url || IMG.featured,
+          cat: communityLabel(r.category, lang),
+          title: (lang === "ar" ? (r.title_ar ?? r.title_en) : (r.title_en ?? r.title_ar)) ?? r.title,
+          date: r.published_at,
+        }));
+        setSlides(mapped);
       });
   }, [lang]);
 
-  const row = slides.length > 0 ? [...slides, ...slides] : [];
+  // Hide section entirely until we have published news to show
+  if (!slides || slides.length === 0) return null;
+
+  const row = [...slides, ...slides];
 
   return (
     <section id="news" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32">
