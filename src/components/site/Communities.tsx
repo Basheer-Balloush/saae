@@ -39,7 +39,7 @@ export function Communities() {
           </h2>
           <p
             className="mx-auto mt-5 max-w-2xl text-body leading-relaxed"
-            style={{ color: "#555555", letterSpacing: "0.01em" }}
+            style={{ color: "var(--muted-foreground)", letterSpacing: "0.01em" }}
           >
             {t.communities.subtitle}
           </p>
