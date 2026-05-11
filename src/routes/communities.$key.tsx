@@ -729,7 +729,7 @@ function CallToConnection({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }
 
           <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
             <a
-              href="#"
+              href="mailto:info@aisyria.org?subject=Join%20SAAE%20Community"
               className="inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
               style={{ backgroundColor: TEAL, fontFamily: '"Cairo", system-ui, sans-serif' }}
             >
