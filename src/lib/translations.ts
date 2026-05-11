@@ -210,7 +210,7 @@ export const translations: Record<Lang, Dict> = {
       title: "الأخبار البارزة والنشاطات الأخيرة",
       subtitle:
         "قصص وأبحاث ومحطات مهمة من الجمعية السورية للذكاء الاصطناعي وريادة الأعمال.",
-      readMore: "اقرأ القصة",
+      readMore: "اكتشف المزيد",
       viewAll: "عرض جميع الأخبار والنشاطات",
       categories: {
         workshop: "ورشة عمل",
