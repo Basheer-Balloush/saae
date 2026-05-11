@@ -102,7 +102,7 @@ export function Communities() {
                     <p
                       className="text-[15px] leading-[1.85]"
                       style={{
-                        color: "#555555",
+                        color: "var(--muted-foreground)",
                         fontFamily: '"Cairo", system-ui, sans-serif',
                         fontWeight: 300,
                         letterSpacing: "0.015em",
