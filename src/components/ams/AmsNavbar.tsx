@@ -79,10 +79,11 @@ export function AmsNavbar({ onSignOut, showSignOut, extra }: Props) {
           >
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </button>
+          {extra}
           {showSignOut && (
             <Button variant="ghost" size="sm" onClick={onSignOut}>
-              <LogOut className="h-4 w-4 mr-1" />
-              Sign out
+              <LogOut className="h-4 w-4 mx-1" />
+              <span className="hidden sm:inline">Sign out</span>
             </Button>
           )}
         </div>
