@@ -48,8 +48,8 @@ export function AmsNavbar({ onSignOut, showSignOut, extra }: Props) {
           : "bg-transparent",
       )}
     >
-      <div className="flex w-full items-center justify-between gap-6 px-6 py-3 lg:px-10">
-        <div className="relative flex items-center" aria-label="SAAIE">
+      <div className="flex w-full items-center justify-between gap-2 px-3 py-3 sm:gap-6 sm:px-6 lg:px-10">
+        <div className="relative flex h-10 sm:h-11 items-center shrink-0" aria-label="SAAIE">
           {variants.map((v, i) => (
             <img
               key={i}
@@ -57,7 +57,7 @@ export function AmsNavbar({ onSignOut, showSignOut, extra }: Props) {
               alt={v.alt}
               className={cn(
                 "h-10 w-auto sm:h-11 transition-opacity duration-150",
-                v.show ? "opacity-100" : "opacity-0 absolute inset-0 pointer-events-none",
+                v.show ? "opacity-100 relative" : "opacity-0 absolute inset-y-0 start-0 pointer-events-none",
               )}
               fetchPriority="high"
               decoding="async"

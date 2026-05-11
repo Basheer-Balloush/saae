@@ -240,6 +240,7 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
   const [attendance, setAttendance] = useState<Array<{ registrant_id: string; session_id: string; present: boolean }>>([]);
   const [loading, setLoading] = useState(true);
   const [openSession, setOpenSession] = useState<Session | null>(null);
+  const [exportingSessions, setExportingSessions] = useState(false);
   const [viewing, setViewing] = useState<Registrant | null>(null);
 
   const load = useCallback(async () => {
@@ -306,18 +307,21 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
     XLSX.writeFile(wb, `${courseName}-${tr.registrants}.xlsx`);
   };
 
-  const exportSessions = () => {
-    const rows = sessions.map((s) => {
-      const presentCount = attendance.filter((a) => a.session_id === s.id && a.present).length;
-      return {
-        [tr.sessionTitle]: s.title,
-        [tr.sessionDate]: s.session_date,
-        [tr.present]: `${presentCount} / ${registrants.length}`,
-      };
-    });
-    const ws = XLSX.utils.json_to_sheet(rows);
+  const exportSessions = (selectedIds: string[]) => {
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, tr.sessions.slice(0, 31));
+    const chosen = sessions.filter((s) => selectedIds.includes(s.id));
+    chosen.forEach((s, idx) => {
+      const rows = registrants.map((r) => {
+        const att = attendance.find((a) => a.session_id === s.id && a.registrant_id === r.id);
+        return {
+          [tr.fullName]: r.full_name,
+          [tr.present]: att?.present ? tr.present : tr.absent,
+        };
+      });
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const safeName = `${s.title} ${s.session_date}`.replace(/[\\\/\?\*\[\]:]/g, "-").slice(0, 31) || `Session ${idx + 1}`;
+      XLSX.utils.book_append_sheet(wb, ws, safeName);
+    });
     XLSX.writeFile(wb, `${courseName}-${tr.sessions}.xlsx`);
   };
 
@@ -398,7 +402,7 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
               </h2>
               <div className="flex items-center gap-2">
                 {sessions.length > 0 && (
-                  <Button size="sm" variant="outline" onClick={exportSessions}>
+                  <Button size="sm" variant="outline" onClick={() => setExportingSessions(true)}>
                     <FileSpreadsheet className="h-4 w-4 mx-1" />
                     {tr.exportExcel}
                   </Button>
@@ -454,6 +458,17 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
           onClose={() => setViewing(null)}
         />
       )}
+
+      {exportingSessions && (
+        <ExportSessionsDialog
+          sessions={sessions}
+          onClose={() => setExportingSessions(false)}
+          onExport={(ids) => {
+            exportSessions(ids);
+            setExportingSessions(false);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -505,6 +520,74 @@ function Row({ label, value, ltr }: { label: string; value: React.ReactNode; ltr
         {value}
       </span>
     </div>
+  );
+}
+
+function ExportSessionsDialog({
+  sessions,
+  onClose,
+  onExport,
+}: {
+  sessions: Session[];
+  onClose: () => void;
+  onExport: (ids: string[]) => void;
+}) {
+  const { lang } = useLang();
+  const tr = amsT[lang];
+  const [selected, setSelected] = useState<Record<string, boolean>>(
+    () => Object.fromEntries(sessions.map((s) => [s.id, true])),
+  );
+  const allChecked = sessions.every((s) => selected[s.id]);
+  const toggleAll = (next: boolean) => {
+    setSelected(Object.fromEntries(sessions.map((s) => [s.id, next])));
+  };
+  const selectedIds = sessions.filter((s) => selected[s.id]).map((s) => s.id);
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent dir={lang === "ar" ? "rtl" : "ltr"}>
+        <DialogHeader>
+          <DialogTitle>{tr.selectSessionsToExport}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+          <label className="flex items-center gap-2 rounded-lg border border-border bg-background/50 px-3 py-2 cursor-pointer">
+            <Checkbox checked={allChecked} onCheckedChange={(v) => toggleAll(v === true)} />
+            <span className="font-medium text-sm">{tr.selectAll}</span>
+          </label>
+          {sessions.map((s) => (
+            <label
+              key={s.id}
+              className="flex items-center gap-2 rounded-lg border border-border bg-background/50 px-3 py-2 cursor-pointer"
+            >
+              <Checkbox
+                checked={!!selected[s.id]}
+                onCheckedChange={(v) =>
+                  setSelected((p) => ({ ...p, [s.id]: v === true }))
+                }
+              />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm truncate">{s.title}</div>
+                <div className="text-xs text-muted-foreground" dir="ltr">
+                  {s.session_date}
+                </div>
+              </div>
+            </label>
+          ))}
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>
+            {tr.cancel}
+          </Button>
+          <Button
+            onClick={() => onExport(selectedIds)}
+            disabled={selectedIds.length === 0}
+          >
+            <FileSpreadsheet className="h-4 w-4 mx-1" />
+            {tr.export}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

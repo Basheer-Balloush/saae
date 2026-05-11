@@ -61,6 +61,10 @@ export const amsT: Record<Lang, {
   details: string;
   exportExcel: string;
   attendanceCount: string;
+  selectSessionsToExport: string;
+  selectAll: string;
+  absent: string;
+  export: string;
 }> = {
   en: {
     title: "Attendance Management",
@@ -123,6 +127,10 @@ export const amsT: Record<Lang, {
     details: "Details",
     exportExcel: "Export to Excel",
     attendanceCount: "Attendance",
+    selectSessionsToExport: "Select sessions to export",
+    selectAll: "Select all",
+    absent: "Absent",
+    export: "Export",
   },
   ar: {
     title: "نظام إدارة الحضور",
@@ -185,5 +193,9 @@ export const amsT: Record<Lang, {
     details: "تفاصيل",
     exportExcel: "تصدير إلى Excel",
     attendanceCount: "الحضور",
+    selectSessionsToExport: "اختر الجلسات للتصدير",
+    selectAll: "تحديد الكل",
+    absent: "غائب",
+    export: "تصدير",
   },
 };
