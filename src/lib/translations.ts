@@ -141,10 +141,10 @@ export const translations: Record<Lang, Dict> = {
       body: "Through education, open research, and entrepreneurship, we are rebuilding technological capacity across Syria — empowering a generation of students, researchers, and founders with the tools, mentorship, and confidence to shape what comes next.",
       stats: [
         { value: "5,000+", label: "Learners" },
-        { value: "120+", label: "Courses" },
+        { value: "120+", label: "Training courses" },
         { value: "30+", label: "Strategic partners" },
-        { value: "15+", label: "Communities" },
-        { value: "50+", label: "Workshops" },
+        { value: "7", label: "Technical communities" },
+        { value: "5,000+", label: "Beneficiary students" },
       ],
     },
     partners: {
