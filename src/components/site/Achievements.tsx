@@ -39,7 +39,6 @@ export function Achievements() {
             transition={{ duration: 0.6 }}
             className="lg:col-span-5"
           >
-            <p className="text-caption text-primary">{t.achievements.eyebrow}</p>
             <h2
               className="mt-4 text-display-1 text-foreground"
               style={{
