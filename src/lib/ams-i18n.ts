@@ -24,6 +24,39 @@ export const amsT: Record<Lang, {
   noSections: string;
   loading: string;
   copyright: string;
+  courses: string;
+  addCourse: string;
+  courseNameAr: string;
+  courseNameEn: string;
+  noCourses: string;
+  registrants: string;
+  addRegistrant: string;
+  fullName: string;
+  emailField: string;
+  phone: string;
+  paymentStatus: string;
+  paid: string;
+  unpaid: string;
+  partial: string;
+  waived: string;
+  noRegistrants: string;
+  sessions: string;
+  addSession: string;
+  sessionTitle: string;
+  sessionDate: string;
+  noSessions: string;
+  attendance: string;
+  present: string;
+  save: string;
+  cancel: string;
+  create: string;
+  add: string;
+  delete: string;
+  confirmDelete: string;
+  saved: string;
+  required: string;
+  back: string;
+  open: string;
 }> = {
   en: {
     title: "Attendance Management",
