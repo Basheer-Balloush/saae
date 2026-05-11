@@ -12,9 +12,10 @@ import logoArDark from "@/assets/saae-logo-ar-dark.png";
 type Props = {
   onSignOut?: () => void;
   showSignOut?: boolean;
+  extra?: React.ReactNode;
 };
 
-export function AmsNavbar({ onSignOut, showSignOut }: Props) {
+export function AmsNavbar({ onSignOut, showSignOut, extra }: Props) {
   const { t, lang, toggle: toggleLang } = useLang();
   const { theme, toggle: toggleTheme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
