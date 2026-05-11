@@ -23,7 +23,7 @@ export function Footer() {
   }
 
   const underlineInput =
-    "w-full bg-transparent border-0 border-b py-2 text-sm outline-none transition-colors placeholder:text-[#A8A8A8] focus:border-[#048090]";
+    "w-full bg-transparent border-0 border-b py-2 text-sm outline-none transition-colors placeholder:text-white/60 focus:border-white";
 
   return (
     <footer
