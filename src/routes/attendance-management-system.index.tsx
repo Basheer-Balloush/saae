@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
-import { ArrowLeft, ArrowRight, Plus, Trash2, Users, CalendarDays, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus, Trash2, Users, CalendarDays, Loader2, Eye, FileSpreadsheet } from "lucide-react";
+import * as XLSX from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { amsT } from "@/lib/ams-i18n";
