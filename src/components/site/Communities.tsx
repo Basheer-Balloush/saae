@@ -28,7 +28,7 @@ export function Communities() {
           transition={{ duration: 0.6 }}
           className="mx-auto max-w-3xl text-center"
         >
-          <p className="text-caption text-primary">{t.communities.eyebrow}</p>
+          
           <h2
             className="mt-4 text-display-2 leading-[1.05] tracking-tight text-foreground"
             style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 900 }}
