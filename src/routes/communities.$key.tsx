@@ -393,6 +393,7 @@ function Prelude({
             <Link
               to="/"
               hash="communities"
+              resetScroll={false}
               className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em]"
               style={{ color: TEAL }}
             >
