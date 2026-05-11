@@ -3,7 +3,7 @@ import { Database, Building2, Stethoscope, Rocket, FlaskConical, Code2, Trending
 import { useLang } from "@/lib/i18n";
 
 export function Communities() {
-  const { t, dir } = useLang();
+  const { t, dir, lang } = useLang();
   const c = t.communities.cards;
   const cards = [
     { icon: Database, ...c.data },
