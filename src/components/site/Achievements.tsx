@@ -91,9 +91,8 @@ function StatCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.55, delay: index * 0.07 }}
-      className={`group relative flex flex-col justify-center overflow-hidden rounded-2xl ${heightClass}`}
+      className={`group relative flex flex-col justify-center overflow-hidden rounded-2xl bg-muted/40 dark:bg-muted/20 ${heightClass}`}
       style={{
-        backgroundColor: "#FBFBFB",
         padding: `${PADDING}px`,
       }}
     >
