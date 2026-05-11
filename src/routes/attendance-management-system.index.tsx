@@ -183,7 +183,6 @@ function AmsDashboard() {
           ))}
         </div>
       )}
-      </div>
 
       <AlertDialog open={!!deleting} onOpenChange={(o) => !o && !deletingBusy && setDeleting(null)}>
         <AlertDialogContent dir={isRtl ? "rtl" : "ltr"}>
