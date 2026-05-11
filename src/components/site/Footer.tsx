@@ -152,12 +152,16 @@ export function Footer() {
         {/* Bottom bar — centered copyright */}
         <div
           className="mt-12 flex flex-col items-center gap-2 pt-5 text-center text-xs whitespace-pre-line"
+          dir={isRtl ? "rtl" : "ltr"}
           style={{ borderTop: `1px solid rgba(255,255,255,0.25)`, color: MUTED }}
         >
           {isRtl ? (
             <>
-              <span>© {new Date().getFullYear()} للجمعية السورية للذكاء الاصطناعي وريادة الأعمال</span>
-              <span>جميع الحقوق محفوظة.</span>
+              <span className="inline-flex flex-wrap items-center justify-center gap-x-1" dir="rtl">
+                <bdi dir="ltr">© {new Date().getFullYear()}</bdi>
+                <span>للجمعية السورية للذكاء الاصطناعي وريادة الأعمال</span>
+              </span>
+              <span dir="rtl">جميع الحقوق محفوظة.</span>
             </>
           ) : (
             <span>© {new Date().getFullYear()} SAAE — {t.footer.rights}</span>
