@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Clock, Calendar } from "lucide-react";
@@ -150,11 +150,46 @@ function NewsDetailPage() {
   const { lang, dir } = useLang();
   const isRtl = dir === "rtl";
 
-  // Use static data for preview; swap back to Supabase fetch when real data is ready
   const staticEntry = STATIC_ARTICLE[id] ?? STATIC_ARTICLE["default"]!;
-  const article: NewsArticle = lang === "ar" ? staticEntry.ar : staticEntry.en;
-  const related: RelatedItem[] = STATIC_RELATED[lang] ?? STATIC_RELATED["en"]!;
-  const loading = false;
+  const staticArticle: NewsArticle = lang === "ar" ? staticEntry.ar : staticEntry.en;
+
+  const [article, setArticle] = useState<NewsArticle>(staticArticle);
+  const [related, setRelated] = useState<RelatedItem[]>(STATIC_RELATED[lang] ?? STATIC_RELATED["en"]!);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    supabase
+      .from("news")
+      .select("id,title,excerpt,content,image_url,category,published_at")
+      .eq("id", id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return;
+        if (data) {
+          setArticle(data as NewsArticle);
+          // load related: same category, exclude current
+          supabase
+            .from("news")
+            .select("id,title,image_url,published_at")
+            .eq("category", data.category)
+            .neq("id", id)
+            .order("published_at", { ascending: false })
+            .limit(3)
+            .then(({ data: rel }) => {
+              if (cancelled) return;
+              if (rel && rel.length > 0) setRelated(rel as RelatedItem[]);
+            });
+        } else {
+          setArticle(staticArticle);
+        }
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [id, lang, staticArticle]);
 
   if (loading) {
     return (
