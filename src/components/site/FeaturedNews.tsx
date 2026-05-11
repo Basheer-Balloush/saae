@@ -117,13 +117,13 @@ export function FeaturedNews() {
       </div>
 
       <div className="mx-auto mt-14 flex max-w-7xl justify-center px-6 lg:px-10">
-        <a
-          href="#"
+        <Link
+          to="/news"
           className="inline-flex items-center gap-2 rounded-full border border-primary px-7 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
         >
           {t.news.viewAll}
           <ArrowRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
-        </a>
+        </Link>
       </div>
 
       <style>{`
