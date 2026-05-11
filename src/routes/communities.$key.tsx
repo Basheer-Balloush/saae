@@ -287,7 +287,7 @@ function ActivityFeed({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
           >
             {heading}
           </h2>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed" style={{ color: "#555" }}>
+          <p className="mt-5 max-w-2xl text-base leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
             {sub}
           </p>
         </motion.div>
