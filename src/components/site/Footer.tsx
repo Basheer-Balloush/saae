@@ -166,7 +166,7 @@ export function Footer() {
               جميع الحقوق محفوظة للجمعية السورية للذكاء الاصطناعي وريادة الأعمال <bdi dir="ltr">{new Date().getFullYear()} ©</bdi>
             </span>
           ) : (
-            <span>© {new Date().getFullYear()} SAAE — {t.footer.rights}</span>
+            <span>All rights reserved for Syrian Association for AI & Entrepreneurship {new Date().getFullYear()}©</span>
           )}
         </div>
       </div>
