@@ -1,5 +1,14 @@
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
+import Autoplay from "embla-carousel-autoplay";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
 import { useLang } from "@/lib/i18n";
 
 const IMG = {
@@ -18,12 +27,15 @@ export function FeaturedNews() {
   const cats = t.news.categories;
   const items = t.news.items;
 
-  const sideCards = [
+  const autoplay = useRef(
+    Autoplay({ delay: 3500, stopOnInteraction: false, stopOnMouseEnter: true }),
+  );
+
+  const slides = [
+    { key: "featured", img: IMG.featured, cat: cats.education, title: items.featured.title, date: items.featured.date, excerpt: items.featured.excerpt },
     { key: "a", img: IMG.a, cat: cats.partnership, title: items.a.title, date: items.a.date },
     { key: "b", img: IMG.b, cat: cats.community, title: items.b.title, date: items.b.date },
     { key: "c", img: IMG.c, cat: cats.event, title: items.c.title, date: items.c.date },
-  ];
-  const recent = [
     { key: "d", img: IMG.d, cat: cats.research, title: items.d.title, date: items.d.date },
     { key: "e", img: IMG.e, cat: cats.community, title: items.e.title, date: items.e.date },
     { key: "f", img: IMG.f, cat: cats.education, title: items.f.title, date: items.f.date },
@@ -42,103 +54,56 @@ export function FeaturedNews() {
         >
           <div className="max-w-2xl">
             <p className="text-caption text-primary">{t.news.eyebrow}</p>
-            <h1 className="mt-4 text-display-2 text-foreground">
-              {t.news.title}
-            </h1>
+            <h1 className="mt-4 text-display-2 text-foreground">{t.news.title}</h1>
             <p className="mt-5 max-w-xl text-body text-muted-foreground">{t.news.subtitle}</p>
           </div>
         </motion.div>
 
-        <div className="grid gap-6 lg:grid-cols-5">
-          {/* Featured */}
-          <motion.a
-            href="#"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.7 }}
-            className="group relative col-span-1 overflow-hidden rounded-2xl border border-border bg-card shadow-soft lg:col-span-3"
-          >
-            <div className="aspect-[16/11] overflow-hidden">
-              <img
-                src={IMG.featured}
-                alt={items.featured.title}
-                className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
-                loading="lazy"
-              />
-            </div>
-            <div className="p-7 lg:p-9">
-              <div className="flex items-center gap-3 text-xs">
-                <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
-                  {cats.education}
-                </span>
-                <span className="text-muted-foreground">{items.featured.date}</span>
-              </div>
-              <h2 className="mt-5 text-h1 text-foreground">
-                {items.featured.title}
-              </h2>
-              <p className="mt-4 max-w-2xl text-body text-muted-foreground">{items.featured.excerpt}</p>
-              <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                {t.news.readMore}
-                <ArrowUpRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
-              </span>
-            </div>
-          </motion.a>
-
-          {/* Side cards */}
-          <div className="col-span-1 flex flex-col gap-6 lg:col-span-2">
-            {sideCards.map((c, i) => (
-              <motion.a
-                key={c.key}
-                href="#"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.55, delay: i * 0.08 }}
-                className="group flex flex-1 gap-4 rounded-xl border border-border bg-card p-3 shadow-soft transition-shadow hover:shadow-lift"
-              >
-                <div className="h-28 w-28 flex-none overflow-hidden rounded-lg sm:h-32 sm:w-32">
-                  <img src={c.img} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
-                  <div>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary">{c.cat}</span>
-                    <h3 className="mt-1.5 line-clamp-3 text-[15px] font-bold leading-snug text-foreground group-hover:text-primary">
+        <Carousel
+          opts={{ loop: true, align: "start", direction: dir === "rtl" ? "rtl" : "ltr" }}
+          plugins={[autoplay.current]}
+          className="relative"
+        >
+          <CarouselContent className="-ml-4">
+            {slides.map((c) => (
+              <CarouselItem key={c.key} className="pl-4 sm:basis-1/2 lg:basis-1/3">
+                <a
+                  href="#"
+                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift"
+                >
+                  <div className="aspect-[16/10] overflow-hidden">
+                    <img
+                      src={c.img}
+                      alt={c.title}
+                      className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col p-6">
+                    <div className="flex items-center gap-3 text-xs">
+                      <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
+                        {c.cat}
+                      </span>
+                      <span className="text-muted-foreground">{c.date}</span>
+                    </div>
+                    <h3 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
                       {c.title}
                     </h3>
+                    {c.excerpt && (
+                      <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{c.excerpt}</p>
+                    )}
+                    <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                      {t.news.readMore}
+                      <ArrowUpRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
+                    </span>
                   </div>
-                  <span className="text-xs text-muted-foreground">{c.date}</span>
-                </div>
-              </motion.a>
+                </a>
+              </CarouselItem>
             ))}
-          </div>
-        </div>
-
-        {/* Recent grid */}
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:mt-14 lg:grid-cols-4">
-          {recent.map((c, i) => (
-            <motion.a
-              key={c.key}
-              href="#"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, delay: i * 0.05 }}
-              className="group overflow-hidden rounded-xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift"
-            >
-              <div className="aspect-[16/10] overflow-hidden">
-                <img src={c.img} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" loading="lazy" />
-              </div>
-              <div className="p-5">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary">{c.cat}</span>
-                <h3 className="mt-2 line-clamp-3 text-[15px] font-bold leading-snug text-foreground group-hover:text-primary">
-                  {c.title}
-                </h3>
-                <p className="mt-3 text-xs text-muted-foreground">{c.date}</p>
-              </div>
-            </motion.a>
-          ))}
-        </div>
+          </CarouselContent>
+          <CarouselPrevious className="left-2" />
+          <CarouselNext className="right-2" />
+        </Carousel>
 
         <div className="mt-14 flex justify-center">
           <a
