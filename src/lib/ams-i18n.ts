@@ -119,6 +119,10 @@ export const amsT: Record<Lang, {
     required: "This field is required",
     back: "Back",
     open: "Open",
+    view: "View",
+    details: "Details",
+    exportExcel: "Export to Excel",
+    attendanceCount: "Attendance",
   },
   ar: {
     title: "نظام إدارة الحضور",
@@ -177,5 +181,9 @@ export const amsT: Record<Lang, {
     required: "هذا الحقل مطلوب",
     back: "رجوع",
     open: "فتح",
+    view: "عرض",
+    details: "تفاصيل",
+    exportExcel: "تصدير إلى Excel",
+    attendanceCount: "الحضور",
   },
 };
