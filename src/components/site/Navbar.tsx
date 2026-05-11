@@ -17,7 +17,7 @@ export function Navbar() {
   const location = useLocation();
   const isAbout = location.pathname.startsWith("/about");
   const isNewsRoute = location.pathname.startsWith("/news");
-  const isHome = !isAbout && !isNewsRoute;
+  const isHome = location.pathname === "/";
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string>(isAbout ? "about" : "home");
