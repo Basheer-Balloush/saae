@@ -1,20 +1,31 @@
-## Goal
-Replace the Data Community hero image with one that visually matches "Data Community" — charts, dashboards, analytics, or people working with data — instead of the current generic photo.
+## المشكلة
 
-## Approach options
+في تركيب الراوتر، الملف `src/routes/news.tsx` (صفحة قائمة الأخبار) صار **أب** للملف `src/routes/news.$id.tsx` (صفحة تفاصيل الخبر). يبيّن هذا واضحاً في `routeTree.gen.ts`:
 
-**Option A — Use a curated Unsplash photo (fastest, no asset to manage).** Swap the `data` entry in `HERO_IMG` (`src/routes/communities.$key.tsx`, line 22) to one of these data-themed photos that still match the rest of the site's "natural-light human collaboration, no robots" tone:
+```
+NewsIdRoute.getParentRoute: () => NewsRoute
+```
 
-1. Analyst at a laptop with charts on screen — `photo-1551288049-bebda4e38f71`
-2. Dashboard on a monitor with graphs — `photo-1460925895917-afdab827c52f`
-3. Two people reviewing data on a screen together — `photo-1543286386-2e659306cd6c`
-4. Sticky-note analytics planning wall — `photo-1454165804606-c3d57bc86b40`
+ولأن `news.tsx` ما فيه `<Outlet />`، لما تنقر على خبر من صفحة المجتمع وتصير الـ URL `/news/<id>`، الراوتر يطابق الأب `/news` (قائمة الأخبار) ويعرضها، وما يعرض صفحة التفاصيل أبداً. هي السبب الفعلي يلي عم يخلي النقر على الخبر يرجعك "للتاب يلي فيها الأخبار كلها".
 
-Recommended default: **option 2** (dashboard/graphs) — clearest "data" signal.
+## الحل
 
-**Option B — Generate a custom branded image** matching the editorial Teal/Olive palette. Slower but unique. Only worth it if you want every community hero to feel custom.
+تحويل `news.tsx` و `news.$id.tsx` لمسارين شقيقين (siblings) بدل أب/ابن، عبر إعادة تسمية ملف القائمة لتنطبق عليه التسمية الـ index في الـ flat routing تبع TanStack.
 
-## Out of scope
-Other community hero images (architecture, medical, etc.) — only `data` is changing.
+### التعديل
 
-Tell me which option (and which photo if A), or just say "go" and I'll use Option A photo 2.
+1. **إعادة تسمية:** `src/routes/news.tsx` → `src/routes/news.index.tsx`
+   - المسار النهائي لا يتغير: لسا `/news`.
+   - بس الراوتر يصير يعتبره index route مستقل مش parent.
+   - بنتيجة هاد الشي `news.$id` يصير ابن للجذر مباشرة ويتطابق مع `/news/<id>` لوحده.
+
+2. **بدون تعديلات داخل الملفين:** المحتوى نفسه (`createFileRoute("/news")` و `createFileRoute("/news/$id")`) يبقى بدون تغيير. تسمية الملف فقط يلي تتغير. الـ `routeTree.gen.ts` يتولّد تلقائياً وما منلمسه.
+
+3. **التحقق:**
+   - النقر من بطاقة خبر داخل `/communities/<key>` يفتح `/news/<id>` وتظهر صفحة التفاصيل (العنوان، الكاروسيل، المحتوى الكامل، الفيديوهات) بدل قائمة الأخبار.
+   - النقر من كاروسيل الأخبار في الصفحة الرئيسية و من بطاقات صفحة `/news` لسا يفتحوا التفاصيل صح.
+   - فتح `/news` لحاله لسا يعرض قائمة كل الأخبار.
+
+### لمحة تقنية
+
+في TanStack Router مع الـ flat file routing، الملف `news.tsx` بمفرده مع وجود `news.$id.tsx` بنفس المجلد بيتعرّف كـ layout parent (حتى لو ما فيه Outlet)، وملف `news.$id.tsx` بيصير ابن. للحصول على مسارين شقيقين بدل أب/ابن، لازم القائمة تتسمى `news.index.tsx`. هاد سلوك موثّق ومعروف بالـ flat routing.
