@@ -154,7 +154,14 @@ export function Footer() {
           className="mt-12 flex flex-col items-center gap-2 pt-5 text-center text-xs whitespace-pre-line"
           style={{ borderTop: `1px solid rgba(255,255,255,0.25)`, color: MUTED }}
         >
-          <span>© {new Date().getFullYear()} {isRtl ? "للجمعية السورية للذكاء الاصطناعي وريادة الأعمال\n جميع الحقوق محفوظة." : `SAAE — ${t.footer.rights}`}</span>
+          {isRtl ? (
+            <>
+              <span>© {new Date().getFullYear()} للجمعية السورية للذكاء الاصطناعي وريادة الأعمال</span>
+              <span>جميع الحقوق محفوظة.</span>
+            </>
+          ) : (
+            <span>© {new Date().getFullYear()} SAAE — {t.footer.rights}</span>
+          )}
         </div>
       </div>
     </footer>
