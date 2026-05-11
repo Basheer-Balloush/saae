@@ -1,4 +1,3 @@
-import { useState, type FormEvent } from "react";
 import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, ArrowRight } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import logo from "@/assets/footer-logo.png";
@@ -7,23 +6,11 @@ import locationMap from "@/assets/location-map.png";
 const TEAL = "#048090";
 const INK = "#FFFFFF";
 const ACCENT = "#A8E6E6";
-const HAIRLINE = "rgba(255,255,255,0.18)";
 const MUTED = "rgba(255,255,255,0.78)";
 
 export function Footer() {
   const { t, dir } = useLang();
   const isRtl = dir === "rtl";
-  const [sent, setSent] = useState(false);
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
-    (e.currentTarget as HTMLFormElement).reset();
-  }
-
-  const underlineInput =
-    "w-full bg-transparent border-0 border-b py-2 text-sm outline-none transition-colors placeholder:text-white/60 focus:border-white";
 
   return (
     <footer
