@@ -63,7 +63,7 @@ export function Footer() {
               {t.footer.quickLinks}
             </h4>
             <ul className={`mt-6 space-y-5 text-sm ${isRtl ? "text-right" : "text-left"}`}>
-              {(["about", "news", "communities", "achievements", "partners", "contact"] as const).map((k) => (
+              {(["communities", "achievements", "partners", "contact", "news", "about"] as const).map((k) => (
                 <li key={k} className="leading-relaxed">
                   <a
                     href={`#${k}`}
