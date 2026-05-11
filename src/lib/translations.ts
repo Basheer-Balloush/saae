@@ -137,7 +137,7 @@ export const translations: Record<Lang, Dict> = {
     },
     achievements: {
       eyebrow: "Our impact",
-      title: "Building Syria's AI future, line by line.",
+      title: "Building Syria's future, line by line.",
       body: "Through education, open research, and entrepreneurship, we are rebuilding technological capacity across Syria — empowering a generation of students, researchers, and founders with the tools, mentorship, and confidence to shape what comes next.",
       stats: [
         { value: "5,000+", label: "Learners" },
