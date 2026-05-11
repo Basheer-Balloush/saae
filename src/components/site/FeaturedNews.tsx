@@ -74,7 +74,7 @@ export function FeaturedNews() {
         >
           <div className="max-w-2xl">
             
-            <h1 className="mt-4 text-display-2 text-foreground">{t.news.title}</h1>
+            <h1 className="mt-4 text-display-2 leading-[1.5] text-foreground">{t.news.title}</h1>
             <p className="mt-5 max-w-xl text-body text-muted-foreground">{t.news.subtitle}</p>
           </div>
         </motion.div>
