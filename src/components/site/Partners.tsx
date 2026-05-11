@@ -21,9 +21,9 @@ export function Partners() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="mx-auto max-w-2xl text-center"
+          className="mx-auto text-center"
         >
-          <h2 className="text-display-2 text-foreground">
+          <h2 className="whitespace-nowrap text-display-2 text-foreground">
             {t.partners.title}
           </h2>
         </motion.div>
