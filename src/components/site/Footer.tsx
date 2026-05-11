@@ -20,8 +20,8 @@ export function Footer() {
         backgroundColor: TEAL,
         color: INK,
         borderTop: `2px solid rgba(255,255,255,0.25)`,
-        paddingTop: "120px",
-        paddingBottom: "48px",
+        paddingTop: "72px",
+        paddingBottom: "32px",
       }}
     >
       <div className="mx-auto w-full max-w-[1440px] px-8 lg:px-16">
