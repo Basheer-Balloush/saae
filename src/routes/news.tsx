@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowUpRight, ArrowLeft, ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
@@ -51,6 +51,8 @@ function NewsPage() {
   const { t, dir, lang } = useLang();
   const isRtl = dir === "rtl";
   const [items, setItems] = useState<NewsRow[] | null>(null);
+  const location = useLocation();
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   useEffect(() => {
     supabase
@@ -62,6 +64,30 @@ function NewsPage() {
         setItems((data ?? []) as NewsRow[]);
       });
   }, []);
+
+  useEffect(() => {
+    const hash = location.hash?.replace(/^#/, "");
+    if (!hash || !items || items.length === 0) return;
+    let cancelled = false;
+    let attempts = 0;
+    const tryRun = () => {
+      if (cancelled) return;
+      const el = document.getElementById(`news-card-${hash}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        setHighlightId(hash);
+        window.setTimeout(() => {
+          if (!cancelled) setHighlightId(null);
+        }, 1600);
+        return;
+      }
+      if (attempts++ < 40) window.setTimeout(tryRun, 50);
+    };
+    tryRun();
+    return () => {
+      cancelled = true;
+    };
+  }, [location.hash, items]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -100,12 +126,18 @@ function NewsPage() {
               {items.map((n) => {
                 const title = pick(n.title_ar, n.title_en, n.title, lang);
                 const excerpt = pick(n.excerpt_ar, n.excerpt_en, n.excerpt, lang);
+                const isHighlight = highlightId === n.id;
                 return (
                   <Link
                     key={n.id}
+                    id={`news-card-${n.id}`}
                     to="/news/$id"
                     params={{ id: n.id }}
-                    className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift"
+                    className={`group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-soft transition-all duration-300 hover:shadow-lift ${
+                      isHighlight
+                        ? "border-primary ring-2 ring-primary/60 shadow-lift scale-[1.01]"
+                        : "border-border"
+                    }`}
                   >
                     <div className="aspect-[16/10] overflow-hidden bg-muted">
                       <img
