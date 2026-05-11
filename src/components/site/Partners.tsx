@@ -2,10 +2,12 @@ import { motion } from "framer-motion";
 import { useLang } from "@/lib/i18n";
 import sarrdehLogo from "@/assets/partner-sarrdeh.png";
 import devistaLogo from "@/assets/partner-devista.png";
+import ilmhubLogo from "@/assets/partner-ilmhub.png";
 
 const PARTNERS = [
   { name: "Sarrdeh Tech", logo: sarrdehLogo },
   { name: "Devista Consulting", logo: devistaLogo },
+  { name: "ILM Hub", logo: ilmhubLogo },
 ];
 
 export function Partners() {
