@@ -89,7 +89,7 @@ export function FeaturedNews() {
                     <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
                       {c.cat}
                     </span>
-                    <span className="text-muted-foreground">{c.date}</span>
+                    <span className="whitespace-nowrap text-muted-foreground">{c.date}</span>
                   </div>
                   <h3 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
                     {c.title}
