@@ -7,7 +7,7 @@ import locationMap from "@/assets/location-map.png";
 const INK = "#2E2E2E";
 const TEAL = "#048090";
 const HAIRLINE = "#EEEEEE";
-const MUTED = "#8A8A8A";
+const MUTED = "#555555";
 
 export function Footer() {
   const { t, dir } = useLang();
@@ -27,11 +27,17 @@ export function Footer() {
   return (
     <footer
       id="contact"
-      className="relative pt-20 pb-8"
-      style={{ backgroundColor: "#FFFFFF", color: INK, borderTop: `1px solid ${HAIRLINE}` }}
+      className="relative"
+      style={{
+        backgroundColor: "#FFFFFF",
+        color: INK,
+        borderTop: `2px solid ${TEAL}`,
+        paddingTop: "120px",
+        paddingBottom: "48px",
+      }}
     >
-      <div className="mx-auto max-w-7xl px-6 lg:px-10">
-        <div className="grid items-start gap-14 lg:grid-cols-12">
+      <div className="mx-auto w-full max-w-[1440px] px-8 lg:px-16">
+        <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Col 1 — Identity */}
           <div className="lg:col-span-3">
             <img
@@ -45,16 +51,16 @@ export function Footer() {
             >
               {t.footer.mission}
             </p>
-            <div className="mt-7 flex items-center gap-5">
+            <div className="mt-8 flex items-center gap-7">
               {[Linkedin, Twitter, Github].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
                   aria-label="social"
-                  className="transition-colors hover:text-[#048090]"
-                  style={{ color: INK }}
+                  className="transition-opacity hover:opacity-70"
+                  style={{ color: TEAL }}
                 >
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
+                  <Icon className="h-6 w-6" strokeWidth={1.5} />
                 </a>
               ))}
             </div>
@@ -63,14 +69,14 @@ export function Footer() {
           {/* Col 2 — Navigation */}
           <div className="lg:col-span-2">
             <h4
-              className="text-xs font-semibold uppercase tracking-[0.18em]"
-              style={{ color: INK }}
+              className="text-base font-bold tracking-tight"
+              style={{ color: INK, fontFamily: '"Cairo", system-ui, sans-serif' }}
             >
               {t.footer.quickLinks}
             </h4>
-            <ul className="mt-6 space-y-4 text-sm">
+            <ul className={`mt-6 space-y-5 text-sm ${isRtl ? "text-right" : "text-left"}`}>
               {(["about", "news", "communities", "achievements", "partners", "contact"] as const).map((k) => (
-                <li key={k}>
+                <li key={k} className="leading-relaxed">
                   <a
                     href={`#${k}`}
                     className="transition-colors hover:text-[#048090]"
@@ -192,20 +198,13 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Divider + copyright */}
+        {/* Bottom bar — teal divider + centered copyright */}
         <div
-          className="mt-16 pt-5 text-center text-xs"
-          style={{ borderTop: `1px solid ${HAIRLINE}`, color: MUTED }}
+          className="mt-20 flex flex-col items-center gap-2 pt-6 text-center text-xs"
+          style={{ borderTop: `1px solid ${TEAL}`, color: "#555555" }}
         >
-          © {new Date().getFullYear()} SAAE — {t.footer.rights}
-        </div>
-
-        {/* Made in Damascus — tiny, bottom-right */}
-        <div
-          className={`mt-3 text-[11px] ${isRtl ? "text-right" : "text-left"}`}
-          style={{ color: "#B5B5B5" }}
-        >
-          {t.footer.madeIn}
+          <span>© {new Date().getFullYear()} SAAE — {t.footer.rights}</span>
+          <span style={{ color: "#555555" }}>{t.footer.madeIn}</span>
         </div>
       </div>
     </footer>
