@@ -110,12 +110,12 @@ export function Footer() {
               <div className="mt-4 space-y-2.5 text-sm">
                 <div className="flex items-start gap-2.5">
                   <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
-                  <span style={{ color: "var(--footer-foreground)" }}>{t.footer.address}</span>
+                  <span style={{ color: "#1a1a1a" }}>{t.footer.address}</span>
                 </div>
                 <a
                   href="mailto:info@aisyria.org"
                   className="flex items-center gap-2.5 transition-opacity hover:opacity-70"
-                  style={{ color: "var(--footer-foreground)" }}
+                  style={{ color: "#1a1a1a" }}
                 >
                   <Mail className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
                   info@aisyria.org
@@ -123,7 +123,7 @@ export function Footer() {
                 <a
                   href="tel:+963930763547"
                   className="flex items-center gap-2.5 transition-opacity hover:opacity-70"
-                  style={{ color: "var(--footer-foreground)" }}
+                  style={{ color: "#1a1a1a" }}
                 >
                   <Phone className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
                   <span dir="ltr">+963 930 763 547</span>
