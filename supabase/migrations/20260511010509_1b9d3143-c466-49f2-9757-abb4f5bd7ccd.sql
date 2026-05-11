@@ -1,0 +1,1 @@
+revoke execute on function public.handle_first_admin() from anon, authenticated, public;
