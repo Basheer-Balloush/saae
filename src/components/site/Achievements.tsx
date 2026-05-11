@@ -17,8 +17,7 @@ export function Achievements() {
   return (
     <section
       id="achievements"
-      className="relative overflow-hidden py-24 lg:py-32"
-      style={{ backgroundColor: "#FFFFFF" }}
+      className="relative overflow-hidden bg-background py-24 lg:py-32"
     >
       <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
         <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
