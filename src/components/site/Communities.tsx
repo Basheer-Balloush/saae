@@ -32,26 +32,24 @@ export function Communities() {
           <p className="mt-5 text-body text-muted-foreground">{t.communities.subtitle}</p>
         </motion.div>
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {cards.map((card, i) => {
-            const Icon = card.icon;
-            return (
-              <motion.div
-                key={card.title}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.5, delay: i * 0.05 }}
-                className="group relative overflow-hidden rounded-2xl border border-border bg-card p-7 shadow-soft transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-lift"
-              >
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                  <Icon className="h-5 w-5" />
+        <div className="relative mt-14 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+          <div className="flex w-max animate-[marquee-communities_60s_linear_infinite] gap-5 hover:[animation-play-state:paused]">
+            {[...cards, ...cards].map((card, i) => {
+              const Icon = card.icon;
+              return (
+                <div
+                  key={i}
+                  className="group relative w-[320px] flex-none overflow-hidden rounded-2xl border border-border bg-card p-7 shadow-soft transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-lift"
+                >
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-6 text-lg font-bold text-foreground">{card.title}</h3>
+                  <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">{card.desc}</p>
                 </div>
-                <h3 className="mt-6 text-lg font-bold text-foreground">{card.title}</h3>
-                <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">{card.desc}</p>
-              </motion.div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         <div className="mt-14 flex justify-center">
