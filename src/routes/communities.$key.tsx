@@ -234,7 +234,7 @@ function Prelude({
               style={{
                 fontFamily: lang === "ar" ? '"Cairo", system-ui, sans-serif' : '"Evanston Tavern 1919", Georgia, serif',
                 fontWeight: lang === "ar" ? 400 : 500,
-                color: "#3a3a3a",
+                color: "var(--foreground)",
                 letterSpacing: "0.005em",
               }}
             >
