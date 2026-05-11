@@ -5,9 +5,9 @@ import devistaLogo from "@/assets/partner-devista.png";
 import ilmhubLogo from "@/assets/partner-ilmhub.png";
 
 const PARTNERS = [
-  { name: "Sarrdeh Tech", logo: sarrdehLogo },
-  { name: "Devista Consulting", logo: devistaLogo },
-  { name: "ILM Hub", logo: ilmhubLogo },
+  { name: "Sarrdeh Tech", logo: sarrdehLogo, sizeClass: "h-28" },
+  { name: "Devista Consulting", logo: devistaLogo, sizeClass: "h-28" },
+  { name: "ILM Hub", logo: ilmhubLogo, sizeClass: "h-40" },
 ];
 
 export function Partners() {
