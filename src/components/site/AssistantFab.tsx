@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, X } from "lucide-react";
 import { useLang } from "@/lib/i18n";
@@ -7,7 +7,18 @@ import { AssistantChatModal } from "./AssistantChatModal";
 export function AssistantFab() {
   const { t, dir } = useLang();
   const [open, setOpen] = useState(false);
+  const [prefill, setPrefill] = useState<string | null>(null);
   const isRtl = dir === "rtl";
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail ?? {};
+      if (typeof detail.prefill === "string") setPrefill(detail.prefill);
+      setOpen(true);
+    };
+    window.addEventListener("assistant:open", handler);
+    return () => window.removeEventListener("assistant:open", handler);
+  }, []);
 
   return (
     <>
