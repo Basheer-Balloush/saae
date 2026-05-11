@@ -151,7 +151,7 @@ export function Footer() {
 
         {/* Bottom bar — centered copyright */}
         <div
-          className="mt-20 flex flex-col items-center gap-2 pt-6 text-center text-xs"
+          className="mt-12 flex flex-col items-center gap-2 pt-5 text-center text-xs"
           style={{ borderTop: `1px solid rgba(255,255,255,0.25)`, color: MUTED }}
         >
           <span>© {new Date().getFullYear()} SAAE — {t.footer.rights}</span>
