@@ -1,5 +1,4 @@
-import { useState, type FormEvent } from "react";
-import { Mail, Phone, MapPin, Linkedin, Twitter, Github, ArrowRight } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, ArrowRight } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import logo from "@/assets/footer-logo.png";
 import locationMap from "@/assets/location-map.png";
@@ -7,23 +6,11 @@ import locationMap from "@/assets/location-map.png";
 const TEAL = "#048090";
 const INK = "#FFFFFF";
 const ACCENT = "#A8E6E6";
-const HAIRLINE = "rgba(255,255,255,0.18)";
 const MUTED = "rgba(255,255,255,0.78)";
 
 export function Footer() {
   const { t, dir } = useLang();
   const isRtl = dir === "rtl";
-  const [sent, setSent] = useState(false);
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
-    (e.currentTarget as HTMLFormElement).reset();
-  }
-
-  const underlineInput =
-    "w-full bg-transparent border-0 border-b py-2 text-sm outline-none transition-colors placeholder:text-white/60 focus:border-white";
 
   return (
     <footer
@@ -40,7 +27,7 @@ export function Footer() {
       <div className="mx-auto w-full max-w-[1440px] px-8 lg:px-16">
         <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Col 1 — Identity */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-5">
             <img
               src={logo}
               alt="SAAE"
@@ -53,7 +40,7 @@ export function Footer() {
               {t.footer.mission}
             </p>
             <div className="mt-8 flex items-center gap-7">
-              {[Linkedin, Twitter, Github].map((Icon, i) => (
+              {[Instagram, Facebook, Linkedin].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
@@ -68,7 +55,7 @@ export function Footer() {
           </div>
 
           {/* Col 2 — Navigation */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <h4
               className="text-base font-bold tracking-tight"
               style={{ color: INK, fontFamily: '"Cairo", system-ui, sans-serif' }}
@@ -90,49 +77,9 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Col 3 — Contact Hub */}
-          <div className="lg:col-span-4">
-            <h4
-              className="text-xs font-semibold uppercase tracking-[0.18em]"
-              style={{ color: INK }}
-            >
-              {t.footer.contact}
-            </h4>
-            <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-              <input
-                required
-                type="text"
-                placeholder={t.footer.form.name}
-                className={underlineInput}
-                style={{ color: INK, borderBottomColor: HAIRLINE }}
-              />
-              <input
-                required
-                type="email"
-                placeholder={t.footer.form.email}
-                className={underlineInput}
-                style={{ color: INK, borderBottomColor: HAIRLINE }}
-              />
-              <textarea
-                required
-                rows={2}
-                placeholder={t.footer.form.message}
-                className={`${underlineInput} resize-none`}
-                style={{ color: INK, borderBottomColor: HAIRLINE }}
-              />
-              <button
-                type="submit"
-                className="inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "#FFFFFF", color: TEAL }}
-              >
-                {sent ? t.footer.form.sent : t.footer.form.send}
-                {!sent && <ArrowRight className={isRtl ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />}
-              </button>
-            </form>
-          </div>
 
           {/* Col 4 — HQ Intelligence */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-4">
             <h4
               className="text-xs font-semibold uppercase tracking-[0.18em]"
               style={{ color: INK }}
