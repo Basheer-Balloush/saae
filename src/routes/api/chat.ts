@@ -117,6 +117,26 @@ export const Route = createFileRoute("/api/chat")({
         if (!Array.isArray(messages)) {
           return new Response("Messages are required", { status: 400 });
         }
+        if (messages.length === 0 || messages.length > 100) {
+          return new Response("Invalid message count", { status: 400 });
+        }
+        const MAX_CONTENT_CHARS = 8000;
+        const allowedRoles = new Set(["user", "assistant", "system"]);
+        for (const m of messages as Array<{ role?: unknown; content?: unknown; parts?: unknown }>) {
+          if (!m || typeof m !== "object") {
+            return new Response("Invalid message", { status: 400 });
+          }
+          if (typeof m.role !== "string" || !allowedRoles.has(m.role)) {
+            return new Response("Invalid message role", { status: 400 });
+          }
+          const contentStr =
+            typeof m.content === "string"
+              ? m.content
+              : JSON.stringify(m.content ?? m.parts ?? "");
+          if (contentStr.length > MAX_CONTENT_CHARS) {
+            return new Response("Message content too long", { status: 400 });
+          }
+        }
 
         const key = process.env.LOVABLE_API_KEY;
         if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
