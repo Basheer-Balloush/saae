@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -19,6 +20,11 @@ import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
+const SuperAdminRoute = SuperAdminRouteImport.update({
+  id: '/super-admin',
+  path: '/super-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AttendanceManagementSystemRoute =
   AttendanceManagementSystemRouteImport.update({
     id: '/attendance-management-system',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRoute
+  '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRoute
+  '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRoute
+  '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/attendance-management-system'
+    | '/super-admin'
     | '/admin/login'
     | '/api/chat'
     | '/communities/$key'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/attendance-management-system'
+    | '/super-admin'
     | '/admin/login'
     | '/api/chat'
     | '/communities/$key'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/attendance-management-system'
+    | '/super-admin'
     | '/admin/login'
     | '/api/chat'
     | '/communities/$key'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRoute
+  SuperAdminRoute: typeof SuperAdminRoute
   AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
@@ -150,6 +163,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/super-admin': {
+      id: '/super-admin'
+      path: '/super-admin'
+      fullPath: '/super-admin'
+      preLoaderRoute: typeof SuperAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/attendance-management-system': {
       id: '/attendance-management-system'
       path: '/attendance-management-system'
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AttendanceManagementSystemRoute: AttendanceManagementSystemRoute,
+  SuperAdminRoute: SuperAdminRoute,
   AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,
