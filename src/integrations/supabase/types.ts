@@ -14,6 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
+      company_leads: {
+        Row: {
+          accepts_training_new_staff: boolean | null
+          company_name: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          country: string | null
+          created_at: string
+          employee_count: string | null
+          has_office: boolean | null
+          id: string
+          licensed_in_syria: boolean | null
+          licensed_outside_syria: boolean | null
+          office_address: string | null
+          raw: Json | null
+          source: string
+          uses_ai: boolean | null
+          work_field: string | null
+        }
+        Insert: {
+          accepts_training_new_staff?: boolean | null
+          company_name: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          employee_count?: string | null
+          has_office?: boolean | null
+          id?: string
+          licensed_in_syria?: boolean | null
+          licensed_outside_syria?: boolean | null
+          office_address?: string | null
+          raw?: Json | null
+          source?: string
+          uses_ai?: boolean | null
+          work_field?: string | null
+        }
+        Update: {
+          accepts_training_new_staff?: boolean | null
+          company_name?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          employee_count?: string | null
+          has_office?: boolean | null
+          id?: string
+          licensed_in_syria?: boolean | null
+          licensed_outside_syria?: boolean | null
+          office_address?: string | null
+          raw?: Json | null
+          source?: string
+          uses_ai?: boolean | null
+          work_field?: string | null
+        }
+        Relationships: []
+      }
+      individual_leads: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          phone: string | null
+          raw: Json | null
+          short_description: string | null
+          source: string
+          specialty: string | null
+          work_field: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          phone?: string | null
+          raw?: Json | null
+          short_description?: string | null
+          source?: string
+          specialty?: string | null
+          work_field?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+          raw?: Json | null
+          short_description?: string | null
+          source?: string
+          specialty?: string | null
+          work_field?: string | null
+        }
+        Relationships: []
+      }
       news: {
         Row: {
           category: string

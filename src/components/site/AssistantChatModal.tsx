@@ -127,6 +127,22 @@ export function AssistantChatModal({
                   <p className="mt-2 max-w-sm text-sm text-muted-foreground">
                     {a.subtitle}
                   </p>
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                    {[
+                      isRtl ? "أنا فرد مهتم بالتدريب" : "I'm an individual interested in training",
+                      isRtl ? "أمثّل شركة وأبحث عن شراكة" : "I represent a company looking to partner",
+                      isRtl ? "أخبرني عن الجمعية" : "Tell me about the association",
+                    ].map((q) => (
+                      <button
+                        key={q}
+                        type="button"
+                        onClick={() => sendMessage({ text: q })}
+                        className="rounded-full border border-border bg-background px-4 py-2 text-xs font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 
