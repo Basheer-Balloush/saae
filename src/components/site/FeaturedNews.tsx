@@ -49,8 +49,8 @@ export function FeaturedNews() {
         </motion.div>
       </div>
 
-      <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
-        <div className="flex w-max animate-[news-marquee_60s_linear_infinite] gap-6 px-6 hover:[animation-play-state:paused]">
+      <div dir="ltr" className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
+        <div className={`flex w-max gap-6 hover:[animation-play-state:paused] ${dir === "rtl" ? "animate-[news-marquee-rtl_60s_linear_infinite]" : "animate-[news-marquee_60s_linear_infinite]"}`}>
           {row.map((c, i) => (
             <a
               key={`${c.key}-${i}`}
@@ -100,8 +100,9 @@ export function FeaturedNews() {
           from { transform: translateX(0); }
           to { transform: translateX(-50%); }
         }
-        [dir="rtl"] .animate-\\[news-marquee_60s_linear_infinite\\] {
-          animation-direction: reverse;
+        @keyframes news-marquee-rtl {
+          from { transform: translateX(-50%); }
+          to { transform: translateX(0); }
         }
       `}</style>
     </section>
