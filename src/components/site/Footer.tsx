@@ -22,12 +22,6 @@ export function Footer() {
           <div className="lg:col-span-4">
             <div className="flex items-center gap-3">
               <img src={logo} alt="SAAE" className="h-14 w-auto brightness-0 invert" />
-              <div className="flex flex-col leading-tight">
-                
-                <span className="text-[11px] text-footer-muted">
-                  {dir === "rtl" ? "الجمعية السورية للذكاء الاصطناعي" : "Syrian Association for AI & Entrepreneurship"}
-                </span>
-              </div>
             </div>
             <p className="mt-6 max-w-sm text-sm leading-relaxed text-footer-muted">{t.footer.mission}</p>
             <div className="mt-6 flex items-center gap-3">
