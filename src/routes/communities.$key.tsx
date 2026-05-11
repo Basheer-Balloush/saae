@@ -10,6 +10,7 @@ import {
   COMMUNITY_KEYS,
   COMMUNITY_LABELS_AR,
   COMMUNITY_LABELS_EN,
+  communityLabel,
   type CommunityKey,
 } from "@/lib/communityCategories";
 
@@ -560,7 +561,7 @@ function ActivityFeed({ isRtl, lang, activities, loading }: { isRtl: boolean; la
                       className="text-xs font-semibold uppercase tracking-[0.22em]"
                       style={{ color: TEAL, fontFamily: '"Cairo", system-ui, sans-serif' }}
                     >
-                      {a.category}
+                      {communityLabel(a.category, lang)}
                     </div>
                     <div
                       className="mt-3 text-sm"
