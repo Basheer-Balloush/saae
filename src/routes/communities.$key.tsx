@@ -31,24 +31,24 @@ type Metric = { value: string; label: { ar: string; en: string } };
 
 const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
   data: {
-    ar: "نُمكِّن العقول السورية من قراءة البيانات وتحويلها إلى قرارات تصنع فرقاً حقيقياً.",
-    en: "Empowering Syrian minds to read data and turn it into decisions that make a real difference.",
+    ar: "نُوفِّر طبقة «الذكاء» الأساسية لجميع قطاعات الجمعية عبر علوم البيانات، ونبني كفاءاتٍ سورية قادرة على قراءة الواقع وصياغة قراراته.",
+    en: "Providing the foundational 'Intelligence' layer for all other SAAE sectors through data science — and building Syrian talent that can read reality and shape its decisions.",
   },
   architecture: {
-    ar: "نُعيد تخيّل المدن السورية عبر عمارة ذكية تجمع الإنسان بالتقنية والمعنى.",
-    en: "Reimagining Syrian cities through smart architecture that unites people, technology and meaning.",
+    ar: "ندمج الذكاء الاصطناعي وإنترنت الأشياء وتحليل البيانات في إعادة إعمار سوريا وتخطيطها العمراني لبناء مدنٍ أكثر ذكاءً واستدامة.",
+    en: "Integrating AI, IoT and data analysis into Syrian reconstruction and urban planning to build smarter, more sustainable cities.",
   },
   medical: {
-    ar: "نُسخِّر الذكاء الاصطناعي لخدمة المريض السوري وبناء طبٍّ أكثر دقّةً وإنسانية.",
-    en: "Harnessing AI to serve the Syrian patient and build a more precise, more human medicine.",
+    ar: "نَصِل الخبرة الطبية بالذكاء الاصطناعي (MedInvoVision) لتحسين دقّة التشخيص وجودة الرعاية الصحية في سوريا.",
+    en: "Bridging medical expertise and AI (MedInvoVision) to improve diagnostic accuracy and quality of care in Syria.",
   },
   entrepreneurship: {
-    ar: "نُحوّل الأفكار الجريئة إلى مشاريع رقمية مستدامة تصنع اقتصاد سوريا الجديد.",
-    en: "Turning bold ideas into sustainable digital ventures that shape Syria's new economy.",
+    ar: "نُمكِّن الشباب السوري من بناء شركات ناشئة تعتمد على الذكاء الاصطناعي وقيادة الاقتصاد الرقمي.",
+    en: "Empowering Syrian youth to build AI-driven startups and lead the digital economy.",
   },
   research: {
-    ar: "نبني جسراً بين الأكاديميا والميدان عبر بحوث تطبيقية تخدم المجتمع.",
-    en: "Bridging academia and the field through applied research that serves the community.",
+    ar: "نبني جسراً علمياً بين الذكاء الاصطناعي النظري والتطبيقات السورية العملية عبر بحوثٍ رصينة ومنشورة.",
+    en: "Building a scientific bridge between theoretical AI and practical Syrian applications through rigorous, published research.",
   },
   software: {
     ar: "نصنع برمجياتٍ من سوريا، للعالم — بمعايير حِرفية وجودة معرفية عالية.",
@@ -60,7 +60,7 @@ const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
   },
 };
 
-const ACTIVITIES: ActivityItem[] = [
+const DEFAULT_ACTIVITIES: ActivityItem[] = [
   {
     date: "2025 / 11 / 12",
     category: { ar: "ورشة عمل", en: "Workshop" },
@@ -88,32 +88,189 @@ const ACTIVITIES: ActivityItem[] = [
       en: "A field paper by community members reviewing the applied impact of locally-built solutions this year.",
     },
   },
-  {
-    date: "2025 / 09 / 14",
-    category: { ar: "لقاء", en: "Meetup" },
-    title: { ar: "لقاء الانطلاق الفصلي للمجتمع", en: "Quarterly Community Kickoff" },
-    desc: {
-      ar: "لقاءٌ ودّي وصارمٌ في آن؛ نستعرض إنجازات الفصل المنصرم ونعلن مبادرات الفصل القادم.",
-      en: "A warm yet rigorous gathering — reviewing the past quarter's wins and announcing the next initiatives.",
-    },
-  },
-  {
-    date: "2025 / 08 / 22",
-    category: { ar: "تعاون", en: "Collaboration" },
-    title: { ar: "شراكة جديدة مع شركاء أكاديميين", en: "New Partnership With Academic Allies" },
-    desc: {
-      ar: "اتفاقية تعاون تفتح أبواب المختبرات والمكتبات أمام أعضاء المجتمع لمشاريعهم البحثية والتطبيقية.",
-      en: "A cooperation agreement that opens labs and libraries to members for research and applied projects.",
-    },
-  },
 ];
 
-const METRICS: Metric[] = [
+const ACTIVITIES_BY_KEY: Record<CommunityKey, ActivityItem[]> = {
+  entrepreneurship: [
+    {
+      date: "2025 / 11 / 20",
+      category: { ar: "هاكاثون", en: "Hackathon" },
+      title: { ar: "مشاركة المجتمع في «أركاثون» للذكاء الاصطناعي", en: "Community Participation in the AI Archathon" },
+      desc: {
+        ar: "فِرَقٌ من رواد الأعمال السوريين تتنافس على بناء حلولٍ ذكية لمشكلاتٍ محلية خلال 48 ساعة من العمل المكثّف.",
+        en: "Teams of Syrian entrepreneurs compete to build smart solutions to local problems in 48 hours of focused work.",
+      },
+    },
+    {
+      date: "2025 / 10 / 18",
+      category: { ar: "إرشاد", en: "Mentorship" },
+      title: { ar: "برنامج إرشاد الشركات الناشئة في الذكاء الاصطناعي", en: "AI-Startup Mentorship Program" },
+      desc: {
+        ar: "إرشادٌ مباشر من مؤسّسي شركاتٍ ومستثمرين، يرافق رواد الأعمال من الفكرة حتى الجولة الاستثمارية الأولى.",
+        en: "Hands-on guidance from founders and investors that walks entrepreneurs from idea to first funding round.",
+      },
+    },
+    {
+      date: "2025 / 09 / 22",
+      category: { ar: "ورشة عمل", en: "Workshop" },
+      title: { ar: "ورشات الثقافة الرقمية لروّاد الأعمال", en: "Digital Culture Workshops for Founders" },
+      desc: {
+        ar: "سلسلة ورشاتٍ تطبيقية تبني الوعي الرقمي وتُمكِّن الفرق من اتخاذ قراراتٍ مبنية على البيانات.",
+        en: "An applied workshop series that builds digital fluency and empowers teams to make data-informed decisions.",
+      },
+    },
+  ],
+  research: [
+    {
+      date: "2025 / 11 / 08",
+      category: { ar: "نشر", en: "Publication" },
+      title: { ar: "إصدار أوراق بحثية محكَّمة في الذكاء الاصطناعي", en: "Publication of Peer-Reviewed AI Research Papers" },
+      desc: {
+        ar: "أوراقٌ بحثية يُسهم فيها أعضاء المجتمع في مجلاتٍ ومؤتمراتٍ دولية، تربط النظرية بالتطبيق السوري.",
+        en: "Community-authored papers in international journals and conferences linking theory to Syrian practice.",
+      },
+    },
+    {
+      date: "2025 / 10 / 14",
+      category: { ar: "تدريب", en: "Training" },
+      title: { ar: "تدريبٌ متخصّص للأكاديميين على أدوات البحث الحديثة", en: "Specialized Training for Academics on Modern Research Tools" },
+      desc: {
+        ar: "برنامجٌ مكثَّف يُؤهِّل أعضاء الهيئات التدريسية لاستخدام أحدث أدوات الذكاء الاصطناعي في أبحاثهم.",
+        en: "An intensive program equipping faculty members to use the latest AI tools in their research pipelines.",
+      },
+    },
+    {
+      date: "2025 / 09 / 02",
+      category: { ar: "مبادرة", en: "Initiative" },
+      title: { ar: "مبادرات الوصول إلى قواعد البيانات العلمية", en: "Database Access Initiatives" },
+      desc: {
+        ar: "نفتح أبواب قواعد البيانات والمكتبات الرقمية أمام الباحثين السوريين عبر شراكاتٍ مؤسّسية.",
+        en: "Unlocking scientific databases and digital libraries for Syrian researchers through institutional partnerships.",
+      },
+    },
+  ],
+  medical: [
+    {
+      date: "2025 / 11 / 15",
+      category: { ar: "تدريب", en: "Training" },
+      title: { ar: "تدريب على المعلوماتية الطبية", en: "Medical Informatics Training" },
+      desc: {
+        ar: "برنامجٌ تطبيقي للأطباء وطلاب الطب على معالجة البيانات السريرية وتوظيف الذكاء الاصطناعي في التشخيص.",
+        en: "A hands-on program for clinicians and medical students on clinical data and AI-assisted diagnosis.",
+      },
+    },
+    {
+      date: "2025 / 10 / 24",
+      category: { ar: "ورشة عمل", en: "Workshop" },
+      title: { ar: "ورشات الذكاء الاصطناعي السريري", en: "Clinical AI Workshops" },
+      desc: {
+        ar: "ورشاتٌ تربط أدوات الذكاء الاصطناعي بالواقع السريري لتحسين دقّة القرارات الطبية وسلامة المريض.",
+        en: "Workshops connecting AI tools with bedside realities to improve clinical decisions and patient safety.",
+      },
+    },
+    {
+      date: "2025 / 09 / 18",
+      category: { ar: "ابتكار", en: "Innovation" },
+      title: { ar: "الابتكار المُقتَصِد في الرعاية الصحية", en: "Frugal Innovation in Healthcare" },
+      desc: {
+        ar: "نماذج أوليّة منخفضة التكلفة تعالج فجواتٍ تشخيصية حقيقية في المستشفيات والعيادات السورية.",
+        en: "Low-cost prototypes that address real diagnostic gaps in Syrian hospitals and clinics.",
+      },
+    },
+  ],
+  architecture: [
+    {
+      date: "2025 / 11 / 05",
+      category: { ar: "نمذجة", en: "Modeling" },
+      title: { ar: "نمذجة المدن الذكية", en: "Smart City Modeling" },
+      desc: {
+        ar: "مشاريع نمذجة حضرية تستخدم البيانات وإنترنت الأشياء لتصوّر مدنٍ سورية أكثر ذكاءً واستجابة.",
+        en: "Urban modeling projects using data and IoT to imagine smarter, more responsive Syrian cities.",
+      },
+    },
+    {
+      date: "2025 / 10 / 11",
+      category: { ar: "ورشة عمل", en: "Workshop" },
+      title: { ar: "ورشات التصميم المعتمد على البيانات", en: "Data-Driven Design Workshops" },
+      desc: {
+        ar: "نمنح المعماريين أدواتٍ لاتخاذ قراراتٍ تصميمية مبنية على بيانات الموقع والمستخدم والمناخ.",
+        en: "Equipping architects with tools to make design decisions grounded in site, user and climate data.",
+      },
+    },
+    {
+      date: "2025 / 09 / 09",
+      category: { ar: "بحث", en: "Research" },
+      title: { ar: "أبحاث الاستدامة في إعادة الإعمار", en: "Sustainability Research in Reconstruction" },
+      desc: {
+        ar: "دراساتٌ تطبيقية حول كفاءة الطاقة والمواد المحلية في إعادة إعمار المناطق السورية.",
+        en: "Applied studies on energy efficiency and local materials for the reconstruction of Syrian regions.",
+      },
+    },
+  ],
+  data: [
+    {
+      date: "2025 / 11 / 02",
+      category: { ar: "بوتكامب", en: "Bootcamp" },
+      title: { ar: "بوتكامب تعلُّم الآلة", en: "Machine Learning Bootcamp" },
+      desc: {
+        ar: "برنامجٌ مكثَّف يُؤهِّل المشاركين من الصفر حتى بناء نماذج تعلُّم آلة قابلة للنشر في بيئاتٍ حقيقية.",
+        en: "An intensive program taking participants from zero to deployable ML models in real environments.",
+      },
+    },
+    {
+      date: "2025 / 10 / 17",
+      category: { ar: "ماراثون", en: "Marathon" },
+      title: { ar: "ماراثونات تنظيف وهيكلة البيانات", en: "Data Cleaning Marathons" },
+      desc: {
+        ar: "أيامٌ مكثَّفة من العمل الجماعي على تجهيز مجموعات بياناتٍ سورية مفتوحة للاستخدام البحثي والتطبيقي.",
+        en: "Intensive collaborative sprints preparing open Syrian datasets for research and applied use.",
+      },
+    },
+    {
+      date: "2025 / 09 / 25",
+      category: { ar: "نمذجة", en: "Modeling" },
+      title: { ar: "النمذجة التنبؤية للأسواق السورية", en: "Predictive Modeling for Syrian Markets" },
+      desc: {
+        ar: "نبني نماذج تنبؤيةً تساعد المؤسسات السورية على فهم سلوك الأسواق واتخاذ قراراتٍ أفضل.",
+        en: "Building predictive models that help Syrian institutions read markets and make better decisions.",
+      },
+    },
+  ],
+  software: DEFAULT_ACTIVITIES,
+  economy: DEFAULT_ACTIVITIES,
+};
+
+const DEFAULT_METRICS: Metric[] = [
   { value: "320+", label: { ar: "عضو نشط", en: "Active Members" } },
   { value: "18", label: { ar: "ورقة بحثية", en: "Research Papers" } },
   { value: "42", label: { ar: "ورشة وفعالية", en: "Workshops & Events" } },
   { value: "27", label: { ar: "مشروع تطبيقي", en: "Applied Projects" } },
 ];
+
+const METRICS_BY_KEY: Record<CommunityKey, Metric[]> = {
+  entrepreneurship: [
+    { value: "+15", label: { ar: "شركة ناشئة مدعومة", en: "Startups Supported" } },
+    { value: "+50", label: { ar: "روّاد أعمال مُدرَّبون", en: "Entrepreneurs Trained" } },
+  ],
+  research: [
+    { value: "+20", label: { ar: "ورقة بحثية", en: "Research Papers" } },
+    { value: "+100", label: { ar: "باحث متّصِل بالشبكة", en: "Researchers Connected" } },
+  ],
+  medical: [
+    { value: "+5", label: { ar: "نموذجٌ طبيٌّ مبتكر", en: "Innovative Medical Prototypes" } },
+    { value: "+300", label: { ar: "طالب طبٍّ مُستفيد", en: "Medical Students Impacted" } },
+  ],
+  architecture: [
+    { value: "+12", label: { ar: "مشروع تصميمٍ ذكي", en: "Smart Design Projects" } },
+    { value: "+50", label: { ar: "معماري متخصّص بالذكاء الاصطناعي", en: "Architects Specialized in AI" } },
+  ],
+  data: [
+    { value: "+200", label: { ar: "مُحلِّل بيانات مُدرَّب", en: "Data Analysts Trained" } },
+    { value: "+10", label: { ar: "مجموعة بيانات مفتوحة", en: "Open-Source Datasets Curated" } },
+  ],
+  software: DEFAULT_METRICS,
+  economy: DEFAULT_METRICS,
+};
 
 export const Route = createFileRoute("/communities/$key")({
   beforeLoad: ({ params }) => {
@@ -175,8 +332,8 @@ function CommunityPage() {
       <Navbar />
       <main className="pt-20">
         <Prelude name={name} mission={mission} img={HERO_IMG[k]} isRtl={isRtl} lang={lang} />
-        <ActivityFeed isRtl={isRtl} lang={lang} />
-        <ImpactMatrix isRtl={isRtl} lang={lang} />
+        <ActivityFeed isRtl={isRtl} lang={lang} activities={ACTIVITIES_BY_KEY[k] ?? DEFAULT_ACTIVITIES} />
+        <ImpactMatrix isRtl={isRtl} lang={lang} metrics={METRICS_BY_KEY[k] ?? DEFAULT_METRICS} />
         <CallToConnection isRtl={isRtl} lang={lang} />
       </main>
       <Footer />
@@ -264,7 +421,7 @@ function Prelude({
 }
 
 /* ---------- SECTION 3: Activity Feed (Editorial Index) ---------- */
-function ActivityFeed({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
+function ActivityFeed({ isRtl, lang, activities }: { isRtl: boolean; lang: "ar" | "en"; activities: ActivityItem[] }) {
   const heading = lang === "ar" ? "الأخبار والفعاليات" : "News & Events";
   const sub = lang === "ar" ? "أرشيفٌ زمنيٌّ لما يصنعه المجتمع: ورشات، أبحاث، لقاءات وشراكات." : "A chronological index of what the community makes: workshops, research, meetups and partnerships.";
 
@@ -293,7 +450,7 @@ function ActivityFeed({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
         </motion.div>
 
         <div className="mt-16" style={{ borderTop: `1px solid ${TEAL}` }}>
-          {ACTIVITIES.map((a, i) => (
+          {activities.map((a, i) => (
             <motion.article
               key={i}
               initial={{ opacity: 0, y: 20 }}
@@ -349,7 +506,7 @@ function ActivityFeed({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
 }
 
 /* ---------- SECTION 4: Impact Matrix ---------- */
-function ImpactMatrix({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
+function ImpactMatrix({ isRtl, lang, metrics }: { isRtl: boolean; lang: "ar" | "en"; metrics: Metric[] }) {
   // Long-Short / Short-Long
   const heights = [
     "min-h-[260px] lg:min-h-[300px]",
@@ -389,14 +546,14 @@ function ImpactMatrix({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
               className="grid grid-cols-1 sm:grid-cols-2"
               style={{ columnGap: "32px", rowGap: "40px" }}
             >
-              {METRICS.map((m, i) => (
+              {metrics.map((m, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
                   transition={{ duration: 0.55, delay: i * 0.08 }}
-                  className={`group flex flex-col justify-center rounded-2xl bg-muted/40 ${heights[i]}`}
+                  className={`group flex flex-col justify-center rounded-2xl bg-muted/40 ${heights[i % heights.length]}`}
                   style={{ padding: "28px" }}
                 >
                   <div className={`flex flex-col ${isRtl ? "items-end text-right" : "items-start text-left"}`}>
