@@ -27,7 +27,7 @@ export function Footer() {
       <div className="mx-auto w-full max-w-[1440px] px-8 lg:px-16">
         <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Col 1 — Identity */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-5">
             <img
               src={logo}
               alt="SAAE"
