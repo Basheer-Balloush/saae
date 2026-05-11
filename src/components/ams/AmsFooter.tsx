@@ -5,7 +5,7 @@ export function AmsFooter() {
   const isRtl = lang === "ar";
   const year = new Date().getFullYear();
   return (
-    <footer className="border-t border-border/60 bg-card/30 mt-12">
+    <footer className="border-t border-border/60 bg-card/30">
       <div
         className="container mx-auto px-4 py-5 text-center text-xs text-muted-foreground whitespace-pre-line"
         dir={isRtl ? "rtl" : "ltr"}
