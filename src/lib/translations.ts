@@ -107,23 +107,23 @@ export const translations: Record<Lang, Dict> = {
       cards: {
         data: {
           title: "Data Community",
-          desc: "A hub for data scientists and analysts exploring data engineering, analytics, and machine learning applications.",
+          desc: "Building an educational environment for data science and machine learning.",
         },
         architecture: {
           title: "Smart Architecture Community",
-          desc: "Bridging architecture and technology — smart buildings, sustainable design, and computational tools for the built environment.",
+          desc: "Integrates AI, IoT, and data analysis into urban planning (e.g., Archathon).",
         },
         medical: {
           title: "Medical & AI Community",
-          desc: "Where physicians and engineers meet to advance diagnostics, medical imaging, and AI-driven healthcare.",
+          desc: "Led by 'MedInvoVision', focusing on digital transformation in the Syrian health sector.",
         },
         entrepreneurship: {
           title: "Entrepreneurship & Digital Transformation",
-          desc: "Founder programs, mentorship, and digital transformation tracks turning ideas into ventures and modernizing organizations.",
+          desc: "Empowering Syrian youth to build startups in the digital economy.",
         },
         research: {
           title: "Research Community",
-          desc: "An open research network advancing applied AI, Arabic-language work, and interdisciplinary scientific publishing.",
+          desc: "Supports scientific research integrated with AI and entrepreneurship.",
         },
         software: {
           title: "Software Community",
