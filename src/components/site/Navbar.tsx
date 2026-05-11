@@ -6,6 +6,7 @@ import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/saae-logo-horizontal.png";
 import logoEnLight from "@/assets/saae-logo-en-light.png";
+import logoEnDark from "@/assets/saae-logo-en-dark.png";
 import logoArDark from "@/assets/saae-logo-ar-dark.png";
 
 const sections = ["home", "communities", "achievements", "partners", "contact", "news", "about"] as const;
