@@ -155,18 +155,7 @@ function AmsDashboard() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!confirm(tr.confirmDeleteCourse)) return;
-                  supabase
-                    .from("ams_courses")
-                    .delete()
-                    .eq("id", c.id)
-                    .then(({ error }) => {
-                      if (error) toast.error(error.message);
-                      else {
-                        toast.success(tr.saved);
-                        loadCourses();
-                      }
-                    });
+                  setDeleting(c);
                 }}
                 className="absolute top-2 end-2 inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                 aria-label={tr.delete}
