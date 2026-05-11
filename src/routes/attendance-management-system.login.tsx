@@ -72,25 +72,25 @@ function AmsLogin() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center px-6 py-10">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-soft">
+    <div className="flex-1 flex items-center justify-center px-6 py-4">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-soft">
         <div className="flex flex-col items-center text-center">
           <img
             src={logo}
             alt="SAAE"
-            width={96}
-            height={96}
-            className="h-24 w-auto"
+            width={80}
+            height={80}
+            className="h-16 w-auto"
           />
         </div>
-        <h1 className="mt-4 text-2xl font-bold text-foreground text-center">
+        <h1 className="mt-3 text-xl font-bold text-foreground text-center">
           {tr.title}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground text-center">
+        <p className="mt-1 text-sm text-muted-foreground text-center">
           {tr.subtitle}
         </p>
 
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
+        <form onSubmit={onSubmit} className="mt-5 space-y-3">
           <div>
             <Label htmlFor="email">{tr.email}</Label>
             <Input

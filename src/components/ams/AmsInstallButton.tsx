@@ -68,14 +68,15 @@ export function AmsInstallButton({ className }: { className?: string }) {
   return (
     <Button
       type="button"
-      variant={installed ? "ghost" : "default"}
-      size="sm"
+      variant="ghost"
+      size="icon"
       onClick={handleClick}
       disabled={installed || busy}
+      aria-label={installed ? tr.installed : tr.install}
+      title={installed ? tr.installed : tr.install}
       className={className}
     >
-      {installed ? <Check className="h-4 w-4 mr-1" /> : <Download className="h-4 w-4 mr-1" />}
-      {installed ? tr.installed : busy ? tr.installing : tr.install}
+      {installed ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />}
     </Button>
   );
 }
