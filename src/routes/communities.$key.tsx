@@ -506,7 +506,7 @@ function ActivityFeed({ isRtl, lang, activities }: { isRtl: boolean; lang: "ar" 
 }
 
 /* ---------- SECTION 4: Impact Matrix ---------- */
-function ImpactMatrix({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
+function ImpactMatrix({ isRtl, lang, metrics }: { isRtl: boolean; lang: "ar" | "en"; metrics: Metric[] }) {
   // Long-Short / Short-Long
   const heights = [
     "min-h-[260px] lg:min-h-[300px]",
