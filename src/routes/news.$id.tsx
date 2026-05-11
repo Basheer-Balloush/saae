@@ -142,7 +142,8 @@ function NewsDetailPage() {
 
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
     if (!isUuid) {
-      setArticle(null);
+      // Avoid extended skeleton flash (<50ms) — show static fallback immediately
+      setArticle(STATIC_ARTICLE);
       setRelated([]);
       setLoading(false);
       return () => { cancelled = true; };
