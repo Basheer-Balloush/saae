@@ -83,9 +83,9 @@ export function Footer() {
             <div
               className="rounded-2xl p-5"
               style={{
-                backgroundColor: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.18)",
-                backdropFilter: "blur(6px)",
+                backgroundColor: "#FFFFFF",
+                color: TEAL,
+                boxShadow: "0 10px 30px -12px rgba(0,0,0,0.25)",
               }}
             >
               <a
