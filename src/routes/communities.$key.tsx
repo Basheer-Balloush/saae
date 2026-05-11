@@ -186,7 +186,7 @@ function CommunityPage() {
     return () => {
       cancelled = true;
     };
-  }, [k]);
+  }, [k, lang]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
