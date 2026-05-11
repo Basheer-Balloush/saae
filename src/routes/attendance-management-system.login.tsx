@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import logo from "@/assets/saae-logo.png";
 
 export const Route = createFileRoute("/attendance-management-system/login")({
   head: () => ({ meta: [{ title: "AMS · Sign in" }] }),
@@ -70,19 +69,7 @@ function AmsLogin() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-soft">
-        <div className="flex flex-col items-center text-center">
-          <img
-            src={logo}
-            alt="SAAE"
-            width={96}
-            height={96}
-            className="h-24 w-auto"
-          />
-          <span className="mt-3 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            AMS
-          </span>
-        </div>
-        <h1 className="mt-4 text-2xl font-bold text-foreground text-center">
+        <h1 className="text-2xl font-bold text-foreground text-center">
           Attendance Management
         </h1>
         <p className="mt-2 text-sm text-muted-foreground text-center">
