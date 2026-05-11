@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X, Moon, Sun, Globe } from "lucide-react";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -12,9 +13,12 @@ const sections = ["home", "communities", "achievements", "partners", "contact", 
 export function Navbar() {
   const { t, lang, toggle: toggleLang } = useLang();
   const { theme, toggle: toggleTheme } = useTheme();
+  const location = useLocation();
+  const isAbout = location.pathname.startsWith("/about");
+  const isHome = !isAbout;
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState<string>("home");
+  const [active, setActive] = useState<string>(isAbout ? "about" : "home");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -24,6 +28,10 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (isAbout) {
+      setActive("about");
+      return;
+    }
     const visible = new Map<string, number>();
     const observer = new IntersectionObserver(
       (entries) => {
@@ -39,13 +47,15 @@ export function Navbar() {
       { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
     );
     sections.forEach((id) => {
-      if (id === "news") return; // الأخبار قسم داخل الرئيسية — يبقى "home" هو الـ active
+      if (id === "news" || id === "about") return;
       const targetId = id === "contact" ? "assistant" : id;
       const el = document.getElementById(targetId);
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
-  }, []);
+  }, [isAbout]);
+
+  const hashHref = (id: string) => (isHome ? `#${id}` : `/#${id}`);
 
   return (
     <header
@@ -57,7 +67,7 @@ export function Navbar() {
       )}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3 lg:px-10">
-        <a href="#home" className="relative flex items-center" aria-label="SAAIE — Syrian Association for AI & Entrepreneurship">
+        <Link to="/" hash="home" className="relative flex items-center" aria-label="SAAIE — Syrian Association for AI & Entrepreneurship">
           {(() => {
             const variants = [
               { src: logoEnLight, show: lang === "en" && theme === "light", alt: "SAAIE — Syrian Association for AI & Entrepreneurship" },
@@ -78,28 +88,39 @@ export function Navbar() {
               />
             ));
           })()}
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-7 lg:flex">
           {sections.map((s) => {
-            const isActive = s === "contact" ? (active === "assistant" || active === "contact") : active === s;
-            const href = s === "contact" ? "#assistant" : `#${s}`;
-            return (
-              <a
-                key={s}
-                href={href}
+            const isActive =
+              s === "contact"
+                ? (active === "assistant" || active === "contact")
+                : active === s;
+            const linkClass = cn(
+              "relative text-sm font-medium transition-colors",
+              isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
+            );
+            const underline = (
+              <span
                 className={cn(
-                  "relative text-sm font-medium transition-colors",
-                  isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
+                  "pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center rounded-full bg-secondary transition-transform duration-300",
+                  isActive ? "scale-x-100" : "scale-x-0",
                 )}
-              >
+              />
+            );
+            if (s === "about") {
+              return (
+                <Link key={s} to="/about" className={linkClass}>
+                  {t.nav[s]}
+                  {underline}
+                </Link>
+              );
+            }
+            const targetId = s === "contact" ? "assistant" : s;
+            return (
+              <a key={s} href={hashHref(targetId)} className={linkClass}>
                 {t.nav[s]}
-                <span
-                  className={cn(
-                    "pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center rounded-full bg-secondary transition-transform duration-300",
-                    isActive ? "scale-x-100" : "scale-x-0",
-                  )}
-                />
+                {underline}
               </a>
             );
           })}
@@ -134,16 +155,31 @@ export function Navbar() {
       {open && (
         <div className="border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
-            {sections.map((s) => (
-              <a
-                key={s}
-                href={s === "contact" ? "#assistant" : `#${s}`}
-                onClick={() => setOpen(false)}
-                className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
-              >
-                {t.nav[s]}
-              </a>
-            ))}
+            {sections.map((s) => {
+              if (s === "about") {
+                return (
+                  <Link
+                    key={s}
+                    to="/about"
+                    onClick={() => setOpen(false)}
+                    className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                  >
+                    {t.nav[s]}
+                  </Link>
+                );
+              }
+              const targetId = s === "contact" ? "assistant" : s;
+              return (
+                <a
+                  key={s}
+                  href={hashHref(targetId)}
+                  onClick={() => setOpen(false)}
+                  className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                >
+                  {t.nav[s]}
+                </a>
+              );
+            })}
             <div className="mt-3 flex items-center gap-2">
               <button
                 onClick={toggleLang}
