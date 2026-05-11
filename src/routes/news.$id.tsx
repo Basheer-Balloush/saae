@@ -131,6 +131,14 @@ function NewsDetailPage() {
   const { id } = Route.useParams();
   const { lang, dir } = useLang();
   const isRtl = dir === "rtl";
+  const router = useRouter();
+  const canGoBack = typeof window !== "undefined" && window.history.length > 1;
+  const handleBack = (e: React.MouseEvent) => {
+    if (canGoBack) {
+      e.preventDefault();
+      router.history.back();
+    }
+  };
 
   const [article, setArticle] = useState<NewsArticle | null>(null);
   const [related, setRelated] = useState<RelatedItem[]>([]);
