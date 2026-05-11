@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Mail, Phone, MapPin, Instagram, Linkedin, Youtube, ArrowRight } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import logo from "@/assets/footer-logo.png";
+import locationMap from "@/assets/location-map.png";
 
 export function Footer() {
   const { t, dir } = useLang();
@@ -94,7 +95,7 @@ export function Footer() {
                 className="block aspect-[16/9] overflow-hidden"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1577086664693-894d8405334a?auto=format&fit=crop&w=900&q=80"
+                  src={locationMap}
                   alt="Damascus"
                   className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
                   loading="lazy"
