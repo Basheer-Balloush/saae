@@ -10,9 +10,13 @@ const transport = new DefaultChatTransport({ api: "/api/chat" });
 export function AssistantChatModal({
   open,
   onClose,
+  prefill,
+  onPrefillConsumed,
 }: {
   open: boolean;
   onClose: () => void;
+  prefill?: string | null;
+  onPrefillConsumed?: () => void;
 }) {
   const { t, dir } = useLang();
   const a = t.assistant;
@@ -60,6 +64,15 @@ export function AssistantChatModal({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
+  // Auto-send prefill when opened with one
+  useEffect(() => {
+    if (open && prefill) {
+      sendMessage({ text: prefill });
+      onPrefillConsumed?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, prefill]);
 
   function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();

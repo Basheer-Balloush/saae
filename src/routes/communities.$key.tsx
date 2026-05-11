@@ -361,7 +361,7 @@ function CommunityPage() {
         <Prelude name={name} mission={mission} img={HERO_IMG[k]} isRtl={isRtl} lang={lang} details={DETAILS[k] ?? []} />
         <ActivityFeed isRtl={isRtl} lang={lang} activities={activities} loading={loadingNews} />
         <ImpactMatrix isRtl={isRtl} lang={lang} metrics={METRICS_BY_KEY[k] ?? DEFAULT_METRICS} />
-        <CallToConnection isRtl={isRtl} lang={lang} />
+        <CallToConnection isRtl={isRtl} lang={lang} communityName={name} />
       </main>
       <Footer />
     </div>
@@ -689,7 +689,13 @@ function ImpactMatrix({ isRtl, lang, metrics }: { isRtl: boolean; lang: "ar" | "
 }
 
 /* ---------- SECTION 5: Call to Connection ---------- */
-function CallToConnection({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
+function CallToConnection({ isRtl, lang, communityName }: { isRtl: boolean; lang: "ar" | "en"; communityName: string }) {
+  const handleJoin = () => {
+    const prefill = lang === "ar"
+      ? `أرغب بالانضمام إلى مجتمع ${communityName}. كيف يمكنني التسجيل والمشاركة؟`
+      : `I'd like to join the ${communityName} community. How can I sign up and get involved?`;
+    window.dispatchEvent(new CustomEvent("assistant:open", { detail: { prefill } }));
+  };
   return (
     <section style={{ backgroundColor: "var(--surface)", paddingTop: 160, paddingBottom: 160 }}>
       <div className="mx-auto max-w-3xl px-6 text-center">
@@ -719,14 +725,15 @@ function CallToConnection({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }
           </p>
 
           <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
-            <a
-              href="mailto:info@aisyria.org?subject=Join%20SAAE%20Community"
+            <button
+              type="button"
+              onClick={handleJoin}
               className="inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
               style={{ backgroundColor: TEAL, fontFamily: '"Cairo", system-ui, sans-serif' }}
             >
               {lang === "ar" ? "انضم إلى المجتمع" : "Join Community"}
               {isRtl ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-            </a>
+            </button>
           </div>
         </motion.div>
       </div>
