@@ -453,7 +453,7 @@ function CallToConnection({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }
               lineHeight: isRtl ? 1.35 : 1.1,
               letterSpacing: "-0.02em",
               fontSize: "clamp(2rem, 4vw, 3rem)",
-              color: "#1a1a1a",
+              color: "var(--foreground)",
             }}
           >
             {lang === "ar"
