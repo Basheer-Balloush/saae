@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -122,13 +123,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+  const isAms = location.pathname.startsWith("/attendance-management-system");
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <LanguageProvider>
           <Outlet />
-          <AssistantFab />
+          {!isAms && <AssistantFab />}
           <Toaster richColors position="top-center" />
         </LanguageProvider>
       </ThemeProvider>

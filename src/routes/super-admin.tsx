@@ -22,12 +22,6 @@ function SuperAdminDashboard() {
           >
             <h2 className="text-xl font-semibold">Content Management System</h2>
           </Link>
-          <Link
-            to="/attendance-management-system"
-            className="block rounded-lg border border-border bg-card p-8 hover:border-primary transition-colors"
-          >
-            <h2 className="text-xl font-semibold">Attendance Management System</h2>
-          </Link>
         </div>
       </main>
     </div>
