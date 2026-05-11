@@ -450,7 +450,7 @@ function ActivityFeed({ isRtl, lang, activities }: { isRtl: boolean; lang: "ar" 
         </motion.div>
 
         <div className="mt-16" style={{ borderTop: `1px solid ${TEAL}` }}>
-          {ACTIVITIES.map((a, i) => (
+          {activities.map((a, i) => (
             <motion.article
               key={i}
               initial={{ opacity: 0, y: 20 }}
