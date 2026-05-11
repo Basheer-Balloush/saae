@@ -39,11 +39,19 @@ function Index() {
     if (!hash) return;
     let cancelled = false;
     let attempts = 0;
+    const doScroll = (el: HTMLElement) => {
+      if (cancelled) return;
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
     const tryScroll = () => {
       if (cancelled) return;
       const el = document.getElementById(hash);
       if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Override TanStack Router's scrollRestoration (runs after mount) by
+        // scheduling a few delayed scrolls.
+        doScroll(el);
+        window.setTimeout(() => doScroll(el), 60);
+        window.setTimeout(() => doScroll(el), 200);
         return;
       }
       if (attempts++ < 40) {
