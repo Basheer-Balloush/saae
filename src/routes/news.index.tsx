@@ -102,8 +102,14 @@ function NewsPage() {
             className="mb-14 max-w-2xl"
           >
             <p className="text-caption text-primary">{t.news.eyebrow}</p>
-            <h1 className="mt-4 text-display-2 leading-[2.1] text-foreground">{t.news.title}</h1>
-            <p className="mt-5 text-body text-muted-foreground">{t.news.subtitle}</p>
+            <h1 className="mt-4 text-display-2 leading-[2.1] text-foreground">
+              {lang === "ar" ? "جميع الأخبار والنشاطات" : "All news & activities"}
+            </h1>
+            <p className="mt-5 text-body text-muted-foreground">
+              {lang === "ar"
+                ? "أرشيف كامل لأخبار ونشاطات الجمعية السورية للذكاء الاصطناعي وريادة الأعمال."
+                : "The full archive of news and activities from the Syrian Association for AI & Entrepreneurship."}
+            </p>
           </motion.div>
 
           {items === null ? (
