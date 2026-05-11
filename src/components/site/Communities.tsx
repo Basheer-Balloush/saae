@@ -116,16 +116,6 @@ export function Communities() {
           })}
         </div>
 
-        {/* CTA */}
-        <div className="mt-20 flex justify-center">
-          <a
-            href="#"
-            className="group inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.55)] transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.7)]"
-          >
-            {t.communities.cta}
-            <ArrowRight className={`h-4 w-4 transition-transform group-hover:translate-x-0.5 ${isRtl ? "-scale-x-100" : ""}`} />
-          </a>
-        </div>
       </div>
     </section>
   );
