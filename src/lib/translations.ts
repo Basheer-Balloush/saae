@@ -12,7 +12,7 @@ type Dict = {
     };
   };
   communities: {
-    eyebrow: string; title: string; subtitle: string; cta: string;
+    eyebrow: string; title: string; subtitle: string; cta: string; discover: string;
     cards: Record<"data" | "architecture" | "medical" | "entrepreneurship" | "research" | "software" | "economy", { title: string; desc: string }>;
   };
   achievements: { eyebrow: string; title: string; body: string; stats: { value: string; label: string }[] };
