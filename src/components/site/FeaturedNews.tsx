@@ -1,14 +1,5 @@
-import { useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
-import Autoplay from "embla-carousel-autoplay";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-} from "@/components/ui/carousel";
 import { useLang } from "@/lib/i18n";
 
 const IMG = {
@@ -27,12 +18,8 @@ export function FeaturedNews() {
   const cats = t.news.categories;
   const items = t.news.items;
 
-  const autoplay = useRef(
-    Autoplay({ delay: 3500, stopOnInteraction: false, stopOnMouseEnter: true }),
-  );
-
   const slides = [
-    { key: "featured", img: IMG.featured, cat: cats.education, title: items.featured.title, date: items.featured.date, excerpt: items.featured.excerpt },
+    { key: "featured", img: IMG.featured, cat: cats.education, title: items.featured.title, date: items.featured.date },
     { key: "a", img: IMG.a, cat: cats.partnership, title: items.a.title, date: items.a.date },
     { key: "b", img: IMG.b, cat: cats.community, title: items.b.title, date: items.b.date },
     { key: "c", img: IMG.c, cat: cats.event, title: items.c.title, date: items.c.date },
@@ -41,6 +28,8 @@ export function FeaturedNews() {
     { key: "f", img: IMG.f, cat: cats.education, title: items.f.title, date: items.f.date },
     { key: "g", img: IMG.g, cat: cats.research, title: items.g.title, date: items.g.date },
   ];
+
+  const row = [...slides, ...slides];
 
   return (
     <section id="news" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32">
@@ -58,63 +47,63 @@ export function FeaturedNews() {
             <p className="mt-5 max-w-xl text-body text-muted-foreground">{t.news.subtitle}</p>
           </div>
         </motion.div>
+      </div>
 
-        <Carousel
-          opts={{ loop: true, align: "start", direction: dir === "rtl" ? "rtl" : "ltr" }}
-          plugins={[autoplay.current]}
-          className="relative"
-        >
-          <CarouselContent className="-ml-4">
-            {slides.map((c) => (
-              <CarouselItem key={c.key} className="pl-4 sm:basis-1/2 lg:basis-1/3">
-                <a
-                  href="#"
-                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift"
-                >
-                  <div className="aspect-[16/10] overflow-hidden">
-                    <img
-                      src={c.img}
-                      alt={c.title}
-                      className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="flex flex-1 flex-col p-6">
-                    <div className="flex items-center gap-3 text-xs">
-                      <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
-                        {c.cat}
-                      </span>
-                      <span className="text-muted-foreground">{c.date}</span>
-                    </div>
-                    <h3 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
-                      {c.title}
-                    </h3>
-                    {c.excerpt && (
-                      <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{c.excerpt}</p>
-                    )}
-                    <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                      {t.news.readMore}
-                      <ArrowUpRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
-                    </span>
-                  </div>
-                </a>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-2" />
-          <CarouselNext className="right-2" />
-        </Carousel>
-
-        <div className="mt-14 flex justify-center">
-          <a
-            href="#"
-            className="inline-flex items-center gap-2 rounded-full border border-primary px-7 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-          >
-            {t.news.viewAll}
-            <ArrowRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
-          </a>
+      <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
+        <div className="flex w-max animate-[news-marquee_60s_linear_infinite] gap-6 px-6 hover:[animation-play-state:paused]">
+          {row.map((c, i) => (
+            <a
+              key={`${c.key}-${i}`}
+              href="#"
+              className="group flex w-[320px] flex-none flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift sm:w-[360px]"
+            >
+              <div className="aspect-[16/10] overflow-hidden">
+                <img
+                  src={c.img}
+                  alt={c.title}
+                  className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
+                  loading="lazy"
+                />
+              </div>
+              <div className="flex flex-1 flex-col p-6">
+                <div className="flex items-center gap-3 text-xs">
+                  <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
+                    {c.cat}
+                  </span>
+                  <span className="text-muted-foreground">{c.date}</span>
+                </div>
+                <h3 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
+                  {c.title}
+                </h3>
+                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                  {t.news.readMore}
+                  <ArrowUpRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
+                </span>
+              </div>
+            </a>
+          ))}
         </div>
       </div>
+
+      <div className="mx-auto mt-14 flex max-w-7xl justify-center px-6 lg:px-10">
+        <a
+          href="#"
+          className="inline-flex items-center gap-2 rounded-full border border-primary px-7 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+        >
+          {t.news.viewAll}
+          <ArrowRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
+        </a>
+      </div>
+
+      <style>{`
+        @keyframes news-marquee {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        [dir="rtl"] .animate-\\[news-marquee_60s_linear_infinite\\] {
+          animation-direction: reverse;
+        }
+      `}</style>
     </section>
   );
 }
