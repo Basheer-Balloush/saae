@@ -185,24 +185,34 @@ function AmsDashboard() {
       )}
 
       <AlertDialog open={!!deleting} onOpenChange={(o) => !o && !deletingBusy && setDeleting(null)}>
-        <AlertDialogContent dir={isRtl ? "rtl" : "ltr"}>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{tr.confirmDeleteCourse}</AlertDialogTitle>
+        <AlertDialogContent
+          dir={isRtl ? "rtl" : "ltr"}
+          className="bg-card text-card-foreground border-border max-w-[calc(100vw-2rem)] sm:max-w-md p-4 sm:p-6 gap-3 rounded-xl"
+        >
+          <AlertDialogHeader className="space-y-1">
+            <AlertDialogTitle className="text-base sm:text-lg text-foreground">
+              {tr.confirmDeleteCourse}
+            </AlertDialogTitle>
             {deleting && (
-              <AlertDialogDescription>
+              <AlertDialogDescription className="text-sm text-muted-foreground">
                 {lang === "ar" ? deleting.name_ar : deleting.name_en || deleting.name_ar}
               </AlertDialogDescription>
             )}
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingBusy}>{tr.cancel}</AlertDialogCancel>
+          <AlertDialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-2 sm:space-x-2">
+            <AlertDialogCancel
+              disabled={deletingBusy}
+              className="mt-0 w-full sm:w-auto h-10 bg-transparent border-border text-foreground hover:bg-muted"
+            >
+              {tr.cancel}
+            </AlertDialogCancel>
             <AlertDialogAction
               disabled={deletingBusy}
               onClick={(e) => {
                 e.preventDefault();
                 confirmDeleteCourse();
               }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="w-full sm:w-auto h-10 bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deletingBusy && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
               {tr.delete}
