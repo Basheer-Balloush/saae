@@ -79,7 +79,7 @@ export function Footer() {
 
 
           {/* Col 4 — HQ Intelligence */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-4">
             <h4
               className="text-xs font-semibold uppercase tracking-[0.18em]"
               style={{ color: INK }}
