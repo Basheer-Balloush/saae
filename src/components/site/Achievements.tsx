@@ -118,9 +118,8 @@ function StatCard({
         />
 
         <span
-          className="mt-5 block"
+          className="mt-5 block text-muted-foreground"
           style={{
-            color: "#666666",
             fontFamily: '"Cairo", system-ui, sans-serif',
             fontWeight: 400,
             fontSize: "14px",
