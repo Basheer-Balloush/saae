@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Clock, Calendar } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
@@ -131,6 +131,14 @@ function NewsDetailPage() {
   const { id } = Route.useParams();
   const { lang, dir } = useLang();
   const isRtl = dir === "rtl";
+  const router = useRouter();
+  const canGoBack = typeof window !== "undefined" && window.history.length > 1;
+  const handleBack = (e: React.MouseEvent) => {
+    if (canGoBack) {
+      e.preventDefault();
+      router.history.back();
+    }
+  };
 
   const [article, setArticle] = useState<NewsArticle | null>(null);
   const [related, setRelated] = useState<RelatedItem[]>([]);
@@ -415,11 +423,12 @@ function NewsDetailPage() {
         <div className="mx-auto mt-16 max-w-[850px] px-6 text-center">
           <Link
             to="/news"
+            onClick={handleBack}
             className="inline-flex items-center gap-2 rounded-full border px-7 py-3 text-sm font-semibold transition-colors hover:bg-primary hover:text-primary-foreground"
             style={{ borderColor: TEAL, color: TEAL }}
           >
             {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
-            {lang === "ar" ? "العودة للأخبار" : "Back to news"}
+            {lang === "ar" ? "رجوع" : "Back"}
           </Link>
         </div>
       </main>
