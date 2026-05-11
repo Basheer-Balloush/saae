@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { createFileRoute, useLocation } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { FeaturedNews } from "@/components/site/FeaturedNews";
 import { Communities } from "@/components/site/Communities";
@@ -32,6 +33,17 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const location = useLocation();
+  useEffect(() => {
+    const hash = location.hash?.replace(/^#/, "");
+    if (!hash) return;
+    const raf = window.requestAnimationFrame(() => {
+      const el = document.getElementById(hash);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(raf);
+  }, [location.hash]);
+
   return (
     <div id="home" className="min-h-screen bg-background text-foreground">
       <Navbar />
