@@ -89,37 +89,72 @@ function renderContent(text: string) {
   ));
 }
 
+const STATIC_ARTICLE: Record<string, { en: NewsArticle; ar: NewsArticle }> = {
+  default: {
+    en: {
+      id: "demo",
+      title: "SAAE Launches National AI Strategy Workshop with Damascus University",
+      excerpt: "The Syrian Association for Artificial Intelligence and Entrepreneurship partnered with Damascus University to host a landmark workshop on national AI strategy development.",
+      content: `The Syrian Association for Artificial Intelligence and Entrepreneurship (SAAE) has partnered with Damascus University to launch a landmark workshop series focused on developing a comprehensive national AI strategy for Syria.
+
+The three-day event, held at the Faculty of Informatics Engineering, brought together over 150 participants including researchers, industry leaders, government officials, and students. The workshop addressed critical areas such as AI policy frameworks, data governance, workforce development, and ethical AI deployment in the Syrian context.
+
+"This workshop represents a pivotal moment for Syria's digital future," said the SAAE president during the opening ceremony. "By bringing together diverse stakeholders, we are laying the groundwork for an AI ecosystem that serves all Syrians and positions our nation competitively in the global technology landscape."
+
+Key outcomes from the workshop included the formation of five specialized working groups, each tasked with developing actionable recommendations in areas ranging from AI in healthcare to smart agriculture. Participants also discussed the importance of building local AI talent through university curricula reform and industry partnerships.
+
+The event featured demonstrations of AI applications developed by Syrian engineers, showcasing innovations in natural language processing for Arabic, computer vision for archaeological preservation, and machine learning models for agricultural optimization.
+
+SAAE announced plans to publish a comprehensive white paper summarizing the workshop findings and recommendations, which will be presented to relevant government ministries for consideration in national technology policy development.`,
+      image_url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
+      category: "data",
+      published_at: "2025-05-08",
+    },
+    ar: {
+      id: "demo",
+      title: "الجمعية السورية تطلق ورشة عمل استراتيجية الذكاء الاصطناعي الوطنية بالتعاون مع جامعة دمشق",
+      excerpt: "شراكة بين الجمعية السورية للذكاء الاصطناعي وريادة الأعمال وجامعة دمشق لاستضافة ورشة عمل بارزة حول تطوير استراتيجية الذكاء الاصطناعي الوطنية.",
+      content: `أطلقت الجمعية السورية للذكاء الاصطناعي وريادة الأعمال بالتعاون مع جامعة دمشق سلسلة ورش عمل بارزة تركز على تطوير استراتيجية وطنية شاملة للذكاء الاصطناعي في سوريا.
+
+استمر الحدث ثلاثة أيام وأُقيم في كلية الهندسة المعلوماتية، وجمع أكثر من ١٥٠ مشاركاً من الباحثين وقادة الصناعة والمسؤولين الحكوميين والطلاب. تناولت الورشة مجالات حيوية مثل أُطر سياسات الذكاء الاصطناعي وحوكمة البيانات وتطوير القوى العاملة والنشر الأخلاقي للذكاء الاصطناعي في السياق السوري.
+
+وقال رئيس الجمعية خلال حفل الافتتاح: "تمثل هذه الورشة لحظة محورية لمستقبل سوريا الرقمي. من خلال الجمع بين أصحاب المصلحة المتنوعين، نضع الأساس لمنظومة ذكاء اصطناعي تخدم جميع السوريين وتضع بلدنا في موقع تنافسي على المستوى التكنولوجي العالمي."
+
+تضمنت النتائج الرئيسية للورشة تشكيل خمس مجموعات عمل متخصصة، كُلفت كل منها بتطوير توصيات عملية في مجالات تتراوح من الذكاء الاصطناعي في الرعاية الصحية إلى الزراعة الذكية. كما ناقش المشاركون أهمية بناء المواهب المحلية في مجال الذكاء الاصطناعي من خلال إصلاح المناهج الجامعية والشراكات مع القطاع الصناعي.
+
+تضمن الحدث عروضاً لتطبيقات الذكاء الاصطناعي التي طورها مهندسون سوريون، حيث عرضت ابتكارات في معالجة اللغة الطبيعية للعربية والرؤية الحاسوبية للحفاظ على التراث الأثري ونماذج التعلم الآلي لتحسين الزراعة.
+
+أعلنت الجمعية عن خطط لنشر ورقة بيضاء شاملة تلخص نتائج وتوصيات الورشة، والتي ستُقدم إلى الوزارات الحكومية المعنية للنظر فيها في تطوير سياسات التكنولوجيا الوطنية.`,
+      image_url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
+      category: "data",
+      published_at: "2025-05-08",
+    },
+  },
+};
+
+const STATIC_RELATED: Record<string, RelatedItem[]> = {
+  en: [
+    { id: "r1", title: "AI Workshop Series Expands to Five Syrian Universities", image_url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=600&q=80", published_at: "2025-04-22" },
+    { id: "r2", title: "SAAE Signs Partnership with Regional Tech Accelerator", image_url: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=80", published_at: "2025-04-15" },
+    { id: "r3", title: "Data Community Hosts First Annual Hackathon in Damascus", image_url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80", published_at: "2025-03-30" },
+  ],
+  ar: [
+    { id: "r1", title: "سلسلة ورش عمل الذكاء الاصطناعي تتوسع لتشمل خمس جامعات سورية", image_url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=600&q=80", published_at: "2025-04-22" },
+    { id: "r2", title: "الجمعية توقع شراكة مع مسرّعة أعمال تقنية إقليمية", image_url: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=80", published_at: "2025-04-15" },
+    { id: "r3", title: "مجتمع البيانات يستضيف أول هاكاثون سنوي في دمشق", image_url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80", published_at: "2025-03-30" },
+  ],
+};
+
 function NewsDetailPage() {
   const { id } = Route.useParams();
   const { lang, dir } = useLang();
   const isRtl = dir === "rtl";
 
-  const [article, setArticle] = useState<NewsArticle | null>(null);
-  const [related, setRelated] = useState<RelatedItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(true);
-    supabase
-      .from("news")
-      .select("id,title,excerpt,content,image_url,category,published_at")
-      .eq("id", id)
-      .single()
-      .then(({ data }) => {
-        setArticle(data as NewsArticle | null);
-        setLoading(false);
-        if (data) {
-          supabase
-            .from("news")
-            .select("id,title,image_url,published_at")
-            .neq("id", id)
-            .eq("category", data.category)
-            .order("published_at", { ascending: false })
-            .limit(4)
-            .then(({ data: rel }) => setRelated((rel as RelatedItem[]) ?? []));
-        }
-      });
-  }, [id]);
+  // Use static data for preview; swap back to Supabase fetch when real data is ready
+  const staticEntry = STATIC_ARTICLE[id] ?? STATIC_ARTICLE["default"]!;
+  const article: NewsArticle = lang === "ar" ? staticEntry.ar : staticEntry.en;
+  const related: RelatedItem[] = STATIC_RELATED[lang] ?? STATIC_RELATED["en"]!;
+  const loading = false;
 
   if (loading) {
     return (
