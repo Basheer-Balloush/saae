@@ -95,7 +95,7 @@ export function Footer() {
               }}
             >
               <a
-                href="https://www.google.com/maps?q=Damascus+University"
+                href="https://maps.app.goo.gl/bKMSHXkmkr5U3tZh6"
                 target="_blank"
                 rel="noreferrer"
                 className="relative block aspect-[16/9] overflow-hidden rounded-lg"
@@ -135,7 +135,7 @@ export function Footer() {
                   <span dir="ltr">+963 930 763 547</span>
                 </a>
                 <a
-                  href="https://www.google.com/maps?q=Damascus"
+                  href="https://maps.app.goo.gl/bKMSHXkmkr5U3tZh6"
                   target="_blank"
                   rel="noreferrer"
                   className="group inline-flex items-center gap-1.5 pt-1 text-sm font-semibold"
