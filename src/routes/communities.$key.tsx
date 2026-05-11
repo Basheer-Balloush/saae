@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, Mail } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { useLang } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
 import {
   COMMUNITY_KEYS,
   COMMUNITY_LABELS_AR,
