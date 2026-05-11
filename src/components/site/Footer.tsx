@@ -109,23 +109,23 @@ export function Footer() {
               </a>
               <div className="mt-4 space-y-2.5 text-sm">
                 <div className="flex items-start gap-2.5">
-                  <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
-                  <span style={{ color: INK }}>{t.footer.address}</span>
+                  <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
+                  <span style={{ color: "#2E2E2E" }}>{t.footer.address}</span>
                 </div>
                 <a
                   href="mailto:info@aisyria.org"
-                  className="flex items-center gap-2.5 transition-colors hover:text-white/80"
-                  style={{ color: INK }}
+                  className="flex items-center gap-2.5 transition-opacity hover:opacity-70"
+                  style={{ color: "#2E2E2E" }}
                 >
-                  <Mail className="h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
+                  <Mail className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
                   info@aisyria.org
                 </a>
                 <a
                   href="tel:+963930763547"
-                  className="flex items-center gap-2.5 transition-colors hover:text-white/80"
-                  style={{ color: INK }}
+                  className="flex items-center gap-2.5 transition-opacity hover:opacity-70"
+                  style={{ color: "#2E2E2E" }}
                 >
-                  <Phone className="h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
+                  <Phone className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
                   <span dir="ltr">+963 930 763 547</span>
                 </a>
                 <a
@@ -133,7 +133,7 @@ export function Footer() {
                   target="_blank"
                   rel="noreferrer"
                   className="group inline-flex items-center gap-1.5 pt-1 text-sm font-semibold"
-                  style={{ color: "#FFFFFF" }}
+                  style={{ color: TEAL }}
                 >
                   {t.footer.visit}
                   <ArrowRight
