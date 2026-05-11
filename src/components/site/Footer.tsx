@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Mail, Phone, MapPin, Instagram, Linkedin, Youtube, ArrowRight } from "lucide-react";
 import { useLang } from "@/lib/i18n";
-import logo from "@/assets/saae-logo.png";
+import logo from "@/assets/footer-logo.png";
 
 export function Footer() {
   const { t, dir } = useLang();
