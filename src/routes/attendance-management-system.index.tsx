@@ -845,22 +845,22 @@ function SessionAttendanceDialog({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{tr.fullName}</TableHead>
-                  <TableHead className="w-24 text-end">{tr.present}</TableHead>
+                  <TableHead className="text-start">{tr.fullName}</TableHead>
+                  <TableHead className="w-24 text-start">{tr.present}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {registrants.map((r) => (
                   <TableRow key={r.id}>
-                    <TableCell className="font-medium">{r.full_name}</TableCell>
-                    <TableCell className="text-end">
-                      <div className="inline-flex items-center gap-2 justify-end">
-                        {savingId === r.id && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                    <TableCell className="font-medium text-start">{r.full_name}</TableCell>
+                    <TableCell className="text-start">
+                      <div className="inline-flex items-center gap-2">
                         <Checkbox
                           checked={!!presentMap[r.id]}
                           onCheckedChange={(v) => toggle(r.id, v === true)}
                           aria-label={tr.present}
                         />
+                        {savingId === r.id && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
                       </div>
                     </TableCell>
                   </TableRow>
