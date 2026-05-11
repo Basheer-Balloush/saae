@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, Mail } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { useLang } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
 import {
   COMMUNITY_KEYS,
   COMMUNITY_LABELS_AR,
@@ -26,7 +28,7 @@ const HERO_IMG: Record<CommunityKey, string> = {
   economy: "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=80",
 };
 
-type ActivityItem = { date: string; category: { ar: string; en: string }; title: { ar: string; en: string }; desc: { ar: string; en: string } };
+type ActivityItem = { id: string; date: string; category: string; title: string; desc: string };
 type Metric = { value: string; label: { ar: string; en: string } };
 
 const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
@@ -60,185 +62,14 @@ const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
   },
 };
 
-const DEFAULT_ACTIVITIES: ActivityItem[] = [
-  {
-    date: "2025 / 11 / 12",
-    category: { ar: "ورشة عمل", en: "Workshop" },
-    title: { ar: "ورشة تطبيقية: من الفكرة إلى النموذج الأولي", en: "Hands-on Workshop: From Idea to MVP" },
-    desc: {
-      ar: "ثلاث جلسات تطبيقية يقودها ممارسون من القطاع، تركّز على التحقّق من الأفكار وبناء نماذج أولية قابلة للاختبار.",
-      en: "Three practitioner-led sessions focused on validating ideas and building testable prototypes end-to-end.",
-    },
-  },
-  {
-    date: "2025 / 10 / 28",
-    category: { ar: "حوار", en: "Roundtable" },
-    title: { ar: "حوار مفتوح حول مستقبل القطاع في سوريا", en: "Open Roundtable on the Sector's Future in Syria" },
-    desc: {
-      ar: "جمعنا روّاد القطاع وأعضاء المجتمع لمناقشة الفرص والتحدّيات وصياغة خارطة طريق مشتركة للسنة القادمة.",
-      en: "We gathered leaders and members to debate opportunities, challenges and a shared one-year roadmap.",
-    },
-  },
-  {
-    date: "2025 / 10 / 05",
-    category: { ar: "بحث", en: "Research" },
-    title: { ar: "إطلاق ورقة بحثية حول الأثر المحلي", en: "Launch of a Research Paper on Local Impact" },
-    desc: {
-      ar: "ورقة بحثية ميدانية أعدّها أعضاء المجتمع تستعرض الأثر التطبيقي للحلول المطوَّرة محلياً خلال العام.",
-      en: "A field paper by community members reviewing the applied impact of locally-built solutions this year.",
-    },
-  },
-];
-
-const ACTIVITIES_BY_KEY: Record<CommunityKey, ActivityItem[]> = {
-  entrepreneurship: [
-    {
-      date: "2025 / 11 / 20",
-      category: { ar: "هاكاثون", en: "Hackathon" },
-      title: { ar: "مشاركة المجتمع في «أركاثون» للذكاء الاصطناعي", en: "Community Participation in the AI Archathon" },
-      desc: {
-        ar: "فِرَقٌ من رواد الأعمال السوريين تتنافس على بناء حلولٍ ذكية لمشكلاتٍ محلية خلال 48 ساعة من العمل المكثّف.",
-        en: "Teams of Syrian entrepreneurs compete to build smart solutions to local problems in 48 hours of focused work.",
-      },
-    },
-    {
-      date: "2025 / 10 / 18",
-      category: { ar: "إرشاد", en: "Mentorship" },
-      title: { ar: "برنامج إرشاد الشركات الناشئة في الذكاء الاصطناعي", en: "AI-Startup Mentorship Program" },
-      desc: {
-        ar: "إرشادٌ مباشر من مؤسّسي شركاتٍ ومستثمرين، يرافق رواد الأعمال من الفكرة حتى الجولة الاستثمارية الأولى.",
-        en: "Hands-on guidance from founders and investors that walks entrepreneurs from idea to first funding round.",
-      },
-    },
-    {
-      date: "2025 / 09 / 22",
-      category: { ar: "ورشة عمل", en: "Workshop" },
-      title: { ar: "ورشات الثقافة الرقمية لروّاد الأعمال", en: "Digital Culture Workshops for Founders" },
-      desc: {
-        ar: "سلسلة ورشاتٍ تطبيقية تبني الوعي الرقمي وتُمكِّن الفرق من اتخاذ قراراتٍ مبنية على البيانات.",
-        en: "An applied workshop series that builds digital fluency and empowers teams to make data-informed decisions.",
-      },
-    },
-  ],
-  research: [
-    {
-      date: "2025 / 11 / 08",
-      category: { ar: "نشر", en: "Publication" },
-      title: { ar: "إصدار أوراق بحثية محكَّمة في الذكاء الاصطناعي", en: "Publication of Peer-Reviewed AI Research Papers" },
-      desc: {
-        ar: "أوراقٌ بحثية يُسهم فيها أعضاء المجتمع في مجلاتٍ ومؤتمراتٍ دولية، تربط النظرية بالتطبيق السوري.",
-        en: "Community-authored papers in international journals and conferences linking theory to Syrian practice.",
-      },
-    },
-    {
-      date: "2025 / 10 / 14",
-      category: { ar: "تدريب", en: "Training" },
-      title: { ar: "تدريبٌ متخصّص للأكاديميين على أدوات البحث الحديثة", en: "Specialized Training for Academics on Modern Research Tools" },
-      desc: {
-        ar: "برنامجٌ مكثَّف يُؤهِّل أعضاء الهيئات التدريسية لاستخدام أحدث أدوات الذكاء الاصطناعي في أبحاثهم.",
-        en: "An intensive program equipping faculty members to use the latest AI tools in their research pipelines.",
-      },
-    },
-    {
-      date: "2025 / 09 / 02",
-      category: { ar: "مبادرة", en: "Initiative" },
-      title: { ar: "مبادرات الوصول إلى قواعد البيانات العلمية", en: "Database Access Initiatives" },
-      desc: {
-        ar: "نفتح أبواب قواعد البيانات والمكتبات الرقمية أمام الباحثين السوريين عبر شراكاتٍ مؤسّسية.",
-        en: "Unlocking scientific databases and digital libraries for Syrian researchers through institutional partnerships.",
-      },
-    },
-  ],
-  medical: [
-    {
-      date: "2025 / 11 / 15",
-      category: { ar: "تدريب", en: "Training" },
-      title: { ar: "تدريب على المعلوماتية الطبية", en: "Medical Informatics Training" },
-      desc: {
-        ar: "برنامجٌ تطبيقي للأطباء وطلاب الطب على معالجة البيانات السريرية وتوظيف الذكاء الاصطناعي في التشخيص.",
-        en: "A hands-on program for clinicians and medical students on clinical data and AI-assisted diagnosis.",
-      },
-    },
-    {
-      date: "2025 / 10 / 24",
-      category: { ar: "ورشة عمل", en: "Workshop" },
-      title: { ar: "ورشات الذكاء الاصطناعي السريري", en: "Clinical AI Workshops" },
-      desc: {
-        ar: "ورشاتٌ تربط أدوات الذكاء الاصطناعي بالواقع السريري لتحسين دقّة القرارات الطبية وسلامة المريض.",
-        en: "Workshops connecting AI tools with bedside realities to improve clinical decisions and patient safety.",
-      },
-    },
-    {
-      date: "2025 / 09 / 18",
-      category: { ar: "ابتكار", en: "Innovation" },
-      title: { ar: "الابتكار المُقتَصِد في الرعاية الصحية", en: "Frugal Innovation in Healthcare" },
-      desc: {
-        ar: "نماذج أوليّة منخفضة التكلفة تعالج فجواتٍ تشخيصية حقيقية في المستشفيات والعيادات السورية.",
-        en: "Low-cost prototypes that address real diagnostic gaps in Syrian hospitals and clinics.",
-      },
-    },
-  ],
-  architecture: [
-    {
-      date: "2025 / 11 / 05",
-      category: { ar: "نمذجة", en: "Modeling" },
-      title: { ar: "نمذجة المدن الذكية", en: "Smart City Modeling" },
-      desc: {
-        ar: "مشاريع نمذجة حضرية تستخدم البيانات وإنترنت الأشياء لتصوّر مدنٍ سورية أكثر ذكاءً واستجابة.",
-        en: "Urban modeling projects using data and IoT to imagine smarter, more responsive Syrian cities.",
-      },
-    },
-    {
-      date: "2025 / 10 / 11",
-      category: { ar: "ورشة عمل", en: "Workshop" },
-      title: { ar: "ورشات التصميم المعتمد على البيانات", en: "Data-Driven Design Workshops" },
-      desc: {
-        ar: "نمنح المعماريين أدواتٍ لاتخاذ قراراتٍ تصميمية مبنية على بيانات الموقع والمستخدم والمناخ.",
-        en: "Equipping architects with tools to make design decisions grounded in site, user and climate data.",
-      },
-    },
-    {
-      date: "2025 / 09 / 09",
-      category: { ar: "بحث", en: "Research" },
-      title: { ar: "أبحاث الاستدامة في إعادة الإعمار", en: "Sustainability Research in Reconstruction" },
-      desc: {
-        ar: "دراساتٌ تطبيقية حول كفاءة الطاقة والمواد المحلية في إعادة إعمار المناطق السورية.",
-        en: "Applied studies on energy efficiency and local materials for the reconstruction of Syrian regions.",
-      },
-    },
-  ],
-  data: [
-    {
-      date: "2025 / 11 / 02",
-      category: { ar: "بوتكامب", en: "Bootcamp" },
-      title: { ar: "بوتكامب تعلُّم الآلة", en: "Machine Learning Bootcamp" },
-      desc: {
-        ar: "برنامجٌ مكثَّف يُؤهِّل المشاركين من الصفر حتى بناء نماذج تعلُّم آلة قابلة للنشر في بيئاتٍ حقيقية.",
-        en: "An intensive program taking participants from zero to deployable ML models in real environments.",
-      },
-    },
-    {
-      date: "2025 / 10 / 17",
-      category: { ar: "ماراثون", en: "Marathon" },
-      title: { ar: "ماراثونات تنظيف وهيكلة البيانات", en: "Data Cleaning Marathons" },
-      desc: {
-        ar: "أيامٌ مكثَّفة من العمل الجماعي على تجهيز مجموعات بياناتٍ سورية مفتوحة للاستخدام البحثي والتطبيقي.",
-        en: "Intensive collaborative sprints preparing open Syrian datasets for research and applied use.",
-      },
-    },
-    {
-      date: "2025 / 09 / 25",
-      category: { ar: "نمذجة", en: "Modeling" },
-      title: { ar: "النمذجة التنبؤية للأسواق السورية", en: "Predictive Modeling for Syrian Markets" },
-      desc: {
-        ar: "نبني نماذج تنبؤيةً تساعد المؤسسات السورية على فهم سلوك الأسواق واتخاذ قراراتٍ أفضل.",
-        en: "Building predictive models that help Syrian institutions read markets and make better decisions.",
-      },
-    },
-  ],
-  software: DEFAULT_ACTIVITIES,
-  economy: DEFAULT_ACTIVITIES,
-};
+function formatNewsDate(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y} / ${m} / ${day}`;
+}
 
 const DEFAULT_METRICS: Metric[] = [
   { value: "320+", label: { ar: "عضو نشط", en: "Active Members" } },
@@ -327,12 +158,42 @@ function CommunityPage() {
   const name = lang === "ar" ? COMMUNITY_LABELS_AR[k] : COMMUNITY_LABELS_EN[k];
   const mission = MISSION[k][lang];
 
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [loadingNews, setLoadingNews] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingNews(true);
+    supabase
+      .from("news")
+      .select("id,title,excerpt,category,published_at")
+      .eq("category", k)
+      .order("published_at", { ascending: false })
+      .limit(10)
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) console.warn("Community news fetch error:", error.message);
+        const rows = (data ?? []).map((r): ActivityItem => ({
+          id: r.id,
+          date: formatNewsDate(r.published_at),
+          category: r.category,
+          title: r.title,
+          desc: r.excerpt ?? "",
+        }));
+        setActivities(rows);
+        setLoadingNews(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [k]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <main className="pt-20">
         <Prelude name={name} mission={mission} img={HERO_IMG[k]} isRtl={isRtl} lang={lang} />
-        <ActivityFeed isRtl={isRtl} lang={lang} activities={ACTIVITIES_BY_KEY[k] ?? DEFAULT_ACTIVITIES} />
+        <ActivityFeed isRtl={isRtl} lang={lang} activities={activities} loading={loadingNews} />
         <ImpactMatrix isRtl={isRtl} lang={lang} metrics={METRICS_BY_KEY[k] ?? DEFAULT_METRICS} />
         <CallToConnection isRtl={isRtl} lang={lang} />
       </main>
@@ -421,9 +282,10 @@ function Prelude({
 }
 
 /* ---------- SECTION 3: Activity Feed (Editorial Index) ---------- */
-function ActivityFeed({ isRtl, lang, activities }: { isRtl: boolean; lang: "ar" | "en"; activities: ActivityItem[] }) {
+function ActivityFeed({ isRtl, lang, activities, loading }: { isRtl: boolean; lang: "ar" | "en"; activities: ActivityItem[]; loading: boolean }) {
   const heading = lang === "ar" ? "الأخبار والفعاليات" : "News & Events";
   const sub = lang === "ar" ? "أرشيفٌ زمنيٌّ لما يصنعه المجتمع: ورشات، أبحاث، لقاءات وشراكات." : "A chronological index of what the community makes: workshops, research, meetups and partnerships.";
+  const emptyMsg = lang === "ar" ? "لا توجد أخبار بعد لهذا المجتمع." : "No news yet for this community.";
 
   return (
     <section className="relative bg-surface py-24 lg:py-32">
@@ -450,55 +312,87 @@ function ActivityFeed({ isRtl, lang, activities }: { isRtl: boolean; lang: "ar" 
         </motion.div>
 
         <div className="mt-16" style={{ borderTop: `1px solid ${TEAL}` }}>
-          {activities.map((a, i) => (
-            <motion.article
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.55, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-              className="grid grid-cols-1 gap-4 py-10 lg:grid-cols-[30%_1fr] lg:gap-12 lg:py-12"
-              style={{ borderBottom: `1px solid ${TEAL}` }}
-            >
-              {/* Column 1: Date + Category (30%) */}
-              <div className={isRtl ? "text-right" : "text-left"}>
-                <div
-                  className="text-xs font-semibold uppercase tracking-[0.22em]"
-                  style={{ color: TEAL, fontFamily: '"Cairo", system-ui, sans-serif' }}
-                >
-                  {a.category[lang]}
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="grid grid-cols-1 gap-4 py-10 lg:grid-cols-[30%_1fr] lg:gap-12 lg:py-12"
+                style={{ borderBottom: `1px solid ${TEAL}` }}
+              >
+                <div className="space-y-3">
+                  <div className="h-3 w-24 animate-pulse rounded bg-muted/50" />
+                  <div className="h-3 w-32 animate-pulse rounded bg-muted/40" />
                 </div>
-                <div
-                  className="mt-3 text-sm"
-                  style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', letterSpacing: "0.04em" }}
-                  dir="ltr"
-                >
-                  {a.date}
+                <div className="space-y-3">
+                  <div className="h-5 w-3/4 animate-pulse rounded bg-muted/50" />
+                  <div className="h-4 w-full animate-pulse rounded bg-muted/40" />
                 </div>
               </div>
+            ))
+          ) : activities.length === 0 ? (
+            <div className="py-16 text-center" style={{ borderBottom: `1px solid ${TEAL}` }}>
+              <p className="text-base" style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif' }}>
+                {emptyMsg}
+              </p>
+            </div>
+          ) : (
+            activities.map((a, i) => (
+              <motion.div
+                key={a.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.55, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                style={{ borderBottom: `1px solid ${TEAL}` }}
+              >
+                <Link
+                  to="/news/$id"
+                  params={{ id: a.id }}
+                  className="grid grid-cols-1 gap-4 py-10 lg:grid-cols-[30%_1fr] lg:gap-12 lg:py-12 transition-opacity hover:opacity-80"
+                >
+                  {/* Column 1: Date + Category (30%) */}
+                  <div className={isRtl ? "text-right" : "text-left"}>
+                    <div
+                      className="text-xs font-semibold uppercase tracking-[0.22em]"
+                      style={{ color: TEAL, fontFamily: '"Cairo", system-ui, sans-serif' }}
+                    >
+                      {a.category}
+                    </div>
+                    <div
+                      className="mt-3 text-sm"
+                      style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', letterSpacing: "0.04em" }}
+                      dir="ltr"
+                    >
+                      {a.date}
+                    </div>
+                  </div>
 
-              {/* Column 2: Title + Description */}
-              <div className={isRtl ? "text-right" : "text-left"}>
-                <h3
-                  style={{
-                    fontFamily: '"Cairo", system-ui, sans-serif',
-                    fontWeight: 700,
-                    lineHeight: 1.3,
-                    fontSize: "clamp(1.25rem, 1.8vw, 1.625rem)",
-                    color: "var(--foreground)",
-                  }}
-                >
-                  {a.title[lang]}
-                </h3>
-                <p
-                  className="mt-3 line-clamp-2 text-base leading-[1.75]"
-                  style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 300 }}
-                >
-                  {a.desc[lang]}
-                </p>
-              </div>
-            </motion.article>
-          ))}
+                  {/* Column 2: Title + Description */}
+                  <div className={isRtl ? "text-right" : "text-left"}>
+                    <h3
+                      style={{
+                        fontFamily: '"Cairo", system-ui, sans-serif',
+                        fontWeight: 700,
+                        lineHeight: 1.3,
+                        fontSize: "clamp(1.25rem, 1.8vw, 1.625rem)",
+                        color: "var(--foreground)",
+                      }}
+                    >
+                      {a.title}
+                    </h3>
+                    {a.desc && (
+                      <p
+                        className="mt-3 line-clamp-2 text-base leading-[1.75]"
+                        style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 300 }}
+                      >
+                        {a.desc}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              </motion.div>
+            ))
+          )}
         </div>
       </div>
     </section>
