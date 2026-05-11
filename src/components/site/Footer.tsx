@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Mail, Phone, MapPin, Instagram, Linkedin, Youtube, ArrowRight } from "lucide-react";
 import { useLang } from "@/lib/i18n";
-import logo from "@/assets/saae-logo.png";
+import logo from "@/assets/footer-logo.png";
 
 export function Footer() {
   const { t, dir } = useLang();
@@ -21,7 +21,7 @@ export function Footer() {
           {/* Col 1 */}
           <div className="lg:col-span-4">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="SAAE" className="h-12 w-auto" />
+              <img src={logo} alt="SAAE" className="h-14 w-auto brightness-0 invert" />
               <div className="flex flex-col leading-tight">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-footer-foreground">SAAE</span>
                 <span className="text-[11px] text-footer-muted">
