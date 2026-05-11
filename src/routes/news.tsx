@@ -89,13 +89,10 @@ function NewsPage() {
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((n, i) => (
-                <motion.a
+                <Link
                   key={n.id}
-                  href="#"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.5, delay: (i % 6) * 0.05 }}
+                  to="/news/$id"
+                  params={{ id: n.id }}
                   className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift"
                 >
                   <div className="aspect-[16/10] overflow-hidden bg-muted">
