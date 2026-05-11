@@ -694,9 +694,6 @@ function CallToConnection({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }
     <section style={{ backgroundColor: "var(--surface)", paddingTop: 160, paddingBottom: 160 }}>
       <div className="mx-auto max-w-3xl px-6 text-center">
         <motion.div {...fadeUp}>
-          <span className="text-xs font-semibold uppercase tracking-[0.22em]" style={{ color: OLIVE }}>
-            {lang === "ar" ? "انضمَّ إلينا" : "Join Us"}
-          </span>
           <h2
             className="mt-6"
             style={{
