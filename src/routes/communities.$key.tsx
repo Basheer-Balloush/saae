@@ -481,7 +481,7 @@ function CallToConnection({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }
             <a
               href="mailto:info@aisyria.org"
               className="group inline-flex items-center gap-2 text-sm font-medium underline-offset-4 hover:underline"
-              style={{ color: "#1a1a1a", fontFamily: '"Cairo", system-ui, sans-serif' }}
+              style={{ color: "var(--foreground)", fontFamily: '"Cairo", system-ui, sans-serif' }}
             >
               <Mail className="h-4 w-4" style={{ color: OLIVE }} />
               {lang === "ar" ? "تواصَل مع المنسِّق" : "Contact Coordinator"}
