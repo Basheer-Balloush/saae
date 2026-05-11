@@ -397,7 +397,7 @@ function Prelude({
               style={{ color: TEAL }}
             >
               {isRtl ? <ArrowRight className="h-3.5 w-3.5 -scale-x-100" /> : <ArrowLeft className="h-3.5 w-3.5" />}
-              {lang === "ar" ? "مجتمعات SAAE" : "SAAE Communities"}
+              {lang === "ar" ? "العودة إلى مجتمعات الجمعية" : "Back to SAAE Communities"}
             </Link>
 
             <h1
