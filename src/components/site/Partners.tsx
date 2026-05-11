@@ -1,22 +1,13 @@
 import { motion } from "framer-motion";
 import { useLang } from "@/lib/i18n";
+import sarrdehLogo from "@/assets/partner-sarrdeh.png";
 
 const PARTNERS = [
-  "Damascus University",
-  "Ministry of Higher Education",
-  "UNESCO",
-  "Aleppo University",
-  "Tishreen University",
-  "Syrian Computer Society",
-  "ICARDA",
-  "UNDP Syria",
-  "Tartous University",
-  "Higher Institute for Applied Sciences",
+  { name: "Sarrdeh Tech", logo: sarrdehLogo },
 ];
 
 export function Partners() {
   const { t } = useLang();
-  const row = [...PARTNERS, ...PARTNERS];
 
   return (
     <section id="partners" className="relative bg-surface py-24 lg:py-28">
@@ -33,28 +24,25 @@ export function Partners() {
           </h2>
         </motion.div>
 
-        <div className="relative mt-14 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
-          <div className="flex w-max animate-[marquee_45s_linear_infinite] gap-12 hover:[animation-play-state:paused]">
-            {row.map((p, i) => (
-              <div
-                key={i}
-                className="flex h-16 min-w-[200px] items-center justify-center px-5 text-[15px] font-semibold tracking-tight text-muted-foreground/70 grayscale transition-all hover:text-primary hover:grayscale-0"
-              >
-                {p}
-              </div>
-            ))}
-          </div>
+        <div className="mt-14 flex flex-wrap items-center justify-center gap-12">
+          {PARTNERS.map((p) => (
+            <motion.div
+              key={p.name}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center justify-center"
+            >
+              <img
+                src={p.logo}
+                alt={p.name}
+                className="h-28 w-auto object-contain transition-transform hover:scale-105"
+              />
+            </motion.div>
+          ))}
         </div>
       </div>
-      <style>{`
-        @keyframes marquee {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-        [dir="rtl"] .animate-\\[marquee_45s_linear_infinite\\] {
-          animation-direction: reverse;
-        }
-      `}</style>
     </section>
   );
 }
