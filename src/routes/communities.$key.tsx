@@ -332,8 +332,8 @@ function CommunityPage() {
       <Navbar />
       <main className="pt-20">
         <Prelude name={name} mission={mission} img={HERO_IMG[k]} isRtl={isRtl} lang={lang} />
-        <ActivityFeed isRtl={isRtl} lang={lang} />
-        <ImpactMatrix isRtl={isRtl} lang={lang} />
+        <ActivityFeed isRtl={isRtl} lang={lang} activities={ACTIVITIES_BY_KEY[k] ?? DEFAULT_ACTIVITIES} />
+        <ImpactMatrix isRtl={isRtl} lang={lang} metrics={METRICS_BY_KEY[k] ?? DEFAULT_METRICS} />
         <CallToConnection isRtl={isRtl} lang={lang} />
       </main>
       <Footer />
