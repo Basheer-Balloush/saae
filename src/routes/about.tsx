@@ -91,13 +91,6 @@ function Hero({ Arrow }: { Arrow: typeof ArrowRight }) {
         </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-          <a
-            href="#join"
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-soft transition-transform hover:scale-[1.02]"
-          >
-            انضم إلينا
-            <Arrow className="h-4 w-4" />
-          </a>
           <Link
             to="/"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-6 py-3 text-sm font-semibold text-foreground/80 backdrop-blur transition-colors hover:border-primary hover:text-primary"
