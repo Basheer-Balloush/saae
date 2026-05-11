@@ -6,13 +6,14 @@ type Ctx = { theme: Theme; toggle: () => void; setTheme: (t: Theme) => void };
 const ThemeContext = createContext<Ctx | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const saved = (localStorage.getItem("saae-theme") as Theme | null) ?? "light";
-    setThemeState(saved);
-  }, []);
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "light";
+    try {
+      return (localStorage.getItem("saae-theme") as Theme | null) ?? "light";
+    } catch {
+      return "light";
+    }
+  });
 
   useEffect(() => {
     if (typeof document === "undefined") return;
