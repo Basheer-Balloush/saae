@@ -47,10 +47,6 @@ export function Communities() {
         <div className="mt-20 border-t border-border/60">
           {cards.map((card, i) => {
             const Icon = card.icon;
-            // Asymmetric 2-column: alternate which column is wider
-            const wideLeft = i % 2 === 0;
-            const gridCols = wideLeft ? "lg:grid-cols-[1.4fr_1fr]" : "lg:grid-cols-[1fr_1.4fr]";
-
             return (
               <motion.a
                 key={card.title}
@@ -61,17 +57,26 @@ export function Communities() {
                 transition={{ duration: 0.6, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
                 className={`group relative block border-b border-border/60 transition-colors duration-500 hover:bg-[rgba(4,128,144,0.02)]`}
               >
-                <div className={`grid grid-cols-1 gap-6 px-2 py-10 lg:gap-12 lg:py-14 ${gridCols}`}>
-                  {/* Title column with icon */}
-                  <div className="flex items-start gap-5">
+                <div className="grid grid-cols-1 gap-6 px-2 py-10 lg:grid-cols-[40px_350px_1fr] lg:gap-x-12 lg:py-14">
+                  {/* Icon column (fixed 40px) */}
+                  <div className="hidden lg:flex items-start justify-center pt-2">
                     <Icon
-                      className="mt-2 h-6 w-6 shrink-0 transition-transform duration-500 group-hover:scale-110"
+                      className="h-6 w-6 shrink-0 transition-transform duration-500 group-hover:scale-110"
+                      strokeWidth={1.75}
+                      style={{ color: "#698F3F" }}
+                    />
+                  </div>
+
+                  {/* Title column (fixed 350px on lg) */}
+                  <div className="flex items-start gap-4 lg:gap-0">
+                    <Icon
+                      className="mt-2 h-6 w-6 shrink-0 transition-transform duration-500 group-hover:scale-110 lg:hidden"
                       strokeWidth={1.75}
                       style={{ color: "#698F3F" }}
                     />
                     <h3
                       className={`text-foreground leading-[1.05] tracking-tight transition-transform duration-500 ${
-                        isRtl ? "group-hover:-translate-x-2" : "group-hover:translate-x-2"
+                        isRtl ? "text-right group-hover:-translate-x-2" : "text-left group-hover:translate-x-2"
                       }`}
                       style={{
                         fontFamily: '"Cairo", system-ui, sans-serif',
@@ -85,7 +90,7 @@ export function Communities() {
 
                   {/* Description column */}
                   <div
-                    className={`flex flex-col justify-center transition-transform duration-500 ${
+                    className={`flex flex-col items-start transition-transform duration-500 ${
                       isRtl ? "group-hover:-translate-x-2" : "group-hover:translate-x-2"
                     }`}
                   >
