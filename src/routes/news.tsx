@@ -29,7 +29,11 @@ export const Route = createFileRoute("/news")({
 type NewsRow = {
   id: string;
   title: string;
+  title_ar: string | null;
+  title_en: string | null;
   excerpt: string | null;
+  excerpt_ar: string | null;
+  excerpt_en: string | null;
   image_url: string | null;
   category: string;
   published_at: string;
@@ -37,6 +41,11 @@ type NewsRow = {
 
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
+
+function pick(ar: string | null, en: string | null, fallback: string | null, lang: "ar" | "en"): string {
+  if (lang === "ar") return ar || en || fallback || "";
+  return en || ar || fallback || "";
+}
 
 function NewsPage() {
   const { t, dir, lang } = useLang();
@@ -46,11 +55,11 @@ function NewsPage() {
   useEffect(() => {
     supabase
       .from("news")
-      .select("id,title,excerpt,image_url,category,published_at")
+      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,published_at")
       .order("published_at", { ascending: false })
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        setItems(data ?? []);
+        setItems((data ?? []) as NewsRow[]);
       });
   }, []);
 
