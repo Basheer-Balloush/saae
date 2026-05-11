@@ -184,7 +184,7 @@ export function Footer() {
                 target="_blank"
                 rel="noreferrer"
                 className="group inline-flex items-center gap-1.5 pt-1 text-sm font-semibold"
-                style={{ color: TEAL }}
+                style={{ color: "#FFFFFF" }}
               >
                 {t.footer.visit}
                 <ArrowRight
