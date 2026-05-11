@@ -361,7 +361,7 @@ function CommunityPage() {
         <Prelude name={name} mission={mission} img={HERO_IMG[k]} isRtl={isRtl} lang={lang} details={DETAILS[k] ?? []} />
         <ActivityFeed isRtl={isRtl} lang={lang} activities={activities} loading={loadingNews} />
         <ImpactMatrix isRtl={isRtl} lang={lang} metrics={METRICS_BY_KEY[k] ?? DEFAULT_METRICS} />
-        <CallToConnection isRtl={isRtl} lang={lang} />
+        <CallToConnection isRtl={isRtl} lang={lang} communityName={name} />
       </main>
       <Footer />
     </div>
