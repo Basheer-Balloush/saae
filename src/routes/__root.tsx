@@ -126,6 +126,7 @@ function RootComponent() {
       <ThemeProvider>
         <LanguageProvider>
           <Outlet />
+          <AssistantFab />
           <Toaster richColors position="top-center" />
         </LanguageProvider>
       </ThemeProvider>
