@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Mail, Phone, MapPin, Linkedin, Twitter, Github, ArrowRight } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, ArrowRight } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import logo from "@/assets/footer-logo.png";
 import locationMap from "@/assets/location-map.png";
