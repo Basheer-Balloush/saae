@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Bot, MessageCircle, Sparkles, Users } from "lucide-react";
 import { useLang } from "@/lib/i18n";
+import { AssistantChatModal } from "./AssistantChatModal";
 
 export function Assistant() {
   const { t, dir } = useLang();
   const a = t.assistant;
+  const [open, setOpen] = useState(false);
 
   const features = [
     { icon: MessageCircle, ...a.features.inquiries },
