@@ -356,8 +356,9 @@ function NewsDetailPage() {
             {...fade}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mx-auto mt-24 max-w-[850px] px-6"
+            style={{ borderTop: `2px solid ${TEAL}`, paddingTop: 32 }}
           >
-            <div className="mb-8 flex items-center gap-4" style={{ borderBottom: `1px solid ${TEAL}`, paddingBottom: 12 }}>
+            <div className="mb-8 flex items-center gap-4">
               <h2 style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 800, fontSize: "1.25rem", color: "var(--foreground)" }}>
                 {lang === "ar" ? "أخبار ذات صلة" : "Related News"}
               </h2>
