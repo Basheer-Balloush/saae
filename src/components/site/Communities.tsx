@@ -1,17 +1,18 @@
 import { motion } from "framer-motion";
-import { Sparkles, Stethoscope, GraduationCap, FlaskConical, Rocket, Bot, ArrowRight } from "lucide-react";
+import { Database, Building2, Stethoscope, Rocket, FlaskConical, Code2, TrendingUp, ArrowRight } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 
 export function Communities() {
   const { t, dir } = useLang();
   const c = t.communities.cards;
   const cards = [
-    { icon: Sparkles, ...c.women },
-    { icon: Stethoscope, ...c.health },
-    { icon: GraduationCap, ...c.education },
-    { icon: FlaskConical, ...c.research },
+    { icon: Database, ...c.data },
+    { icon: Building2, ...c.architecture },
+    { icon: Stethoscope, ...c.medical },
     { icon: Rocket, ...c.entrepreneurship },
-    { icon: Bot, ...c.robotics },
+    { icon: FlaskConical, ...c.research },
+    { icon: Code2, ...c.software },
+    { icon: TrendingUp, ...c.economy },
   ];
 
   return (
