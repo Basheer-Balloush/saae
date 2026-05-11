@@ -110,9 +110,9 @@ export function Footer() {
                   <Mail className="h-4 w-4 flex-none text-footer-foreground" />
                   info@aisyria.org
                 </a>
-                <a href="tel:+963930763547" className="flex items-center gap-2.5 text-footer-muted hover:text-footer-foreground" dir="ltr">
+                <a href="tel:+963930763547" className="flex items-center gap-2.5 text-footer-muted hover:text-footer-foreground">
                   <Phone className="h-4 w-4 flex-none text-footer-foreground" />
-                  +963 930 763 547
+                  <span dir="ltr">+963 930 763 547</span>
                 </a>
                 <a
                   href="https://www.google.com/maps?q=Damascus"
