@@ -115,7 +115,7 @@ export function AssistantChatModal({
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-6 py-6">
+            <div className="chat-scroll flex-1 overflow-y-auto px-6 py-6">
               {messages.length === 0 && (
                 <div className="flex h-full flex-col items-center justify-center text-center">
                   <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
