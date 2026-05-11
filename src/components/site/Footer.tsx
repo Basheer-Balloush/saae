@@ -199,13 +199,12 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom bar — teal divider + centered copyright */}
+        {/* Bottom bar — centered copyright */}
         <div
           className="mt-20 flex flex-col items-center gap-2 pt-6 text-center text-xs"
-          style={{ borderTop: `1px solid ${TEAL}`, color: "#555555" }}
+          style={{ borderTop: `1px solid rgba(255,255,255,0.25)`, color: MUTED }}
         >
           <span>© {new Date().getFullYear()} SAAE — {t.footer.rights}</span>
-          <span style={{ color: "#555555" }}>{t.footer.madeIn}</span>
         </div>
       </div>
     </footer>
