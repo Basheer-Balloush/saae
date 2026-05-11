@@ -13,9 +13,12 @@ const sections = ["home", "communities", "achievements", "partners", "contact", 
 export function Navbar() {
   const { t, lang, toggle: toggleLang } = useLang();
   const { theme, toggle: toggleTheme } = useTheme();
+  const location = useLocation();
+  const isAbout = location.pathname.startsWith("/about");
+  const isHome = !isAbout;
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState<string>("home");
+  const [active, setActive] = useState<string>(isAbout ? "about" : "home");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -25,6 +28,10 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (isAbout) {
+      setActive("about");
+      return;
+    }
     const visible = new Map<string, number>();
     const observer = new IntersectionObserver(
       (entries) => {
@@ -40,13 +47,15 @@ export function Navbar() {
       { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
     );
     sections.forEach((id) => {
-      if (id === "news") return; // الأخبار قسم داخل الرئيسية — يبقى "home" هو الـ active
+      if (id === "news" || id === "about") return;
       const targetId = id === "contact" ? "assistant" : id;
       const el = document.getElementById(targetId);
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
-  }, []);
+  }, [isAbout]);
+
+  const hashHref = (id: string) => (isHome ? `#${id}` : `/#${id}`);
 
   return (
     <header
