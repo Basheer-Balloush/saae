@@ -28,8 +28,7 @@ export function Partners() {
           transition={{ duration: 0.6 }}
           className="mx-auto max-w-2xl text-center"
         >
-          <p className="text-caption text-primary">{t.partners.eyebrow}</p>
-          <h2 className="mt-4 text-display-2 text-foreground">
+          <h2 className="text-display-2 text-foreground">
             {t.partners.title}
           </h2>
         </motion.div>
