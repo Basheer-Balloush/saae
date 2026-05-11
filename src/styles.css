@@ -58,6 +58,10 @@
   --color-ring-offset-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-foreground: var(--surface-foreground);
+  --color-footer: var(--footer);
+  --color-footer-foreground: var(--footer-foreground);
+  --color-footer-muted: var(--footer-muted);
+  --color-footer-border: var(--footer-border);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -81,6 +85,12 @@
   --foreground: oklch(0.235 0 0);               /* Jet Black #2E2E2E */
   --surface: oklch(0.975 0.004 95);             /* off-white section bg */
   --surface-foreground: oklch(0.235 0 0);
+
+  /* Footer — teal #048090 */
+  --footer: oklch(0.524 0.105 215);
+  --footer-foreground: oklch(0.985 0.005 95);
+  --footer-muted: oklch(0.88 0.03 215);
+  --footer-border: oklch(1 0 0 / 0.14);
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.235 0 0);
