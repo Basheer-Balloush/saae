@@ -65,6 +65,9 @@ export const amsT: Record<Lang, {
   selectAll: string;
   absent: string;
   export: string;
+  confirmDeleteCourse: string;
+  previousRegistrants: string;
+  useDetails: string;
 }> = {
   en: {
     title: "Attendance Management",
@@ -131,6 +134,9 @@ export const amsT: Record<Lang, {
     selectAll: "Select all",
     absent: "Absent",
     export: "Export",
+    confirmDeleteCourse: "Delete this course and all its data?",
+    previousRegistrants: "Previously registered",
+    useDetails: "Use details",
   },
   ar: {
     title: "نظام إدارة الحضور",
@@ -197,5 +203,8 @@ export const amsT: Record<Lang, {
     selectAll: "تحديد الكل",
     absent: "غائب",
     export: "تصدير",
+    confirmDeleteCourse: "هل تريد حذف هذه الدورة وكل بياناتها؟",
+    previousRegistrants: "مسجَّل سابقًا",
+    useDetails: "استخدام المعلومات",
   },
 };

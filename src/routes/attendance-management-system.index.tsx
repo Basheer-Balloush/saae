@@ -122,24 +122,49 @@ function AmsDashboard() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map((c) => (
-            <button
+            <div
               key={c.id}
-              onClick={() => setSelected(c)}
-              className="text-start rounded-2xl border border-border bg-card p-5 shadow-soft hover:border-primary hover:shadow-md transition-all"
+              className="group relative rounded-2xl border border-border bg-card p-5 shadow-soft hover:border-primary hover:shadow-md transition-all"
             >
-              <div className="font-semibold text-base">
-                {lang === "ar" ? c.name_ar : c.name_en || c.name_ar}
-              </div>
-              {((lang === "ar" && c.name_en) || (lang === "en" && c.name_ar)) && (
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {lang === "ar" ? c.name_en : c.name_ar}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!confirm(tr.confirmDeleteCourse)) return;
+                  supabase
+                    .from("ams_courses")
+                    .delete()
+                    .eq("id", c.id)
+                    .then(({ error }) => {
+                      if (error) toast.error(error.message);
+                      else {
+                        toast.success(tr.saved);
+                        loadCourses();
+                      }
+                    });
+                }}
+                className="absolute top-2 end-2 inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                aria-label={tr.delete}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setSelected(c)}
+                className="w-full text-start"
+              >
+                <div className="font-semibold text-base pe-8">
+                  {lang === "ar" ? c.name_ar : c.name_en || c.name_ar}
                 </div>
-              )}
-              <div className="mt-4 inline-flex items-center gap-1 text-xs text-primary">
-                {tr.open}
-                {isRtl ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
-              </div>
-            </button>
+                {((lang === "ar" && c.name_en) || (lang === "en" && c.name_ar)) && (
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {lang === "ar" ? c.name_en : c.name_ar}
+                  </div>
+                )}
+                <div className="mt-4 inline-flex items-center gap-1 text-xs text-primary">
+                  {tr.open}
+                  {isRtl ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
+                </div>
+              </button>
+            </div>
           ))}
         </div>
       )}
@@ -639,6 +664,48 @@ function AddRegistrantDialog({ courseId, onCreated }: { courseId: string; onCrea
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<PaymentStatus>("unpaid");
   const [saving, setSaving] = useState(false);
+  const [suggestions, setSuggestions] = useState<Registrant[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Debounced lookup of previous registrants by name (across courses).
+  useEffect(() => {
+    if (!open) return;
+    const q = fullName.trim();
+    if (q.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      const { data, error } = await supabase
+        .from("ams_registrants")
+        .select("*")
+        .ilike("full_name", `%${q}%`)
+        .neq("course_id", courseId)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) return;
+      // Keep only the most recent record per unique full_name.
+      const seen = new Set<string>();
+      const unique: Registrant[] = [];
+      for (const r of (data as Registrant[]) ?? []) {
+        const key = r.full_name.trim().toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        unique.push(r);
+        if (unique.length >= 6) break;
+      }
+      setSuggestions(unique);
+    }, 200);
+    return () => clearTimeout(handle);
+  }, [fullName, courseId, open]);
+
+  const applySuggestion = (r: Registrant) => {
+    setFullName(r.full_name);
+    setEmail(r.email ?? "");
+    setPhone(r.phone ?? "");
+    setStatus(r.payment_status);
+    setShowSuggestions(false);
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -667,6 +734,7 @@ function AddRegistrantDialog({ courseId, onCreated }: { courseId: string; onCrea
     setEmail("");
     setPhone("");
     setStatus("unpaid");
+    setSuggestions([]);
     setOpen(false);
     onCreated();
   };
@@ -684,9 +752,46 @@ function AddRegistrantDialog({ courseId, onCreated }: { courseId: string; onCrea
           <DialogTitle>{tr.addRegistrant}</DialogTitle>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-3">
-          <div>
+          <div className="relative">
             <Label htmlFor="fn">{tr.fullName}</Label>
-            <Input id="fn" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+            <Input
+              id="fn"
+              value={fullName}
+              onChange={(e) => {
+                setFullName(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+              autoComplete="off"
+              required
+            />
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-popover shadow-lg max-h-56 overflow-y-auto">
+                <div className="px-3 py-1.5 text-[10px] uppercase tracking-wide text-muted-foreground border-b border-border/60">
+                  {tr.previousRegistrants}
+                </div>
+                {suggestions.map((s) => (
+                  <button
+                    type="button"
+                    key={s.id}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      applySuggestion(s);
+                    }}
+                    className="w-full text-start px-3 py-2 hover:bg-accent transition-colors flex items-center justify-between gap-2"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium truncate">{s.full_name}</div>
+                      <div className="text-[11px] text-muted-foreground truncate" dir="ltr">
+                        {s.email || ""}{s.email && s.phone ? " · " : ""}{s.phone || ""}
+                      </div>
+                    </div>
+                    <span className="text-[11px] text-primary shrink-0">{tr.useDetails}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div>
             <Label htmlFor="em">{tr.emailField}</Label>
@@ -863,15 +968,15 @@ function SessionAttendanceDialog({
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-start">{tr.fullName}</TableHead>
-                  <TableHead className="w-24 text-start">{tr.present}</TableHead>
+                  <TableHead className="w-24 text-center">{tr.present}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {registrants.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium text-start">{r.full_name}</TableCell>
-                    <TableCell className="text-start">
-                      <div className="inline-flex items-center gap-2">
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-2">
                         <Checkbox
                           checked={!!presentMap[r.id]}
                           onCheckedChange={(v) => toggle(r.id, v === true)}
