@@ -80,12 +80,6 @@ export function Footer() {
 
           {/* Col 4 — HQ Intelligence */}
           <div className="lg:col-span-4">
-            <h4
-              className="text-xs font-semibold uppercase tracking-[0.18em]"
-              style={{ color: INK }}
-            >
-              {t.footer.hq ?? "HQ"}
-            </h4>
             <a
               href="https://www.google.com/maps?q=Damascus+University"
               target="_blank"
