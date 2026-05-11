@@ -7,7 +7,7 @@ import locationMap from "@/assets/location-map.png";
 const INK = "#2E2E2E";
 const TEAL = "#048090";
 const HAIRLINE = "#EEEEEE";
-const MUTED = "#8A8A8A";
+const MUTED = "#555555";
 
 export function Footer() {
   const { t, dir } = useLang();
