@@ -158,12 +158,42 @@ function CommunityPage() {
   const name = lang === "ar" ? COMMUNITY_LABELS_AR[k] : COMMUNITY_LABELS_EN[k];
   const mission = MISSION[k][lang];
 
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [loadingNews, setLoadingNews] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingNews(true);
+    supabase
+      .from("news")
+      .select("id,title,excerpt,category,published_at")
+      .eq("category", k)
+      .order("published_at", { ascending: false })
+      .limit(10)
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) console.warn("Community news fetch error:", error.message);
+        const rows = (data ?? []).map((r): ActivityItem => ({
+          id: r.id,
+          date: formatNewsDate(r.published_at),
+          category: r.category,
+          title: r.title,
+          desc: r.excerpt ?? "",
+        }));
+        setActivities(rows);
+        setLoadingNews(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [k]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <main className="pt-20">
         <Prelude name={name} mission={mission} img={HERO_IMG[k]} isRtl={isRtl} lang={lang} />
-        <ActivityFeed isRtl={isRtl} lang={lang} activities={ACTIVITIES_BY_KEY[k] ?? DEFAULT_ACTIVITIES} />
+        <ActivityFeed isRtl={isRtl} lang={lang} activities={activities} loading={loadingNews} />
         <ImpactMatrix isRtl={isRtl} lang={lang} metrics={METRICS_BY_KEY[k] ?? DEFAULT_METRICS} />
         <CallToConnection isRtl={isRtl} lang={lang} />
       </main>
