@@ -31,20 +31,32 @@ export const Route = createFileRoute("/admin/")({
 type NewsRow = {
   id: string;
   title: string;
+  title_ar: string | null;
+  title_en: string | null;
   excerpt: string | null;
+  excerpt_ar: string | null;
+  excerpt_en: string | null;
+  content: string | null;
+  content_ar: string | null;
+  content_en: string | null;
   image_url: string | null;
+  images: string[] | null;
+  videos: string[] | null;
   category: string;
   published_at: string;
   show_on_home: boolean;
 };
 
 const newsSchema = z.object({
-  title: z.string().trim().min(1, "Title required").max(200),
-  excerpt: z.string().trim().max(500).optional().or(z.literal("")),
+  title_ar: z.string().trim().min(1, "Arabic title required").max(200),
+  title_en: z.string().trim().min(1, "English title required").max(200),
+  excerpt_ar: z.string().trim().max(500).optional().or(z.literal("")),
+  excerpt_en: z.string().trim().max(500).optional().or(z.literal("")),
+  content_ar: z.string().trim().max(20000).optional().or(z.literal("")),
+  content_en: z.string().trim().max(20000).optional().or(z.literal("")),
   category: z.enum(COMMUNITY_KEYS),
   published_at: z.string().min(1),
   show_on_home: z.boolean(),
-  image_url: z.string().url().optional().or(z.literal("")),
 });
 
 function AdminDashboard() {
@@ -74,7 +86,7 @@ function AdminDashboard() {
       .order("created_at", { ascending: false })
       .then(({ data, error }) => {
         if (error) toast.error(error.message);
-        else setItems(data ?? []);
+        else setItems((data ?? []) as NewsRow[]);
       });
   }, [isAdmin, refreshKey]);
 
@@ -174,7 +186,7 @@ function AdminDashboard() {
                       <div className="h-12 w-16 rounded bg-muted" />
                     )}
                   </td>
-                  <td className="px-4 py-3 font-medium text-foreground">{row.title}</td>
+                  <td className="px-4 py-3 font-medium text-foreground">{row.title_en || row.title}</td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {COMMUNITY_LABELS_EN[row.category as CommunityKey] ?? row.category}
                   </td>
@@ -218,6 +230,19 @@ function AdminDashboard() {
   );
 }
 
+async function uploadToBucket(file: File, kind: "image" | "video"): Promise<string> {
+  const ext = file.name.split(".").pop() || (kind === "video" ? "mp4" : "jpg");
+  const path = `${kind}s/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from("news-images").upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: file.type || undefined,
+  });
+  if (error) throw error;
+  const { data } = supabase.storage.from("news-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+
 function NewsForm({
   initial,
   onClose,
@@ -227,8 +252,12 @@ function NewsForm({
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const [title, setTitle] = useState(initial?.title ?? "");
-  const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
+  const [titleAr, setTitleAr] = useState(initial?.title_ar ?? initial?.title ?? "");
+  const [titleEn, setTitleEn] = useState(initial?.title_en ?? initial?.title ?? "");
+  const [excerptAr, setExcerptAr] = useState(initial?.excerpt_ar ?? initial?.excerpt ?? "");
+  const [excerptEn, setExcerptEn] = useState(initial?.excerpt_en ?? initial?.excerpt ?? "");
+  const [contentAr, setContentAr] = useState(initial?.content_ar ?? initial?.content ?? "");
+  const [contentEn, setContentEn] = useState(initial?.content_en ?? initial?.content ?? "");
   const [category, setCategory] = useState<CommunityKey>(
     (initial?.category as CommunityKey) ?? "data",
   );
@@ -237,22 +266,49 @@ function NewsForm({
   );
   const [showOnHome, setShowOnHome] = useState(initial?.show_on_home ?? true);
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
+  const [images, setImages] = useState<string[]>(initial?.images ?? []);
+  const [videos, setVideos] = useState<string[]>(initial?.videos ?? []);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const handleUpload = async (file: File) => {
+  const handleCoverUpload = async (file: File) => {
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
-      const path = `${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("news-images").upload(path, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-      if (error) throw error;
-      const { data } = supabase.storage.from("news-images").getPublicUrl(path);
-      setImageUrl(data.publicUrl);
-      toast.success("Image uploaded");
+      const url = await uploadToBucket(file, "image");
+      setImageUrl(url);
+      toast.success("Cover uploaded");
+    } catch (err: any) {
+      toast.error(err.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleGalleryUpload = async (files: FileList) => {
+    setUploading(true);
+    try {
+      const urls: string[] = [];
+      for (const f of Array.from(files)) {
+        urls.push(await uploadToBucket(f, "image"));
+      }
+      setImages((prev) => [...prev, ...urls]);
+      toast.success(`${urls.length} image(s) uploaded`);
+    } catch (err: any) {
+      toast.error(err.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleVideoUpload = async (files: FileList) => {
+    setUploading(true);
+    try {
+      const urls: string[] = [];
+      for (const f of Array.from(files)) {
+        urls.push(await uploadToBucket(f, "video"));
+      }
+      setVideos((prev) => [...prev, ...urls]);
+      toast.success(`${urls.length} video(s) uploaded`);
     } catch (err: any) {
       toast.error(err.message ?? "Upload failed");
     } finally {
@@ -263,12 +319,15 @@ function NewsForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = newsSchema.safeParse({
-      title,
-      excerpt,
+      title_ar: titleAr,
+      title_en: titleEn,
+      excerpt_ar: excerptAr,
+      excerpt_en: excerptEn,
+      content_ar: contentAr,
+      content_en: contentEn,
       category,
       published_at: publishedAt,
       show_on_home: showOnHome,
-      image_url: imageUrl,
     });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
@@ -277,12 +336,22 @@ function NewsForm({
     setSaving(true);
     try {
       const payload = {
-        title: parsed.data.title,
-        excerpt: parsed.data.excerpt || null,
+        // keep legacy mirrors for backward compatibility
+        title: parsed.data.title_en || parsed.data.title_ar,
+        excerpt: parsed.data.excerpt_en || parsed.data.excerpt_ar || null,
+        content: parsed.data.content_en || parsed.data.content_ar || null,
+        title_ar: parsed.data.title_ar,
+        title_en: parsed.data.title_en,
+        excerpt_ar: parsed.data.excerpt_ar || null,
+        excerpt_en: parsed.data.excerpt_en || null,
+        content_ar: parsed.data.content_ar || null,
+        content_en: parsed.data.content_en || null,
         category: parsed.data.category,
         published_at: parsed.data.published_at,
         show_on_home: parsed.data.show_on_home,
-        image_url: parsed.data.image_url || null,
+        image_url: imageUrl || null,
+        images,
+        videos,
       };
       if (initial) {
         const { error } = await supabase.from("news").update(payload).eq("id", initial.id);
@@ -303,7 +372,7 @@ function NewsForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir="ltr">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-card p-7 shadow-lift">
+      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-border bg-card p-7 shadow-lift">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-foreground">
             {initial ? "Edit news" : "New news article"}
@@ -313,15 +382,38 @@ function NewsForm({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-          <div>
-            <Label htmlFor="title">Title</Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={200} />
+        <form onSubmit={handleSubmit} className="mt-5 space-y-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="title_en">Title (English)</Label>
+              <Input id="title_en" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} required maxLength={200} />
+            </div>
+            <div dir="rtl">
+              <Label htmlFor="title_ar">العنوان (عربي)</Label>
+              <Input id="title_ar" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} required maxLength={200} />
+            </div>
           </div>
 
-          <div>
-            <Label htmlFor="excerpt">Excerpt</Label>
-            <Textarea id="excerpt" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} maxLength={500} rows={3} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="excerpt_en">Excerpt (English)</Label>
+              <Textarea id="excerpt_en" value={excerptEn} onChange={(e) => setExcerptEn(e.target.value)} maxLength={500} rows={3} />
+            </div>
+            <div dir="rtl">
+              <Label htmlFor="excerpt_ar">المقتطف (عربي)</Label>
+              <Textarea id="excerpt_ar" value={excerptAr} onChange={(e) => setExcerptAr(e.target.value)} maxLength={500} rows={3} />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="content_en">Full content (English)</Label>
+              <Textarea id="content_en" value={contentEn} onChange={(e) => setContentEn(e.target.value)} rows={10} />
+            </div>
+            <div dir="rtl">
+              <Label htmlFor="content_ar">النص الكامل (عربي)</Label>
+              <Textarea id="content_ar" value={contentAr} onChange={(e) => setContentAr(e.target.value)} rows={10} />
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -356,14 +448,14 @@ function NewsForm({
               )}
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {uploading ? "Uploading…" : "Upload image"}
+                {uploading ? "Uploading…" : "Upload cover"}
                 <input
                   type="file"
                   accept="image/*"
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
-                    if (f) handleUpload(f);
+                    if (f) handleCoverUpload(f);
                   }}
                 />
               </label>
@@ -376,6 +468,72 @@ function NewsForm({
                   Remove
                 </button>
               )}
+            </div>
+          </div>
+
+          <div>
+            <Label>Gallery images (carousel)</Label>
+            <div className="mt-2 flex flex-wrap gap-3">
+              {images.map((url, i) => (
+                <div key={url} className="relative h-20 w-28">
+                  <img src={url} alt="" className="h-full w-full rounded object-cover" />
+                  <button
+                    type="button"
+                    aria-label="Remove image"
+                    onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
+                    className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+              <label className="inline-flex h-20 w-28 cursor-pointer items-center justify-center gap-1 rounded border border-dashed border-input text-xs font-medium hover:bg-accent">
+                <Upload className="h-4 w-4" />
+                Add
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) handleGalleryUpload(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <Label>Videos</Label>
+            <div className="mt-2 space-y-2">
+              {videos.map((url, i) => (
+                <div key={url} className="flex items-center gap-3 rounded border border-border p-2">
+                  <video src={url} className="h-14 w-24 rounded object-cover" muted />
+                  <span className="flex-1 truncate text-xs text-muted-foreground">{url}</span>
+                  <button
+                    type="button"
+                    className="text-xs text-destructive hover:underline"
+                    onClick={() => setVideos((prev) => prev.filter((_, idx) => idx !== i))}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
+                <Upload className="h-4 w-4" />
+                {uploading ? "Uploading…" : "Upload video(s)"}
+                <input
+                  type="file"
+                  accept="video/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) handleVideoUpload(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
             </div>
           </div>
 
