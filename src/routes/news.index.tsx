@@ -101,7 +101,6 @@ function NewsPage() {
             transition={{ duration: 0.6 }}
             className="mb-14 max-w-2xl"
           >
-            
             <h1 className="mt-4 text-display-2 leading-[2.1] text-foreground">
               {lang === "ar" ? "جميع الأخبار والنشاطات" : "All news & activities"}
             </h1>
