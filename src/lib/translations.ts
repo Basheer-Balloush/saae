@@ -143,7 +143,7 @@ export const translations: Record<Lang, Dict> = {
         { value: "5,000+", label: "Learners" },
         { value: "120+", label: "Training courses" },
         { value: "30+", label: "Strategic partners" },
-        { value: "5,000+", label: "Beneficiary students" },
+        { value: "7+", label: "Beneficiary students" },
       ],
     },
     partners: {
@@ -301,7 +301,7 @@ export const translations: Record<Lang, Dict> = {
         { value: "+5,000", label: "المتعلمين" },
         { value: "+120", label: "دورة تدريبية" },
         { value: "+30", label: "شريك استراتيجي" },
-        { value: "+5,000", label: "طالب مستفيد" },
+        { value: "+7", label: "طالب مستفيد" },
       ],
     },
     partners: {
