@@ -305,8 +305,8 @@ function NewsDetailPage() {
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                <CarouselPrevious className="h-7 w-7 sm:h-8 sm:w-8 left-1 sm:-left-12 [&_svg]:h-3.5 [&_svg]:w-3.5" />
-                <CarouselNext className="h-7 w-7 sm:h-8 sm:w-8 right-1 sm:-right-12 [&_svg]:h-3.5 [&_svg]:w-3.5" />
+                <CarouselPrevious className="h-7 w-7 lg:h-8 lg:w-8 left-1 lg:-left-12 [&_svg]:h-3.5 [&_svg]:w-3.5" />
+                <CarouselNext className="h-7 w-7 lg:h-8 lg:w-8 right-1 lg:-right-12 [&_svg]:h-3.5 [&_svg]:w-3.5" />
               </Carousel>
             )}
           </motion.div>
