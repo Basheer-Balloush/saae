@@ -40,11 +40,17 @@ export function Footer() {
               {t.footer.mission}
             </p>
             <div className="mt-8 flex items-center gap-7">
-              {[Instagram, Facebook, Linkedin].map((Icon, i) => (
+              {[
+                { Icon: Instagram, href: "https://www.instagram.com/saae_sy?igsh=ZjE0eXN0Y3hlODNz", label: "Instagram" },
+                { Icon: Facebook, href: "https://www.facebook.com/share/18SQ11hcct/", label: "Facebook" },
+                { Icon: Linkedin, href: "https://www.linkedin.com/company/syrian-association-for-ai-entrepreneurship/", label: "LinkedIn" },
+              ].map(({ Icon, href, label }) => (
                 <a
-                  key={i}
-                  href="#"
-                  aria-label="social"
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
                   className="transition-opacity hover:opacity-80"
                   style={{ color: INK }}
                 >
