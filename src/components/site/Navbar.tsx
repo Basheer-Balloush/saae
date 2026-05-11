@@ -67,7 +67,7 @@ export function Navbar() {
       )}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3 lg:px-10">
-        <a href="#home" className="relative flex items-center" aria-label="SAAIE — Syrian Association for AI & Entrepreneurship">
+        <Link to="/" hash="home" className="relative flex items-center" aria-label="SAAIE — Syrian Association for AI & Entrepreneurship">
           {(() => {
             const variants = [
               { src: logoEnLight, show: lang === "en" && theme === "light", alt: "SAAIE — Syrian Association for AI & Entrepreneurship" },
@@ -88,28 +88,39 @@ export function Navbar() {
               />
             ));
           })()}
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-7 lg:flex">
           {sections.map((s) => {
-            const isActive = s === "contact" ? (active === "assistant" || active === "contact") : active === s;
-            const href = s === "contact" ? "#assistant" : `#${s}`;
-            return (
-              <a
-                key={s}
-                href={href}
+            const isActive =
+              s === "contact"
+                ? (active === "assistant" || active === "contact")
+                : active === s;
+            const linkClass = cn(
+              "relative text-sm font-medium transition-colors",
+              isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
+            );
+            const underline = (
+              <span
                 className={cn(
-                  "relative text-sm font-medium transition-colors",
-                  isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
+                  "pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center rounded-full bg-secondary transition-transform duration-300",
+                  isActive ? "scale-x-100" : "scale-x-0",
                 )}
-              >
+              />
+            );
+            if (s === "about") {
+              return (
+                <Link key={s} to="/about" className={linkClass}>
+                  {t.nav[s]}
+                  {underline}
+                </Link>
+              );
+            }
+            const targetId = s === "contact" ? "assistant" : s;
+            return (
+              <a key={s} href={hashHref(targetId)} className={linkClass}>
                 {t.nav[s]}
-                <span
-                  className={cn(
-                    "pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center rounded-full bg-secondary transition-transform duration-300",
-                    isActive ? "scale-x-100" : "scale-x-0",
-                  )}
-                />
+                {underline}
               </a>
             );
           })}
@@ -144,16 +155,31 @@ export function Navbar() {
       {open && (
         <div className="border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
-            {sections.map((s) => (
-              <a
-                key={s}
-                href={s === "contact" ? "#assistant" : `#${s}`}
-                onClick={() => setOpen(false)}
-                className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
-              >
-                {t.nav[s]}
-              </a>
-            ))}
+            {sections.map((s) => {
+              if (s === "about") {
+                return (
+                  <Link
+                    key={s}
+                    to="/about"
+                    onClick={() => setOpen(false)}
+                    className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                  >
+                    {t.nav[s]}
+                  </Link>
+                );
+              }
+              const targetId = s === "contact" ? "assistant" : s;
+              return (
+                <a
+                  key={s}
+                  href={hashHref(targetId)}
+                  onClick={() => setOpen(false)}
+                  className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                >
+                  {t.nav[s]}
+                </a>
+              );
+            })}
             <div className="mt-3 flex items-center gap-2">
               <button
                 onClick={toggleLang}
