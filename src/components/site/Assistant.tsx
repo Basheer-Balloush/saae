@@ -58,7 +58,6 @@ export function Assistant() {
                 onClick={() => setOpen(true)}
                 className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-soft transition-transform hover:scale-[1.02] hover:opacity-95"
               >
-                <Bot className="h-4 w-4" />
                 {a.cta}
               </button>
             </div>
