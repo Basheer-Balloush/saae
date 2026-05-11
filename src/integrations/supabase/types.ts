@@ -120,38 +120,62 @@ export type Database = {
         Row: {
           category: string
           content: string | null
+          content_ar: string | null
+          content_en: string | null
           created_at: string
           excerpt: string | null
+          excerpt_ar: string | null
+          excerpt_en: string | null
           id: string
           image_url: string | null
+          images: string[]
           published_at: string
           show_on_home: boolean
           title: string
+          title_ar: string | null
+          title_en: string | null
           updated_at: string
+          videos: string[]
         }
         Insert: {
           category: string
           content?: string | null
+          content_ar?: string | null
+          content_en?: string | null
           created_at?: string
           excerpt?: string | null
+          excerpt_ar?: string | null
+          excerpt_en?: string | null
           id?: string
           image_url?: string | null
+          images?: string[]
           published_at?: string
           show_on_home?: boolean
           title: string
+          title_ar?: string | null
+          title_en?: string | null
           updated_at?: string
+          videos?: string[]
         }
         Update: {
           category?: string
           content?: string | null
+          content_ar?: string | null
+          content_en?: string | null
           created_at?: string
           excerpt?: string | null
+          excerpt_ar?: string | null
+          excerpt_en?: string | null
           id?: string
           image_url?: string | null
+          images?: string[]
           published_at?: string
           show_on_home?: boolean
           title?: string
+          title_ar?: string | null
+          title_en?: string | null
           updated_at?: string
+          videos?: string[]
         }
         Relationships: []
       }
