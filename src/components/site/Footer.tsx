@@ -104,7 +104,7 @@ export function Footer() {
                   className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
                   aria-hidden
                 >
-                  <MapPin className="h-5 w-5" style={{ color: "#FFFFFF" }} strokeWidth={2.25} fill="#FFFFFF" />
+                  <MapPin className="h-5 w-5" style={{ color: TEAL }} strokeWidth={2.25} fill={TEAL} />
                 </span>
               </a>
               <div className="mt-4 space-y-2.5 text-sm">
