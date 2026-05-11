@@ -122,24 +122,49 @@ function AmsDashboard() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map((c) => (
-            <button
+            <div
               key={c.id}
-              onClick={() => setSelected(c)}
-              className="text-start rounded-2xl border border-border bg-card p-5 shadow-soft hover:border-primary hover:shadow-md transition-all"
+              className="group relative rounded-2xl border border-border bg-card p-5 shadow-soft hover:border-primary hover:shadow-md transition-all"
             >
-              <div className="font-semibold text-base">
-                {lang === "ar" ? c.name_ar : c.name_en || c.name_ar}
-              </div>
-              {((lang === "ar" && c.name_en) || (lang === "en" && c.name_ar)) && (
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {lang === "ar" ? c.name_en : c.name_ar}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!confirm(tr.confirmDeleteCourse)) return;
+                  supabase
+                    .from("ams_courses")
+                    .delete()
+                    .eq("id", c.id)
+                    .then(({ error }) => {
+                      if (error) toast.error(error.message);
+                      else {
+                        toast.success(tr.saved);
+                        loadCourses();
+                      }
+                    });
+                }}
+                className="absolute top-2 end-2 inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                aria-label={tr.delete}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setSelected(c)}
+                className="w-full text-start"
+              >
+                <div className="font-semibold text-base pe-8">
+                  {lang === "ar" ? c.name_ar : c.name_en || c.name_ar}
                 </div>
-              )}
-              <div className="mt-4 inline-flex items-center gap-1 text-xs text-primary">
-                {tr.open}
-                {isRtl ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
-              </div>
-            </button>
+                {((lang === "ar" && c.name_en) || (lang === "en" && c.name_ar)) && (
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {lang === "ar" ? c.name_en : c.name_ar}
+                  </div>
+                )}
+                <div className="mt-4 inline-flex items-center gap-1 text-xs text-primary">
+                  {tr.open}
+                  {isRtl ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
+                </div>
+              </button>
+            </div>
           ))}
         </div>
       )}
