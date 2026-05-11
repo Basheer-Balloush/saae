@@ -420,7 +420,7 @@ function ImpactMatrix({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
                         fontWeight: 400,
                         fontSize: "14px",
                         letterSpacing: "0.01em",
-                        color: "#555",
+                        color: "var(--muted-foreground)",
                       }}
                     >
                       {m.label[lang]}
