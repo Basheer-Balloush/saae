@@ -44,7 +44,7 @@ export function Achievements() {
               style={{
                 fontFamily: '"Cairo", system-ui, sans-serif',
                 fontWeight: 900,
-                lineHeight: 1.02,
+                lineHeight: isRtl ? 1.45 : 1.02,
                 letterSpacing: "-0.02em",
               }}
             >
