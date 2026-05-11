@@ -703,7 +703,6 @@ function AddRegistrantDialog({ courseId, onCreated }: { courseId: string; onCrea
     setFullName(r.full_name);
     setEmail(r.email ?? "");
     setPhone(r.phone ?? "");
-    setStatus(r.payment_status);
     setShowSuggestions(false);
   };
 
