@@ -20,15 +20,6 @@ export function Achievements() {
       className="relative overflow-hidden py-24 lg:py-32"
       style={{ backgroundColor: "#FFFFFF" }}
     >
-      {/* Innovation accent */}
-      <div
-        className={`absolute top-8 ${isRtl ? "left-8" : "right-8"} flex flex-col items-center gap-2`}
-        aria-hidden
-      >
-        <Plus className="h-4 w-4" strokeWidth={1.5} style={{ color: "#698F3F" }} />
-        <span className="block h-10 w-px" style={{ backgroundColor: "#698F3F" }} />
-      </div>
-
       <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
         <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
           {/* Headline column — vertically centered to the stat grid */}
