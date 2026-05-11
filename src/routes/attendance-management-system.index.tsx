@@ -81,6 +81,22 @@ function AmsDashboard() {
   const tr = amsT[lang];
   const [courses, setCourses] = useState<Course[] | null>(null);
   const [selected, setSelected] = useState<Course | null>(null);
+  const [deleting, setDeleting] = useState<Course | null>(null);
+  const [deletingBusy, setDeletingBusy] = useState(false);
+
+  const confirmDeleteCourse = async () => {
+    if (!deleting) return;
+    setDeletingBusy(true);
+    const { error } = await supabase.from("ams_courses").delete().eq("id", deleting.id);
+    setDeletingBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(tr.saved);
+    setDeleting(null);
+    loadCourses();
+  };
 
   const loadCourses = useCallback(async () => {
     const { data, error } = await supabase
