@@ -17,8 +17,7 @@ export function Achievements() {
   return (
     <section
       id="achievements"
-      className="relative overflow-hidden py-24 lg:py-32"
-      style={{ backgroundColor: "#FFFFFF" }}
+      className="relative overflow-hidden bg-background py-24 lg:py-32"
     >
       <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
         <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
@@ -92,9 +91,8 @@ function StatCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.55, delay: index * 0.07 }}
-      className={`group relative flex flex-col justify-center overflow-hidden rounded-2xl ${heightClass}`}
+      className={`group relative flex flex-col justify-center overflow-hidden rounded-2xl bg-muted/40 dark:bg-muted/20 ${heightClass}`}
       style={{
-        backgroundColor: "#FBFBFB",
         padding: `${PADDING}px`,
       }}
     >
@@ -120,9 +118,8 @@ function StatCard({
         />
 
         <span
-          className="mt-5 block"
+          className="mt-5 block text-muted-foreground"
           style={{
-            color: "#666666",
             fontFamily: '"Cairo", system-ui, sans-serif',
             fontWeight: 400,
             fontSize: "14px",
