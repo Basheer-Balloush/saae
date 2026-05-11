@@ -68,7 +68,7 @@ export function Navbar() {
           : "bg-transparent",
       )}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3 lg:px-10">
+      <div className="flex w-full items-center justify-between gap-6 px-6 py-3 lg:px-10">
         <Link to="/" hash="home" className="relative flex items-center" aria-label="SAAIE — Syrian Association for AI & Entrepreneurship">
           {(() => {
             const isEnLight = lang === "en" && theme === "light";
