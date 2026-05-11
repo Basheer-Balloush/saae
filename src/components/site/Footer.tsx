@@ -156,13 +156,9 @@ export function Footer() {
           style={{ borderTop: `1px solid rgba(255,255,255,0.25)`, color: MUTED }}
         >
           {isRtl ? (
-            <>
-              <span className="inline-flex flex-wrap items-center justify-center gap-x-1" dir="rtl">
-                <bdi dir="ltr">© {new Date().getFullYear()}</bdi>
-                <span>للجمعية السورية للذكاء الاصطناعي وريادة الأعمال</span>
-              </span>
-              <span dir="rtl">جميع الحقوق محفوظة.</span>
-            </>
+            <span dir="rtl">
+              جميع الحقوق محفوظة للجمعية السورية للذكاء الاصطناعي وريادة الأعمال <bdi dir="ltr">{new Date().getFullYear()} ©</bdi>
+            </span>
           ) : (
             <span>© {new Date().getFullYear()} SAAE — {t.footer.rights}</span>
           )}
