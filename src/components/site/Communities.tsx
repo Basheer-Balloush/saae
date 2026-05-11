@@ -116,7 +116,8 @@ export function Communities() {
                     </span>
                   </div>
                 </div>
-              </motion.a>
+              </Link>
+              </motion.div>
             );
           })}
         </div>
