@@ -15,23 +15,12 @@ export function Communities() {
     { icon: TrendingUp, ...c.economy },
   ];
 
-  // Editorial alternating rhythm on lg: 3 cards (col-span-2) / 2 cards (col-span-3) / 2 cards (col-span-3)
-  const spans = ["lg:col-span-2", "lg:col-span-2", "lg:col-span-2", "lg:col-span-3", "lg:col-span-3", "lg:col-span-3", "lg:col-span-3"];
+  const isRtl = dir === "rtl";
 
   return (
     <section id="communities" className="relative overflow-hidden bg-surface py-28 lg:py-36">
-      {/* Faint architectural grid pattern */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.05] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)",
-          backgroundSize: "56px 56px",
-        }}
-      />
-
-      <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
+      <div className="relative mx-auto max-w-5xl px-6 sm:px-10 lg:px-16">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -40,56 +29,96 @@ export function Communities() {
           className="mx-auto max-w-3xl text-center"
         >
           <p className="text-caption text-primary">{t.communities.eyebrow}</p>
-          <h2 className="mt-4 text-display-2 leading-[1.1] tracking-tight text-foreground">
+          <h2
+            className="mt-4 text-display-2 leading-[1.05] tracking-tight text-foreground"
+            style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 900 }}
+          >
             {t.communities.title}
           </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-body leading-relaxed text-muted-foreground">
+          <p
+            className="mx-auto mt-5 max-w-2xl text-body leading-relaxed"
+            style={{ color: "#555555", letterSpacing: "0.01em" }}
+          >
             {t.communities.subtitle}
           </p>
         </motion.div>
 
-        <div className="mt-20 grid gap-8 sm:grid-cols-2 lg:grid-cols-6 lg:gap-10">
+        {/* Editorial index */}
+        <div className="mt-20 border-t border-border/60">
           {cards.map((card, i) => {
             const Icon = card.icon;
+            // Asymmetric 2-column: alternate which column is wider
+            const wideLeft = i % 2 === 0;
+            const gridCols = wideLeft ? "lg:grid-cols-[1.4fr_1fr]" : "lg:grid-cols-[1fr_1.4fr]";
+
             return (
               <motion.a
                 key={card.title}
                 href="#"
-                initial={{ opacity: 0, y: 18 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.55, delay: i * 0.05 }}
-                className={`group relative flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-[0_24px_60px_-20px_hsl(var(--foreground)/0.12)] lg:p-9 ${spans[i] ?? ""}`}
+                transition={{ duration: 0.6, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                className={`group relative block border-b border-border/60 transition-colors duration-500 hover:bg-[rgba(4,128,144,0.02)]`}
               >
-                <Icon className="h-7 w-7 text-secondary" strokeWidth={1.75} />
+                <div className={`grid grid-cols-1 gap-6 px-2 py-10 lg:gap-12 lg:py-14 ${gridCols}`}>
+                  {/* Title column with icon */}
+                  <div className="flex items-start gap-5">
+                    <Icon
+                      className="mt-2 h-6 w-6 shrink-0 transition-transform duration-500 group-hover:scale-110"
+                      strokeWidth={1.75}
+                      style={{ color: "#698F3F" }}
+                    />
+                    <h3
+                      className={`text-foreground leading-[1.05] tracking-tight transition-transform duration-500 ${
+                        isRtl ? "group-hover:-translate-x-2" : "group-hover:translate-x-2"
+                      }`}
+                      style={{
+                        fontFamily: '"Cairo", system-ui, sans-serif',
+                        fontWeight: 900,
+                        fontSize: "clamp(1.5rem, 2.4vw, 2.125rem)",
+                      }}
+                    >
+                      {card.title}
+                    </h3>
+                  </div>
 
-                <h3
-                  className="mt-7 font-bold leading-snug tracking-tight text-foreground text-[1.0625rem] lg:text-lg"
-                  style={{ fontFamily: '"Cairo", system-ui, sans-serif' }}
-                >
-                  {card.title}
-                </h3>
-
-                <p className="mt-3 text-[13.5px] text-muted-foreground" style={{ lineHeight: 1.7 }}>
-                  {card.desc}
-                </p>
-
-                <span className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-primary opacity-0 transition-all duration-300 group-hover:opacity-100">
-                  {t.news.readMore}
-                  <ArrowUpRight className={dir === "rtl" ? "h-3.5 w-3.5 -scale-x-100" : "h-3.5 w-3.5"} />
-                </span>
+                  {/* Description column */}
+                  <div
+                    className={`flex flex-col justify-center transition-transform duration-500 ${
+                      isRtl ? "group-hover:-translate-x-2" : "group-hover:translate-x-2"
+                    }`}
+                  >
+                    <p
+                      className="text-[15px] leading-[1.85]"
+                      style={{
+                        color: "#555555",
+                        fontFamily: '"Cairo", system-ui, sans-serif',
+                        fontWeight: 300,
+                        letterSpacing: "0.015em",
+                      }}
+                    >
+                      {card.desc}
+                    </p>
+                    <span className="mt-5 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                      {t.news.readMore}
+                      <ArrowUpRight className={isRtl ? "h-3.5 w-3.5 -scale-x-100" : "h-3.5 w-3.5"} />
+                    </span>
+                  </div>
+                </div>
               </motion.a>
             );
           })}
         </div>
 
+        {/* CTA */}
         <div className="mt-20 flex justify-center">
           <a
             href="#"
             className="group inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.55)] transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.7)]"
           >
             {t.communities.cta}
-            <ArrowRight className={`h-4 w-4 transition-transform group-hover:translate-x-0.5 ${dir === "rtl" ? "-scale-x-100" : ""}`} />
+            <ArrowRight className={`h-4 w-4 transition-transform group-hover:translate-x-0.5 ${isRtl ? "-scale-x-100" : ""}`} />
           </a>
         </div>
       </div>
