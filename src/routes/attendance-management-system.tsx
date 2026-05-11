@@ -1,10 +1,9 @@
-import { createFileRoute, Outlet, Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAmsAuth } from "@/hooks/useAmsAuth";
 import { registerAmsServiceWorker } from "@/lib/ams-pwa";
-import { Button } from "@/components/ui/button";
-import { LogOut, Clock } from "lucide-react";
+import { AmsNavbar } from "@/components/ams/AmsNavbar";
 
 export const Route = createFileRoute("/attendance-management-system")({
   head: () => ({
@@ -47,47 +46,24 @@ function AmsLayout() {
     navigate({ to: "/attendance-management-system/login" });
   };
 
-  if (isLoginPage) {
-    return (
-      <div className="min-h-screen bg-background text-foreground" dir="ltr">
-        <Outlet />
-      </div>
-    );
-  }
-
-  if (loading || !user || !hasAccess) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-sm text-muted-foreground">Loading…</div>
-      </div>
-    );
-  }
+  const showSignOut = !isLoginPage && !!user && hasAccess;
 
   return (
-    <div className="min-h-screen bg-background text-foreground" dir="ltr">
-      <header className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-30">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <Link
-            to="/attendance-management-system"
-            className="flex items-center gap-2 font-semibold"
-          >
-            <Clock className="h-5 w-5 text-primary" />
-            <span>Attendance Management System</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground hidden sm:inline">
-              {user.email}
-            </span>
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-1" />
-              Sign out
-            </Button>
+    <div className="min-h-screen bg-background text-foreground">
+      <AmsNavbar onSignOut={handleSignOut} showSignOut={showSignOut} />
+      <div className="pt-20">
+        {isLoginPage ? (
+          <Outlet />
+        ) : loading || !user || !hasAccess ? (
+          <div className="flex items-center justify-center py-24">
+            <div className="text-sm text-muted-foreground">Loading…</div>
           </div>
-        </div>
-      </header>
-      <main>
-        <Outlet />
-      </main>
+        ) : (
+          <main>
+            <Outlet />
+          </main>
+        )}
+      </div>
     </div>
   );
 }
