@@ -71,7 +71,12 @@ export function Assistant() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="relative"
           >
-            <div className="relative rounded-3xl border border-border bg-card/80 p-6 shadow-soft backdrop-blur">
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="group relative block w-full rounded-3xl border border-border bg-card/80 p-6 text-start shadow-soft backdrop-blur transition-transform hover:scale-[1.01]"
+              aria-label={a.cta}
+            >
               <div className="flex items-center gap-3 border-b border-border pb-4">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
                   <Bot className="h-5 w-5" />
@@ -100,10 +105,12 @@ export function Assistant() {
                   </p>
                 </div>
               </div>
-            </div>
+            </button>
           </motion.div>
         </div>
       </div>
+
+      <AssistantChatModal open={open} onClose={() => setOpen(false)} />
     </section>
   );
 }
