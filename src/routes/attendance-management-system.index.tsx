@@ -523,6 +523,74 @@ function Row({ label, value, ltr }: { label: string; value: React.ReactNode; ltr
   );
 }
 
+function ExportSessionsDialog({
+  sessions,
+  onClose,
+  onExport,
+}: {
+  sessions: Session[];
+  onClose: () => void;
+  onExport: (ids: string[]) => void;
+}) {
+  const { lang } = useLang();
+  const tr = amsT[lang];
+  const [selected, setSelected] = useState<Record<string, boolean>>(
+    () => Object.fromEntries(sessions.map((s) => [s.id, true])),
+  );
+  const allChecked = sessions.every((s) => selected[s.id]);
+  const toggleAll = (next: boolean) => {
+    setSelected(Object.fromEntries(sessions.map((s) => [s.id, next])));
+  };
+  const selectedIds = sessions.filter((s) => selected[s.id]).map((s) => s.id);
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent dir={lang === "ar" ? "rtl" : "ltr"}>
+        <DialogHeader>
+          <DialogTitle>{tr.selectSessionsToExport}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+          <label className="flex items-center gap-2 rounded-lg border border-border bg-background/50 px-3 py-2 cursor-pointer">
+            <Checkbox checked={allChecked} onCheckedChange={(v) => toggleAll(v === true)} />
+            <span className="font-medium text-sm">{tr.selectAll}</span>
+          </label>
+          {sessions.map((s) => (
+            <label
+              key={s.id}
+              className="flex items-center gap-2 rounded-lg border border-border bg-background/50 px-3 py-2 cursor-pointer"
+            >
+              <Checkbox
+                checked={!!selected[s.id]}
+                onCheckedChange={(v) =>
+                  setSelected((p) => ({ ...p, [s.id]: v === true }))
+                }
+              />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm truncate">{s.title}</div>
+                <div className="text-xs text-muted-foreground" dir="ltr">
+                  {s.session_date}
+                </div>
+              </div>
+            </label>
+          ))}
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>
+            {tr.cancel}
+          </Button>
+          <Button
+            onClick={() => onExport(selectedIds)}
+            disabled={selectedIds.length === 0}
+          >
+            <FileSpreadsheet className="h-4 w-4 mx-1" />
+            {tr.export}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function PaymentBadge({ status }: { status: PaymentStatus }) {
   const { lang } = useLang();
   const tr = amsT[lang];
