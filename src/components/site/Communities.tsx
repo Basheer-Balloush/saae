@@ -106,7 +106,7 @@ export function Communities() {
                       {card.desc}
                     </p>
                     <span className="mt-5 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                      {t.news.readMore}
+                      {lang === "ar" ? "اكتشف المجتمع" : "Discover community"}
                       <ArrowUpRight className={isRtl ? "h-3.5 w-3.5 -scale-x-100" : "h-3.5 w-3.5"} />
                     </span>
                   </div>
