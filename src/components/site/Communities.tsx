@@ -18,7 +18,7 @@ export function Communities() {
   const isRtl = dir === "rtl";
 
   return (
-    <section id="communities" className="relative overflow-hidden bg-surface py-28 lg:py-36">
+    <section id="communities" className="relative overflow-hidden bg-surface pb-28 pt-16 lg:pb-36 lg:pt-20">
       <div className="relative mx-auto max-w-5xl px-6 sm:px-10 lg:px-16">
         {/* Header */}
         <motion.div
@@ -116,16 +116,6 @@ export function Communities() {
           })}
         </div>
 
-        {/* CTA */}
-        <div className="mt-20 flex justify-center">
-          <a
-            href="#"
-            className="group inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.55)] transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.7)]"
-          >
-            {t.communities.cta}
-            <ArrowRight className={`h-4 w-4 transition-transform group-hover:translate-x-0.5 ${isRtl ? "-scale-x-100" : ""}`} />
-          </a>
-        </div>
       </div>
     </section>
   );
