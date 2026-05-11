@@ -101,12 +101,8 @@ export function FeaturedNews() {
                 </div>
               </>
             );
-            return c.id ? (
-              <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id }} className={cardClass}>
-                {inner}
-              </Link>
-            ) : (
-              <Link key={`${c.key}-${i}`} to="/news" className={cardClass}>
+            return (
+              <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id! }} className={cardClass}>
                 {inner}
               </Link>
             );
