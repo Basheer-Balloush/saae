@@ -55,13 +55,12 @@ export function Assistant() {
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                disabled
-                className="inline-flex cursor-not-allowed items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground opacity-90 shadow-soft"
+                onClick={() => setOpen(true)}
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-soft transition-transform hover:scale-[1.02] hover:opacity-95"
               >
                 <Bot className="h-4 w-4" />
                 {a.cta}
               </button>
-              <span className="text-xs font-medium text-muted-foreground">{a.soon}</span>
             </div>
           </motion.div>
 
