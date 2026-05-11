@@ -462,7 +462,7 @@ function CallToConnection({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }
           </h2>
           <p
             className="mx-auto mt-6 max-w-xl text-base leading-[1.85]"
-            style={{ color: "#555", fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 300 }}
+            style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 300 }}
           >
             {lang === "ar"
               ? "ندعو الباحثين والطلاب والممارسين للانضمام إلى مجتمعٍ يعمل بهدوءٍ وإصرارٍ على بناء أثرٍ مستدام."
