@@ -439,7 +439,7 @@ function ImpactMatrix({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
 /* ---------- SECTION 5: Call to Connection ---------- */
 function CallToConnection({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
   return (
-    <section style={{ backgroundColor: OFFWHITE, paddingTop: 160, paddingBottom: 160 }}>
+    <section style={{ backgroundColor: "var(--surface)", paddingTop: 160, paddingBottom: 160 }}>
       <div className="mx-auto max-w-3xl px-6 text-center">
         <motion.div {...fadeUp}>
           <span className="text-xs font-semibold uppercase tracking-[0.22em]" style={{ color: OLIVE }}>
