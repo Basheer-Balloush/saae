@@ -123,7 +123,7 @@ function NewsPage() {
                       <ArrowUpRight className={isRtl ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
                     </span>
                   </div>
-                </motion.a>
+                </Link>
               ))}
             </div>
           )}
