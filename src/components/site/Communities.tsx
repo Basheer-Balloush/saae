@@ -75,7 +75,7 @@ export function Communities() {
                       style={{ color: "#698F3F" }}
                     />
                     <h3
-                      className={`text-foreground leading-[1.05] tracking-tight transition-transform duration-500 ${
+                      className={`text-foreground leading-[1.35] tracking-tight transition-transform duration-500 ${
                         isRtl ? "text-right group-hover:-translate-x-2" : "text-left group-hover:translate-x-2"
                       }`}
                       style={{
