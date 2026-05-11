@@ -44,7 +44,7 @@ export function Footer() {
             <img
               src={logo}
               alt="SAAE"
-              className="h-12 w-auto grayscale opacity-90"
+              className="h-12 w-auto brightness-0 invert"
             />
             <p
               className="mt-6 max-w-xs text-sm leading-relaxed"
@@ -58,8 +58,8 @@ export function Footer() {
                   key={i}
                   href="#"
                   aria-label="social"
-                  className="transition-opacity hover:opacity-70"
-                  style={{ color: TEAL }}
+                  className="transition-opacity hover:opacity-80"
+                  style={{ color: INK }}
                 >
                   <Icon className="h-6 w-6" strokeWidth={1.5} />
                 </a>
