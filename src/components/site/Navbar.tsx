@@ -97,10 +97,15 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-7 lg:flex">
           {sections.map((s) => {
+            const isNewsRoute = location.pathname.startsWith("/news");
             const isActive =
               s === "contact"
                 ? (active === "assistant" || active === "contact")
-                : active === s;
+                : s === "news"
+                ? isNewsRoute
+                : s === "about"
+                ? isAbout
+                : !isAbout && !isNewsRoute && active === s;
             const linkClass = cn(
               "relative text-sm font-medium transition-colors",
               isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
@@ -116,6 +121,14 @@ export function Navbar() {
             if (s === "about") {
               return (
                 <Link key={s} to="/about" className={linkClass}>
+                  {t.nav[s]}
+                  {underline}
+                </Link>
+              );
+            }
+            if (s === "news") {
+              return (
+                <Link key={s} to="/news" className={linkClass}>
                   {t.nav[s]}
                   {underline}
                 </Link>
@@ -166,6 +179,18 @@ export function Navbar() {
                   <Link
                     key={s}
                     to="/about"
+                    onClick={() => setOpen(false)}
+                    className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                  >
+                    {t.nav[s]}
+                  </Link>
+                );
+              }
+              if (s === "news") {
+                return (
+                  <Link
+                    key={s}
+                    to="/news"
                     onClick={() => setOpen(false)}
                     className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                   >
