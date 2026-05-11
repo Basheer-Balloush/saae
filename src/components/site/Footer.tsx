@@ -80,7 +80,7 @@ export function Footer() {
                 <li key={k} className="leading-relaxed">
                   <a
                     href={`#${k}`}
-                    className="transition-colors hover:text-[#048090]"
+                    className="transition-colors hover:text-white/80"
                     style={{ color: INK }}
                   >
                     {t.nav[k]}
@@ -165,7 +165,7 @@ export function Footer() {
               </div>
               <a
                 href="mailto:info@aisyria.org"
-                className="flex items-center gap-2.5 transition-colors hover:text-[#048090]"
+                className="flex items-center gap-2.5 transition-colors hover:text-white/80"
                 style={{ color: INK }}
               >
                 <Mail className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
@@ -173,7 +173,7 @@ export function Footer() {
               </a>
               <a
                 href="tel:+963930763547"
-                className="flex items-center gap-2.5 transition-colors hover:text-[#048090]"
+                className="flex items-center gap-2.5 transition-colors hover:text-white/80"
                 style={{ color: INK }}
               >
                 <Phone className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
