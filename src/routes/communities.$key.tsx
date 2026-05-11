@@ -358,7 +358,7 @@ function CommunityPage() {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <main className="pt-20">
-        <Prelude name={name} mission={mission} img={HERO_IMG[k]} isRtl={isRtl} lang={lang} />
+        <Prelude name={name} mission={mission} img={HERO_IMG[k]} isRtl={isRtl} lang={lang} details={DETAILS[k] ?? []} />
         <ActivityFeed isRtl={isRtl} lang={lang} activities={activities} loading={loadingNews} />
         <ImpactMatrix isRtl={isRtl} lang={lang} metrics={METRICS_BY_KEY[k] ?? DEFAULT_METRICS} />
         <CallToConnection isRtl={isRtl} lang={lang} />
@@ -375,17 +375,19 @@ function Prelude({
   img,
   isRtl,
   lang,
+  details,
 }: {
   name: string;
   mission: string;
   img: string;
   isRtl: boolean;
   lang: "ar" | "en";
+  details: DetailBlock[];
 }) {
   return (
     <section className="relative pt-16 pb-24 lg:pt-24 lg:pb-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
-        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+        <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-16">
           {/* Text */}
           <motion.div {...fadeUp} className="lg:col-span-6">
             <Link
@@ -424,6 +426,45 @@ function Prelude({
             >
               {mission}
             </p>
+
+            {details.length > 0 && (
+              <dl className={`mt-10 max-w-xl space-y-6 ${isRtl ? "text-right" : "text-left"}`}>
+                {details.map((d, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-60px" }}
+                    transition={{ duration: 0.5, delay: i * 0.08 }}
+                    className={`flex gap-4 ${isRtl ? "flex-row-reverse" : ""}`}
+                  >
+                    <span
+                      aria-hidden
+                      className="mt-2 h-px flex-none"
+                      style={{ width: 28, backgroundColor: TEAL }}
+                    />
+                    <div className="flex-1">
+                      <dt
+                        className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+                        style={{ color: TEAL, fontFamily: '"Cairo", system-ui, sans-serif' }}
+                      >
+                        {d.label[lang]}
+                      </dt>
+                      <dd
+                        className="mt-2 text-base leading-[1.85]"
+                        style={{
+                          fontFamily: '"Cairo", system-ui, sans-serif',
+                          fontWeight: 400,
+                          color: "var(--foreground)",
+                        }}
+                      >
+                        {d.text[lang]}
+                      </dd>
+                    </div>
+                  </motion.div>
+                ))}
+              </dl>
+            )}
           </motion.div>
 
           {/* Image */}
