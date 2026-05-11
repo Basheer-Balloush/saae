@@ -51,6 +51,8 @@ function NewsPage() {
   const { t, dir, lang } = useLang();
   const isRtl = dir === "rtl";
   const [items, setItems] = useState<NewsRow[] | null>(null);
+  const location = useLocation();
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   useEffect(() => {
     supabase
@@ -62,6 +64,30 @@ function NewsPage() {
         setItems((data ?? []) as NewsRow[]);
       });
   }, []);
+
+  useEffect(() => {
+    const hash = location.hash?.replace(/^#/, "");
+    if (!hash || !items || items.length === 0) return;
+    let cancelled = false;
+    let attempts = 0;
+    const tryRun = () => {
+      if (cancelled) return;
+      const el = document.getElementById(`news-card-${hash}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        setHighlightId(hash);
+        window.setTimeout(() => {
+          if (!cancelled) setHighlightId(null);
+        }, 1600);
+        return;
+      }
+      if (attempts++ < 40) window.setTimeout(tryRun, 50);
+    };
+    tryRun();
+    return () => {
+      cancelled = true;
+    };
+  }, [location.hash, items]);
 
   return (
     <div className="min-h-screen bg-background">
