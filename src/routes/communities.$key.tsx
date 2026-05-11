@@ -234,7 +234,7 @@ function Prelude({
               style={{
                 fontFamily: lang === "ar" ? '"Cairo", system-ui, sans-serif' : '"Evanston Tavern 1919", Georgia, serif',
                 fontWeight: lang === "ar" ? 400 : 500,
-                color: "#3a3a3a",
+                color: "var(--foreground)",
                 letterSpacing: "0.005em",
               }}
             >
@@ -287,7 +287,7 @@ function ActivityFeed({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
           >
             {heading}
           </h2>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed" style={{ color: "#555" }}>
+          <p className="mt-5 max-w-2xl text-base leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
             {sub}
           </p>
         </motion.div>
@@ -313,7 +313,7 @@ function ActivityFeed({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
                 </div>
                 <div
                   className="mt-3 text-sm"
-                  style={{ color: "#888", fontFamily: '"Cairo", system-ui, sans-serif', letterSpacing: "0.04em" }}
+                  style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', letterSpacing: "0.04em" }}
                   dir="ltr"
                 >
                   {a.date}
@@ -328,14 +328,14 @@ function ActivityFeed({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
                     fontWeight: 700,
                     lineHeight: 1.3,
                     fontSize: "clamp(1.25rem, 1.8vw, 1.625rem)",
-                    color: "#1a1a1a",
+                    color: "var(--foreground)",
                   }}
                 >
                   {a.title[lang]}
                 </h3>
                 <p
                   className="mt-3 line-clamp-2 text-base leading-[1.75]"
-                  style={{ color: "#555", fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 300 }}
+                  style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 300 }}
                 >
                   {a.desc[lang]}
                 </p>
@@ -420,7 +420,7 @@ function ImpactMatrix({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
                         fontWeight: 400,
                         fontSize: "14px",
                         letterSpacing: "0.01em",
-                        color: "#555",
+                        color: "var(--muted-foreground)",
                       }}
                     >
                       {m.label[lang]}
@@ -439,7 +439,7 @@ function ImpactMatrix({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
 /* ---------- SECTION 5: Call to Connection ---------- */
 function CallToConnection({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
   return (
-    <section style={{ backgroundColor: OFFWHITE, paddingTop: 160, paddingBottom: 160 }}>
+    <section style={{ backgroundColor: "var(--surface)", paddingTop: 160, paddingBottom: 160 }}>
       <div className="mx-auto max-w-3xl px-6 text-center">
         <motion.div {...fadeUp}>
           <span className="text-xs font-semibold uppercase tracking-[0.22em]" style={{ color: OLIVE }}>
@@ -453,7 +453,7 @@ function CallToConnection({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }
               lineHeight: isRtl ? 1.35 : 1.1,
               letterSpacing: "-0.02em",
               fontSize: "clamp(2rem, 4vw, 3rem)",
-              color: "#1a1a1a",
+              color: "var(--foreground)",
             }}
           >
             {lang === "ar"
@@ -462,7 +462,7 @@ function CallToConnection({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }
           </h2>
           <p
             className="mx-auto mt-6 max-w-xl text-base leading-[1.85]"
-            style={{ color: "#555", fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 300 }}
+            style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 300 }}
           >
             {lang === "ar"
               ? "ندعو الباحثين والطلاب والممارسين للانضمام إلى مجتمعٍ يعمل بهدوءٍ وإصرارٍ على بناء أثرٍ مستدام."
@@ -481,7 +481,7 @@ function CallToConnection({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }
             <a
               href="mailto:info@aisyria.org"
               className="group inline-flex items-center gap-2 text-sm font-medium underline-offset-4 hover:underline"
-              style={{ color: "#1a1a1a", fontFamily: '"Cairo", system-ui, sans-serif' }}
+              style={{ color: "var(--foreground)", fontFamily: '"Cairo", system-ui, sans-serif' }}
             >
               <Mail className="h-4 w-4" style={{ color: OLIVE }} />
               {lang === "ar" ? "تواصَل مع المنسِّق" : "Contact Coordinator"}

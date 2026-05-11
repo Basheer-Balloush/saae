@@ -238,7 +238,7 @@ function NewsDetailPage() {
           </h1>
 
           {/* Date & reading time */}
-          <div className="mt-5 flex items-center justify-center gap-6 text-sm" style={{ color: "#999" }}>
+          <div className="mt-5 flex items-center justify-center gap-6 text-sm" style={{ color: "var(--muted-foreground)" }}>
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" strokeWidth={1.75} />
               {dateStr}
@@ -285,7 +285,7 @@ function NewsDetailPage() {
           {bodyText ? (
             renderContent(bodyText)
           ) : (
-            <p style={{ color: "#999" }}>
+            <p style={{ color: "var(--muted-foreground)" }}>
               {lang === "ar" ? "لا يوجد محتوى بعد." : "No content available yet."}
             </p>
           )}
@@ -332,7 +332,7 @@ function NewsDetailPage() {
                         loading="lazy"
                       />
                     </div>
-                    <p className="mt-2 text-xs" style={{ color: "#999" }}>
+                    <p className="mt-2 text-xs" style={{ color: "var(--muted-foreground)" }}>
                       {formatDate(r.published_at, lang)}
                     </p>
                   </div>
