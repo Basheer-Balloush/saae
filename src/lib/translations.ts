@@ -51,7 +51,7 @@ export const translations: Record<Lang, Dict> = {
       title: "Featured news & recent activities",
       subtitle:
         "Stories, research, and milestones from across the Syrian Association for AI & Entrepreneurship.",
-      readMore: "Read story",
+      readMore: "Read more",
       viewAll: "View all news & activities",
       categories: {
         workshop: "Workshop",
