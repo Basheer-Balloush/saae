@@ -30,7 +30,7 @@ export function Communities() {
         >
           
           <h2
-            className="mt-4 text-display-2 leading-[1.05] tracking-tight text-foreground"
+            className="mt-4 text-display-2 leading-[1.4] tracking-tight text-foreground"
             style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 900 }}
           >
             {t.communities.title}
