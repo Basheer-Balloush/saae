@@ -159,17 +159,31 @@ function NewsDetailPage() {
 
   useEffect(() => {
     let cancelled = false;
+    console.log("Fetching data for ID:", id);
     setLoading(true);
+
+    // UUID check — if id is not a UUID, skip supabase and use static
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+    if (!isUuid) {
+      setArticle(staticArticle);
+      setRelated(STATIC_RELATED[lang] ?? STATIC_RELATED["en"]!);
+      setLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
     supabase
       .from("news")
       .select("id,title,excerpt,content,image_url,category,published_at")
       .eq("id", id)
       .maybeSingle()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (cancelled) return;
+        if (error) console.warn("News fetch error:", error.message);
         if (data) {
           setArticle(data as NewsArticle);
-          // load related: same category, exclude current
           supabase
             .from("news")
             .select("id,title,image_url,published_at")
@@ -180,16 +194,20 @@ function NewsDetailPage() {
             .then(({ data: rel }) => {
               if (cancelled) return;
               if (rel && rel.length > 0) setRelated(rel as RelatedItem[]);
+              else setRelated(STATIC_RELATED[lang] ?? STATIC_RELATED["en"]!);
             });
         } else {
+          // No row → fall back to static (specific id if exists, else default)
           setArticle(staticArticle);
+          setRelated(STATIC_RELATED[lang] ?? STATIC_RELATED["en"]!);
         }
         setLoading(false);
       });
     return () => {
       cancelled = true;
     };
-  }, [id, lang, staticArticle]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, lang]);
 
   if (loading) {
     return (
