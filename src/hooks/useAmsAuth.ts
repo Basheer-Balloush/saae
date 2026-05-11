@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-const AMS_ROLES = ["attendance_user", "attendance_admin"] as const;
+const AMS_ROLES = ["attendance_user", "attendance_admin"] as const satisfies readonly ("attendance_user" | "attendance_admin")[];
 
 export function useAmsAuth() {
   const [session, setSession] = useState<Session | null>(null);
@@ -16,7 +16,7 @@ export function useAmsAuth() {
         .from("user_roles")
         .select("role")
         .eq("user_id", uid)
-        .in("role", AMS_ROLES as unknown as string[]);
+        .in("role", [...AMS_ROLES]);
       setHasAccess(!!data && data.length > 0);
     };
 
