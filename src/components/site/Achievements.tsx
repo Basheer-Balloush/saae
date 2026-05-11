@@ -6,14 +6,12 @@ export function Achievements() {
   const { t, dir } = useLang();
   const isRtl = dir === "rtl";
 
-  // Per-card sizing: 5,000+ cards are taller; "7" card is minimal.
-  // Stagger: right column shifts down by 60px on large screens.
-  const cardConfig = [
-    { minHeight: "lg:min-h-[220px]", column: "left" },  // 5,000+ learners (taller)
-    { minHeight: "lg:min-h-[170px]", column: "right" }, // 120+ courses
-    { minHeight: "lg:min-h-[170px]", column: "left" },  // 30+ partners
-    { minHeight: "lg:min-h-[140px]", column: "right" }, // 7 communities (smallest)
-    { minHeight: "lg:min-h-[220px]", column: "left" },  // 5,000+ students (taller)
+  // Masonry rhythm: long, short / short, long → X-pattern of visual weight
+  const heights = [
+    "min-h-[260px] lg:min-h-[300px]", // 0: 5,000+ learners (long)
+    "min-h-[180px] lg:min-h-[200px]", // 1: 120+ courses (short)
+    "min-h-[180px] lg:min-h-[200px]", // 2: 30+ partners (short)
+    "min-h-[260px] lg:min-h-[300px]", // 3: 5,000+ students (long)
   ];
 
   return (
@@ -22,7 +20,7 @@ export function Achievements() {
       className="relative overflow-hidden py-24 lg:py-32"
       style={{ backgroundColor: "#FFFFFF" }}
     >
-      {/* Innovation accent — top-right (top-left in RTL since mirrored visually) */}
+      {/* Innovation accent */}
       <div
         className={`absolute top-8 ${isRtl ? "left-8" : "right-8"} flex flex-col items-center gap-2`}
         aria-hidden
@@ -33,7 +31,7 @@ export function Achievements() {
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
         <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
-          {/* Headline column — vertically centered to grid */}
+          {/* Headline column — vertically centered to the stat grid */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -59,28 +57,22 @@ export function Achievements() {
             <div className="mt-8 h-[3px] w-20 bg-gradient-brand" />
           </motion.div>
 
-          {/* Bento-editorial 2-column staggered grid */}
+          {/* 2×2 masonry stat grid */}
           <div className="lg:col-span-7">
-            <div className="grid grid-cols-1 sm:grid-cols-2" style={{ columnGap: "32px", rowGap: "32px" }}>
-              {/* Left column */}
-              <div className="flex flex-col" style={{ gap: "32px" }}>
-                {t.achievements.stats
-                  .map((s, i) => ({ s, i, cfg: cardConfig[i] }))
-                  .filter(({ cfg }) => cfg.column === "left")
-                  .map(({ s, i, cfg }) => (
-                    <StatCard key={s.label} value={s.value} label={s.label} index={i} minHeight={cfg.minHeight} isRtl={isRtl} />
-                  ))}
-              </div>
-
-              {/* Right column — offset down 60px on lg */}
-              <div className="flex flex-col lg:translate-y-[60px]" style={{ gap: "32px" }}>
-                {t.achievements.stats
-                  .map((s, i) => ({ s, i, cfg: cardConfig[i] }))
-                  .filter(({ cfg }) => cfg.column === "right")
-                  .map(({ s, i, cfg }) => (
-                    <StatCard key={s.label} value={s.value} label={s.label} index={i} minHeight={cfg.minHeight} isRtl={isRtl} />
-                  ))}
-              </div>
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2"
+              style={{ columnGap: "32px", rowGap: "40px" }}
+            >
+              {t.achievements.stats.slice(0, 4).map((s, i) => (
+                <StatCard
+                  key={s.label}
+                  value={s.value}
+                  label={s.label}
+                  index={i}
+                  heightClass={heights[i]}
+                  isRtl={isRtl}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -93,59 +85,57 @@ function StatCard({
   value,
   label,
   index,
-  minHeight,
+  heightClass,
   isRtl,
 }: {
   value: string;
   label: string;
   index: number;
-  minHeight: string;
+  heightClass: string;
   isRtl: boolean;
 }) {
+  const PADDING = 28; // px — controls both inner padding and divider width
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.55, delay: index * 0.07 }}
-      className={`group relative flex flex-col justify-center overflow-hidden rounded-2xl p-7 sm:p-8 ${minHeight}`}
+      className={`group relative flex flex-col justify-center overflow-hidden rounded-2xl ${heightClass}`}
       style={{
-        backgroundColor: "rgba(255,255,255,0.95)",
-        border: "1px solid #F2F2F2",
-        backdropFilter: "blur(6px)",
-        boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+        backgroundColor: "#FBFBFB",
+        padding: `${PADDING}px`,
       }}
     >
-      <div className={`flex flex-col ${isRtl ? "items-end" : "items-start"}`}>
-        {/* Number with underline that extends 20px beyond */}
-        <div className="relative inline-block">
-          <span
-            className="block leading-none"
-            style={{
-              color: "#048090",
-              fontFamily: '"Cairo", system-ui, sans-serif',
-              fontWeight: 900,
-              letterSpacing: "-0.03em",
-              fontSize: "clamp(2.5rem, 4.5vw, 3.75rem)",
-            }}
-          >
-            {value}
-          </span>
-          <span
-            aria-hidden
-            className="absolute block h-[2px]"
-            style={{
-              backgroundColor: "#048090",
-              bottom: "-10px",
-              left: isRtl ? "-20px" : 0,
-              right: isRtl ? 0 : "-20px",
-            }}
-          />
-        </div>
-
-        {/* Label — start-aligned flush with the number */}
+      <div className={`flex flex-col ${isRtl ? "items-end text-right" : "items-start text-left"}`}>
         <span
-          className={`mt-6 ${isRtl ? "text-right" : "text-left"}`}
+          className="block leading-none"
+          style={{
+            color: "#048090",
+            fontFamily: '"Cairo", system-ui, sans-serif',
+            fontWeight: 900,
+            letterSpacing: "-0.03em",
+            fontSize: "clamp(2.75rem, 5vw, 4rem)",
+          }}
+        >
+          {value}
+        </span>
+
+        {/* Teal divider — exactly as wide as inner padding region */}
+        <span
+          aria-hidden
+          className="mt-5 block h-[2px]"
+          style={{
+            backgroundColor: "#048090",
+            width: `calc(100% + ${PADDING * 2}px)`,
+            marginLeft: isRtl ? undefined : `-${PADDING}px`,
+            marginRight: isRtl ? `-${PADDING}px` : undefined,
+          }}
+        />
+
+        <span
+          className="mt-5 block"
           style={{
             color: "#666666",
             fontFamily: '"Cairo", system-ui, sans-serif',
