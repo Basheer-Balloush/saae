@@ -27,12 +27,44 @@ export function Footer() {
   return (
     <footer
       id="contact"
-      className="relative pt-20 pb-8"
-      style={{ backgroundColor: "#FFFFFF", color: INK, borderTop: `1px solid ${HAIRLINE}` }}
+      className="relative"
+      style={{
+        backgroundColor: "#FFFFFF",
+        color: INK,
+        borderTop: `2px solid ${TEAL}`,
+        paddingTop: "120px",
+        paddingBottom: "48px",
+      }}
     >
-      <div className="mx-auto max-w-7xl px-6 lg:px-10">
-        <div className="grid items-start gap-14 lg:grid-cols-12">
+      <div className="mx-auto w-full max-w-[1440px] px-8 lg:px-16">
+        <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Col 1 — Identity */}
+          <div className="lg:col-span-3">
+            <img
+              src={logo}
+              alt="SAAE"
+              className="h-12 w-auto grayscale opacity-90"
+            />
+            <p
+              className="mt-6 max-w-xs text-sm leading-relaxed"
+              style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 400, color: INK }}
+            >
+              {t.footer.mission}
+            </p>
+            <div className="mt-8 flex items-center gap-7">
+              {[Linkedin, Twitter, Github].map((Icon, i) => (
+                <a
+                  key={i}
+                  href="#"
+                  aria-label="social"
+                  className="transition-opacity hover:opacity-70"
+                  style={{ color: TEAL }}
+                >
+                  <Icon className="h-6 w-6" strokeWidth={1.5} />
+                </a>
+              ))}
+            </div>
+          </div>
           <div className="lg:col-span-3">
             <img
               src={logo}
