@@ -4,10 +4,11 @@ import { useLang } from "@/lib/i18n";
 import logo from "@/assets/footer-logo.png";
 import locationMap from "@/assets/location-map.png";
 
-const INK = "#2E2E2E";
 const TEAL = "#048090";
-const HAIRLINE = "#EEEEEE";
-const MUTED = "#555555";
+const INK = "#FFFFFF";
+const ACCENT = "#A8E6E6";
+const HAIRLINE = "rgba(255,255,255,0.18)";
+const MUTED = "rgba(255,255,255,0.78)";
 
 export function Footer() {
   const { t, dir } = useLang();
