@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowLeft, Mail } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { useLang } from "@/lib/i18n";
@@ -60,6 +60,172 @@ const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
     ar: "نُعيد تعريف الاقتصاد عبر البيانات والذكاء الاصطناعي وأدوات القرن الجديد.",
     en: "Redefining the economy through data, AI, and the tools of a new century.",
   },
+};
+
+type DetailBlock = { label: { ar: string; en: string }; text: { ar: string; en: string } };
+
+const DETAILS: Record<CommunityKey, DetailBlock[]> = {
+  research: [
+    {
+      label: { ar: "المحور", en: "Focus" },
+      text: {
+        ar: "دعم البحث العلمي ودمجه بالذكاء الاصطناعي والتطبيقات العملية وريادة الأعمال.",
+        en: "Supports scientific research and integrates it with AI, practical applications and entrepreneurship.",
+      },
+    },
+    {
+      label: { ar: "المنصّة", en: "Platform" },
+      text: {
+        ar: "تربط الباحثين والأكاديميين والطلاب والمبرمجين لبناء بيئةٍ بحثيةٍ حديثة في سوريا.",
+        en: "Connects researchers, academics, students and programmers to develop a modern research environment in Syria.",
+      },
+    },
+    {
+      label: { ar: "الأهداف", en: "Goals" },
+      text: {
+        ar: "تدريب الباحثين على الأدوات الحديثة وتطوير دراساتٍ تطبيقيةٍ تستثمر الذكاء الاصطناعي.",
+        en: "Training researchers on modern tools and developing applied studies that leverage AI.",
+      },
+    },
+  ],
+  medical: [
+    {
+      label: { ar: "المحور", en: "Focus" },
+      text: {
+        ar: "يُمثَّل أساساً بفريق «MedInvoVision» التطوعي، ويركّز على استراتيجيات التحول الرقمي في القطاع الصحي السوري.",
+        en: "Represented largely by the MedInvoVision volunteer team, focused on digital-transformation strategies in the Syrian health sector.",
+      },
+    },
+    {
+      label: { ar: "الرؤية", en: "Vision" },
+      text: {
+        ar: "ردم الفجوة التكنولوجية في الرعاية الصحية عبر تحالفٍ استراتيجي بين الكوادر الطبية والتقنية.",
+        en: "Bridge the technological gap in healthcare through a strategic alliance between medical and technical cadres.",
+      },
+    },
+    {
+      label: { ar: "الرسالة", en: "Mission" },
+      text: {
+        ar: "تحويل الذكاء الاصطناعي من «ترفٍ معرفي» إلى أداةٍ عمليةٍ لمعالجة تحدّيات الرعاية الصحية المركّبة في سوريا.",
+        en: "Turn AI from a 'cognitive luxury' into a practical tool for addressing complex healthcare challenges in Syria.",
+      },
+    },
+  ],
+  architecture: [
+    {
+      label: { ar: "المحور", en: "Focus" },
+      text: {
+        ar: "دمج التقنيات الحديثة بالعمارة والهندسة والتخطيط العمراني.",
+        en: "Integrating modern technology with architecture, engineering and urban planning.",
+      },
+    },
+    {
+      label: { ar: "المنصّة", en: "Platform" },
+      text: {
+        ar: "تربط المعماريين والمهندسين والمبرمجين لتطوير حلولٍ ذكية بالذكاء الاصطناعي وتحليل البيانات وإنترنت الأشياء.",
+        en: "Connects architects, engineers and programmers to develop smart solutions using AI, data analysis and IoT.",
+      },
+    },
+    {
+      label: { ar: "أنشطةٌ بارزة", en: "Key Activities" },
+      text: {
+        ar: "برامجُ مميَّزةٌ مثل «Archathon» المتخصِّص بتحليل البيانات والابتكار المعماري.",
+        en: "Signature programs such as 'Archathon', focused on data analysis and architectural innovation.",
+      },
+    },
+  ],
+  data: [
+    {
+      label: { ar: "المحور", en: "Focus" },
+      text: {
+        ar: "بناء بيئةٍ تعليميةٍ وتقنيةٍ لعلوم البيانات وتحليل المعلومات.",
+        en: "Building an educational and technical environment for data science and information analysis.",
+      },
+    },
+    {
+      label: { ar: "المهارات", en: "Skills" },
+      text: {
+        ar: "تطوير مهارات تحليل البيانات وتعلّم الآلة واتّخاذ القرار المبنيّ على البيانات.",
+        en: "Developing skills in data analysis, machine learning and data-driven decision-making.",
+      },
+    },
+    {
+      label: { ar: "الهدف", en: "Objective" },
+      text: {
+        ar: "ربط خبرات علم البيانات بسوق العمل واحتياجات ريادة الأعمال في سوريا.",
+        en: "Linking data-science expertise with the labor market and entrepreneurial needs in Syria.",
+      },
+    },
+  ],
+  entrepreneurship: [
+    {
+      label: { ar: "المحور", en: "Focus" },
+      text: {
+        ar: "تمكين الشباب السوري من بناء مشاريع تقنيةٍ حديثةٍ تعتمد على الذكاء الاصطناعي والتحول الرقمي.",
+        en: "Enabling Syrian youth to build modern technical projects rooted in AI and digital transformation.",
+      },
+    },
+    {
+      label: { ar: "المنصّة", en: "Platform" },
+      text: {
+        ar: "ملتقىً لرواد الأعمال والمبرمجين والطلاب وأصحاب الشركات الناشئة.",
+        en: "A gathering place for entrepreneurs, programmers, students and startup owners.",
+      },
+    },
+    {
+      label: { ar: "الهدف", en: "Objective" },
+      text: {
+        ar: "خلق بيئةٍ تقنيةٍ وريادية تحوِّل الأفكار المبتكرة إلى شركاتٍ ناجحةٍ في الاقتصاد الرقمي.",
+        en: "Create a technical and entrepreneurial environment that transforms innovative ideas into successful digital-economy companies.",
+      },
+    },
+  ],
+  software: [
+    {
+      label: { ar: "المحور", en: "Focus" },
+      text: {
+        ar: "صناعة البرمجيات بمعاييرَ حِرفيةٍ عالميةٍ من قلب سوريا.",
+        en: "Crafting software from Syria with world-class engineering standards.",
+      },
+    },
+    {
+      label: { ar: "المنصّة", en: "Platform" },
+      text: {
+        ar: "مجتمعٌ يجمع المهندسين والمصممين والمبرمجين حول ممارساتٍ هندسية ومنهجياتٍ حديثة.",
+        en: "A community connecting engineers, designers and developers around modern engineering practices.",
+      },
+    },
+    {
+      label: { ar: "الهدف", en: "Objective" },
+      text: {
+        ar: "بناء منتجاتٍ برمجيةٍ سوريةٍ موجَّهةٍ للسوق المحلي والعالمي بجودةٍ عاليةٍ ومستدامة.",
+        en: "Build Syrian software products serving local and global markets with high, sustainable quality.",
+      },
+    },
+  ],
+  economy: [
+    {
+      label: { ar: "المحور", en: "Focus" },
+      text: {
+        ar: "إعادة تعريف الاقتصاد عبر البيانات والذكاء الاصطناعي وأدوات القرن الجديد.",
+        en: "Redefining the economy through data, AI and the tools of a new century.",
+      },
+    },
+    {
+      label: { ar: "المنصّة", en: "Platform" },
+      text: {
+        ar: "تجمع الاقتصاديين والمحلِّلين وصنّاع القرار لدراسة الاقتصاد الذكي والتحول الرقمي.",
+        en: "Connects economists, analysts and decision-makers to study smart economy and digital transformation.",
+      },
+    },
+    {
+      label: { ar: "الهدف", en: "Objective" },
+      text: {
+        ar: "تطوير قراءاتٍ اقتصاديةٍ مبنيّةٍ على البيانات تدعم القرار العام والخاص في سوريا.",
+        en: "Develop data-driven economic insights that support public and private decision-making in Syria.",
+      },
+    },
+  ],
 };
 
 function formatNewsDate(iso: string): string {
