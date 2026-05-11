@@ -198,20 +198,13 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Divider + copyright */}
+        {/* Bottom bar — teal divider + centered copyright */}
         <div
-          className="mt-16 pt-5 text-center text-xs"
-          style={{ borderTop: `1px solid ${HAIRLINE}`, color: MUTED }}
+          className="mt-20 flex flex-col items-center gap-2 pt-6 text-center text-xs"
+          style={{ borderTop: `1px solid ${TEAL}`, color: "#555555" }}
         >
-          © {new Date().getFullYear()} SAAE — {t.footer.rights}
-        </div>
-
-        {/* Made in Damascus — tiny, bottom-right */}
-        <div
-          className={`mt-3 text-[11px] ${isRtl ? "text-right" : "text-left"}`}
-          style={{ color: "#B5B5B5" }}
-        >
-          {t.footer.madeIn}
+          <span>© {new Date().getFullYear()} SAAE — {t.footer.rights}</span>
+          <span style={{ color: "#555555" }}>{t.footer.madeIn}</span>
         </div>
       </div>
     </footer>
