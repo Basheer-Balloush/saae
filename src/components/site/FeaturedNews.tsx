@@ -24,18 +24,7 @@ export function FeaturedNews() {
   const cats = t.news.categories;
   const items = t.news.items;
 
-  const fallback: Slide[] = [
-    { key: "featured", img: IMG.featured, cat: cats.education, title: items.featured.title, date: items.featured.date },
-    { key: "a", img: IMG.a, cat: cats.partnership, title: items.a.title, date: items.a.date },
-    { key: "b", img: IMG.b, cat: cats.community, title: items.b.title, date: items.b.date },
-    { key: "c", img: IMG.c, cat: cats.event, title: items.c.title, date: items.c.date },
-    { key: "d", img: IMG.d, cat: cats.research, title: items.d.title, date: items.d.date },
-    { key: "e", img: IMG.e, cat: cats.community, title: items.e.title, date: items.e.date },
-    { key: "f", img: IMG.f, cat: cats.education, title: items.f.title, date: items.f.date },
-    { key: "g", img: IMG.g, cat: cats.research, title: items.g.title, date: items.g.date },
-  ];
-
-  const [slides, setSlides] = useState<Slide[]>(fallback);
+  const [slides, setSlides] = useState<Slide[] | null>(null);
 
   useEffect(() => {
     supabase
