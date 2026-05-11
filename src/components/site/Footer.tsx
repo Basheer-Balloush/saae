@@ -65,32 +65,6 @@ export function Footer() {
               ))}
             </div>
           </div>
-          <div className="lg:col-span-3">
-            <img
-              src={logo}
-              alt="SAAE"
-              className="h-12 w-auto grayscale opacity-90"
-            />
-            <p
-              className="mt-6 max-w-xs text-sm leading-relaxed"
-              style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 400, color: INK }}
-            >
-              {t.footer.mission}
-            </p>
-            <div className="mt-7 flex items-center gap-5">
-              {[Linkedin, Twitter, Github].map((Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  aria-label="social"
-                  className="transition-colors hover:text-[#048090]"
-                  style={{ color: INK }}
-                >
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
-                </a>
-              ))}
-            </div>
-          </div>
 
           {/* Col 2 — Navigation */}
           <div className="lg:col-span-2">
