@@ -13,6 +13,7 @@ import { Route as NewsRouteImport } from './routes/news'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as NewsIdRouteImport } from './routes/news.$id'
 import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
@@ -37,6 +38,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NewsIdRoute = NewsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => NewsRoute,
+} as any)
 const CommunitiesKeyRoute = CommunitiesKeyRouteImport.update({
   id: '/communities/$key',
   path: '/communities/$key',
@@ -56,29 +62,32 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/news': typeof NewsRoute
+  '/news': typeof NewsRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/news/$id': typeof NewsIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/news': typeof NewsRoute
+  '/news': typeof NewsRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/news/$id': typeof NewsIdRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/news': typeof NewsRoute
+  '/news': typeof NewsRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/news/$id': typeof NewsIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/api/chat'
     | '/communities/$key'
+    | '/news/$id'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/api/chat'
     | '/communities/$key'
+    | '/news/$id'
     | '/admin'
   id:
     | '__root__'
@@ -108,13 +119,14 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/api/chat'
     | '/communities/$key'
+    | '/news/$id'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  NewsRoute: typeof NewsRoute
+  NewsRoute: typeof NewsRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
@@ -151,6 +163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/news/$id': {
+      id: '/news/$id'
+      path: '/$id'
+      fullPath: '/news/$id'
+      preLoaderRoute: typeof NewsIdRouteImport
+      parentRoute: typeof NewsRoute
+    }
     '/communities/$key': {
       id: '/communities/$key'
       path: '/communities/$key'
@@ -175,10 +194,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface NewsRouteChildren {
+  NewsIdRoute: typeof NewsIdRoute
+}
+
+const NewsRouteChildren: NewsRouteChildren = {
+  NewsIdRoute: NewsIdRoute,
+}
+
+const NewsRouteWithChildren = NewsRoute._addFileChildren(NewsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  NewsRoute: NewsRoute,
+  NewsRoute: NewsRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,

@@ -118,6 +118,7 @@ export function Communities() {
                 </div>
               </Link>
               </motion.div>
+
             );
           })}
         </div>
