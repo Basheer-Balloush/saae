@@ -5,9 +5,9 @@ import devistaLogo from "@/assets/partner-devista.png";
 import ilmhubLogo from "@/assets/partner-ilmhub.png";
 
 const PARTNERS = [
-  { name: "Sarrdeh Tech", logo: sarrdehLogo },
-  { name: "Devista Consulting", logo: devistaLogo },
-  { name: "ILM Hub", logo: ilmhubLogo },
+  { name: "Sarrdeh Tech", logo: sarrdehLogo, sizeClass: "h-28" },
+  { name: "Devista Consulting", logo: devistaLogo, sizeClass: "h-28" },
+  { name: "ILM Hub", logo: ilmhubLogo, sizeClass: "h-40" },
 ];
 
 export function Partners() {
@@ -41,7 +41,7 @@ export function Partners() {
               <img
                 src={p.logo}
                 alt={p.name}
-                className="h-28 w-auto object-contain transition-transform hover:scale-105"
+                className={`${p.sizeClass} w-auto object-contain transition-transform hover:scale-105`}
               />
             </motion.div>
           ))}
