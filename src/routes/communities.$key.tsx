@@ -166,19 +166,19 @@ function CommunityPage() {
     setLoadingNews(true);
     supabase
       .from("news")
-      .select("id,title,excerpt,category,published_at")
+      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,category,published_at")
       .eq("category", k)
       .order("published_at", { ascending: false })
       .limit(10)
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error) console.warn("Community news fetch error:", error.message);
-        const rows = (data ?? []).map((r): ActivityItem => ({
+        const rows = (data ?? []).map((r: any): ActivityItem => ({
           id: r.id,
           date: formatNewsDate(r.published_at),
           category: r.category,
-          title: r.title,
-          desc: r.excerpt ?? "",
+          title: (lang === "ar" ? (r.title_ar ?? r.title_en) : (r.title_en ?? r.title_ar)) ?? r.title,
+          desc: ((lang === "ar" ? (r.excerpt_ar ?? r.excerpt_en) : (r.excerpt_en ?? r.excerpt_ar)) ?? r.excerpt) ?? "",
         }));
         setActivities(rows);
         setLoadingNews(false);
