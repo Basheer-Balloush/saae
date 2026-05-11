@@ -53,7 +53,7 @@ export function Footer() {
               {t.footer.mission}
             </p>
             <div className="mt-8 flex items-center gap-7">
-              {[Linkedin, Twitter, Github].map((Icon, i) => (
+              {[Instagram, Facebook, Linkedin].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
