@@ -37,11 +37,23 @@ function Index() {
   useEffect(() => {
     const hash = location.hash?.replace(/^#/, "");
     if (!hash) return;
-    const raf = window.requestAnimationFrame(() => {
+    let cancelled = false;
+    let attempts = 0;
+    const tryScroll = () => {
+      if (cancelled) return;
       const el = document.getElementById(hash);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    return () => window.cancelAnimationFrame(raf);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      if (attempts++ < 40) {
+        window.setTimeout(tryScroll, 50);
+      }
+    };
+    tryScroll();
+    return () => {
+      cancelled = true;
+    };
   }, [location.hash]);
 
   return (
