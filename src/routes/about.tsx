@@ -47,7 +47,7 @@ function AboutPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
-      <main className="pt-28">
+      <main className="pt-20">
         <Hero Arrow={Arrow} />
         <VisionMission />
         <Goals />
