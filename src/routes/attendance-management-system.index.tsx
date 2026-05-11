@@ -442,7 +442,7 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
         <SessionAttendanceDialog
           session={openSession}
           registrants={registrants}
-          onClose={() => setOpenSession(null)}
+          onClose={() => { setOpenSession(null); load(); }}
         />
       )}
 
