@@ -34,6 +34,16 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/attendance-management-system/")({
@@ -71,6 +81,22 @@ function AmsDashboard() {
   const tr = amsT[lang];
   const [courses, setCourses] = useState<Course[] | null>(null);
   const [selected, setSelected] = useState<Course | null>(null);
+  const [deleting, setDeleting] = useState<Course | null>(null);
+  const [deletingBusy, setDeletingBusy] = useState(false);
+
+  const confirmDeleteCourse = async () => {
+    if (!deleting) return;
+    setDeletingBusy(true);
+    const { error } = await supabase.from("ams_courses").delete().eq("id", deleting.id);
+    setDeletingBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(tr.saved);
+    setDeleting(null);
+    loadCourses();
+  };
 
   const loadCourses = useCallback(async () => {
     const { data, error } = await supabase
@@ -129,18 +155,7 @@ function AmsDashboard() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!confirm(tr.confirmDeleteCourse)) return;
-                  supabase
-                    .from("ams_courses")
-                    .delete()
-                    .eq("id", c.id)
-                    .then(({ error }) => {
-                      if (error) toast.error(error.message);
-                      else {
-                        toast.success(tr.saved);
-                        loadCourses();
-                      }
-                    });
+                  setDeleting(c);
                 }}
                 className="absolute top-2 end-2 inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                 aria-label={tr.delete}
@@ -168,6 +183,33 @@ function AmsDashboard() {
           ))}
         </div>
       )}
+
+      <AlertDialog open={!!deleting} onOpenChange={(o) => !o && !deletingBusy && setDeleting(null)}>
+        <AlertDialogContent dir={isRtl ? "rtl" : "ltr"}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tr.confirmDeleteCourse}</AlertDialogTitle>
+            {deleting && (
+              <AlertDialogDescription>
+                {lang === "ar" ? deleting.name_ar : deleting.name_en || deleting.name_ar}
+              </AlertDialogDescription>
+            )}
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingBusy}>{tr.cancel}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deletingBusy}
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDeleteCourse();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingBusy && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
+              {tr.delete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -703,7 +745,6 @@ function AddRegistrantDialog({ courseId, onCreated }: { courseId: string; onCrea
     setFullName(r.full_name);
     setEmail(r.email ?? "");
     setPhone(r.phone ?? "");
-    setStatus(r.payment_status);
     setShowSuggestions(false);
   };
 
