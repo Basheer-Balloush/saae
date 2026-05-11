@@ -98,7 +98,6 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-7 lg:flex">
           {sections.map((s) => {
-            const isNewsRoute = location.pathname.startsWith("/news");
             const isActive =
               s === "contact"
                 ? (active === "assistant" || active === "contact")
