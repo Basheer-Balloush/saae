@@ -313,7 +313,7 @@ function ActivityFeed({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
                 </div>
                 <div
                   className="mt-3 text-sm"
-                  style={{ color: "#888", fontFamily: '"Cairo", system-ui, sans-serif', letterSpacing: "0.04em" }}
+                  style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', letterSpacing: "0.04em" }}
                   dir="ltr"
                 >
                   {a.date}
