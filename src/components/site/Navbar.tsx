@@ -186,6 +186,18 @@ export function Navbar() {
                   </Link>
                 );
               }
+              if (s === "news") {
+                return (
+                  <Link
+                    key={s}
+                    to="/news"
+                    onClick={() => setOpen(false)}
+                    className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                  >
+                    {t.nav[s]}
+                  </Link>
+                );
+              }
               const targetId = s === "contact" ? "assistant" : s;
               return (
                 <a
