@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
-import { ArrowLeft, ArrowRight, Plus, Trash2, Users, CalendarDays, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus, Trash2, Users, CalendarDays, Loader2, Eye, FileSpreadsheet } from "lucide-react";
+import * as XLSX from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { amsT } from "@/lib/ams-i18n";
@@ -236,8 +237,10 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
   const tr = amsT[lang];
   const [registrants, setRegistrants] = useState<Registrant[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [attendance, setAttendance] = useState<Array<{ registrant_id: string; session_id: string; present: boolean }>>([]);
   const [loading, setLoading] = useState(true);
   const [openSession, setOpenSession] = useState<Session | null>(null);
+  const [viewing, setViewing] = useState<Registrant | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -247,14 +250,28 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
     ]);
     if (r.error) toast.error(r.error.message);
     if (s.error) toast.error(s.error.message);
+    const sessIds = (s.data ?? []).map((x) => x.id);
+    let att: Array<{ registrant_id: string; session_id: string; present: boolean }> = [];
+    if (sessIds.length > 0) {
+      const a = await supabase
+        .from("ams_attendance")
+        .select("registrant_id, session_id, present")
+        .in("session_id", sessIds);
+      if (a.error) toast.error(a.error.message);
+      att = (a.data as typeof att) ?? [];
+    }
     setRegistrants((r.data as Registrant[]) ?? []);
     setSessions((s.data as Session[]) ?? []);
+    setAttendance(att);
     setLoading(false);
   }, [course.id]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  const attendanceFor = (registrantId: string) =>
+    attendance.filter((a) => a.registrant_id === registrantId && a.present).length;
 
   const deleteRegistrant = async (id: string) => {
     if (!confirm(tr.confirmDelete)) return;
@@ -270,6 +287,40 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
     load();
   };
 
+  const paymentLabel = (s: PaymentStatus) =>
+    ({ paid: tr.paid, unpaid: tr.unpaid, partial: tr.partial, waived: tr.waived })[s];
+
+  const courseName = lang === "ar" ? course.name_ar : course.name_en || course.name_ar;
+
+  const exportRegistrants = () => {
+    const rows = registrants.map((r) => ({
+      [tr.fullName]: r.full_name,
+      [tr.emailField]: r.email || "",
+      [tr.phone]: r.phone || "",
+      [tr.paymentStatus]: paymentLabel(r.payment_status),
+      [tr.attendanceCount]: `${attendanceFor(r.id)} / ${sessions.length}`,
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, tr.registrants.slice(0, 31));
+    XLSX.writeFile(wb, `${courseName}-${tr.registrants}.xlsx`);
+  };
+
+  const exportSessions = () => {
+    const rows = sessions.map((s) => {
+      const presentCount = attendance.filter((a) => a.session_id === s.id && a.present).length;
+      return {
+        [tr.sessionTitle]: s.title,
+        [tr.sessionDate]: s.session_date,
+        [tr.present]: `${presentCount} / ${registrants.length}`,
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, tr.sessions.slice(0, 31));
+    XLSX.writeFile(wb, `${courseName}-${tr.sessions}.xlsx`);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8" dir={isRtl ? "rtl" : "ltr"}>
       <button
@@ -280,9 +331,7 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
         {tr.back}
       </button>
 
-      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-        {lang === "ar" ? course.name_ar : course.name_en || course.name_ar}
-      </h1>
+      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{courseName}</h1>
 
       {loading ? (
         <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
@@ -293,62 +342,69 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Registrants */}
           <section className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
               <h2 className="font-semibold inline-flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" />
                 {tr.registrants}
               </h2>
-              <AddRegistrantDialog courseId={course.id} onCreated={load} />
+              <div className="flex items-center gap-2">
+                {registrants.length > 0 && (
+                  <Button size="sm" variant="outline" onClick={exportRegistrants}>
+                    <FileSpreadsheet className="h-4 w-4 mx-1" />
+                    {tr.exportExcel}
+                  </Button>
+                )}
+                <AddRegistrantDialog courseId={course.id} onCreated={load} />
+              </div>
             </div>
             {registrants.length === 0 ? (
               <p className="text-sm text-muted-foreground py-8 text-center">{tr.noRegistrants}</p>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{tr.fullName}</TableHead>
-                      <TableHead>{tr.emailField}</TableHead>
-                      <TableHead>{tr.phone}</TableHead>
-                      <TableHead>{tr.paymentStatus}</TableHead>
-                      <TableHead />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {registrants.map((r) => (
-                      <TableRow key={r.id}>
-                        <TableCell className="font-medium">{r.full_name}</TableCell>
-                        <TableCell className="text-xs" dir="ltr">{r.email || "—"}</TableCell>
-                        <TableCell className="text-xs" dir="ltr">{r.phone || "—"}</TableCell>
-                        <TableCell>
-                          <PaymentBadge status={r.payment_status} />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => deleteRegistrant(r.id)}
-                            aria-label={tr.delete}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <ul className="space-y-2">
+                {registrants.map((r) => (
+                  <li
+                    key={r.id}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background/50 px-3 py-2"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm truncate">{r.full_name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {tr.attendanceCount}: {attendanceFor(r.id)} / {sessions.length}
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => setViewing(r)} aria-label={tr.view}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteRegistrant(r.id)}
+                      aria-label={tr.delete}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
             )}
           </section>
 
           {/* Sessions */}
           <section className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
               <h2 className="font-semibold inline-flex items-center gap-2">
                 <CalendarDays className="h-4 w-4 text-primary" />
                 {tr.sessions}
               </h2>
-              <AddSessionDialog courseId={course.id} onCreated={load} />
+              <div className="flex items-center gap-2">
+                {sessions.length > 0 && (
+                  <Button size="sm" variant="outline" onClick={exportSessions}>
+                    <FileSpreadsheet className="h-4 w-4 mx-1" />
+                    {tr.exportExcel}
+                  </Button>
+                )}
+                <AddSessionDialog courseId={course.id} onCreated={load} />
+              </div>
             </div>
             {sessions.length === 0 ? (
               <p className="text-sm text-muted-foreground py-8 text-center">{tr.noSessions}</p>
@@ -389,6 +445,65 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
           onClose={() => setOpenSession(null)}
         />
       )}
+
+      {viewing && (
+        <RegistrantDetailsDialog
+          registrant={viewing}
+          attendanceCount={attendanceFor(viewing.id)}
+          totalSessions={sessions.length}
+          onClose={() => setViewing(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function RegistrantDetailsDialog({
+  registrant,
+  attendanceCount,
+  totalSessions,
+  onClose,
+}: {
+  registrant: Registrant;
+  attendanceCount: number;
+  totalSessions: number;
+  onClose: () => void;
+}) {
+  const { lang } = useLang();
+  const tr = amsT[lang];
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent dir={lang === "ar" ? "rtl" : "ltr"}>
+        <DialogHeader>
+          <DialogTitle>{tr.details}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 text-sm">
+          <Row label={tr.fullName} value={registrant.full_name} />
+          <Row label={tr.emailField} value={registrant.email || "—"} ltr />
+          <Row label={tr.phone} value={registrant.phone || "—"} ltr />
+          <Row
+            label={tr.paymentStatus}
+            value={<PaymentBadge status={registrant.payment_status} />}
+          />
+          <Row label={tr.attendanceCount} value={`${attendanceCount} / ${totalSessions}`} />
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>
+            {tr.cancel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function Row({ label, value, ltr }: { label: string; value: React.ReactNode; ltr?: boolean }) {
+  return (
+    <div className="flex items-start justify-between gap-3 border-b border-border/50 pb-2">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-end" dir={ltr ? "ltr" : undefined}>
+        {value}
+      </span>
     </div>
   );
 }
