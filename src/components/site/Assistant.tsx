@@ -30,8 +30,7 @@ export function Assistant() {
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-caption text-primary">{a.eyebrow}</p>
-            <h2 className="mt-4 text-display-2 text-foreground">{a.title}</h2>
+            <h2 className="text-display-2 text-foreground">{a.title}</h2>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground">
               {a.subtitle}
             </p>
