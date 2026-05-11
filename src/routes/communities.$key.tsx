@@ -335,7 +335,7 @@ function ActivityFeed({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
                 </h3>
                 <p
                   className="mt-3 line-clamp-2 text-base leading-[1.75]"
-                  style={{ color: "#555", fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 300 }}
+                  style={{ color: "var(--muted-foreground)", fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 300 }}
                 >
                   {a.desc[lang]}
                 </p>
