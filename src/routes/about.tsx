@@ -160,10 +160,6 @@ function Goals() {
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-              <Rocket className="h-3.5 w-3.5" />
-              ما نسعى إليه
-            </span>
             <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
               أهدافنا
             </h2>
