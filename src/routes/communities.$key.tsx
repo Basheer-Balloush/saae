@@ -328,7 +328,7 @@ function ActivityFeed({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
                     fontWeight: 700,
                     lineHeight: 1.3,
                     fontSize: "clamp(1.25rem, 1.8vw, 1.625rem)",
-                    color: "#1a1a1a",
+                    color: "var(--foreground)",
                   }}
                 >
                   {a.title[lang]}
