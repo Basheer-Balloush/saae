@@ -863,15 +863,15 @@ function SessionAttendanceDialog({
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-start">{tr.fullName}</TableHead>
-                  <TableHead className="w-24 text-start">{tr.present}</TableHead>
+                  <TableHead className="w-24 text-center">{tr.present}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {registrants.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium text-start">{r.full_name}</TableCell>
-                    <TableCell className="text-start">
-                      <div className="inline-flex items-center gap-2">
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-2">
                         <Checkbox
                           checked={!!presentMap[r.id]}
                           onCheckedChange={(v) => toggle(r.id, v === true)}
