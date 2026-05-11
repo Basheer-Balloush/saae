@@ -69,8 +69,8 @@ export function Footer() {
           {/* Col 2 — Navigation */}
           <div className="lg:col-span-2">
             <h4
-              className="text-xs font-semibold uppercase tracking-[0.18em]"
-              style={{ color: INK }}
+              className="text-base font-bold tracking-tight"
+              style={{ color: INK, fontFamily: '"Cairo", system-ui, sans-serif' }}
             >
               {t.footer.quickLinks}
             </h4>
