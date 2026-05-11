@@ -18,7 +18,7 @@ export function Communities() {
   const isRtl = dir === "rtl";
 
   return (
-    <section id="communities" className="relative overflow-hidden bg-surface py-28 lg:py-36">
+    <section id="communities" className="relative overflow-hidden bg-surface pb-28 pt-16 lg:pb-36 lg:pt-20">
       <div className="relative mx-auto max-w-5xl px-6 sm:px-10 lg:px-16">
         {/* Header */}
         <motion.div
