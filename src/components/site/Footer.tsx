@@ -90,46 +90,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Col 3 — Contact Hub */}
-          <div className="lg:col-span-4">
-            <h4
-              className="text-xs font-semibold uppercase tracking-[0.18em]"
-              style={{ color: INK }}
-            >
-              {t.footer.contact}
-            </h4>
-            <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-              <input
-                required
-                type="text"
-                placeholder={t.footer.form.name}
-                className={underlineInput}
-                style={{ color: INK, borderBottomColor: HAIRLINE }}
-              />
-              <input
-                required
-                type="email"
-                placeholder={t.footer.form.email}
-                className={underlineInput}
-                style={{ color: INK, borderBottomColor: HAIRLINE }}
-              />
-              <textarea
-                required
-                rows={2}
-                placeholder={t.footer.form.message}
-                className={`${underlineInput} resize-none`}
-                style={{ color: INK, borderBottomColor: HAIRLINE }}
-              />
-              <button
-                type="submit"
-                className="inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "#FFFFFF", color: TEAL }}
-              >
-                {sent ? t.footer.form.sent : t.footer.form.send}
-                {!sent && <ArrowRight className={isRtl ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />}
-              </button>
-            </form>
-          </div>
 
           {/* Col 4 — HQ Intelligence */}
           <div className="lg:col-span-3">
