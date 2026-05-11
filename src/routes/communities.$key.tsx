@@ -28,7 +28,7 @@ const HERO_IMG: Record<CommunityKey, string> = {
   economy: "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=80",
 };
 
-type ActivityItem = { date: string; category: { ar: string; en: string }; title: { ar: string; en: string }; desc: { ar: string; en: string } };
+type ActivityItem = { id: string; date: string; category: string; title: string; desc: string };
 type Metric = { value: string; label: { ar: string; en: string } };
 
 const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
