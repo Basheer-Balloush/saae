@@ -55,7 +55,7 @@ export function Footer() {
           </div>
 
           {/* Col 2 — Navigation */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <h4
               className="text-base font-bold tracking-tight"
               style={{ color: INK, fontFamily: '"Cairo", system-ui, sans-serif' }}
