@@ -14,6 +14,151 @@ export type Database = {
   }
   public: {
     Tables: {
+      ams_attendance: {
+        Row: {
+          created_at: string
+          id: string
+          present: boolean
+          registrant_id: string
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          present?: boolean
+          registrant_id: string
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          present?: boolean
+          registrant_id?: string
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ams_attendance_registrant_id_fkey"
+            columns: ["registrant_id"]
+            isOneToOne: false
+            referencedRelation: "ams_registrants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ams_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ams_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ams_courses: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name_ar: string
+          name_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name_ar: string
+          name_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name_ar?: string
+          name_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ams_registrants: {
+        Row: {
+          course_id: string
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          payment_status: Database["public"]["Enums"]["ams_payment_status"]
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          payment_status?: Database["public"]["Enums"]["ams_payment_status"]
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          payment_status?: Database["public"]["Enums"]["ams_payment_status"]
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ams_registrants_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ams_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ams_sessions: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          session_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          session_date?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          session_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ams_sessions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ams_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_leads: {
         Row: {
           accepts_training_new_staff: boolean | null
@@ -205,6 +350,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      has_ams_access: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -214,6 +360,7 @@ export type Database = {
       }
     }
     Enums: {
+      ams_payment_status: "unpaid" | "paid" | "partial" | "waived"
       app_role: "admin" | "user" | "attendance_user" | "attendance_admin"
     }
     CompositeTypes: {
@@ -342,6 +489,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ams_payment_status: ["unpaid", "paid", "partial", "waived"],
       app_role: ["admin", "user", "attendance_user", "attendance_admin"],
     },
   },
