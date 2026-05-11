@@ -65,6 +65,15 @@ export function AssistantChatModal({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // Auto-send prefill when opened with one
+  useEffect(() => {
+    if (open && prefill) {
+      sendMessage({ text: prefill });
+      onPrefillConsumed?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, prefill]);
+
   function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     const text = input.trim();
