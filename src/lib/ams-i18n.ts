@@ -57,6 +57,10 @@ export const amsT: Record<Lang, {
   required: string;
   back: string;
   open: string;
+  view: string;
+  details: string;
+  exportExcel: string;
+  attendanceCount: string;
 }> = {
   en: {
     title: "Attendance Management",
