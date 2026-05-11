@@ -12,7 +12,7 @@ type Dict = {
     };
   };
   communities: {
-    eyebrow: string; title: string; subtitle: string; cta: string;
+    eyebrow: string; title: string; subtitle: string; cta: string; discover: string;
     cards: Record<"data" | "architecture" | "medical" | "entrepreneurship" | "research" | "software" | "economy", { title: string; desc: string }>;
   };
   achievements: { eyebrow: string; title: string; body: string; stats: { value: string; label: string }[] };
@@ -104,6 +104,7 @@ export const translations: Record<Lang, Dict> = {
       subtitle:
         "Collaborative ecosystems connecting students, developers, researchers, educators, and entrepreneurs across the country.",
       cta: "Discover communities",
+      discover: "Discover community",
       cards: {
         data: {
           title: "Data Community",
@@ -262,6 +263,7 @@ export const translations: Record<Lang, Dict> = {
       subtitle:
         "أنظمة تعاونية تربط الطلاب والمطورين والباحثين والمعلمين ورواد الأعمال في كل أنحاء البلاد.",
       cta: "استكشف المجتمعات",
+      discover: "اكتشف المجتمع",
       cards: {
         data: {
           title: "مجتمع البيانات",
