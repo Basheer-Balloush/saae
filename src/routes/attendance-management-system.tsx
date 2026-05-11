@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAmsAuth } from "@/hooks/useAmsAuth";
 import { registerAmsServiceWorker } from "@/lib/ams-pwa";
 import { AmsNavbar } from "@/components/ams/AmsNavbar";
+import { AmsInstallButton } from "@/components/ams/AmsInstallButton";
+import { useLang } from "@/lib/i18n";
+import { amsT } from "@/lib/ams-i18n";
 
 export const Route = createFileRoute("/attendance-management-system")({
   head: () => ({
@@ -27,6 +30,8 @@ function AmsLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, hasAccess, loading } = useAmsAuth();
+  const { lang } = useLang();
+  const tr = amsT[lang];
 
   const isLoginPage = location.pathname.endsWith("/login");
 
@@ -50,13 +55,17 @@ function AmsLayout() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <AmsNavbar onSignOut={handleSignOut} showSignOut={showSignOut} />
+      <AmsNavbar
+        onSignOut={handleSignOut}
+        showSignOut={showSignOut}
+        extra={<AmsInstallButton />}
+      />
       <div className="pt-20">
         {isLoginPage ? (
           <Outlet />
         ) : loading || !user || !hasAccess ? (
           <div className="flex items-center justify-center py-24">
-            <div className="text-sm text-muted-foreground">Loading…</div>
+            <div className="text-sm text-muted-foreground">{tr.loading}</div>
           </div>
         ) : (
           <main>

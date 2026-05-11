@@ -4,6 +4,7 @@ import { useLang } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { amsT } from "@/lib/ams-i18n";
 import logo from "@/assets/saae-logo-horizontal.png";
 import logoEnLight from "@/assets/saae-logo-en-light.png";
 import logoEnDark from "@/assets/saae-logo-en-dark.png";
@@ -12,11 +13,13 @@ import logoArDark from "@/assets/saae-logo-ar-dark.png";
 type Props = {
   onSignOut?: () => void;
   showSignOut?: boolean;
+  extra?: React.ReactNode;
 };
 
-export function AmsNavbar({ onSignOut, showSignOut }: Props) {
+export function AmsNavbar({ onSignOut, showSignOut, extra }: Props) {
   const { t, lang, toggle: toggleLang } = useLang();
   const { theme, toggle: toggleTheme } = useTheme();
+  const tr = amsT[lang];
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -78,10 +81,11 @@ export function AmsNavbar({ onSignOut, showSignOut }: Props) {
           >
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </button>
+          {extra}
           {showSignOut && (
             <Button variant="ghost" size="sm" onClick={onSignOut}>
-              <LogOut className="h-4 w-4 mr-1" />
-              Sign out
+              <LogOut className="h-4 w-4 mx-1" />
+              <span className="hidden sm:inline">{tr.signOut}</span>
             </Button>
           )}
         </div>
