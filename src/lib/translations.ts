@@ -105,29 +105,33 @@ export const translations: Record<Lang, Dict> = {
         "Collaborative ecosystems connecting students, developers, researchers, educators, and entrepreneurs across the country.",
       cta: "Discover communities",
       cards: {
-        women: {
-          title: "Women in AI",
-          desc: "Mentorship, scholarships, and research circles championing women in artificial intelligence.",
+        data: {
+          title: "Data Community",
+          desc: "A hub for data scientists and analysts exploring data engineering, analytics, and machine learning applications.",
         },
-        health: {
-          title: "HealthTech",
-          desc: "Bringing clinicians and engineers together to design healthcare for everyone.",
+        architecture: {
+          title: "Smart Architecture Community",
+          desc: "Bridging architecture and technology — smart buildings, sustainable design, and computational tools for the built environment.",
         },
-        education: {
-          title: "Digital Education",
-          desc: "Modernizing classrooms with open curricula, training, and accessible tools.",
-        },
-        research: {
-          title: "AI Research",
-          desc: "An open research network advancing Arabic-language and applied AI work.",
+        medical: {
+          title: "Medical & AI Community",
+          desc: "Where physicians and engineers meet to advance diagnostics, medical imaging, and AI-driven healthcare.",
         },
         entrepreneurship: {
-          title: "Entrepreneurship",
-          desc: "Founder programs, mentorship, and pathways from idea to early traction.",
+          title: "Entrepreneurship & Digital Transformation",
+          desc: "Founder programs, mentorship, and digital transformation tracks turning ideas into ventures and modernizing organizations.",
         },
-        robotics: {
-          title: "Robotics",
-          desc: "Labs and competitions that introduce students to building, not just using, technology.",
+        research: {
+          title: "Research Community",
+          desc: "An open research network advancing applied AI, Arabic-language work, and interdisciplinary scientific publishing.",
+        },
+        software: {
+          title: "Software Community",
+          desc: "Developers and engineers building software, open source, and modern development practices across the stack.",
+        },
+        economy: {
+          title: "Smart Economy Community",
+          desc: "Exploring fintech, digital economy, and data-driven decisions for businesses and public institutions.",
         },
       },
     },
