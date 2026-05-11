@@ -308,21 +308,38 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
   };
 
   const exportSessions = (selectedIds: string[]) => {
-    const wb = XLSX.utils.book_new();
-    const chosen = sessions.filter((s) => selectedIds.includes(s.id));
-    chosen.forEach((s, idx) => {
-      const rows = registrants.map((r) => {
-        const att = attendance.find((a) => a.session_id === s.id && a.registrant_id === r.id);
-        return {
-          [tr.fullName]: r.full_name,
-          [tr.present]: att?.present ? tr.present : tr.absent,
-        };
+    try {
+      const wb = XLSX.utils.book_new();
+      const chosen = sessions.filter((s) => selectedIds.includes(s.id));
+      if (chosen.length === 0) return;
+      const used = new Set<string>();
+      chosen.forEach((s, idx) => {
+        const rows = registrants.map((r) => {
+          const att = attendance.find((a) => a.session_id === s.id && a.registrant_id === r.id);
+          return {
+            [tr.fullName]: r.full_name,
+            [tr.present]: att?.present ? tr.present : tr.absent,
+          };
+        });
+        const ws = XLSX.utils.json_to_sheet(
+          rows.length > 0 ? rows : [{ [tr.fullName]: "", [tr.present]: "" }],
+        );
+        const base = (s.title || `Session ${idx + 1}`)
+          .replace(/[\\\/\?\*\[\]:]/g, "-")
+          .trim()
+          .slice(0, 28) || `Session ${idx + 1}`;
+        let name = base;
+        let n = 2;
+        while (used.has(name.toLowerCase())) {
+          name = `${base.slice(0, 28)} ${n++}`;
+        }
+        used.add(name.toLowerCase());
+        XLSX.utils.book_append_sheet(wb, ws, name);
       });
-      const ws = XLSX.utils.json_to_sheet(rows);
-      const safeName = `${s.title} ${s.session_date}`.replace(/[\\\/\?\*\[\]:]/g, "-").slice(0, 31) || `Session ${idx + 1}`;
-      XLSX.utils.book_append_sheet(wb, ws, safeName);
-    });
-    XLSX.writeFile(wb, `${courseName}-${tr.sessions}.xlsx`);
+      XLSX.writeFile(wb, `${courseName}-${tr.sessions}.xlsx`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   };
 
   return (
@@ -845,22 +862,22 @@ function SessionAttendanceDialog({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{tr.fullName}</TableHead>
-                  <TableHead className="w-24 text-end">{tr.present}</TableHead>
+                  <TableHead className="text-start">{tr.fullName}</TableHead>
+                  <TableHead className="w-24 text-start">{tr.present}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {registrants.map((r) => (
                   <TableRow key={r.id}>
-                    <TableCell className="font-medium">{r.full_name}</TableCell>
-                    <TableCell className="text-end">
-                      <div className="inline-flex items-center gap-2 justify-end">
-                        {savingId === r.id && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                    <TableCell className="font-medium text-start">{r.full_name}</TableCell>
+                    <TableCell className="text-start">
+                      <div className="inline-flex items-center gap-2">
                         <Checkbox
                           checked={!!presentMap[r.id]}
                           onCheckedChange={(v) => toggle(r.id, v === true)}
                           aria-label={tr.present}
                         />
+                        {savingId === r.id && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
                       </div>
                     </TableCell>
                   </TableRow>
