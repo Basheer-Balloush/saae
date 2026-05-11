@@ -70,10 +70,14 @@ export function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3 lg:px-10">
         <Link to="/" hash="home" className="relative flex items-center" aria-label="SAAIE — Syrian Association for AI & Entrepreneurship">
           {(() => {
+            const isEnLight = lang === "en" && theme === "light";
+            const isEnDark = lang === "en" && theme === "dark";
+            const isArDark = lang === "ar" && theme === "dark";
             const variants = [
-              { src: logoEnLight, show: lang === "en" && theme === "light", alt: "SAAIE — Syrian Association for AI & Entrepreneurship" },
-              { src: logoArDark, show: lang === "ar" && theme === "dark", alt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
-              { src: logo, show: !((lang === "en" && theme === "light") || (lang === "ar" && theme === "dark")), alt: "SAAIE" },
+              { src: logoEnLight, show: isEnLight, alt: "SAAIE — Syrian Association for AI & Entrepreneurship" },
+              { src: logoEnDark, show: isEnDark, alt: "SAAIE — Syrian Association for AI & Entrepreneurship" },
+              { src: logoArDark, show: isArDark, alt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
+              { src: logo, show: !(isEnLight || isEnDark || isArDark), alt: "SAAIE" },
             ];
             return variants.map((v, i) => (
               <img
