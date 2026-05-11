@@ -4,10 +4,11 @@ import { useLang } from "@/lib/i18n";
 import logo from "@/assets/footer-logo.png";
 import locationMap from "@/assets/location-map.png";
 
-const INK = "#2E2E2E";
 const TEAL = "#048090";
-const HAIRLINE = "#EEEEEE";
-const MUTED = "#555555";
+const INK = "#FFFFFF";
+const ACCENT = "#A8E6E6";
+const HAIRLINE = "rgba(255,255,255,0.18)";
+const MUTED = "rgba(255,255,255,0.78)";
 
 export function Footer() {
   const { t, dir } = useLang();
@@ -22,16 +23,16 @@ export function Footer() {
   }
 
   const underlineInput =
-    "w-full bg-transparent border-0 border-b py-2 text-sm outline-none transition-colors placeholder:text-[#A8A8A8] focus:border-[#048090]";
+    "w-full bg-transparent border-0 border-b py-2 text-sm outline-none transition-colors placeholder:text-white/60 focus:border-white";
 
   return (
     <footer
       id="contact"
       className="relative"
       style={{
-        backgroundColor: "#FFFFFF",
+        backgroundColor: TEAL,
         color: INK,
-        borderTop: `2px solid ${TEAL}`,
+        borderTop: `2px solid rgba(255,255,255,0.25)`,
         paddingTop: "120px",
         paddingBottom: "48px",
       }}
@@ -43,7 +44,7 @@ export function Footer() {
             <img
               src={logo}
               alt="SAAE"
-              className="h-12 w-auto grayscale opacity-90"
+              className="h-12 w-auto brightness-0 invert"
             />
             <p
               className="mt-6 max-w-xs text-sm leading-relaxed"
@@ -57,8 +58,8 @@ export function Footer() {
                   key={i}
                   href="#"
                   aria-label="social"
-                  className="transition-opacity hover:opacity-70"
-                  style={{ color: TEAL }}
+                  className="transition-opacity hover:opacity-80"
+                  style={{ color: INK }}
                 >
                   <Icon className="h-6 w-6" strokeWidth={1.5} />
                 </a>
@@ -79,7 +80,7 @@ export function Footer() {
                 <li key={k} className="leading-relaxed">
                   <a
                     href={`#${k}`}
-                    className="transition-colors hover:text-[#048090]"
+                    className="transition-colors hover:text-white/80"
                     style={{ color: INK }}
                   >
                     {t.nav[k]}
@@ -121,8 +122,8 @@ export function Footer() {
               />
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: TEAL }}
+                className="inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-90"
+                style={{ backgroundColor: "#FFFFFF", color: TEAL }}
               >
                 {sent ? t.footer.form.sent : t.footer.form.send}
                 {!sent && <ArrowRight className={isRtl ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />}
@@ -154,28 +155,28 @@ export function Footer() {
                 className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
                 aria-hidden
               >
-                <MapPin className="h-5 w-5" style={{ color: TEAL }} strokeWidth={2.25} fill={TEAL} />
+                <MapPin className="h-5 w-5" style={{ color: "#FFFFFF" }} strokeWidth={2.25} fill="#FFFFFF" />
               </span>
             </a>
             <div className="mt-5 space-y-3 text-sm">
               <div className="flex items-start gap-2.5">
-                <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
+                <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
                 <span style={{ color: INK }}>{t.footer.address}</span>
               </div>
               <a
                 href="mailto:info@aisyria.org"
-                className="flex items-center gap-2.5 transition-colors hover:text-[#048090]"
+                className="flex items-center gap-2.5 transition-colors hover:text-white/80"
                 style={{ color: INK }}
               >
-                <Mail className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
+                <Mail className="h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
                 info@aisyria.org
               </a>
               <a
                 href="tel:+963930763547"
-                className="flex items-center gap-2.5 transition-colors hover:text-[#048090]"
+                className="flex items-center gap-2.5 transition-colors hover:text-white/80"
                 style={{ color: INK }}
               >
-                <Phone className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
+                <Phone className="h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
                 <span dir="ltr">+963 930 763 547</span>
               </a>
               <a
@@ -183,7 +184,7 @@ export function Footer() {
                 target="_blank"
                 rel="noreferrer"
                 className="group inline-flex items-center gap-1.5 pt-1 text-sm font-semibold"
-                style={{ color: TEAL }}
+                style={{ color: "#FFFFFF" }}
               >
                 {t.footer.visit}
                 <ArrowRight
@@ -198,13 +199,12 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom bar — teal divider + centered copyright */}
+        {/* Bottom bar — centered copyright */}
         <div
           className="mt-20 flex flex-col items-center gap-2 pt-6 text-center text-xs"
-          style={{ borderTop: `1px solid ${TEAL}`, color: "#555555" }}
+          style={{ borderTop: `1px solid rgba(255,255,255,0.25)`, color: MUTED }}
         >
           <span>© {new Date().getFullYear()} SAAE — {t.footer.rights}</span>
-          <span style={{ color: "#555555" }}>{t.footer.madeIn}</span>
         </div>
       </div>
     </footer>
