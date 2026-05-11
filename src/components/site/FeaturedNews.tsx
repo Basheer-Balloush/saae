@@ -83,37 +83,45 @@ export function FeaturedNews() {
 
       <div dir="ltr" className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
         <div className={`flex w-max gap-6 hover:[animation-play-state:paused] ${dir === "rtl" ? "animate-[news-marquee-rtl_60s_linear_infinite]" : "animate-[news-marquee_60s_linear_infinite]"}`}>
-          {row.map((c, i) => (
-            <a
-              key={`${c.key}-${i}`}
-              href="#"
-              className="group flex w-[320px] flex-none flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift sm:w-[360px]"
-            >
-              <div className="aspect-[16/10] overflow-hidden">
-                <img
-                  src={c.img}
-                  alt={c.title}
-                  className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
-                  loading="lazy"
-                />
-              </div>
-              <div className="flex flex-1 flex-col p-6">
-                <div className="flex items-center gap-3 text-xs">
-                  <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
-                    {c.cat}
-                  </span>
-                  <span className="text-muted-foreground">{c.date}</span>
+          {row.map((c, i) => {
+            const cardClass = "group flex w-[320px] flex-none flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift sm:w-[360px]";
+            const inner = (
+              <>
+                <div className="aspect-[16/10] overflow-hidden">
+                  <img
+                    src={c.img}
+                    alt={c.title}
+                    className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
+                    loading="lazy"
+                  />
                 </div>
-                <h3 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
-                  {c.title}
-                </h3>
-                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                  {t.news.readMore}
-                  <ArrowUpRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
-                </span>
-              </div>
-            </a>
-          ))}
+                <div className="flex flex-1 flex-col p-6">
+                  <div className="flex items-center gap-3 text-xs">
+                    <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
+                      {c.cat}
+                    </span>
+                    <span className="text-muted-foreground">{c.date}</span>
+                  </div>
+                  <h3 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
+                    {c.title}
+                  </h3>
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                    {t.news.readMore}
+                    <ArrowUpRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
+                  </span>
+                </div>
+              </>
+            );
+            return c.id ? (
+              <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id }} className={cardClass}>
+                {inner}
+              </Link>
+            ) : (
+              <Link key={`${c.key}-${i}`} to="/news" className={cardClass}>
+                {inner}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
