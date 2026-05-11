@@ -71,10 +71,6 @@ function Hero({ Arrow }: { Arrow: typeof ArrowRight }) {
       </div>
 
       <div className="relative mx-auto max-w-5xl px-6 py-20 text-center lg:px-10 lg:py-28">
-        <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-          <Sparkles className="h-3.5 w-3.5" />
-          عن الجمعية
-        </span>
         <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
           من نحن
         </h1>
