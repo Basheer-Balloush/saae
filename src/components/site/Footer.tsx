@@ -78,64 +78,73 @@ export function Footer() {
           </div>
 
 
-          {/* Col 4 — HQ Intelligence */}
+          {/* Col 3 — HQ Intelligence */}
           <div className="lg:col-span-4">
-            <a
-              href="https://www.google.com/maps?q=Damascus+University"
-              target="_blank"
-              rel="noreferrer"
-              className="relative mt-6 block aspect-[16/10] overflow-hidden rounded-md"
+            <div
+              className="rounded-2xl p-5"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.18)",
+                backdropFilter: "blur(6px)",
+              }}
             >
-              <img
-                src={locationMap}
-                alt="Damascus"
-                className="h-full w-full object-cover grayscale"
-                loading="lazy"
-              />
-              <span
-                className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
-                aria-hidden
-              >
-                <MapPin className="h-5 w-5" style={{ color: "#FFFFFF" }} strokeWidth={2.25} fill="#FFFFFF" />
-              </span>
-            </a>
-            <div className="mt-5 space-y-3 text-sm">
-              <div className="flex items-start gap-2.5">
-                <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
-                <span style={{ color: INK }}>{t.footer.address}</span>
-              </div>
               <a
-                href="mailto:info@aisyria.org"
-                className="flex items-center gap-2.5 transition-colors hover:text-white/80"
-                style={{ color: INK }}
-              >
-                <Mail className="h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
-                info@aisyria.org
-              </a>
-              <a
-                href="tel:+963930763547"
-                className="flex items-center gap-2.5 transition-colors hover:text-white/80"
-                style={{ color: INK }}
-              >
-                <Phone className="h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
-                <span dir="ltr">+963 930 763 547</span>
-              </a>
-              <a
-                href="https://www.google.com/maps?q=Damascus"
+                href="https://www.google.com/maps?q=Damascus+University"
                 target="_blank"
                 rel="noreferrer"
-                className="group inline-flex items-center gap-1.5 pt-1 text-sm font-semibold"
-                style={{ color: "#FFFFFF" }}
+                className="relative block aspect-[16/9] overflow-hidden rounded-lg"
               >
-                {t.footer.visit}
-                <ArrowRight
-                  className={`h-3.5 w-3.5 transition-transform duration-300 ${
-                    isRtl
-                      ? "-scale-x-100 group-hover:-translate-x-1"
-                      : "group-hover:translate-x-1"
-                  }`}
+                <img
+                  src={locationMap}
+                  alt="Damascus"
+                  className="h-full w-full object-cover grayscale"
+                  loading="lazy"
                 />
+                <span
+                  className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+                  aria-hidden
+                >
+                  <MapPin className="h-5 w-5" style={{ color: "#FFFFFF" }} strokeWidth={2.25} fill="#FFFFFF" />
+                </span>
               </a>
+              <div className="mt-4 space-y-2.5 text-sm">
+                <div className="flex items-start gap-2.5">
+                  <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
+                  <span style={{ color: INK }}>{t.footer.address}</span>
+                </div>
+                <a
+                  href="mailto:info@aisyria.org"
+                  className="flex items-center gap-2.5 transition-colors hover:text-white/80"
+                  style={{ color: INK }}
+                >
+                  <Mail className="h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
+                  info@aisyria.org
+                </a>
+                <a
+                  href="tel:+963930763547"
+                  className="flex items-center gap-2.5 transition-colors hover:text-white/80"
+                  style={{ color: INK }}
+                >
+                  <Phone className="h-4 w-4 flex-none" style={{ color: ACCENT }} strokeWidth={1.75} />
+                  <span dir="ltr">+963 930 763 547</span>
+                </a>
+                <a
+                  href="https://www.google.com/maps?q=Damascus"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group inline-flex items-center gap-1.5 pt-1 text-sm font-semibold"
+                  style={{ color: "#FFFFFF" }}
+                >
+                  {t.footer.visit}
+                  <ArrowRight
+                    className={`h-3.5 w-3.5 transition-transform duration-300 ${
+                      isRtl
+                        ? "-scale-x-100 group-hover:-translate-x-1"
+                        : "group-hover:translate-x-1"
+                    }`}
+                  />
+                </a>
+              </div>
             </div>
           </div>
         </div>
