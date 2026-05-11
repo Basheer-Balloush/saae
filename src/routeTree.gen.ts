@@ -14,9 +14,11 @@ import { Route as AttendanceManagementSystemRouteImport } from './routes/attenda
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
+import { Route as AttendanceManagementSystemIndexRouteImport } from './routes/attendance-management-system.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as NewsIdRouteImport } from './routes/news.$id'
 import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
+import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system.login'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
@@ -46,6 +48,12 @@ const NewsIndexRoute = NewsIndexRouteImport.update({
   path: '/news/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AttendanceManagementSystemIndexRoute =
+  AttendanceManagementSystemIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AttendanceManagementSystemRoute,
+  } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -61,6 +69,12 @@ const CommunitiesKeyRoute = CommunitiesKeyRouteImport.update({
   path: '/communities/$key',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AttendanceManagementSystemLoginRoute =
+  AttendanceManagementSystemLoginRouteImport.update({
+    id: '/login',
+    path: '/login',
+    getParentRoute: () => AttendanceManagementSystemRoute,
+  } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -75,38 +89,43 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/attendance-management-system': typeof AttendanceManagementSystemRoute
+  '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
+  '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
   '/news/$id': typeof NewsIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/attendance-management-system': typeof AttendanceManagementSystemRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
+  '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
   '/news/$id': typeof NewsIdRoute
   '/admin': typeof AdminIndexRoute
+  '/attendance-management-system': typeof AttendanceManagementSystemIndexRoute
   '/news': typeof NewsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/attendance-management-system': typeof AttendanceManagementSystemRoute
+  '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
+  '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
   '/news/$id': typeof NewsIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
 }
 export interface FileRouteTypes {
@@ -118,21 +137,24 @@ export interface FileRouteTypes {
     | '/super-admin'
     | '/admin/login'
     | '/api/chat'
+    | '/attendance-management-system/login'
     | '/communities/$key'
     | '/news/$id'
     | '/admin/'
+    | '/attendance-management-system/'
     | '/news/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/attendance-management-system'
     | '/super-admin'
     | '/admin/login'
     | '/api/chat'
+    | '/attendance-management-system/login'
     | '/communities/$key'
     | '/news/$id'
     | '/admin'
+    | '/attendance-management-system'
     | '/news'
   id:
     | '__root__'
@@ -142,16 +164,18 @@ export interface FileRouteTypes {
     | '/super-admin'
     | '/admin/login'
     | '/api/chat'
+    | '/attendance-management-system/login'
     | '/communities/$key'
     | '/news/$id'
     | '/admin/'
+    | '/attendance-management-system/'
     | '/news/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRoute
+  AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   SuperAdminRoute: typeof SuperAdminRoute
   AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -198,6 +222,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/attendance-management-system/': {
+      id: '/attendance-management-system/'
+      path: '/'
+      fullPath: '/attendance-management-system/'
+      preLoaderRoute: typeof AttendanceManagementSystemIndexRouteImport
+      parentRoute: typeof AttendanceManagementSystemRoute
+    }
     '/admin/': {
       id: '/admin/'
       path: '/admin'
@@ -219,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitiesKeyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/attendance-management-system/login': {
+      id: '/attendance-management-system/login'
+      path: '/login'
+      fullPath: '/attendance-management-system/login'
+      preLoaderRoute: typeof AttendanceManagementSystemLoginRouteImport
+      parentRoute: typeof AttendanceManagementSystemRoute
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -236,10 +274,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AttendanceManagementSystemRouteChildren {
+  AttendanceManagementSystemLoginRoute: typeof AttendanceManagementSystemLoginRoute
+  AttendanceManagementSystemIndexRoute: typeof AttendanceManagementSystemIndexRoute
+}
+
+const AttendanceManagementSystemRouteChildren: AttendanceManagementSystemRouteChildren =
+  {
+    AttendanceManagementSystemLoginRoute: AttendanceManagementSystemLoginRoute,
+    AttendanceManagementSystemIndexRoute: AttendanceManagementSystemIndexRoute,
+  }
+
+const AttendanceManagementSystemRouteWithChildren =
+  AttendanceManagementSystemRoute._addFileChildren(
+    AttendanceManagementSystemRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AttendanceManagementSystemRoute: AttendanceManagementSystemRoute,
+  AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   SuperAdminRoute: SuperAdminRoute,
   AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,

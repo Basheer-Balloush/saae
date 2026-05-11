@@ -1,0 +1,25 @@
+{
+  "name": "Attendance Management System",
+  "short_name": "AMS",
+  "id": "/attendance-management-system/",
+  "start_url": "/attendance-management-system/",
+  "scope": "/attendance-management-system/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#1d4ed8",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/ams-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/ams-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
