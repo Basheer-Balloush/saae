@@ -421,7 +421,7 @@ function Prelude({
 }
 
 /* ---------- SECTION 3: Activity Feed (Editorial Index) ---------- */
-function ActivityFeed({ isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
+function ActivityFeed({ isRtl, lang, activities }: { isRtl: boolean; lang: "ar" | "en"; activities: ActivityItem[] }) {
   const heading = lang === "ar" ? "الأخبار والفعاليات" : "News & Events";
   const sub = lang === "ar" ? "أرشيفٌ زمنيٌّ لما يصنعه المجتمع: ورشات، أبحاث، لقاءات وشراكات." : "A chronological index of what the community makes: workshops, research, meetups and partnerships.";
 
