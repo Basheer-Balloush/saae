@@ -41,7 +41,7 @@ export function Partners() {
               <img
                 src={p.logo}
                 alt={p.name}
-                className="h-28 w-auto object-contain transition-transform hover:scale-105"
+                className={`${p.sizeClass} w-auto object-contain transition-transform hover:scale-105`}
               />
             </motion.div>
           ))}
