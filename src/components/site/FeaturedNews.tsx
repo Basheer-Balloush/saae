@@ -42,7 +42,7 @@ export function FeaturedNews() {
           className="mb-12 flex flex-col gap-4 lg:mb-16 lg:flex-row lg:items-end lg:justify-between"
         >
           <div className="max-w-2xl">
-            <p className="text-caption text-primary">{t.news.eyebrow}</p>
+            
             <h1 className="mt-4 text-display-2 text-foreground">{t.news.title}</h1>
             <p className="mt-5 max-w-xl text-body text-muted-foreground">{t.news.subtitle}</p>
           </div>
