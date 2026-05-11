@@ -664,6 +664,48 @@ function AddRegistrantDialog({ courseId, onCreated }: { courseId: string; onCrea
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<PaymentStatus>("unpaid");
   const [saving, setSaving] = useState(false);
+  const [suggestions, setSuggestions] = useState<Registrant[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Debounced lookup of previous registrants by name (across courses).
+  useEffect(() => {
+    if (!open) return;
+    const q = fullName.trim();
+    if (q.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      const { data, error } = await supabase
+        .from("ams_registrants")
+        .select("*")
+        .ilike("full_name", `%${q}%`)
+        .neq("course_id", courseId)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) return;
+      // Keep only the most recent record per unique full_name.
+      const seen = new Set<string>();
+      const unique: Registrant[] = [];
+      for (const r of (data as Registrant[]) ?? []) {
+        const key = r.full_name.trim().toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        unique.push(r);
+        if (unique.length >= 6) break;
+      }
+      setSuggestions(unique);
+    }, 200);
+    return () => clearTimeout(handle);
+  }, [fullName, courseId, open]);
+
+  const applySuggestion = (r: Registrant) => {
+    setFullName(r.full_name);
+    setEmail(r.email ?? "");
+    setPhone(r.phone ?? "");
+    setStatus(r.payment_status);
+    setShowSuggestions(false);
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -692,6 +734,7 @@ function AddRegistrantDialog({ courseId, onCreated }: { courseId: string; onCrea
     setEmail("");
     setPhone("");
     setStatus("unpaid");
+    setSuggestions([]);
     setOpen(false);
     onCreated();
   };
@@ -709,9 +752,46 @@ function AddRegistrantDialog({ courseId, onCreated }: { courseId: string; onCrea
           <DialogTitle>{tr.addRegistrant}</DialogTitle>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-3">
-          <div>
+          <div className="relative">
             <Label htmlFor="fn">{tr.fullName}</Label>
-            <Input id="fn" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+            <Input
+              id="fn"
+              value={fullName}
+              onChange={(e) => {
+                setFullName(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+              autoComplete="off"
+              required
+            />
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-popover shadow-lg max-h-56 overflow-y-auto">
+                <div className="px-3 py-1.5 text-[10px] uppercase tracking-wide text-muted-foreground border-b border-border/60">
+                  {tr.previousRegistrants}
+                </div>
+                {suggestions.map((s) => (
+                  <button
+                    type="button"
+                    key={s.id}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      applySuggestion(s);
+                    }}
+                    className="w-full text-start px-3 py-2 hover:bg-accent transition-colors flex items-center justify-between gap-2"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium truncate">{s.full_name}</div>
+                      <div className="text-[11px] text-muted-foreground truncate" dir="ltr">
+                        {s.email || ""}{s.email && s.phone ? " · " : ""}{s.phone || ""}
+                      </div>
+                    </div>
+                    <span className="text-[11px] text-primary shrink-0">{tr.useDetails}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div>
             <Label htmlFor="em">{tr.emailField}</Label>
