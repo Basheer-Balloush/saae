@@ -141,10 +141,10 @@ export const translations: Record<Lang, Dict> = {
       body: "Through education, open research, and entrepreneurship, we are rebuilding technological capacity across Syria — empowering a generation of students, researchers, and founders with the tools, mentorship, and confidence to shape what comes next.",
       stats: [
         { value: "5,000+", label: "Learners" },
-        { value: "120+", label: "Courses" },
+        { value: "120+", label: "Training courses" },
         { value: "30+", label: "Strategic partners" },
-        { value: "15+", label: "Communities" },
-        { value: "50+", label: "Workshops" },
+        { value: "7", label: "Technical communities" },
+        { value: "5,000+", label: "Beneficiary students" },
       ],
     },
     partners: {
@@ -299,11 +299,11 @@ export const translations: Record<Lang, Dict> = {
       title: "نبني مستقبل سورية في الذكاء سطراً بسطر.",
       body: "من خلال التعليم والبحث المفتوح وريادة الأعمال، نعيد بناء القدرة التكنولوجية في سورية، ونمكّن جيلاً من الطلاب والباحثين والمؤسسين بالأدوات والإرشاد والثقة لصياغة ما هو قادم.",
       stats: [
-        { value: "+5,000", label: "متعلّم" },
-        { value: "+120", label: "دورة" },
+        { value: "+5,000", label: "المتعلمين" },
+        { value: "+120", label: "دورة تدريبية" },
         { value: "+30", label: "شريك استراتيجي" },
-        { value: "+15", label: "مجتمع" },
-        { value: "+50", label: "ورشة عمل" },
+        { value: "7", label: "مجتمعات تقنية" },
+        { value: "+5,000", label: "طالب مستفيد" },
       ],
     },
     partners: {
