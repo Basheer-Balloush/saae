@@ -621,9 +621,6 @@ function ImpactMatrix({ isRtl, lang, metrics }: { isRtl: boolean; lang: "ar" | "
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
           <motion.div {...fadeUp} className={`lg:col-span-5 ${isRtl ? "text-right" : "text-left"}`}>
-            <span className="text-xs font-semibold uppercase tracking-[0.22em]" style={{ color: TEAL }}>
-              {lang === "ar" ? "أرقام المجتمع" : "Community in Numbers"}
-            </span>
             <h2
               className="mt-5"
               style={{
