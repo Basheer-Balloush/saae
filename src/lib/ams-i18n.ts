@@ -23,6 +23,7 @@ export const amsT: Record<Lang, {
   welcome: string;
   noSections: string;
   loading: string;
+  copyright: string;
 }> = {
   en: {
     title: "Attendance Management",
@@ -47,6 +48,7 @@ export const amsT: Record<Lang, {
     welcome: "Welcome to the Attendance Management System. Sections will appear here soon.",
     noSections: "No sections configured yet.",
     loading: "Loading…",
+    copyright: "© {year} Syrian Association for AI & Entrepreneurship. All rights reserved.",
   },
   ar: {
     title: "نظام إدارة الحضور",
@@ -71,5 +73,6 @@ export const amsT: Record<Lang, {
     welcome: "مرحبًا بك في نظام إدارة الحضور. ستظهر الأقسام هنا قريبًا.",
     noSections: "لا توجد أقسام مُهيّأة بعد.",
     loading: "جارٍ التحميل…",
+    copyright: "© {year} الجمعية السورية للذكاء الاصطناعي وريادة الأعمال. جميع الحقوق محفوظة.",
   },
 };

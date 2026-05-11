@@ -5,6 +5,7 @@ import { useAmsAuth } from "@/hooks/useAmsAuth";
 import { registerAmsServiceWorker } from "@/lib/ams-pwa";
 import { AmsNavbar } from "@/components/ams/AmsNavbar";
 import { AmsInstallButton } from "@/components/ams/AmsInstallButton";
+import { AmsFooter } from "@/components/ams/AmsFooter";
 import { useLang } from "@/lib/i18n";
 import { amsT } from "@/lib/ams-i18n";
 
@@ -54,13 +55,13 @@ function AmsLayout() {
   const showSignOut = !isLoginPage && !!user && hasAccess;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <AmsNavbar
         onSignOut={handleSignOut}
         showSignOut={showSignOut}
         extra={<AmsInstallButton />}
       />
-      <div className="pt-20">
+      <div className="flex-1 pt-20 flex flex-col">
         {isLoginPage ? (
           <Outlet />
         ) : loading || !user || !hasAccess ? (
@@ -68,11 +69,12 @@ function AmsLayout() {
             <div className="text-sm text-muted-foreground">{tr.loading}</div>
           </div>
         ) : (
-          <main>
+          <main className="flex-1">
             <Outlet />
           </main>
         )}
       </div>
+      <AmsFooter />
     </div>
   );
 }
