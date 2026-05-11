@@ -29,7 +29,11 @@ export const Route = createFileRoute("/news")({
 type NewsRow = {
   id: string;
   title: string;
+  title_ar: string | null;
+  title_en: string | null;
   excerpt: string | null;
+  excerpt_ar: string | null;
+  excerpt_en: string | null;
   image_url: string | null;
   category: string;
   published_at: string;
@@ -37,6 +41,11 @@ type NewsRow = {
 
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
+
+function pick(ar: string | null, en: string | null, fallback: string | null, lang: "ar" | "en"): string {
+  if (lang === "ar") return ar || en || fallback || "";
+  return en || ar || fallback || "";
+}
 
 function NewsPage() {
   const { t, dir, lang } = useLang();
@@ -46,11 +55,11 @@ function NewsPage() {
   useEffect(() => {
     supabase
       .from("news")
-      .select("id,title,excerpt,image_url,category,published_at")
+      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,published_at")
       .order("published_at", { ascending: false })
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        setItems(data ?? []);
+        setItems((data ?? []) as NewsRow[]);
       });
   }, []);
 
@@ -88,43 +97,47 @@ function NewsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((n, i) => (
-                <Link
-                  key={n.id}
-                  to="/news/$id"
-                  params={{ id: n.id }}
-                  className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift"
-                >
-                  <div className="aspect-[16/10] overflow-hidden bg-muted">
-                    <img
-                      src={n.image_url || FALLBACK_IMG}
-                      alt={n.title}
-                      className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="flex flex-1 flex-col p-6">
-                    <div className="flex items-center gap-3 text-xs">
-                      <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
-                        {communityLabel(n.category, lang)}
-                      </span>
-                      <span className="text-muted-foreground">{n.published_at}</span>
+              {items.map((n) => {
+                const title = pick(n.title_ar, n.title_en, n.title, lang);
+                const excerpt = pick(n.excerpt_ar, n.excerpt_en, n.excerpt, lang);
+                return (
+                  <Link
+                    key={n.id}
+                    to="/news/$id"
+                    params={{ id: n.id }}
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift"
+                  >
+                    <div className="aspect-[16/10] overflow-hidden bg-muted">
+                      <img
+                        src={n.image_url || FALLBACK_IMG}
+                        alt={title}
+                        className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
+                        loading="lazy"
+                      />
                     </div>
-                    <h3 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
-                      {n.title}
-                    </h3>
-                    {n.excerpt ? (
-                      <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
-                        {n.excerpt}
-                      </p>
-                    ) : null}
-                    <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                      {t.news.readMore}
-                      <ArrowUpRight className={isRtl ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
-                    </span>
-                  </div>
-                </Link>
-              ))}
+                    <div className="flex flex-1 flex-col p-6">
+                      <div className="flex items-center gap-3 text-xs">
+                        <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
+                          {communityLabel(n.category, lang)}
+                        </span>
+                        <span className="text-muted-foreground">{n.published_at}</span>
+                      </div>
+                      <h3 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
+                        {title}
+                      </h3>
+                      {excerpt ? (
+                        <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
+                          {excerpt}
+                        </p>
+                      ) : null}
+                      <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                        {t.news.readMore}
+                        <ArrowUpRight className={isRtl ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           )}
 

@@ -40,7 +40,7 @@ export function FeaturedNews() {
   useEffect(() => {
     supabase
       .from("news")
-      .select("id,title,image_url,category,published_at")
+      .select("id,title,title_ar,title_en,image_url,category,published_at")
       .eq("show_on_home", true)
       .order("published_at", { ascending: false })
       .order("created_at", { ascending: false })
@@ -48,12 +48,12 @@ export function FeaturedNews() {
       .then(({ data }) => {
         if (data && data.length > 0) {
           setSlides(
-            data.map((r) => ({
+            data.map((r: any) => ({
               key: r.id,
               id: r.id,
               img: r.image_url || IMG.featured,
               cat: communityLabel(r.category, lang),
-              title: r.title,
+              title: (lang === "ar" ? (r.title_ar ?? r.title_en) : (r.title_en ?? r.title_ar)) ?? r.title,
               date: r.published_at,
             })),
           );
