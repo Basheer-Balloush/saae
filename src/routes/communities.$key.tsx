@@ -498,9 +498,6 @@ function ActivityFeed({ isRtl, lang, activities, loading }: { isRtl: boolean; la
     <section className="relative bg-surface py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-6 lg:px-10">
         <motion.div {...fadeUp} className={isRtl ? "text-right" : "text-left"}>
-          <span className="text-xs font-semibold uppercase tracking-[0.22em]" style={{ color: TEAL }}>
-            {lang === "ar" ? "نشاط المجتمع" : "Community Activity"}
-          </span>
           <h2
             className="mt-4"
             style={{
