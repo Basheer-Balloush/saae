@@ -10,9 +10,13 @@ const transport = new DefaultChatTransport({ api: "/api/chat" });
 export function AssistantChatModal({
   open,
   onClose,
+  prefill,
+  onPrefillConsumed,
 }: {
   open: boolean;
   onClose: () => void;
+  prefill?: string | null;
+  onPrefillConsumed?: () => void;
 }) {
   const { t, dir } = useLang();
   const a = t.assistant;
