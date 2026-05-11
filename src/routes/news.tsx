@@ -57,7 +57,7 @@ function NewsPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="pt-32 pb-24 lg:pt-40 lg:pb-32">
+      <main className="pt-24 pb-24 lg:pt-28 lg:pb-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
