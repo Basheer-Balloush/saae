@@ -151,10 +151,10 @@ export function Footer() {
 
         {/* Bottom bar — centered copyright */}
         <div
-          className="mt-12 flex flex-col items-center gap-2 pt-5 text-center text-xs"
+          className="mt-12 flex flex-col items-center gap-2 pt-5 text-center text-xs whitespace-pre-line"
           style={{ borderTop: `1px solid rgba(255,255,255,0.25)`, color: MUTED }}
         >
-          <span>© {new Date().getFullYear()} SAAE — {t.footer.rights}</span>
+          <span>© {new Date().getFullYear()} {isRtl ? "للجمعية السورية للذكاء الاصطناعي وريادة الأعمال\n جميع الحقوق محفوظة." : `SAAE — ${t.footer.rights}`}</span>
         </div>
       </div>
     </footer>
