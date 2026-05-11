@@ -1,6 +1,9 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { useLang } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
+import { communityLabel } from "@/lib/communityCategories";
 
 const IMG = {
   featured: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80",
@@ -13,12 +16,14 @@ const IMG = {
   g: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=900&q=80",
 };
 
+type Slide = { key: string; img: string; cat: string; title: string; date: string };
+
 export function FeaturedNews() {
-  const { t, dir } = useLang();
+  const { t, dir, lang } = useLang();
   const cats = t.news.categories;
   const items = t.news.items;
 
-  const slides = [
+  const fallback: Slide[] = [
     { key: "featured", img: IMG.featured, cat: cats.education, title: items.featured.title, date: items.featured.date },
     { key: "a", img: IMG.a, cat: cats.partnership, title: items.a.title, date: items.a.date },
     { key: "b", img: IMG.b, cat: cats.community, title: items.b.title, date: items.b.date },
@@ -29,7 +34,32 @@ export function FeaturedNews() {
     { key: "g", img: IMG.g, cat: cats.research, title: items.g.title, date: items.g.date },
   ];
 
-  const row = [...slides, ...slides];
+  const [slides, setSlides] = useState<Slide[]>(fallback);
+
+  useEffect(() => {
+    supabase
+      .from("news")
+      .select("id,title,image_url,category,published_at")
+      .eq("show_on_home", true)
+      .order("published_at", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(8)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setSlides(
+            data.map((r) => ({
+              key: r.id,
+              img: r.image_url || IMG.featured,
+              cat: communityLabel(r.category, lang),
+              title: r.title,
+              date: r.published_at,
+            })),
+          );
+        }
+      });
+  }, [lang]);
+
+  const row = slides.length > 0 ? [...slides, ...slides] : [];
 
   return (
     <section id="news" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32">
