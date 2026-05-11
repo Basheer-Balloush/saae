@@ -62,6 +62,15 @@ export function Communities() {
           </a>
         </div>
       </div>
+      <style>{`
+        @keyframes marquee-communities {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        [dir="rtl"] .animate-\\[marquee-communities_60s_linear_infinite\\] {
+          animation-direction: reverse;
+        }
+      `}</style>
     </section>
   );
 }
