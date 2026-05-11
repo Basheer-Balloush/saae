@@ -126,12 +126,18 @@ function NewsPage() {
               {items.map((n) => {
                 const title = pick(n.title_ar, n.title_en, n.title, lang);
                 const excerpt = pick(n.excerpt_ar, n.excerpt_en, n.excerpt, lang);
+                const isHighlight = highlightId === n.id;
                 return (
                   <Link
                     key={n.id}
+                    id={`news-card-${n.id}`}
                     to="/news/$id"
                     params={{ id: n.id }}
-                    className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift"
+                    className={`group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-soft transition-all duration-300 hover:shadow-lift ${
+                      isHighlight
+                        ? "border-primary ring-2 ring-primary/60 shadow-lift scale-[1.01]"
+                        : "border-border"
+                    }`}
                   >
                     <div className="aspect-[16/10] overflow-hidden bg-muted">
                       <img
