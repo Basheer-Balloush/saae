@@ -66,6 +66,7 @@ function AdminDashboard() {
   const [editing, setEditing] = useState<NewsRow | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [tab, setTab] = useState<"news" | "members">("news");
 
   useEffect(() => {
     if (!loading) {
@@ -145,75 +146,102 @@ function AdminDashboard() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-foreground">All news ({items.length})</h2>
-          <Button
-            onClick={() => {
-              setEditing(null);
-              setShowForm(true);
-            }}
+        <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-border bg-card p-1">
+          <button
+            type="button"
+            onClick={() => setTab("news")}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              tab === "news" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
           >
-            <Plus className="h-4 w-4" /> New article
-          </Button>
+            News
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("members")}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              tab === "members" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Members
+          </button>
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3">Cover</th>
-                <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">On home</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                    No news yet. Create your first article.
-                  </td>
-                </tr>
-              )}
-              {items.map((row) => (
-                <tr key={row.id} className="border-t border-border">
-                  <td className="px-4 py-3">
-                    {row.image_url ? (
-                      <img src={row.image_url} alt="" className="h-12 w-16 rounded object-cover" />
-                    ) : (
-                      <div className="h-12 w-16 rounded bg-muted" />
-                    )}
-                  </td>
-                  <td className="px-4 py-3 font-medium text-foreground">{row.title_en || row.title}</td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {COMMUNITY_LABELS_EN[row.category as CommunityKey] ?? row.category}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{row.published_at}</td>
-                  <td className="px-4 py-3">
-                    <Switch checked={row.show_on_home} onCheckedChange={(v) => toggleHome(row, v)} />
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setEditing(row);
-                        setShowForm(true);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(row.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {tab === "news" ? (
+          <>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground">All news ({items.length})</h2>
+              <Button
+                onClick={() => {
+                  setEditing(null);
+                  setShowForm(true);
+                }}
+              >
+                <Plus className="h-4 w-4" /> New article
+              </Button>
+            </div>
+
+            <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3">Cover</th>
+                    <th className="px-4 py-3">Title</th>
+                    <th className="px-4 py-3">Category</th>
+                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">On home</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
+                        No news yet. Create your first article.
+                      </td>
+                    </tr>
+                  )}
+                  {items.map((row) => (
+                    <tr key={row.id} className="border-t border-border">
+                      <td className="px-4 py-3">
+                        {row.image_url ? (
+                          <img src={row.image_url} alt="" className="h-12 w-16 rounded object-cover" />
+                        ) : (
+                          <div className="h-12 w-16 rounded bg-muted" />
+                        )}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-foreground">{row.title_en || row.title}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {COMMUNITY_LABELS_EN[row.category as CommunityKey] ?? row.category}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{row.published_at}</td>
+                      <td className="px-4 py-3">
+                        <Switch checked={row.show_on_home} onCheckedChange={(v) => toggleHome(row, v)} />
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditing(row);
+                            setShowForm(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDelete(row.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ) : (
+          <MembersAdmin />
+        )}
       </main>
 
       {showForm && (
