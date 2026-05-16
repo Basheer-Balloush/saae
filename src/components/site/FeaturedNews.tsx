@@ -106,7 +106,7 @@ export function FeaturedNews() {
       </div>
 
       <div dir="ltr" className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
-        <div className={`flex w-max gap-6 hover:[animation-play-state:paused] ${dir === "rtl" ? "animate-[news-marquee-rtl_60s_linear_infinite]" : "animate-[news-marquee_60s_linear_infinite]"}`}>
+        <div ref={rowRef} className={`flex w-max gap-6 hover:[animation-play-state:paused] ${dir === "rtl" ? "animate-[news-marquee-rtl_60s_linear_infinite]" : "animate-[news-marquee_60s_linear_infinite]"}`}>
           {row.map((c, i) => {
             const cardClass = "group flex w-[78vw] max-w-[320px] flex-none flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift sm:w-[340px] sm:max-w-none lg:w-[360px]";
             const inner = (
@@ -137,7 +137,7 @@ export function FeaturedNews() {
               </>
             );
             return (
-              <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id! }} className={cardClass}>
+              <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id! }} onClick={saveOffset} className={cardClass}>
                 {inner}
               </Link>
             );
