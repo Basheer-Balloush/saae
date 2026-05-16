@@ -25,6 +25,7 @@ type Dict = {
       suggestions: { title: string; desc: string };
     };
     chat: { name: string; status: string; user: string; bot: string; typing: string };
+    greeting: string;
   };
   footer: {
     mission: string; quickLinks: string; contact: string;
@@ -179,6 +180,7 @@ export const translations: Record<Lang, Dict> = {
         bot: "Great question! I can connect you with our partnerships team. Could I get your company name and email?",
         typing: "Assistant is typing…",
       },
+      greeting: "Need help? Chat with me 👋",
     },
     footer: {
       mission:
@@ -338,6 +340,7 @@ export const translations: Record<Lang, Dict> = {
         bot: "سؤال ممتاز! يسعدني توصيلك بفريق الشراكات. هل يمكنني أخذ اسم شركتك وبريدك الإلكتروني؟",
         typing: "المساعد يكتب…",
       },
+      greeting: "بحاجة لمساعدة؟ تحدّث معي 👋",
     },
     footer: {
       mission:

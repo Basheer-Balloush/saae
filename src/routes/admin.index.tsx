@@ -66,6 +66,7 @@ function AdminDashboard() {
   const [editing, setEditing] = useState<NewsRow | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [tab, setTab] = useState<"news" | "members">("news");
 
   useEffect(() => {
     if (!loading) {
@@ -145,75 +146,102 @@ function AdminDashboard() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-foreground">All news ({items.length})</h2>
-          <Button
-            onClick={() => {
-              setEditing(null);
-              setShowForm(true);
-            }}
+        <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-border bg-card p-1">
+          <button
+            type="button"
+            onClick={() => setTab("news")}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              tab === "news" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
           >
-            <Plus className="h-4 w-4" /> New article
-          </Button>
+            News
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("members")}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              tab === "members" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Members
+          </button>
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3">Cover</th>
-                <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">On home</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                    No news yet. Create your first article.
-                  </td>
-                </tr>
-              )}
-              {items.map((row) => (
-                <tr key={row.id} className="border-t border-border">
-                  <td className="px-4 py-3">
-                    {row.image_url ? (
-                      <img src={row.image_url} alt="" className="h-12 w-16 rounded object-cover" />
-                    ) : (
-                      <div className="h-12 w-16 rounded bg-muted" />
-                    )}
-                  </td>
-                  <td className="px-4 py-3 font-medium text-foreground">{row.title_en || row.title}</td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {COMMUNITY_LABELS_EN[row.category as CommunityKey] ?? row.category}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{row.published_at}</td>
-                  <td className="px-4 py-3">
-                    <Switch checked={row.show_on_home} onCheckedChange={(v) => toggleHome(row, v)} />
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setEditing(row);
-                        setShowForm(true);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(row.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {tab === "news" ? (
+          <>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground">All news ({items.length})</h2>
+              <Button
+                onClick={() => {
+                  setEditing(null);
+                  setShowForm(true);
+                }}
+              >
+                <Plus className="h-4 w-4" /> New article
+              </Button>
+            </div>
+
+            <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3">Cover</th>
+                    <th className="px-4 py-3">Title</th>
+                    <th className="px-4 py-3">Category</th>
+                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">On home</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
+                        No news yet. Create your first article.
+                      </td>
+                    </tr>
+                  )}
+                  {items.map((row) => (
+                    <tr key={row.id} className="border-t border-border">
+                      <td className="px-4 py-3">
+                        {row.image_url ? (
+                          <img src={row.image_url} alt="" className="h-12 w-16 rounded object-cover" />
+                        ) : (
+                          <div className="h-12 w-16 rounded bg-muted" />
+                        )}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-foreground">{row.title_en || row.title}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {COMMUNITY_LABELS_EN[row.category as CommunityKey] ?? row.category}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{row.published_at}</td>
+                      <td className="px-4 py-3">
+                        <Switch checked={row.show_on_home} onCheckedChange={(v) => toggleHome(row, v)} />
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditing(row);
+                            setShowForm(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDelete(row.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ) : (
+          <MembersAdmin />
+        )}
       </main>
 
       {showForm && (
@@ -549,6 +577,288 @@ function NewsForm({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
+            <Button type="submit" disabled={saving || uploading}>
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+              {initial ? "Save changes" : "Create"}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Members admin ---------- */
+
+type MemberRow = {
+  id: string;
+  category: "board" | "executive";
+  full_name_ar: string;
+  full_name_en: string | null;
+  position_ar: string;
+  position_en: string | null;
+  bio_ar: string | null;
+  bio_en: string | null;
+  photo_url: string | null;
+  display_order: number;
+};
+
+function MembersAdmin() {
+  const [list, setList] = useState<MemberRow[]>([]);
+  const [editing, setEditing] = useState<MemberRow | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [bump, setBump] = useState(0);
+
+  useEffect(() => {
+    supabase
+      .from("members")
+      .select("*")
+      .order("category", { ascending: true })
+      .order("display_order", { ascending: true })
+      .then(({ data, error }) => {
+        if (error) toast.error(error.message);
+        else setList((data ?? []) as MemberRow[]);
+      });
+  }, [bump]);
+
+  const remove = async (id: string) => {
+    if (!confirm("Delete this member?")) return;
+    const { error } = await supabase.from("members").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Deleted"); setBump((k) => k + 1); }
+  };
+
+  return (
+    <>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-foreground">Members ({list.length})</h2>
+        <Button onClick={() => { setEditing(null); setShowForm(true); }}>
+          <Plus className="h-4 w-4" /> New member
+        </Button>
+      </div>
+
+      <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3">Photo</th>
+              <th className="px-4 py-3">Name</th>
+              <th className="px-4 py-3">Position</th>
+              <th className="px-4 py-3">Category</th>
+              <th className="px-4 py-3">Order</th>
+              <th className="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {list.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
+                  No members yet.
+                </td>
+              </tr>
+            )}
+            {list.map((m) => (
+              <tr key={m.id} className="border-t border-border">
+                <td className="px-4 py-3">
+                  {m.photo_url ? (
+                    <img src={m.photo_url} alt="" className="h-10 w-10 rounded-full object-cover" />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-muted" />
+                  )}
+                </td>
+                <td className="px-4 py-3 font-medium text-foreground">{m.full_name_en || m.full_name_ar}</td>
+                <td className="px-4 py-3 text-muted-foreground">{m.position_en || m.position_ar}</td>
+                <td className="px-4 py-3 text-muted-foreground capitalize">{m.category}</td>
+                <td className="px-4 py-3 text-muted-foreground">{m.display_order}</td>
+                <td className="px-4 py-3 text-right">
+                  <Button variant="ghost" size="sm" onClick={() => { setEditing(m); setShowForm(true); }}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => remove(m.id)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {showForm && (
+        <MemberForm
+          initial={editing}
+          onClose={() => setShowForm(false)}
+          onSaved={() => { setShowForm(false); setBump((k) => k + 1); }}
+        />
+      )}
+    </>
+  );
+}
+
+function MemberForm({
+  initial,
+  onClose,
+  onSaved,
+}: {
+  initial: MemberRow | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [category, setCategory] = useState<"board" | "executive">(initial?.category ?? "board");
+  const [nameAr, setNameAr] = useState(initial?.full_name_ar ?? "");
+  const [nameEn, setNameEn] = useState(initial?.full_name_en ?? "");
+  const [posAr, setPosAr] = useState(initial?.position_ar ?? "");
+  const [posEn, setPosEn] = useState(initial?.position_en ?? "");
+  const [bioAr, setBioAr] = useState(initial?.bio_ar ?? "");
+  const [bioEn, setBioEn] = useState(initial?.bio_en ?? "");
+  const [photoUrl, setPhotoUrl] = useState(initial?.photo_url ?? "");
+  const [order, setOrder] = useState(initial?.display_order ?? 0);
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handlePhoto = async (file: File) => {
+    setUploading(true);
+    try {
+      const url = await uploadToBucket(file, "image");
+      setPhotoUrl(url);
+      toast.success("Photo uploaded");
+    } catch (err: any) {
+      toast.error(err.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nameAr.trim() || !posAr.trim()) {
+      toast.error("Arabic name and position are required");
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = {
+        category,
+        full_name_ar: nameAr.trim(),
+        full_name_en: nameEn.trim() || null,
+        position_ar: posAr.trim(),
+        position_en: posEn.trim() || null,
+        bio_ar: bioAr.trim() || null,
+        bio_en: bioEn.trim() || null,
+        photo_url: photoUrl || null,
+        display_order: Number(order) || 0,
+      };
+      if (initial) {
+        const { error } = await supabase.from("members").update(payload).eq("id", initial.id);
+        if (error) throw error;
+        toast.success("Updated");
+      } else {
+        const { error } = await supabase.from("members").insert(payload);
+        if (error) throw error;
+        toast.success("Created");
+      }
+      onSaved();
+    } catch (err: any) {
+      toast.error(err.message ?? "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir="ltr">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-card p-7 shadow-lift">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-bold text-foreground">
+            {initial ? "Edit member" : "New member"}
+          </h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={onSubmit} className="mt-5 space-y-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label>Category</Label>
+              <Select value={category} onValueChange={(v) => setCategory(v as "board" | "executive")}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="board">Board of Directors</SelectItem>
+                  <SelectItem value="executive">Executive Members</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="order">Display order</Label>
+              <Input id="order" type="number" value={order} onChange={(e) => setOrder(Number(e.target.value))} />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="name_en">Name (English)</Label>
+              <Input id="name_en" value={nameEn} onChange={(e) => setNameEn(e.target.value)} maxLength={120} />
+            </div>
+            <div dir="rtl">
+              <Label htmlFor="name_ar">الاسم (عربي)</Label>
+              <Input id="name_ar" value={nameAr} onChange={(e) => setNameAr(e.target.value)} required maxLength={120} />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="pos_en">Position (English)</Label>
+              <Input id="pos_en" value={posEn} onChange={(e) => setPosEn(e.target.value)} maxLength={120} />
+            </div>
+            <div dir="rtl">
+              <Label htmlFor="pos_ar">المنصب (عربي)</Label>
+              <Input id="pos_ar" value={posAr} onChange={(e) => setPosAr(e.target.value)} required maxLength={120} />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="bio_en">Bio (English)</Label>
+              <Textarea id="bio_en" value={bioEn} onChange={(e) => setBioEn(e.target.value)} rows={4} maxLength={1000} />
+            </div>
+            <div dir="rtl">
+              <Label htmlFor="bio_ar">نبذة (عربي)</Label>
+              <Textarea id="bio_ar" value={bioAr} onChange={(e) => setBioAr(e.target.value)} rows={4} maxLength={1000} />
+            </div>
+          </div>
+
+          <div>
+            <Label>Photo</Label>
+            <div className="mt-2 flex items-center gap-4">
+              {photoUrl ? (
+                <img src={photoUrl} alt="" className="h-20 w-20 rounded-full object-cover" />
+              ) : (
+                <div className="h-20 w-20 rounded-full bg-muted" />
+              )}
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
+                <Upload className="h-4 w-4" />
+                {uploading ? "Uploading…" : "Upload photo"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handlePhoto(f);
+                  }}
+                />
+              </label>
+              {photoUrl && (
+                <button type="button" className="text-xs text-destructive hover:underline" onClick={() => setPhotoUrl("")}>
+                  Remove
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
             <Button type="submit" disabled={saving || uploading}>
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {initial ? "Save changes" : "Create"}
