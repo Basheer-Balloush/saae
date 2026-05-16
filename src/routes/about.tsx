@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { useLang } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sparkles,
   Target,
@@ -18,7 +20,21 @@ import {
   Share2,
   ArrowLeft,
   ArrowRight,
+  UserCircle2,
 } from "lucide-react";
+
+type Member = {
+  id: string;
+  category: "board" | "executive";
+  full_name_ar: string;
+  full_name_en: string | null;
+  position_ar: string;
+  position_en: string | null;
+  bio_ar: string | null;
+  bio_en: string | null;
+  photo_url: string | null;
+  display_order: number;
+};
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -53,10 +69,82 @@ function AboutPage() {
         <Goals />
         <Fields />
         <Values />
-        
+        <MembersSection category="board" />
+        <MembersSection category="executive" />
       </main>
       <Footer />
     </div>
+  );
+}
+
+/* ---------- MEMBERS ---------- */
+function MembersSection({ category }: { category: "board" | "executive" }) {
+  const { lang } = useLang();
+  const [members, setMembers] = useState<Member[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("members")
+      .select("*")
+      .eq("category", category)
+      .order("display_order", { ascending: true })
+      .then(({ data }) => setMembers((data ?? []) as Member[]));
+  }, [category]);
+
+  const title = category === "board"
+    ? (lang === "ar" ? "مجلس الإدارة" : "Board of Directors")
+    : (lang === "ar" ? "الفريق التنفيذي" : "Executive Members");
+
+  const subtitle = category === "board"
+    ? (lang === "ar"
+        ? "القيادة الاستراتيجية التي ترسم رؤية الجمعية واتجاهها."
+        : "The strategic leadership shaping the association's vision and direction.")
+    : (lang === "ar"
+        ? "الفريق الذي يقود العمل اليومي ويُترجم الرؤية إلى أثر ملموس."
+        : "The team driving daily operations and turning vision into measurable impact.");
+
+  if (members.length === 0) return null;
+
+  const pick = (ar: string | null, en: string | null) =>
+    lang === "ar" ? (ar ?? en ?? "") : (en ?? ar ?? "");
+
+  return (
+    <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
+      <div className="mx-auto max-w-3xl text-center">
+        <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
+        <p className="mt-5 text-base leading-loose text-muted-foreground">{subtitle}</p>
+      </div>
+
+      <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {members.map((m) => (
+          <article
+            key={m.id}
+            className="group flex flex-col items-center rounded-3xl border border-border bg-card p-7 text-center transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-soft"
+          >
+            <div className="relative h-28 w-28 overflow-hidden rounded-full ring-4 ring-primary/10">
+              {m.photo_url ? (
+                <img src={m.photo_url} alt={pick(m.full_name_ar, m.full_name_en)} className="h-full w-full object-cover" loading="lazy" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
+                  <UserCircle2 className="h-14 w-14" />
+                </div>
+              )}
+            </div>
+            <h3 className="mt-5 text-lg font-bold text-foreground">
+              {pick(m.full_name_ar, m.full_name_en)}
+            </h3>
+            <p className="mt-1 text-sm font-semibold text-primary">
+              {pick(m.position_ar, m.position_en)}
+            </p>
+            {(m.bio_ar || m.bio_en) && (
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                {pick(m.bio_ar, m.bio_en)}
+              </p>
+            )}
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
