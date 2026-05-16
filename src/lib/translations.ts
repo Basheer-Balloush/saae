@@ -25,6 +25,7 @@ type Dict = {
       suggestions: { title: string; desc: string };
     };
     chat: { name: string; status: string; user: string; bot: string; typing: string };
+    greeting: string;
   };
   footer: {
     mission: string; quickLinks: string; contact: string;
