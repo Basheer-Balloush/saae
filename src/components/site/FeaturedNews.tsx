@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { communityLabel } from "@/lib/communityCategories";
+
+const SCROLL_KEY = "saae-news-marquee-offset";
 
 const IMG = {
   featured: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80",
@@ -25,6 +27,7 @@ export function FeaturedNews() {
   const items = t.news.items;
 
   const [slides, setSlides] = useState<Slide[] | null>(null);
+  const rowRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     supabase
@@ -46,6 +49,38 @@ export function FeaturedNews() {
         setSlides(mapped);
       });
   }, [lang]);
+
+  // Restore marquee position when returning from a news detail page.
+  useEffect(() => {
+    if (!slides || slides.length === 0) return;
+    if (typeof window === "undefined") return;
+    const raw = sessionStorage.getItem(SCROLL_KEY);
+    if (!raw) return;
+    const savedPx = parseFloat(raw);
+    if (!Number.isFinite(savedPx)) return;
+    const row = rowRef.current;
+    if (!row) return;
+    // Wait for layout/images so scrollWidth is accurate.
+    const apply = () => {
+      const cycle = row.scrollWidth / 2; // duplicated row
+      if (!cycle) return;
+      const pct = Math.min(Math.max(savedPx / cycle, 0), 1);
+      // CSS animation runs 60s, translates 0 → -50%. delay = -(pct * 60s).
+      row.style.animationDelay = `-${(pct * 60).toFixed(3)}s`;
+      sessionStorage.removeItem(SCROLL_KEY);
+    };
+    const id = window.setTimeout(apply, 50);
+    return () => window.clearTimeout(id);
+  }, [slides, dir]);
+
+  const saveOffset = () => {
+    const row = rowRef.current;
+    if (!row) return;
+    const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
+    // translateX is negative while marquee moves left; for RTL it goes the other way.
+    const offset = Math.abs(m.m41);
+    try { sessionStorage.setItem(SCROLL_KEY, String(offset)); } catch {}
+  };
 
   // Hide section entirely until we have published news to show
   if (!slides || slides.length === 0) return null;
