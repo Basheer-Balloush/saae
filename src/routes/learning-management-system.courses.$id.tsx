@@ -83,8 +83,27 @@ function CourseDetails() {
       if (error) throw error;
       setEnrolled(true);
       toast.success(tr.enrollmentSuccess);
+      // refresh balance
+      const { data: w } = await supabase.from("lms_wallets").select("balance").eq("user_id", user.id).maybeSingle();
+      setBalance(w ? Number((w as { balance: number }).balance) : 0);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : tr.authFailed);
+      const rawMsg =
+        (err && typeof err === "object" && "message" in err && typeof (err as { message: unknown }).message === "string")
+          ? (err as { message: string }).message
+          : "";
+      const map: Record<string, string> = {
+        "insufficient balance": lang === "ar" ? "رصيدك غير كافٍ" : "Insufficient balance",
+        "already enrolled": lang === "ar" ? "أنت مسجَّل في هذه الدورة" : "Already enrolled",
+        "invalid coupon": lang === "ar" ? "كود الخصم غير صالح" : "Invalid coupon",
+        "coupon expired": lang === "ar" ? "انتهت صلاحية كود الخصم" : "Coupon expired",
+        "coupon exhausted": lang === "ar" ? "استُنفد كود الخصم" : "Coupon exhausted",
+        "coupon not valid for this course": lang === "ar" ? "كود الخصم لا يصلح لهذه الدورة" : "Coupon not valid for this course",
+        "course not published": lang === "ar" ? "الدورة غير منشورة" : "Course not published",
+        "course not found": lang === "ar" ? "الدورة غير موجودة" : "Course not found",
+        "unauthenticated": lang === "ar" ? "يجب تسجيل الدخول أوّلاً" : "You must sign in first",
+      };
+      const key = Object.keys(map).find((k) => rawMsg.toLowerCase().includes(k));
+      toast.error(key ? map[key] : (rawMsg || (lang === "ar" ? "تعذّر إتمام العمليّة" : "Operation failed")));
     } finally {
       setEnrolling(false);
     }
