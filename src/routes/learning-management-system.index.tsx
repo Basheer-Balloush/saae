@@ -46,7 +46,7 @@ function LmsHome() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border bg-gradient-to-br from-primary/10 via-background to-accent/10 py-32 sm:py-44 lg:py-52 min-h-[80vh] flex items-center">
+      <section className="relative overflow-hidden border-b border-border bg-gradient-to-br from-primary/10 via-background to-accent/10 py-20 sm:py-28 lg:py-36 min-h-[60vh] flex items-center">
         {/* Animated blurred background blobs */}
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-32 -left-24 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-blob-1" />
