@@ -563,6 +563,8 @@ export type Database = {
         Row: {
           attachments: Json
           content_md: string | null
+          content_md_ar: string | null
+          content_md_en: string | null
           created_at: string
           display_order: number
           duration_seconds: number
@@ -570,11 +572,15 @@ export type Database = {
           is_preview: boolean
           section_id: string
           title: string
+          title_ar: string | null
+          title_en: string | null
           video_url: string | null
         }
         Insert: {
           attachments?: Json
           content_md?: string | null
+          content_md_ar?: string | null
+          content_md_en?: string | null
           created_at?: string
           display_order?: number
           duration_seconds?: number
@@ -582,11 +588,15 @@ export type Database = {
           is_preview?: boolean
           section_id: string
           title: string
+          title_ar?: string | null
+          title_en?: string | null
           video_url?: string | null
         }
         Update: {
           attachments?: Json
           content_md?: string | null
+          content_md_ar?: string | null
+          content_md_en?: string | null
           created_at?: string
           display_order?: number
           duration_seconds?: number
@@ -594,6 +604,8 @@ export type Database = {
           is_preview?: boolean
           section_id?: string
           title?: string
+          title_ar?: string | null
+          title_en?: string | null
           video_url?: string | null
         }
         Relationships: [
@@ -781,6 +793,8 @@ export type Database = {
           display_order: number
           id: string
           title: string
+          title_ar: string | null
+          title_en: string | null
         }
         Insert: {
           course_id: string
@@ -788,6 +802,8 @@ export type Database = {
           display_order?: number
           id?: string
           title: string
+          title_ar?: string | null
+          title_en?: string | null
         }
         Update: {
           course_id?: string
@@ -795,6 +811,8 @@ export type Database = {
           display_order?: number
           id?: string
           title?: string
+          title_ar?: string | null
+          title_en?: string | null
         }
         Relationships: [
           {

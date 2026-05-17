@@ -14,8 +14,13 @@ export const Route = createFileRoute("/learning-management-system/student/player
   component: Player,
 });
 
-type Section = { id: string; title: string; display_order: number };
-type Lesson = { id: string; section_id: string; title: string; video_url: string | null; content_md: string | null; attachments: unknown; display_order: number };
+type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
+type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; attachments: unknown; display_order: number };
+
+const pick = (lang: "ar" | "en", ar: string | null | undefined, en: string | null | undefined, fallback: string) => {
+  if (lang === "en") return en || ar || fallback;
+  return ar || en || fallback;
+};
 type Progress = { lesson_id: string; is_completed: boolean };
 
 function Player() {
@@ -34,12 +39,12 @@ function Player() {
     if (!user) return;
     (async () => {
       const { data: secs } = await supabase.from("lms_sections")
-        .select("id,title,display_order").eq("course_id", courseId).order("display_order");
+        .select("id,title,title_ar,title_en,display_order").eq("course_id", courseId).order("display_order");
       setSections((secs as Section[]) ?? []);
       if (secs && secs.length) {
         const ids = secs.map((s) => s.id);
         const [{ data: lss }, { data: prs }] = await Promise.all([
-          supabase.from("lms_lessons").select("id,section_id,title,video_url,content_md,attachments,display_order").in("section_id", ids).order("display_order"),
+          supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids).order("display_order"),
           supabase.from("lms_lesson_progress").select("lesson_id,is_completed").eq("student_id", user.id),
         ]);
         const list = (lss as Lesson[]) ?? [];
@@ -53,11 +58,9 @@ function Player() {
 
   const current = useMemo(() => lessons.find((l) => l.id === currentId) ?? null, [lessons, currentId]);
   const isDone = (id: string) => progress.find((p) => p.lesson_id === id)?.is_completed === true;
-  const hasArabicContent = useMemo(
-    () => [...sections.map((s) => s.title), ...lessons.map((l) => l.title)].some((title) => /[\u0600-\u06FF]/.test(title)),
-    [sections, lessons],
-  );
-  const isRtl = lang === "ar" || hasArabicContent;
+  const isRtl = lang === "ar";
+  const currentTitle = current ? pick(lang, current.title_ar, current.title_en, current.title) : "";
+  const currentContent = current ? pick(lang, current.content_md_ar, current.content_md_en, current.content_md ?? "") : "";
 
   // Resolve private video paths to fresh short-lived signed URLs
   useEffect(() => {
@@ -121,7 +124,7 @@ function Player() {
         {current && (
           <>
             <div className="mt-4 flex items-start justify-between gap-3 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-foreground">{current.title}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">{currentTitle}</h1>
               <div className="flex gap-2">
                 <Link to="/learning-management-system/student/quiz/$courseId" params={{ courseId }}>
                   <Button variant="outline" size="sm"><Award className="h-4 w-4 mx-1" />{tr.finalTest}</Button>
@@ -133,9 +136,9 @@ function Player() {
               </div>
             </div>
 
-            {current.content_md && (
+            {currentContent && (
               <div className="mt-4 prose prose-sm max-w-none text-foreground whitespace-pre-wrap">
-                {current.content_md}
+                {currentContent}
               </div>
             )}
 
@@ -166,7 +169,7 @@ function Player() {
       <aside dir={isRtl ? "rtl" : "ltr"} className="rounded-2xl border border-border bg-card overflow-hidden self-start lg:sticky lg:top-24 max-h-[80vh] overflow-y-auto">
         {sections.map((s) => (
           <div key={s.id}>
-            <div className={cn("px-4 py-2.5 bg-muted/40 font-semibold text-foreground text-sm", isRtl && "text-right")}>{s.title}</div>
+            <div className={cn("px-4 py-2.5 bg-muted/40 font-semibold text-foreground text-sm", isRtl && "text-right")}>{pick(lang, s.title_ar, s.title_en, s.title)}</div>
             <ul>
               {lessons.filter((l) => l.section_id === s.id).map((l) => {
                 const done = isDone(l.id);
@@ -185,7 +188,7 @@ function Player() {
                       {done ? <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" /> :
                         active ? <PlayCircle className="h-4 w-4 mt-0.5 shrink-0" /> :
                         <Circle className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />}
-                      <span className="flex-1">{l.title}</span>
+                      <span className="flex-1">{pick(lang, l.title_ar, l.title_en, l.title)}</span>
                     </button>
                   </li>
                 );
