@@ -187,13 +187,19 @@ function InstructorAssignments() {
               className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
             >
               <option value="">{t(lang, "بدون درس محدد", "No specific lesson")}</option>
-              {sections.map((s) => (
-                <optgroup key={s.id} label={pick(lang, s.title_ar, s.title_en, "")}>
-                  {lessons.filter((l) => l.section_id === s.id).map((l) => (
-                    <option key={l.id} value={l.id}>{pick(lang, l.title_ar, l.title_en, "")}</option>
-                  ))}
-                </optgroup>
-              ))}
+              {sections.map((s, si) => {
+                const secLessons = lessons.filter((l) => l.section_id === s.id);
+                if (secLessons.length === 0) return null;
+                const secLabel = pick(lang, s.title_ar, s.title_en, "") || t(lang, `القسم ${si + 1}`, `Section ${si + 1}`);
+                return (
+                  <optgroup key={s.id} label={secLabel}>
+                    {secLessons.map((l, li) => {
+                      const lessonLabel = pick(lang, l.title_ar, l.title_en, "") || t(lang, `الدرس ${li + 1}`, `Lesson ${li + 1}`);
+                      return <option key={l.id} value={l.id}>{lessonLabel}</option>;
+                    })}
+                  </optgroup>
+                );
+              })}
             </select>
           </div>
           <div>
