@@ -63,9 +63,9 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
     if (data) setQuestions([...questions, data as Question]);
   };
 
-  const updateQ = async (qid: string, patch: Partial<Question>) => {
+  const updateQ = async (qid: string, patch: { question?: string; choices?: string[]; correct_index?: number }) => {
     setQuestions(questions.map((q) => q.id === qid ? { ...q, ...patch } : q));
-    await supabase.from("lms_quiz_questions").update(patch).eq("id", qid);
+    await supabase.from("lms_quiz_questions").update(patch as never).eq("id", qid);
   };
 
   const deleteQ = async (qid: string) => {
@@ -126,7 +126,7 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
                     <Input value={c} onChange={(e) => {
                       const next = [...choices]; next[idx] = e.target.value;
                       setQuestions(questions.map((x) => x.id === q.id ? { ...x, choices: next } : x));
-                    }} onBlur={() => updateQ(q.id, { choices: choices as unknown as never })} className="flex-1 h-8" />
+                    }} onBlur={() => updateQ(q.id, { choices })} className="flex-1 h-8" />
                   </div>
                 ))}
                 <p className="text-xs text-muted-foreground">{tr.correctAnswer}: <b>{String.fromCharCode(65 + q.correct_index)}</b></p>
