@@ -312,6 +312,42 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_coupons: {
+        Row: {
+          active: boolean
+          code: string
+          course_id: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          percent_off: number
+          used_count: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          course_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          percent_off: number
+          used_count?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          course_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          percent_off?: number
+          used_count?: number
+        }
+        Relationships: []
+      }
       lms_courses: {
         Row: {
           category_id: string | null
@@ -421,6 +457,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lms_instructor_earnings: {
+        Row: {
+          commission: number
+          course_id: string
+          created_at: string
+          gross: number
+          id: string
+          instructor_id: string
+          net: number
+          student_id: string
+        }
+        Insert: {
+          commission: number
+          course_id: string
+          created_at?: string
+          gross: number
+          id?: string
+          instructor_id: string
+          net: number
+          student_id: string
+        }
+        Update: {
+          commission?: number
+          course_id?: string
+          created_at?: string
+          gross?: number
+          id?: string
+          instructor_id?: string
+          net?: number
+          student_id?: string
+        }
+        Relationships: []
       }
       lms_instructors: {
         Row: {
@@ -536,6 +605,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lms_payouts: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          instructor_id: string
+          method: string | null
+          notes: string | null
+          processed_at: string | null
+          status: Database["public"]["Enums"]["lms_payout_status"]
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          instructor_id: string
+          method?: string | null
+          notes?: string | null
+          processed_at?: string | null
+          status?: Database["public"]["Enums"]["lms_payout_status"]
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          instructor_id?: string
+          method?: string | null
+          notes?: string | null
+          processed_at?: string | null
+          status?: Database["public"]["Enums"]["lms_payout_status"]
+        }
+        Relationships: []
       }
       lms_quiz_attempts: {
         Row: {
@@ -704,6 +806,81 @@ export type Database = {
           },
         ]
       }
+      lms_settings: {
+        Row: {
+          commission_pct: number
+          currency: string
+          id: boolean
+          min_payout: number
+          updated_at: string
+        }
+        Insert: {
+          commission_pct?: number
+          currency?: string
+          id?: boolean
+          min_payout?: number
+          updated_at?: string
+        }
+        Update: {
+          commission_pct?: number
+          currency?: string
+          id?: boolean
+          min_payout?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lms_transactions: {
+        Row: {
+          amount: number
+          course_id: string | null
+          created_at: string
+          id: string
+          meta: Json
+          type: Database["public"]["Enums"]["lms_tx_type"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          meta?: Json
+          type: Database["public"]["Enums"]["lms_tx_type"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          meta?: Json
+          type?: Database["public"]["Enums"]["lms_tx_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lms_wallets: {
+        Row: {
+          balance: number
+          pending_payout: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          pending_payout?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          pending_payout?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       members: {
         Row: {
           bio_ar: string | null
@@ -854,7 +1031,23 @@ export type Database = {
         Returns: boolean
       }
       is_lms_admin: { Args: { _user_id: string }; Returns: boolean }
+      lms_admin_topup: {
+        Args: { _amount: number; _notes?: string; _user_id: string }
+        Returns: undefined
+      }
+      lms_checkout: {
+        Args: { _coupon?: string; _course_id: string }
+        Returns: Json
+      }
       lms_enroll: { Args: { _course_id: string }; Returns: string }
+      lms_process_payout: {
+        Args: { _approve: boolean; _payout_id: string }
+        Returns: undefined
+      }
+      lms_request_payout: {
+        Args: { _amount: number; _method?: string; _notes?: string }
+        Returns: string
+      }
       lms_submit_quiz: {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json
@@ -872,6 +1065,14 @@ export type Database = {
         | "lms_admin"
       lms_course_level: "beginner" | "intermediate" | "advanced"
       lms_course_status: "draft" | "pending" | "rejected" | "published"
+      lms_payout_status: "pending" | "approved" | "rejected" | "paid"
+      lms_tx_type:
+        | "topup"
+        | "purchase"
+        | "earning"
+        | "payout"
+        | "refund"
+        | "adjustment"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1011,6 +1212,15 @@ export const Constants = {
       ],
       lms_course_level: ["beginner", "intermediate", "advanced"],
       lms_course_status: ["draft", "pending", "rejected", "published"],
+      lms_payout_status: ["pending", "approved", "rejected", "paid"],
+      lms_tx_type: [
+        "topup",
+        "purchase",
+        "earning",
+        "payout",
+        "refund",
+        "adjustment",
+      ],
     },
   },
 } as const
