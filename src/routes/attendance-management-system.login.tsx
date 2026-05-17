@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAmsAuth } from "@/hooks/useAmsAuth";
 import { useLang } from "@/lib/i18n";
 import { amsT } from "@/lib/ams-i18n";
+import { localizeAuthError } from "@/lib/auth-error-i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,8 +65,7 @@ function AmsLogin() {
 
       toast.success(tr.signedIn);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : tr.authFailed;
-      toast.error(msg);
+      toast.error(localizeAuthError(err, lang, tr.authFailed));
     } finally {
       setSubmitting(false);
     }
