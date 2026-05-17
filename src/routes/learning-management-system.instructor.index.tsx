@@ -104,7 +104,7 @@ function InstructorHome() {
                 <span>
                   {c.is_free ? tr.free : (
                     <span dir="ltr" className="inline-flex flex-row items-center gap-1">
-                      <span>ل.س</span>
+                      <span dir="rtl">ل.س</span>
                       <span>{c.price.toLocaleString()}</span>
                     </span>
                   )}
