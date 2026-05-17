@@ -87,6 +87,28 @@ export const lmsT: Record<Lang, {
   authRequired: string;
   enrollmentSuccess: string;
   comingSoon: string;
+  // quizzes & certificates
+  finalTest: string;
+  startTest: string;
+  submitTest: string;
+  passScore: string;
+  yourScore: string;
+  testPassed: string;
+  testFailed: string;
+  retakeTest: string;
+  noTestYet: string;
+  certificate: string;
+  certificateIssued: string;
+  viewCertificate: string;
+  certificateOf: string;
+  hasCompleted: string;
+  serial: string;
+  issuedOn: string;
+  printCertificate: string;
+  question: string;
+  addQuestion: string;
+  correctAnswer: string;
+  mustCompleteFirst: string;
 }> = {
   ar: {
     brand: "منصة التعلم",
