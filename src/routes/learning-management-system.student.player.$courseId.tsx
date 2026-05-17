@@ -169,7 +169,7 @@ function Player() {
       <aside dir={isRtl ? "rtl" : "ltr"} className="rounded-2xl border border-border bg-card overflow-hidden self-start lg:sticky lg:top-24 max-h-[80vh] overflow-y-auto">
         {sections.map((s) => (
           <div key={s.id}>
-            <div className={cn("px-4 py-2.5 bg-muted/40 font-semibold text-foreground text-sm", isRtl && "text-right")}>{s.title}</div>
+            <div className={cn("px-4 py-2.5 bg-muted/40 font-semibold text-foreground text-sm", isRtl && "text-right")}>{pick(lang, s.title_ar, s.title_en, s.title)}</div>
             <ul>
               {lessons.filter((l) => l.section_id === s.id).map((l) => {
                 const done = isDone(l.id);
@@ -188,7 +188,7 @@ function Player() {
                       {done ? <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" /> :
                         active ? <PlayCircle className="h-4 w-4 mt-0.5 shrink-0" /> :
                         <Circle className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />}
-                      <span className="flex-1">{l.title}</span>
+                      <span className="flex-1">{pick(lang, l.title_ar, l.title_en, l.title)}</span>
                     </button>
                   </li>
                 );
