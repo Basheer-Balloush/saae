@@ -145,9 +145,8 @@ function CourseBuilder() {
     toast.info(lang === "ar" ? "جاري رفع الفيديو..." : "Uploading video...");
     const { error } = await supabase.storage.from("lms-private").upload(path, file, { upsert: true });
     if (error) { toast.error(error.message); return; }
-    const { data: signed } = await supabase.storage.from("lms-private").createSignedUrl(path, 60 * 60 * 24 * 365);
-    const url = signed?.signedUrl ?? null;
-    await updateLesson(lesson.id, { video_url: url });
+    // Store the storage path with prefix; the player resolves a fresh short-lived signed URL on demand
+    await updateLesson(lesson.id, { video_url: `private:${path}` });
     toast.success(lang === "ar" ? "تم رفع الفيديو" : "Video uploaded");
   };
 
