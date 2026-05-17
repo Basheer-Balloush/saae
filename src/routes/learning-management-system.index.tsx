@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, BookOpen, Award, ArrowRight } from "lucide-react";
+import { BookOpen, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
@@ -19,7 +20,8 @@ export const Route = createFileRoute("/learning-management-system/")({
 type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
 
 function LmsHome() {
-  const { lang } = useLang();
+  const { lang, dir } = useLang();
+  const isRtl = dir === "rtl";
   const tr = lmsT[lang];
   const [categories, setCategories] = useState<Category[]>([]);
   const [stats, setStats] = useState({ courses: 0, students: 0, instructors: 0 });
@@ -65,14 +67,70 @@ function LmsHome() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-12 border-b border-border">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 grid grid-cols-3 gap-4 sm:gap-8 text-center">
-          <Stat icon={<BookOpen className="h-5 w-5" />} value={stats.courses} label={tr.statCourses} />
-          <Stat icon={<Users className="h-5 w-5" />} value={stats.students} label={tr.statStudents} />
-          <Stat icon={<Award className="h-5 w-5" />} value={stats.instructors} label={tr.statInstructors} />
+      {/* Stats — Achievements-style */}
+      <section className="relative overflow-hidden bg-background py-24 lg:py-32">
+        <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
+          <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
+            {/* Headline column */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.6 }}
+              className="lg:col-span-5"
+            >
+              <h2
+                className="mt-4 text-display-1 text-foreground"
+                style={{
+                  fontFamily: '"Cairo", system-ui, sans-serif',
+                  fontWeight: 900,
+                  lineHeight: isRtl ? 1.45 : 1.02,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                {lang === "ar" ? "أرقامنا تحكي قصّتنا" : "Our numbers tell our story"}
+              </h2>
+              <p className="mt-6 max-w-lg text-body text-muted-foreground">
+                {lang === "ar"
+                  ? "منصة تعليمية متنامية تجمع المتعلّمين والمدرّسين حول محتوى عربي عالي الجودة في الذكاء الاصطناعي وريادة الأعمال."
+                  : "A growing learning platform bringing learners and instructors together around high-quality Arabic content in AI and entrepreneurship."}
+              </p>
+              <div className="mt-8 h-[3px] w-20 bg-gradient-brand" />
+            </motion.div>
+
+            {/* Stat grid */}
+            <div className="lg:col-span-7">
+              <div
+                className="grid grid-cols-1 sm:grid-cols-2"
+                style={{ columnGap: "32px", rowGap: "40px" }}
+              >
+                <LmsStatCard
+                  value={`+${stats.courses.toLocaleString()}`}
+                  label={tr.statCourses}
+                  index={0}
+                  heightClass="min-h-[260px] lg:min-h-[300px]"
+                  isRtl={isRtl}
+                />
+                <LmsStatCard
+                  value={`+${stats.students.toLocaleString()}`}
+                  label={tr.statStudents}
+                  index={1}
+                  heightClass="min-h-[180px] lg:min-h-[200px]"
+                  isRtl={isRtl}
+                />
+                <LmsStatCard
+                  value={`+${stats.instructors.toLocaleString()}`}
+                  label={tr.statInstructors}
+                  index={2}
+                  heightClass="min-h-[180px] lg:min-h-[200px] sm:col-span-2"
+                  isRtl={isRtl}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
+
 
       {/* Categories */}
       <section className="py-12 sm:py-16">
@@ -118,14 +176,56 @@ function LmsHome() {
   );
 }
 
-function Stat({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) {
+function LmsStatCard({
+  value,
+  label,
+  index,
+  heightClass,
+  isRtl,
+}: {
+  value: string;
+  label: string;
+  index: number;
+  heightClass: string;
+  isRtl: boolean;
+}) {
+  const PADDING = 28;
   return (
-    <div className="flex flex-col items-center">
-      <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-        {icon}
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.55, delay: index * 0.07 }}
+      className={`group relative flex flex-col justify-center overflow-hidden rounded-2xl bg-muted/40 dark:bg-muted/20 ${heightClass}`}
+      style={{ padding: `${PADDING}px` }}
+    >
+      <div className={`flex flex-col ${isRtl ? "items-end text-right" : "items-start text-left"}`}>
+        <span
+          className="block leading-none"
+          style={{
+            color: "#048090",
+            fontFamily: '"Cairo", system-ui, sans-serif',
+            fontWeight: 900,
+            letterSpacing: "-0.03em",
+            fontSize: "clamp(2.75rem, 5vw, 4rem)",
+          }}
+        >
+          {value}
+        </span>
+        <span aria-hidden className="mt-5 block h-[2px] w-full" style={{ backgroundColor: "#048090" }} />
+        <span
+          className="mt-5 block text-muted-foreground"
+          style={{
+            fontFamily: '"Cairo", system-ui, sans-serif',
+            fontWeight: 400,
+            fontSize: "14px",
+            letterSpacing: "0.01em",
+          }}
+        >
+          {label}
+        </span>
       </div>
-      <div className="mt-2 text-2xl sm:text-3xl font-bold text-foreground">{value.toLocaleString()}</div>
-      <div className="text-xs sm:text-sm text-muted-foreground">{label}</div>
-    </div>
+    </motion.div>
   );
 }
+
