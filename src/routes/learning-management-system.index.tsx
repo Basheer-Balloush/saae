@@ -238,7 +238,10 @@ function LmsHome() {
                     className="group relative block overflow-hidden rounded-3xl border border-white/20 min-h-[200px] sm:min-h-[220px] p-6 sm:p-7 shadow-lift transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                     style={{ background: surface }}
                   >
-                    <div aria-hidden className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.24)_0%,rgba(255,255,255,0.05)_38%,rgba(0,0,0,0.16)_100%)]" />
+                    <div
+                      aria-hidden
+                      className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.24)_0%,rgba(255,255,255,0.05)_38%,rgba(0,0,0,0.16)_100%)]"
+                    />
                     <div
                       aria-hidden
                       className={`absolute -top-10 ${isRtl ? "-left-10" : "-right-10"} h-40 w-40 rounded-full bg-white/18 blur-3xl transition-opacity group-hover:opacity-70`}
