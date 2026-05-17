@@ -85,6 +85,7 @@ export const lmsT: Record<Lang, {
   loading: string;
   copyright: string;
   authRequired: string;
+  alreadyRequested: string;
   enrollmentSuccess: string;
   comingSoon: string;
   // quizzes & certificates
@@ -208,6 +209,7 @@ export const lmsT: Record<Lang, {
     loading: "جارٍ التحميل...",
     copyright: "جميع الحقوق محفوظة",
     authRequired: "يجب تسجيل الدخول أوّلاً",
+    alreadyRequested: "لقد أرسلت طلباً سابقاً — قيد المراجعة من قبل الإدارة",
     enrollmentSuccess: "تمّ التسجيل في الدورة بنجاح",
     comingSoon: "قريباً",
     finalTest: "الاختبار النهائيّ",
@@ -330,6 +332,7 @@ export const lmsT: Record<Lang, {
     loading: "Loading...",
     copyright: "All rights reserved",
     authRequired: "You must sign in first",
+    alreadyRequested: "You have already submitted a request — it is under review",
     enrollmentSuccess: "Enrolled successfully",
     comingSoon: "Coming soon",
     finalTest: "Final test",
