@@ -98,7 +98,7 @@ function LmsHome() {
         .eq("user_id", user.id)
         .maybeSingle();
       if (existing) {
-        toast.info(lang === "ar" ? "طلبك قيد المراجعة" : "Your application is under review");
+        toast.info(tr.alreadyRequested);
       } else {
         const fullName = (user.user_metadata?.full_name as string) || user.email || "";
         const { error } = await supabase
