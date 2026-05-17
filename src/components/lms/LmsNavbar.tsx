@@ -111,9 +111,65 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
               </Link>
             </>
           )}
+          <button
+            onClick={() => setOpen(true)}
+            className="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-foreground/70 hover:border-primary hover:text-primary"
+            aria-label={tr.menu}
+          >
+            <Menu className="h-4 w-4" />
+          </button>
         </div>
       </div>
+
+      {open && (
+        <div className="md:hidden fixed inset-0 z-50 bg-background/95 backdrop-blur-xl animate-in fade-in duration-200">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <span className="font-bold text-foreground">{tr.menu}</span>
+            <button
+              onClick={() => setOpen(false)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground/70 hover:border-primary hover:text-primary"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <nav className="flex flex-col gap-1 p-4">
+            <MobileItem to="/learning-management-system" label={tr.navHome} onClick={() => setOpen(false)} />
+            <MobileItem to="/learning-management-system/catalog" label={tr.navCatalog} onClick={() => setOpen(false)} icon={<BookOpen className="h-4 w-4" />} />
+            <MobileItem to="/learning-management-system/verify" label={tr.verifyCertificate} onClick={() => setOpen(false)} icon={<ShieldCheck className="h-4 w-4" />} />
+            {isAuthed && (
+              <MobileItem to="/learning-management-system/student" label={tr.navMyCourses} onClick={() => setOpen(false)} icon={<BookOpen className="h-4 w-4" />} />
+            )}
+            {isAuthed && (
+              <MobileItem to="/learning-management-system/instructor" label={tr.navInstructor} onClick={() => setOpen(false)} />
+            )}
+            {role === "lms_admin" && (
+              <MobileItem to="/learning-management-system/admin" label={tr.navAdmin} onClick={() => setOpen(false)} icon={<LayoutDashboard className="h-4 w-4" />} />
+            )}
+            {!isAuthed && (
+              <>
+                <MobileItem to="/learning-management-system/login" label={tr.signIn} onClick={() => setOpen(false)} />
+                <MobileItem to="/learning-management-system/signup" label={tr.signUp} onClick={() => setOpen(false)} />
+              </>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
+  );
+}
+
+function MobileItem({ to, label, icon, onClick }: { to: string; label: string; icon?: React.ReactNode; onClick: () => void }) {
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className="flex items-center gap-3 rounded-xl px-4 py-3 text-base font-medium text-foreground/80 hover:bg-muted"
+      activeProps={{ className: "bg-muted text-foreground" }}
+    >
+      {icon}
+      {label}
+    </Link>
   );
 }
 
