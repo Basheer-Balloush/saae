@@ -179,10 +179,10 @@ function AdminHome() {
       {tab === "categories" && (
         <div className="mt-6 space-y-4">
           <form onSubmit={addCategory} className="grid sm:grid-cols-4 gap-2">
-            <Input placeholder="Name (AR)" value={newCat.name_ar} onChange={(e) => setNewCat({ ...newCat, name_ar: e.target.value })} required />
-            <Input placeholder="Name (EN)" value={newCat.name_en} onChange={(e) => setNewCat({ ...newCat, name_en: e.target.value })} />
-            <Input placeholder="slug" value={newCat.slug} onChange={(e) => setNewCat({ ...newCat, slug: e.target.value })} required />
-            <Button type="submit"><Plus className="h-4 w-4 mx-1" />Add</Button>
+            <Input placeholder={lang === "ar" ? "الاسم (عربي)" : "Name (AR)"} value={newCat.name_ar} onChange={(e) => setNewCat({ ...newCat, name_ar: e.target.value })} required />
+            <Input placeholder={lang === "ar" ? "الاسم (إنجليزي)" : "Name (EN)"} value={newCat.name_en} onChange={(e) => setNewCat({ ...newCat, name_en: e.target.value })} />
+            <Input placeholder={lang === "ar" ? "المعرّف" : "slug"} value={newCat.slug} onChange={(e) => setNewCat({ ...newCat, slug: e.target.value })} required />
+            <Button type="submit"><Plus className="h-4 w-4 mx-1" />{lang === "ar" ? "إضافة" : "Add"}</Button>
           </form>
           <div className="space-y-2">
             {categories.map((c) => (
