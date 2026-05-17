@@ -181,10 +181,12 @@ function InstructorAssignments() {
           </div>
           <div className="sm:col-span-2">
             <Label>{t(lang, "الدرس (اختياري)", "Lesson (optional)")}</Label>
+            <div className="relative">
             <select
               value={form.lesson_id}
               onChange={(e) => setForm({ ...form, lesson_id: e.target.value })}
-              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              className={`w-full h-10 rounded-md border border-input bg-background text-sm appearance-none ${lang === "ar" ? "pr-3 pl-9 text-right" : "pl-3 pr-9 text-left"}`}
+              dir={lang === "ar" ? "rtl" : "ltr"}
             >
               <option value="">{t(lang, "بدون درس محدد", "No specific lesson")}</option>
               {sections.map((s, si) => {
@@ -201,6 +203,8 @@ function InstructorAssignments() {
                 );
               })}
             </select>
+            <ChevronDown className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-4 w-4 opacity-60 ${lang === "ar" ? "left-3" : "right-3"}`} />
+            </div>
           </div>
           <div>
             <Label>{t(lang, "الوصف بالعربي", "Description (Arabic)")}</Label>
