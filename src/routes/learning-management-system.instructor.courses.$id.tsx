@@ -270,6 +270,15 @@ function CourseBuilder() {
         </div>
       </section>
 
+      <div className="mt-6">
+        <Link to="/learning-management-system/instructor/assignments/$courseId" params={{ courseId: course.id }}>
+          <Button variant="outline">
+            <ClipboardList className="h-4 w-4 mx-1" />
+            إدارة الوظائف / Manage Assignments
+          </Button>
+        </Link>
+      </div>
+
       <QuizBuilder courseId={course.id} />
     </div>
   );
