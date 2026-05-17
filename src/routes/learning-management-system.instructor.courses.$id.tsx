@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { QuizBuilder } from "@/components/lms/QuizBuilder";
 
 export const Route = createFileRoute("/learning-management-system/instructor/courses/$id")({
   head: () => ({ meta: [{ title: "LMS · Edit course" }] }),
@@ -269,6 +270,8 @@ function CourseBuilder() {
           ))}
         </div>
       </section>
+
+      <QuizBuilder courseId={course.id} />
     </div>
   );
 }

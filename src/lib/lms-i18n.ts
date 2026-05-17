@@ -87,6 +87,28 @@ export const lmsT: Record<Lang, {
   authRequired: string;
   enrollmentSuccess: string;
   comingSoon: string;
+  // quizzes & certificates
+  finalTest: string;
+  startTest: string;
+  submitTest: string;
+  passScore: string;
+  yourScore: string;
+  testPassed: string;
+  testFailed: string;
+  retakeTest: string;
+  noTestYet: string;
+  certificate: string;
+  certificateIssued: string;
+  viewCertificate: string;
+  certificateOf: string;
+  hasCompleted: string;
+  serial: string;
+  issuedOn: string;
+  printCertificate: string;
+  question: string;
+  addQuestion: string;
+  correctAnswer: string;
+  mustCompleteFirst: string;
 }> = {
   ar: {
     brand: "منصة التعلم",
@@ -165,6 +187,27 @@ export const lmsT: Record<Lang, {
     authRequired: "يجب تسجيل الدخول أولاً",
     enrollmentSuccess: "تم التسجيل بالكورس بنجاح",
     comingSoon: "قريباً",
+    finalTest: "الاختبار النهائي",
+    startTest: "ابدأ الاختبار",
+    submitTest: "إرسال الإجابات",
+    passScore: "علامة النجاح",
+    yourScore: "علامتك",
+    testPassed: "نجحت في الاختبار",
+    testFailed: "لم تنجح، حاول مرة أخرى",
+    retakeTest: "أعد الاختبار",
+    noTestYet: "ما في اختبار بعد",
+    certificate: "الشهادة",
+    certificateIssued: "تم إصدار شهادتك",
+    viewCertificate: "عرض الشهادة",
+    certificateOf: "شهادة إتمام",
+    hasCompleted: "أكمل بنجاح كورس",
+    serial: "الرقم التسلسلي",
+    issuedOn: "تاريخ الإصدار",
+    printCertificate: "طباعة",
+    question: "سؤال",
+    addQuestion: "أضف سؤال",
+    correctAnswer: "الإجابة الصحيحة",
+    mustCompleteFirst: "أكمل كل الدروس أولاً للحصول على الشهادة",
   },
   en: {
     brand: "Learning Platform",
@@ -243,5 +286,26 @@ export const lmsT: Record<Lang, {
     authRequired: "You must sign in first",
     enrollmentSuccess: "Enrolled successfully",
     comingSoon: "Coming soon",
+    finalTest: "Final test",
+    startTest: "Start test",
+    submitTest: "Submit answers",
+    passScore: "Pass score",
+    yourScore: "Your score",
+    testPassed: "You passed!",
+    testFailed: "Not passed, try again",
+    retakeTest: "Retake test",
+    noTestYet: "No test yet",
+    certificate: "Certificate",
+    certificateIssued: "Your certificate was issued",
+    viewCertificate: "View certificate",
+    certificateOf: "Certificate of Completion",
+    hasCompleted: "has successfully completed",
+    serial: "Serial",
+    issuedOn: "Issued on",
+    printCertificate: "Print",
+    question: "Question",
+    addQuestion: "Add question",
+    correctAnswer: "Correct answer",
+    mustCompleteFirst: "Complete all lessons first to earn the certificate",
   },
 };

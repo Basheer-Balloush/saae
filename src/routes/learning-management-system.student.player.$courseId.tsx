@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, PlayCircle, Circle, MessageSquare, Paperclip } from "lucide-react";
+import { CheckCircle2, PlayCircle, Circle, MessageSquare, Paperclip, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -96,12 +96,17 @@ function Player() {
 
         {current && (
           <>
-            <div className="mt-4 flex items-start justify-between gap-3">
+            <div className="mt-4 flex items-start justify-between gap-3 flex-wrap">
               <h1 className="text-xl sm:text-2xl font-bold text-foreground">{current.title}</h1>
-              <Button onClick={markComplete} disabled={isDone(current.id)} size="sm">
-                <CheckCircle2 className="h-4 w-4 mx-1" />
-                {isDone(current.id) ? tr.completed : tr.markCompleted}
-              </Button>
+              <div className="flex gap-2">
+                <Link to="/learning-management-system/student/quiz/$courseId" params={{ courseId }}>
+                  <Button variant="outline" size="sm"><Award className="h-4 w-4 mx-1" />{tr.finalTest}</Button>
+                </Link>
+                <Button onClick={markComplete} disabled={isDone(current.id)} size="sm">
+                  <CheckCircle2 className="h-4 w-4 mx-1" />
+                  {isDone(current.id) ? tr.completed : tr.markCompleted}
+                </Button>
+              </div>
             </div>
 
             {current.content_md && (

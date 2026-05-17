@@ -33,6 +33,8 @@ import { Route as LearningManagementSystemStudentIndexRouteImport } from './rout
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
 import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system.admin.index'
 import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/learning-management-system.courses.$id'
+import { Route as LearningManagementSystemCertificateIdRouteImport } from './routes/learning-management-system.certificate.$id'
+import { Route as LearningManagementSystemStudentQuizCourseIdRouteImport } from './routes/learning-management-system.student.quiz.$courseId'
 import { Route as LearningManagementSystemStudentPlayerCourseIdRouteImport } from './routes/learning-management-system.student.player.$courseId'
 import { Route as LearningManagementSystemInstructorCoursesIdRouteImport } from './routes/learning-management-system.instructor.courses.$id'
 
@@ -171,6 +173,18 @@ const LearningManagementSystemCoursesIdRoute =
     path: '/courses/$id',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
+const LearningManagementSystemCertificateIdRoute =
+  LearningManagementSystemCertificateIdRouteImport.update({
+    id: '/certificate/$id',
+    path: '/certificate/$id',
+    getParentRoute: () => LearningManagementSystemRoute,
+  } as any)
+const LearningManagementSystemStudentQuizCourseIdRoute =
+  LearningManagementSystemStudentQuizCourseIdRouteImport.update({
+    id: '/quiz/$courseId',
+    path: '/quiz/$courseId',
+    getParentRoute: () => LearningManagementSystemStudentRoute,
+  } as any)
 const LearningManagementSystemStudentPlayerCourseIdRoute =
   LearningManagementSystemStudentPlayerCourseIdRouteImport.update({
     id: '/player/$courseId',
@@ -205,12 +219,14 @@ export interface FileRoutesByFullPath {
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
+  '/learning-management-system/student/quiz/$courseId': typeof LearningManagementSystemStudentQuizCourseIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -228,12 +244,14 @@ export interface FileRoutesByTo {
   '/attendance-management-system': typeof AttendanceManagementSystemIndexRoute
   '/learning-management-system': typeof LearningManagementSystemIndexRoute
   '/news': typeof NewsIndexRoute
+  '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentIndexRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
+  '/learning-management-system/student/quiz/$courseId': typeof LearningManagementSystemStudentQuizCourseIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -257,12 +275,14 @@ export interface FileRoutesById {
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
+  '/learning-management-system/student/quiz/$courseId': typeof LearningManagementSystemStudentQuizCourseIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -287,12 +307,14 @@ export interface FileRouteTypes {
     | '/attendance-management-system/'
     | '/learning-management-system/'
     | '/news/'
+    | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/admin/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/student/'
     | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/student/player/$courseId'
+    | '/learning-management-system/student/quiz/$courseId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -310,12 +332,14 @@ export interface FileRouteTypes {
     | '/attendance-management-system'
     | '/learning-management-system'
     | '/news'
+    | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/admin'
     | '/learning-management-system/instructor'
     | '/learning-management-system/student'
     | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/student/player/$courseId'
+    | '/learning-management-system/student/quiz/$courseId'
   id:
     | '__root__'
     | '/'
@@ -338,12 +362,14 @@ export interface FileRouteTypes {
     | '/attendance-management-system/'
     | '/learning-management-system/'
     | '/news/'
+    | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/admin/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/student/'
     | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/student/player/$courseId'
+    | '/learning-management-system/student/quiz/$courseId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -530,6 +556,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemCoursesIdRouteImport
       parentRoute: typeof LearningManagementSystemRoute
     }
+    '/learning-management-system/certificate/$id': {
+      id: '/learning-management-system/certificate/$id'
+      path: '/certificate/$id'
+      fullPath: '/learning-management-system/certificate/$id'
+      preLoaderRoute: typeof LearningManagementSystemCertificateIdRouteImport
+      parentRoute: typeof LearningManagementSystemRoute
+    }
+    '/learning-management-system/student/quiz/$courseId': {
+      id: '/learning-management-system/student/quiz/$courseId'
+      path: '/quiz/$courseId'
+      fullPath: '/learning-management-system/student/quiz/$courseId'
+      preLoaderRoute: typeof LearningManagementSystemStudentQuizCourseIdRouteImport
+      parentRoute: typeof LearningManagementSystemStudentRoute
+    }
     '/learning-management-system/student/player/$courseId': {
       id: '/learning-management-system/student/player/$courseId'
       path: '/player/$courseId'
@@ -599,6 +639,7 @@ const LearningManagementSystemInstructorRouteWithChildren =
 interface LearningManagementSystemStudentRouteChildren {
   LearningManagementSystemStudentIndexRoute: typeof LearningManagementSystemStudentIndexRoute
   LearningManagementSystemStudentPlayerCourseIdRoute: typeof LearningManagementSystemStudentPlayerCourseIdRoute
+  LearningManagementSystemStudentQuizCourseIdRoute: typeof LearningManagementSystemStudentQuizCourseIdRoute
 }
 
 const LearningManagementSystemStudentRouteChildren: LearningManagementSystemStudentRouteChildren =
@@ -607,6 +648,8 @@ const LearningManagementSystemStudentRouteChildren: LearningManagementSystemStud
       LearningManagementSystemStudentIndexRoute,
     LearningManagementSystemStudentPlayerCourseIdRoute:
       LearningManagementSystemStudentPlayerCourseIdRoute,
+    LearningManagementSystemStudentQuizCourseIdRoute:
+      LearningManagementSystemStudentQuizCourseIdRoute,
   }
 
 const LearningManagementSystemStudentRouteWithChildren =
@@ -622,6 +665,7 @@ interface LearningManagementSystemRouteChildren {
   LearningManagementSystemSignupRoute: typeof LearningManagementSystemSignupRoute
   LearningManagementSystemStudentRoute: typeof LearningManagementSystemStudentRouteWithChildren
   LearningManagementSystemIndexRoute: typeof LearningManagementSystemIndexRoute
+  LearningManagementSystemCertificateIdRoute: typeof LearningManagementSystemCertificateIdRoute
   LearningManagementSystemCoursesIdRoute: typeof LearningManagementSystemCoursesIdRoute
 }
 
@@ -637,6 +681,8 @@ const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildr
     LearningManagementSystemStudentRoute:
       LearningManagementSystemStudentRouteWithChildren,
     LearningManagementSystemIndexRoute: LearningManagementSystemIndexRoute,
+    LearningManagementSystemCertificateIdRoute:
+      LearningManagementSystemCertificateIdRoute,
     LearningManagementSystemCoursesIdRoute:
       LearningManagementSystemCoursesIdRoute,
   }
