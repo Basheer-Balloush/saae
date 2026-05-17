@@ -43,8 +43,17 @@ export function CourseCard({ course }: { course: CourseCardData }) {
             <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">{tr.free}</span>
           ) : (
             <span dir="ltr" className="inline-flex flex-row items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5">
-              <span dir="rtl">{lang === "ar" ? "ل.س" : "SYP"}</span>
-              <span>{course.price.toLocaleString()}</span>
+              {lang === "ar" ? (
+                <>
+                  <span dir="rtl">ل.س</span>
+                  <span>{course.price.toLocaleString()}</span>
+                </>
+              ) : (
+                <>
+                  <span>{course.price.toLocaleString()}</span>
+                  <span>SYP</span>
+                </>
+              )}
             </span>
           )}
         </div>
