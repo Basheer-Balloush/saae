@@ -24,6 +24,7 @@ type Category = { id: string; name_ar: string; name_en: string | null; slug: str
 function Catalog() {
   const { lang } = useLang();
   const tr = lmsT[lang];
+  const dir: "rtl" | "ltr" = lang === "ar" ? "rtl" : "ltr";
   const [courses, setCourses] = useState<CourseCardData[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [q, setQ] = useState("");
