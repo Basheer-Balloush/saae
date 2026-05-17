@@ -50,6 +50,7 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
         <nav className="hidden md:flex items-center gap-1">
           <NavItem to="/learning-management-system" label={tr.navHome} />
           <NavItem to="/learning-management-system/catalog" label={tr.navCatalog} />
+          <NavItem to="/learning-management-system/verify" label={tr.verifyCertificate} />
           {isAuthed && (
             <NavItem
               to="/learning-management-system/student"

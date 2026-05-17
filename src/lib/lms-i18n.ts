@@ -109,6 +109,19 @@ export const lmsT: Record<Lang, {
   addQuestion: string;
   correctAnswer: string;
   mustCompleteFirst: string;
+  reviews: string;
+  writeReview: string;
+  yourRating: string;
+  yourComment: string;
+  submitReview: string;
+  noReviews: string;
+  verifyCertificate: string;
+  verifyTitle: string;
+  verifySubtitle: string;
+  enterSerial: string;
+  verify: string;
+  verifyValid: string;
+  verifyInvalid: string;
 }> = {
   ar: {
     brand: "منصة التعلم",
@@ -208,6 +221,19 @@ export const lmsT: Record<Lang, {
     addQuestion: "أضف سؤال",
     correctAnswer: "الإجابة الصحيحة",
     mustCompleteFirst: "أكمل كل الدروس أولاً للحصول على الشهادة",
+    reviews: "التقييمات",
+    writeReview: "أضف تقييمك",
+    yourRating: "تقييمك",
+    yourComment: "تعليقك",
+    submitReview: "إرسال التقييم",
+    noReviews: "ما في تقييمات بعد",
+    verifyCertificate: "تحقّق من شهادة",
+    verifyTitle: "التحقّق من الشهادات",
+    verifySubtitle: "أدخل الرقم التسلسلي للتأكّد من صحة الشهادة",
+    enterSerial: "الرقم التسلسلي",
+    verify: "تحقّق",
+    verifyValid: "الشهادة صحيحة",
+    verifyInvalid: "لم نجد شهادة بهذا الرقم",
   },
   en: {
     brand: "Learning Platform",
@@ -307,5 +333,18 @@ export const lmsT: Record<Lang, {
     addQuestion: "Add question",
     correctAnswer: "Correct answer",
     mustCompleteFirst: "Complete all lessons first to earn the certificate",
+    reviews: "Reviews",
+    writeReview: "Write a review",
+    yourRating: "Your rating",
+    yourComment: "Your comment",
+    submitReview: "Submit review",
+    noReviews: "No reviews yet",
+    verifyCertificate: "Verify a certificate",
+    verifyTitle: "Certificate verification",
+    verifySubtitle: "Enter the certificate serial to verify it is genuine",
+    enterSerial: "Certificate serial",
+    verify: "Verify",
+    verifyValid: "Valid certificate",
+    verifyInvalid: "No certificate found for that serial",
   },
 };

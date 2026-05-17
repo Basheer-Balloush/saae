@@ -7,6 +7,7 @@ import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { CourseReviews } from "@/components/lms/CourseReviews";
 
 export const Route = createFileRoute("/learning-management-system/courses/$id")({
   head: () => ({ meta: [{ title: "LMS · Course" }] }),
@@ -123,6 +124,8 @@ function CourseDetails() {
               </div>
             ))}
           </div>
+
+          <CourseReviews courseId={course.id} canReview={enrolled} />
         </div>
 
         <aside className="lg:sticky lg:top-24 self-start rounded-2xl border border-border bg-card p-6 shadow-soft">

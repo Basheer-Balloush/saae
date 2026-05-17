@@ -19,6 +19,7 @@ import { Route as LearningManagementSystemIndexRouteImport } from './routes/lear
 import { Route as AttendanceManagementSystemIndexRouteImport } from './routes/attendance-management-system.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as NewsIdRouteImport } from './routes/news.$id'
+import { Route as LearningManagementSystemVerifyRouteImport } from './routes/learning-management-system.verify'
 import { Route as LearningManagementSystemStudentRouteImport } from './routes/learning-management-system.student'
 import { Route as LearningManagementSystemSignupRouteImport } from './routes/learning-management-system.signup'
 import { Route as LearningManagementSystemLoginRouteImport } from './routes/learning-management-system.login'
@@ -92,6 +93,12 @@ const NewsIdRoute = NewsIdRouteImport.update({
   path: '/news/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LearningManagementSystemVerifyRoute =
+  LearningManagementSystemVerifyRouteImport.update({
+    id: '/verify',
+    path: '/verify',
+    getParentRoute: () => LearningManagementSystemRoute,
+  } as any)
 const LearningManagementSystemStudentRoute =
   LearningManagementSystemStudentRouteImport.update({
     id: '/student',
@@ -214,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentRouteWithChildren
+  '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
   '/news/$id': typeof NewsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
@@ -239,6 +247,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
+  '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
   '/news/$id': typeof NewsIdRoute
   '/admin': typeof AdminIndexRoute
   '/attendance-management-system': typeof AttendanceManagementSystemIndexRoute
@@ -270,6 +279,7 @@ export interface FileRoutesById {
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentRouteWithChildren
+  '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
   '/news/$id': typeof NewsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
@@ -302,6 +312,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/login'
     | '/learning-management-system/signup'
     | '/learning-management-system/student'
+    | '/learning-management-system/verify'
     | '/news/$id'
     | '/admin/'
     | '/attendance-management-system/'
@@ -327,6 +338,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/catalog'
     | '/learning-management-system/login'
     | '/learning-management-system/signup'
+    | '/learning-management-system/verify'
     | '/news/$id'
     | '/admin'
     | '/attendance-management-system'
@@ -357,6 +369,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/login'
     | '/learning-management-system/signup'
     | '/learning-management-system/student'
+    | '/learning-management-system/verify'
     | '/news/$id'
     | '/admin/'
     | '/attendance-management-system/'
@@ -457,6 +470,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/news/$id'
       preLoaderRoute: typeof NewsIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/learning-management-system/verify': {
+      id: '/learning-management-system/verify'
+      path: '/verify'
+      fullPath: '/learning-management-system/verify'
+      preLoaderRoute: typeof LearningManagementSystemVerifyRouteImport
+      parentRoute: typeof LearningManagementSystemRoute
     }
     '/learning-management-system/student': {
       id: '/learning-management-system/student'
@@ -664,6 +684,7 @@ interface LearningManagementSystemRouteChildren {
   LearningManagementSystemLoginRoute: typeof LearningManagementSystemLoginRoute
   LearningManagementSystemSignupRoute: typeof LearningManagementSystemSignupRoute
   LearningManagementSystemStudentRoute: typeof LearningManagementSystemStudentRouteWithChildren
+  LearningManagementSystemVerifyRoute: typeof LearningManagementSystemVerifyRoute
   LearningManagementSystemIndexRoute: typeof LearningManagementSystemIndexRoute
   LearningManagementSystemCertificateIdRoute: typeof LearningManagementSystemCertificateIdRoute
   LearningManagementSystemCoursesIdRoute: typeof LearningManagementSystemCoursesIdRoute
@@ -680,6 +701,7 @@ const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildr
     LearningManagementSystemSignupRoute: LearningManagementSystemSignupRoute,
     LearningManagementSystemStudentRoute:
       LearningManagementSystemStudentRouteWithChildren,
+    LearningManagementSystemVerifyRoute: LearningManagementSystemVerifyRoute,
     LearningManagementSystemIndexRoute: LearningManagementSystemIndexRoute,
     LearningManagementSystemCertificateIdRoute:
       LearningManagementSystemCertificateIdRoute,
