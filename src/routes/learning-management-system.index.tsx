@@ -118,6 +118,7 @@ function LmsHome() {
     }
   };
 
+  useEffect(() => {
     (async () => {
       const { data: cats } = await supabase
         .from("lms_categories")
