@@ -127,14 +127,10 @@ function FilterSelect({
   options: { value: string; label: string }[];
   label: string;
 }) {
-  const current = options.find((o) => o.value === value);
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-full h-10" aria-label={label}>
-        <SelectValue placeholder={label}>
-          <span className="text-muted-foreground">{label}:</span>{" "}
-          <span className="text-foreground font-medium">{current?.label}</span>
-        </SelectValue>
+      <SelectTrigger className="w-full h-10 text-sm font-semibold [&>span]:text-start" aria-label={label} dir="rtl">
+        <SelectValue placeholder={label}>{label}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         {options.map((o) => (
