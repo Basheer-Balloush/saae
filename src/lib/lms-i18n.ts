@@ -332,6 +332,7 @@ export const lmsT: Record<Lang, {
     loading: "Loading...",
     copyright: "All rights reserved",
     authRequired: "You must sign in first",
+    alreadyRequested: "You have already submitted a request — it is under review",
     enrollmentSuccess: "Enrolled successfully",
     comingSoon: "Coming soon",
     finalTest: "Final test",
