@@ -71,27 +71,60 @@ function AdminHome() {
     await supabase.from("lms_categories").delete().eq("id", id); load();
   };
 
+  const sideLinks: { to: string; label: string }[] = [
+    { to: "/learning-management-system/admin/analytics", label: lang === "ar" ? "تحليلات" : "Analytics" },
+    { to: "/learning-management-system/admin/users", label: lang === "ar" ? "المستخدمون" : "Users" },
+    { to: "/learning-management-system/admin/payouts", label: lang === "ar" ? "طلبات السحب" : "Payouts" },
+    { to: "/learning-management-system/admin/coupons", label: lang === "ar" ? "الكوبونات" : "Coupons" },
+    { to: "/learning-management-system/admin/wallet", label: lang === "ar" ? "المحافظ والإعدادات" : "Wallets & Settings" },
+    { to: "/learning-management-system/admin/reviews", label: lang === "ar" ? "التقييمات" : "Reviews" },
+  ];
+  const tabLabels: Record<"courses" | "instructors" | "categories", string> = {
+    courses: lang === "ar" ? "الدورات" : "Courses",
+    instructors: lang === "ar" ? "المدرّسون" : "Instructors",
+    categories: lang === "ar" ? "التصنيفات" : "Categories",
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
       <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tr.navAdmin}</h1>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Link to="/learning-management-system/admin/analytics"><Button variant="outline" size="sm">📊 {lang === "ar" ? "تحليلات" : "Analytics"}</Button></Link>
-        <Link to="/learning-management-system/admin/users"><Button variant="outline" size="sm">🛡️ {lang === "ar" ? "المستخدمون" : "Users"}</Button></Link>
-        <Link to="/learning-management-system/admin/payouts"><Button variant="outline" size="sm">💸 {lang === "ar" ? "طلبات السحب" : "Payouts"}</Button></Link>
-        <Link to="/learning-management-system/admin/coupons"><Button variant="outline" size="sm">🎟️ {lang === "ar" ? "الكوبونات" : "Coupons"}</Button></Link>
-        <Link to="/learning-management-system/admin/wallet"><Button variant="outline" size="sm">💳 {lang === "ar" ? "المحافظ والإعدادات" : "Wallets & Settings"}</Button></Link>
-        <Link to="/learning-management-system/admin/reviews"><Button variant="outline" size="sm">⭐ {lang === "ar" ? "التقييمات" : "Reviews"}</Button></Link>
-      </div>
 
-      <div className="mt-6 flex gap-2 border-b border-border">
-        {(["courses", "instructors", "categories"] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px ${tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>
-            {t}
-          </button>
-        ))}
-      </div>
+      <div className="mt-6 grid gap-6 md:grid-cols-[220px_1fr]">
+        <aside className="rounded-xl border border-border bg-card p-3 h-fit">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-2 py-1">
+            {lang === "ar" ? "الأقسام" : "Sections"}
+          </div>
+          <nav className="mt-1 flex flex-col">
+            {(["courses", "instructors", "categories"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`text-start px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  tab === t ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
+                }`}
+              >
+                {tabLabels[t]}
+              </button>
+            ))}
+          </nav>
+          <div className="my-3 h-px bg-border" />
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-2 py-1">
+            {lang === "ar" ? "الإدارة" : "Manage"}
+          </div>
+          <nav className="mt-1 flex flex-col">
+            {sideLinks.map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                className="text-start px-3 py-2 rounded-md text-sm font-medium text-foreground hover:bg-muted"
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+        </aside>
 
+        <div>
       {tab === "courses" && (
         <div className="mt-6 space-y-3">
           {courses.map((c) => (
@@ -156,6 +189,8 @@ function AdminHome() {
           </div>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 }
