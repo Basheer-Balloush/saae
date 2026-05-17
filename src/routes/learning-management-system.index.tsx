@@ -48,12 +48,12 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 
 // Gradient palette — cycled by category index
 const CATEGORY_GRADIENTS = [
-  "from-primary/80 via-primary/60 to-accent/70",
-  "from-accent/80 via-accent/60 to-primary/70",
-  "from-primary/70 via-accent/50 to-primary/80",
-  "from-accent/70 via-primary/50 to-accent/80",
-  "from-primary/90 via-primary/40 to-accent/60",
-  "from-accent/90 via-accent/40 to-primary/60",
+  "from-primary via-primary to-accent",
+  "from-accent via-accent to-primary",
+  "from-primary via-accent to-primary",
+  "from-accent via-primary to-accent",
+  "from-primary via-primary/90 to-accent",
+  "from-accent via-accent/90 to-primary",
 ];
 
 export const Route = createFileRoute("/learning-management-system/")({
