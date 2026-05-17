@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BookOpen, PlayCircle } from "lucide-react";
+import { BookOpen, PlayCircle, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -17,6 +17,7 @@ type Row = {
   progress: number;
   course: { id: string; title_ar: string; title_en: string | null; cover_url: string | null } | null;
 };
+type Cert = { id: string; serial: string; issued_at: string; course_id: string; title?: string };
 
 function StudentHome() {
   const { user } = useLmsAuth();
