@@ -194,7 +194,7 @@ function CourseDetails() {
               )}
               <Button className="w-full mt-4" size="lg" onClick={onEnroll} disabled={enrolling}>
                 {enrolling && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-                {enrolling ? tr.enrolling : (course.is_free ? tr.enroll : (lang === "ar" ? "سجّل الآن" : "Register now"))}
+                {enrolling ? tr.enrolling : (course.is_free ? tr.enroll : (lang === "ar" ? "سجّل الآن" : "ENROLL NOW"))}
               </Button>
             </>
           )}
