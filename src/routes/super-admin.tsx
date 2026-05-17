@@ -1,4 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/super-admin")({
   head: () => ({
@@ -11,6 +14,23 @@ export const Route = createFileRoute("/super-admin")({
 });
 
 function SuperAdminDashboard() {
+  const navigate = useNavigate();
+  const { user, isAdmin, loading } = useAuth();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) navigate({ to: "/admin/login" });
+    else if (!isAdmin) navigate({ to: "/" });
+  }, [loading, user, isAdmin, navigate]);
+
+  if (loading || !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className="container mx-auto px-4 py-16">
