@@ -74,6 +74,11 @@ function AdminHome() {
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
       <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tr.navAdmin}</h1>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link to="/learning-management-system/admin/payouts"><Button variant="outline" size="sm">💸 {lang === "ar" ? "طلبات السحب" : "Payouts"}</Button></Link>
+        <Link to="/learning-management-system/admin/coupons"><Button variant="outline" size="sm">🎟️ {lang === "ar" ? "الكوبونات" : "Coupons"}</Button></Link>
+        <Link to="/learning-management-system/admin/wallet"><Button variant="outline" size="sm">💳 {lang === "ar" ? "المحافظ والإعدادات" : "Wallets & Settings"}</Button></Link>
+      </div>
 
       <div className="mt-6 flex gap-2 border-b border-border">
         {(["courses", "instructors", "categories"] as const).map((t) => (
