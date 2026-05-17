@@ -119,6 +119,12 @@
 
   /* Brand gradient (subtle, sparing use only) */
   --gradient-brand: linear-gradient(135deg, oklch(0.55 0.085 209) 0%, oklch(0.595 0.115 130) 100%);
+  --category-card-1: linear-gradient(135deg, oklch(0.48 0.105 209) 0%, oklch(0.58 0.075 190) 48%, oklch(0.72 0.04 185) 100%);
+  --category-card-2: linear-gradient(135deg, oklch(0.73 0.045 185) 0%, oklch(0.60 0.075 196) 48%, oklch(0.46 0.11 209) 100%);
+  --category-card-3: linear-gradient(135deg, oklch(0.42 0.11 205) 0%, oklch(0.52 0.10 190) 52%, oklch(0.69 0.045 184) 100%);
+  --category-card-4: linear-gradient(135deg, oklch(0.50 0.10 212) 0%, oklch(0.58 0.085 204) 45%, oklch(0.74 0.04 188) 100%);
+  --category-card-5: linear-gradient(135deg, oklch(0.46 0.10 192) 0%, oklch(0.56 0.08 205) 50%, oklch(0.76 0.035 186) 100%);
+  --category-card-6: linear-gradient(135deg, oklch(0.70 0.045 186) 0%, oklch(0.56 0.08 192) 45%, oklch(0.43 0.11 210) 100%);
   --shadow-soft: 0 1px 2px rgba(46, 46, 46, 0.04), 0 8px 24px -12px rgba(46, 46, 46, 0.08);
   --shadow-lift: 0 2px 4px rgba(46, 46, 46, 0.04), 0 16px 40px -16px rgba(46, 46, 46, 0.12);
 
@@ -171,6 +177,13 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.65 0.09 209);
+
+  --category-card-1: linear-gradient(135deg, oklch(0.38 0.09 209) 0%, oklch(0.48 0.07 190) 48%, oklch(0.62 0.035 185) 100%);
+  --category-card-2: linear-gradient(135deg, oklch(0.62 0.04 185) 0%, oklch(0.50 0.07 196) 48%, oklch(0.36 0.095 209) 100%);
+  --category-card-3: linear-gradient(135deg, oklch(0.34 0.095 205) 0%, oklch(0.44 0.085 190) 52%, oklch(0.58 0.04 184) 100%);
+  --category-card-4: linear-gradient(135deg, oklch(0.40 0.09 212) 0%, oklch(0.48 0.075 204) 45%, oklch(0.62 0.035 188) 100%);
+  --category-card-5: linear-gradient(135deg, oklch(0.36 0.09 192) 0%, oklch(0.46 0.07 205) 50%, oklch(0.63 0.032 186) 100%);
+  --category-card-6: linear-gradient(135deg, oklch(0.60 0.04 186) 0%, oklch(0.46 0.07 192) 45%, oklch(0.34 0.095 210) 100%);
 
   --shadow-soft: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.5);
   --shadow-lift: 0 2px 4px rgba(0,0,0,0.4), 0 16px 40px -16px rgba(0,0,0,0.6);
