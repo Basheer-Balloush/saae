@@ -1,12 +1,169 @@
+import { Link } from "@tanstack/react-router";
+import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, ArrowRight, GraduationCap } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
+import logo from "@/assets/footer-logo.png";
+
+const TEAL = "#048090";
+const INK = "#FFFFFF";
+const MUTED = "rgba(255,255,255,0.78)";
 
 export function LmsFooter() {
-  const { lang } = useLang();
+  const { lang, dir } = useLang();
   const tr = lmsT[lang];
+  const isRtl = dir === "rtl";
+
+  const quickLinks = [
+    { to: "/learning-management-system", label: tr.navHome },
+    { to: "/learning-management-system/catalog", label: tr.navCatalog },
+    { to: "/learning-management-system/verify", label: tr.verifyCertificate },
+    { to: "/learning-management-system/student", label: tr.navMyCourses },
+    { to: "/learning-management-system/instructor", label: tr.navInstructor },
+    { to: "/learning-management-system/login", label: tr.signIn },
+  ];
+
   return (
-    <footer className="border-t border-border bg-muted/30 py-6 text-center text-sm text-muted-foreground">
-      © {new Date().getFullYear()} {tr.brand} · {tr.copyright}
+    <footer
+      className="relative mt-12"
+      style={{
+        backgroundColor: TEAL,
+        color: INK,
+        borderTop: `2px solid rgba(255,255,255,0.25)`,
+        paddingTop: "72px",
+        paddingBottom: "32px",
+      }}
+    >
+      <div className="mx-auto w-full max-w-[1440px] px-6 sm:px-8 lg:px-16">
+        <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
+          {/* Col 1 — Identity */}
+          <div className="lg:col-span-5">
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="SAAE" className="h-12 w-auto brightness-0 invert" />
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/40 px-2.5 py-1 text-xs font-bold" style={{ color: INK }}>
+                <GraduationCap className="h-3.5 w-3.5" />
+                {tr.brand}
+              </span>
+            </div>
+            <p
+              className="mt-6 max-w-sm text-sm leading-relaxed"
+              style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 400, color: INK }}
+            >
+              {tr.tagline} — {lang === "ar"
+                ? "منصة التعلم التابعة للجمعية السورية للذكاء الاصطناعي وريادة الأعمال."
+                : "Learning platform of the Syrian Association for AI & Entrepreneurship."}
+            </p>
+            <div className="mt-8 flex items-center gap-7">
+              {[
+                { Icon: Instagram, href: "https://www.instagram.com/saae_sy?igsh=ZjE0eXN0Y3hlODNz", label: "Instagram" },
+                { Icon: Facebook, href: "https://www.facebook.com/share/18SQ11hcct/", label: "Facebook" },
+                { Icon: Linkedin, href: "https://www.linkedin.com/company/syrian-association-for-ai-entrepreneurship/", label: "LinkedIn" },
+              ].map(({ Icon, href, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="transition-opacity hover:opacity-80"
+                  style={{ color: INK }}
+                >
+                  <Icon className="h-6 w-6" strokeWidth={1.5} />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Col 2 — Quick links */}
+          <div className="lg:col-span-3">
+            <h4
+              className="text-base font-bold tracking-tight"
+              style={{ color: INK, fontFamily: '"Cairo", system-ui, sans-serif' }}
+            >
+              {lang === "ar" ? "روابط سريعة" : "Quick Links"}
+            </h4>
+            <ul className={`mt-6 space-y-4 text-sm ${isRtl ? "text-right" : "text-left"}`}>
+              {quickLinks.map((l) => (
+                <li key={l.to + l.label} className="leading-relaxed">
+                  <Link
+                    to={l.to}
+                    className="transition-colors hover:text-white/80"
+                    style={{ color: INK }}
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Col 3 — Contact card */}
+          <div className="lg:col-span-4">
+            <div
+              className="rounded-2xl p-5"
+              style={{
+                backgroundColor: "#FFFFFF",
+                color: TEAL,
+                boxShadow: "0 10px 30px -12px rgba(0,0,0,0.25)",
+              }}
+            >
+              <h4 className="text-base font-bold tracking-tight" style={{ color: TEAL }}>
+                {lang === "ar" ? "تواصل معنا" : "Get in touch"}
+              </h4>
+              <div className="mt-4 space-y-2.5 text-sm">
+                <div className="flex items-start gap-2.5">
+                  <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
+                  <span style={{ color: "#1a1a1a" }}>
+                    {lang === "ar" ? "دمشق، سوريا" : "Damascus, Syria"}
+                  </span>
+                </div>
+                <a
+                  href="mailto:info@aisyria.org"
+                  className="flex items-center gap-2.5 transition-opacity hover:opacity-70"
+                  style={{ color: "#1a1a1a" }}
+                >
+                  <Mail className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
+                  info@aisyria.org
+                </a>
+                <a
+                  href="tel:+963930763547"
+                  className="flex items-center gap-2.5 transition-opacity hover:opacity-70"
+                  style={{ color: "#1a1a1a" }}
+                >
+                  <Phone className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
+                  <span dir="ltr">+963 930 763 547</span>
+                </a>
+                <Link
+                  to="/learning-management-system/catalog"
+                  className="group inline-flex items-center gap-1.5 pt-2 text-sm font-semibold"
+                  style={{ color: TEAL }}
+                >
+                  {lang === "ar" ? "تصفّح الدورات" : "Browse courses"}
+                  <ArrowRight
+                    className={`h-3.5 w-3.5 transition-transform duration-300 ${
+                      isRtl ? "-scale-x-100 group-hover:-translate-x-1" : "group-hover:translate-x-1"
+                    }`}
+                  />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div
+          className="mt-12 flex flex-col items-center gap-2 pt-5 text-center text-xs whitespace-pre-line"
+          dir={isRtl ? "rtl" : "ltr"}
+          style={{ borderTop: `1px solid rgba(255,255,255,0.25)`, color: MUTED }}
+        >
+          {isRtl ? (
+            <span dir="rtl">
+              {tr.copyright} — {tr.brand} <bdi dir="ltr">{new Date().getFullYear()} ©</bdi>
+            </span>
+          ) : (
+            <span>{tr.copyright} — {tr.brand} {new Date().getFullYear()}©</span>
+          )}
+        </div>
+      </div>
     </footer>
   );
 }

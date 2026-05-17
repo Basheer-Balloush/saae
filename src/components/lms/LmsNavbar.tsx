@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { GraduationCap, Moon, Sun, Globe, LogOut, BookOpen, LayoutDashboard, Menu, X, ShieldCheck } from "lucide-react";
+import { Menu, X, Moon, Sun, Globe, LogOut, BookOpen, LayoutDashboard, ShieldCheck, GraduationCap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
@@ -7,12 +7,18 @@ import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { LmsRole } from "@/hooks/useLmsAuth";
+import logo from "@/assets/saae-logo-horizontal.png";
+import logoEnLight from "@/assets/saae-logo-en-light.png";
+import logoEnDark from "@/assets/saae-logo-en-dark.png";
+import logoArDark from "@/assets/saae-logo-ar-dark.png";
 
 type Props = {
   role: LmsRole;
   isAuthed: boolean;
   onSignOut: () => void;
 };
+
+type NavLink = { to: string; label: string; icon?: React.ReactNode };
 
 export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
   const { lang, toggle: toggleLang } = useLang();
@@ -29,10 +35,22 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
   }, []);
 
   useEffect(() => {
-    if (open) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
+    document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
+
+  const links: NavLink[] = [
+    { to: "/learning-management-system", label: tr.navHome },
+    { to: "/learning-management-system/catalog", label: tr.navCatalog, icon: <BookOpen className="h-3.5 w-3.5" /> },
+    { to: "/learning-management-system/verify", label: tr.verifyCertificate, icon: <ShieldCheck className="h-3.5 w-3.5" /> },
+  ];
+  if (isAuthed) {
+    links.push({ to: "/learning-management-system/student", label: tr.navMyCourses });
+    links.push({ to: "/learning-management-system/instructor", label: tr.navInstructor });
+  }
+  if (role === "lms_admin") {
+    links.push({ to: "/learning-management-system/admin", label: tr.navAdmin, icon: <LayoutDashboard className="h-3.5 w-3.5" /> });
+  }
 
   return (
     <header
@@ -40,148 +58,161 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
         "fixed inset-x-0 top-0 z-50 transition-all duration-300",
         scrolled
           ? "border-b border-border/60 bg-background/80 backdrop-blur-xl shadow-soft"
-          : "bg-background/40 backdrop-blur-sm",
+          : "bg-transparent",
       )}
     >
-      <div className="flex w-full items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-6 lg:px-10">
+      <div className="flex w-full items-center justify-between gap-6 px-6 py-3 lg:px-10">
+        {/* Logo: SAAE variants like the main site */}
         <Link
           to="/learning-management-system"
-          className="flex items-center gap-2 text-foreground font-bold"
+          className="relative flex items-center gap-3"
+          aria-label="SAAE Learning Platform"
         >
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <GraduationCap className="h-5 w-5" />
+          {(() => {
+            const isEnLight = lang === "en" && theme === "light";
+            const isEnDark = lang === "en" && theme === "dark";
+            const isArDark = lang === "ar" && theme === "dark";
+            const variants = [
+              { src: logoEnLight, show: isEnLight, alt: "SAAE — Learning Platform" },
+              { src: logoEnDark, show: isEnDark, alt: "SAAE — Learning Platform" },
+              { src: logoArDark, show: isArDark, alt: "منصة التعلم — SAAE" },
+              { src: logo, show: !(isEnLight || isEnDark || isArDark), alt: "SAAE" },
+            ];
+            return variants.map((v, i) => (
+              <img
+                key={i}
+                src={v.src}
+                alt={v.alt}
+                className={cn(
+                  "h-10 w-auto sm:h-11 transition-opacity duration-150",
+                  v.show ? "opacity-100" : "opacity-0 absolute inset-0 pointer-events-none",
+                )}
+                fetchPriority="high"
+                decoding="async"
+              />
+            ));
+          })()}
+          <span className="hidden xl:inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
+            <GraduationCap className="h-3.5 w-3.5" />
+            {tr.brand}
           </span>
-          <span className="hidden sm:inline text-base">{tr.brand}</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-1">
-          <NavItem to="/learning-management-system" label={tr.navHome} />
-          <NavItem to="/learning-management-system/catalog" label={tr.navCatalog} />
-          <NavItem to="/learning-management-system/verify" label={tr.verifyCertificate} />
-          {isAuthed && (
-            <NavItem
-              to="/learning-management-system/student"
-              label={tr.navMyCourses}
-              icon={<BookOpen className="h-3.5 w-3.5" />}
-            />
-          )}
-          {isAuthed && (
-            <NavItem
-              to="/learning-management-system/instructor"
-              label={tr.navInstructor}
-            />
-          )}
-          {role === "lms_admin" && (
-            <NavItem
-              to="/learning-management-system/admin"
-              label={tr.navAdmin}
-              icon={<LayoutDashboard className="h-3.5 w-3.5" />}
-            />
-          )}
+        {/* Desktop nav with animated underline */}
+        <nav className="hidden items-center gap-7 lg:flex">
+          {links.map((l) => (
+            <Link
+              key={l.to + l.label}
+              to={l.to}
+              className="group relative inline-flex items-center gap-1.5 text-sm font-medium text-foreground/75 transition-colors hover:text-primary"
+              activeProps={{ className: "!text-secondary [&_.lms-underline]:scale-x-100" }}
+              activeOptions={{ exact: l.to === "/learning-management-system" }}
+            >
+              {l.icon}
+              {l.label}
+              <span className="lms-underline pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center scale-x-0 rounded-full bg-secondary transition-transform duration-300 group-hover:scale-x-100" />
+            </Link>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-1.5">
+        {/* Right cluster: lang / theme / auth / mobile menu */}
+        <div className="flex items-center gap-2">
           <button
             onClick={toggleLang}
-            className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary"
+            className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary md:inline-flex"
             aria-label="Toggle language"
           >
             <Globe className="h-3.5 w-3.5" />
-            <span className="hidden xs:inline">{lang === "ar" ? "EN" : "AR"}</span>
+            {lang === "ar" ? "EN" : "AR"}
           </button>
           <button
             onClick={toggleTheme}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-foreground/70 transition-colors hover:border-primary hover:text-primary"
+            className="hidden h-9 w-9 items-center justify-center rounded-full border border-border text-foreground/70 transition-colors hover:border-primary hover:text-primary md:inline-flex"
             aria-label="Toggle theme"
           >
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </button>
+
           {isAuthed ? (
-            <Button variant="ghost" size="sm" onClick={onSignOut}>
+            <Button variant="ghost" size="sm" onClick={onSignOut} className="hidden md:inline-flex">
               <LogOut className="h-4 w-4 mx-1" />
-              <span className="hidden sm:inline">{tr.signOut}</span>
+              <span>{tr.signOut}</span>
             </Button>
           ) : (
-            <>
+            <div className="hidden md:flex items-center gap-1.5">
               <Link to="/learning-management-system/login">
                 <Button variant="ghost" size="sm">{tr.signIn}</Button>
               </Link>
-              <Link to="/learning-management-system/signup" className="hidden sm:block">
+              <Link to="/learning-management-system/signup">
                 <Button size="sm">{tr.signUp}</Button>
               </Link>
-            </>
+            </div>
           )}
+
           <button
-            onClick={() => setOpen(true)}
-            className="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-foreground/70 hover:border-primary hover:text-primary"
-            aria-label={tr.menu}
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border lg:hidden"
+            aria-label="Menu"
           >
-            <Menu className="h-4 w-4" />
+            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
       </div>
 
+      {/* Mobile menu — same pattern as site Navbar */}
       {open && (
-        <div className="md:hidden fixed inset-0 z-50 bg-background/95 backdrop-blur-xl animate-in fade-in duration-200">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <span className="font-bold text-foreground">{tr.menu}</span>
-            <button
-              onClick={() => setOpen(false)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground/70 hover:border-primary hover:text-primary"
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </button>
+        <div className="border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
+          <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
+            {links.map((l) => (
+              <Link
+                key={l.to + l.label}
+                to={l.to}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                activeProps={{ className: "bg-muted text-foreground" }}
+                activeOptions={{ exact: l.to === "/learning-management-system" }}
+              >
+                {l.icon}
+                {l.label}
+              </Link>
+            ))}
+
+            {isAuthed ? (
+              <button
+                onClick={() => { setOpen(false); onSignOut(); }}
+                className="mt-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+              >
+                <LogOut className="h-4 w-4" />
+                {tr.signOut}
+              </button>
+            ) : (
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <Link to="/learning-management-system/login" onClick={() => setOpen(false)}>
+                  <Button variant="outline" size="sm" className="w-full">{tr.signIn}</Button>
+                </Link>
+                <Link to="/learning-management-system/signup" onClick={() => setOpen(false)}>
+                  <Button size="sm" className="w-full">{tr.signUp}</Button>
+                </Link>
+              </div>
+            )}
+
+            <div className="mt-3 flex items-center gap-2">
+              <button
+                onClick={toggleLang}
+                className="flex-1 rounded-full border border-border px-3 py-2 text-xs font-semibold"
+              >
+                {lang === "ar" ? "EN" : "AR"}
+              </button>
+              <button
+                onClick={toggleTheme}
+                className="rounded-full border border-border px-3 py-2 text-xs font-semibold"
+              >
+                {theme === "light" ? "Dark" : "Light"}
+              </button>
+            </div>
           </div>
-          <nav className="flex flex-col gap-1 p-4">
-            <MobileItem to="/learning-management-system" label={tr.navHome} onClick={() => setOpen(false)} />
-            <MobileItem to="/learning-management-system/catalog" label={tr.navCatalog} onClick={() => setOpen(false)} icon={<BookOpen className="h-4 w-4" />} />
-            <MobileItem to="/learning-management-system/verify" label={tr.verifyCertificate} onClick={() => setOpen(false)} icon={<ShieldCheck className="h-4 w-4" />} />
-            {isAuthed && (
-              <MobileItem to="/learning-management-system/student" label={tr.navMyCourses} onClick={() => setOpen(false)} icon={<BookOpen className="h-4 w-4" />} />
-            )}
-            {isAuthed && (
-              <MobileItem to="/learning-management-system/instructor" label={tr.navInstructor} onClick={() => setOpen(false)} />
-            )}
-            {role === "lms_admin" && (
-              <MobileItem to="/learning-management-system/admin" label={tr.navAdmin} onClick={() => setOpen(false)} icon={<LayoutDashboard className="h-4 w-4" />} />
-            )}
-            {!isAuthed && (
-              <>
-                <MobileItem to="/learning-management-system/login" label={tr.signIn} onClick={() => setOpen(false)} />
-                <MobileItem to="/learning-management-system/signup" label={tr.signUp} onClick={() => setOpen(false)} />
-              </>
-            )}
-          </nav>
         </div>
       )}
     </header>
-  );
-}
-
-function MobileItem({ to, label, icon, onClick }: { to: string; label: string; icon?: React.ReactNode; onClick: () => void }) {
-  return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className="flex items-center gap-3 rounded-xl px-4 py-3 text-base font-medium text-foreground/80 hover:bg-muted"
-      activeProps={{ className: "bg-muted text-foreground" }}
-    >
-      {icon}
-      {label}
-    </Link>
-  );
-}
-
-function NavItem({ to, label, icon }: { to: string; label: string; icon?: React.ReactNode }) {
-  return (
-    <Link
-      to={to}
-      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted hover:text-foreground"
-      activeProps={{ className: "bg-muted text-foreground" }}
-    >
-      {icon}
-      {label}
-    </Link>
   );
 }
