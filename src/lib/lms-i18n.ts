@@ -122,6 +122,16 @@ export const lmsT: Record<Lang, {
   verify: string;
   verifyValid: string;
   verifyInvalid: string;
+  forgotPassword: string;
+  forgotTitle: string;
+  forgotSubtitle: string;
+  sendResetLink: string;
+  resetLinkSent: string;
+  resetTitle: string;
+  newPassword: string;
+  updatePassword: string;
+  passwordUpdated: string;
+  menu: string;
 }> = {
   ar: {
     brand: "منصة التعلم",
