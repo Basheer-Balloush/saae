@@ -1,5 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useLmsAuth } from "@/hooks/useLmsAuth";
 import {
   ArrowRight,
   BookOpen,
@@ -72,9 +74,49 @@ function LmsHome() {
   const { lang, dir } = useLang();
   const isRtl = dir === "rtl";
   const tr = lmsT[lang];
+  const navigate = useNavigate();
+  const { user, role } = useLmsAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [stats, setStats] = useState({ courses: 0, students: 0, instructors: 0 });
   const [coursesByCategory, setCoursesByCategory] = useState<Record<string, number>>({});
+  const [applying, setApplying] = useState(false);
+
+  const handleBecomeInstructor = async () => {
+    if (!user) {
+      navigate({ to: "/learning-management-system/signup" });
+      return;
+    }
+    if (role === "lms_instructor" || role === "lms_admin") {
+      navigate({ to: "/learning-management-system/instructor" });
+      return;
+    }
+    setApplying(true);
+    try {
+      const { data: existing } = await supabase
+        .from("lms_instructors")
+        .select("approved")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (existing) {
+        toast.info(lang === "ar" ? "طلبك قيد المراجعة" : "Your application is under review");
+      } else {
+        const fullName = (user.user_metadata?.full_name as string) || user.email || "";
+        const { error } = await supabase
+          .from("lms_instructors")
+          .insert({ user_id: user.id, full_name: fullName, approved: false });
+        if (error) throw error;
+        toast.success(
+          lang === "ar"
+            ? "تم استلام طلبك — قيد المراجعة من قبل الإدارة"
+            : "Application received — pending admin review",
+        );
+      }
+    } catch {
+      toast.error(lang === "ar" ? "تعذّر إرسال الطلب" : "Could not submit application");
+    } finally {
+      setApplying(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -132,11 +174,15 @@ function LmsHome() {
                 {tr.heroBrowse} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
               </Button>
             </Link>
-            <Link to="/learning-management-system/signup">
-              <Button size="lg" variant="outline" className="h-12 px-7 text-base">
-                {tr.heroBecomeInstructor}
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-12 px-7 text-base"
+              onClick={handleBecomeInstructor}
+              disabled={applying}
+            >
+              {tr.heroBecomeInstructor}
+            </Button>
           </div>
         </div>
       </section>
