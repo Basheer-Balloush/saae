@@ -75,6 +75,8 @@ function AdminHome() {
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
       <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tr.navAdmin}</h1>
       <div className="mt-4 flex flex-wrap gap-2">
+        <Link to="/learning-management-system/admin/analytics"><Button variant="outline" size="sm">📊 {lang === "ar" ? "تحليلات" : "Analytics"}</Button></Link>
+        <Link to="/learning-management-system/admin/users"><Button variant="outline" size="sm">🛡️ {lang === "ar" ? "المستخدمون" : "Users"}</Button></Link>
         <Link to="/learning-management-system/admin/payouts"><Button variant="outline" size="sm">💸 {lang === "ar" ? "طلبات السحب" : "Payouts"}</Button></Link>
         <Link to="/learning-management-system/admin/coupons"><Button variant="outline" size="sm">🎟️ {lang === "ar" ? "الكوبونات" : "Coupons"}</Button></Link>
         <Link to="/learning-management-system/admin/wallet"><Button variant="outline" size="sm">💳 {lang === "ar" ? "المحافظ والإعدادات" : "Wallets & Settings"}</Button></Link>

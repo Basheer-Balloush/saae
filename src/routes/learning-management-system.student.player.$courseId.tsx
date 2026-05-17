@@ -27,6 +27,7 @@ function Player() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [progress, setProgress] = useState<Progress[]>([]);
   const [currentId, setCurrentId] = useState<string | null>(null);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,6 +53,24 @@ function Player() {
 
   const current = useMemo(() => lessons.find((l) => l.id === currentId) ?? null, [lessons, currentId]);
   const isDone = (id: string) => progress.find((p) => p.lesson_id === id)?.is_completed === true;
+
+  // Resolve private video paths to fresh short-lived signed URLs
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (!current?.video_url) { setVideoSrc(null); return; }
+      if (current.video_url.startsWith("private:")) {
+        const path = current.video_url.slice("private:".length);
+        const { data, error } = await supabase.storage.from("lms-private").createSignedUrl(path, 60 * 60 * 2);
+        if (!active) return;
+        if (error) { toast.error(error.message); setVideoSrc(null); return; }
+        setVideoSrc(data?.signedUrl ?? null);
+      } else {
+        setVideoSrc(current.video_url);
+      }
+    })();
+    return () => { active = false; };
+  }, [current]);
 
   const markComplete = async () => {
     if (!user || !current) return;
@@ -80,10 +99,10 @@ function Player() {
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 grid lg:grid-cols-[1fr_320px] gap-6">
       <div>
         <div className="aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center">
-          {current?.video_url ? (
+          {current?.video_url && videoSrc ? (
             <video
               key={current.id}
-              src={current.video_url}
+              src={videoSrc}
               controls
               controlsList="nodownload"
               onEnded={markComplete}
