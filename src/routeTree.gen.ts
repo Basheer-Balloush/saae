@@ -24,6 +24,7 @@ import { Route as LearningManagementSystemStudentRouteImport } from './routes/le
 import { Route as LearningManagementSystemSignupRouteImport } from './routes/learning-management-system.signup'
 import { Route as LearningManagementSystemLoginRouteImport } from './routes/learning-management-system.login'
 import { Route as LearningManagementSystemInstructorRouteImport } from './routes/learning-management-system.instructor'
+import { Route as LearningManagementSystemForgotPasswordRouteImport } from './routes/learning-management-system.forgot-password'
 import { Route as LearningManagementSystemCatalogRouteImport } from './routes/learning-management-system.catalog'
 import { Route as LearningManagementSystemAdminRouteImport } from './routes/learning-management-system.admin'
 import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
@@ -122,6 +123,12 @@ const LearningManagementSystemInstructorRoute =
   LearningManagementSystemInstructorRouteImport.update({
     id: '/instructor',
     path: '/instructor',
+    getParentRoute: () => LearningManagementSystemRoute,
+  } as any)
+const LearningManagementSystemForgotPasswordRoute =
+  LearningManagementSystemForgotPasswordRouteImport.update({
+    id: '/forgot-password',
+    path: '/forgot-password',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
 const LearningManagementSystemCatalogRoute =
@@ -224,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/communities/$key': typeof CommunitiesKeyRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
+  '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorRouteWithChildren
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
@@ -253,6 +261,7 @@ export interface FileRoutesByTo {
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
+  '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
@@ -284,6 +293,7 @@ export interface FileRoutesById {
   '/communities/$key': typeof CommunitiesKeyRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
+  '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorRouteWithChildren
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/communities/$key'
     | '/learning-management-system/admin'
     | '/learning-management-system/catalog'
+    | '/learning-management-system/forgot-password'
     | '/learning-management-system/instructor'
     | '/learning-management-system/login'
     | '/learning-management-system/signup'
@@ -347,6 +358,7 @@ export interface FileRouteTypes {
     | '/attendance-management-system/login'
     | '/communities/$key'
     | '/learning-management-system/catalog'
+    | '/learning-management-system/forgot-password'
     | '/learning-management-system/login'
     | '/learning-management-system/signup'
     | '/learning-management-system/verify'
@@ -377,6 +389,7 @@ export interface FileRouteTypes {
     | '/communities/$key'
     | '/learning-management-system/admin'
     | '/learning-management-system/catalog'
+    | '/learning-management-system/forgot-password'
     | '/learning-management-system/instructor'
     | '/learning-management-system/login'
     | '/learning-management-system/signup'
@@ -517,6 +530,13 @@ declare module '@tanstack/react-router' {
       path: '/instructor'
       fullPath: '/learning-management-system/instructor'
       preLoaderRoute: typeof LearningManagementSystemInstructorRouteImport
+      parentRoute: typeof LearningManagementSystemRoute
+    }
+    '/learning-management-system/forgot-password': {
+      id: '/learning-management-system/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/learning-management-system/forgot-password'
+      preLoaderRoute: typeof LearningManagementSystemForgotPasswordRouteImport
       parentRoute: typeof LearningManagementSystemRoute
     }
     '/learning-management-system/catalog': {
@@ -700,6 +720,7 @@ const LearningManagementSystemStudentRouteWithChildren =
 interface LearningManagementSystemRouteChildren {
   LearningManagementSystemAdminRoute: typeof LearningManagementSystemAdminRouteWithChildren
   LearningManagementSystemCatalogRoute: typeof LearningManagementSystemCatalogRoute
+  LearningManagementSystemForgotPasswordRoute: typeof LearningManagementSystemForgotPasswordRoute
   LearningManagementSystemInstructorRoute: typeof LearningManagementSystemInstructorRouteWithChildren
   LearningManagementSystemLoginRoute: typeof LearningManagementSystemLoginRoute
   LearningManagementSystemSignupRoute: typeof LearningManagementSystemSignupRoute
@@ -716,6 +737,8 @@ const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildr
     LearningManagementSystemAdminRoute:
       LearningManagementSystemAdminRouteWithChildren,
     LearningManagementSystemCatalogRoute: LearningManagementSystemCatalogRoute,
+    LearningManagementSystemForgotPasswordRoute:
+      LearningManagementSystemForgotPasswordRoute,
     LearningManagementSystemInstructorRoute:
       LearningManagementSystemInstructorRouteWithChildren,
     LearningManagementSystemLoginRoute: LearningManagementSystemLoginRoute,
@@ -753,3 +776,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
