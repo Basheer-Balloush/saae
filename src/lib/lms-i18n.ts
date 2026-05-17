@@ -144,7 +144,7 @@ export const lmsT: Record<Lang, {
     signIn: "تسجيل الدخول",
     signUp: "إنشاء حساب",
     signOut: "تسجيل الخروج",
-    heroTitle: "اكتشف آلاف الدورات وطوّر مهاراتك",
+    heroTitle: "اكتشف الدورات وطوّر مهاراتك",
     heroSubtitle: "منصة تعليمية متكاملة تجمع أفضل المدرّسين والمحتوى التعليمي بمكان واحد",
     heroBrowse: "تصفّح الدورات",
     heroBecomeInstructor: "كن مدرّساً",
