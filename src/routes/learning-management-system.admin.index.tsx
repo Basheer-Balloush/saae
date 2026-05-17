@@ -189,6 +189,8 @@ function AdminHome() {
           </div>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 }
