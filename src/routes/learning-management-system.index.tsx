@@ -1,11 +1,60 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  Code2,
+  Brain,
+  Briefcase,
+  Palette,
+  LineChart,
+  Megaphone,
+  Camera,
+  Languages,
+  Music,
+  HeartPulse,
+  Cpu,
+  Database,
+  type LucideIcon,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
+
+// Icon mapping for category slugs (fallback: BookOpen)
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  programming: Code2,
+  development: Code2,
+  "web-development": Code2,
+  ai: Brain,
+  "artificial-intelligence": Brain,
+  "machine-learning": Brain,
+  "data-science": Database,
+  data: Database,
+  business: Briefcase,
+  entrepreneurship: Briefcase,
+  design: Palette,
+  "ui-ux": Palette,
+  marketing: Megaphone,
+  finance: LineChart,
+  photography: Camera,
+  languages: Languages,
+  music: Music,
+  health: HeartPulse,
+  technology: Cpu,
+};
+
+// Gradient palette — cycled by category index
+const CATEGORY_GRADIENTS = [
+  "from-primary/80 via-primary/60 to-accent/70",
+  "from-accent/80 via-accent/60 to-primary/70",
+  "from-primary/70 via-accent/50 to-primary/80",
+  "from-accent/70 via-primary/50 to-accent/80",
+  "from-primary/90 via-primary/40 to-accent/60",
+  "from-accent/90 via-accent/40 to-primary/60",
+];
 
 export const Route = createFileRoute("/learning-management-system/")({
   head: () => ({
