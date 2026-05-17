@@ -42,7 +42,7 @@ export function CourseCard({ course }: { course: CourseCardData }) {
           {course.is_free ? (
             <span className="rounded-full bg-emerald-500/10 text-emerald-600 px-2 py-0.5">{tr.free}</span>
           ) : (
-            <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">ل.س {course.price.toLocaleString()}</span>
+            <span dir="ltr" className="rounded-full bg-primary/10 text-primary px-2 py-0.5">ل.س {course.price.toLocaleString()}</span>
           )}
         </div>
         <h3 className="mt-2 font-bold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
