@@ -158,7 +158,7 @@ function Player() {
         )}
       </div>
 
-      <aside className="rounded-2xl border border-border bg-card overflow-hidden self-start lg:sticky lg:top-24 max-h-[80vh] overflow-y-auto">
+      <aside dir={lang === "ar" ? "rtl" : "ltr"} className="rounded-2xl border border-border bg-card overflow-hidden self-start lg:sticky lg:top-24 max-h-[80vh] overflow-y-auto">
         {sections.map((s) => (
           <div key={s.id}>
             <div className="px-4 py-2.5 bg-muted/40 font-semibold text-foreground text-sm">{s.title}</div>
