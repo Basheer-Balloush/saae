@@ -163,11 +163,16 @@ function Player() {
               </div>
             )}
 
-            <div className="mt-8 rounded-2xl border border-dashed border-border bg-muted/20 p-6 text-center">
-              <MessageSquare className="mx-auto h-6 w-6 text-muted-foreground" />
-              <h3 className="mt-2 font-bold text-foreground">{tr.qa}</h3>
-              <p className="text-sm text-muted-foreground">{tr.qaComingSoon}</p>
-            </div>
+            <AssignmentsPanel lessonId={current.id} user={user} lang={lang} />
+
+            <QAPanel
+              lessonId={current.id}
+              user={user}
+              isInstructor={
+                role === "lms_admin" || (!!user && !!courseInstructorId && user.id === courseInstructorId)
+              }
+              lang={lang}
+            />
           </>
         )}
       </div>
