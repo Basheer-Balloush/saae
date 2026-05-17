@@ -62,7 +62,7 @@ function InstructorHome() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tr.navInstructor}</h1>
         <Link to="/learning-management-system/instructor/earnings">
-          <Button variant="outline" size="sm">💰 {lang === "ar" ? "أرباحي" : "Earnings"}</Button>
+          <Button variant="outline" size="sm">{lang === "ar" ? "أرباحي" : "Earnings"}</Button>
         </Link>
       </div>
       <div className="flex items-center justify-between mt-4">
