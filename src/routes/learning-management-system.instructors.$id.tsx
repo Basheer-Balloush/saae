@@ -47,7 +47,7 @@ function InstructorProfile() {
         supabase.from("lms_instructors").select("*").eq("user_id", id).maybeSingle(),
         supabase
           .from("lms_courses")
-          .select("id,title_ar,title_en,cover_url,level,price,is_free,students_count,rating_avg")
+          .select("id,title_ar,title_en,description_ar,description_en,cover_url,level,price,is_free,students_count,rating_avg")
           .eq("instructor_id", id)
           .eq("status", "published")
           .order("created_at", { ascending: false }),
