@@ -107,9 +107,25 @@ export function LmsFooter() {
                 boxShadow: "0 10px 30px -12px rgba(0,0,0,0.25)",
               }}
             >
-              <h4 className="text-base font-bold tracking-tight" style={{ color: TEAL }}>
-                {lang === "ar" ? "تواصل معنا" : "Get in touch"}
-              </h4>
+              <a
+                href="https://maps.app.goo.gl/bKMSHXkmkr5U3tZh6"
+                target="_blank"
+                rel="noreferrer"
+                className="relative block aspect-[16/9] overflow-hidden rounded-lg"
+              >
+                <img
+                  src={locationMap}
+                  alt="Damascus"
+                  className="h-full w-full object-cover grayscale"
+                  loading="lazy"
+                />
+                <span
+                  className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+                  aria-hidden
+                >
+                  <MapPin className="h-5 w-5" style={{ color: TEAL }} strokeWidth={2.25} fill={TEAL} />
+                </span>
+              </a>
               <div className="mt-4 space-y-2.5 text-sm">
                 <div className="flex items-start gap-2.5">
                   <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
