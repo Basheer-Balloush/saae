@@ -24,30 +24,46 @@ function StudentHome() {
   const { lang } = useLang();
   const tr = lmsT[lang];
   const [rows, setRows] = useState<Row[]>([]);
+  const [certs, setCerts] = useState<Cert[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: enrolls } = await supabase
-        .from("lms_enrollments")
-        .select("id, progress, course_id")
-        .eq("student_id", user.id)
-        .order("enrolled_at", { ascending: false });
+      const [{ data: enrolls }, { data: cs }] = await Promise.all([
+        supabase
+          .from("lms_enrollments")
+          .select("id, progress, course_id")
+          .eq("student_id", user.id)
+          .order("enrolled_at", { ascending: false }),
+        supabase
+          .from("lms_certificates")
+          .select("id,serial,issued_at,course_id")
+          .eq("student_id", user.id)
+          .order("issued_at", { ascending: false }),
+      ]);
       const list = (enrolls as { id: string; progress: number; course_id: string }[] | null) ?? [];
-      const ids = list.map((r) => r.course_id);
+      const certList = (cs as Cert[] | null) ?? [];
+      const ids = Array.from(new Set([...list.map((r) => r.course_id), ...certList.map((c) => c.course_id)]));
       let courses: { id: string; title_ar: string; title_en: string | null; cover_url: string | null }[] = [];
       if (ids.length) {
-        const { data: cs } = await supabase
+        const { data: csR } = await supabase
           .from("lms_courses")
           .select("id,title_ar,title_en,cover_url")
           .in("id", ids);
-        courses = cs ?? [];
+        courses = csR ?? [];
       }
       setRows(list.map((r) => ({ id: r.id, progress: r.progress, course: courses.find((c) => c.id === r.course_id) ?? null })));
+      setCerts(certList.map((c) => ({
+        ...c,
+        title: (() => {
+          const co = courses.find((x) => x.id === c.course_id);
+          return co ? (lang === "ar" ? co.title_ar : co.title_en || co.title_ar) : "";
+        })(),
+      })));
       setLoading(false);
     })();
-  }, [user]);
+  }, [user, lang]);
 
   const avg = rows.length ? Math.round(rows.reduce((s, r) => s + Number(r.progress), 0) / rows.length) : 0;
 
