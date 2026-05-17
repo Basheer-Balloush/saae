@@ -1,11 +1,60 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  Code2,
+  Brain,
+  Briefcase,
+  Palette,
+  LineChart,
+  Megaphone,
+  Camera,
+  Languages,
+  Music,
+  HeartPulse,
+  Cpu,
+  Database,
+  type LucideIcon,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
+
+// Icon mapping for category slugs (fallback: BookOpen)
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  programming: Code2,
+  development: Code2,
+  "web-development": Code2,
+  ai: Brain,
+  "artificial-intelligence": Brain,
+  "machine-learning": Brain,
+  "data-science": Database,
+  data: Database,
+  business: Briefcase,
+  entrepreneurship: Briefcase,
+  design: Palette,
+  "ui-ux": Palette,
+  marketing: Megaphone,
+  finance: LineChart,
+  photography: Camera,
+  languages: Languages,
+  music: Music,
+  health: HeartPulse,
+  technology: Cpu,
+};
+
+// Gradient palette — cycled by category index
+const CATEGORY_GRADIENTS = [
+  "from-primary/80 via-primary/60 to-accent/70",
+  "from-accent/80 via-accent/60 to-primary/70",
+  "from-primary/70 via-accent/50 to-primary/80",
+  "from-accent/70 via-primary/50 to-accent/80",
+  "from-primary/90 via-primary/40 to-accent/60",
+  "from-accent/90 via-accent/40 to-primary/60",
+];
 
 export const Route = createFileRoute("/learning-management-system/")({
   head: () => ({
@@ -25,6 +74,7 @@ function LmsHome() {
   const tr = lmsT[lang];
   const [categories, setCategories] = useState<Category[]>([]);
   const [stats, setStats] = useState({ courses: 0, students: 0, instructors: 0 });
+  const [coursesByCategory, setCoursesByCategory] = useState<Record<string, number>>({});
 
   useEffect(() => {
     (async () => {
@@ -34,12 +84,19 @@ function LmsHome() {
         .order("display_order");
       setCategories((cats as Category[]) ?? []);
 
-      const [{ count: cCount }, { count: eCount }, { count: iCount }] = await Promise.all([
+      const [{ count: cCount }, { count: eCount }, { count: iCount }, { data: courseRows }] = await Promise.all([
         supabase.from("lms_courses").select("*", { count: "exact", head: true }).eq("status", "published"),
         supabase.from("lms_enrollments").select("*", { count: "exact", head: true }),
         supabase.from("lms_instructors").select("*", { count: "exact", head: true }).eq("approved", true),
+        supabase.from("lms_courses").select("category_id").eq("status", "published"),
       ]);
       setStats({ courses: cCount ?? 0, students: eCount ?? 0, instructors: iCount ?? 0 });
+
+      const counts: Record<string, number> = {};
+      ((courseRows as { category_id: string | null }[]) ?? []).forEach((r) => {
+        if (r.category_id) counts[r.category_id] = (counts[r.category_id] ?? 0) + 1;
+      });
+      setCoursesByCategory(counts);
     })();
   }, []);
 
@@ -140,30 +197,77 @@ function LmsHome() {
       </section>
 
 
-      {/* Categories */}
-      <section className="py-12 sm:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="flex items-end justify-between mb-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">{tr.categories}</h2>
+      {/* Categories — large gradient cards */}
+      <section className="py-16 sm:py-24 bg-muted/20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+                {tr.categories}
+              </h2>
+              <p className="mt-2 text-sm sm:text-base text-muted-foreground">
+                {lang === "ar"
+                  ? "اختر مجالك وابدأ رحلتك التعليميّة"
+                  : "Pick your field and start your learning journey"}
+              </p>
+            </div>
             <Link
               to="/learning-management-system/catalog"
-              className="text-sm font-semibold text-primary hover:underline"
+              className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
             >
               {tr.viewAll}
+              <ArrowRight className="h-4 w-4 rtl:rotate-180" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-            {categories.map((c) => (
-              <Link
-                key={c.id}
-                to="/learning-management-system/catalog"
-                className="group rounded-2xl border border-border bg-card p-5 text-center transition-all hover:border-primary hover:shadow-soft"
-              >
-                <div className="mt-3 font-semibold text-foreground text-sm">
-                  {lang === "ar" ? c.name_ar : c.name_en || c.name_ar}
-                </div>
-              </Link>
-            ))}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            {categories.map((c, i) => {
+              const Icon = CATEGORY_ICONS[c.slug] ?? BookOpen;
+              const gradient = CATEGORY_GRADIENTS[i % CATEGORY_GRADIENTS.length];
+              const count = coursesByCategory[c.id] ?? 0;
+              return (
+                <motion.div
+                  key={c.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.5, delay: (i % 6) * 0.06 }}
+                >
+                  <Link
+                    to="/learning-management-system/catalog"
+                    className={`group relative block overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-br ${gradient} min-h-[200px] sm:min-h-[220px] p-6 sm:p-7 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}
+                  >
+                    <div
+                      aria-hidden
+                      className={`absolute -top-10 ${isRtl ? "-left-10" : "-right-10"} h-40 w-40 rounded-full bg-white/20 blur-3xl transition-opacity group-hover:opacity-70`}
+                    />
+                    <div className="relative flex h-full flex-col justify-between">
+                      <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/25 backdrop-blur-sm text-white shadow-inner ring-1 ring-white/30">
+                        <Icon className="h-7 w-7" strokeWidth={1.75} />
+                      </div>
+                      <div className="mt-8">
+                        <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight drop-shadow-sm">
+                          {lang === "ar" ? c.name_ar : c.name_en || c.name_ar}
+                        </h3>
+                        <div className="mt-2 flex items-center justify-between">
+                          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-white/90">
+                            <BookOpen className="h-3.5 w-3.5" />
+                            {count} {lang === "ar" ? "دورة" : count === 1 ? "course" : "courses"}
+                          </span>
+                          <ArrowRight
+                            className={`h-5 w-5 text-white transition-transform duration-300 ${
+                              isRtl
+                                ? "-scale-x-100 group-hover:-translate-x-1"
+                                : "group-hover:translate-x-1"
+                            }`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
