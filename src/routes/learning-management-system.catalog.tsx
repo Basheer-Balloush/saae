@@ -1,0 +1,104 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Search } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useLang } from "@/lib/i18n";
+import { lmsT } from "@/lib/lms-i18n";
+import { Input } from "@/components/ui/input";
+import { CourseCard, type CourseCardData } from "@/components/lms/CourseCard";
+
+export const Route = createFileRoute("/learning-management-system/catalog")({
+  head: () => ({ meta: [{ title: "LMS · Catalog" }] }),
+  component: Catalog,
+});
+
+type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
+
+function Catalog() {
+  const { lang } = useLang();
+  const tr = lmsT[lang];
+  const [courses, setCourses] = useState<CourseCardData[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState<string>("all");
+  const [level, setLevel] = useState<string>("all");
+  const [price, setPrice] = useState<string>("all");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const [{ data: cs }, { data: cats }] = await Promise.all([
+        supabase
+          .from("lms_courses")
+          .select("id,title_ar,title_en,description_ar,description_en,cover_url,level,price,is_free,students_count,rating_avg,category_id")
+          .eq("status", "published")
+          .order("created_at", { ascending: false }),
+        supabase.from("lms_categories").select("id,name_ar,name_en,slug").order("display_order"),
+      ]);
+      setCourses(((cs as (CourseCardData & { category_id: string })[]) ?? []) as CourseCardData[]);
+      setCategories((cats as Category[]) ?? []);
+      setLoading(false);
+    })();
+  }, []);
+
+  const filtered = useMemo(() => {
+    return courses.filter((c) => {
+      if (q && !(`${c.title_ar} ${c.title_en ?? ""}`.toLowerCase().includes(q.toLowerCase()))) return false;
+      if (cat !== "all" && (c as unknown as { category_id: string }).category_id !== cat) return false;
+      if (level !== "all" && c.level !== level) return false;
+      if (price === "free" && !c.is_free) return false;
+      if (price === "paid" && c.is_free) return false;
+      return true;
+    });
+  }, [courses, q, cat, level, price]);
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
+      <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tr.catalogTitle}</h1>
+
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="relative sm:col-span-2 lg:col-span-1">
+          <Search className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-muted-foreground" />
+          <Input placeholder={tr.search} value={q} onChange={(e) => setQ(e.target.value)} className="ps-9" />
+        </div>
+        <Select value={cat} onChange={setCat} options={[{ value: "all", label: tr.all }, ...categories.map((c) => ({ value: c.id, label: lang === "ar" ? c.name_ar : c.name_en || c.name_ar }))]} label={tr.filterCategory} />
+        <Select value={level} onChange={setLevel} options={[
+          { value: "all", label: tr.all },
+          { value: "beginner", label: tr.beginner },
+          { value: "intermediate", label: tr.intermediate },
+          { value: "advanced", label: tr.advanced },
+        ]} label={tr.filterLevel} />
+        <Select value={price} onChange={setPrice} options={[
+          { value: "all", label: tr.all },
+          { value: "free", label: tr.free },
+          { value: "paid", label: tr.paid },
+        ]} label={tr.filterPrice} />
+      </div>
+
+      {loading ? (
+        <p className="mt-10 text-center text-muted-foreground">{tr.loading}</p>
+      ) : filtered.length === 0 ? (
+        <p className="mt-16 text-center text-muted-foreground">{tr.noCourses}</p>
+      ) : (
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          {filtered.map((c) => <CourseCard key={c.id} course={c} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Select({ value, onChange, options, label }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[]; label: string }) {
+  return (
+    <label className="block">
+      <span className="sr-only">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+      >
+        {options.map((o) => <option key={o.value} value={o.value}>{label}: {o.label}</option>)}
+      </select>
+    </label>
+  );
+}
