@@ -232,7 +232,7 @@ function CourseBuilder() {
           <Button size="sm" onClick={addSection}><Plus className="h-4 w-4 mx-1" />{lang === "ar" ? "قسم" : "Section"}</Button>
         </div>
         <div className="mt-4 space-y-4">
-          {sections.length === 0 && <p className="text-sm text-muted-foreground">{lang === "ar" ? "ما في أقسام بعد" : "No sections yet"}</p>}
+          {sections.length === 0 && <p className="text-sm text-muted-foreground">{lang === "ar" ? "لا توجد أقسام بعد" : "No sections yet"}</p>}
           {sections.map((s) => (
             <div key={s.id} className="rounded-xl border border-border">
               <div className="flex items-center justify-between gap-2 px-4 py-2.5 bg-muted/40">
