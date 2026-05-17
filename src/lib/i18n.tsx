@@ -12,13 +12,10 @@ type Ctx = {
 const LanguageContext = createContext<Ctx | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("en");
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const saved = (localStorage.getItem("saae-lang") as Lang | null) ?? "en";
-    setLangState(saved);
-  }, []);
+  const [lang, setLangState] = useState<Lang>(() => {
+    if (typeof window === "undefined") return "en";
+    return (localStorage.getItem("saae-lang") as Lang | null) ?? "en";
+  });
 
   useEffect(() => {
     if (typeof document === "undefined") return;
