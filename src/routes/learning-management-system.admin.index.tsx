@@ -80,6 +80,7 @@ function AdminHome() {
         <Link to="/learning-management-system/admin/payouts"><Button variant="outline" size="sm">💸 {lang === "ar" ? "طلبات السحب" : "Payouts"}</Button></Link>
         <Link to="/learning-management-system/admin/coupons"><Button variant="outline" size="sm">🎟️ {lang === "ar" ? "الكوبونات" : "Coupons"}</Button></Link>
         <Link to="/learning-management-system/admin/wallet"><Button variant="outline" size="sm">💳 {lang === "ar" ? "المحافظ والإعدادات" : "Wallets & Settings"}</Button></Link>
+        <Link to="/learning-management-system/admin/reviews"><Button variant="outline" size="sm">⭐ {lang === "ar" ? "التقييمات" : "Reviews"}</Button></Link>
       </div>
 
       <div className="mt-6 flex gap-2 border-b border-border">

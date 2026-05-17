@@ -42,6 +42,7 @@ import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/
 import { Route as LearningManagementSystemCertificateIdRouteImport } from './routes/learning-management-system.certificate.$id'
 import { Route as LearningManagementSystemAdminWalletRouteImport } from './routes/learning-management-system.admin.wallet'
 import { Route as LearningManagementSystemAdminUsersRouteImport } from './routes/learning-management-system.admin.users'
+import { Route as LearningManagementSystemAdminReviewsRouteImport } from './routes/learning-management-system.admin.reviews'
 import { Route as LearningManagementSystemAdminPayoutsRouteImport } from './routes/learning-management-system.admin.payouts'
 import { Route as LearningManagementSystemAdminCouponsRouteImport } from './routes/learning-management-system.admin.coupons'
 import { Route as LearningManagementSystemAdminAnalyticsRouteImport } from './routes/learning-management-system.admin.analytics'
@@ -239,6 +240,12 @@ const LearningManagementSystemAdminUsersRoute =
     path: '/users',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const LearningManagementSystemAdminReviewsRoute =
+  LearningManagementSystemAdminReviewsRouteImport.update({
+    id: '/reviews',
+    path: '/reviews',
+    getParentRoute: () => LearningManagementSystemAdminRoute,
+  } as any)
 const LearningManagementSystemAdminPayoutsRoute =
   LearningManagementSystemAdminPayoutsRouteImport.update({
     id: '/payouts',
@@ -309,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/payouts': typeof LearningManagementSystemAdminPayoutsRoute
+  '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/admin/wallet': typeof LearningManagementSystemAdminWalletRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
@@ -346,6 +354,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/payouts': typeof LearningManagementSystemAdminPayoutsRoute
+  '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/admin/wallet': typeof LearningManagementSystemAdminWalletRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
@@ -389,6 +398,7 @@ export interface FileRoutesById {
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/payouts': typeof LearningManagementSystemAdminPayoutsRoute
+  '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/admin/wallet': typeof LearningManagementSystemAdminWalletRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
@@ -433,6 +443,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/payouts'
+    | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/admin/wallet'
     | '/learning-management-system/certificate/$id'
@@ -470,6 +481,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/payouts'
+    | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/admin/wallet'
     | '/learning-management-system/certificate/$id'
@@ -512,6 +524,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/payouts'
+    | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/admin/wallet'
     | '/learning-management-system/certificate/$id'
@@ -775,6 +788,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemAdminUsersRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
     }
+    '/learning-management-system/admin/reviews': {
+      id: '/learning-management-system/admin/reviews'
+      path: '/reviews'
+      fullPath: '/learning-management-system/admin/reviews'
+      preLoaderRoute: typeof LearningManagementSystemAdminReviewsRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRoute
+    }
     '/learning-management-system/admin/payouts': {
       id: '/learning-management-system/admin/payouts'
       path: '/payouts'
@@ -847,6 +867,7 @@ interface LearningManagementSystemAdminRouteChildren {
   LearningManagementSystemAdminAnalyticsRoute: typeof LearningManagementSystemAdminAnalyticsRoute
   LearningManagementSystemAdminCouponsRoute: typeof LearningManagementSystemAdminCouponsRoute
   LearningManagementSystemAdminPayoutsRoute: typeof LearningManagementSystemAdminPayoutsRoute
+  LearningManagementSystemAdminReviewsRoute: typeof LearningManagementSystemAdminReviewsRoute
   LearningManagementSystemAdminUsersRoute: typeof LearningManagementSystemAdminUsersRoute
   LearningManagementSystemAdminWalletRoute: typeof LearningManagementSystemAdminWalletRoute
   LearningManagementSystemAdminIndexRoute: typeof LearningManagementSystemAdminIndexRoute
@@ -860,6 +881,8 @@ const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminR
       LearningManagementSystemAdminCouponsRoute,
     LearningManagementSystemAdminPayoutsRoute:
       LearningManagementSystemAdminPayoutsRoute,
+    LearningManagementSystemAdminReviewsRoute:
+      LearningManagementSystemAdminReviewsRoute,
     LearningManagementSystemAdminUsersRoute:
       LearningManagementSystemAdminUsersRoute,
     LearningManagementSystemAdminWalletRoute:
