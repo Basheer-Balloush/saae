@@ -70,6 +70,7 @@ function Catalog() {
           <Input placeholder={tr.search} value={q} onChange={(e) => setQ(e.target.value)} className="ps-9" />
         </div>
         <FilterSelect
+          dir={dir}
           value={cat}
           onChange={setCat}
           label={tr.filterCategory}
@@ -82,6 +83,7 @@ function Catalog() {
           ]}
         />
         <FilterSelect
+          dir={dir}
           value={level}
           onChange={setLevel}
           label={tr.filterLevel}
@@ -93,6 +95,7 @@ function Catalog() {
           ]}
         />
         <FilterSelect
+          dir={dir}
           value={price}
           onChange={setPrice}
           label={tr.filterPrice}
