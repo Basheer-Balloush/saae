@@ -406,7 +406,16 @@ export type Database = {
     }
     Enums: {
       ams_payment_status: "unpaid" | "paid" | "partial" | "waived"
-      app_role: "admin" | "user" | "attendance_user" | "attendance_admin"
+      app_role:
+        | "admin"
+        | "user"
+        | "attendance_user"
+        | "attendance_admin"
+        | "lms_student"
+        | "lms_instructor"
+        | "lms_admin"
+      lms_course_level: "beginner" | "intermediate" | "advanced"
+      lms_course_status: "draft" | "pending" | "rejected" | "published"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -535,7 +544,17 @@ export const Constants = {
   public: {
     Enums: {
       ams_payment_status: ["unpaid", "paid", "partial", "waived"],
-      app_role: ["admin", "user", "attendance_user", "attendance_admin"],
+      app_role: [
+        "admin",
+        "user",
+        "attendance_user",
+        "attendance_admin",
+        "lms_student",
+        "lms_instructor",
+        "lms_admin",
+      ],
+      lms_course_level: ["beginner", "intermediate", "advanced"],
+      lms_course_status: ["draft", "pending", "rejected", "published"],
     },
   },
 } as const
