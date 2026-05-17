@@ -84,12 +84,19 @@ function LmsHome() {
         .order("display_order");
       setCategories((cats as Category[]) ?? []);
 
-      const [{ count: cCount }, { count: eCount }, { count: iCount }, { data: courseRows }] = await Promise.all([
-        supabase.from("lms_courses").select("*", { count: "exact", head: true }).eq("status", "published"),
-        supabase.from("lms_enrollments").select("*", { count: "exact", head: true }),
-        supabase.from("lms_instructors").select("*", { count: "exact", head: true }).eq("approved", true),
-        supabase.from("lms_courses").select("category_id").eq("status", "published"),
-      ]);
+      const [{ count: cCount }, { count: eCount }, { count: iCount }, { data: courseRows }] =
+        await Promise.all([
+          supabase
+            .from("lms_courses")
+            .select("*", { count: "exact", head: true })
+            .eq("status", "published"),
+          supabase.from("lms_enrollments").select("*", { count: "exact", head: true }),
+          supabase
+            .from("lms_instructors")
+            .select("*", { count: "exact", head: true })
+            .eq("approved", true),
+          supabase.from("lms_courses").select("category_id").eq("status", "published"),
+        ]);
       setStats({ courses: cCount ?? 0, students: eCount ?? 0, instructors: iCount ?? 0 });
 
       const counts: Record<string, number> = {};
@@ -126,7 +133,9 @@ function LmsHome() {
               </Button>
             </Link>
             <Link to="/learning-management-system/signup">
-              <Button size="lg" variant="outline" className="h-12 px-7 text-base">{tr.heroBecomeInstructor}</Button>
+              <Button size="lg" variant="outline" className="h-12 px-7 text-base">
+                {tr.heroBecomeInstructor}
+              </Button>
             </Link>
           </div>
         </div>
@@ -195,7 +204,6 @@ function LmsHome() {
           </div>
         </div>
       </section>
-
 
       {/* Categories — large gradient cards */}
       <section className="py-16 sm:py-24 bg-muted/20">
@@ -276,7 +284,6 @@ function LmsHome() {
           </div>
         </div>
       </section>
-
     </div>
   );
 }
@@ -317,7 +324,11 @@ function LmsStatCard({
         >
           {value}
         </span>
-        <span aria-hidden className="mt-5 block h-[2px] w-full" style={{ backgroundColor: "#048090" }} />
+        <span
+          aria-hidden
+          className="mt-5 block h-[2px] w-full"
+          style={{ backgroundColor: "#048090" }}
+        />
         <span
           className="mt-5 block text-muted-foreground"
           style={{
@@ -333,4 +344,3 @@ function LmsStatCard({
     </motion.div>
   );
 }
-
