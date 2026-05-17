@@ -116,6 +116,29 @@ function StudentHome() {
           ))}
         </div>
       )}
+
+      {certs.length > 0 && (
+        <>
+          <h2 className="mt-12 text-xl font-bold text-foreground">{tr.certificate}</h2>
+          <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {certs.map((c) => (
+              <Link
+                key={c.id}
+                to="/learning-management-system/certificate/$id"
+                params={{ id: c.id }}
+                className="group rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-accent/10 p-5 hover:border-primary transition-colors"
+              >
+                <Award className="h-8 w-8 text-primary" />
+                <div className="mt-3 font-bold text-foreground line-clamp-2">{c.title}</div>
+                <div className="mt-2 text-xs font-mono text-muted-foreground">{c.serial}</div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {new Date(c.issued_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
