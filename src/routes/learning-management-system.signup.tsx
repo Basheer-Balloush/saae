@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
+import { localizeAuthError } from "@/lib/auth-error-i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -71,7 +72,7 @@ function LmsSignup() {
       }
       toast.success(tr.signedUp);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : tr.authFailed);
+      toast.error(localizeAuthError(err, lang, tr.authFailed));
     } finally {
       setSubmitting(false);
     }

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
+import { localizeAuthError } from "@/lib/auth-error-i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/learning-management-system/forgot-passwor
 
 function ForgotPage() {
   const { lang } = useLang();
+  void lang;
   const tr = lmsT[lang];
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
