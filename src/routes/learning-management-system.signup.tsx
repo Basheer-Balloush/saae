@@ -34,6 +34,7 @@ function LmsSignup() {
   const [password, setPassword] = useState("");
   const [asInstructor, setAsInstructor] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/learning-management-system/student" });
