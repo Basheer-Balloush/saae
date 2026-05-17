@@ -329,7 +329,7 @@ export const lmsT: Record<Lang, {
     continueLesson: "Continue where you left off",
     enrolledCourses: "Enrolled courses",
     avgProgress: "Average progress",
-    loading: "Loading...",
+    loading: "Loading...‎",
     copyright: "All rights reserved",
     authRequired: "You must sign in first",
     alreadyRequested: "You have already submitted a request — it is under review",

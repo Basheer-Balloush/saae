@@ -128,7 +128,7 @@ export function QAPanel({ lessonId, user, isInstructor, lang }: Props) {
 
       <div className="mt-6 space-y-4">
         {loading ? (
-          <p className="text-sm text-muted-foreground">{t(lang, "جاري التحميل...", "Loading...")}</p>
+          <p className="text-sm text-muted-foreground">{t(lang, "جاري التحميل...", "Loading...‎")}</p>
         ) : questions.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t(lang, "لا توجد أسئلة بعد. كن أول من يسأل!", "No questions yet. Be the first to ask!")}</p>
         ) : (

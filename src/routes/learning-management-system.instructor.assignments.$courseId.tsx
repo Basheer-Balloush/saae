@@ -136,7 +136,7 @@ function InstructorAssignments() {
   };
 
   if (authLoading || authorized === null) {
-    return <p className="text-center py-20 text-muted-foreground">{t(lang, "جاري التحميل...", "Loading...")}</p>;
+    return <p className="text-center py-20 text-muted-foreground">{t(lang, "جاري التحميل...", "Loading...‎")}</p>;
   }
   if (!authorized) {
     return (
@@ -222,7 +222,7 @@ function InstructorAssignments() {
       {/* Assignments list */}
       <div className="mt-6 space-y-3">
         {loading ? (
-          <p className="text-center text-muted-foreground">{t(lang, "جاري التحميل...", "Loading...")}</p>
+          <p className="text-center text-muted-foreground">{t(lang, "جاري التحميل...", "Loading...‎")}</p>
         ) : assignments.length === 0 ? (
           <p className="text-center text-muted-foreground py-8">{t(lang, "لا توجد وظائف بعد", "No assignments yet")}</p>
         ) : (
@@ -327,7 +327,7 @@ function AssignmentRow({
       {expanded && (
         <div className="mt-4 border-t border-border pt-4">
           {loadingSubs ? (
-            <p className="text-sm text-muted-foreground">{t(lang, "جاري التحميل...", "Loading...")}</p>
+            <p className="text-sm text-muted-foreground">{t(lang, "جاري التحميل...", "Loading...‎")}</p>
           ) : subs.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t(lang, "لا توجد تسليمات بعد", "No submissions yet")}</p>
           ) : (
