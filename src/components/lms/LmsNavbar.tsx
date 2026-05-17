@@ -92,10 +92,6 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
               />
             ));
           })()}
-          <span className="hidden xl:inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
-            <GraduationCap className="h-3.5 w-3.5" />
-            {tr.brand}
-          </span>
         </Link>
 
         {/* Desktop nav with animated underline */}
