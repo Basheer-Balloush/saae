@@ -154,7 +154,7 @@ function InstructorAssignments() {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <Link to="/learning-management-system/instructor/courses/$id" params={{ id: courseId }} className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
             {t(lang, "العودة للدورة", "Back to course")}
           </Link>
           <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">

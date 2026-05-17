@@ -54,7 +54,7 @@ function AdminReviews() {
           {isAr ? "إدارة التقييمات" : "Manage Reviews"}
         </h1>
         <Link to="/learning-management-system/admin">
-          <Button variant="outline" size="sm"><ArrowRight className="h-4 w-4 mx-1" />{isAr ? "رجوع" : "Back"}</Button>
+          <Button variant="outline" size="sm"><ArrowRight className="h-4 w-4 mx-1 rtl:rotate-180" />{isAr ? "رجوع" : "Back"}</Button>
         </Link>
       </div>
       <p className="mt-2 text-sm text-muted-foreground">
