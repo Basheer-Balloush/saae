@@ -104,13 +104,13 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
             <Link
               key={l.to + l.label}
               to={l.to}
-              className="relative inline-flex items-center gap-1.5 text-sm font-medium text-foreground/75 transition-colors hover:text-primary"
-              activeProps={{ className: "!text-secondary" }}
+              className="group relative inline-flex items-center gap-1.5 text-sm font-medium text-foreground/75 transition-colors hover:text-primary"
+              activeProps={{ className: "!text-secondary [&_.lms-underline]:scale-x-100" }}
               activeOptions={{ exact: l.to === "/learning-management-system" }}
             >
               {l.icon}
               {l.label}
-              <span className="pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center scale-x-0 rounded-full bg-secondary transition-transform duration-300 [.\\!text-secondary_&]:scale-x-100" />
+              <span className="lms-underline pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center scale-x-0 rounded-full bg-secondary transition-transform duration-300 group-hover:scale-x-100" />
             </Link>
           ))}
         </nav>
