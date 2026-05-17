@@ -20,7 +20,8 @@ export const Route = createFileRoute("/learning-management-system/")({
 type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
 
 function LmsHome() {
-  const { lang } = useLang();
+  const { lang, dir } = useLang();
+  const isRtl = dir === "rtl";
   const tr = lmsT[lang];
   const [categories, setCategories] = useState<Category[]>([]);
   const [stats, setStats] = useState({ courses: 0, students: 0, instructors: 0 });
