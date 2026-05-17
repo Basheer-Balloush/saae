@@ -125,13 +125,14 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const location = useLocation();
   const isAms = location.pathname.startsWith("/attendance-management-system");
+  const isLms = location.pathname.startsWith("/learning-management-system");
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <LanguageProvider>
           <Outlet />
-          {!isAms && <AssistantFab />}
+          {!isAms && !isLms && <AssistantFab />}
           <Toaster richColors position="top-center" />
         </LanguageProvider>
       </ThemeProvider>
