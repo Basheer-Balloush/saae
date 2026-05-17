@@ -19,6 +19,7 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
   const { theme, toggle: toggleTheme } = useTheme();
   const tr = lmsT[lang];
   const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -26,6 +27,12 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (open) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
 
   return (
     <header
