@@ -49,8 +49,6 @@ function LmsHome() {
           <h1 className="mt-4 text-3xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
             {tr.heroTitle}
           </h1>
-            {tr.heroTitle}
-          </h1>
           <p className="mt-4 max-w-2xl mx-auto text-base sm:text-lg text-muted-foreground">
             {tr.heroSubtitle}
           </p>
