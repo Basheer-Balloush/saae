@@ -320,7 +320,7 @@ export const lmsT: Record<Lang, {
     haveAccount: "Already have an account? Sign in",
     authFailed: "Sign in failed",
     signedIn: "Signed in",
-    signedUp: "Account created successfully",
+    signedUp: "Confirmation email sent — check your inbox",
     invalidEmail: "Invalid email",
     passwordMin: "Password must be at least 6 characters",
     welcomeBack: "Welcome back",
