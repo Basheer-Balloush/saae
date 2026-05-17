@@ -101,7 +101,14 @@ function InstructorHome() {
               </div>
               <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" />{c.students_count}</span>
-                <span>{c.is_free ? tr.free : `ل.س ${c.price.toLocaleString()}`}</span>
+                <span>
+                  {c.is_free ? tr.free : (
+                    <span dir="ltr" className="inline-flex flex-row items-center gap-1">
+                      <span>ل.س</span>
+                      <span>{c.price.toLocaleString()}</span>
+                    </span>
+                  )}
+                </span>
                 <span className="inline-flex items-center gap-1 text-primary"><Edit3 className="h-3.5 w-3.5" />{lang === "ar" ? "تعديل" : "Edit"}</span>
               </div>
             </Link>
