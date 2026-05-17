@@ -198,7 +198,7 @@ export const lmsT: Record<Lang, {
     haveAccount: "لديك حساب؟ سجّل الدخول",
     authFailed: "فشل تسجيل الدخول",
     signedIn: "تمّ تسجيل الدخول",
-    signedUp: "تمّ إنشاء الحساب بنجاح",
+    signedUp: "أرسلنا لك إيميل تأكيد — راجع صندوق الوارد",
     invalidEmail: "بريد إلكترونيّ غير صالح",
     passwordMin: "يجب ألّا تقلّ كلمة المرور عن 6 أحرف",
     welcomeBack: "مرحباً بعودتك",
