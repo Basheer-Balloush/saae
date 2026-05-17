@@ -176,14 +176,56 @@ function LmsHome() {
   );
 }
 
-function Stat({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) {
+function LmsStatCard({
+  value,
+  label,
+  index,
+  heightClass,
+  isRtl,
+}: {
+  value: string;
+  label: string;
+  index: number;
+  heightClass: string;
+  isRtl: boolean;
+}) {
+  const PADDING = 28;
   return (
-    <div className="flex flex-col items-center">
-      <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-        {icon}
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.55, delay: index * 0.07 }}
+      className={`group relative flex flex-col justify-center overflow-hidden rounded-2xl bg-muted/40 dark:bg-muted/20 ${heightClass}`}
+      style={{ padding: `${PADDING}px` }}
+    >
+      <div className={`flex flex-col ${isRtl ? "items-end text-right" : "items-start text-left"}`}>
+        <span
+          className="block leading-none"
+          style={{
+            color: "#048090",
+            fontFamily: '"Cairo", system-ui, sans-serif',
+            fontWeight: 900,
+            letterSpacing: "-0.03em",
+            fontSize: "clamp(2.75rem, 5vw, 4rem)",
+          }}
+        >
+          {value}
+        </span>
+        <span aria-hidden className="mt-5 block h-[2px] w-full" style={{ backgroundColor: "#048090" }} />
+        <span
+          className="mt-5 block text-muted-foreground"
+          style={{
+            fontFamily: '"Cairo", system-ui, sans-serif',
+            fontWeight: 400,
+            fontSize: "14px",
+            letterSpacing: "0.01em",
+          }}
+        >
+          {label}
+        </span>
       </div>
-      <div className="mt-2 text-2xl sm:text-3xl font-bold text-foreground">{value.toLocaleString()}</div>
-      <div className="text-xs sm:text-sm text-muted-foreground">{label}</div>
-    </div>
+    </motion.div>
   );
 }
+
