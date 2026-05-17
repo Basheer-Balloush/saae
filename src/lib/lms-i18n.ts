@@ -209,6 +209,7 @@ export const lmsT: Record<Lang, {
     loading: "جارٍ التحميل...",
     copyright: "جميع الحقوق محفوظة",
     authRequired: "يجب تسجيل الدخول أوّلاً",
+    alreadyRequested: "لقد أرسلت طلباً سابقاً — قيد المراجعة من قبل الإدارة",
     enrollmentSuccess: "تمّ التسجيل في الدورة بنجاح",
     comingSoon: "قريباً",
     finalTest: "الاختبار النهائيّ",
