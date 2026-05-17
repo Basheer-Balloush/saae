@@ -70,7 +70,7 @@ function Analytics() {
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
       <Link to="/learning-management-system/admin" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-4">
-        <ArrowLeft className="h-4 w-4" />{ar ? "رجوع" : "Back"}
+        <ArrowLeft className="h-4 w-4 rtl:rotate-180" />{ar ? "رجوع" : "Back"}
       </Link>
       <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{ar ? "تحليلات المنصة" : "Platform Analytics"}</h1>
 
