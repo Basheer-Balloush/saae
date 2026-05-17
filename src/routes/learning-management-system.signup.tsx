@@ -81,9 +81,13 @@ function LmsSignup() {
     <div className="flex-1 flex items-center justify-center px-6 py-10">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-soft">
         <div className="flex flex-col items-center text-center">
-          <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <GraduationCap className="h-6 w-6" />
-          </span>
+          <img
+            src={logo}
+            alt="SAAE"
+            width={80}
+            height={80}
+            className="h-16 w-auto"
+          />
         </div>
         <h1 className="mt-3 text-xl font-bold text-foreground text-center">{tr.signUpTitle}</h1>
         <p className="mt-1 text-sm text-muted-foreground text-center">{tr.signUpSubtitle}</p>
