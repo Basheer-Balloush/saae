@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BookOpen, Users, Star, PlayCircle, Loader2, Lock } from "lucide-react";
+import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { CourseReviews } from "@/components/lms/CourseReviews";
 
@@ -37,6 +38,8 @@ function CourseDetails() {
   const [enrolled, setEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
+  const [coupon, setCoupon] = useState("");
+  const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -57,9 +60,12 @@ function CourseDetails() {
           setLessons((lss as Lesson[]) ?? []);
         }
         if (user) {
-          const { data: e } = await supabase.from("lms_enrollments")
-            .select("id").eq("course_id", id).eq("student_id", user.id).maybeSingle();
+          const [{ data: e }, { data: w }] = await Promise.all([
+            supabase.from("lms_enrollments").select("id").eq("course_id", id).eq("student_id", user.id).maybeSingle(),
+            supabase.from("lms_wallets").select("balance").eq("user_id", user.id).maybeSingle(),
+          ]);
           setEnrolled(!!e);
+          setBalance(w ? Number((w as { balance: number }).balance) : 0);
         }
       }
       setLoading(false);
@@ -73,7 +79,7 @@ function CourseDetails() {
     }
     setEnrolling(true);
     try {
-      const { error } = await supabase.rpc("lms_enroll", { _course_id: id });
+      const { error } = await supabase.rpc("lms_checkout", { _course_id: id, _coupon: coupon || undefined });
       if (error) throw error;
       setEnrolled(true);
       toast.success(tr.enrollmentSuccess);
@@ -130,17 +136,40 @@ function CourseDetails() {
 
         <aside className="lg:sticky lg:top-24 self-start rounded-2xl border border-border bg-card p-6 shadow-soft">
           <div className="text-3xl font-bold text-foreground">
-            {course.is_free ? tr.free : `$${course.price}`}
+            {course.is_free ? tr.free : `${Number(course.price).toLocaleString()} SYP`}
           </div>
           {enrolled ? (
             <Link to="/learning-management-system/student/player/$courseId" params={{ courseId: course.id }}>
               <Button className="w-full mt-4" size="lg">{tr.goToCourse}</Button>
             </Link>
           ) : (
-            <Button className="w-full mt-4" size="lg" onClick={onEnroll} disabled={enrolling}>
-              {enrolling && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-              {enrolling ? tr.enrolling : tr.enroll}
-            </Button>
+            <>
+              {!course.is_free && user && (
+                <>
+                  <Input
+                    placeholder={lang === "ar" ? "كود خصم (اختياري)" : "Coupon code (optional)"}
+                    value={coupon}
+                    onChange={(e) => setCoupon(e.target.value.toUpperCase())}
+                    className="mt-4"
+                  />
+                  {balance !== null && (
+                    <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Wallet className="h-3.5 w-3.5" />
+                      {lang === "ar" ? "رصيدك:" : "Your balance:"} <span className="font-semibold text-foreground">{balance.toLocaleString()} SYP</span>
+                      {balance < Number(course.price) && (
+                        <Link to="/learning-management-system/student/wallet" className="text-primary underline mx-1">
+                          {lang === "ar" ? "اشحن" : "Top up"}
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+              <Button className="w-full mt-4" size="lg" onClick={onEnroll} disabled={enrolling}>
+                {enrolling && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
+                {enrolling ? tr.enrolling : (course.is_free ? tr.enroll : (lang === "ar" ? "اشترِ الآن" : "Buy now"))}
+              </Button>
+            </>
           )}
           {instructor && (
             <div className="mt-6 pt-6 border-t border-border">
