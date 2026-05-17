@@ -145,7 +145,11 @@ function CourseDetails() {
           {instructor && (
             <div className="mt-6 pt-6 border-t border-border">
               <div className="text-xs text-muted-foreground">{tr.byInstructor}</div>
-              <div className="mt-2 flex items-center gap-3">
+              <Link
+                to="/learning-management-system/instructors/$id"
+                params={{ id: instructor.user_id }}
+                className="mt-2 flex items-center gap-3 group"
+              >
                 {instructor.avatar_url ? (
                   <img src={instructor.avatar_url} alt={instructor.full_name} className="h-10 w-10 rounded-full object-cover" />
                 ) : (
@@ -154,10 +158,10 @@ function CourseDetails() {
                   </div>
                 )}
                 <div>
-                  <div className="font-semibold text-foreground text-sm">{instructor.full_name}</div>
+                  <div className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">{instructor.full_name}</div>
                   {instructor.bio && <div className="text-xs text-muted-foreground line-clamp-2">{instructor.bio}</div>}
                 </div>
-              </div>
+              </Link>
             </div>
           )}
         </aside>
