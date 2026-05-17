@@ -53,6 +53,11 @@ function Player() {
 
   const current = useMemo(() => lessons.find((l) => l.id === currentId) ?? null, [lessons, currentId]);
   const isDone = (id: string) => progress.find((p) => p.lesson_id === id)?.is_completed === true;
+  const hasArabicContent = useMemo(
+    () => [...sections.map((s) => s.title), ...lessons.map((l) => l.title)].some((title) => /[\u0600-\u06FF]/.test(title)),
+    [sections, lessons],
+  );
+  const isRtl = lang === "ar" || hasArabicContent;
 
   // Resolve private video paths to fresh short-lived signed URLs
   useEffect(() => {
@@ -158,10 +163,10 @@ function Player() {
         )}
       </div>
 
-      <aside dir={lang === "ar" ? "rtl" : "ltr"} className="rounded-2xl border border-border bg-card overflow-hidden self-start lg:sticky lg:top-24 max-h-[80vh] overflow-y-auto">
+      <aside dir={isRtl ? "rtl" : "ltr"} className="rounded-2xl border border-border bg-card overflow-hidden self-start lg:sticky lg:top-24 max-h-[80vh] overflow-y-auto">
         {sections.map((s) => (
           <div key={s.id}>
-            <div className="px-4 py-2.5 bg-muted/40 font-semibold text-foreground text-sm">{s.title}</div>
+            <div className={cn("px-4 py-2.5 bg-muted/40 font-semibold text-foreground text-sm", isRtl && "text-right")}>{s.title}</div>
             <ul>
               {lessons.filter((l) => l.section_id === s.id).map((l) => {
                 const done = isDone(l.id);
@@ -170,10 +175,10 @@ function Player() {
                   <li key={l.id}>
                     <button
                       onClick={() => setCurrentId(l.id)}
-                      dir={lang === "ar" ? "rtl" : "ltr"}
+                      dir={isRtl ? "rtl" : "ltr"}
                       className={cn(
                         "w-full flex items-start gap-2 px-4 py-2.5 text-sm text-start hover:bg-muted/50 transition-colors border-b border-border/50",
-                        lang === "ar" && "flex-row-reverse text-right",
+                        isRtl && "text-right",
                         active && "bg-primary/10 text-primary font-semibold",
                       )}
                     >
