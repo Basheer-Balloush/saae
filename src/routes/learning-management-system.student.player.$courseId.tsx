@@ -158,7 +158,7 @@ function Player() {
         )}
       </div>
 
-      <aside className="rounded-2xl border border-border bg-card overflow-hidden self-start lg:sticky lg:top-24 max-h-[80vh] overflow-y-auto">
+      <aside dir={lang === "ar" ? "rtl" : "ltr"} className="rounded-2xl border border-border bg-card overflow-hidden self-start lg:sticky lg:top-24 max-h-[80vh] overflow-y-auto">
         {sections.map((s) => (
           <div key={s.id}>
             <div className="px-4 py-2.5 bg-muted/40 font-semibold text-foreground text-sm">{s.title}</div>
@@ -170,6 +170,7 @@ function Player() {
                   <li key={l.id}>
                     <button
                       onClick={() => setCurrentId(l.id)}
+                      dir={lang === "ar" ? "rtl" : "ltr"}
                       className={cn(
                         "w-full flex items-start gap-2 px-4 py-2.5 text-sm text-start hover:bg-muted/50 transition-colors border-b border-border/50",
                         active && "bg-primary/10 text-primary font-semibold",
