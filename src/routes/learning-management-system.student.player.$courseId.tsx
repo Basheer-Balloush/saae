@@ -27,7 +27,7 @@ type Progress = { lesson_id: string; is_completed: boolean };
 
 function Player() {
   const { courseId } = Route.useParams();
-  const { user } = useLmsAuth();
+  const { user, role } = useLmsAuth();
   const { lang } = useLang();
   const tr = lmsT[lang];
   const [sections, setSections] = useState<Section[]>([]);
@@ -36,10 +36,14 @@ function Player() {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [courseInstructorId, setCourseInstructorId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
+      const { data: course } = await supabase.from("lms_courses").select("instructor_id").eq("id", courseId).maybeSingle();
+      setCourseInstructorId((course as { instructor_id: string } | null)?.instructor_id ?? null);
+
       const { data: secs } = await supabase.from("lms_sections")
         .select("id,title,title_ar,title_en,display_order").eq("course_id", courseId).order("display_order");
       setSections((secs as Section[]) ?? []);
