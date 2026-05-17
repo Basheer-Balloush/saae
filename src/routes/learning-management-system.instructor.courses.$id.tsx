@@ -155,9 +155,9 @@ function CourseBuilder() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <button onClick={() => navigate({ to: "/learning-management-system/instructor" })} className="text-xs text-muted-foreground hover:text-primary">
-            ← {lang === "ar" ? "كل الكورسات" : "All courses"}
+            ← {lang === "ar" ? "كل الدورات" : "All courses"}
           </button>
-          <h1 className="mt-1 text-2xl font-bold text-foreground">{lang === "ar" ? "تحرير الكورس" : "Edit course"}</h1>
+          <h1 className="mt-1 text-2xl font-bold text-foreground">{lang === "ar" ? "تحرير الدورة" : "Edit course"}</h1>
           <span className="text-xs text-muted-foreground">Status: <b>{course.status}</b></span>
         </div>
         <div className="flex gap-2">
