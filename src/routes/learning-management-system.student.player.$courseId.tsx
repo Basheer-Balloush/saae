@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, PlayCircle, Circle, MessageSquare, Paperclip, Award } from "lucide-react";
+import { CheckCircle2, PlayCircle, Circle, Paperclip, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -8,6 +8,8 @@ import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { QAPanel } from "@/components/lms/QAPanel";
+import { AssignmentsPanel } from "@/components/lms/AssignmentsPanel";
 
 export const Route = createFileRoute("/learning-management-system/student/player/$courseId")({
   head: () => ({ meta: [{ title: "LMS · Player" }] }),
@@ -25,7 +27,7 @@ type Progress = { lesson_id: string; is_completed: boolean };
 
 function Player() {
   const { courseId } = Route.useParams();
-  const { user } = useLmsAuth();
+  const { user, role } = useLmsAuth();
   const { lang } = useLang();
   const tr = lmsT[lang];
   const [sections, setSections] = useState<Section[]>([]);
@@ -34,10 +36,14 @@ function Player() {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [courseInstructorId, setCourseInstructorId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
+      const { data: course } = await supabase.from("lms_courses").select("instructor_id").eq("id", courseId).maybeSingle();
+      setCourseInstructorId((course as { instructor_id: string } | null)?.instructor_id ?? null);
+
       const { data: secs } = await supabase.from("lms_sections")
         .select("id,title,title_ar,title_en,display_order").eq("course_id", courseId).order("display_order");
       setSections((secs as Section[]) ?? []);
@@ -157,11 +163,16 @@ function Player() {
               </div>
             )}
 
-            <div className="mt-8 rounded-2xl border border-dashed border-border bg-muted/20 p-6 text-center">
-              <MessageSquare className="mx-auto h-6 w-6 text-muted-foreground" />
-              <h3 className="mt-2 font-bold text-foreground">{tr.qa}</h3>
-              <p className="text-sm text-muted-foreground">{tr.qaComingSoon}</p>
-            </div>
+            <AssignmentsPanel lessonId={current.id} user={user} lang={lang} />
+
+            <QAPanel
+              lessonId={current.id}
+              user={user}
+              isInstructor={
+                role === "lms_admin" || (!!user && !!courseInstructorId && user.id === courseInstructorId)
+              }
+              lang={lang}
+            />
           </>
         )}
       </div>
