@@ -1,0 +1,50 @@
+// Localize common Supabase auth error messages to Arabic/English.
+// Falls back to the original message if no mapping exists.
+
+type Lang = "ar" | "en";
+
+const MAP: Array<{ match: RegExp; ar: string; en: string }> = [
+  {
+    match: /invalid login credentials/i,
+    ar: "بيانات تسجيل الدخول غير صحيحة",
+    en: "Invalid login credentials",
+  },
+  {
+    match: /email not confirmed/i,
+    ar: "لم يتمّ تأكيد البريد الإلكترونيّ بعد",
+    en: "Email not confirmed",
+  },
+  {
+    match: /user already registered|already exists/i,
+    ar: "هذا البريد الإلكترونيّ مسجَّل مسبقاً",
+    en: "This email is already registered",
+  },
+  {
+    match: /password should be at least/i,
+    ar: "يجب ألّا تقلّ كلمة المرور عن 6 أحرف",
+    en: "Password must be at least 6 characters",
+  },
+  {
+    match: /unable to validate email address|invalid email/i,
+    ar: "بريد إلكترونيّ غير صالح",
+    en: "Invalid email address",
+  },
+  {
+    match: /rate limit|too many requests/i,
+    ar: "محاولات كثيرة جداً، حاول لاحقاً",
+    en: "Too many attempts, please try again later",
+  },
+  {
+    match: /network|failed to fetch/i,
+    ar: "تعذّر الاتصال بالخادم",
+    en: "Network error, please try again",
+  },
+];
+
+export function localizeAuthError(err: unknown, lang: Lang, fallback: string): string {
+  const msg = err instanceof Error ? err.message : typeof err === "string" ? err : "";
+  for (const entry of MAP) {
+    if (entry.match.test(msg)) return lang === "ar" ? entry.ar : entry.en;
+  }
+  return fallback;
+}
