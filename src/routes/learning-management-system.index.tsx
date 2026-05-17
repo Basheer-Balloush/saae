@@ -46,22 +46,30 @@ function LmsHome() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border bg-gradient-to-br from-primary/10 via-background to-accent/10 py-16 sm:py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 text-center">
-          <h1 className="mt-4 text-3xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
+      <section className="relative overflow-hidden border-b border-border bg-gradient-to-br from-primary/10 via-background to-accent/10 py-32 sm:py-44 lg:py-52 min-h-[80vh] flex items-center">
+        {/* Animated blurred background blobs */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-32 -left-24 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-blob-1" />
+          <div className="absolute top-1/3 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/30 blur-3xl animate-blob-2" />
+          <div className="absolute -bottom-40 left-1/3 h-[26rem] w-[26rem] rounded-full bg-primary/20 blur-3xl animate-blob-3" />
+          <div className="absolute top-1/2 left-1/2 h-[18rem] w-[18rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/20 blur-2xl animate-blob-4" />
+        </div>
+
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 text-center w-full">
+          <h1 className="mt-4 text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-foreground leading-tight tracking-tight">
             {tr.heroTitle}
           </h1>
-          <p className="mt-4 max-w-2xl mx-auto text-base sm:text-lg text-muted-foreground">
+          <p className="mt-6 max-w-3xl mx-auto text-lg sm:text-xl lg:text-2xl text-muted-foreground">
             {tr.heroSubtitle}
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link to="/learning-management-system/catalog">
-              <Button size="lg" className="gap-2">
+              <Button size="lg" className="gap-2 h-12 px-7 text-base">
                 {tr.heroBrowse} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
               </Button>
             </Link>
             <Link to="/learning-management-system/signup">
-              <Button size="lg" variant="outline">{tr.heroBecomeInstructor}</Button>
+              <Button size="lg" variant="outline" className="h-12 px-7 text-base">{tr.heroBecomeInstructor}</Button>
             </Link>
           </div>
         </div>
