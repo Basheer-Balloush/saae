@@ -46,14 +46,14 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   technology: Cpu,
 };
 
-// Gradient palette — cycled by category index
-const CATEGORY_GRADIENTS = [
-  "from-primary via-primary to-accent",
-  "from-accent via-accent to-primary",
-  "from-primary via-accent to-primary",
-  "from-accent via-primary to-accent",
-  "from-primary via-primary/90 to-accent",
-  "from-accent via-accent/90 to-primary",
+// Category card surfaces — cycled by category index
+const CATEGORY_SURFACES = [
+  "var(--category-card-1)",
+  "var(--category-card-2)",
+  "var(--category-card-3)",
+  "var(--category-card-4)",
+  "var(--category-card-5)",
+  "var(--category-card-6)",
 ];
 
 export const Route = createFileRoute("/learning-management-system/")({
@@ -84,12 +84,19 @@ function LmsHome() {
         .order("display_order");
       setCategories((cats as Category[]) ?? []);
 
-      const [{ count: cCount }, { count: eCount }, { count: iCount }, { data: courseRows }] = await Promise.all([
-        supabase.from("lms_courses").select("*", { count: "exact", head: true }).eq("status", "published"),
-        supabase.from("lms_enrollments").select("*", { count: "exact", head: true }),
-        supabase.from("lms_instructors").select("*", { count: "exact", head: true }).eq("approved", true),
-        supabase.from("lms_courses").select("category_id").eq("status", "published"),
-      ]);
+      const [{ count: cCount }, { count: eCount }, { count: iCount }, { data: courseRows }] =
+        await Promise.all([
+          supabase
+            .from("lms_courses")
+            .select("*", { count: "exact", head: true })
+            .eq("status", "published"),
+          supabase.from("lms_enrollments").select("*", { count: "exact", head: true }),
+          supabase
+            .from("lms_instructors")
+            .select("*", { count: "exact", head: true })
+            .eq("approved", true),
+          supabase.from("lms_courses").select("category_id").eq("status", "published"),
+        ]);
       setStats({ courses: cCount ?? 0, students: eCount ?? 0, instructors: iCount ?? 0 });
 
       const counts: Record<string, number> = {};
@@ -126,7 +133,9 @@ function LmsHome() {
               </Button>
             </Link>
             <Link to="/learning-management-system/signup">
-              <Button size="lg" variant="outline" className="h-12 px-7 text-base">{tr.heroBecomeInstructor}</Button>
+              <Button size="lg" variant="outline" className="h-12 px-7 text-base">
+                {tr.heroBecomeInstructor}
+              </Button>
             </Link>
           </div>
         </div>
@@ -196,7 +205,6 @@ function LmsHome() {
         </div>
       </section>
 
-
       {/* Categories — large gradient cards */}
       <section className="py-16 sm:py-24 bg-muted/20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -223,7 +231,7 @@ function LmsHome() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {categories.map((c, i) => {
               const Icon = CATEGORY_ICONS[c.slug] ?? BookOpen;
-              const gradient = CATEGORY_GRADIENTS[i % CATEGORY_GRADIENTS.length];
+              const surface = CATEGORY_SURFACES[i % CATEGORY_SURFACES.length];
               const count = coursesByCategory[c.id] ?? 0;
               return (
                 <motion.div
@@ -235,11 +243,16 @@ function LmsHome() {
                 >
                   <Link
                     to="/learning-management-system/catalog"
-                    className={`group relative block overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-br ${gradient} min-h-[200px] sm:min-h-[220px] p-6 sm:p-7 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}
+                    className="group relative block overflow-hidden rounded-3xl border border-white/20 min-h-[200px] sm:min-h-[220px] p-6 sm:p-7 shadow-lift transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                    style={{ background: surface }}
                   >
                     <div
                       aria-hidden
-                      className={`absolute -top-10 ${isRtl ? "-left-10" : "-right-10"} h-40 w-40 rounded-full bg-white/20 blur-3xl transition-opacity group-hover:opacity-70`}
+                      className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.24)_0%,rgba(255,255,255,0.05)_38%,rgba(0,0,0,0.16)_100%)]"
+                    />
+                    <div
+                      aria-hidden
+                      className={`absolute -top-10 ${isRtl ? "-left-10" : "-right-10"} h-40 w-40 rounded-full bg-white/18 blur-3xl transition-opacity group-hover:opacity-70`}
                     />
                     <div className="relative flex h-full flex-col justify-between">
                       <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/25 backdrop-blur-sm text-white shadow-inner ring-1 ring-white/30">
@@ -271,7 +284,6 @@ function LmsHome() {
           </div>
         </div>
       </section>
-
     </div>
   );
 }
@@ -312,7 +324,11 @@ function LmsStatCard({
         >
           {value}
         </span>
-        <span aria-hidden className="mt-5 block h-[2px] w-full" style={{ backgroundColor: "#048090" }} />
+        <span
+          aria-hidden
+          className="mt-5 block h-[2px] w-full"
+          style={{ backgroundColor: "#048090" }}
+        />
         <span
           className="mt-5 block text-muted-foreground"
           style={{
@@ -328,4 +344,3 @@ function LmsStatCard({
     </motion.div>
   );
 }
-
