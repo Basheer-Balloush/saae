@@ -14,8 +14,13 @@ export const Route = createFileRoute("/learning-management-system/student/player
   component: Player,
 });
 
-type Section = { id: string; title: string; display_order: number };
-type Lesson = { id: string; section_id: string; title: string; video_url: string | null; content_md: string | null; attachments: unknown; display_order: number };
+type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
+type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; attachments: unknown; display_order: number };
+
+const pick = (lang: "ar" | "en", ar: string | null | undefined, en: string | null | undefined, fallback: string) => {
+  if (lang === "en") return en || ar || fallback;
+  return ar || en || fallback;
+};
 type Progress = { lesson_id: string; is_completed: boolean };
 
 function Player() {
