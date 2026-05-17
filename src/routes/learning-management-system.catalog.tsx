@@ -132,9 +132,9 @@ function FilterSelect({
       <SelectTrigger className="w-full h-10 text-sm font-semibold [&>span]:text-start" aria-label={label} dir="rtl">
         <SelectValue placeholder={label}>{label}</SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent dir="rtl">
         {options.map((o) => (
-          <SelectItem key={o.value} value={o.value}>
+          <SelectItem key={o.value} value={o.value} className="text-end">
             {o.label}
           </SelectItem>
         ))}
