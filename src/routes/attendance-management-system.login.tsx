@@ -72,7 +72,7 @@ function AmsLogin() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center px-6 py-4">
+    <div className="flex-1 flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-soft">
         <div className="flex flex-col items-center text-center">
           <img
