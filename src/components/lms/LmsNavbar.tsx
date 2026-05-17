@@ -42,7 +42,7 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
   const links: NavLink[] = [
     { to: "/learning-management-system", label: tr.navHome },
     { to: "/learning-management-system/catalog", label: tr.navCatalog, icon: <BookOpen className="h-3.5 w-3.5" /> },
-    { to: "/learning-management-system/verify", label: tr.verifyCertificate, icon: <ShieldCheck className="h-3.5 w-3.5" /> },
+    { to: "/learning-management-system/verify", label: tr.verifyCertificate },
   ];
   if (isAuthed) {
     links.push({ to: "/learning-management-system/student", label: tr.navMyCourses });
