@@ -67,14 +67,70 @@ function LmsHome() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-12 border-b border-border">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 grid grid-cols-3 gap-4 sm:gap-8 text-center">
-          <Stat icon={<BookOpen className="h-5 w-5" />} value={stats.courses} label={tr.statCourses} />
-          <Stat icon={<Users className="h-5 w-5" />} value={stats.students} label={tr.statStudents} />
-          <Stat icon={<Award className="h-5 w-5" />} value={stats.instructors} label={tr.statInstructors} />
+      {/* Stats — Achievements-style */}
+      <section className="relative overflow-hidden bg-background py-24 lg:py-32">
+        <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
+          <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
+            {/* Headline column */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.6 }}
+              className="lg:col-span-5"
+            >
+              <h2
+                className="mt-4 text-display-1 text-foreground"
+                style={{
+                  fontFamily: '"Cairo", system-ui, sans-serif',
+                  fontWeight: 900,
+                  lineHeight: isRtl ? 1.45 : 1.02,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                {lang === "ar" ? "أرقامنا تحكي قصّتنا" : "Our numbers tell our story"}
+              </h2>
+              <p className="mt-6 max-w-lg text-body text-muted-foreground">
+                {lang === "ar"
+                  ? "منصة تعليمية متنامية تجمع المتعلّمين والمدرّسين حول محتوى عربي عالي الجودة في الذكاء الاصطناعي وريادة الأعمال."
+                  : "A growing learning platform bringing learners and instructors together around high-quality Arabic content in AI and entrepreneurship."}
+              </p>
+              <div className="mt-8 h-[3px] w-20 bg-gradient-brand" />
+            </motion.div>
+
+            {/* Stat grid */}
+            <div className="lg:col-span-7">
+              <div
+                className="grid grid-cols-1 sm:grid-cols-2"
+                style={{ columnGap: "32px", rowGap: "40px" }}
+              >
+                <LmsStatCard
+                  value={`+${stats.courses.toLocaleString()}`}
+                  label={tr.statCourses}
+                  index={0}
+                  heightClass="min-h-[260px] lg:min-h-[300px]"
+                  isRtl={isRtl}
+                />
+                <LmsStatCard
+                  value={`+${stats.students.toLocaleString()}`}
+                  label={tr.statStudents}
+                  index={1}
+                  heightClass="min-h-[180px] lg:min-h-[200px]"
+                  isRtl={isRtl}
+                />
+                <LmsStatCard
+                  value={`+${stats.instructors.toLocaleString()}`}
+                  label={tr.statInstructors}
+                  index={2}
+                  heightClass="min-h-[180px] lg:min-h-[200px] sm:col-span-2"
+                  isRtl={isRtl}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
+
 
       {/* Categories */}
       <section className="py-12 sm:py-16">
