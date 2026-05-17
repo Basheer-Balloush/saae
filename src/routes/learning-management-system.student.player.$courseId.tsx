@@ -58,11 +58,9 @@ function Player() {
 
   const current = useMemo(() => lessons.find((l) => l.id === currentId) ?? null, [lessons, currentId]);
   const isDone = (id: string) => progress.find((p) => p.lesson_id === id)?.is_completed === true;
-  const hasArabicContent = useMemo(
-    () => [...sections.map((s) => s.title), ...lessons.map((l) => l.title)].some((title) => /[\u0600-\u06FF]/.test(title)),
-    [sections, lessons],
-  );
-  const isRtl = lang === "ar" || hasArabicContent;
+  const isRtl = lang === "ar";
+  const currentTitle = current ? pick(lang, current.title_ar, current.title_en, current.title) : "";
+  const currentContent = current ? pick(lang, current.content_md_ar, current.content_md_en, current.content_md ?? "") : "";
 
   // Resolve private video paths to fresh short-lived signed URLs
   useEffect(() => {
