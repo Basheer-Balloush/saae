@@ -71,6 +71,7 @@ function LmsSignup() {
           });
         }
       }
+      setSentTo(parsed.data.email);
       toast.success(tr.signedUp);
     } catch (err: unknown) {
       toast.error(localizeAuthError(err, lang, tr.authFailed));
