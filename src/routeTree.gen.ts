@@ -10,10 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
+import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
+import { Route as LearningManagementSystemIndexRouteImport } from './routes/learning-management-system.index'
 import { Route as AttendanceManagementSystemIndexRouteImport } from './routes/attendance-management-system.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as NewsIdRouteImport } from './routes/news.$id'
@@ -27,6 +29,12 @@ const SuperAdminRoute = SuperAdminRouteImport.update({
   path: '/super-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LearningManagementSystemRoute =
+  LearningManagementSystemRouteImport.update({
+    id: '/learning-management-system',
+    path: '/learning-management-system',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AttendanceManagementSystemRoute =
   AttendanceManagementSystemRouteImport.update({
     id: '/attendance-management-system',
@@ -48,6 +56,12 @@ const NewsIndexRoute = NewsIndexRouteImport.update({
   path: '/news/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LearningManagementSystemIndexRoute =
+  LearningManagementSystemIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => LearningManagementSystemRoute,
+  } as any)
 const AttendanceManagementSystemIndexRoute =
   AttendanceManagementSystemIndexRouteImport.update({
     id: '/',
@@ -90,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
+  '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
   '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
@@ -98,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/news/$id': typeof NewsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
+  '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -111,6 +127,7 @@ export interface FileRoutesByTo {
   '/news/$id': typeof NewsIdRoute
   '/admin': typeof AdminIndexRoute
   '/attendance-management-system': typeof AttendanceManagementSystemIndexRoute
+  '/learning-management-system': typeof LearningManagementSystemIndexRoute
   '/news': typeof NewsIndexRoute
 }
 export interface FileRoutesById {
@@ -118,6 +135,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
+  '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
   '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
@@ -126,6 +144,7 @@ export interface FileRoutesById {
   '/news/$id': typeof NewsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
+  '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
 }
 export interface FileRouteTypes {
@@ -134,6 +153,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/attendance-management-system'
+    | '/learning-management-system'
     | '/super-admin'
     | '/admin/login'
     | '/api/chat'
@@ -142,6 +162,7 @@ export interface FileRouteTypes {
     | '/news/$id'
     | '/admin/'
     | '/attendance-management-system/'
+    | '/learning-management-system/'
     | '/news/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -155,12 +176,14 @@ export interface FileRouteTypes {
     | '/news/$id'
     | '/admin'
     | '/attendance-management-system'
+    | '/learning-management-system'
     | '/news'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/attendance-management-system'
+    | '/learning-management-system'
     | '/super-admin'
     | '/admin/login'
     | '/api/chat'
@@ -169,6 +192,7 @@ export interface FileRouteTypes {
     | '/news/$id'
     | '/admin/'
     | '/attendance-management-system/'
+    | '/learning-management-system/'
     | '/news/'
   fileRoutesById: FileRoutesById
 }
@@ -176,6 +200,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
+  LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
   SuperAdminRoute: typeof SuperAdminRoute
   AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -192,6 +217,13 @@ declare module '@tanstack/react-router' {
       path: '/super-admin'
       fullPath: '/super-admin'
       preLoaderRoute: typeof SuperAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learning-management-system': {
+      id: '/learning-management-system'
+      path: '/learning-management-system'
+      fullPath: '/learning-management-system'
+      preLoaderRoute: typeof LearningManagementSystemRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/attendance-management-system': {
@@ -221,6 +253,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/news/'
       preLoaderRoute: typeof NewsIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/learning-management-system/': {
+      id: '/learning-management-system/'
+      path: '/'
+      fullPath: '/learning-management-system/'
+      preLoaderRoute: typeof LearningManagementSystemIndexRouteImport
+      parentRoute: typeof LearningManagementSystemRoute
     }
     '/attendance-management-system/': {
       id: '/attendance-management-system/'
@@ -290,10 +329,25 @@ const AttendanceManagementSystemRouteWithChildren =
     AttendanceManagementSystemRouteChildren,
   )
 
+interface LearningManagementSystemRouteChildren {
+  LearningManagementSystemIndexRoute: typeof LearningManagementSystemIndexRoute
+}
+
+const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildren =
+  {
+    LearningManagementSystemIndexRoute: LearningManagementSystemIndexRoute,
+  }
+
+const LearningManagementSystemRouteWithChildren =
+  LearningManagementSystemRoute._addFileChildren(
+    LearningManagementSystemRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
+  LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
   SuperAdminRoute: SuperAdminRoute,
   AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,
@@ -305,13 +359,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

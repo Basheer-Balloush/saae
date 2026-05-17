@@ -261,6 +261,325 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_categories: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          name_ar: string
+          name_en: string | null
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_ar: string
+          name_en?: string | null
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_ar?: string
+          name_en?: string | null
+          slug?: string
+        }
+        Relationships: []
+      }
+      lms_courses: {
+        Row: {
+          category_id: string | null
+          cover_url: string | null
+          created_at: string
+          description_ar: string | null
+          description_en: string | null
+          id: string
+          instructor_id: string
+          is_free: boolean
+          level: Database["public"]["Enums"]["lms_course_level"]
+          price: number
+          rating_avg: number
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["lms_course_status"]
+          students_count: number
+          title_ar: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          id?: string
+          instructor_id: string
+          is_free?: boolean
+          level?: Database["public"]["Enums"]["lms_course_level"]
+          price?: number
+          rating_avg?: number
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["lms_course_status"]
+          students_count?: number
+          title_ar: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          id?: string
+          instructor_id?: string
+          is_free?: boolean
+          level?: Database["public"]["Enums"]["lms_course_level"]
+          price?: number
+          rating_avg?: number
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["lms_course_status"]
+          students_count?: number
+          title_ar?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_courses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "lms_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_courses_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "lms_instructors"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      lms_enrollments: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          enrolled_at: string
+          id: string
+          progress: number
+          student_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          enrolled_at?: string
+          id?: string
+          progress?: number
+          student_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          enrolled_at?: string
+          id?: string
+          progress?: number
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_instructors: {
+        Row: {
+          approved: boolean
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          full_name: string
+          github_url: string | null
+          linkedin_url: string | null
+          specialty: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved?: boolean
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          full_name: string
+          github_url?: string | null
+          linkedin_url?: string | null
+          specialty?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved?: boolean
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          full_name?: string
+          github_url?: string | null
+          linkedin_url?: string | null
+          specialty?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lms_lesson_progress: {
+        Row: {
+          completed_at: string | null
+          is_completed: boolean
+          lesson_id: string
+          student_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          is_completed?: boolean
+          lesson_id: string
+          student_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          is_completed?: boolean
+          lesson_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lms_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_lessons: {
+        Row: {
+          attachments: Json
+          content_md: string | null
+          created_at: string
+          display_order: number
+          duration_seconds: number
+          id: string
+          is_preview: boolean
+          section_id: string
+          title: string
+          video_url: string | null
+        }
+        Insert: {
+          attachments?: Json
+          content_md?: string | null
+          created_at?: string
+          display_order?: number
+          duration_seconds?: number
+          id?: string
+          is_preview?: boolean
+          section_id: string
+          title: string
+          video_url?: string | null
+        }
+        Update: {
+          attachments?: Json
+          content_md?: string | null
+          created_at?: string
+          display_order?: number
+          duration_seconds?: number
+          id?: string
+          is_preview?: boolean
+          section_id?: string
+          title?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_lessons_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "lms_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_reviews: {
+        Row: {
+          comment: string | null
+          course_id: string
+          created_at: string
+          id: string
+          rating: number
+          student_id: string
+        }
+        Insert: {
+          comment?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          rating: number
+          student_id: string
+        }
+        Update: {
+          comment?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_reviews_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_sections: {
+        Row: {
+          course_id: string
+          created_at: string
+          display_order: number
+          id: string
+          title: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          title: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_sections_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       members: {
         Row: {
           bio_ar: string | null
@@ -396,6 +715,13 @@ export type Database = {
     }
     Functions: {
       has_ams_access: { Args: { _user_id: string }; Returns: boolean }
+      has_lms_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -403,10 +729,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_lms_admin: { Args: { _user_id: string }; Returns: boolean }
+      lms_enroll: { Args: { _course_id: string }; Returns: string }
     }
     Enums: {
       ams_payment_status: "unpaid" | "paid" | "partial" | "waived"
-      app_role: "admin" | "user" | "attendance_user" | "attendance_admin"
+      app_role:
+        | "admin"
+        | "user"
+        | "attendance_user"
+        | "attendance_admin"
+        | "lms_student"
+        | "lms_instructor"
+        | "lms_admin"
+      lms_course_level: "beginner" | "intermediate" | "advanced"
+      lms_course_status: "draft" | "pending" | "rejected" | "published"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -535,7 +872,17 @@ export const Constants = {
   public: {
     Enums: {
       ams_payment_status: ["unpaid", "paid", "partial", "waived"],
-      app_role: ["admin", "user", "attendance_user", "attendance_admin"],
+      app_role: [
+        "admin",
+        "user",
+        "attendance_user",
+        "attendance_admin",
+        "lms_student",
+        "lms_instructor",
+        "lms_admin",
+      ],
+      lms_course_level: ["beginner", "intermediate", "advanced"],
+      lms_course_status: ["draft", "pending", "rejected", "published"],
     },
   },
 } as const
