@@ -136,7 +136,7 @@ function CourseDetails() {
 
         <aside className="lg:sticky lg:top-24 self-start rounded-2xl border border-border bg-card p-6 shadow-soft">
           <div className="text-3xl font-bold text-foreground">
-            {course.is_free ? tr.free : `${Number(course.price).toLocaleString()} SYP`}
+            {course.is_free ? tr.free : `ل.س ${Number(course.price).toLocaleString()}`}
           </div>
           {enrolled ? (
             <Link to="/learning-management-system/student/player/$courseId" params={{ courseId: course.id }}>
