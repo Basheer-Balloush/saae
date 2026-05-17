@@ -24,14 +24,14 @@ function AdminWallet() {
   const topup = async () => {
     if (!userId.trim() || !amount) return;
     setBusy(true);
-    const { error } = await supabase.rpc("lms_admin_topup", { _user_id: userId.trim(), _amount: parseFloat(amount), _notes: notes || null });
+    const { error } = await supabase.rpc("lms_admin_topup", { _user_id: userId.trim(), _amount: parseFloat(amount), _notes: notes || undefined });
     setBusy(false);
     if (error) toast.error(error.message);
     else { toast.success(lang === "ar" ? "تم شحن الرصيد" : "Wallet topped up"); setAmount(""); setNotes(""); }
   };
 
   const saveSettings = async () => {
-    const patch: Record<string, number> = {};
+    const patch: { commission_pct?: number; min_payout?: number } = {};
     if (pct) patch.commission_pct = parseFloat(pct);
     if (minPayout) patch.min_payout = parseFloat(minPayout);
     if (!Object.keys(patch).length) return;

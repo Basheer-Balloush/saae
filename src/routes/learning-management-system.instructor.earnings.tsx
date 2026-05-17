@@ -51,7 +51,7 @@ function EarningsPage() {
     if (!amt || amt <= 0) return;
     setSubmitting(true);
     try {
-      const { error } = await supabase.rpc("lms_request_payout", { _amount: amt, _method: method || null });
+      const { error } = await supabase.rpc("lms_request_payout", { _amount: amt, _method: method || undefined });
       if (error) throw error;
       toast.success(lang === "ar" ? "تم تقديم طلب السحب" : "Payout request submitted");
       setAmount(""); setMethod("");
