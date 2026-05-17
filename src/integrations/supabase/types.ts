@@ -288,6 +288,30 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_certificates: {
+        Row: {
+          course_id: string
+          id: string
+          issued_at: string
+          serial: string
+          student_id: string
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          issued_at?: string
+          serial: string
+          student_id: string
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          issued_at?: string
+          serial?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
       lms_courses: {
         Row: {
           category_id: string | null
@@ -513,6 +537,106 @@ export type Database = {
           },
         ]
       }
+      lms_quiz_attempts: {
+        Row: {
+          answers: Json
+          id: string
+          passed: boolean
+          quiz_id: string
+          score: number
+          student_id: string
+          submitted_at: string
+        }
+        Insert: {
+          answers?: Json
+          id?: string
+          passed?: boolean
+          quiz_id: string
+          score?: number
+          student_id: string
+          submitted_at?: string
+        }
+        Update: {
+          answers?: Json
+          id?: string
+          passed?: boolean
+          quiz_id?: string
+          score?: number
+          student_id?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_quiz_attempts_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "lms_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_quiz_questions: {
+        Row: {
+          choices: Json
+          correct_index: number
+          created_at: string
+          display_order: number
+          id: string
+          question: string
+          quiz_id: string
+        }
+        Insert: {
+          choices?: Json
+          correct_index?: number
+          created_at?: string
+          display_order?: number
+          id?: string
+          question: string
+          quiz_id: string
+        }
+        Update: {
+          choices?: Json
+          correct_index?: number
+          created_at?: string
+          display_order?: number
+          id?: string
+          question?: string
+          quiz_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "lms_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_quizzes: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          pass_score: number
+          title: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          pass_score?: number
+          title: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          pass_score?: number
+          title?: string
+        }
+        Relationships: []
+      }
       lms_reviews: {
         Row: {
           comment: string | null
@@ -731,6 +855,10 @@ export type Database = {
       }
       is_lms_admin: { Args: { _user_id: string }; Returns: boolean }
       lms_enroll: { Args: { _course_id: string }; Returns: string }
+      lms_submit_quiz: {
+        Args: { _answers: Json; _quiz_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       ams_payment_status: "unpaid" | "paid" | "partial" | "waived"
