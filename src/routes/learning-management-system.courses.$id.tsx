@@ -136,7 +136,12 @@ function CourseDetails() {
 
         <aside className="lg:sticky lg:top-24 self-start rounded-2xl border border-border bg-card p-6 shadow-soft">
           <div className="text-3xl font-bold text-foreground">
-            {course.is_free ? tr.free : `ل.س ${Number(course.price).toLocaleString()}`}
+            {course.is_free ? tr.free : (
+              <span dir="ltr" className="inline-flex flex-row items-center gap-2">
+                <span>ل.س</span>
+                <span>{Number(course.price).toLocaleString()}</span>
+              </span>
+            )}
           </div>
           {enrolled ? (
             <Link to="/learning-management-system/student/player/$courseId" params={{ courseId: course.id }}>
@@ -155,7 +160,11 @@ function CourseDetails() {
                   {balance !== null && (
                     <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Wallet className="h-3.5 w-3.5" />
-                      {lang === "ar" ? "رصيدك:" : "Your balance:"} <span className="font-semibold text-foreground">{balance.toLocaleString()} SYP</span>
+                      {lang === "ar" ? "رصيدك:" : "Your balance:"}{" "}
+                      <span dir="ltr" className="inline-flex flex-row items-center gap-1 font-semibold text-foreground">
+                        <span>ل.س</span>
+                        <span>{balance.toLocaleString()}</span>
+                      </span>
                       {balance < Number(course.price) && (
                         <Link to="/learning-management-system/student/wallet" className="text-primary underline mx-1">
                           {lang === "ar" ? "اشحن" : "Top up"}
