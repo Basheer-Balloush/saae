@@ -22,14 +22,19 @@ import { Route as NewsIdRouteImport } from './routes/news.$id'
 import { Route as LearningManagementSystemStudentRouteImport } from './routes/learning-management-system.student'
 import { Route as LearningManagementSystemSignupRouteImport } from './routes/learning-management-system.signup'
 import { Route as LearningManagementSystemLoginRouteImport } from './routes/learning-management-system.login'
+import { Route as LearningManagementSystemInstructorRouteImport } from './routes/learning-management-system.instructor'
 import { Route as LearningManagementSystemCatalogRouteImport } from './routes/learning-management-system.catalog'
+import { Route as LearningManagementSystemAdminRouteImport } from './routes/learning-management-system.admin'
 import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system.login'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system.student.index'
+import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
+import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system.admin.index'
 import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/learning-management-system.courses.$id'
 import { Route as LearningManagementSystemStudentPlayerCourseIdRouteImport } from './routes/learning-management-system.student.player.$courseId'
+import { Route as LearningManagementSystemInstructorCoursesIdRouteImport } from './routes/learning-management-system.instructor.courses.$id'
 
 const SuperAdminRoute = SuperAdminRouteImport.update({
   id: '/super-admin',
@@ -103,10 +108,22 @@ const LearningManagementSystemLoginRoute =
     path: '/login',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
+const LearningManagementSystemInstructorRoute =
+  LearningManagementSystemInstructorRouteImport.update({
+    id: '/instructor',
+    path: '/instructor',
+    getParentRoute: () => LearningManagementSystemRoute,
+  } as any)
 const LearningManagementSystemCatalogRoute =
   LearningManagementSystemCatalogRouteImport.update({
     id: '/catalog',
     path: '/catalog',
+    getParentRoute: () => LearningManagementSystemRoute,
+  } as any)
+const LearningManagementSystemAdminRoute =
+  LearningManagementSystemAdminRouteImport.update({
+    id: '/admin',
+    path: '/admin',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
 const CommunitiesKeyRoute = CommunitiesKeyRouteImport.update({
@@ -136,6 +153,18 @@ const LearningManagementSystemStudentIndexRoute =
     path: '/',
     getParentRoute: () => LearningManagementSystemStudentRoute,
   } as any)
+const LearningManagementSystemInstructorIndexRoute =
+  LearningManagementSystemInstructorIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => LearningManagementSystemInstructorRoute,
+  } as any)
+const LearningManagementSystemAdminIndexRoute =
+  LearningManagementSystemAdminIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => LearningManagementSystemAdminRoute,
+  } as any)
 const LearningManagementSystemCoursesIdRoute =
   LearningManagementSystemCoursesIdRouteImport.update({
     id: '/courses/$id',
@@ -148,6 +177,12 @@ const LearningManagementSystemStudentPlayerCourseIdRoute =
     path: '/player/$courseId',
     getParentRoute: () => LearningManagementSystemStudentRoute,
   } as any)
+const LearningManagementSystemInstructorCoursesIdRoute =
+  LearningManagementSystemInstructorCoursesIdRouteImport.update({
+    id: '/courses/$id',
+    path: '/courses/$id',
+    getParentRoute: () => LearningManagementSystemInstructorRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -159,7 +194,9 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
+  '/learning-management-system/instructor': typeof LearningManagementSystemInstructorRouteWithChildren
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentRouteWithChildren
@@ -169,7 +206,10 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
+  '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
+  '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
+  '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
 }
 export interface FileRoutesByTo {
@@ -189,7 +229,10 @@ export interface FileRoutesByTo {
   '/learning-management-system': typeof LearningManagementSystemIndexRoute
   '/news': typeof NewsIndexRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
+  '/learning-management-system/admin': typeof LearningManagementSystemAdminIndexRoute
+  '/learning-management-system/instructor': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentIndexRoute
+  '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
 }
 export interface FileRoutesById {
@@ -203,7 +246,9 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
+  '/learning-management-system/instructor': typeof LearningManagementSystemInstructorRouteWithChildren
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentRouteWithChildren
@@ -213,7 +258,10 @@ export interface FileRoutesById {
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
+  '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
+  '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
+  '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
 }
 export interface FileRouteTypes {
@@ -228,7 +276,9 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/learning-management-system/admin'
     | '/learning-management-system/catalog'
+    | '/learning-management-system/instructor'
     | '/learning-management-system/login'
     | '/learning-management-system/signup'
     | '/learning-management-system/student'
@@ -238,7 +288,10 @@ export interface FileRouteTypes {
     | '/learning-management-system/'
     | '/news/'
     | '/learning-management-system/courses/$id'
+    | '/learning-management-system/admin/'
+    | '/learning-management-system/instructor/'
     | '/learning-management-system/student/'
+    | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/student/player/$courseId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -258,7 +311,10 @@ export interface FileRouteTypes {
     | '/learning-management-system'
     | '/news'
     | '/learning-management-system/courses/$id'
+    | '/learning-management-system/admin'
+    | '/learning-management-system/instructor'
     | '/learning-management-system/student'
+    | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/student/player/$courseId'
   id:
     | '__root__'
@@ -271,7 +327,9 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/learning-management-system/admin'
     | '/learning-management-system/catalog'
+    | '/learning-management-system/instructor'
     | '/learning-management-system/login'
     | '/learning-management-system/signup'
     | '/learning-management-system/student'
@@ -281,7 +339,10 @@ export interface FileRouteTypes {
     | '/learning-management-system/'
     | '/news/'
     | '/learning-management-system/courses/$id'
+    | '/learning-management-system/admin/'
+    | '/learning-management-system/instructor/'
     | '/learning-management-system/student/'
+    | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/student/player/$courseId'
   fileRoutesById: FileRoutesById
 }
@@ -392,11 +453,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemLoginRouteImport
       parentRoute: typeof LearningManagementSystemRoute
     }
+    '/learning-management-system/instructor': {
+      id: '/learning-management-system/instructor'
+      path: '/instructor'
+      fullPath: '/learning-management-system/instructor'
+      preLoaderRoute: typeof LearningManagementSystemInstructorRouteImport
+      parentRoute: typeof LearningManagementSystemRoute
+    }
     '/learning-management-system/catalog': {
       id: '/learning-management-system/catalog'
       path: '/catalog'
       fullPath: '/learning-management-system/catalog'
       preLoaderRoute: typeof LearningManagementSystemCatalogRouteImport
+      parentRoute: typeof LearningManagementSystemRoute
+    }
+    '/learning-management-system/admin': {
+      id: '/learning-management-system/admin'
+      path: '/admin'
+      fullPath: '/learning-management-system/admin'
+      preLoaderRoute: typeof LearningManagementSystemAdminRouteImport
       parentRoute: typeof LearningManagementSystemRoute
     }
     '/communities/$key': {
@@ -434,6 +509,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemStudentIndexRouteImport
       parentRoute: typeof LearningManagementSystemStudentRoute
     }
+    '/learning-management-system/instructor/': {
+      id: '/learning-management-system/instructor/'
+      path: '/'
+      fullPath: '/learning-management-system/instructor/'
+      preLoaderRoute: typeof LearningManagementSystemInstructorIndexRouteImport
+      parentRoute: typeof LearningManagementSystemInstructorRoute
+    }
+    '/learning-management-system/admin/': {
+      id: '/learning-management-system/admin/'
+      path: '/'
+      fullPath: '/learning-management-system/admin/'
+      preLoaderRoute: typeof LearningManagementSystemAdminIndexRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRoute
+    }
     '/learning-management-system/courses/$id': {
       id: '/learning-management-system/courses/$id'
       path: '/courses/$id'
@@ -447,6 +536,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/learning-management-system/student/player/$courseId'
       preLoaderRoute: typeof LearningManagementSystemStudentPlayerCourseIdRouteImport
       parentRoute: typeof LearningManagementSystemStudentRoute
+    }
+    '/learning-management-system/instructor/courses/$id': {
+      id: '/learning-management-system/instructor/courses/$id'
+      path: '/courses/$id'
+      fullPath: '/learning-management-system/instructor/courses/$id'
+      preLoaderRoute: typeof LearningManagementSystemInstructorCoursesIdRouteImport
+      parentRoute: typeof LearningManagementSystemInstructorRoute
     }
   }
 }
@@ -465,6 +561,39 @@ const AttendanceManagementSystemRouteChildren: AttendanceManagementSystemRouteCh
 const AttendanceManagementSystemRouteWithChildren =
   AttendanceManagementSystemRoute._addFileChildren(
     AttendanceManagementSystemRouteChildren,
+  )
+
+interface LearningManagementSystemAdminRouteChildren {
+  LearningManagementSystemAdminIndexRoute: typeof LearningManagementSystemAdminIndexRoute
+}
+
+const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminRouteChildren =
+  {
+    LearningManagementSystemAdminIndexRoute:
+      LearningManagementSystemAdminIndexRoute,
+  }
+
+const LearningManagementSystemAdminRouteWithChildren =
+  LearningManagementSystemAdminRoute._addFileChildren(
+    LearningManagementSystemAdminRouteChildren,
+  )
+
+interface LearningManagementSystemInstructorRouteChildren {
+  LearningManagementSystemInstructorIndexRoute: typeof LearningManagementSystemInstructorIndexRoute
+  LearningManagementSystemInstructorCoursesIdRoute: typeof LearningManagementSystemInstructorCoursesIdRoute
+}
+
+const LearningManagementSystemInstructorRouteChildren: LearningManagementSystemInstructorRouteChildren =
+  {
+    LearningManagementSystemInstructorIndexRoute:
+      LearningManagementSystemInstructorIndexRoute,
+    LearningManagementSystemInstructorCoursesIdRoute:
+      LearningManagementSystemInstructorCoursesIdRoute,
+  }
+
+const LearningManagementSystemInstructorRouteWithChildren =
+  LearningManagementSystemInstructorRoute._addFileChildren(
+    LearningManagementSystemInstructorRouteChildren,
   )
 
 interface LearningManagementSystemStudentRouteChildren {
@@ -486,7 +615,9 @@ const LearningManagementSystemStudentRouteWithChildren =
   )
 
 interface LearningManagementSystemRouteChildren {
+  LearningManagementSystemAdminRoute: typeof LearningManagementSystemAdminRouteWithChildren
   LearningManagementSystemCatalogRoute: typeof LearningManagementSystemCatalogRoute
+  LearningManagementSystemInstructorRoute: typeof LearningManagementSystemInstructorRouteWithChildren
   LearningManagementSystemLoginRoute: typeof LearningManagementSystemLoginRoute
   LearningManagementSystemSignupRoute: typeof LearningManagementSystemSignupRoute
   LearningManagementSystemStudentRoute: typeof LearningManagementSystemStudentRouteWithChildren
@@ -496,7 +627,11 @@ interface LearningManagementSystemRouteChildren {
 
 const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildren =
   {
+    LearningManagementSystemAdminRoute:
+      LearningManagementSystemAdminRouteWithChildren,
     LearningManagementSystemCatalogRoute: LearningManagementSystemCatalogRoute,
+    LearningManagementSystemInstructorRoute:
+      LearningManagementSystemInstructorRouteWithChildren,
     LearningManagementSystemLoginRoute: LearningManagementSystemLoginRoute,
     LearningManagementSystemSignupRoute: LearningManagementSystemSignupRoute,
     LearningManagementSystemStudentRoute:
