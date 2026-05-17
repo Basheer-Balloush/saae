@@ -39,12 +39,12 @@ function Player() {
     if (!user) return;
     (async () => {
       const { data: secs } = await supabase.from("lms_sections")
-        .select("id,title,display_order").eq("course_id", courseId).order("display_order");
+        .select("id,title,title_ar,title_en,display_order").eq("course_id", courseId).order("display_order");
       setSections((secs as Section[]) ?? []);
       if (secs && secs.length) {
         const ids = secs.map((s) => s.id);
         const [{ data: lss }, { data: prs }] = await Promise.all([
-          supabase.from("lms_lessons").select("id,section_id,title,video_url,content_md,attachments,display_order").in("section_id", ids).order("display_order"),
+          supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids).order("display_order"),
           supabase.from("lms_lesson_progress").select("lesson_id,is_completed").eq("student_id", user.id),
         ]);
         const list = (lss as Lesson[]) ?? [];
