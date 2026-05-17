@@ -61,7 +61,7 @@ function EarningsPage() {
     } finally { setSubmitting(false); }
   };
 
-  if (loading) return <p className="text-center py-20 text-muted-foreground">{lang === "ar" ? "جارٍ التحميل..." : "Loading..."}</p>;
+  if (loading) return <p className="text-center py-20 text-muted-foreground">{lang === "ar" ? "جارٍ التحميل..." : "Loading...‎"}</p>;
 
   const total = earnings.reduce((s, x) => s + Number(x.net), 0);
 

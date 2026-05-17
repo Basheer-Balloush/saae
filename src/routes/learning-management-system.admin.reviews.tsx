@@ -62,7 +62,7 @@ function AdminReviews() {
       </p>
 
       <div className="mt-6 space-y-3">
-        {loading && <p className="text-sm text-muted-foreground">{isAr ? "جار التحميل..." : "Loading..."}</p>}
+        {loading && <p className="text-sm text-muted-foreground">{isAr ? "جار التحميل..." : "Loading...‎"}</p>}
         {!loading && reviews.length === 0 && (
           <p className="text-sm text-muted-foreground">{isAr ? "لا توجد تقييمات." : "No reviews."}</p>
         )}
