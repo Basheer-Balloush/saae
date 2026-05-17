@@ -48,6 +48,7 @@ import { Route as LearningManagementSystemAdminAnalyticsRouteImport } from './ro
 import { Route as LearningManagementSystemStudentQuizCourseIdRouteImport } from './routes/learning-management-system.student.quiz.$courseId'
 import { Route as LearningManagementSystemStudentPlayerCourseIdRouteImport } from './routes/learning-management-system.student.player.$courseId'
 import { Route as LearningManagementSystemInstructorCoursesIdRouteImport } from './routes/learning-management-system.instructor.courses.$id'
+import { Route as LearningManagementSystemInstructorAssignmentsCourseIdRouteImport } from './routes/learning-management-system.instructor.assignments.$courseId'
 
 const SuperAdminRoute = SuperAdminRouteImport.update({
   id: '/super-admin',
@@ -274,6 +275,12 @@ const LearningManagementSystemInstructorCoursesIdRoute =
     path: '/courses/$id',
     getParentRoute: () => LearningManagementSystemInstructorRoute,
   } as any)
+const LearningManagementSystemInstructorAssignmentsCourseIdRoute =
+  LearningManagementSystemInstructorAssignmentsCourseIdRouteImport.update({
+    id: '/assignments/$courseId',
+    path: '/assignments/$courseId',
+    getParentRoute: () => LearningManagementSystemInstructorRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -312,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
+  '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
   '/learning-management-system/student/quiz/$courseId': typeof LearningManagementSystemStudentQuizCourseIdRoute
@@ -348,6 +356,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/admin': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentIndexRoute
+  '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
   '/learning-management-system/student/quiz/$courseId': typeof LearningManagementSystemStudentQuizCourseIdRoute
@@ -390,6 +399,7 @@ export interface FileRoutesById {
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
+  '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
   '/learning-management-system/student/quiz/$courseId': typeof LearningManagementSystemStudentQuizCourseIdRoute
@@ -433,6 +443,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/student/'
+    | '/learning-management-system/instructor/assignments/$courseId'
     | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/student/player/$courseId'
     | '/learning-management-system/student/quiz/$courseId'
@@ -469,6 +480,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin'
     | '/learning-management-system/instructor'
     | '/learning-management-system/student'
+    | '/learning-management-system/instructor/assignments/$courseId'
     | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/student/player/$courseId'
     | '/learning-management-system/student/quiz/$courseId'
@@ -510,6 +522,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/student/'
+    | '/learning-management-system/instructor/assignments/$courseId'
     | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/student/player/$courseId'
     | '/learning-management-system/student/quiz/$courseId'
@@ -804,6 +817,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemInstructorCoursesIdRouteImport
       parentRoute: typeof LearningManagementSystemInstructorRoute
     }
+    '/learning-management-system/instructor/assignments/$courseId': {
+      id: '/learning-management-system/instructor/assignments/$courseId'
+      path: '/assignments/$courseId'
+      fullPath: '/learning-management-system/instructor/assignments/$courseId'
+      preLoaderRoute: typeof LearningManagementSystemInstructorAssignmentsCourseIdRouteImport
+      parentRoute: typeof LearningManagementSystemInstructorRoute
+    }
   }
 }
 
@@ -856,6 +876,7 @@ const LearningManagementSystemAdminRouteWithChildren =
 interface LearningManagementSystemInstructorRouteChildren {
   LearningManagementSystemInstructorEarningsRoute: typeof LearningManagementSystemInstructorEarningsRoute
   LearningManagementSystemInstructorIndexRoute: typeof LearningManagementSystemInstructorIndexRoute
+  LearningManagementSystemInstructorAssignmentsCourseIdRoute: typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   LearningManagementSystemInstructorCoursesIdRoute: typeof LearningManagementSystemInstructorCoursesIdRoute
 }
 
@@ -865,6 +886,8 @@ const LearningManagementSystemInstructorRouteChildren: LearningManagementSystemI
       LearningManagementSystemInstructorEarningsRoute,
     LearningManagementSystemInstructorIndexRoute:
       LearningManagementSystemInstructorIndexRoute,
+    LearningManagementSystemInstructorAssignmentsCourseIdRoute:
+      LearningManagementSystemInstructorAssignmentsCourseIdRoute,
     LearningManagementSystemInstructorCoursesIdRoute:
       LearningManagementSystemInstructorCoursesIdRoute,
   }
