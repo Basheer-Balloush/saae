@@ -261,6 +261,89 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_answers: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          is_instructor_answer: boolean
+          question_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          is_instructor_answer?: boolean
+          question_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_instructor_answer?: boolean
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "lms_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_assignments: {
+        Row: {
+          brief_file_path: string | null
+          course_id: string
+          created_at: string
+          created_by: string
+          description_ar: string | null
+          description_en: string | null
+          due_date: string | null
+          id: string
+          lesson_id: string | null
+          max_grade: number
+          title_ar: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          brief_file_path?: string | null
+          course_id: string
+          created_at?: string
+          created_by: string
+          description_ar?: string | null
+          description_en?: string | null
+          due_date?: string | null
+          id?: string
+          lesson_id?: string | null
+          max_grade?: number
+          title_ar: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brief_file_path?: string | null
+          course_id?: string
+          created_at?: string
+          created_by?: string
+          description_ar?: string | null
+          description_en?: string | null
+          due_date?: string | null
+          id?: string
+          lesson_id?: string | null
+          max_grade?: number
+          title_ar?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lms_categories: {
         Row: {
           created_at: string
@@ -651,6 +734,30 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_questions: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          lesson_id: string
+          student_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          lesson_id: string
+          student_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
       lms_quiz_attempts: {
         Row: {
           answers: Json
@@ -847,6 +954,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      lms_submissions: {
+        Row: {
+          assignment_id: string
+          feedback: string | null
+          file_path: string
+          grade: number | null
+          graded_at: string | null
+          graded_by: string | null
+          id: string
+          student_id: string
+          submitted_at: string
+        }
+        Insert: {
+          assignment_id: string
+          feedback?: string | null
+          file_path: string
+          grade?: number | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          student_id: string
+          submitted_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          feedback?: string | null
+          file_path?: string
+          grade?: number | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          student_id?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_submissions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "lms_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lms_transactions: {
         Row: {
@@ -1046,6 +1197,14 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_course_instructor: {
+        Args: { _course_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_enrolled_in_course: {
+        Args: { _course_id: string; _user_id: string }
         Returns: boolean
       }
       is_lms_admin: { Args: { _user_id: string }; Returns: boolean }
