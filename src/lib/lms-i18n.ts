@@ -85,6 +85,7 @@ export const lmsT: Record<Lang, {
   loading: string;
   copyright: string;
   authRequired: string;
+  alreadyRequested: string;
   enrollmentSuccess: string;
   comingSoon: string;
   // quizzes & certificates
