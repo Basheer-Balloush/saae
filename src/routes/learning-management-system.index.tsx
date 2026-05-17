@@ -100,7 +100,7 @@ function LmsHome() {
       if (existing) {
         toast.info(tr.alreadyRequested);
       } else {
-        const fullName = (user.user_metadata?.full_name as string) || user.email || "";
+        const fullName = ((user as any).user_metadata?.full_name as string) || user.email || "";
         const { error } = await supabase
           .from("lms_instructors")
           .insert({ user_id: user.id, full_name: fullName, approved: false });
