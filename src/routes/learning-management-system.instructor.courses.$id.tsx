@@ -158,7 +158,7 @@ function CourseBuilder() {
             ← {lang === "ar" ? "كل الدورات" : "All courses"}
           </button>
           <h1 className="mt-1 text-2xl font-bold text-foreground">{lang === "ar" ? "تحرير الدورة" : "Edit course"}</h1>
-          <span className="text-xs text-muted-foreground">Status: <b>{course.status}</b></span>
+          <span className="text-xs text-muted-foreground">{lang === "ar" ? "الحالة" : "Status"}: <b>{course.status}</b></span>
         </div>
         <div className="flex gap-2">
           <Button onClick={saveCourse} variant="outline" disabled={saving}>
@@ -219,8 +219,11 @@ function CourseBuilder() {
                 <ImageIcon className="h-6 w-6" />
               </div>
             )}
-            <input type="file" accept="image/*" disabled={uploading}
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadCover(f); }} />
+            <label className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-input bg-background text-sm cursor-pointer hover:bg-muted">
+              <span>{lang === "ar" ? "اختر صورة" : "Choose image"}</span>
+              <input type="file" accept="image/*" disabled={uploading} className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadCover(f); }} />
+            </label>
           </div>
         </div>
       </section>
@@ -250,13 +253,16 @@ function CourseBuilder() {
                         onBlur={() => updateLesson(l.id, { title: l.title })} className="flex-1" />
                       <label className="text-xs flex items-center gap-1">
                         <input type="checkbox" checked={l.is_preview} onChange={(e) => updateLesson(l.id, { is_preview: e.target.checked })} />
-                        Preview
+                        {lang === "ar" ? "معاينة" : "Preview"}
                       </label>
                       <Button size="sm" variant="ghost" onClick={() => deleteLesson(l.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
                     <div className="flex items-center gap-2 text-xs">
-                      <input type="file" accept="video/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
-                      {l.video_url && <span className="text-emerald-600">✓ video</span>}
+                      <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
+                        <span>{lang === "ar" ? "اختر فيديو" : "Choose video"}</span>
+                        <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
+                      </label>
+                      {l.video_url && <span className="text-emerald-600">✓ {lang === "ar" ? "تم رفع الفيديو" : "video"}</span>}
                     </div>
                     <Textarea rows={2} placeholder={lang === "ar" ? "محتوى الدرس (Markdown)" : "Lesson content (Markdown)"}
                       value={l.content_md ?? ""}
@@ -274,7 +280,7 @@ function CourseBuilder() {
         <Link to="/learning-management-system/instructor/assignments/$courseId" params={{ courseId: course.id }}>
           <Button variant="outline">
             <ClipboardList className="h-4 w-4 mx-1" />
-            إدارة الوظائف / Manage Assignments
+            {lang === "ar" ? "إدارة الوظائف" : "Manage Assignments"}
           </Button>
         </Link>
       </div>
