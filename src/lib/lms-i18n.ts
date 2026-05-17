@@ -122,6 +122,16 @@ export const lmsT: Record<Lang, {
   verify: string;
   verifyValid: string;
   verifyInvalid: string;
+  forgotPassword: string;
+  forgotTitle: string;
+  forgotSubtitle: string;
+  sendResetLink: string;
+  resetLinkSent: string;
+  resetTitle: string;
+  newPassword: string;
+  updatePassword: string;
+  passwordUpdated: string;
+  menu: string;
 }> = {
   ar: {
     brand: "منصة التعلم",
@@ -234,6 +244,16 @@ export const lmsT: Record<Lang, {
     verify: "تحقّق",
     verifyValid: "الشهادة صحيحة",
     verifyInvalid: "لم نجد شهادة بهذا الرقم",
+    forgotPassword: "نسيت كلمة المرور؟",
+    forgotTitle: "استعادة كلمة المرور",
+    forgotSubtitle: "أدخل بريدك وسنرسل رابط لإعادة التعيين",
+    sendResetLink: "أرسل الرابط",
+    resetLinkSent: "تم إرسال الرابط، تفقّد بريدك",
+    resetTitle: "تعيين كلمة مرور جديدة",
+    newPassword: "كلمة المرور الجديدة",
+    updatePassword: "تحديث كلمة المرور",
+    passwordUpdated: "تم تحديث كلمة المرور",
+    menu: "القائمة",
   },
   en: {
     brand: "Learning Platform",
@@ -346,5 +366,15 @@ export const lmsT: Record<Lang, {
     verify: "Verify",
     verifyValid: "Valid certificate",
     verifyInvalid: "No certificate found for that serial",
+    forgotPassword: "Forgot password?",
+    forgotTitle: "Reset your password",
+    forgotSubtitle: "Enter your email to receive a reset link",
+    sendResetLink: "Send reset link",
+    resetLinkSent: "Reset link sent — check your inbox",
+    resetTitle: "Set a new password",
+    newPassword: "New password",
+    updatePassword: "Update password",
+    passwordUpdated: "Password updated",
+    menu: "Menu",
   },
 };

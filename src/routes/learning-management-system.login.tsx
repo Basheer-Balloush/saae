@@ -79,11 +79,14 @@ function LmsLogin() {
             {tr.signIn}
           </Button>
         </form>
-        <p className="mt-4 text-center text-sm text-muted-foreground">
+        <div className="mt-4 flex items-center justify-between text-sm">
           <Link to="/learning-management-system/signup" className="text-primary hover:underline font-medium">
             {tr.needAccount}
           </Link>
-        </p>
+          <Link to="/learning-management-system/forgot-password" className="text-muted-foreground hover:text-primary">
+            {tr.forgotPassword}
+          </Link>
+        </div>
       </div>
     </div>
   );
