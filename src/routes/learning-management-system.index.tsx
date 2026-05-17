@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BookOpen, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
@@ -159,9 +159,6 @@ function LmsHome() {
                 to="/learning-management-system/catalog"
                 className="group rounded-2xl border border-border bg-card p-5 text-center transition-all hover:border-primary hover:shadow-soft"
               >
-                <div className="mx-auto h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <BookOpen className="h-5 w-5" />
-                </div>
                 <div className="mt-3 font-semibold text-foreground text-sm">
                   {lang === "ar" ? c.name_ar : c.name_en || c.name_ar}
                 </div>
