@@ -203,6 +203,8 @@ function InstructorAssignments() {
                 );
               })}
             </select>
+            <ChevronDown className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-4 w-4 opacity-60 ${lang === "ar" ? "left-3" : "right-3"}`} />
+            </div>
           </div>
           <div>
             <Label>{t(lang, "الوصف بالعربي", "Description (Arabic)")}</Label>
