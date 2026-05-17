@@ -173,6 +173,7 @@ function Player() {
                       dir={lang === "ar" ? "rtl" : "ltr"}
                       className={cn(
                         "w-full flex items-start gap-2 px-4 py-2.5 text-sm text-start hover:bg-muted/50 transition-colors border-b border-border/50",
+                        lang === "ar" && "flex-row-reverse text-right",
                         active && "bg-primary/10 text-primary font-semibold",
                       )}
                     >
