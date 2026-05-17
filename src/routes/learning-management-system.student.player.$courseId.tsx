@@ -124,7 +124,7 @@ function Player() {
         {current && (
           <>
             <div className="mt-4 flex items-start justify-between gap-3 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-foreground">{current.title}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">{currentTitle}</h1>
               <div className="flex gap-2">
                 <Link to="/learning-management-system/student/quiz/$courseId" params={{ courseId }}>
                   <Button variant="outline" size="sm"><Award className="h-4 w-4 mx-1" />{tr.finalTest}</Button>
@@ -136,9 +136,9 @@ function Player() {
               </div>
             </div>
 
-            {current.content_md && (
+            {currentContent && (
               <div className="mt-4 prose prose-sm max-w-none text-foreground whitespace-pre-wrap">
-                {current.content_md}
+                {currentContent}
               </div>
             )}
 
