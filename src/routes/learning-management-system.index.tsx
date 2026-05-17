@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { GraduationCap, Users, BookOpen, Award, ArrowRight } from "lucide-react";
+import { Users, BookOpen, Award, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
