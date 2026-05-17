@@ -57,9 +57,15 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
               icon={<BookOpen className="h-3.5 w-3.5" />}
             />
           )}
+          {isAuthed && (
+            <NavItem
+              to="/learning-management-system/instructor"
+              label={tr.navInstructor}
+            />
+          )}
           {role === "lms_admin" && (
             <NavItem
-              to="/learning-management-system"
+              to="/learning-management-system/admin"
               label={tr.navAdmin}
               icon={<LayoutDashboard className="h-3.5 w-3.5" />}
             />
