@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, PlayCircle, Circle, MessageSquare, Paperclip, Award } from "lucide-react";
+import { CheckCircle2, PlayCircle, Circle, Paperclip, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -8,6 +8,8 @@ import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { QAPanel } from "@/components/lms/QAPanel";
+import { AssignmentsPanel } from "@/components/lms/AssignmentsPanel";
 
 export const Route = createFileRoute("/learning-management-system/student/player/$courseId")({
   head: () => ({ meta: [{ title: "LMS · Player" }] }),
