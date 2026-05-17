@@ -163,15 +163,6 @@ function LmsHome() {
         </div>
       </section>
 
-      {/* Coming soon notice */}
-      <section className="pb-16">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-center">
-            <h3 className="text-lg font-bold text-foreground">{tr.featuredCourses}</h3>
-            <p className="mt-2 text-sm text-muted-foreground">{tr.comingSoon}</p>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
