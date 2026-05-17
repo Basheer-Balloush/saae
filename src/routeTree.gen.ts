@@ -22,6 +22,7 @@ import { Route as NewsIdRouteImport } from './routes/news.$id'
 import { Route as LearningManagementSystemVerifyRouteImport } from './routes/learning-management-system.verify'
 import { Route as LearningManagementSystemStudentRouteImport } from './routes/learning-management-system.student'
 import { Route as LearningManagementSystemSignupRouteImport } from './routes/learning-management-system.signup'
+import { Route as LearningManagementSystemResetPasswordRouteImport } from './routes/learning-management-system.reset-password'
 import { Route as LearningManagementSystemLoginRouteImport } from './routes/learning-management-system.login'
 import { Route as LearningManagementSystemInstructorRouteImport } from './routes/learning-management-system.instructor'
 import { Route as LearningManagementSystemForgotPasswordRouteImport } from './routes/learning-management-system.forgot-password'
@@ -111,6 +112,12 @@ const LearningManagementSystemSignupRoute =
   LearningManagementSystemSignupRouteImport.update({
     id: '/signup',
     path: '/signup',
+    getParentRoute: () => LearningManagementSystemRoute,
+  } as any)
+const LearningManagementSystemResetPasswordRoute =
+  LearningManagementSystemResetPasswordRouteImport.update({
+    id: '/reset-password',
+    path: '/reset-password',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
 const LearningManagementSystemLoginRoute =
@@ -234,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorRouteWithChildren
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
+  '/learning-management-system/reset-password': typeof LearningManagementSystemResetPasswordRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentRouteWithChildren
   '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
@@ -263,6 +271,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
+  '/learning-management-system/reset-password': typeof LearningManagementSystemResetPasswordRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
   '/news/$id': typeof NewsIdRoute
@@ -296,6 +305,7 @@ export interface FileRoutesById {
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorRouteWithChildren
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
+  '/learning-management-system/reset-password': typeof LearningManagementSystemResetPasswordRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentRouteWithChildren
   '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
@@ -331,6 +341,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/forgot-password'
     | '/learning-management-system/instructor'
     | '/learning-management-system/login'
+    | '/learning-management-system/reset-password'
     | '/learning-management-system/signup'
     | '/learning-management-system/student'
     | '/learning-management-system/verify'
@@ -360,6 +371,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
     | '/learning-management-system/login'
+    | '/learning-management-system/reset-password'
     | '/learning-management-system/signup'
     | '/learning-management-system/verify'
     | '/news/$id'
@@ -392,6 +404,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/forgot-password'
     | '/learning-management-system/instructor'
     | '/learning-management-system/login'
+    | '/learning-management-system/reset-password'
     | '/learning-management-system/signup'
     | '/learning-management-system/student'
     | '/learning-management-system/verify'
@@ -516,6 +529,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/learning-management-system/signup'
       preLoaderRoute: typeof LearningManagementSystemSignupRouteImport
+      parentRoute: typeof LearningManagementSystemRoute
+    }
+    '/learning-management-system/reset-password': {
+      id: '/learning-management-system/reset-password'
+      path: '/reset-password'
+      fullPath: '/learning-management-system/reset-password'
+      preLoaderRoute: typeof LearningManagementSystemResetPasswordRouteImport
       parentRoute: typeof LearningManagementSystemRoute
     }
     '/learning-management-system/login': {
@@ -723,6 +743,7 @@ interface LearningManagementSystemRouteChildren {
   LearningManagementSystemForgotPasswordRoute: typeof LearningManagementSystemForgotPasswordRoute
   LearningManagementSystemInstructorRoute: typeof LearningManagementSystemInstructorRouteWithChildren
   LearningManagementSystemLoginRoute: typeof LearningManagementSystemLoginRoute
+  LearningManagementSystemResetPasswordRoute: typeof LearningManagementSystemResetPasswordRoute
   LearningManagementSystemSignupRoute: typeof LearningManagementSystemSignupRoute
   LearningManagementSystemStudentRoute: typeof LearningManagementSystemStudentRouteWithChildren
   LearningManagementSystemVerifyRoute: typeof LearningManagementSystemVerifyRoute
@@ -742,6 +763,8 @@ const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildr
     LearningManagementSystemInstructorRoute:
       LearningManagementSystemInstructorRouteWithChildren,
     LearningManagementSystemLoginRoute: LearningManagementSystemLoginRoute,
+    LearningManagementSystemResetPasswordRoute:
+      LearningManagementSystemResetPasswordRoute,
     LearningManagementSystemSignupRoute: LearningManagementSystemSignupRoute,
     LearningManagementSystemStudentRoute:
       LearningManagementSystemStudentRouteWithChildren,
