@@ -109,6 +109,19 @@ export const lmsT: Record<Lang, {
   addQuestion: string;
   correctAnswer: string;
   mustCompleteFirst: string;
+  reviews: string;
+  writeReview: string;
+  yourRating: string;
+  yourComment: string;
+  submitReview: string;
+  noReviews: string;
+  verifyCertificate: string;
+  verifyTitle: string;
+  verifySubtitle: string;
+  enterSerial: string;
+  verify: string;
+  verifyValid: string;
+  verifyInvalid: string;
 }> = {
   ar: {
     brand: "منصة التعلم",
