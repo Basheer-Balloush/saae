@@ -95,39 +95,68 @@ function LmsSignup() {
         <h1 className="mt-3 text-xl font-bold text-foreground text-center">{tr.signUpTitle}</h1>
         <p className="mt-1 text-sm text-muted-foreground text-center">{tr.signUpSubtitle}</p>
 
-        <form onSubmit={onSubmit} className="mt-5 space-y-3">
-          <div>
-            <Label htmlFor="name">{tr.fullName}</Label>
-            <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
+        {sentTo ? (
+          <div className="mt-6 flex flex-col items-center text-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-5">
+            <div className="rounded-full bg-primary/10 p-3">
+              <MailCheck className="h-7 w-7 text-primary" />
+            </div>
+            <h2 className="text-base font-semibold text-foreground">
+              {lang === "ar" ? "تحقّق من بريدك الإلكتروني" : "Check your email"}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {lang === "ar"
+                ? "أرسلنا رابط تأكيد إلى"
+                : "We sent a confirmation link to"}{" "}
+              <span className="font-semibold text-foreground" dir="ltr">{sentTo}</span>
+              {". "}
+              {lang === "ar"
+                ? "افتح الرابط لتفعيل حسابك."
+                : "Open the link to activate your account."}
+            </p>
+            <Link
+              to="/learning-management-system/login"
+              className="mt-2 text-sm text-primary hover:underline font-medium"
+            >
+              {tr.haveAccount}
+            </Link>
           </div>
-          <div>
-            <Label htmlFor="email">{tr.email}</Label>
-            <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" />
-          </div>
-          <div>
-            <Label htmlFor="password">{tr.password}</Label>
-            <Input id="password" type="password" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} dir="ltr" />
-          </div>
-          <div className="flex flex-col gap-2 rounded-xl border border-border p-3 bg-muted/30">
-            <label className="flex items-center gap-2 cursor-pointer text-sm">
-              <input type="radio" name="role" checked={!asInstructor} onChange={() => setAsInstructor(false)} />
-              <span className="font-medium text-foreground">{tr.iAmStudent}</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer text-sm">
-              <input type="radio" name="role" checked={asInstructor} onChange={() => setAsInstructor(true)} />
-              <span className="font-medium text-foreground">{tr.iAmInstructor}</span>
-            </label>
-          </div>
-          <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-            {tr.signUp}
-          </Button>
-        </form>
-        <p className="mt-4 text-center text-sm text-muted-foreground">
-          <Link to="/learning-management-system/login" className="text-primary hover:underline font-medium">
-            {tr.haveAccount}
-          </Link>
-        </p>
+        ) : (
+          <>
+            <form onSubmit={onSubmit} className="mt-5 space-y-3">
+              <div>
+                <Label htmlFor="name">{tr.fullName}</Label>
+                <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor="email">{tr.email}</Label>
+                <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label htmlFor="password">{tr.password}</Label>
+                <Input id="password" type="password" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} dir="ltr" />
+              </div>
+              <div className="flex flex-col gap-2 rounded-xl border border-border p-3 bg-muted/30">
+                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                  <input type="radio" name="role" checked={!asInstructor} onChange={() => setAsInstructor(false)} />
+                  <span className="font-medium text-foreground">{tr.iAmStudent}</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                  <input type="radio" name="role" checked={asInstructor} onChange={() => setAsInstructor(true)} />
+                  <span className="font-medium text-foreground">{tr.iAmInstructor}</span>
+                </label>
+              </div>
+              <Button type="submit" className="w-full" disabled={submitting}>
+                {submitting && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
+                {tr.signUp}
+              </Button>
+            </form>
+            <p className="mt-4 text-center text-sm text-muted-foreground">
+              <Link to="/learning-management-system/login" className="text-primary hover:underline font-medium">
+                {tr.haveAccount}
+              </Link>
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
