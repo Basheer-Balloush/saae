@@ -5,6 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CourseCard, type CourseCardData } from "@/components/lms/CourseCard";
 
 export const Route = createFileRoute("/learning-management-system/catalog")({
@@ -61,18 +68,39 @@ function Catalog() {
           <Search className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-muted-foreground" />
           <Input placeholder={tr.search} value={q} onChange={(e) => setQ(e.target.value)} className="ps-9" />
         </div>
-        <Select value={cat} onChange={setCat} options={[{ value: "all", label: tr.all }, ...categories.map((c) => ({ value: c.id, label: lang === "ar" ? c.name_ar : c.name_en || c.name_ar }))]} label={tr.filterCategory} />
-        <Select value={level} onChange={setLevel} options={[
-          { value: "all", label: tr.all },
-          { value: "beginner", label: tr.beginner },
-          { value: "intermediate", label: tr.intermediate },
-          { value: "advanced", label: tr.advanced },
-        ]} label={tr.filterLevel} />
-        <Select value={price} onChange={setPrice} options={[
-          { value: "all", label: tr.all },
-          { value: "free", label: tr.free },
-          { value: "paid", label: tr.paid },
-        ]} label={tr.filterPrice} />
+        <FilterSelect
+          value={cat}
+          onChange={setCat}
+          label={tr.filterCategory}
+          options={[
+            { value: "all", label: tr.all },
+            ...categories.map((c) => ({
+              value: c.id,
+              label: lang === "ar" ? c.name_ar : c.name_en || c.name_ar,
+            })),
+          ]}
+        />
+        <FilterSelect
+          value={level}
+          onChange={setLevel}
+          label={tr.filterLevel}
+          options={[
+            { value: "all", label: tr.all },
+            { value: "beginner", label: tr.beginner },
+            { value: "intermediate", label: tr.intermediate },
+            { value: "advanced", label: tr.advanced },
+          ]}
+        />
+        <FilterSelect
+          value={price}
+          onChange={setPrice}
+          label={tr.filterPrice}
+          options={[
+            { value: "all", label: tr.all },
+            { value: "free", label: tr.free },
+            { value: "paid", label: tr.paid },
+          ]}
+        />
       </div>
 
       {loading ? (
@@ -88,17 +116,33 @@ function Catalog() {
   );
 }
 
-function Select({ value, onChange, options, label }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[]; label: string }) {
+function FilterSelect({
+  value,
+  onChange,
+  options,
+  label,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  label: string;
+}) {
+  const current = options.find((o) => o.value === value);
   return (
-    <label className="block">
-      <span className="sr-only">{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-      >
-        {options.map((o) => <option key={o.value} value={o.value}>{label}: {o.label}</option>)}
-      </select>
-    </label>
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="w-full h-10" aria-label={label}>
+        <SelectValue placeholder={label}>
+          <span className="text-muted-foreground">{label}:</span>{" "}
+          <span className="text-foreground font-medium">{current?.label}</span>
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((o) => (
+          <SelectItem key={o.value} value={o.value}>
+            {o.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
