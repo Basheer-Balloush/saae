@@ -125,20 +125,22 @@ function FilterSelect({
   onChange,
   options,
   label,
+  dir = "rtl",
 }: {
   value: string;
   onChange: (v: string) => void;
   options: { value: string; label: string }[];
   label: string;
+  dir?: "rtl" | "ltr";
 }) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-full h-10 text-sm font-semibold [&>span]:text-start" aria-label={label} dir="rtl">
+      <SelectTrigger className="w-full h-10 text-sm font-semibold [&>span]:text-start" aria-label={label} dir={dir}>
         <SelectValue placeholder={label}>{label}</SelectValue>
       </SelectTrigger>
-      <SelectContent dir="rtl">
+      <SelectContent dir={dir}>
         {options.map((o) => (
-          <SelectItem key={o.value} value={o.value} className="text-end">
+          <SelectItem key={o.value} value={o.value} className="text-start">
             {o.label}
           </SelectItem>
         ))}
