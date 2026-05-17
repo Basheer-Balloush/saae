@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, ArrowRight, Graduat
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import logo from "@/assets/footer-logo.png";
+import locationMap from "@/assets/location-map.png";
 
 const TEAL = "#048090";
 const INK = "#FFFFFF";
