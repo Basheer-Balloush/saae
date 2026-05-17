@@ -138,7 +138,7 @@ function CourseDetails() {
           <div className="text-3xl font-bold text-foreground">
             {course.is_free ? tr.free : (
               <span dir="ltr" className="inline-flex flex-row items-center gap-2">
-                <span dir="rtl">ل.س</span>
+                <span dir="rtl">{lang === "ar" ? "ل.س" : "SYP"}</span>
                 <span>{Number(course.price).toLocaleString()}</span>
               </span>
             )}
@@ -162,7 +162,7 @@ function CourseDetails() {
                       <Wallet className="h-3.5 w-3.5" />
                       {lang === "ar" ? "رصيدك:" : "Your balance:"}{" "}
                       <span dir="ltr" className="inline-flex flex-row items-center gap-1 font-semibold text-foreground">
-                        <span dir="rtl">ل.س</span>
+                        <span dir="rtl">{lang === "ar" ? "ل.س" : "SYP"}</span>
                         <span>{balance.toLocaleString()}</span>
                       </span>
                       {balance < Number(course.price) && (
