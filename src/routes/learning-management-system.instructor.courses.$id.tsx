@@ -270,6 +270,8 @@ function CourseBuilder() {
           ))}
         </div>
       </section>
+
+      <QuizBuilder courseId={course.id} />
     </div>
   );
 }
