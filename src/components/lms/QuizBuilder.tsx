@@ -106,7 +106,7 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
       </div>
 
       <div className="space-y-3">
-        {questions.length === 0 && <p className="text-sm text-muted-foreground">{lang === "ar" ? "ما في أسئلة بعد" : "No questions yet"}</p>}
+        {questions.length === 0 && <p className="text-sm text-muted-foreground">{lang === "ar" ? "لا توجد أسئلة بعد" : "No questions yet"}</p>}
         {questions.map((q, i) => {
           const choices = Array.isArray(q.choices) ? (q.choices as string[]) : [];
           return (

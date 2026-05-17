@@ -68,10 +68,10 @@ function InstructorHome() {
       <div className="flex items-center justify-between mt-4">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mx-1" />{lang === "ar" ? "دورة جديد" : "New course"}</Button>
+            <Button><Plus className="h-4 w-4 mx-1" />{lang === "ar" ? "دورة جديدة" : "New course"}</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>{lang === "ar" ? "دورة جديد" : "New course"}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{lang === "ar" ? "دورة جديدة" : "New course"}</DialogTitle></DialogHeader>
             <form onSubmit={onCreate} className="space-y-3">
               <div><Label>{lang === "ar" ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
                 <Input required value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></div>
@@ -89,7 +89,7 @@ function InstructorHome() {
       {loading ? (
         <p className="mt-10 text-center text-muted-foreground">{tr.loading}</p>
       ) : courses.length === 0 ? (
-        <p className="mt-16 text-center text-muted-foreground">{lang === "ar" ? "ما عندك دورات بعد. أنشئ أول دورة!" : "No courses yet. Create your first!"}</p>
+        <p className="mt-16 text-center text-muted-foreground">{lang === "ar" ? "ليس لديك دورات بعد. أنشئ أول دورة!" : "No courses yet. Create your first!"}</p>
       ) : (
         <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map((c) => (
