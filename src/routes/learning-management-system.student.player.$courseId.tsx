@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, PlayCircle, Circle, MessageSquare, Paperclip } from "lucide-react";
+import { CheckCircle2, PlayCircle, Circle, MessageSquare, Paperclip, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
