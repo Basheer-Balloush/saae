@@ -47,8 +47,8 @@ function AdminHome() {
     toast.success("OK"); load();
   };
 
-  const setCourseStatus = async (cid: string, status: string, reason?: string) => {
-    const patch: { status: string; rejection_reason?: string | null } = { status };
+  const setCourseStatus = async (cid: string, status: "draft" | "pending" | "published" | "rejected", reason?: string) => {
+    const patch: { status: typeof status; rejection_reason?: string | null } = { status };
     if (status === "rejected") patch.rejection_reason = reason ?? null;
     const { error } = await supabase.from("lms_courses").update(patch).eq("id", cid);
     if (error) { toast.error(error.message); return; }
@@ -93,7 +93,7 @@ function AdminHome() {
                 <div className="text-xs text-muted-foreground">{c.status}</div>
               </div>
               <div className="flex gap-2">
-                {c.status === "pending_review" && (
+                {c.status === "pending" && (
                   <>
                     <Button size="sm" onClick={() => setCourseStatus(c.id, "published")}><Check className="h-4 w-4 mx-1" />Publish</Button>
                     <Button size="sm" variant="destructive" onClick={() => {

@@ -110,7 +110,7 @@ function InstructorHome() {
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     draft: "bg-muted text-muted-foreground",
-    pending_review: "bg-amber-500/15 text-amber-600",
+    pending: "bg-amber-500/15 text-amber-600",
     published: "bg-emerald-500/15 text-emerald-600",
     rejected: "bg-destructive/15 text-destructive",
   };

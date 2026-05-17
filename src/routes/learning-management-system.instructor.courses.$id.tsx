@@ -70,7 +70,7 @@ function CourseBuilder() {
     const { error } = await supabase.from("lms_courses").update({
       title_ar: course.title_ar, title_en: course.title_en,
       description_ar: course.description_ar, description_en: course.description_en,
-      level: course.level, price: course.price, is_free: course.is_free,
+      level: course.level as "beginner" | "intermediate" | "advanced", price: course.price, is_free: course.is_free,
       category_id: course.category_id, cover_url: course.cover_url,
     }).eq("id", course.id);
     setSaving(false);
@@ -79,9 +79,9 @@ function CourseBuilder() {
   };
 
   const submitForReview = async () => {
-    const { error } = await supabase.from("lms_courses").update({ status: "pending_review" }).eq("id", course.id);
+    const { error } = await supabase.from("lms_courses").update({ status: "pending" }).eq("id", course.id);
     if (error) { toast.error(error.message); return; }
-    setCourse({ ...course, status: "pending_review" });
+    setCourse({ ...course, status: "pending" });
     toast.success(lang === "ar" ? "تم الإرسال للمراجعة" : "Submitted for review");
   };
 
