@@ -7,6 +7,7 @@ import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { CourseReviews } from "@/components/lms/CourseReviews";
 
 export const Route = createFileRoute("/learning-management-system/courses/$id")({
   head: () => ({ meta: [{ title: "LMS · Course" }] }),
