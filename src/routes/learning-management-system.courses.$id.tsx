@@ -124,6 +124,8 @@ function CourseDetails() {
               </div>
             ))}
           </div>
+
+          <CourseReviews courseId={course.id} canReview={enrolled} />
         </div>
 
         <aside className="lg:sticky lg:top-24 self-start rounded-2xl border border-border bg-card p-6 shadow-soft">
