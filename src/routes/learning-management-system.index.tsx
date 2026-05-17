@@ -120,10 +120,10 @@ function LmsHome() {
         </div>
 
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 text-center w-full">
-          <h1 className="mt-4 text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-foreground leading-tight tracking-tight">
+          <h1 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
             {tr.heroTitle}
           </h1>
-          <p className="mt-6 max-w-3xl mx-auto text-lg sm:text-xl lg:text-2xl text-muted-foreground">
+          <p className="mt-6 max-w-3xl mx-auto text-base sm:text-lg lg:text-xl text-muted-foreground">
             {tr.heroSubtitle}
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
