@@ -25,6 +25,8 @@ type Course = {
   id: string;
   title_ar: string;
   title_en: string | null;
+  description_ar: string | null;
+  description_en: string | null;
   cover_url: string | null;
   level: string;
   price: number;
