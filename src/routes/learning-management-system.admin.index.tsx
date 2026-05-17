@@ -127,27 +127,32 @@ function AdminHome() {
         <div>
       {tab === "courses" && (
         <div className="mt-6 space-y-3">
-          {courses.map((c) => (
+          {courses.map((c) => {
+            const statusLabel = lang === "ar"
+              ? ({ draft: "مسودّة", pending: "بانتظار المراجعة", published: "منشورة", rejected: "مرفوضة" } as const)[c.status as "draft" | "pending" | "published" | "rejected"] ?? c.status
+              : c.status;
+            return (
             <div key={c.id} className="rounded-xl border border-border bg-card p-4 flex items-center justify-between gap-3">
               <div>
                 <div className="font-bold text-foreground">{c.title_ar}</div>
-                <div className="text-xs text-muted-foreground">{c.status}</div>
+                <div className="text-xs text-muted-foreground">{statusLabel}</div>
               </div>
               <div className="flex gap-2">
                 {c.status === "pending" && (
                   <>
-                    <Button size="sm" onClick={() => setCourseStatus(c.id, "published")}><Check className="h-4 w-4 mx-1" />Publish</Button>
+                    <Button size="sm" onClick={() => setCourseStatus(c.id, "published")}><Check className="h-4 w-4 mx-1" />{lang === "ar" ? "نشر" : "Publish"}</Button>
                     <Button size="sm" variant="destructive" onClick={() => {
-                      const r = prompt("Reason?"); if (r !== null) setCourseStatus(c.id, "rejected", r);
-                    }}><X className="h-4 w-4 mx-1" />Reject</Button>
+                      const r = prompt(lang === "ar" ? "السبب؟" : "Reason?"); if (r !== null) setCourseStatus(c.id, "rejected", r);
+                    }}><X className="h-4 w-4 mx-1" />{lang === "ar" ? "رفض" : "Reject"}</Button>
                   </>
                 )}
                 {c.status === "published" && (
-                  <Button size="sm" variant="outline" onClick={() => setCourseStatus(c.id, "draft")}>Unpublish</Button>
+                  <Button size="sm" variant="outline" onClick={() => setCourseStatus(c.id, "draft")}>{lang === "ar" ? "إلغاء النشر" : "Unpublish"}</Button>
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -157,13 +162,13 @@ function AdminHome() {
             <div key={i.user_id} className="rounded-xl border border-border bg-card p-4 flex items-center justify-between gap-3">
               <div>
                 <div className="font-bold text-foreground">{i.full_name}</div>
-                <div className="text-xs text-muted-foreground">{i.specialty || "—"} · {i.approved ? "approved" : "pending"}</div>
+                <div className="text-xs text-muted-foreground">{i.specialty || "—"} · {i.approved ? (lang === "ar" ? "موافَق عليه" : "approved") : (lang === "ar" ? "بانتظار الموافقة" : "pending")}</div>
               </div>
               <div className="flex gap-2">
                 {!i.approved ? (
-                  <Button size="sm" onClick={() => approveInstructor(i.user_id, true)}><Check className="h-4 w-4 mx-1" />Approve</Button>
+                  <Button size="sm" onClick={() => approveInstructor(i.user_id, true)}><Check className="h-4 w-4 mx-1" />{lang === "ar" ? "موافقة" : "Approve"}</Button>
                 ) : (
-                  <Button size="sm" variant="outline" onClick={() => approveInstructor(i.user_id, false)}>Revoke</Button>
+                  <Button size="sm" variant="outline" onClick={() => approveInstructor(i.user_id, false)}>{lang === "ar" ? "إلغاء الموافقة" : "Revoke"}</Button>
                 )}
               </div>
             </div>
