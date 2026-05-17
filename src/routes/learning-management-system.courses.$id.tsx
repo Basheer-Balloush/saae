@@ -38,6 +38,8 @@ function CourseDetails() {
   const [enrolled, setEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
+  const [coupon, setCoupon] = useState("");
+  const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -58,9 +60,12 @@ function CourseDetails() {
           setLessons((lss as Lesson[]) ?? []);
         }
         if (user) {
-          const { data: e } = await supabase.from("lms_enrollments")
-            .select("id").eq("course_id", id).eq("student_id", user.id).maybeSingle();
+          const [{ data: e }, { data: w }] = await Promise.all([
+            supabase.from("lms_enrollments").select("id").eq("course_id", id).eq("student_id", user.id).maybeSingle(),
+            supabase.from("lms_wallets").select("balance").eq("user_id", user.id).maybeSingle(),
+          ]);
           setEnrolled(!!e);
+          setBalance(w ? Number((w as { balance: number }).balance) : 0);
         }
       }
       setLoading(false);
@@ -74,7 +79,7 @@ function CourseDetails() {
     }
     setEnrolling(true);
     try {
-      const { error } = await supabase.rpc("lms_enroll", { _course_id: id });
+      const { error } = await supabase.rpc("lms_checkout", { _course_id: id, _coupon: coupon || undefined });
       if (error) throw error;
       setEnrolled(true);
       toast.success(tr.enrollmentSuccess);
