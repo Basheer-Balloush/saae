@@ -127,7 +127,6 @@ function FilterSelect({
   options: { value: string; label: string }[];
   label: string;
 }) {
-  const current = options.find((o) => o.value === value);
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="w-full h-10 text-sm font-semibold [&>span]:text-start" aria-label={label} dir="rtl">
