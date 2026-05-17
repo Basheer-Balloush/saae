@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, ArrowRight, GraduationCap } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, ArrowRight } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import logo from "@/assets/footer-logo.png";
@@ -10,7 +10,7 @@ const INK = "#FFFFFF";
 const MUTED = "rgba(255,255,255,0.78)";
 
 export function LmsFooter() {
-  const { lang, dir } = useLang();
+  const { t, lang, dir } = useLang();
   const tr = lmsT[lang];
   const isRtl = dir === "rtl";
 
@@ -25,7 +25,8 @@ export function LmsFooter() {
 
   return (
     <footer
-      className="relative mt-12"
+      id="contact"
+      className="relative"
       style={{
         backgroundColor: TEAL,
         color: INK,
@@ -34,24 +35,20 @@ export function LmsFooter() {
         paddingBottom: "32px",
       }}
     >
-      <div className="mx-auto w-full max-w-[1440px] px-6 sm:px-8 lg:px-16">
+      <div className="mx-auto w-full max-w-[1440px] px-8 lg:px-16">
         <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Col 1 — Identity */}
           <div className="lg:col-span-5">
-            <div className="flex items-center gap-3">
-              <img src={logo} alt="SAAE" className="h-12 w-auto brightness-0 invert" />
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/40 px-2.5 py-1 text-xs font-bold" style={{ color: INK }}>
-                <GraduationCap className="h-3.5 w-3.5" />
-                {tr.brand}
-              </span>
-            </div>
+            <img
+              src={logo}
+              alt="SAAE"
+              className="h-12 w-auto brightness-0 invert"
+            />
             <p
-              className="mt-6 max-w-sm text-sm leading-relaxed"
+              className="mt-6 max-w-xs text-sm leading-relaxed"
               style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 400, color: INK }}
             >
-              {tr.tagline} — {lang === "ar"
-                ? "منصة التعلم التابعة للجمعية السورية للذكاء الاصطناعي وريادة الأعمال."
-                : "Learning platform of the Syrian Association for AI & Entrepreneurship."}
+              {t.footer.mission}
             </p>
             <div className="mt-8 flex items-center gap-7">
               {[
@@ -74,15 +71,15 @@ export function LmsFooter() {
             </div>
           </div>
 
-          {/* Col 2 — Quick links */}
+          {/* Col 2 — Navigation */}
           <div className="lg:col-span-3">
             <h4
               className="text-base font-bold tracking-tight"
               style={{ color: INK, fontFamily: '"Cairo", system-ui, sans-serif' }}
             >
-              {lang === "ar" ? "روابط سريعة" : "Quick Links"}
+              {t.footer.quickLinks}
             </h4>
-            <ul className={`mt-6 space-y-4 text-sm ${isRtl ? "text-right" : "text-left"}`}>
+            <ul className={`mt-6 space-y-5 text-sm ${isRtl ? "text-right" : "text-left"}`}>
               {quickLinks.map((l) => (
                 <li key={l.to + l.label} className="leading-relaxed">
                   <Link
@@ -97,7 +94,8 @@ export function LmsFooter() {
             </ul>
           </div>
 
-          {/* Col 3 — Contact card */}
+
+          {/* Col 3 — HQ Intelligence */}
           <div className="lg:col-span-4">
             <div
               className="rounded-2xl p-5"
@@ -129,9 +127,7 @@ export function LmsFooter() {
               <div className="mt-4 space-y-2.5 text-sm">
                 <div className="flex items-start gap-2.5">
                   <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
-                  <span style={{ color: "#1a1a1a" }}>
-                    {lang === "ar" ? "دمشق، سوريا" : "Damascus, Syria"}
-                  </span>
+                  <span style={{ color: "#1a1a1a" }}>{t.footer.address}</span>
                 </div>
                 <a
                   href="mailto:info@aisyria.org"
@@ -149,24 +145,28 @@ export function LmsFooter() {
                   <Phone className="h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
                   <span dir="ltr">+963 930 763 547</span>
                 </a>
-                <Link
-                  to="/learning-management-system/catalog"
-                  className="group inline-flex items-center gap-1.5 pt-2 text-sm font-semibold"
+                <a
+                  href="https://maps.app.goo.gl/bKMSHXkmkr5U3tZh6"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group inline-flex items-center gap-1.5 pt-1 text-sm font-semibold"
                   style={{ color: TEAL }}
                 >
-                  {lang === "ar" ? "تصفّح الدورات" : "Browse courses"}
+                  {t.footer.visit}
                   <ArrowRight
                     className={`h-3.5 w-3.5 transition-transform duration-300 ${
-                      isRtl ? "-scale-x-100 group-hover:-translate-x-1" : "group-hover:translate-x-1"
+                      isRtl
+                        ? "-scale-x-100 group-hover:-translate-x-1"
+                        : "group-hover:translate-x-1"
                     }`}
                   />
-                </Link>
+                </a>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom bar */}
+        {/* Bottom bar — centered copyright */}
         <div
           className="mt-12 flex flex-col items-center gap-2 pt-5 text-center text-xs whitespace-pre-line"
           dir={isRtl ? "rtl" : "ltr"}
@@ -174,10 +174,10 @@ export function LmsFooter() {
         >
           {isRtl ? (
             <span dir="rtl">
-              {tr.copyright} — {tr.brand} <bdi dir="ltr">{new Date().getFullYear()} ©</bdi>
+              جميع الحقوق محفوظة للجمعية السورية للذكاء الاصطناعي وريادة الأعمال <bdi dir="ltr">{new Date().getFullYear()} ©</bdi>
             </span>
           ) : (
-            <span>{tr.copyright} — {tr.brand} {new Date().getFullYear()}©</span>
+            <span>All rights reserved for Syrian Association for AI & Entrepreneurship {new Date().getFullYear()}©</span>
           )}
         </div>
       </div>
