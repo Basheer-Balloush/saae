@@ -19,7 +19,6 @@ export const Route = createFileRoute("/learning-management-system/forgot-passwor
 
 function ForgotPage() {
   const { lang } = useLang();
-  void lang;
   const tr = lmsT[lang];
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -41,7 +40,7 @@ function ForgotPage() {
       setSent(true);
       toast.success(tr.resetLinkSent);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : tr.authFailed);
+      toast.error(localizeAuthError(err, lang, tr.authFailed));
     } finally {
       setSubmitting(false);
     }
