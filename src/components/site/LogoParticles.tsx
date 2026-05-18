@@ -30,14 +30,14 @@ type Phase =
   | "scatterB";
 
 const DUR: Record<Phase, number> = {
-  assembleA: 1200,
+  assembleA: 2200,
   revealA: 1400,
   hideA: 400,
-  scatterA: 800,
-  assembleB: 1200,
+  scatterA: 700,
+  assembleB: 2200,
   revealB: 1400,
   hideB: 400,
-  scatterB: 800,
+  scatterB: 700,
 };
 
 const NEXT: Record<Phase, Phase> = {
@@ -173,10 +173,18 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
         const dur = DUR[phase];
         let elapsed = now - phaseStart;
         if (elapsed > dur) {
+          const prev = phase;
           phase = NEXT[phase];
           phaseStart = now;
           elapsed = 0;
-          if (phase === "scatterA" || phase === "scatterB") randomizeScatter();
+          // when entering a new assemble phase, reset particles to random start positions
+          if (phase === "assembleA" || phase === "assembleB") {
+            for (const p of particles) {
+              p.x = cx + (Math.random() - 0.5) * size * 1.2;
+              p.y = cy + (Math.random() - 0.5) * size * 1.2;
+            }
+          }
+          void prev;
         }
         const t = Math.min(elapsed / DUR[phase], 1);
         const st = smoothstep(t);
@@ -188,12 +196,12 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
           case "revealA":
           case "hideA":
             cp = 0; break;
-          case "scatterA": cp = st; break; // teal → gold while scattering
+          case "scatterA": cp = st; break;
           case "assembleB":
           case "revealB":
           case "hideB":
             cp = 1; break;
-          case "scatterB": cp = 1 - st; break; // gold → teal
+          case "scatterB": cp = 1 - st; break;
         }
         const r = Math.round(rgbA[0] + (rgbB[0] - rgbA[0]) * cp);
         const g = Math.round(rgbA[1] + (rgbB[1] - rgbA[1]) * cp);
@@ -202,8 +210,7 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
         // alphas + motion behaviour by phase
         let particleAlpha = 0;
         let imageAlpha = 0;
-        let movingToScatter = false;
-        let usingShapeB = false; // which assemble target the particles head toward
+        let usingShapeB = false;
         switch (phase) {
           case "assembleA":
             particleAlpha = 0.88 * st;
@@ -215,13 +222,11 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
             usingShapeB = false;
             break;
           case "hideA":
-            particleAlpha = 0.88 * st;
             imageAlpha = 1 - st;
             usingShapeB = false;
             break;
           case "scatterA":
-            particleAlpha = 0.88 * (1 - st);
-            movingToScatter = true;
+            // brief pause between shapes — everything hidden
             break;
           case "assembleB":
             particleAlpha = 0.88 * st;
@@ -233,49 +238,41 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
             usingShapeB = true;
             break;
           case "hideB":
-            particleAlpha = 0.88 * st;
             imageAlpha = 1 - st;
             usingShapeB = true;
             break;
           case "scatterB":
-            particleAlpha = 0.88 * (1 - st);
-            movingToScatter = true;
             break;
         }
 
         ctx.clearRect(0, 0, size, size);
 
-        // draw image overlay (sharp version of the logo)
         if (imageAlpha > 0.01) {
-          const img = phase.endsWith("A") ? imgA : imgB;
-          const fit = phase.endsWith("A") ? fitA : fitB;
+          const useA = phase === "revealA" || phase === "hideA";
+          const img = useA ? imgA : imgB;
+          const fit = useA ? fitA : fitB;
           ctx.globalAlpha = imageAlpha;
           ctx.drawImage(img, fit.ox, fit.oy, fit.w, fit.h);
         }
 
         // update + draw particles
-        if (particleAlpha > 0.01 || phase === "assembleA" || phase === "assembleB" || movingToScatter) {
-          // physics: only move during assemble/scatter phases. reveal/hide hold position.
-          const isMoving = phase === "assembleA" || phase === "assembleB" || movingToScatter;
-          const ease = movingToScatter ? 0.06 : 0.1;
-          if (isMoving) {
-            for (const p of particles) {
-              let tx: number, ty: number;
-              if (movingToScatter) { tx = p.sx; ty = p.sy; }
-              else if (usingShapeB) { tx = p.tbX; ty = p.tbY; }
-              else { tx = p.taX; ty = p.taY; }
-              p.x += (tx - p.x) * ease;
-              p.y += (ty - p.y) * ease;
-            }
+        const isAssembling = phase === "assembleA" || phase === "assembleB";
+        if (isAssembling) {
+          const ease = 0.045;
+          for (const p of particles) {
+            const tx = usingShapeB ? p.tbX : p.taX;
+            const ty = usingShapeB ? p.tbY : p.taY;
+            p.x += (tx - p.x) * ease;
+            p.y += (ty - p.y) * ease;
           }
-          if (particleAlpha > 0.01) {
-            ctx.globalAlpha = particleAlpha;
-            ctx.fillStyle = `rgb(${r},${g},${b})`;
-            for (const p of particles) {
-              ctx.beginPath();
-              ctx.arc(p.x, p.y, 1.3, 0, Math.PI * 2);
-              ctx.fill();
-            }
+        }
+        if (particleAlpha > 0.01) {
+          ctx.globalAlpha = particleAlpha;
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          for (const p of particles) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 1.3, 0, Math.PI * 2);
+            ctx.fill();
           }
         }
 
