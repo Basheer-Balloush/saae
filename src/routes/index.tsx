@@ -90,8 +90,8 @@ function Index() {
         <FeaturedNews />
         <Partners />
         <Achievements />
-        <LmsCta />
         <Communities />
+        <LmsCta />
       </main>
       <Footer />
     </div>
