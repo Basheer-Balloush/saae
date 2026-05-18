@@ -33,11 +33,11 @@ const DUR: Record<Phase, number> = {
   assembleA: 2200,
   revealA: 1400,
   hideA: 400,
-  scatterA: 700,
+  scatterA: 300,
   assembleB: 2200,
   revealB: 1400,
   hideB: 400,
-  scatterB: 700,
+  scatterB: 300,
 };
 
 const NEXT: Record<Phase, Phase> = {
