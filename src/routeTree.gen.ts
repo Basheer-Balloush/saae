@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as LmsRouteImport } from './routes/lms'
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
@@ -62,11 +61,6 @@ const SuperAdminRoute = SuperAdminRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LmsRoute = LmsRouteImport.update({
-  id: '/lms',
-  path: '/lms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearningManagementSystemRoute =
@@ -313,7 +307,6 @@ export interface FileRoutesByFullPath {
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
-  '/lms': typeof LmsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
@@ -357,7 +350,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/lms': typeof LmsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
@@ -401,7 +393,6 @@ export interface FileRoutesById {
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
-  '/lms': typeof LmsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
@@ -449,7 +440,6 @@ export interface FileRouteTypes {
     | '/attendance-management-system'
     | '/contact'
     | '/learning-management-system'
-    | '/lms'
     | '/sitemap.xml'
     | '/super-admin'
     | '/admin/login'
@@ -493,7 +483,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
-    | '/lms'
     | '/sitemap.xml'
     | '/super-admin'
     | '/admin/login'
@@ -536,7 +525,6 @@ export interface FileRouteTypes {
     | '/attendance-management-system'
     | '/contact'
     | '/learning-management-system'
-    | '/lms'
     | '/sitemap.xml'
     | '/super-admin'
     | '/admin/login'
@@ -583,7 +571,6 @@ export interface RootRouteChildren {
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
-  LmsRoute: typeof LmsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
   AdminLoginRoute: typeof AdminLoginRoute
@@ -608,13 +595,6 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lms': {
-      id: '/lms'
-      path: '/lms'
-      fullPath: '/lms'
-      preLoaderRoute: typeof LmsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learning-management-system': {
@@ -1056,7 +1036,6 @@ const rootRouteChildren: RootRouteChildren = {
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
-  LmsRoute: LmsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,
   AdminLoginRoute: AdminLoginRoute,
