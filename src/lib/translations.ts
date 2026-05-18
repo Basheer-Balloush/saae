@@ -13,7 +13,7 @@ type Dict = {
   };
   communities: {
     eyebrow: string; title: string; subtitle: string; cta: string; discover: string;
-    cards: Record<"data" | "architecture" | "medical" | "entrepreneurship" | "research" | "software" | "economy", { title: string; desc: string }>;
+    cards: Record<"data" | "architecture" | "medical" | "research" | "software" | "economy", { title: string; desc: string }>;
   };
   achievements: { eyebrow: string; title: string; body: string; stats: { value: string; label: string }[] };
   partners: { eyebrow: string; title: string };
@@ -118,10 +118,6 @@ export const translations: Record<Lang, Dict> = {
         medical: {
           title: "Healthcare Community",
           desc: "Led by 'MedInvoVision', focusing on digital transformation in the Syrian health sector.",
-        },
-        entrepreneurship: {
-          title: "Entrepreneurship & Digital Transformation",
-          desc: "Empowering Syrian youth to build startups in the digital economy.",
         },
         research: {
           title: "Research Community",
@@ -278,10 +274,6 @@ export const translations: Record<Lang, Dict> = {
         medical: {
           title: "مجتمع الرعاية الصحية",
           desc: "يقوده فريق «MedInvoVision» ويركّز على التحول الرقمي في القطاع الصحي السوري.",
-        },
-        entrepreneurship: {
-          title: "مجتمع ريادة الأعمال والتحول الرقمي",
-          desc: "تمكين الشباب السوري من بناء شركاتٍ ناشئةٍ في الاقتصاد الرقمي.",
         },
         research: {
           title: "المجتمع البحثي",

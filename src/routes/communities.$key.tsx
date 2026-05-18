@@ -23,7 +23,7 @@ const HERO_IMG: Record<CommunityKey, string> = {
   data: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80",
   architecture: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80",
   medical: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1600&q=80",
-  entrepreneurship: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1600&q=80",
+  
   research: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1600&q=80",
   software: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1600&q=80",
   economy: "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=80",
@@ -44,10 +44,6 @@ const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
   medical: {
     ar: "نَصِل الخبرة الطبية بالذكاء الاصطناعي (MedInvoVision) لتحسين دقّة التشخيص وجودة الرعاية الصحية في سوريا.",
     en: "Bridging medical expertise and AI (MedInvoVision) to improve diagnostic accuracy and quality of care in Syria.",
-  },
-  entrepreneurship: {
-    ar: "نُمكِّن الشباب السوري من بناء شركات ناشئة تعتمد على الذكاء الاصطناعي وقيادة الاقتصاد الرقمي.",
-    en: "Empowering Syrian youth to build AI-driven startups and lead the digital economy.",
   },
   research: {
     ar: "نبني جسراً علمياً بين الذكاء الاصطناعي النظري والتطبيقات السورية العملية عبر بحوثٍ رصينة ومنشورة.",
@@ -158,29 +154,6 @@ const DETAILS: Record<CommunityKey, DetailBlock[]> = {
       },
     },
   ],
-  entrepreneurship: [
-    {
-      label: { ar: "المحور", en: "Focus" },
-      text: {
-        ar: "تمكين الشباب السوري من بناء مشاريع تقنيةٍ حديثةٍ تعتمد على الذكاء الاصطناعي والتحول الرقمي.",
-        en: "Enabling Syrian youth to build modern technical projects rooted in AI and digital transformation.",
-      },
-    },
-    {
-      label: { ar: "المنصّة", en: "Platform" },
-      text: {
-        ar: "ملتقىً لرواد الأعمال والمبرمجين والطلاب وأصحاب الشركات الناشئة.",
-        en: "A gathering place for entrepreneurs, programmers, students and startup owners.",
-      },
-    },
-    {
-      label: { ar: "الهدف", en: "Objective" },
-      text: {
-        ar: "خلق بيئةٍ تقنيةٍ وريادية تحوِّل الأفكار المبتكرة إلى شركاتٍ ناجحةٍ في الاقتصاد الرقمي.",
-        en: "Create a technical and entrepreneurial environment that transforms innovative ideas into successful digital-economy companies.",
-      },
-    },
-  ],
   software: [
     {
       label: { ar: "المحور", en: "Focus" },
@@ -246,10 +219,6 @@ const DEFAULT_METRICS: Metric[] = [
 ];
 
 const METRICS_BY_KEY: Record<CommunityKey, Metric[]> = {
-  entrepreneurship: [
-    { value: "+15", label: { ar: "شركة ناشئة مدعومة", en: "Startups Supported" } },
-    { value: "+50", label: { ar: "روّاد أعمال مُدرَّبون", en: "Entrepreneurs Trained" } },
-  ],
   research: [
     { value: "+20", label: { ar: "ورقة بحثية", en: "Research Papers" } },
     { value: "+100", label: { ar: "باحث متّصِل بالشبكة", en: "Researchers Connected" } },
