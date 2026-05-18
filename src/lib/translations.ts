@@ -153,11 +153,11 @@ export const translations: Record<Lang, Dict> = {
       title: "Trusted by institutions driving innovation",
     },
     assistant: {
-      eyebrow: "SAAE Assistant",
-      title: "Meet your AI guide to the association",
+      eyebrow: "Abu Al-Joud — SAAE Assistant",
+      title: "Meet Abu Al-Joud, your AI guide to the association",
       subtitle:
         "An intelligent assistant that answers your questions, captures your details, and recommends the right path — whether you are an individual learner or a company looking to partner.",
-      cta: "Chat with the assistant",
+      cta: "Chat with Abu Al-Joud",
       soon: "Launching soon",
       features: {
         inquiries: {
@@ -174,13 +174,13 @@ export const translations: Record<Lang, Dict> = {
         },
       },
       chat: {
-        name: "SAAE Assistant",
+        name: "Abu Al-Joud",
         status: "Online — ready to help",
         user: "How can my company partner with the association?",
         bot: "Great question! I can connect you with our partnerships team. Could I get your company name and email?",
-        typing: "Assistant is typing…",
+        typing: "Abu Al-Joud is typing…",
       },
-      greeting: "Need help? Chat with me 👋",
+      greeting: "Need help? Chat with Abu Al-Joud 👋",
     },
     footer: {
       mission:
@@ -313,11 +313,11 @@ export const translations: Record<Lang, Dict> = {
       title: "مؤسسات تقود الابتكار تثق بنا",
     },
     assistant: {
-      eyebrow: "مساعد الجمعية الذكي",
-      title: "تعرّف على دليلك الذكي للجمعية",
+      eyebrow: "أبو الجود — مساعد الجمعية الذكي",
+      title: "تعرّف على أبو الجود، دليلك الذكي للجمعية",
       subtitle:
         "مساعد ذكي يجيب عن استفساراتك، ويأخذ بياناتك للتواصل معك، ويقدّم لك اقتراحات مناسبة — سواء كنت فرداً يبحث عن التعلّم أو شركة تبحث عن شراكة.",
-      cta: "تحدث مع المساعد",
+      cta: "تحدث مع أبو الجود",
       soon: "قريباً",
       features: {
         inquiries: {
@@ -334,13 +334,13 @@ export const translations: Record<Lang, Dict> = {
         },
       },
       chat: {
-        name: "مساعد الجمعية",
+        name: "أبو الجود",
         status: "متصل — جاهز لمساعدتك",
         user: "كيف يمكن لشركتي أن تصبح شريكاً للجمعية؟",
         bot: "سؤال ممتاز! يسعدني توصيلك بفريق الشراكات. هل يمكنني أخذ اسم شركتك وبريدك الإلكتروني؟",
-        typing: "المساعد يكتب…",
+        typing: "أبو الجود يكتب…",
       },
-      greeting: "بحاجة لمساعدة؟ تحدّث معي 👋",
+      greeting: "بحاجة لمساعدة؟ تحدّث مع أبو الجود 👋",
     },
     footer: {
       mission:
