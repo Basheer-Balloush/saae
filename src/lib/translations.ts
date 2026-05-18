@@ -120,7 +120,7 @@ export const translations: Record<Lang, Dict> = {
           desc: "Led by 'MedInvoVision', focusing on digital transformation in the Syrian health sector.",
         },
         research: {
-          title: "Research Community",
+          title: "Smart Research Community",
           desc: "Supports scientific research integrated with AI and entrepreneurship.",
         },
         software: {
@@ -276,7 +276,7 @@ export const translations: Record<Lang, Dict> = {
           desc: "يقوده فريق «MedInvoVision» ويركّز على التحول الرقمي في القطاع الصحي السوري.",
         },
         research: {
-          title: "المجتمع البحثي",
+          title: "المجتمع البحثي الذكي",
           desc: "يدعم البحث العلمي ودمجه بالذكاء الاصطناعي وريادة الأعمال.",
         },
         software: {
