@@ -8,9 +8,11 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 import appCss from "../styles.css?url";
-import { LanguageProvider } from "@/lib/i18n";
+import { LanguageProvider, useLang } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "@/components/ui/sonner";
 import { AssistantFab } from "@/components/site/AssistantFab";
@@ -127,6 +129,42 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+function FormValidationHandler() {
+  const { lang } = useLang();
+  const isAr = lang === "ar";
+  useEffect(() => {
+    const labelFor = (el: HTMLElement): string => {
+      const id = el.getAttribute("id");
+      if (id) {
+        const lbl = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+        if (lbl?.textContent) return lbl.textContent.replace(/[*]/g, "").trim();
+      }
+      const aria = el.getAttribute("aria-label") || el.getAttribute("placeholder") || el.getAttribute("name");
+      return aria || (isAr ? "هذا الحقل" : "this field");
+    };
+    const handler = (e: Event) => {
+      const t = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+      if (!t || !("validity" in t)) return;
+      e.preventDefault();
+      const v = t.validity;
+      const name = labelFor(t);
+      let msg = "";
+      if (v.valueMissing) msg = isAr ? `يرجى ملء "${name}"` : `Please fill in "${name}"`;
+      else if (v.typeMismatch && t.type === "email") msg = isAr ? "يرجى إدخال بريد إلكتروني صالح" : "Please enter a valid email";
+      else if (v.typeMismatch && t.type === "url") msg = isAr ? "يرجى إدخال رابط صالح" : "Please enter a valid URL";
+      else if (v.tooShort) msg = isAr ? `"${name}" قصير جداً` : `"${name}" is too short`;
+      else if (v.tooLong) msg = isAr ? `"${name}" طويل جداً` : `"${name}" is too long`;
+      else if (v.patternMismatch) msg = isAr ? `صيغة "${name}" غير صحيحة` : `"${name}" format is invalid`;
+      else msg = isAr ? `يرجى التحقق من "${name}"` : `Please check "${name}"`;
+      toast.error(msg);
+      (t as HTMLElement).focus({ preventScroll: false });
+    };
+    document.addEventListener("invalid", handler, true);
+    return () => document.removeEventListener("invalid", handler, true);
+  }, [isAr]);
+  return null;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const location = useLocation();
@@ -137,6 +175,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <LanguageProvider>
+          <FormValidationHandler />
           <Outlet />
           {!isAms && !isLms && <AssistantFab />}
           <Toaster richColors position="top-center" />
