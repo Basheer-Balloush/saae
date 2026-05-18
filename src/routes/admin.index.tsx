@@ -84,7 +84,7 @@ const ADMIN_TEXT = {
     name: "Name",
     position: "Position",
     order: "Order",
-    noMembers: "No members yet.",
+    noMembers: "{labels.noMembers}",
     deleteMemberConfirm: "Delete this member?",
     editMember: "Edit member",
     categoryBoard: "Board of Directors",
@@ -809,9 +809,9 @@ function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar"
   return (
     <>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">Members ({list.length})</h2>
+        <h2 className="text-lg font-semibold text-foreground">{labels.membersTitle} ({list.length})</h2>
         <Button onClick={() => { setEditing(null); setShowForm(true); }}>
-          <Plus className="h-4 w-4" /> New member
+          <Plus className="h-4 w-4" /> {labels.newMember}
         </Button>
       </div>
 
@@ -819,11 +819,11 @@ function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar"
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-4 py-3">Photo</th>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Position</th>
+              <th className="px-4 py-3">{labels.photo}</th>
+              <th className="px-4 py-3">{labels.name}</th>
+              <th className="px-4 py-3">{labels.position}</th>
               <th className="px-4 py-3">{labels.category}</th>
-              <th className="px-4 py-3">Order</th>
+              <th className="px-4 py-3">{labels.order}</th>
               <th className="px-4 py-3 text-right">{labels.actions}</th>
             </tr>
           </thead>
@@ -831,7 +831,7 @@ function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar"
             {list.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                  No members yet.
+                  {labels.noMembers}
                 </td>
               </tr>
             )}
@@ -844,9 +844,9 @@ function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar"
                     <div className="h-10 w-10 rounded-full bg-muted" />
                   )}
                 </td>
-                <td className="px-4 py-3 font-medium text-foreground">{m.full_name_en || m.full_name_ar}</td>
-                <td className="px-4 py-3 text-muted-foreground">{m.position_en || m.position_ar}</td>
-                <td className="px-4 py-3 text-muted-foreground capitalize">{m.category}</td>
+                <td className="px-4 py-3 font-medium text-foreground">{lang === "ar" ? m.full_name_ar || m.full_name_en : m.full_name_en || m.full_name_ar}</td>
+                <td className="px-4 py-3 text-muted-foreground">{lang === "ar" ? m.position_ar || m.position_en : m.position_en || m.position_ar}</td>
+                <td className="px-4 py-3 text-muted-foreground capitalize">{m.category === "board" ? labels.categoryBoard : labels.categoryExecutive}</td>
                 <td className="px-4 py-3 text-muted-foreground">{m.display_order}</td>
                 <td className="px-4 py-3 text-right">
                   <Button variant="ghost" size="sm" onClick={() => { setEditing(m); setShowForm(true); }}>
@@ -865,6 +865,8 @@ function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar"
       {showForm && (
         <MemberForm
           initial={editing}
+          labels={labels}
+          lang={lang}
           onClose={() => setShowForm(false)}
           onSaved={() => { setShowForm(false); setBump((k) => k + 1); }}
         />
