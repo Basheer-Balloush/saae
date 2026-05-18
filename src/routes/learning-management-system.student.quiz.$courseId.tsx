@@ -38,7 +38,7 @@ function QuizPage() {
       setQuiz(q as Quiz | null);
       if (q) {
         const { data: qs } = await supabase.rpc("lms_get_quiz_questions" as never, { _quiz_id: q.id } as never);
-        setQuestions((qs as Question[]) ?? []);
+        setQuestions(((qs as unknown) as Question[]) ?? []);
       }
       const { data: e } = await supabase.from("lms_enrollments").select("progress").eq("course_id", courseId).eq("student_id", user.id).maybeSingle();
       setProgress(Number(e?.progress ?? 0));
