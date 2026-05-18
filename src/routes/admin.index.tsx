@@ -121,16 +121,60 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background" dir="ltr">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div>
-            <Link to="/" className="text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-primary">
-              ← Site
-            </Link>
-            <h1 className="mt-1 text-xl font-bold text-foreground">News Admin</h1>
-          </div>
+      <header className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-center gap-3">
-            <span className="hidden text-xs text-muted-foreground sm:inline">{user?.email}</span>
+            <Link
+              to="/"
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors hover:bg-primary/20"
+              aria-label="Back to site"
+              title="Back to site"
+            >
+              <span className="text-sm font-bold">SAAE</span>
+            </Link>
+            <div className="leading-tight">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Control Panel</div>
+              <h1 className="text-base font-semibold text-foreground">Site Admin</h1>
+            </div>
+            <span className="ml-2 hidden rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-primary sm:inline">
+              Admin
+            </span>
+          </div>
+
+          <nav className="hidden items-center gap-1 rounded-full border border-border bg-background/60 p-1 md:flex">
+            <button
+              type="button"
+              onClick={() => setTab("news")}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                tab === "news" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              News
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab("members")}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                tab === "members" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Members
+            </button>
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <Link
+              to="/"
+              className="hidden rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
+            >
+              View site
+            </Link>
+            <div className="hidden items-center gap-2 rounded-md border border-border bg-background px-2.5 py-1.5 sm:flex">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold uppercase text-primary">
+                {(user?.email ?? "?").slice(0, 1)}
+              </div>
+              <span className="max-w-[160px] truncate text-xs text-foreground">{user?.email}</span>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -146,7 +190,7 @@ function AdminDashboard() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
-        <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-border bg-card p-1">
+        <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-border bg-card p-1 md:hidden">
           <button
             type="button"
             onClick={() => setTab("news")}
@@ -254,6 +298,21 @@ function AdminDashboard() {
           }}
         />
       )}
+
+      <footer className="mt-10 border-t border-border bg-card/60">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-5 text-xs text-muted-foreground sm:flex-row">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-foreground">SAAE Admin</span>
+            <span>•</span>
+            <span>© {new Date().getFullYear()} All rights reserved</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="hover:text-foreground">Public site</Link>
+            <a href="mailto:support@aisyria.org" className="hover:text-foreground">Support</a>
+            <span className="rounded-full border border-border bg-background px-2 py-0.5 text-[10px] uppercase tracking-wider">v1.0</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
