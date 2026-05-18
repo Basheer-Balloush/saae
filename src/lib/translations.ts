@@ -109,31 +109,31 @@ export const translations: Record<Lang, Dict> = {
       cards: {
         data: {
           title: "Data Community",
-          desc: "Building an educational environment for data science and machine learning.",
+          desc: "A community dedicated to data and its role in shaping decisions and building knowledge.",
         },
         architecture: {
           title: "Smart Architecture Community",
-          desc: "Integrates AI, IoT, and data analysis into urban planning (e.g., Archathon).",
+          desc: "A community concerned with architecture and urban planning in the modern era.",
         },
         medical: {
           title: "Healthcare Community",
-          desc: "Led by 'MedInvoVision', focusing on digital transformation in the Syrian health sector.",
+          desc: "A community working on the development of the healthcare sector.",
         },
         research: {
           title: "Smart Research Community",
-          desc: "Supports scientific research integrated with AI and entrepreneurship.",
+          desc: "A community supporting scientific research and connecting researchers.",
         },
         software: {
           title: "Software Community",
-          desc: "Developers and engineers building software, open source, and modern development practices across the stack.",
+          desc: "A community bringing together developers and engineers around software craftsmanship.",
         },
         economy: {
           title: "Smart Economy Community",
-          desc: "Exploring fintech, digital economy, and data-driven decisions for businesses and public institutions.",
+          desc: "A community interested in the economy and its tools in a changing world.",
         },
         trainers: {
           title: "Trainers Community",
-          desc: "A network of certified trainers building consistent, high-quality learning experiences across the association's programs.",
+          desc: "A community bringing trainers together to develop training practices.",
         },
       },
     },
@@ -269,31 +269,31 @@ export const translations: Record<Lang, Dict> = {
       cards: {
         data: {
           title: "مجتمع البيانات",
-          desc: "بناء بيئةٍ تعليميةٍ لعلوم البيانات وتعلّم الآلة.",
+          desc: "مجتمعٌ مهتمٌّ بالبيانات ودورها في صياغة القرار وبناء المعرفة.",
         },
         architecture: {
           title: "المجتمع المعماري الذكي",
-          desc: "يدمج الذكاء الاصطناعي وإنترنت الأشياء وتحليل البيانات في التخطيط العمراني (مثل Archathon).",
+          desc: "مجتمعٌ يُعنى بالعمارة والتخطيط العمراني في العصر الحديث.",
         },
         medical: {
           title: "مجتمع الرعاية الصحية",
-          desc: "يقوده فريق «MedInvoVision» ويركّز على التحول الرقمي في القطاع الصحي السوري.",
+          desc: "مجتمعٌ يعمل على تطوير قطاع الرعاية الصحية.",
         },
         research: {
           title: "المجتمع البحثي الذكي",
-          desc: "يدعم البحث العلمي ودمجه بالذكاء الاصطناعي وريادة الأعمال.",
+          desc: "مجتمعٌ يدعم البحث العلمي ويربط الباحثين.",
         },
         software: {
           title: "مجتمع البرمجيات",
-          desc: "مطوّرون ومهندسون يبنون البرمجيات والمصادر المفتوحة وأحدث ممارسات التطوير عبر مختلف التقنيات.",
+          desc: "مجتمعٌ يجمع المطوّرين والمهندسين حول صناعة البرمجيات.",
         },
         economy: {
           title: "مجتمع الاقتصاد الذكي",
-          desc: "يستكشف التكنولوجيا المالية والاقتصاد الرقمي واتخاذ القرارات المعتمدة على البيانات للشركات والمؤسسات.",
+          desc: "مجتمعٌ يهتمّ بالاقتصاد وأدواته في عالمٍ متغيّر.",
         },
         trainers: {
           title: "مجتمع المدربين",
-          desc: "شبكةٌ من المدرّبين المعتمدين تبني تجاربَ تدريبيةً متّسقةً وعاليةَ الجودة عبر برامج الجمعية.",
+          desc: "مجتمعٌ يجمع المدرّبين لتطوير الممارسات التدريبية.",
         },
       },
     },
