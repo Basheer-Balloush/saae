@@ -21,10 +21,31 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/about", changefreq: "monthly", priority: "0.8" },
           { path: "/contact", changefreq: "monthly", priority: "0.6" },
           { path: "/news", changefreq: "daily", priority: "0.9" },
+          { path: "/learning-management-system", changefreq: "weekly", priority: "0.8" },
+          { path: "/learning-management-system/catalog", changefreq: "daily", priority: "0.8" },
         ];
 
         for (const key of COMMUNITY_KEYS) {
           entries.push({ path: `/communities/${key}`, changefreq: "weekly", priority: "0.8" });
+        }
+
+        try {
+          const { data } = await supabaseAdmin
+            .from("lms_courses")
+            .select("id,updated_at")
+            .eq("status", "published")
+            .order("created_at", { ascending: false })
+            .limit(1000);
+          for (const row of data ?? []) {
+            entries.push({
+              path: `/learning-management-system/courses/${row.id}`,
+              lastmod: (row as { updated_at?: string }).updated_at ?? undefined,
+              changefreq: "weekly",
+              priority: "0.6",
+            });
+          }
+        } catch (e) {
+          console.warn("sitemap: failed to load lms_courses rows", e);
         }
 
         try {
