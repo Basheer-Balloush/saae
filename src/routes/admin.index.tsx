@@ -136,6 +136,14 @@ function AdminDashboard() {
             <Button
               variant="outline"
               size="sm"
+              onClick={toggleLang}
+              aria-label="Toggle language"
+            >
+              <Globe className="h-4 w-4" /> {t.nav.langToggle}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={async () => {
                 await supabase.auth.signOut();
                 navigate({ to: "/admin/login" });
