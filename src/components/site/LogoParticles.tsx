@@ -180,8 +180,8 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
           // when entering a new assemble phase, reset particles to random start positions
           if (phase === "assembleA" || phase === "assembleB") {
             for (const p of particles) {
-              p.x = cx + (Math.random() - 0.5) * size * 1.2;
-              p.y = cy + (Math.random() - 0.5) * size * 1.2;
+              p.x = cx + (Math.random() - 0.5) * size * 1.4;
+              p.y = cy + (Math.random() - 0.5) * size * 1.4;
             }
           }
           void prev;
