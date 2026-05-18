@@ -90,18 +90,6 @@ function pickLang<T>(ar: T | null | undefined, en: T | null | undefined, fallbac
   return (en ?? ar ?? fallback ?? null) as T | null;
 }
 
-function estimateReadTime(text: string | null | undefined, lang: string): string {
-  if (!text) return lang === "ar" ? "٣ دقائق" : "3 min";
-  const words = text.trim().split(/\s+/).length;
-  const mins = Math.max(1, Math.ceil(words / 200));
-  if (lang === "ar") {
-    const arNums = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
-    const arMin = String(mins).split("").map((d) => arNums[parseInt(d)]).join("");
-    return `${arMin} دقائق`;
-  }
-  return `${mins} min read`;
-}
-
 function formatDate(iso: string, lang: string): string {
   try {
     return new Date(iso).toLocaleDateString(lang === "ar" ? "ar-SY" : "en-US", {
