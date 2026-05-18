@@ -780,7 +780,7 @@ type MemberRow = {
   display_order: number;
 };
 
-function MembersAdmin() {
+function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar" }) {
   const [list, setList] = useState<MemberRow[]>([]);
   const [editing, setEditing] = useState<MemberRow | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -799,7 +799,7 @@ function MembersAdmin() {
   }, [bump]);
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this member?")) return;
+    if (!confirm(labels.deleteMemberConfirm)) return;
     const { error } = await supabase.from("members").delete().eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success(labels.deleted); setBump((k) => k + 1); }
