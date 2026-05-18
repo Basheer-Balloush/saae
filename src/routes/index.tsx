@@ -33,6 +33,21 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const location = useLocation();
+
+  // Prevent the browser's scroll restoration from flashing a previous
+  // position (e.g. Partners section) before TanStack Router scrolls to top.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const prev = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+    if (!window.location.hash) {
+      window.scrollTo(0, 0);
+    }
+    return () => {
+      window.history.scrollRestoration = prev;
+    };
+  }, []);
+
   useEffect(() => {
     const hash = location.hash?.replace(/^#/, "");
     if (!hash) return;
