@@ -37,8 +37,7 @@ function QuizPage() {
       const { data: q } = await supabase.from("lms_quizzes").select("id,title,pass_score").eq("course_id", courseId).maybeSingle();
       setQuiz(q as Quiz | null);
       if (q) {
-        const { data: qs } = await supabase.from("lms_quiz_questions")
-          .select("id,question,choices,display_order").eq("quiz_id", q.id).order("display_order");
+        const { data: qs } = await supabase.rpc("lms_get_quiz_questions" as never, { _quiz_id: q.id } as never);
         setQuestions((qs as Question[]) ?? []);
       }
       const { data: e } = await supabase.from("lms_enrollments").select("progress").eq("course_id", courseId).eq("student_id", user.id).maybeSingle();
