@@ -877,10 +877,14 @@ function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar"
 
 function MemberForm({
   initial,
+  labels,
+  lang,
   onClose,
   onSaved,
 }: {
   initial: MemberRow | null;
+  labels: AdminLabels;
+  lang: "en" | "ar";
   onClose: () => void;
   onSaved: () => void;
 }) {
