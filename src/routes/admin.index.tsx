@@ -562,26 +562,26 @@ function NewsForm({
       if (initial) {
         const { error } = await supabase.from("news").update(payload).eq("id", initial.id);
         if (error) throw error;
-        toast.success("Updated");
+        toast.success(labels.updated);
       } else {
         const { error } = await supabase.from("news").insert(payload);
         if (error) throw error;
-        toast.success("Created");
+        toast.success(labels.created);
       }
       onSaved();
     } catch (err: any) {
-      toast.error(err.message ?? "Save failed");
+      toast.error(err.message ?? labels.saveFailed);
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir="ltr">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir={lang === "ar" ? "rtl" : "ltr"}>
       <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-border bg-card p-7 shadow-lift">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-foreground">
-            {initial ? "Edit news" : "New news article"}
+            {initial ? labels.editNews : labels.newNewsArticle}
           </h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
@@ -591,40 +591,40 @@ function NewsForm({
         <form onSubmit={handleSubmit} className="mt-5 space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="title_en">Title (English)</Label>
+              <Label htmlFor="title_en">{labels.titleEn}</Label>
               <Input id="title_en" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} required maxLength={200} />
             </div>
             <div dir="rtl">
-              <Label htmlFor="title_ar">العنوان (عربي)</Label>
+              <Label htmlFor="title_ar">{labels.titleAr}</Label>
               <Input id="title_ar" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} required maxLength={200} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="excerpt_en">Excerpt (English)</Label>
+              <Label htmlFor="excerpt_en">{labels.excerptEn}</Label>
               <Textarea id="excerpt_en" value={excerptEn} onChange={(e) => setExcerptEn(e.target.value)} maxLength={500} rows={3} />
             </div>
             <div dir="rtl">
-              <Label htmlFor="excerpt_ar">المقتطف (عربي)</Label>
+              <Label htmlFor="excerpt_ar">{labels.excerptAr}</Label>
               <Textarea id="excerpt_ar" value={excerptAr} onChange={(e) => setExcerptAr(e.target.value)} maxLength={500} rows={3} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="content_en">Full content (English)</Label>
+              <Label htmlFor="content_en">{labels.contentEn}</Label>
               <Textarea id="content_en" value={contentEn} onChange={(e) => setContentEn(e.target.value)} rows={10} />
             </div>
             <div dir="rtl">
-              <Label htmlFor="content_ar">النص الكامل (عربي)</Label>
+              <Label htmlFor="content_ar">{labels.contentAr}</Label>
               <Textarea id="content_ar" value={contentAr} onChange={(e) => setContentAr(e.target.value)} rows={10} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label>Community (category)</Label>
+              <Label>{labels.communityCategory}</Label>
               <Select value={category} onValueChange={(v) => setCategory(v as CommunityKey)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -632,20 +632,20 @@ function NewsForm({
                 <SelectContent>
                   {COMMUNITY_KEYS.map((k) => (
                     <SelectItem key={k} value={k}>
-                      {COMMUNITY_LABELS_EN[k]}
+                      {communityLabels[k]}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date">{labels.date}</Label>
               <Input id="date" type="date" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} required />
             </div>
           </div>
 
           <div>
-            <Label>Cover image</Label>
+            <Label>{labels.coverImage}</Label>
             <div className="mt-2 flex items-center gap-4">
               {imageUrl ? (
                 <img src={imageUrl} alt="" className="h-20 w-28 rounded object-cover" />
@@ -654,7 +654,7 @@ function NewsForm({
               )}
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {uploading ? "Uploading…" : "Upload cover"}
+                {uploading ? labels.uploading : labels.uploadCover}
                 <input
                   type="file"
                   accept="image/*"
@@ -671,21 +671,21 @@ function NewsForm({
                   className="text-xs text-destructive hover:underline"
                   onClick={() => setImageUrl("")}
                 >
-                  Remove
+                  {labels.remove}
                 </button>
               )}
             </div>
           </div>
 
           <div>
-            <Label>Gallery images (carousel)</Label>
+            <Label>{labels.galleryImages}</Label>
             <div className="mt-2 flex flex-wrap gap-3">
               {images.map((url, i) => (
                 <div key={url} className="relative h-20 w-28">
                   <img src={url} alt="" className="h-full w-full rounded object-cover" />
                   <button
                     type="button"
-                    aria-label="Remove image"
+                    aria-label={labels.remove}
                     onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
                     className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground"
                   >
@@ -695,7 +695,7 @@ function NewsForm({
               ))}
               <label className="inline-flex h-20 w-28 cursor-pointer items-center justify-center gap-1 rounded border border-dashed border-input text-xs font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                Add
+                {labels.add}
                 <input
                   type="file"
                   accept="image/*"
@@ -711,7 +711,7 @@ function NewsForm({
           </div>
 
           <div>
-            <Label>Videos</Label>
+            <Label>{labels.videos}</Label>
             <div className="mt-2 space-y-2">
               {videos.map((url, i) => (
                 <div key={url} className="flex items-center gap-3 rounded border border-border p-2">
@@ -728,7 +728,7 @@ function NewsForm({
               ))}
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {uploading ? "Uploading…" : "Upload video(s)"}
+                {uploading ? labels.uploading : labels.uploadVideos}
                 <input
                   type="file"
                   accept="video/*"
@@ -745,19 +745,19 @@ function NewsForm({
 
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div>
-              <p className="text-sm font-medium text-foreground">Show on home page</p>
-              <p className="text-xs text-muted-foreground">Appears in the homepage news carousel.</p>
+              <p className="text-sm font-medium text-foreground">{labels.showOnHomeTitle}</p>
+              <p className="text-xs text-muted-foreground">{labels.showOnHomeHint}</p>
             </div>
             <Switch checked={showOnHome} onCheckedChange={setShowOnHome} />
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              {labels.cancel}
             </Button>
             <Button type="submit" disabled={saving || uploading}>
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {initial ? "Save changes" : "Create"}
+              {initial ? labels.saveChanges : labels.create}
             </Button>
           </div>
         </form>
@@ -929,22 +929,22 @@ function MemberForm({
       if (initial) {
         const { error } = await supabase.from("members").update(payload).eq("id", initial.id);
         if (error) throw error;
-        toast.success("Updated");
+        toast.success(labels.updated);
       } else {
         const { error } = await supabase.from("members").insert(payload);
         if (error) throw error;
-        toast.success("Created");
+        toast.success(labels.created);
       }
       onSaved();
     } catch (err: any) {
-      toast.error(err.message ?? "Save failed");
+      toast.error(err.message ?? labels.saveFailed);
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir="ltr">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir={lang === "ar" ? "rtl" : "ltr"}>
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-card p-7 shadow-lift">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-foreground">
@@ -1029,7 +1029,7 @@ function MemberForm({
               </label>
               {photoUrl && (
                 <button type="button" className="text-xs text-destructive hover:underline" onClick={() => setPhotoUrl("")}>
-                  Remove
+                  {labels.remove}
                 </button>
               )}
             </div>
@@ -1039,7 +1039,7 @@ function MemberForm({
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
             <Button type="submit" disabled={saving || uploading}>
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {initial ? "Save changes" : "Create"}
+              {initial ? labels.saveChanges : labels.create}
             </Button>
           </div>
         </form>
