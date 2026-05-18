@@ -99,8 +99,8 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
 
     Promise.all([loadImage(logoTree), loadImage(logoEagle)]).then(([imgA, imgB]) => {
       if (cancelled) return;
-      const ptsA = samplePoints(imgA, size, 5);
-      const ptsB = samplePoints(imgB, size, 5);
+      const ptsA = samplePoints(imgA, size, 4);
+      const ptsB = samplePoints(imgB, size, 4);
       const count = Math.max(ptsA.length, ptsB.length);
       const particles: Particle[] = [];
       for (let i = 0; i < count; i++) {
