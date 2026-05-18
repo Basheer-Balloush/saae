@@ -1,20 +1,43 @@
-## Goal
-Rename the `medical` community across the site to "Healthcare Community" (EN) and "مجتمع الرعاية الصحية" (AR). The internal key `medical` stays the same to preserve URLs and the news category mapping.
+## المشكلة
 
-## Changes
+لما تفتح رابط الموقع (مثلاً `aisyria.org`)، الصفحة لحظياً بتظهر عند قسم الشركاء، وبعدين بتطلع لفوق. ده مزعج بصرياً.
 
-1. **`src/lib/communityCategories.ts`**
-   - `COMMUNITY_LABELS_AR.medical`: `"المجتمع الطبي والذكاء الاصطناعي"` → `"مجتمع الرعاية الصحية"`
-   - `COMMUNITY_LABELS_EN.medical`: `"Medical & AI Community"` → `"Healthcare Community"`
+## السبب
 
-2. **`src/lib/translations.ts`**
-   - EN `communities.cards.medical.title`: → `"Healthcare Community"`
-   - AR `communities.cards.medical.title`: → `"مجتمع الرعاية الصحية"`
-   - Descriptions kept as-is (still accurate: digital transformation in the Syrian health sector).
+في `src/routes/index.tsx` ترتيب الأقسام: `FeaturedNews → Partners → Achievements → Communities`. عند تحميل الصفحة:
 
-3. **`src/routes/communities.$key.tsx`**
-   - No code changes required — labels come from `COMMUNITY_LABELS_*` and translations. Mission/details text already speaks about healthcare and remains accurate.
+1. السيرفر يرسم HTML كامل (SSR) — كل الأقسام مرتفعة، بما فيها Partners.
+2. المتصفح (بسبب browser scroll restoration / bfcache) يستعيد آخر مكان كان فيه المستخدم بزيارة سابقة — غالباً عند Partners أو تحته.
+3. بعدها بمللي ثوان، TanStack Router مع `scrollRestoration: true` يقفز لأعلى الصفحة.
 
-## Out of scope
-- URL slug `/communities/medical` stays unchanged (no broken links, no routing churn).
-- News rows tagged with `category = "medical"` continue to map to this community.
+النتيجة: ومضة من Partners ثم قفزة للأعلى.
+
+## الحل
+
+تعديلين صغيرين على `src/routes/index.tsx`:
+
+1. **تعطيل استعادة سكرول المتصفح للصفحة الرئيسية** عبر ضبط `history.scrollRestoration = "manual"` بمجرد التحميل، إذا ما كان فيه hash بالـ URL.
+2. **القفز الفوري لأعلى الصفحة (`window.scrollTo(0, 0)`) في أول رسمة** قبل ما المتصفح يحاول يستعيد مكان قديم، فقط لما يكون فيه ما في hash. لو فيه hash (مثلاً `/#partners`) السلوك الحالي يبقى كما هو ويتم التمرير للقسم المطلوب.
+
+التعديل محدود بملف واحد فقط ولا يلمس باقي الأقسام ولا الترتيب ولا أي ستايل.
+
+## القسم التقني
+
+```tsx
+// في بداية مكوّن Index، قبل الـ useEffect الموجود
+useEffect(() => {
+  if (typeof window === "undefined") return;
+  // إيقاف استعادة سكرول المتصفح للصفحة الرئيسية
+  const prev = window.history.scrollRestoration;
+  window.history.scrollRestoration = "manual";
+  // إذا فتح المستخدم الجذر بدون hash، اضمن أنه يبدأ من الأعلى فوراً
+  if (!location.hash) {
+    window.scrollTo(0, 0);
+  }
+  return () => {
+    window.history.scrollRestoration = prev;
+  };
+}, []);
+```
+
+لا تغييرات على `src/router.tsx` أو على ترتيب أقسام الصفحة.
