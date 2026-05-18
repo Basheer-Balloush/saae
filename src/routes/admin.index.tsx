@@ -376,7 +376,15 @@ function AdminDashboard() {
                     <tr key={row.id} className="border-t border-border">
                       <td className="px-4 py-3">
                         {row.image_url ? (
-                          <img src={row.image_url} alt="" className="h-12 w-16 rounded object-cover" />
+                          <img
+                            src={row.image_url}
+                            alt=""
+                            className="h-12 w-16 rounded object-cover bg-muted"
+                            onError={(e) => {
+                              const img = e.currentTarget;
+                              img.style.visibility = "hidden";
+                            }}
+                          />
                         ) : (
                           <div className="h-12 w-16 rounded bg-muted" />
                         )}
