@@ -300,7 +300,7 @@ function AdminDashboard() {
               onClick={toggleTheme}
               aria-label="Toggle theme"
             >
-              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />} {labels.themeButton}
+              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
             <Button
               variant="outline"
