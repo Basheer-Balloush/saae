@@ -10,13 +10,13 @@ export function LmsCta() {
     ? {
         eyebrow: "منصّة التعلّم",
         title: "منصة الجمعية التعليمية",
-        body: "ادخل إلى منصّة التعلّم الخاصّة بالجمعية واكتشف مساراتٍ تعليميّةً في الذكاء الاصطناعي وريادة الأعمال.",
+        body: "منصة تعليمية متكاملة توفّر مسارات تدريبيّة متنوعة لتأهيل الكوادر السورية وتطوير مهاراتهم المهنية والتقنية.",
         cta: "ادخل إلى المنصّة",
       }
     : {
         eyebrow: "Learning Platform",
-        title: "Learn. Build. Launch.",
-        body: "Step into SAAE's learning platform and explore curated tracks in AI and entrepreneurship.",
+        title: "SAAE Learning Platform",
+        body: "A comprehensive learning platform offering diverse training paths to develop Syrian talent and build professional and technical skills.",
         cta: "Enter the platform",
       };
 
@@ -36,7 +36,7 @@ export function LmsCta() {
         >
           <div className="max-w-2xl">
             <h2
-              className="mt-4 text-display-1 text-foreground"
+              className="mt-4 text-display-2 text-foreground"
               style={{
                 fontFamily: '"Cairo", system-ui, sans-serif',
                 fontWeight: 900,
