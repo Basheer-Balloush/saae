@@ -35,7 +35,7 @@ export function LmsCta() {
           }`}
         >
           <div className="max-w-2xl">
-              className="mt-4 text-display-2 text-foreground"
+              <h2
               style={{
                 fontFamily: '"Cairo", system-ui, sans-serif',
                 fontWeight: 900,
