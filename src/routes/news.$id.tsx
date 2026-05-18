@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Clock, Calendar } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Calendar } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { useLang } from "@/lib/i18n";
@@ -88,18 +88,6 @@ const fade = {
 function pickLang<T>(ar: T | null | undefined, en: T | null | undefined, fallback: T | null | undefined, lang: "ar" | "en"): T | null {
   if (lang === "ar") return (ar ?? en ?? fallback ?? null) as T | null;
   return (en ?? ar ?? fallback ?? null) as T | null;
-}
-
-function estimateReadTime(text: string | null | undefined, lang: string): string {
-  if (!text) return lang === "ar" ? "٣ دقائق" : "3 min";
-  const words = text.trim().split(/\s+/).length;
-  const mins = Math.max(1, Math.ceil(words / 200));
-  if (lang === "ar") {
-    const arNums = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
-    const arMin = String(mins).split("").map((d) => arNums[parseInt(d)]).join("");
-    return `${arMin} دقائق`;
-  }
-  return `${mins} min read`;
 }
 
 function formatDate(iso: string, lang: string): string {
@@ -228,7 +216,6 @@ function NewsDetailPage() {
 
   const title = pickLang(article.title_ar, article.title_en, article.title, lang) || article.title;
   const bodyText = pickLang(article.content_ar, article.content_en, article.content, lang) || pickLang(article.excerpt_ar, article.excerpt_en, article.excerpt, lang) || "";
-  const readTime = estimateReadTime(bodyText, lang);
   const dateStr = formatDate(article.published_at, lang);
 
   const gallery = (article.images ?? []).filter(Boolean);
@@ -265,10 +252,6 @@ function NewsDetailPage() {
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" strokeWidth={1.75} />
               {dateStr}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5" strokeWidth={1.75} />
-              {readTime}
             </span>
           </div>
         </motion.header>
