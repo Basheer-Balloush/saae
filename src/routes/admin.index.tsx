@@ -475,15 +475,16 @@ function NewsForm({
   const [videos, setVideos] = useState<string[]>(initial?.videos ?? []);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const communityLabels = lang === "ar" ? COMMUNITY_LABELS_AR : COMMUNITY_LABELS_EN;
 
   const handleCoverUpload = async (file: File) => {
     setUploading(true);
     try {
       const url = await uploadToBucket(file, "image");
       setImageUrl(url);
-      toast.success("Cover uploaded");
+      toast.success(labels.coverUploaded);
     } catch (err: any) {
-      toast.error(err.message ?? "Upload failed");
+      toast.error(err.message ?? labels.uploadFailed);
     } finally {
       setUploading(false);
     }
@@ -497,9 +498,9 @@ function NewsForm({
         urls.push(await uploadToBucket(f, "image"));
       }
       setImages((prev) => [...prev, ...urls]);
-      toast.success(`${urls.length} image(s) uploaded`);
+      toast.success(labels.imagesUploaded(urls.length));
     } catch (err: any) {
-      toast.error(err.message ?? "Upload failed");
+      toast.error(err.message ?? labels.uploadFailed);
     } finally {
       setUploading(false);
     }
@@ -513,9 +514,9 @@ function NewsForm({
         urls.push(await uploadToBucket(f, "video"));
       }
       setVideos((prev) => [...prev, ...urls]);
-      toast.success(`${urls.length} video(s) uploaded`);
+      toast.success(labels.videosUploaded(urls.length));
     } catch (err: any) {
-      toast.error(err.message ?? "Upload failed");
+      toast.error(err.message ?? labels.uploadFailed);
     } finally {
       setUploading(false);
     }
