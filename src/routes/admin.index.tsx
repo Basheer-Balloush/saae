@@ -277,7 +277,7 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background" dir={dir}>
       <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <div>
             <Link to="/" className="text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-primary">
               {labels.backToSite}
@@ -316,7 +316,7 @@ function AdminDashboard() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-border bg-card p-1">
           <button
             type="button"
@@ -352,8 +352,8 @@ function AdminDashboard() {
               </Button>
             </div>
 
-            <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
-              <table className="w-full text-sm">
+            <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-card">
+              <table className="w-full min-w-[720px] text-sm">
                 <thead className="bg-muted/40 text-start text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 text-start">{labels.cover}</th>
