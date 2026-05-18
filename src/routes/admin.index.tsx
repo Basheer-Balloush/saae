@@ -444,10 +444,14 @@ async function uploadToBucket(file: File, kind: "image" | "video"): Promise<stri
 
 function NewsForm({
   initial,
+  labels,
+  lang,
   onClose,
   onSaved,
 }: {
   initial: NewsRow | null;
+  labels: (typeof ADMIN_TEXT)["en"];
+  lang: "en" | "ar";
   onClose: () => void;
   onSaved: () => void;
 }) {
