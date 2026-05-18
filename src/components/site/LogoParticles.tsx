@@ -30,14 +30,14 @@ type Phase =
   | "scatterB";
 
 const DUR: Record<Phase, number> = {
-  assembleA: 1200,
+  assembleA: 2200,
   revealA: 1400,
   hideA: 400,
-  scatterA: 800,
-  assembleB: 1200,
+  scatterA: 700,
+  assembleB: 2200,
   revealB: 1400,
   hideB: 400,
-  scatterB: 800,
+  scatterB: 700,
 };
 
 const NEXT: Record<Phase, Phase> = {
