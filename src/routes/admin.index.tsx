@@ -14,6 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import logoSrc from "@/assets/saae-logo-horizontal.png";
 import { toast } from "sonner";
 import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X } from "lucide-react";
 import { z } from "zod";
