@@ -285,6 +285,9 @@ function AdminDashboard() {
             <h1 className="mt-1 text-xl font-bold text-foreground">{labels.adminTitle}</h1>
           </div>
           <div className="flex items-center gap-3">
+            {user?.email && (
+              <span className="hidden text-xs text-muted-foreground sm:inline">{user.email}</span>
+            )}
             <Button
               variant="outline"
               size="sm"
