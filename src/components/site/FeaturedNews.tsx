@@ -5,6 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { communityLabel } from "@/lib/communityCategories";
+import { LogoParticles } from "./LogoParticles";
 
 const SCROLL_KEY = "saae-news-marquee-offset";
 
@@ -95,12 +96,15 @@ export function FeaturedNews() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-12 flex flex-col gap-4 lg:mb-16 lg:flex-row lg:items-end lg:justify-between"
+          className="mb-12 grid gap-8 lg:mb-16 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12"
         >
           <div className="max-w-2xl">
-            
             <h1 className="mt-4 text-display-2 leading-[1.5] text-foreground">{t.news.title}</h1>
             <p className="mt-5 max-w-xl text-body text-muted-foreground">{t.news.subtitle}</p>
+          </div>
+          <div className={`flex justify-center ${dir === "rtl" ? "lg:justify-start" : "lg:justify-end"}`}>
+            <LogoParticles size={260} className="hidden sm:block" />
+            <LogoParticles size={180} className="sm:hidden" />
           </div>
         </motion.div>
       </div>
