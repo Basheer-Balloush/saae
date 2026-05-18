@@ -1,37 +1,20 @@
-## الهدف
-بعد ما تتجمع الجزيئات (شجرة أو نسر)، تختفي الجزيئات تدريجياً وتظهر الصورة الأصلية الكاملة مكانها بنفس المكان والحجم. وبعدين تختفي الصورة وترجع الجزيئات تتناثر لتنتقل للشكل التاني.
+## Goal
+Rename the `medical` community across the site to "Healthcare Community" (EN) and "مجتمع الرعاية الصحية" (AR). The internal key `medical` stays the same to preserve URLs and the news category mapping.
 
-## التعديل (ملف واحد فقط)
+## Changes
 
-### `src/components/site/LogoParticles.tsx`
+1. **`src/lib/communityCategories.ts`**
+   - `COMMUNITY_LABELS_AR.medical`: `"المجتمع الطبي والذكاء الاصطناعي"` → `"مجتمع الرعاية الصحية"`
+   - `COMMUNITY_LABELS_EN.medical`: `"Medical & AI Community"` → `"Healthcare Community"`
 
-**التسلسل الجديد لكل دورة (~6 ثواني):**
+2. **`src/lib/translations.ts`**
+   - EN `communities.cards.medical.title`: → `"Healthcare Community"`
+   - AR `communities.cards.medical.title`: → `"مجتمع الرعاية الصحية"`
+   - Descriptions kept as-is (still accurate: digital transformation in the Syrian health sector).
 
-| المرحلة | المدة | ما يحدث |
-|---|---|---|
-| `assembleA` | 1200ms | الجزيئات (تركوازي) تتجمع لتشكّل الشجرة، alpha 0→1 |
-| `revealA`  | 1400ms | الجزيئات تختفي (alpha 1→0)، صورة الشجرة تظهر فوقها (alpha 0→1)، تبقى ظاهرة آخر 600ms |
-| `hideA`    | 400ms  | صورة الشجرة تختفي (1→0) والجزيئات ترجع تظهر بمكانها (0→1) قبل التناثر |
-| `scatterA` | 800ms  | الجزيئات تتناثر للخارج، alpha 1→0، اللون يتحول تركوازي→ذهبي |
-| `assembleB` | 1200ms | الجزيئات (ذهبي) تتجمع لتشكّل النسر |
-| `revealB`  | 1400ms | الجزيئات تختفي، صورة النسر تظهر فوقها |
-| `hideB`    | 400ms  | صورة النسر تختفي والجزيئات ترجع تظهر |
-| `scatterB` | 800ms  | تناثر، اللون يرجع ذهبي→تركوازي |
+3. **`src/routes/communities.$key.tsx`**
+   - No code changes required — labels come from `COMMUNITY_LABELS_*` and translations. Mission/details text already speaks about healthcare and remains accurate.
 
-ثم لوب.
-
-**التفاصيل التقنية:**
-- نضيف الصورتين `imgA` (شجرة) و `imgB` (نسر) كـ refs محمّلين فعلاً (موجودين أصلاً للـ sampling) — نعيد استخدامهم برسم مباشر `ctx.drawImage`.
-- داخل `draw()`: نحسب `imageAlpha` و `particleAlpha` حسب المرحلة:
-  - `revealA/B`: `particleAlpha = 1 - smoothstep(t)`, `imageAlpha = smoothstep(t)`
-  - `hideA/B`: عكس
-  - باقي المراحل: `imageAlpha = 0`
-- ترتيب الرسم: مسح → رسم الصورة (لو `imageAlpha > 0`) → رسم الجزيئات (لو `particleAlpha > 0`).
-- نستخدم `ctx.drawImage(img, ox, oy, w, h)` بنفس الـ contain-fit المحسوب بالـ `samplePoints` (نخزّن `ox,oy,w,h` لكل صورة).
-- نشيل `useB` غير المستخدم.
-- لا تغيير على `FeaturedNews.tsx`.
-
-## ملاحظات
-- الجزيئات أثناء `reveal/hide` ما عاد تتحرك (واصلين هدفهم) — بس alpha يتغير.
-- المدة الكلية صارت ~7.6s لكل لوب كامل (شجرة → نسر → شجرة).
-- يحترم `prefers-reduced-motion` (يعرض الشجرة كصورة ثابتة كما هو).
+## Out of scope
+- URL slug `/communities/medical` stays unchanged (no broken links, no routing churn).
+- News rows tagged with `category = "medical"` continue to map to this community.
