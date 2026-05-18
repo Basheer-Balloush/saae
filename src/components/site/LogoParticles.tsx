@@ -21,9 +21,9 @@ type Particle = {
 
 type Phase = "assembleA" | "holdA" | "scatterA" | "assembleB" | "holdB" | "scatterB";
 
-const HOLD_MS = 1600;
-const ASSEMBLE_MS = 1800;
-const SCATTER_MS = 1200;
+const HOLD_MS = 800;
+const ASSEMBLE_MS = 1200;
+const SCATTER_MS = 800;
 
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
