@@ -219,6 +219,45 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          inquiry_type: string
+          message: string
+          organization: string | null
+          phone: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          inquiry_type: string
+          message: string
+          organization?: string | null
+          phone?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          inquiry_type?: string
+          message?: string
+          organization?: string | null
+          phone?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       individual_leads: {
         Row: {
           address: string | null
