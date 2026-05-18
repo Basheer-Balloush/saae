@@ -77,9 +77,7 @@ export function LmsCta() {
             >
               {copy.cta}
               <Arrow
-                className={`h-4 w-4 transition-transform ${
-                  isRtl ? "group-hover:translate-x-1" : "group-hover:translate-x-1"
-                }`}
+                className="h-4 w-4 transition-transform group-hover:translate-x-1"
               />
             </a>
           </div>
