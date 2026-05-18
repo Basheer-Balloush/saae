@@ -14,6 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import logoSrc from "@/assets/saae-logo-horizontal.png";
 import { toast } from "sonner";
 import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X } from "lucide-react";
 import { z } from "zod";
@@ -126,11 +128,21 @@ function AdminDashboard() {
           <div className="flex items-center gap-3">
             <Link
               to="/"
-              className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors hover:bg-primary/20"
+              className="flex items-center justify-center transition-opacity hover:opacity-80"
               aria-label="Back to site"
               title="Back to site"
             >
-              <span className="text-sm font-bold">SAAE</span>
+              <img
+                src={logoSrc}
+                alt="SAAE logo"
+                className="h-9 w-auto dark:hidden"
+              />
+              <img
+                src={logoSrc}
+                alt="SAAE logo"
+                className="hidden h-9 w-auto dark:block"
+                style={{ filter: "invert(1) brightness(2)" }}
+              />
             </Link>
             <div className="leading-tight">
               <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Control Panel</div>
@@ -163,6 +175,7 @@ function AdminDashboard() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Link
               to="/"
               className="hidden rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
