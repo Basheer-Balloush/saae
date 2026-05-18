@@ -14,8 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import logoSrc from "@/assets/saae-logo-horizontal.png";
+import { Navbar } from "@/components/site/Navbar";
 import { toast } from "sonner";
 import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X } from "lucide-react";
 import { z } from "zod";
@@ -122,33 +121,15 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background" dir="ltr">
-      <header className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
+    <div className="min-h-screen bg-background">
+      <Navbar />
+
+      <div className="border-b border-border bg-card/60 pt-20">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-4">
           <div className="flex items-center gap-3">
-            <Link
-              to="/"
-              className="flex items-center justify-center transition-opacity hover:opacity-80"
-              aria-label="Back to site"
-              title="Back to site"
-            >
-              <img
-                src={logoSrc}
-                alt="SAAE logo"
-                className="h-9 w-auto dark:hidden"
-              />
-              <img
-                src={logoSrc}
-                alt="SAAE logo"
-                className="hidden h-9 w-auto dark:block"
-                style={{ filter: "invert(1) brightness(2)" }}
-              />
-            </Link>
-            <div className="leading-tight">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Control Panel</div>
-              <h1 className="text-base font-semibold text-foreground">Site Admin</h1>
-            </div>
-            <span className="ml-2 hidden rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-primary sm:inline">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Control Panel</span>
+            <h1 className="text-lg font-semibold text-foreground">Site Admin</h1>
+            <span className="rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-primary">
               Admin
             </span>
           </div>
@@ -175,19 +156,7 @@ function AdminDashboard() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Link
-              to="/"
-              className="hidden rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
-            >
-              View site
-            </Link>
-            <div className="hidden items-center gap-2 rounded-md border border-border bg-background px-2.5 py-1.5 sm:flex">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold uppercase text-primary">
-                {(user?.email ?? "?").slice(0, 1)}
-              </div>
-              <span className="max-w-[160px] truncate text-xs text-foreground">{user?.email}</span>
-            </div>
+            <span className="hidden text-xs text-muted-foreground sm:inline">{user?.email}</span>
             <Button
               variant="outline"
               size="sm"
@@ -200,7 +169,7 @@ function AdminDashboard() {
             </Button>
           </div>
         </div>
-      </header>
+      </div>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-border bg-card p-1 md:hidden">
