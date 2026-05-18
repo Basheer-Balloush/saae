@@ -298,6 +298,21 @@ function AdminDashboard() {
           }}
         />
       )}
+
+      <footer className="mt-10 border-t border-border bg-card/60">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-5 text-xs text-muted-foreground sm:flex-row">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-foreground">SAAE Admin</span>
+            <span>•</span>
+            <span>© {new Date().getFullYear()} All rights reserved</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="hover:text-foreground">Public site</Link>
+            <a href="mailto:support@aisyria.org" className="hover:text-foreground">Support</a>
+            <span className="rounded-full border border-border bg-background px-2 py-0.5 text-[10px] uppercase tracking-wider">v1.0</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
