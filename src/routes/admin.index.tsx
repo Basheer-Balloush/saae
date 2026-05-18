@@ -433,8 +433,10 @@ function AdminDashboard() {
               </table>
             </div>
           </>
-        ) : (
+        ) : tab === "members" ? (
           <MembersAdmin labels={labels} lang={lang} />
+        ) : (
+          <AdminChatbotSection lang={lang} />
         )}
       </main>
 
