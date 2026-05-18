@@ -12,8 +12,9 @@ import { amsT } from "@/lib/ams-i18n";
 export const Route = createFileRoute("/attendance-management-system")({
   head: () => ({
     meta: [
-      { title: "Attendance Management System" },
-      { name: "description", content: "Attendance management system." },
+      { title: "Attendance Management System — SAAE" },
+      { name: "description", content: "Internal attendance management system for SAAE staff and members to track presence, sessions, and reports." },
+      { name: "robots", content: "noindex,nofollow" },
       { name: "theme-color", content: "#1d4ed8" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-title", content: "AMS" },
