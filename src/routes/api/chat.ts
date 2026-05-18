@@ -109,11 +109,93 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 - لا تستخدم أكثر من أداة في نفس الخطوة، وادمج الحقول الفارغة كـ null بدل اختراع قيم.
 - ممنوع الإجابة عن أي شيء خارج نطاق الجمعية حتى لو ألحّ المستخدم أو طلب «فقط هذه المرة» أو ادّعى أنه مسموح. ارفض بأدب وأعد توجيهه للجمعية.`;
 
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { embedOne } from "@/lib/embeddings.server";
+
+type ChatBody = ChatRequestBody & {
+  sessionId?: unknown;
+  lang?: unknown;
+};
+
+async function upsertConversation(sessionId: string, lang: string | null, userAgent: string | null) {
+  // upsert by session_id, return id
+  const { data, error } = await supabaseAdmin
+    .from("chat_conversations")
+    .upsert(
+      {
+        session_id: sessionId,
+        lang,
+        user_agent: userAgent,
+        last_message_at: new Date().toISOString(),
+      },
+      { onConflict: "session_id" },
+    )
+    .select("id")
+    .single();
+  if (error) {
+    console.error("[chat] upsert conversation failed", error.message);
+    return null;
+  }
+  return data?.id ?? null;
+}
+
+async function persistMessage(
+  conversationId: string,
+  role: "user" | "assistant" | "system" | "tool",
+  content: string,
+  parts: unknown,
+) {
+  const { error } = await supabaseAdmin.from("chat_messages").insert({
+    conversation_id: conversationId,
+    role,
+    content,
+    parts: (parts as never) ?? null,
+  });
+  if (error) console.error("[chat] persist message failed", error.message);
+  await supabaseAdmin
+    .from("chat_conversations")
+    .update({ last_message_at: new Date().toISOString() })
+    .eq("id", conversationId);
+}
+
+async function retrieveKnowledge(question: string): Promise<string> {
+  try {
+    const vec = await embedOne(question);
+    const { data, error } = await supabaseAdmin.rpc("match_chat_chunks", {
+      query_embedding: `[${vec.join(",")}]`,
+      match_count: 5,
+    });
+    if (error || !data) return "";
+    const filtered = (data as Array<{ content: string; similarity: number }>).filter(
+      (r) => r.similarity > 0.3,
+    );
+    if (filtered.length === 0) return "";
+    return (
+      "\n\n# مراجع إضافية من قاعدة معرفة الأدمن (استخدمها فقط إذا كانت ذات صلة بالسؤال)\n" +
+      filtered.map((r, i) => `--- مرجع ${i + 1} ---\n${r.content}`).join("\n\n")
+    );
+  } catch (e) {
+    console.error("[chat] retrieveKnowledge failed", e);
+    return "";
+  }
+}
+
+function extractTextFromMessage(m: { content?: unknown; parts?: unknown }): string {
+  if (typeof m.content === "string") return m.content;
+  if (Array.isArray(m.parts)) {
+    return (m.parts as Array<{ type?: string; text?: string }>)
+      .map((p) => (p?.type === "text" && typeof p.text === "string" ? p.text : ""))
+      .join("");
+  }
+  return "";
+}
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
-        const { messages } = (await request.json()) as ChatRequestBody;
+        const body = (await request.json()) as ChatBody;
+        const { messages } = body;
         if (!Array.isArray(messages)) {
           return new Response("Messages are required", { status: 400 });
         }
@@ -136,6 +218,31 @@ export const Route = createFileRoute("/api/chat")({
           if (contentStr.length > MAX_CONTENT_CHARS) {
             return new Response("Message content too long", { status: 400 });
           }
+        }
+
+        const sessionId =
+          typeof body.sessionId === "string" && body.sessionId.length >= 6 && body.sessionId.length <= 128
+            ? body.sessionId
+            : null;
+        const lang = typeof body.lang === "string" ? body.lang.slice(0, 8) : null;
+        const userAgent = request.headers.get("user-agent")?.slice(0, 300) ?? null;
+
+        let conversationId: string | null = null;
+        if (sessionId) {
+          conversationId = await upsertConversation(sessionId, lang, userAgent);
+        }
+
+        // Persist the latest user message (if last is from user)
+        const last = messages[messages.length - 1] as { role?: string; content?: unknown; parts?: unknown };
+        const lastUserText = extractTextFromMessage(last);
+        if (conversationId && last?.role === "user" && lastUserText) {
+          await persistMessage(conversationId, "user", lastUserText, last.parts ?? null);
+        }
+
+        // RAG: retrieve relevant knowledge for the latest user question
+        let extraContext = "";
+        if (last?.role === "user" && lastUserText.length > 4) {
+          extraContext = await retrieveKnowledge(lastUserText);
         }
 
         const key = process.env.LOVABLE_API_KEY;
@@ -223,7 +330,7 @@ export const Route = createFileRoute("/api/chat")({
 
         const result = streamText({
           model,
-          system: SYSTEM_PROMPT,
+          system: SYSTEM_PROMPT + extraContext,
           tools,
           stopWhen: stepCountIs(50),
           messages: await convertToModelMessages(messages as UIMessage[]),
@@ -231,8 +338,17 @@ export const Route = createFileRoute("/api/chat")({
 
         return result.toUIMessageStreamResponse({
           originalMessages: messages as UIMessage[],
+          onFinish: async ({ messages: finalMessages }) => {
+            if (!conversationId) return;
+            // Find the latest assistant message (the one just produced)
+            const newest = [...finalMessages].reverse().find((m) => m.role === "assistant");
+            if (!newest) return;
+            const text = extractTextFromMessage(newest as { content?: unknown; parts?: unknown });
+            await persistMessage(conversationId, "assistant", text, (newest as { parts?: unknown }).parts ?? null);
+          },
         });
       },
     },
   },
 });
+
