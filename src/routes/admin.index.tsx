@@ -905,9 +905,9 @@ function MemberForm({
     try {
       const url = await uploadToBucket(file, "image");
       setPhotoUrl(url);
-      toast.success("Photo uploaded");
+      toast.success(labels.photoUploaded);
     } catch (err: any) {
-      toast.error(err.message ?? "Upload failed");
+      toast.error(err.message ?? labels.uploadFailed);
     } finally {
       setUploading(false);
     }
@@ -916,7 +916,7 @@ function MemberForm({
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nameAr.trim() || !posAr.trim()) {
-      toast.error("Arabic name and position are required");
+      toast.error(labels.requiredMemberFields);
       return;
     }
     setSaving(true);
@@ -954,7 +954,7 @@ function MemberForm({
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-card p-7 shadow-lift">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-foreground">
-            {initial ? "Edit member" : "New member"}
+            {initial ? labels.editMember : labels.newMember}
           </h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
@@ -964,56 +964,56 @@ function MemberForm({
         <form onSubmit={onSubmit} className="mt-5 space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label>Category</Label>
+              <Label>{labels.category}</Label>
               <Select value={category} onValueChange={(v) => setCategory(v as "board" | "executive")}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="board">Board of Directors</SelectItem>
-                  <SelectItem value="executive">Executive Members</SelectItem>
+                  <SelectItem value="board">{labels.categoryBoard}</SelectItem>
+                  <SelectItem value="executive">{labels.categoryExecutive}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="order">Display order</Label>
+              <Label htmlFor="order">{labels.displayOrder}</Label>
               <Input id="order" type="number" value={order} onChange={(e) => setOrder(Number(e.target.value))} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="name_en">Name (English)</Label>
+              <Label htmlFor="name_en">{labels.nameEn}</Label>
               <Input id="name_en" value={nameEn} onChange={(e) => setNameEn(e.target.value)} maxLength={120} />
             </div>
             <div dir="rtl">
-              <Label htmlFor="name_ar">الاسم (عربي)</Label>
+              <Label htmlFor="name_ar">{labels.nameAr}</Label>
               <Input id="name_ar" value={nameAr} onChange={(e) => setNameAr(e.target.value)} required maxLength={120} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="pos_en">Position (English)</Label>
+              <Label htmlFor="pos_en">{labels.positionEn}</Label>
               <Input id="pos_en" value={posEn} onChange={(e) => setPosEn(e.target.value)} maxLength={120} />
             </div>
             <div dir="rtl">
-              <Label htmlFor="pos_ar">المنصب (عربي)</Label>
+              <Label htmlFor="pos_ar">{labels.positionAr}</Label>
               <Input id="pos_ar" value={posAr} onChange={(e) => setPosAr(e.target.value)} required maxLength={120} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="bio_en">Bio (English)</Label>
+              <Label htmlFor="bio_en">{labels.bioEn}</Label>
               <Textarea id="bio_en" value={bioEn} onChange={(e) => setBioEn(e.target.value)} rows={4} maxLength={1000} />
             </div>
             <div dir="rtl">
-              <Label htmlFor="bio_ar">نبذة (عربي)</Label>
+              <Label htmlFor="bio_ar">{labels.bioAr}</Label>
               <Textarea id="bio_ar" value={bioAr} onChange={(e) => setBioAr(e.target.value)} rows={4} maxLength={1000} />
             </div>
           </div>
 
           <div>
-            <Label>Photo</Label>
+            <Label>{labels.photo}</Label>
             <div className="mt-2 flex items-center gap-4">
               {photoUrl ? (
                 <img src={photoUrl} alt="" className="h-20 w-20 rounded-full object-cover" />
@@ -1022,7 +1022,7 @@ function MemberForm({
               )}
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {uploading ? "Uploading…" : "Upload photo"}
+                {uploading ? labels.uploading : labels.uploadPhoto}
                 <input
                   type="file"
                   accept="image/*"
@@ -1042,7 +1042,7 @@ function MemberForm({
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>{labels.cancel}</Button>
             <Button type="submit" disabled={saving || uploading}>
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {initial ? labels.saveChanges : labels.create}
