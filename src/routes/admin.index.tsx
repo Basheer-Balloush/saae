@@ -352,8 +352,8 @@ function AdminDashboard() {
               </Button>
             </div>
 
-            <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
-              <table className="w-full text-sm">
+            <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-card">
+              <table className="w-full min-w-[720px] text-sm">
                 <thead className="bg-muted/40 text-start text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 text-start">{labels.cover}</th>
