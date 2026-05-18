@@ -29,12 +29,12 @@ import {
 
 const ADMIN_TEXT = {
   en: {
-    backToSite: "← Site",
+    backToSite: "{labels.backToSite}",
     adminTitle: "Admin Dashboard",
     languageButton: "العربية",
     themeButton: "Theme",
     signOut: "Sign out",
-    noAccess: "You don't have admin access.",
+    noAccess: labels.noAccess,
     news: "News",
     members: "Members",
     allNews: "All news",
@@ -45,7 +45,7 @@ const ADMIN_TEXT = {
     date: "Date",
     onHome: "On home",
     actions: "Actions",
-    noNews: "No news yet. Create your first article.",
+    noNews: "{labels.noNews}",
     deleteNewsConfirm: "Delete this news item?",
     deleted: "Deleted",
     editNews: "Edit news",
@@ -211,7 +211,10 @@ const newsSchema = z.object({
 function AdminDashboard() {
   const navigate = useNavigate();
   const { user, isAdmin, loading } = useAuth();
-  const { t, toggle: toggleLang } = useLang();
+  const { lang, dir, toggle: toggleLang } = useLang();
+  const { theme, toggle: toggleTheme } = useTheme();
+  const labels = ADMIN_TEXT[lang];
+  const communityLabels = lang === "ar" ? COMMUNITY_LABELS_AR : COMMUNITY_LABELS_EN;
   const [items, setItems] = useState<NewsRow[]>([]);
   const [editing, setEditing] = useState<NewsRow | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -222,7 +225,7 @@ function AdminDashboard() {
     if (!loading) {
       if (!user) navigate({ to: "/admin/login" });
       else if (!isAdmin) {
-        toast.error("You don't have admin access.");
+        toast.error(labels.noAccess);
         navigate({ to: "/" });
       }
     }
@@ -244,11 +247,11 @@ function AdminDashboard() {
   const refresh = () => setRefreshKey((k) => k + 1);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this news item?")) return;
+    if (!confirm(labels.deleteNewsConfirm)) return;
     const { error } = await supabase.from("news").delete().eq("id", id);
     if (error) toast.error(error.message);
     else {
-      toast.success("Deleted");
+      toast.success(labels.deleted);
       refresh();
     }
   };
@@ -270,14 +273,14 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background" dir="ltr">
+    <div className="min-h-screen bg-background" dir={dir}>
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div>
             <Link to="/" className="text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-primary">
-              ← Site
+              {labels.backToSite}
             </Link>
-            <h1 className="mt-1 text-xl font-bold text-foreground">News Admin</h1>
+            <h1 className="mt-1 text-xl font-bold text-foreground">{labels.adminTitle}</h1>
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden text-xs text-muted-foreground sm:inline">{user?.email}</span>
@@ -287,7 +290,15 @@ function AdminDashboard() {
               onClick={toggleLang}
               aria-label="Toggle language"
             >
-              <Globe className="h-4 w-4" /> {t.nav.langToggle}
+              <Globe className="h-4 w-4" /> {labels.languageButton}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />} {labels.themeButton}
             </Button>
             <Button
               variant="outline"
@@ -297,7 +308,7 @@ function AdminDashboard() {
                 navigate({ to: "/admin/login" });
               }}
             >
-              <LogOut className="h-4 w-4" /> Sign out
+              <LogOut className="h-4 w-4" /> {labels.signOut}
             </Button>
           </div>
         </div>
@@ -312,7 +323,7 @@ function AdminDashboard() {
               tab === "news" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            News
+            {labels.news}
           </button>
           <button
             type="button"
@@ -321,21 +332,21 @@ function AdminDashboard() {
               tab === "members" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Members
+            {labels.members}
           </button>
         </div>
 
         {tab === "news" ? (
           <>
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">All news ({items.length})</h2>
+              <h2 className="text-lg font-semibold text-foreground">{labels.allNews} ({items.length})</h2>
               <Button
                 onClick={() => {
                   setEditing(null);
                   setShowForm(true);
                 }}
               >
-                <Plus className="h-4 w-4" /> New article
+                <Plus className="h-4 w-4" /> {labels.newArticle}
               </Button>
             </div>
 
@@ -343,19 +354,19 @@ function AdminDashboard() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    <th className="px-4 py-3">Cover</th>
-                    <th className="px-4 py-3">Title</th>
-                    <th className="px-4 py-3">Category</th>
-                    <th className="px-4 py-3">Date</th>
-                    <th className="px-4 py-3">On home</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
+                    <th className="px-4 py-3">{labels.cover}</th>
+                    <th className="px-4 py-3">{labels.title}</th>
+                    <th className="px-4 py-3">{labels.category}</th>
+                    <th className="px-4 py-3">{labels.date}</th>
+                    <th className="px-4 py-3">{labels.onHome}</th>
+                    <th className="px-4 py-3 text-right">{labels.actions}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.length === 0 && (
                     <tr>
                       <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                        No news yet. Create your first article.
+                        {labels.noNews}
                       </td>
                     </tr>
                   )}
@@ -368,9 +379,9 @@ function AdminDashboard() {
                           <div className="h-12 w-16 rounded bg-muted" />
                         )}
                       </td>
-                      <td className="px-4 py-3 font-medium text-foreground">{row.title_en || row.title}</td>
+                      <td className="px-4 py-3 font-medium text-foreground">{lang === "ar" ? row.title_ar || row.title_en || row.title : row.title_en || row.title_ar || row.title}</td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {COMMUNITY_LABELS_EN[row.category as CommunityKey] ?? row.category}
+                        {communityLabels[row.category as CommunityKey] ?? row.category}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">{row.published_at}</td>
                       <td className="px-4 py-3">
@@ -398,13 +409,15 @@ function AdminDashboard() {
             </div>
           </>
         ) : (
-          <MembersAdmin />
+          <MembersAdmin labels={labels} lang={lang} />
         )}
       </main>
 
       {showForm && (
         <NewsForm
           initial={editing}
+          labels={labels}
+          lang={lang}
           onClose={() => setShowForm(false)}
           onSaved={() => {
             setShowForm(false);
@@ -783,7 +796,7 @@ function MembersAdmin() {
     if (!confirm("Delete this member?")) return;
     const { error } = await supabase.from("members").delete().eq("id", id);
     if (error) toast.error(error.message);
-    else { toast.success("Deleted"); setBump((k) => k + 1); }
+    else { toast.success(labels.deleted); setBump((k) => k + 1); }
   };
 
   return (
@@ -802,9 +815,9 @@ function MembersAdmin() {
               <th className="px-4 py-3">Photo</th>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Position</th>
-              <th className="px-4 py-3">Category</th>
+              <th className="px-4 py-3">{labels.category}</th>
               <th className="px-4 py-3">Order</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3 text-right">{labels.actions}</th>
             </tr>
           </thead>
           <tbody>
