@@ -452,7 +452,7 @@ function NewsForm({
   onSaved,
 }: {
   initial: NewsRow | null;
-  labels: (typeof ADMIN_TEXT)["en"];
+  labels: AdminLabels;
   lang: "en" | "ar";
   onClose: () => void;
   onSaved: () => void;
