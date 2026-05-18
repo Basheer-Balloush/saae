@@ -15,7 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X, Globe } from "lucide-react";
+import { useLang } from "@/lib/i18n";
 import { z } from "zod";
 import {
   COMMUNITY_KEYS,
@@ -62,6 +63,7 @@ const newsSchema = z.object({
 function AdminDashboard() {
   const navigate = useNavigate();
   const { user, isAdmin, loading } = useAuth();
+  const { t, toggle: toggleLang } = useLang();
   const [items, setItems] = useState<NewsRow[]>([]);
   const [editing, setEditing] = useState<NewsRow | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -131,6 +133,14 @@ function AdminDashboard() {
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden text-xs text-muted-foreground sm:inline">{user?.email}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleLang}
+              aria-label="Toggle language"
+            >
+              <Globe className="h-4 w-4" /> {t.nav.langToggle}
+            </Button>
             <Button
               variant="outline"
               size="sm"
