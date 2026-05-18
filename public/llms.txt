@@ -1,0 +1,22 @@
+# SAAE — Syrian Association for AI & Entrepreneurship
+
+> الجمعية السورية للذكاء الاصطناعي وريادة الأعمال — الأولى من نوعها في سوريا، تعمل على نشر ثقافة الذكاء الاصطناعي وريادة الأعمال عبر مجتمعات تقنية متخصصة وبرامج تدريب وأبحاث تطبيقية.
+
+The Syrian Association for AI & Entrepreneurship (SAAE) is the first official Syrian organization dedicated to artificial intelligence, innovation, and entrepreneurship. It builds specialized technical communities, runs training programs, and supports applied research to empower Syrian youth and rebuild the country's technological capacity.
+
+## Pages
+
+- [Home](/): Overview of SAAE — mission, communities, news, partners.
+- [About](/about): The association's story, mission, vision, fields and values.
+- [News & Activities](/news): Latest news, events and activities across SAAE communities.
+- [Contact](/contact): Contact form, email, phone and Damascus headquarters address.
+
+## Communities
+
+- [Data Community](/communities/data): Data, decision-making and knowledge.
+- [Smart Architecture Community](/communities/architecture): Architecture and urban planning in the modern era.
+- [Healthcare Community](/communities/medical): Development of the healthcare sector.
+- [Smart Research Community](/communities/research): Scientific research and researcher networking.
+- [Software Community](/communities/software): Developers and engineers around software craftsmanship.
+- [Smart Economy Community](/communities/economy): Economy and its tools in a changing world.
+- [Trainers Community](/communities/trainers): Trainers developing training practices.

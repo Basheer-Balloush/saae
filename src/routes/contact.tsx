@@ -21,6 +21,10 @@ export const Route = createFileRoute("/contact")({
       { name: "description", content: "تواصل مع الجمعية السورية للذكاء الصنعي وريادة الأعمال — للاستفسارات، الشراكات، التدريب، أو الانضمام للمجتمع." },
       { property: "og:title", content: "تواصل معنا — SAAE" },
       { property: "og:description", content: "نحن هنا للإجابة على استفساراتك. تواصل معنا عبر النموذج، الإيميل، الهاتف، أو زرنا في دمشق." },
+      { property: "og:url", content: "https://aisyria.org/contact" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://aisyria.org/contact" },
     ],
   }),
   component: ContactPage,

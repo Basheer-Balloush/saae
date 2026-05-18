@@ -281,14 +281,19 @@ export const Route = createFileRoute("/communities/$key")({
     const k = params.key as CommunityKey;
     const nameAr = COMMUNITY_LABELS_AR[k] ?? "مجتمع";
     const nameEn = COMMUNITY_LABELS_EN[k] ?? "Community";
+    const url = `https://aisyria.org/communities/${params.key}`;
     return {
       meta: [
         { title: `${nameAr} — SAAE` },
         { name: "description", content: `${nameEn} — part of the SAAE ecosystem. Activities, research, achievements and how to join.` },
         { property: "og:title", content: `${nameEn} — SAAE` },
         { property: "og:description", content: MISSION[k]?.en ?? "" },
+        { property: "og:url", content: url },
         { property: "og:image", content: HERO_IMG[k] },
         { name: "twitter:image", content: HERO_IMG[k] },
+      ],
+      links: [
+        { rel: "canonical", href: url },
       ],
     };
   },

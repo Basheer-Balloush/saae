@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /super-admin
+Disallow: /attendance-management-system
+Disallow: /learning-management-system/admin
+Disallow: /learning-management-system/instructor
+Disallow: /learning-management-system/student
+
+Sitemap: https://aisyria.org/sitemap.xml
