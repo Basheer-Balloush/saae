@@ -110,6 +110,7 @@ const ADMIN_TEXT = {
     noAccess: "ليس لديك صلاحية دخول للوحة الإدارة.",
     news: "الأخبار",
     members: "الأعضاء",
+    chatbot: "الشات بوت",
     allNews: "كل الأخبار",
     newArticle: "خبر جديد",
     cover: "الغلاف",
