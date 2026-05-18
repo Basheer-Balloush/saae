@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 
 export function LmsCta() {
@@ -61,10 +62,8 @@ export function LmsCta() {
           </div>
 
           <div className="shrink-0">
-            <a
-              href="https://lms.aisyria.org"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/lms"
               className={`group inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-base transition-all hover:-translate-y-0.5 ${
                 isRtl ? "flex-row-reverse" : ""
               }`}
@@ -79,7 +78,7 @@ export function LmsCta() {
               <Arrow
                 className="h-4 w-4 transition-transform group-hover:translate-x-1"
               />
-            </a>
+            </Link>
           </div>
         </motion.div>
       </div>
