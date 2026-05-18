@@ -175,6 +175,7 @@ function AdminDashboard() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Link
               to="/"
               className="hidden rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
