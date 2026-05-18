@@ -397,7 +397,8 @@ function AdminDashboard() {
                       <td className="px-4 py-3">
                         <Switch checked={row.show_on_home} onCheckedChange={(v) => toggleHome(row, v)} />
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-end">
+
                         <Button
                           variant="ghost"
                           size="sm"
