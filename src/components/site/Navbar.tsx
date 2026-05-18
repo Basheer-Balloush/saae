@@ -98,14 +98,15 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-7 lg:flex">
           {sections.map((s) => {
+            const isContactRoute = location.pathname.startsWith("/contact");
             const isActive =
               s === "contact"
-                ? (active === "assistant" || active === "contact")
+                ? isContactRoute
                 : s === "news"
                 ? isNewsRoute
                 : s === "about"
                 ? isAbout
-                : !isAbout && !isNewsRoute && active === s;
+                : !isAbout && !isNewsRoute && !isContactRoute && active === s;
             const linkClass = cn(
               "relative text-sm font-medium transition-colors",
               isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
@@ -134,9 +135,16 @@ export function Navbar() {
                 </Link>
               );
             }
-            const targetId = s === "contact" ? "assistant" : s;
+            if (s === "contact") {
+              return (
+                <Link key={s} to="/contact" className={linkClass}>
+                  {t.nav[s]}
+                  {underline}
+                </Link>
+              );
+            }
             return (
-              <a key={s} href={hashHref(targetId)} className={linkClass}>
+              <a key={s} href={hashHref(s)} className={linkClass}>
                 {t.nav[s]}
                 {underline}
               </a>
@@ -198,11 +206,22 @@ export function Navbar() {
                   </Link>
                 );
               }
-              const targetId = s === "contact" ? "assistant" : s;
+              if (s === "contact") {
+                return (
+                  <Link
+                    key={s}
+                    to="/contact"
+                    onClick={() => setOpen(false)}
+                    className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                  >
+                    {t.nav[s]}
+                  </Link>
+                );
+              }
               return (
                 <a
                   key={s}
-                  href={hashHref(targetId)}
+                  href={hashHref(s)}
                   onClick={() => setOpen(false)}
                   className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                 >

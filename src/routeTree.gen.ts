@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -62,6 +63,11 @@ const LearningManagementSystemRoute =
     path: '/learning-management-system',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AttendanceManagementSystemRoute =
   AttendanceManagementSystemRouteImport.update({
     id: '/attendance-management-system',
@@ -293,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
+  '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
   '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
@@ -335,6 +342,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
@@ -375,6 +383,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
+  '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
   '/super-admin': typeof SuperAdminRoute
   '/admin/login': typeof AdminLoginRoute
@@ -420,6 +429,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/attendance-management-system'
+    | '/contact'
     | '/learning-management-system'
     | '/super-admin'
     | '/admin/login'
@@ -462,6 +472,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/contact'
     | '/super-admin'
     | '/admin/login'
     | '/api/chat'
@@ -501,6 +512,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/attendance-management-system'
+    | '/contact'
     | '/learning-management-system'
     | '/super-admin'
     | '/admin/login'
@@ -545,6 +557,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
+  ContactRoute: typeof ContactRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
   SuperAdminRoute: typeof SuperAdminRoute
   AdminLoginRoute: typeof AdminLoginRoute
@@ -569,6 +582,13 @@ declare module '@tanstack/react-router' {
       path: '/learning-management-system'
       fullPath: '/learning-management-system'
       preLoaderRoute: typeof LearningManagementSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/attendance-management-system': {
@@ -994,6 +1014,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
+  ContactRoute: ContactRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
   SuperAdminRoute: SuperAdminRoute,
   AdminLoginRoute: AdminLoginRoute,

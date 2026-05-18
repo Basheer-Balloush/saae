@@ -1,4 +1,5 @@
 import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import logo from "@/assets/footer-logo.png";
 import locationMap from "@/assets/location-map.png";
@@ -69,17 +70,31 @@ export function Footer() {
               {t.footer.quickLinks}
             </h4>
             <ul className={`mt-6 space-y-5 text-sm ${isRtl ? "text-right" : "text-left"}`}>
-              {(["communities", "achievements", "partners", "contact", "news", "about"] as const).map((k) => (
-                <li key={k} className="leading-relaxed">
-                  <a
-                    href={`#${k}`}
-                    className="transition-colors hover:text-white/80"
-                    style={{ color: INK }}
-                  >
-                    {t.nav[k]}
-                  </a>
-                </li>
-              ))}
+              {(["communities", "achievements", "partners", "contact", "news", "about"] as const).map((k) => {
+                const isRoute = k === "contact" || k === "news" || k === "about";
+                const to = k === "contact" ? "/contact" : k === "news" ? "/news" : "/about";
+                return (
+                  <li key={k} className="leading-relaxed">
+                    {isRoute ? (
+                      <Link
+                        to={to}
+                        className="transition-colors hover:text-white/80"
+                        style={{ color: INK }}
+                      >
+                        {t.nav[k]}
+                      </Link>
+                    ) : (
+                      <a
+                        href={`#${k}`}
+                        className="transition-colors hover:text-white/80"
+                        style={{ color: INK }}
+                      >
+                        {t.nav[k]}
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
