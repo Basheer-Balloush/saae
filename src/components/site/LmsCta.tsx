@@ -20,7 +20,7 @@ export function LmsCta() {
         cta: "Enter the platform",
       };
 
-  const Arrow = isRtl ? ArrowRight : ArrowRight;
+  const Arrow = ArrowRight;
 
   return (
     <section id="lms" className="relative bg-background py-10 lg:py-14">
