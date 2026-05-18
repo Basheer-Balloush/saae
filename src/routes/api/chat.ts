@@ -149,11 +149,9 @@ async function persistMessage(
     conversation_id: conversationId,
     role,
     content,
-    parts: parts ?? null,
+    parts: (parts as never) ?? null,
   });
   if (error) console.error("[chat] persist message failed", error.message);
-  // bump counter
-  await supabaseAdmin.rpc("set_updated_at").catch(() => {});
   await supabaseAdmin
     .from("chat_conversations")
     .update({ last_message_at: new Date().toISOString() })
@@ -164,7 +162,7 @@ async function retrieveKnowledge(question: string): Promise<string> {
   try {
     const vec = await embedOne(question);
     const { data, error } = await supabaseAdmin.rpc("match_chat_chunks", {
-      query_embedding: `[${vec.join(",")}]` as unknown as number[],
+      query_embedding: `[${vec.join(",")}]` as unknown as string,
       match_count: 5,
     });
     if (error || !data) return "";
