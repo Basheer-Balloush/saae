@@ -19,16 +19,47 @@ type Particle = {
   sy: number;
 };
 
-type Phase = "assembleA" | "holdA" | "scatterA" | "assembleB" | "holdB" | "scatterB";
+type Phase =
+  | "assembleA"
+  | "revealA"
+  | "hideA"
+  | "scatterA"
+  | "assembleB"
+  | "revealB"
+  | "hideB"
+  | "scatterB";
 
-const HOLD_MS = 800;
-const ASSEMBLE_MS = 1200;
-const SCATTER_MS = 800;
+const DUR: Record<Phase, number> = {
+  assembleA: 1200,
+  revealA: 1400,
+  hideA: 400,
+  scatterA: 800,
+  assembleB: 1200,
+  revealB: 1400,
+  hideB: 400,
+  scatterB: 800,
+};
+
+const NEXT: Record<Phase, Phase> = {
+  assembleA: "revealA",
+  revealA: "hideA",
+  hideA: "scatterA",
+  scatterA: "assembleB",
+  assembleB: "revealB",
+  revealB: "hideB",
+  hideB: "scatterB",
+  scatterB: "assembleA",
+};
 
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
   const n = parseInt(h, 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function smoothstep(x: number) {
+  const t = Math.max(0, Math.min(1, x));
+  return t * t * (3 - 2 * t);
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -41,16 +72,22 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-function samplePoints(img: HTMLImageElement, size: number, step: number): Array<{ x: number; y: number }> {
+type FitBox = { ox: number; oy: number; w: number; h: number };
+
+function fitContain(img: HTMLImageElement, size: number): FitBox {
+  const scale = Math.min(size / img.width, size / img.height);
+  const w = img.width * scale;
+  const h = img.height * scale;
+  return { ox: (size - w) / 2, oy: (size - h) / 2, w, h };
+}
+
+function samplePoints(img: HTMLImageElement, size: number, step: number, fit: FitBox): Array<{ x: number; y: number }> {
   const c = document.createElement("canvas");
   c.width = size;
   c.height = size;
   const ctx = c.getContext("2d");
   if (!ctx) return [];
-  const scale = Math.min(size / img.width, size / img.height);
-  const w = img.width * scale;
-  const h = img.height * scale;
-  ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+  ctx.drawImage(img, fit.ox, fit.oy, fit.w, fit.h);
   const data = ctx.getImageData(0, 0, size, size).data;
   const pts: Array<{ x: number; y: number }> = [];
   for (let y = 0; y < size; y += step) {
@@ -59,7 +96,6 @@ function samplePoints(img: HTMLImageElement, size: number, step: number): Array<
       if (data[i + 3] > 128) pts.push({ x, y });
     }
   }
-  // shuffle for nicer mapping between shapes
   for (let i = pts.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pts[i], pts[j]] = [pts[j], pts[i]];
@@ -99,8 +135,10 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
 
     Promise.all([loadImage(logoTree), loadImage(logoEagle)]).then(([imgA, imgB]) => {
       if (cancelled) return;
-      const ptsA = samplePoints(imgA, size, 4);
-      const ptsB = samplePoints(imgB, size, 4);
+      const fitA = fitContain(imgA, size);
+      const fitB = fitContain(imgB, size);
+      const ptsA = samplePoints(imgA, size, 4, fitA);
+      const ptsB = samplePoints(imgB, size, 4, fitB);
       const count = Math.max(ptsA.length, ptsB.length);
       const particles: Particle[] = [];
       for (let i = 0; i < count; i++) {
@@ -130,80 +168,116 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
       let phase: Phase = "assembleA";
       let phaseStart = performance.now();
 
-      const phaseDuration = (p: Phase) => {
-        if (p === "holdA" || p === "holdB") return HOLD_MS;
-        if (p === "scatterA" || p === "scatterB") return SCATTER_MS;
-        return ASSEMBLE_MS;
-      };
-
-      const nextPhase = (p: Phase): Phase => {
-        switch (p) {
-          case "assembleA": return "holdA";
-          case "holdA": return "scatterA";
-          case "scatterA": return "assembleB";
-          case "assembleB": return "holdB";
-          case "holdB": return "scatterB";
-          case "scatterB": return "assembleA";
-        }
-      };
-
       const draw = (now: number) => {
         if (cancelled) return;
-        const elapsed = now - phaseStart;
-        const dur = phaseDuration(phase);
+        const dur = DUR[phase];
+        let elapsed = now - phaseStart;
         if (elapsed > dur) {
-          phase = nextPhase(phase);
+          phase = NEXT[phase];
           phaseStart = now;
+          elapsed = 0;
           if (phase === "scatterA" || phase === "scatterB") randomizeScatter();
         }
-        const t = Math.min(elapsed / dur, 1);
+        const t = Math.min(elapsed / DUR[phase], 1);
+        const st = smoothstep(t);
 
         // color interpolation: 0 = A (teal), 1 = B (gold)
         let cp = 0;
         switch (phase) {
-          case "assembleA": cp = 1 - t; break;
-          case "holdA":
-          case "scatterA": cp = 0; break;
-          case "assembleB": cp = t; break;
-          case "holdB":
-          case "scatterB": cp = 1; break;
+          case "assembleA":
+          case "revealA":
+          case "hideA":
+            cp = 0; break;
+          case "scatterA": cp = st; break; // teal → gold while scattering
+          case "assembleB":
+          case "revealB":
+          case "hideB":
+            cp = 1; break;
+          case "scatterB": cp = 1 - st; break; // gold → teal
         }
         const r = Math.round(rgbA[0] + (rgbB[0] - rgbA[0]) * cp);
         const g = Math.round(rgbA[1] + (rgbB[1] - rgbA[1]) * cp);
         const b = Math.round(rgbA[2] + (rgbB[2] - rgbA[2]) * cp);
 
-        // target per particle by phase
-        const useScatter = phase === "scatterA" || phase === "scatterB";
-        const useB = phase === "assembleB" || phase === "holdB" || phase === "scatterA";
-        // scatterA happens AFTER holdA → next assemble is B, so particles fly outward and the next attractor is B.
-        // But while in scatterA we don't pull toward a logo target — just scatter outward. Same for scatterB.
-
-        const ease = useScatter ? 0.06 : 0.08;
-        ctx.clearRect(0, 0, size, size);
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
-        // fade out during scatter, fade in during assemble
-        let alpha = 0.88;
-        if (useScatter) alpha = 0.88 * Math.max(0, 1 - t * 1.2);
-        else if (phase === "assembleA" || phase === "assembleB") alpha = 0.88 * Math.min(1, t * 1.5);
-        ctx.globalAlpha = alpha;
-
-        for (const p of particles) {
-          let tx: number, ty: number;
-          if (useScatter) {
-            tx = p.sx; ty = p.sy;
-          } else if (phase === "assembleA" || phase === "holdA") {
-            tx = p.taX; ty = p.taY;
-          } else {
-            tx = p.tbX; ty = p.tbY;
-          }
-          p.x += (tx - p.x) * ease;
-          p.y += (ty - p.y) * ease;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 1.3, 0, Math.PI * 2);
-          ctx.fill();
+        // alphas + motion behaviour by phase
+        let particleAlpha = 0;
+        let imageAlpha = 0;
+        let movingToScatter = false;
+        let usingShapeB = false; // which assemble target the particles head toward
+        switch (phase) {
+          case "assembleA":
+            particleAlpha = 0.88 * st;
+            usingShapeB = false;
+            break;
+          case "revealA":
+            particleAlpha = 0.88 * (1 - st);
+            imageAlpha = st;
+            usingShapeB = false;
+            break;
+          case "hideA":
+            particleAlpha = 0.88 * st;
+            imageAlpha = 1 - st;
+            usingShapeB = false;
+            break;
+          case "scatterA":
+            particleAlpha = 0.88 * (1 - st);
+            movingToScatter = true;
+            break;
+          case "assembleB":
+            particleAlpha = 0.88 * st;
+            usingShapeB = true;
+            break;
+          case "revealB":
+            particleAlpha = 0.88 * (1 - st);
+            imageAlpha = st;
+            usingShapeB = true;
+            break;
+          case "hideB":
+            particleAlpha = 0.88 * st;
+            imageAlpha = 1 - st;
+            usingShapeB = true;
+            break;
+          case "scatterB":
+            particleAlpha = 0.88 * (1 - st);
+            movingToScatter = true;
+            break;
         }
-        // suppress unused-var warning if linter cares
-        void useB;
+
+        ctx.clearRect(0, 0, size, size);
+
+        // draw image overlay (sharp version of the logo)
+        if (imageAlpha > 0.01) {
+          const img = phase.endsWith("A") ? imgA : imgB;
+          const fit = phase.endsWith("A") ? fitA : fitB;
+          ctx.globalAlpha = imageAlpha;
+          ctx.drawImage(img, fit.ox, fit.oy, fit.w, fit.h);
+        }
+
+        // update + draw particles
+        if (particleAlpha > 0.01 || phase === "assembleA" || phase === "assembleB" || movingToScatter) {
+          // physics: only move during assemble/scatter phases. reveal/hide hold position.
+          const isMoving = phase === "assembleA" || phase === "assembleB" || movingToScatter;
+          const ease = movingToScatter ? 0.06 : 0.1;
+          if (isMoving) {
+            for (const p of particles) {
+              let tx: number, ty: number;
+              if (movingToScatter) { tx = p.sx; ty = p.sy; }
+              else if (usingShapeB) { tx = p.tbX; ty = p.tbY; }
+              else { tx = p.taX; ty = p.taY; }
+              p.x += (tx - p.x) * ease;
+              p.y += (ty - p.y) * ease;
+            }
+          }
+          if (particleAlpha > 0.01) {
+            ctx.globalAlpha = particleAlpha;
+            ctx.fillStyle = `rgb(${r},${g},${b})`;
+            for (const p of particles) {
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, 1.3, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+        }
 
         rafId = requestAnimationFrame(draw);
       };
