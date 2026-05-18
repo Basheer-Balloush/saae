@@ -11,7 +11,91 @@ import { toast } from "sonner";
 import { CourseReviews } from "@/components/lms/CourseReviews";
 
 export const Route = createFileRoute("/learning-management-system/courses/$id")({
-  head: () => ({ meta: [{ title: "LMS · Course" }] }),
+  loader: async ({ params }) => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
+    if (!isUuid) return { meta: null as null | { title: string; description: string; image: string | null; price: number; isFree: boolean; rating: number } };
+    try {
+      const { data } = await supabase
+        .from("lms_courses")
+        .select("title_ar,title_en,description_ar,description_en,cover_url,price,is_free,rating_avg")
+        .eq("id", params.id)
+        .maybeSingle();
+      if (!data) return { meta: null };
+      const title = (data.title_en ?? data.title_ar ?? "Course") as string;
+      const rawDesc = (data.description_en ?? data.description_ar ?? "") as string;
+      const description = rawDesc && rawDesc.length >= 50
+        ? rawDesc.slice(0, 300)
+        : `${title} — course on the SAAE Learning Platform.`.slice(0, 300);
+      return {
+        meta: {
+          title,
+          description,
+          image: (data.cover_url as string | null) ?? null,
+          price: Number(data.price ?? 0),
+          isFree: Boolean(data.is_free),
+          rating: Number(data.rating_avg ?? 0),
+        },
+      };
+    } catch {
+      return { meta: null };
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const m = loaderData?.meta;
+    const url = `https://aisyria.org/learning-management-system/courses/${params.id}`;
+    const title = m?.title ? `${m.title} — SAAE Learning Platform` : "Course — SAAE Learning Platform";
+    const description = m?.description ?? "Course on the SAAE Learning Platform — learn from expert instructors and grow your skills.";
+    const image = m?.image ?? undefined;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        ...(image ? [{ property: "og:image", content: image }, { name: "twitter:image", content: image }] : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: m
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Course",
+                name: m.title,
+                description,
+                ...(image ? { image: [image] } : {}),
+                provider: {
+                  "@type": "Organization",
+                  name: "SAAE — Syrian Association for AI & Entrepreneurship",
+                  sameAs: "https://aisyria.org",
+                },
+                ...(m.rating > 0
+                  ? {
+                      aggregateRating: {
+                        "@type": "AggregateRating",
+                        ratingValue: m.rating,
+                        bestRating: 5,
+                        ratingCount: 1,
+                      },
+                    }
+                  : {}),
+                offers: {
+                  "@type": "Offer",
+                  price: m.isFree ? 0 : m.price,
+                  priceCurrency: "USD",
+                  availability: "https://schema.org/InStock",
+                  url,
+                },
+                url,
+              }),
+            },
+          ]
+        : undefined,
+    };
+  },
   component: CourseDetails,
 });
 
