@@ -341,6 +341,15 @@ function AdminDashboard() {
           >
             {labels.members}
           </button>
+          <button
+            type="button"
+            onClick={() => setTab("chatbot")}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              tab === "chatbot" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {labels.chatbot}
+          </button>
         </div>
 
         {tab === "news" ? (
