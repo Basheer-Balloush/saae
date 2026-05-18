@@ -33,11 +33,11 @@ const DUR: Record<Phase, number> = {
   assembleA: 2200,
   revealA: 1400,
   hideA: 400,
-  scatterA: 700,
+  scatterA: 300,
   assembleB: 2200,
   revealB: 1400,
   hideB: 400,
-  scatterB: 700,
+  scatterB: 300,
 };
 
 const NEXT: Record<Phase, Phase> = {
@@ -180,8 +180,8 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
           // when entering a new assemble phase, reset particles to random start positions
           if (phase === "assembleA" || phase === "assembleB") {
             for (const p of particles) {
-              p.x = cx + (Math.random() - 0.5) * size * 1.2;
-              p.y = cy + (Math.random() - 0.5) * size * 1.2;
+              p.x = cx + (Math.random() - 0.5) * size * 1.4;
+              p.y = cy + (Math.random() - 0.5) * size * 1.4;
             }
           }
           void prev;
@@ -213,7 +213,7 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
         let usingShapeB = false;
         switch (phase) {
           case "assembleA":
-            particleAlpha = 0.88 * st;
+            particleAlpha = 0.88 * smoothstep(Math.min(t * 3, 1));
             usingShapeB = false;
             break;
           case "revealA":
@@ -229,7 +229,7 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
             // brief pause between shapes — everything hidden
             break;
           case "assembleB":
-            particleAlpha = 0.88 * st;
+            particleAlpha = 0.88 * smoothstep(Math.min(t * 3, 1));
             usingShapeB = true;
             break;
           case "revealB":
@@ -258,7 +258,7 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
         // update + draw particles
         const isAssembling = phase === "assembleA" || phase === "assembleB";
         if (isAssembling) {
-          const ease = 0.045;
+          const ease = 0.025;
           for (const p of particles) {
             const tx = usingShapeB ? p.tbX : p.taX;
             const ty = usingShapeB ? p.tbY : p.taY;
