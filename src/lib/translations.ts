@@ -116,7 +116,7 @@ export const translations: Record<Lang, Dict> = {
           desc: "Integrates AI, IoT, and data analysis into urban planning (e.g., Archathon).",
         },
         medical: {
-          title: "Medical & AI Community",
+          title: "Healthcare Community",
           desc: "Led by 'MedInvoVision', focusing on digital transformation in the Syrian health sector.",
         },
         entrepreneurship: {
@@ -276,7 +276,7 @@ export const translations: Record<Lang, Dict> = {
           desc: "يدمج الذكاء الاصطناعي وإنترنت الأشياء وتحليل البيانات في التخطيط العمراني (مثل Archathon).",
         },
         medical: {
-          title: "المجتمع الطبي والذكاء الاصطناعي",
+          title: "مجتمع الرعاية الصحية",
           desc: "يقوده فريق «MedInvoVision» ويركّز على التحول الرقمي في القطاع الصحي السوري.",
         },
         entrepreneurship: {
