@@ -258,7 +258,7 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
         // update + draw particles
         const isAssembling = phase === "assembleA" || phase === "assembleB";
         if (isAssembling) {
-          const ease = 0.045;
+          const ease = 0.025;
           for (const p of particles) {
             const tx = usingShapeB ? p.tbX : p.taX;
             const ty = usingShapeB ? p.tbY : p.taY;
