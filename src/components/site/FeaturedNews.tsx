@@ -5,6 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { communityLabel } from "@/lib/communityCategories";
+import { LogoParticles } from "./LogoParticles";
 
 const SCROLL_KEY = "saae-news-marquee-offset";
 
