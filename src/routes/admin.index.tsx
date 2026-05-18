@@ -29,12 +29,12 @@ import {
 
 const ADMIN_TEXT = {
   en: {
-    backToSite: "{labels.backToSite}",
+    backToSite: "← Site",
     adminTitle: "Admin Dashboard",
     languageButton: "العربية",
     themeButton: "Theme",
     signOut: "Sign out",
-    noAccess: labels.noAccess,
+    noAccess: "You don't have admin access.",
     news: "News",
     members: "Members",
     allNews: "All news",
@@ -171,6 +171,8 @@ const ADMIN_TEXT = {
     requiredMemberFields: "الاسم والمنصب بالعربية مطلوبان",
   },
 } as const;
+
+type AdminLabels = (typeof ADMIN_TEXT)[keyof typeof ADMIN_TEXT];
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Admin Dashboard" }] }),
