@@ -190,7 +190,7 @@ function AdminDashboard() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
-        <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-border bg-card p-1">
+        <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-border bg-card p-1 md:hidden">
           <button
             type="button"
             onClick={() => setTab("news")}
