@@ -1,11 +1,22 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot, Send, X, Loader2 } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useLang } from "@/lib/i18n";
 
-const transport = new DefaultChatTransport({ api: "/api/chat" });
+function getOrCreateSessionId(): string {
+  if (typeof window === "undefined") return "ssr";
+  const KEY = "saae_chat_session";
+  let id = window.localStorage.getItem(KEY);
+  if (!id) {
+    id =
+      (crypto.randomUUID && crypto.randomUUID()) ||
+      `s_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    window.localStorage.setItem(KEY, id);
+  }
+  return id;
+}
 
 export function AssistantChatModal({
   open,
@@ -18,13 +29,23 @@ export function AssistantChatModal({
   prefill?: string | null;
   onPrefillConsumed?: () => void;
 }) {
-  const { t, dir } = useLang();
+  const { t, dir, lang } = useLang();
   const a = t.assistant;
   const isRtl = dir === "rtl";
 
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const sessionId = useMemo(() => getOrCreateSessionId(), []);
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        body: { sessionId, lang },
+      }),
+    [sessionId, lang],
+  );
 
   const { messages, sendMessage, status, error } = useChat({
     transport,
