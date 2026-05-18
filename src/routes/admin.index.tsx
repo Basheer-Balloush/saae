@@ -38,6 +38,7 @@ const ADMIN_TEXT = {
     noAccess: "You don't have admin access.",
     news: "News",
     members: "Members",
+    chatbot: "Chatbot",
     allNews: "All news",
     newArticle: "New article",
     cover: "Cover",
