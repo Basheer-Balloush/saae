@@ -25,28 +25,6 @@ import {
   type CommunityKey,
 } from "@/lib/communityCategories";
 
-const STR = {
-  en: {
-    backToSite: "← Site",
-    adminTitle: "Admin Dashboard",
-    signOut: "Sign out",
-    news: "News",
-    members: "Members",
-    allNews: "All news",
-    newArticle: "New article",
-    cover: "Cover",
-    title: "Title",
-    category: "Category",
-    date: "Date",
-    onHome: "On home",
-    actions: "Actions",
-    noNews: "No news yet. Create your first article.",
-    deleteNewsConfirm: "Delete this news item?",
-    deleted: "Deleted",
-    editNews: "Edit news",
-    newNewsArticle: "New news article",
-    titleEnL
-
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Admin Dashboard" }] }),
   component: AdminDashboard,
