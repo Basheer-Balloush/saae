@@ -398,7 +398,7 @@ function Prelude({
               className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em]"
               style={{ color: TEAL }}
             >
-              {isRtl ? <ArrowRight className="h-3.5 w-3.5 -scale-x-100" /> : <ArrowLeft className="h-3.5 w-3.5" />}
+              {isRtl ? <ArrowRight className="h-3.5 w-3.5" /> : <ArrowLeft className="h-3.5 w-3.5" />}
               {lang === "ar" ? "العودة إلى مجتمعات الجمعية" : "Back to SAAE Communities"}
             </Link>
 
@@ -734,7 +734,7 @@ function CallToConnection({ isRtl, lang, communityName }: { isRtl: boolean; lang
               style={{ backgroundColor: TEAL, fontFamily: '"Cairo", system-ui, sans-serif' }}
             >
               {lang === "ar" ? "انضم إلى المجتمع" : "Join Community"}
-              {isRtl ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
+              {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
             </button>
           </div>
         </motion.div>
