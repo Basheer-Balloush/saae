@@ -1362,7 +1362,41 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      lms_quiz_questions_student: {
+        Row: {
+          choices: Json | null
+          created_at: string | null
+          display_order: number | null
+          id: string | null
+          question: string | null
+          quiz_id: string | null
+        }
+        Insert: {
+          choices?: Json | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: string | null
+          question?: string | null
+          quiz_id?: string | null
+        }
+        Update: {
+          choices?: Json | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: string | null
+          question?: string | null
+          quiz_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "lms_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_ams_access: { Args: { _user_id: string }; Returns: boolean }
@@ -1417,6 +1451,16 @@ export type Database = {
           document_id: string
           id: string
           similarity: number
+        }[]
+      }
+      verify_certificate: {
+        Args: { _serial: string }
+        Returns: {
+          course_id: string
+          id: string
+          issued_at: string
+          serial: string
+          student_id: string
         }[]
       }
     }
