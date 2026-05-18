@@ -11,16 +11,20 @@ import { communityLabel } from "@/lib/communityCategories";
 export const Route = createFileRoute("/news/")({
   head: () => ({
     meta: [
-      { title: "الأخبار والنشاطات — الجمعية السورية للذكاء الصنعي وريادة الأعمال" },
+      { title: "الأخبار والنشاطات — SAAE" },
       {
         name: "description",
-        content: "آخر الأخبار والنشاطات للجمعية السورية للذكاء الصنعي وريادة الأعمال.",
+        content: "آخر الأخبار والنشاطات والفعاليات للجمعية السورية للذكاء الصنعي وريادة الأعمال ومجتمعاتها المتخصصة.",
       },
-      { property: "og:title", content: "الأخبار والنشاطات" },
+      { property: "og:title", content: "الأخبار والنشاطات — SAAE" },
       {
         property: "og:description",
-        content: "آخر الأخبار والنشاطات للجمعية السورية للذكاء الصنعي وريادة الأعمال.",
+        content: "آخر الأخبار والنشاطات والفعاليات للجمعية السورية للذكاء الصنعي وريادة الأعمال ومجتمعاتها المتخصصة.",
       },
+      { property: "og:url", content: "https://aisyria.org/news" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://aisyria.org/news" },
     ],
   }),
   component: NewsPage,

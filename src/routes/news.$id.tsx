@@ -16,12 +16,71 @@ import {
 } from "@/components/ui/carousel";
 
 export const Route = createFileRoute("/news/$id")({
-  head: () => ({
-    meta: [
-      { title: "News — SAAE" },
-      { name: "description", content: "News article from SAAE." },
-    ],
-  }),
+  loader: async ({ params }) => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
+    if (!isUuid) return { meta: null as null | { title: string; description: string; image: string | null; publishedAt: string | null } };
+    try {
+      const { data } = await supabase
+        .from("news")
+        .select("title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,published_at")
+        .eq("id", params.id)
+        .maybeSingle();
+      if (!data) return { meta: null };
+      const title = (data.title_en ?? data.title_ar ?? data.title ?? "News") as string;
+      const rawDesc = (data.excerpt_en ?? data.excerpt_ar ?? data.excerpt ?? "") as string;
+      const description = rawDesc && rawDesc.length >= 50
+        ? rawDesc.slice(0, 300)
+        : `${title} — ${rawDesc || "خبر من الجمعية السورية للذكاء الصنعي وريادة الأعمال (SAAE)."}`.slice(0, 300);
+      return {
+        meta: {
+          title,
+          description,
+          image: (data.image_url as string | null) ?? null,
+          publishedAt: (data.published_at as string | null) ?? null,
+        },
+      };
+    } catch {
+      return { meta: null };
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const m = loaderData?.meta;
+    const url = `https://aisyria.org/news/${params.id}`;
+    const title = m?.title ? `${m.title} — SAAE` : "News — SAAE";
+    const description = m?.description ?? "News article from the Syrian Association for AI & Entrepreneurship (SAAE) — read the latest activities and updates.";
+    const image = m?.image ?? "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        { property: "og:image", content: image },
+        { name: "twitter:image", content: image },
+      ],
+      links: [
+        { rel: "canonical", href: url },
+      ],
+      scripts: m
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Article",
+                headline: m.title,
+                description,
+                image: image ? [image] : undefined,
+                datePublished: m.publishedAt ?? undefined,
+                url,
+              }),
+            },
+          ]
+        : undefined,
+    };
+  },
   component: NewsDetailPage,
 });
 

@@ -14,18 +14,22 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "The first official Syrian organization dedicated to artificial intelligence, innovation, and entrepreneurship — empowering Syrian youth and rebuilding technological capacity.",
+          "Syria's first official organization for AI, innovation and entrepreneurship — empowering youth and rebuilding technological capacity.",
       },
       { property: "og:title", content: "SAAE — Syrian Association for AI & Entrepreneurship" },
       {
         property: "og:description",
         content: "Education, research, and entrepreneurship building Syria's AI future, line by line.",
       },
+      { property: "og:url", content: "https://aisyria.org/" },
       {
         property: "og:image",
         content:
           "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80",
       },
+    ],
+    links: [
+      { rel: "canonical", href: "https://aisyria.org/" },
     ],
   }),
   component: Index,
