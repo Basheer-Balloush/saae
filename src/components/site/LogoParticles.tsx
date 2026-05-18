@@ -213,7 +213,7 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
         let usingShapeB = false;
         switch (phase) {
           case "assembleA":
-            particleAlpha = 0.88 * st;
+            particleAlpha = 0.88 * smoothstep(Math.min(t * 3, 1));
             usingShapeB = false;
             break;
           case "revealA":
