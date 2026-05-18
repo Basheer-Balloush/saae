@@ -159,6 +159,148 @@ export type Database = {
           },
         ]
       }
+      chat_conversations: {
+        Row: {
+          id: string
+          lang: string | null
+          last_message_at: string
+          message_count: number
+          session_id: string
+          started_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          id?: string
+          lang?: string | null
+          last_message_at?: string
+          message_count?: number
+          session_id: string
+          started_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          id?: string
+          lang?: string | null
+          last_message_at?: string
+          message_count?: number
+          session_id?: string
+          started_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      chat_knowledge_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string
+          document_id: string
+          embedding: string
+          id: string
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          created_at?: string
+          document_id: string
+          embedding: string
+          id?: string
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          document_id?: string
+          embedding?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_knowledge_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "chat_knowledge_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_knowledge_documents: {
+        Row: {
+          chunk_count: number
+          created_at: string
+          created_by: string | null
+          error_message: string | null
+          file_path: string | null
+          id: string
+          original_text: string | null
+          source_type: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          chunk_count?: number
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          file_path?: string | null
+          id?: string
+          original_text?: string | null
+          source_type: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          chunk_count?: number
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          file_path?: string | null
+          id?: string
+          original_text?: string | null
+          source_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          parts: Json | null
+          role: string
+        }
+        Insert: {
+          content?: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          parts?: Json | null
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          parts?: Json | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_leads: {
         Row: {
           accepts_training_new_staff: boolean | null
@@ -1267,6 +1409,15 @@ export type Database = {
       lms_submit_quiz: {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json
+      }
+      match_chat_chunks: {
+        Args: { match_count?: number; query_embedding: string }
+        Returns: {
+          content: string
+          document_id: string
+          id: string
+          similarity: number
+        }[]
       }
     }
     Enums: {
