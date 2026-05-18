@@ -27,6 +27,7 @@ const HERO_IMG: Record<CommunityKey, string> = {
   research: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1600&q=80",
   software: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1600&q=80",
   economy: "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=80",
+  trainers: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1600&q=80",
 };
 
 type ActivityItem = { id: string; date: string; category: string; title: string; desc: string };
@@ -56,6 +57,10 @@ const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
   economy: {
     ar: "نُعيد تعريف الاقتصاد عبر البيانات والذكاء الاصطناعي وأدوات القرن الجديد.",
     en: "Redefining the economy through data, AI, and the tools of a new century.",
+  },
+  trainers: {
+    ar: "نبني شبكةً من المدرّبين المعتمدين الذين يقودون تجارب التعلّم في الجمعية بمعايير جودةٍ موحَّدة.",
+    en: "Building a network of certified trainers who lead the association's learning experiences with unified quality standards.",
   },
 };
 
@@ -200,6 +205,29 @@ const DETAILS: Record<CommunityKey, DetailBlock[]> = {
       },
     },
   ],
+  trainers: [
+    {
+      label: { ar: "المحور", en: "Focus" },
+      text: {
+        ar: "بناء مجتمعٍ من المدرّبين المعتمدين الذين يقودون البرامج التدريبية للجمعية.",
+        en: "Building a community of certified trainers who lead the association's training programs.",
+      },
+    },
+    {
+      label: { ar: "المنصّة", en: "Platform" },
+      text: {
+        ar: "تجمع المدرّبين والمختصّين لتبادل المنهجيات والممارسات وضمان جودة التدريب.",
+        en: "Connects trainers and specialists to exchange methodologies and ensure training quality.",
+      },
+    },
+    {
+      label: { ar: "الهدف", en: "Objective" },
+      text: {
+        ar: "تأهيل جيلٍ من المدرّبين السوريين القادرين على نقل المعرفة بمعاييرَ احترافيةٍ عالية.",
+        en: "Equip a generation of Syrian trainers capable of transferring knowledge with high professional standards.",
+      },
+    },
+  ],
 };
 
 function formatNewsDate(iso: string): string {
@@ -237,6 +265,10 @@ const METRICS_BY_KEY: Record<CommunityKey, Metric[]> = {
   ],
   software: DEFAULT_METRICS,
   economy: DEFAULT_METRICS,
+  trainers: [
+    { value: "+80", label: { ar: "مدرّب معتمد", en: "Certified Trainers" } },
+    { value: "+150", label: { ar: "ورشة تدريبية", en: "Training Workshops" } },
+  ],
 };
 
 export const Route = createFileRoute("/communities/$key")({

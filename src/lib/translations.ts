@@ -13,7 +13,7 @@ type Dict = {
   };
   communities: {
     eyebrow: string; title: string; subtitle: string; cta: string; discover: string;
-    cards: Record<"data" | "architecture" | "medical" | "research" | "software" | "economy", { title: string; desc: string }>;
+    cards: Record<"data" | "architecture" | "medical" | "research" | "software" | "economy" | "trainers", { title: string; desc: string }>;
   };
   achievements: { eyebrow: string; title: string; body: string; stats: { value: string; label: string }[] };
   partners: { eyebrow: string; title: string };
@@ -130,6 +130,10 @@ export const translations: Record<Lang, Dict> = {
         economy: {
           title: "Smart Economy Community",
           desc: "Exploring fintech, digital economy, and data-driven decisions for businesses and public institutions.",
+        },
+        trainers: {
+          title: "Trainers Community",
+          desc: "A network of certified trainers building consistent, high-quality learning experiences across the association's programs.",
         },
       },
     },
@@ -286,6 +290,10 @@ export const translations: Record<Lang, Dict> = {
         economy: {
           title: "مجتمع الاقتصاد الذكي",
           desc: "يستكشف التكنولوجيا المالية والاقتصاد الرقمي واتخاذ القرارات المعتمدة على البيانات للشركات والمؤسسات.",
+        },
+        trainers: {
+          title: "مجتمع المدربين",
+          desc: "شبكةٌ من المدرّبين المعتمدين تبني تجاربَ تدريبيةً متّسقةً وعاليةَ الجودة عبر برامج الجمعية.",
         },
       },
     },
