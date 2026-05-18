@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X, Globe, Sun, Moon } from "lucide-react";
 import { useLang } from "@/lib/i18n";
+import { AdminChatbotSection } from "@/components/admin/AdminChatbotSection";
 import { useTheme } from "@/lib/theme";
 import { z } from "zod";
 import {
@@ -37,6 +38,7 @@ const ADMIN_TEXT = {
     noAccess: "You don't have admin access.",
     news: "News",
     members: "Members",
+    chatbot: "Chatbot",
     allNews: "All news",
     newArticle: "New article",
     cover: "Cover",
@@ -108,6 +110,7 @@ const ADMIN_TEXT = {
     noAccess: "ليس لديك صلاحية دخول للوحة الإدارة.",
     news: "الأخبار",
     members: "الأعضاء",
+    chatbot: "الشات بوت",
     allNews: "كل الأخبار",
     newArticle: "خبر جديد",
     cover: "الغلاف",
@@ -221,7 +224,7 @@ function AdminDashboard() {
   const [editing, setEditing] = useState<NewsRow | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [tab, setTab] = useState<"news" | "members">("news");
+  const [tab, setTab] = useState<"news" | "members" | "chatbot">("news");
 
   useEffect(() => {
     if (!loading) {
@@ -338,6 +341,15 @@ function AdminDashboard() {
           >
             {labels.members}
           </button>
+          <button
+            type="button"
+            onClick={() => setTab("chatbot")}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              tab === "chatbot" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {labels.chatbot}
+          </button>
         </div>
 
         {tab === "news" ? (
@@ -421,8 +433,10 @@ function AdminDashboard() {
               </table>
             </div>
           </>
-        ) : (
+        ) : tab === "members" ? (
           <MembersAdmin labels={labels} lang={lang} />
+        ) : (
+          <AdminChatbotSection lang={lang} />
         )}
       </main>
 
