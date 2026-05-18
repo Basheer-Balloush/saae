@@ -98,11 +98,11 @@ export function FeaturedNews() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-12 grid gap-8 lg:mb-16 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12"
         >
-          <div className="max-w-2xl">
+        <div className="order-2 max-w-2xl lg:order-1">
             <h1 className="mt-4 text-display-2 leading-[1.5] text-foreground">{t.news.title}</h1>
             <p className="mt-5 max-w-xl text-body text-muted-foreground">{t.news.subtitle}</p>
           </div>
-          <div className={`flex justify-center ${dir === "rtl" ? "lg:justify-start lg:-ml-8 lg:pl-0" : "lg:justify-end lg:-mr-8 lg:pr-0"}`}>
+          <div className={`order-1 flex justify-center lg:order-2 ${dir === "rtl" ? "lg:justify-start lg:-ml-8 lg:pl-0" : "lg:justify-end lg:-mr-8 lg:pr-0"}`}>
             <LogoParticles size={200} className="hidden sm:block" />
             <LogoParticles size={150} className="sm:hidden" />
           </div>
