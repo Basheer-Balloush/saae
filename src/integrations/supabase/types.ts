@@ -1362,41 +1362,7 @@ export type Database = {
       }
     }
     Views: {
-      lms_quiz_questions_student: {
-        Row: {
-          choices: Json | null
-          created_at: string | null
-          display_order: number | null
-          id: string | null
-          question: string | null
-          quiz_id: string | null
-        }
-        Insert: {
-          choices?: Json | null
-          created_at?: string | null
-          display_order?: number | null
-          id?: string | null
-          question?: string | null
-          quiz_id?: string | null
-        }
-        Update: {
-          choices?: Json | null
-          created_at?: string | null
-          display_order?: number | null
-          id?: string | null
-          question?: string | null
-          quiz_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lms_quiz_questions_quiz_id_fkey"
-            columns: ["quiz_id"]
-            isOneToOne: false
-            referencedRelation: "lms_quizzes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       has_ams_access: { Args: { _user_id: string }; Returns: boolean }
@@ -1432,6 +1398,17 @@ export type Database = {
         Returns: Json
       }
       lms_enroll: { Args: { _course_id: string }; Returns: string }
+      lms_get_quiz_questions: {
+        Args: { _quiz_id: string }
+        Returns: {
+          choices: Json
+          created_at: string
+          display_order: number
+          id: string
+          question: string
+          quiz_id: string
+        }[]
+      }
       lms_process_payout: {
         Args: { _approve: boolean; _payout_id: string }
         Returns: undefined
