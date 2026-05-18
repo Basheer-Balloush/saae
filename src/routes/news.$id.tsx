@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Clock, Calendar } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Calendar } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { useLang } from "@/lib/i18n";
