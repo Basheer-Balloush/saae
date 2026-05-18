@@ -170,6 +170,7 @@ function RootComponent() {
   const location = useLocation();
   const isAms = location.pathname.startsWith("/attendance-management-system");
   const isLms = location.pathname.startsWith("/learning-management-system");
+  const isAdmin = location.pathname.startsWith("/admin") || location.pathname.startsWith("/super-admin") || location.pathname.startsWith("/learning-management-system/admin");
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -177,7 +178,7 @@ function RootComponent() {
         <LanguageProvider>
           <FormValidationHandler />
           <Outlet />
-          {!isAms && !isLms && <AssistantFab />}
+          {!isAms && !isLms && !isAdmin && <AssistantFab />}
           <Toaster richColors position="top-center" />
         </LanguageProvider>
       </ThemeProvider>
