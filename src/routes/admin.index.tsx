@@ -277,7 +277,7 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background" dir={dir}>
       <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <div>
             <Link to="/" className="text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-primary">
               {labels.backToSite}
