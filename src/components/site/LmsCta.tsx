@@ -23,14 +23,14 @@ export function LmsCta() {
   const Arrow = isRtl ? ArrowLeft : ArrowRight;
 
   return (
-    <section id="lms" className="relative bg-background py-20 lg:py-28">
+    <section id="lms" className="relative bg-background py-10 lg:py-14">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className={`flex flex-col gap-10 border-y border-border/60 py-14 lg:flex-row lg:items-center lg:justify-between lg:gap-16 lg:py-16 ${
+          className={`flex flex-col gap-6 py-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10 lg:py-8 ${
             isRtl ? "lg:flex-row-reverse text-right" : "text-left"
           }`}
         >
