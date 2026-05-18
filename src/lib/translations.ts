@@ -109,31 +109,31 @@ export const translations: Record<Lang, Dict> = {
       cards: {
         data: {
           title: "Data Community",
-          desc: "Building an educational environment for data science and machine learning.",
+          desc: "A community dedicated to data and its role in shaping decisions and building knowledge.",
         },
         architecture: {
           title: "Smart Architecture Community",
-          desc: "Integrates AI, IoT, and data analysis into urban planning (e.g., Archathon).",
+          desc: "A community concerned with architecture and urban planning in the modern era.",
         },
         medical: {
           title: "Healthcare Community",
-          desc: "Led by 'MedInvoVision', focusing on digital transformation in the Syrian health sector.",
+          desc: "A community working on the development of the healthcare sector.",
         },
         research: {
           title: "Smart Research Community",
-          desc: "Supports scientific research integrated with AI and entrepreneurship.",
+          desc: "A community supporting scientific research and connecting researchers.",
         },
         software: {
           title: "Software Community",
-          desc: "Developers and engineers building software, open source, and modern development practices across the stack.",
+          desc: "A community bringing together developers and engineers around software craftsmanship.",
         },
         economy: {
           title: "Smart Economy Community",
-          desc: "Exploring fintech, digital economy, and data-driven decisions for businesses and public institutions.",
+          desc: "A community interested in the economy and its tools in a changing world.",
         },
         trainers: {
           title: "Trainers Community",
-          desc: "A network of certified trainers building consistent, high-quality learning experiences across the association's programs.",
+          desc: "A community bringing trainers together to develop training practices.",
         },
       },
     },
