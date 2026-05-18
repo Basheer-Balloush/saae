@@ -115,10 +115,6 @@ function ContactPage() {
             <div className="absolute bottom-0 end-1/4 h-[24rem] w-[24rem] rounded-full bg-secondary/15 blur-3xl" />
           </div>
           <div className="relative mx-auto max-w-5xl px-6 py-20 text-center lg:px-10 lg:py-28">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-1.5 text-xs font-semibold text-primary backdrop-blur">
-              <MessageSquare className="h-3.5 w-3.5" />
-              {isAr ? "نحن هنا لمساعدتك" : "We're here to help"}
-            </div>
             <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
               {isAr ? "تواصل معنا" : "Contact us"}
             </h1>
