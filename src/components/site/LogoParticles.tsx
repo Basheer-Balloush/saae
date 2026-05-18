@@ -19,35 +19,23 @@ type Particle = {
   sy: number;
 };
 
-type Phase =
-  | "assembleA"
-  | "revealA"
-  | "hideA"
-  | "scatterA"
-  | "assembleB"
-  | "revealB"
-  | "hideB"
-  | "scatterB";
+type Phase = "assembleA" | "holdA" | "scatterA" | "assembleB" | "holdB" | "scatterB";
 
 const DUR: Record<Phase, number> = {
   assembleA: 1200,
-  revealA: 1400,
-  hideA: 400,
+  holdA: 900,
   scatterA: 800,
   assembleB: 1200,
-  revealB: 1400,
-  hideB: 400,
+  holdB: 900,
   scatterB: 800,
 };
 
 const NEXT: Record<Phase, Phase> = {
-  assembleA: "revealA",
-  revealA: "hideA",
-  hideA: "scatterA",
+  assembleA: "holdA",
+  holdA: "scatterA",
   scatterA: "assembleB",
-  assembleB: "revealB",
-  revealB: "hideB",
-  hideB: "scatterB",
+  assembleB: "holdB",
+  holdB: "scatterB",
   scatterB: "assembleA",
 };
 
