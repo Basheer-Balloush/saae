@@ -15,7 +15,23 @@ import {
 import { CourseCard, type CourseCardData } from "@/components/lms/CourseCard";
 
 export const Route = createFileRoute("/learning-management-system/catalog")({
-  head: () => ({ meta: [{ title: "LMS · Catalog" }] }),
+  head: () => {
+    const url = "https://aisyria.org/learning-management-system/catalog";
+    const title = "Course Catalog — SAAE Learning Platform";
+    const description =
+      "Browse all published courses on the SAAE Learning Platform — filter by category, level, and price to find the right course for you.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:url", content: url },
+        { property: "og:type", content: "website" },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: Catalog,
 });
 
