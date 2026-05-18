@@ -15,8 +15,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X, Globe } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X, Globe, Sun, Moon } from "lucide-react";
 import { useLang } from "@/lib/i18n";
+import { useTheme } from "@/lib/theme";
 import { z } from "zod";
 import {
   COMMUNITY_KEYS,
@@ -24,6 +25,154 @@ import {
   COMMUNITY_LABELS_EN,
   type CommunityKey,
 } from "@/lib/communityCategories";
+
+
+const ADMIN_TEXT = {
+  en: {
+    backToSite: "← Site",
+    adminTitle: "Admin Dashboard",
+    languageButton: "العربية",
+    themeButton: "Theme",
+    signOut: "Sign out",
+    noAccess: "You don't have admin access.",
+    news: "News",
+    members: "Members",
+    allNews: "All news",
+    newArticle: "New article",
+    cover: "Cover",
+    title: "Title",
+    category: "Category",
+    date: "Date",
+    onHome: "On home",
+    actions: "Actions",
+    noNews: "{labels.noNews}",
+    deleteNewsConfirm: "Delete this news item?",
+    deleted: "Deleted",
+    editNews: "Edit news",
+    newNewsArticle: "New news article",
+    titleEn: "Title (English)",
+    titleAr: "Title (Arabic)",
+    excerptEn: "Excerpt (English)",
+    excerptAr: "Excerpt (Arabic)",
+    contentEn: "Full content (English)",
+    contentAr: "Full content (Arabic)",
+    communityCategory: "Community (category)",
+    coverImage: "Cover image",
+    uploading: "Uploading…",
+    uploadCover: "Upload cover",
+    remove: "Remove",
+    galleryImages: "Gallery images (carousel)",
+    add: "Add",
+    videos: "Videos",
+    uploadVideos: "Upload video(s)",
+    showOnHomeTitle: "Show on home page",
+    showOnHomeHint: "Appears in the homepage news carousel.",
+    cancel: "Cancel",
+    saveChanges: "Save changes",
+    create: "Create",
+    updated: "Updated",
+    created: "Created",
+    saveFailed: "Save failed",
+    coverUploaded: "Cover uploaded",
+    photoUploaded: "Photo uploaded",
+    uploadFailed: "Upload failed",
+    imagesUploaded: (count: number) => `${count} image(s) uploaded`,
+    videosUploaded: (count: number) => `${count} video(s) uploaded`,
+    membersTitle: "Members",
+    newMember: "New member",
+    photo: "Photo",
+    name: "Name",
+    position: "Position",
+    order: "Order",
+    noMembers: "{labels.noMembers}",
+    deleteMemberConfirm: "Delete this member?",
+    editMember: "Edit member",
+    categoryBoard: "Board of Directors",
+    categoryExecutive: "Executive Members",
+    displayOrder: "Display order",
+    nameEn: "Name (English)",
+    nameAr: "Name (Arabic)",
+    positionEn: "Position (English)",
+    positionAr: "Position (Arabic)",
+    bioEn: "Bio (English)",
+    bioAr: "Bio (Arabic)",
+    uploadPhoto: "Upload photo",
+    requiredMemberFields: "Arabic name and position are required",
+  },
+  ar: {
+    backToSite: "الموقع ←",
+    adminTitle: "لوحة إدارة المحتوى",
+    languageButton: "English",
+    themeButton: "الثيم",
+    signOut: "تسجيل الخروج",
+    noAccess: "ليس لديك صلاحية دخول للوحة الإدارة.",
+    news: "الأخبار",
+    members: "الأعضاء",
+    allNews: "كل الأخبار",
+    newArticle: "خبر جديد",
+    cover: "الغلاف",
+    title: "العنوان",
+    category: "التصنيف",
+    date: "التاريخ",
+    onHome: "في الرئيسية",
+    actions: "الإجراءات",
+    noNews: "لا توجد أخبار بعد. أنشئ أول خبر.",
+    deleteNewsConfirm: "هل تريد حذف هذا الخبر؟",
+    deleted: "تم الحذف",
+    editNews: "تعديل الخبر",
+    newNewsArticle: "خبر جديد",
+    titleEn: "العنوان (إنجليزي)",
+    titleAr: "العنوان (عربي)",
+    excerptEn: "المقتطف (إنجليزي)",
+    excerptAr: "المقتطف (عربي)",
+    contentEn: "النص الكامل (إنجليزي)",
+    contentAr: "النص الكامل (عربي)",
+    communityCategory: "المجتمع (التصنيف)",
+    coverImage: "صورة الغلاف",
+    uploading: "جارٍ الرفع…",
+    uploadCover: "رفع الغلاف",
+    remove: "إزالة",
+    galleryImages: "صور المعرض (السلايدر)",
+    add: "إضافة",
+    videos: "الفيديوهات",
+    uploadVideos: "رفع فيديوهات",
+    showOnHomeTitle: "إظهار في الصفحة الرئيسية",
+    showOnHomeHint: "يظهر ضمن سلايدر الأخبار في الصفحة الرئيسية.",
+    cancel: "إلغاء",
+    saveChanges: "حفظ التعديلات",
+    create: "إنشاء",
+    updated: "تم التحديث",
+    created: "تم الإنشاء",
+    saveFailed: "فشل الحفظ",
+    coverUploaded: "تم رفع الغلاف",
+    photoUploaded: "تم رفع الصورة",
+    uploadFailed: "فشل الرفع",
+    imagesUploaded: (count: number) => `تم رفع ${count} صورة`,
+    videosUploaded: (count: number) => `تم رفع ${count} فيديو`,
+    membersTitle: "الأعضاء",
+    newMember: "عضو جديد",
+    photo: "الصورة",
+    name: "الاسم",
+    position: "المنصب",
+    order: "الترتيب",
+    noMembers: "لا يوجد أعضاء بعد.",
+    deleteMemberConfirm: "هل تريد حذف هذا العضو؟",
+    editMember: "تعديل العضو",
+    categoryBoard: "مجلس الإدارة",
+    categoryExecutive: "الأعضاء التنفيذيون",
+    displayOrder: "ترتيب العرض",
+    nameEn: "الاسم (إنجليزي)",
+    nameAr: "الاسم (عربي)",
+    positionEn: "المنصب (إنجليزي)",
+    positionAr: "المنصب (عربي)",
+    bioEn: "النبذة (إنجليزي)",
+    bioAr: "النبذة (عربي)",
+    uploadPhoto: "رفع الصورة",
+    requiredMemberFields: "الاسم والمنصب بالعربية مطلوبان",
+  },
+} as const;
+
+type AdminLabels = (typeof ADMIN_TEXT)[keyof typeof ADMIN_TEXT];
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Admin Dashboard" }] }),
@@ -64,7 +213,10 @@ const newsSchema = z.object({
 function AdminDashboard() {
   const navigate = useNavigate();
   const { user, isAdmin, loading } = useAuth();
-  const { t, toggle: toggleLang } = useLang();
+  const { lang, dir, toggle: toggleLang } = useLang();
+  const { theme, toggle: toggleTheme } = useTheme();
+  const labels = ADMIN_TEXT[lang];
+  const communityLabels = lang === "ar" ? COMMUNITY_LABELS_AR : COMMUNITY_LABELS_EN;
   const [items, setItems] = useState<NewsRow[]>([]);
   const [editing, setEditing] = useState<NewsRow | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -75,7 +227,7 @@ function AdminDashboard() {
     if (!loading) {
       if (!user) navigate({ to: "/admin/login" });
       else if (!isAdmin) {
-        toast.error("You don't have admin access.");
+        toast.error(labels.noAccess);
         navigate({ to: "/" });
       }
     }
@@ -97,11 +249,11 @@ function AdminDashboard() {
   const refresh = () => setRefreshKey((k) => k + 1);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this news item?")) return;
+    if (!confirm(labels.deleteNewsConfirm)) return;
     const { error } = await supabase.from("news").delete().eq("id", id);
     if (error) toast.error(error.message);
     else {
-      toast.success("Deleted");
+      toast.success(labels.deleted);
       refresh();
     }
   };
@@ -123,14 +275,14 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background" dir="ltr">
+    <div className="min-h-screen bg-background" dir={dir}>
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div>
             <Link to="/" className="text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-primary">
-              ← Site
+              {labels.backToSite}
             </Link>
-            <h1 className="mt-1 text-xl font-bold text-foreground">News Admin</h1>
+            <h1 className="mt-1 text-xl font-bold text-foreground">{labels.adminTitle}</h1>
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden text-xs text-muted-foreground sm:inline">{user?.email}</span>
@@ -140,7 +292,15 @@ function AdminDashboard() {
               onClick={toggleLang}
               aria-label="Toggle language"
             >
-              <Globe className="h-4 w-4" /> {t.nav.langToggle}
+              <Globe className="h-4 w-4" /> {labels.languageButton}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />} {labels.themeButton}
             </Button>
             <Button
               variant="outline"
@@ -150,7 +310,7 @@ function AdminDashboard() {
                 navigate({ to: "/admin/login" });
               }}
             >
-              <LogOut className="h-4 w-4" /> Sign out
+              <LogOut className="h-4 w-4" /> {labels.signOut}
             </Button>
           </div>
         </div>
@@ -165,7 +325,7 @@ function AdminDashboard() {
               tab === "news" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            News
+            {labels.news}
           </button>
           <button
             type="button"
@@ -174,21 +334,21 @@ function AdminDashboard() {
               tab === "members" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Members
+            {labels.members}
           </button>
         </div>
 
         {tab === "news" ? (
           <>
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">All news ({items.length})</h2>
+              <h2 className="text-lg font-semibold text-foreground">{labels.allNews} ({items.length})</h2>
               <Button
                 onClick={() => {
                   setEditing(null);
                   setShowForm(true);
                 }}
               >
-                <Plus className="h-4 w-4" /> New article
+                <Plus className="h-4 w-4" /> {labels.newArticle}
               </Button>
             </div>
 
@@ -196,19 +356,19 @@ function AdminDashboard() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    <th className="px-4 py-3">Cover</th>
-                    <th className="px-4 py-3">Title</th>
-                    <th className="px-4 py-3">Category</th>
-                    <th className="px-4 py-3">Date</th>
-                    <th className="px-4 py-3">On home</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
+                    <th className="px-4 py-3">{labels.cover}</th>
+                    <th className="px-4 py-3">{labels.title}</th>
+                    <th className="px-4 py-3">{labels.category}</th>
+                    <th className="px-4 py-3">{labels.date}</th>
+                    <th className="px-4 py-3">{labels.onHome}</th>
+                    <th className="px-4 py-3 text-right">{labels.actions}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.length === 0 && (
                     <tr>
                       <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                        No news yet. Create your first article.
+                        {labels.noNews}
                       </td>
                     </tr>
                   )}
@@ -221,9 +381,9 @@ function AdminDashboard() {
                           <div className="h-12 w-16 rounded bg-muted" />
                         )}
                       </td>
-                      <td className="px-4 py-3 font-medium text-foreground">{row.title_en || row.title}</td>
+                      <td className="px-4 py-3 font-medium text-foreground">{lang === "ar" ? row.title_ar || row.title_en || row.title : row.title_en || row.title_ar || row.title}</td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {COMMUNITY_LABELS_EN[row.category as CommunityKey] ?? row.category}
+                        {communityLabels[row.category as CommunityKey] ?? row.category}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">{row.published_at}</td>
                       <td className="px-4 py-3">
@@ -251,13 +411,15 @@ function AdminDashboard() {
             </div>
           </>
         ) : (
-          <MembersAdmin />
+          <MembersAdmin labels={labels} lang={lang} />
         )}
       </main>
 
       {showForm && (
         <NewsForm
           initial={editing}
+          labels={labels}
+          lang={lang}
           onClose={() => setShowForm(false)}
           onSaved={() => {
             setShowForm(false);
@@ -284,10 +446,14 @@ async function uploadToBucket(file: File, kind: "image" | "video"): Promise<stri
 
 function NewsForm({
   initial,
+  labels,
+  lang,
   onClose,
   onSaved,
 }: {
   initial: NewsRow | null;
+  labels: AdminLabels;
+  lang: "en" | "ar";
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -309,15 +475,16 @@ function NewsForm({
   const [videos, setVideos] = useState<string[]>(initial?.videos ?? []);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const communityLabels = lang === "ar" ? COMMUNITY_LABELS_AR : COMMUNITY_LABELS_EN;
 
   const handleCoverUpload = async (file: File) => {
     setUploading(true);
     try {
       const url = await uploadToBucket(file, "image");
       setImageUrl(url);
-      toast.success("Cover uploaded");
+      toast.success(labels.coverUploaded);
     } catch (err: any) {
-      toast.error(err.message ?? "Upload failed");
+      toast.error(err.message ?? labels.uploadFailed);
     } finally {
       setUploading(false);
     }
@@ -331,9 +498,9 @@ function NewsForm({
         urls.push(await uploadToBucket(f, "image"));
       }
       setImages((prev) => [...prev, ...urls]);
-      toast.success(`${urls.length} image(s) uploaded`);
+      toast.success(labels.imagesUploaded(urls.length));
     } catch (err: any) {
-      toast.error(err.message ?? "Upload failed");
+      toast.error(err.message ?? labels.uploadFailed);
     } finally {
       setUploading(false);
     }
@@ -347,9 +514,9 @@ function NewsForm({
         urls.push(await uploadToBucket(f, "video"));
       }
       setVideos((prev) => [...prev, ...urls]);
-      toast.success(`${urls.length} video(s) uploaded`);
+      toast.success(labels.videosUploaded(urls.length));
     } catch (err: any) {
-      toast.error(err.message ?? "Upload failed");
+      toast.error(err.message ?? labels.uploadFailed);
     } finally {
       setUploading(false);
     }
@@ -395,26 +562,26 @@ function NewsForm({
       if (initial) {
         const { error } = await supabase.from("news").update(payload).eq("id", initial.id);
         if (error) throw error;
-        toast.success("Updated");
+        toast.success(labels.updated);
       } else {
         const { error } = await supabase.from("news").insert(payload);
         if (error) throw error;
-        toast.success("Created");
+        toast.success(labels.created);
       }
       onSaved();
     } catch (err: any) {
-      toast.error(err.message ?? "Save failed");
+      toast.error(err.message ?? labels.saveFailed);
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir="ltr">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir={lang === "ar" ? "rtl" : "ltr"}>
       <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-border bg-card p-7 shadow-lift">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-foreground">
-            {initial ? "Edit news" : "New news article"}
+            {initial ? labels.editNews : labels.newNewsArticle}
           </h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
@@ -424,40 +591,40 @@ function NewsForm({
         <form onSubmit={handleSubmit} className="mt-5 space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="title_en">Title (English)</Label>
+              <Label htmlFor="title_en">{labels.titleEn}</Label>
               <Input id="title_en" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} required maxLength={200} />
             </div>
             <div dir="rtl">
-              <Label htmlFor="title_ar">العنوان (عربي)</Label>
+              <Label htmlFor="title_ar">{labels.titleAr}</Label>
               <Input id="title_ar" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} required maxLength={200} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="excerpt_en">Excerpt (English)</Label>
+              <Label htmlFor="excerpt_en">{labels.excerptEn}</Label>
               <Textarea id="excerpt_en" value={excerptEn} onChange={(e) => setExcerptEn(e.target.value)} maxLength={500} rows={3} />
             </div>
             <div dir="rtl">
-              <Label htmlFor="excerpt_ar">المقتطف (عربي)</Label>
+              <Label htmlFor="excerpt_ar">{labels.excerptAr}</Label>
               <Textarea id="excerpt_ar" value={excerptAr} onChange={(e) => setExcerptAr(e.target.value)} maxLength={500} rows={3} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="content_en">Full content (English)</Label>
+              <Label htmlFor="content_en">{labels.contentEn}</Label>
               <Textarea id="content_en" value={contentEn} onChange={(e) => setContentEn(e.target.value)} rows={10} />
             </div>
             <div dir="rtl">
-              <Label htmlFor="content_ar">النص الكامل (عربي)</Label>
+              <Label htmlFor="content_ar">{labels.contentAr}</Label>
               <Textarea id="content_ar" value={contentAr} onChange={(e) => setContentAr(e.target.value)} rows={10} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label>Community (category)</Label>
+              <Label>{labels.communityCategory}</Label>
               <Select value={category} onValueChange={(v) => setCategory(v as CommunityKey)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -465,20 +632,20 @@ function NewsForm({
                 <SelectContent>
                   {COMMUNITY_KEYS.map((k) => (
                     <SelectItem key={k} value={k}>
-                      {COMMUNITY_LABELS_EN[k]}
+                      {communityLabels[k]}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date">{labels.date}</Label>
               <Input id="date" type="date" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} required />
             </div>
           </div>
 
           <div>
-            <Label>Cover image</Label>
+            <Label>{labels.coverImage}</Label>
             <div className="mt-2 flex items-center gap-4">
               {imageUrl ? (
                 <img src={imageUrl} alt="" className="h-20 w-28 rounded object-cover" />
@@ -487,7 +654,7 @@ function NewsForm({
               )}
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {uploading ? "Uploading…" : "Upload cover"}
+                {uploading ? labels.uploading : labels.uploadCover}
                 <input
                   type="file"
                   accept="image/*"
@@ -504,21 +671,21 @@ function NewsForm({
                   className="text-xs text-destructive hover:underline"
                   onClick={() => setImageUrl("")}
                 >
-                  Remove
+                  {labels.remove}
                 </button>
               )}
             </div>
           </div>
 
           <div>
-            <Label>Gallery images (carousel)</Label>
+            <Label>{labels.galleryImages}</Label>
             <div className="mt-2 flex flex-wrap gap-3">
               {images.map((url, i) => (
                 <div key={url} className="relative h-20 w-28">
                   <img src={url} alt="" className="h-full w-full rounded object-cover" />
                   <button
                     type="button"
-                    aria-label="Remove image"
+                    aria-label={labels.remove}
                     onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
                     className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground"
                   >
@@ -528,7 +695,7 @@ function NewsForm({
               ))}
               <label className="inline-flex h-20 w-28 cursor-pointer items-center justify-center gap-1 rounded border border-dashed border-input text-xs font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                Add
+                {labels.add}
                 <input
                   type="file"
                   accept="image/*"
@@ -544,7 +711,7 @@ function NewsForm({
           </div>
 
           <div>
-            <Label>Videos</Label>
+            <Label>{labels.videos}</Label>
             <div className="mt-2 space-y-2">
               {videos.map((url, i) => (
                 <div key={url} className="flex items-center gap-3 rounded border border-border p-2">
@@ -555,13 +722,13 @@ function NewsForm({
                     className="text-xs text-destructive hover:underline"
                     onClick={() => setVideos((prev) => prev.filter((_, idx) => idx !== i))}
                   >
-                    Remove
+                    {labels.remove}
                   </button>
                 </div>
               ))}
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {uploading ? "Uploading…" : "Upload video(s)"}
+                {uploading ? labels.uploading : labels.uploadVideos}
                 <input
                   type="file"
                   accept="video/*"
@@ -578,19 +745,19 @@ function NewsForm({
 
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div>
-              <p className="text-sm font-medium text-foreground">Show on home page</p>
-              <p className="text-xs text-muted-foreground">Appears in the homepage news carousel.</p>
+              <p className="text-sm font-medium text-foreground">{labels.showOnHomeTitle}</p>
+              <p className="text-xs text-muted-foreground">{labels.showOnHomeHint}</p>
             </div>
             <Switch checked={showOnHome} onCheckedChange={setShowOnHome} />
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              {labels.cancel}
             </Button>
             <Button type="submit" disabled={saving || uploading}>
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {initial ? "Save changes" : "Create"}
+              {initial ? labels.saveChanges : labels.create}
             </Button>
           </div>
         </form>
@@ -614,7 +781,7 @@ type MemberRow = {
   display_order: number;
 };
 
-function MembersAdmin() {
+function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar" }) {
   const [list, setList] = useState<MemberRow[]>([]);
   const [editing, setEditing] = useState<MemberRow | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -633,18 +800,18 @@ function MembersAdmin() {
   }, [bump]);
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this member?")) return;
+    if (!confirm(labels.deleteMemberConfirm)) return;
     const { error } = await supabase.from("members").delete().eq("id", id);
     if (error) toast.error(error.message);
-    else { toast.success("Deleted"); setBump((k) => k + 1); }
+    else { toast.success(labels.deleted); setBump((k) => k + 1); }
   };
 
   return (
     <>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">Members ({list.length})</h2>
+        <h2 className="text-lg font-semibold text-foreground">{labels.membersTitle} ({list.length})</h2>
         <Button onClick={() => { setEditing(null); setShowForm(true); }}>
-          <Plus className="h-4 w-4" /> New member
+          <Plus className="h-4 w-4" /> {labels.newMember}
         </Button>
       </div>
 
@@ -652,19 +819,19 @@ function MembersAdmin() {
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-4 py-3">Photo</th>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Position</th>
-              <th className="px-4 py-3">Category</th>
-              <th className="px-4 py-3">Order</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3">{labels.photo}</th>
+              <th className="px-4 py-3">{labels.name}</th>
+              <th className="px-4 py-3">{labels.position}</th>
+              <th className="px-4 py-3">{labels.category}</th>
+              <th className="px-4 py-3">{labels.order}</th>
+              <th className="px-4 py-3 text-right">{labels.actions}</th>
             </tr>
           </thead>
           <tbody>
             {list.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                  No members yet.
+                  {labels.noMembers}
                 </td>
               </tr>
             )}
@@ -677,9 +844,9 @@ function MembersAdmin() {
                     <div className="h-10 w-10 rounded-full bg-muted" />
                   )}
                 </td>
-                <td className="px-4 py-3 font-medium text-foreground">{m.full_name_en || m.full_name_ar}</td>
-                <td className="px-4 py-3 text-muted-foreground">{m.position_en || m.position_ar}</td>
-                <td className="px-4 py-3 text-muted-foreground capitalize">{m.category}</td>
+                <td className="px-4 py-3 font-medium text-foreground">{lang === "ar" ? m.full_name_ar || m.full_name_en : m.full_name_en || m.full_name_ar}</td>
+                <td className="px-4 py-3 text-muted-foreground">{lang === "ar" ? m.position_ar || m.position_en : m.position_en || m.position_ar}</td>
+                <td className="px-4 py-3 text-muted-foreground capitalize">{m.category === "board" ? labels.categoryBoard : labels.categoryExecutive}</td>
                 <td className="px-4 py-3 text-muted-foreground">{m.display_order}</td>
                 <td className="px-4 py-3 text-right">
                   <Button variant="ghost" size="sm" onClick={() => { setEditing(m); setShowForm(true); }}>
@@ -698,6 +865,8 @@ function MembersAdmin() {
       {showForm && (
         <MemberForm
           initial={editing}
+          labels={labels}
+          lang={lang}
           onClose={() => setShowForm(false)}
           onSaved={() => { setShowForm(false); setBump((k) => k + 1); }}
         />
@@ -708,10 +877,14 @@ function MembersAdmin() {
 
 function MemberForm({
   initial,
+  labels,
+  lang,
   onClose,
   onSaved,
 }: {
   initial: MemberRow | null;
+  labels: AdminLabels;
+  lang: "en" | "ar";
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -732,9 +905,9 @@ function MemberForm({
     try {
       const url = await uploadToBucket(file, "image");
       setPhotoUrl(url);
-      toast.success("Photo uploaded");
+      toast.success(labels.photoUploaded);
     } catch (err: any) {
-      toast.error(err.message ?? "Upload failed");
+      toast.error(err.message ?? labels.uploadFailed);
     } finally {
       setUploading(false);
     }
@@ -743,7 +916,7 @@ function MemberForm({
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nameAr.trim() || !posAr.trim()) {
-      toast.error("Arabic name and position are required");
+      toast.error(labels.requiredMemberFields);
       return;
     }
     setSaving(true);
@@ -762,26 +935,26 @@ function MemberForm({
       if (initial) {
         const { error } = await supabase.from("members").update(payload).eq("id", initial.id);
         if (error) throw error;
-        toast.success("Updated");
+        toast.success(labels.updated);
       } else {
         const { error } = await supabase.from("members").insert(payload);
         if (error) throw error;
-        toast.success("Created");
+        toast.success(labels.created);
       }
       onSaved();
     } catch (err: any) {
-      toast.error(err.message ?? "Save failed");
+      toast.error(err.message ?? labels.saveFailed);
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir="ltr">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir={lang === "ar" ? "rtl" : "ltr"}>
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-card p-7 shadow-lift">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-foreground">
-            {initial ? "Edit member" : "New member"}
+            {initial ? labels.editMember : labels.newMember}
           </h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
@@ -791,56 +964,56 @@ function MemberForm({
         <form onSubmit={onSubmit} className="mt-5 space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label>Category</Label>
+              <Label>{labels.category}</Label>
               <Select value={category} onValueChange={(v) => setCategory(v as "board" | "executive")}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="board">Board of Directors</SelectItem>
-                  <SelectItem value="executive">Executive Members</SelectItem>
+                  <SelectItem value="board">{labels.categoryBoard}</SelectItem>
+                  <SelectItem value="executive">{labels.categoryExecutive}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="order">Display order</Label>
+              <Label htmlFor="order">{labels.displayOrder}</Label>
               <Input id="order" type="number" value={order} onChange={(e) => setOrder(Number(e.target.value))} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="name_en">Name (English)</Label>
+              <Label htmlFor="name_en">{labels.nameEn}</Label>
               <Input id="name_en" value={nameEn} onChange={(e) => setNameEn(e.target.value)} maxLength={120} />
             </div>
             <div dir="rtl">
-              <Label htmlFor="name_ar">الاسم (عربي)</Label>
+              <Label htmlFor="name_ar">{labels.nameAr}</Label>
               <Input id="name_ar" value={nameAr} onChange={(e) => setNameAr(e.target.value)} required maxLength={120} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="pos_en">Position (English)</Label>
+              <Label htmlFor="pos_en">{labels.positionEn}</Label>
               <Input id="pos_en" value={posEn} onChange={(e) => setPosEn(e.target.value)} maxLength={120} />
             </div>
             <div dir="rtl">
-              <Label htmlFor="pos_ar">المنصب (عربي)</Label>
+              <Label htmlFor="pos_ar">{labels.positionAr}</Label>
               <Input id="pos_ar" value={posAr} onChange={(e) => setPosAr(e.target.value)} required maxLength={120} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="bio_en">Bio (English)</Label>
+              <Label htmlFor="bio_en">{labels.bioEn}</Label>
               <Textarea id="bio_en" value={bioEn} onChange={(e) => setBioEn(e.target.value)} rows={4} maxLength={1000} />
             </div>
             <div dir="rtl">
-              <Label htmlFor="bio_ar">نبذة (عربي)</Label>
+              <Label htmlFor="bio_ar">{labels.bioAr}</Label>
               <Textarea id="bio_ar" value={bioAr} onChange={(e) => setBioAr(e.target.value)} rows={4} maxLength={1000} />
             </div>
           </div>
 
           <div>
-            <Label>Photo</Label>
+            <Label>{labels.photo}</Label>
             <div className="mt-2 flex items-center gap-4">
               {photoUrl ? (
                 <img src={photoUrl} alt="" className="h-20 w-20 rounded-full object-cover" />
@@ -849,7 +1022,7 @@ function MemberForm({
               )}
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {uploading ? "Uploading…" : "Upload photo"}
+                {uploading ? labels.uploading : labels.uploadPhoto}
                 <input
                   type="file"
                   accept="image/*"
@@ -862,17 +1035,17 @@ function MemberForm({
               </label>
               {photoUrl && (
                 <button type="button" className="text-xs text-destructive hover:underline" onClick={() => setPhotoUrl("")}>
-                  Remove
+                  {labels.remove}
                 </button>
               )}
             </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>{labels.cancel}</Button>
             <Button type="submit" disabled={saving || uploading}>
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {initial ? "Save changes" : "Create"}
+              {initial ? labels.saveChanges : labels.create}
             </Button>
           </div>
         </form>
