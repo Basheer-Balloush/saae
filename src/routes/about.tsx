@@ -51,6 +51,10 @@ export const Route = createFileRoute("/about")({
         content:
           "نبني بيئة معرفية تجمع بين التكنولوجيا الحديثة وروح المبادرة عبر التدريب والمشاريع التطبيقية.",
       },
+      { property: "og:url", content: "https://aisyria.org/about" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://aisyria.org/about" },
     ],
   }),
   component: AboutPage,
