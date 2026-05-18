@@ -35,19 +35,7 @@ export function LmsCta() {
           }`}
         >
           <div className="max-w-2xl">
-            <span
-              className="text-xs uppercase tracking-[0.22em]"
-              style={{
-                color: "#048090",
-                fontFamily: '"Cairo", system-ui, sans-serif',
-                fontWeight: 600,
-              }}
-            >
-              {copy.eyebrow}
-            </span>
-
-            <h2
-              className="mt-4 text-display-2 text-foreground"
+              <h2
               style={{
                 fontFamily: '"Cairo", system-ui, sans-serif',
                 fontWeight: 900,
