@@ -13,7 +13,7 @@ export const COMMUNITY_LABELS_AR: Record<CommunityKey, string> = {
   data: "مجتمع البيانات",
   architecture: "المجتمع المعماري الذكي",
   medical: "مجتمع الرعاية الصحية",
-  research: "المجتمع البحثي",
+  research: "المجتمع البحثي الذكي",
   software: "مجتمع البرمجيات",
   economy: "مجتمع الاقتصاد الذكي",
 };
@@ -22,7 +22,7 @@ export const COMMUNITY_LABELS_EN: Record<CommunityKey, string> = {
   data: "Data Community",
   architecture: "Smart Architecture Community",
   medical: "Healthcare Community",
-  research: "Research Community",
+  research: "Smart Research Community",
   software: "Software Community",
   economy: "Smart Economy Community",
 };
