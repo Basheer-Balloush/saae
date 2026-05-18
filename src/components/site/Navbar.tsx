@@ -206,11 +206,22 @@ export function Navbar() {
                   </Link>
                 );
               }
-              const targetId = s === "contact" ? "assistant" : s;
+              if (s === "contact") {
+                return (
+                  <Link
+                    key={s}
+                    to="/contact"
+                    onClick={() => setOpen(false)}
+                    className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                  >
+                    {t.nav[s]}
+                  </Link>
+                );
+              }
               return (
                 <a
                   key={s}
-                  href={hashHref(targetId)}
+                  href={hashHref(s)}
                   onClick={() => setOpen(false)}
                   className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                 >
