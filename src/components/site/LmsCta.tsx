@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 
 export function LmsCta() {
@@ -20,7 +20,7 @@ export function LmsCta() {
         cta: "Enter the platform",
       };
 
-  const Arrow = isRtl ? ArrowLeft : ArrowRight;
+  const Arrow = ArrowRight;
 
   return (
     <section id="lms" className="relative bg-background py-10 lg:py-14">
@@ -77,9 +77,7 @@ export function LmsCta() {
             >
               {copy.cta}
               <Arrow
-                className={`h-4 w-4 transition-transform ${
-                  isRtl ? "group-hover:-translate-x-1" : "group-hover:translate-x-1"
-                }`}
+                className="h-4 w-4 transition-transform group-hover:translate-x-1"
               />
             </a>
           </div>
