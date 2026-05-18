@@ -181,7 +181,11 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
         const ease = useScatter ? 0.06 : 0.08;
         ctx.clearRect(0, 0, size, size);
         ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.globalAlpha = 0.88;
+        // fade out during scatter, fade in during assemble
+        let alpha = 0.88;
+        if (useScatter) alpha = 0.88 * Math.max(0, 1 - t * 1.2);
+        else if (phase === "assembleA" || phase === "assembleB") alpha = 0.88 * Math.min(1, t * 1.5);
+        ctx.globalAlpha = alpha;
 
         for (const p of particles) {
           let tx: number, ty: number;
