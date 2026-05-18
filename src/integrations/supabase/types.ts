@@ -1398,6 +1398,17 @@ export type Database = {
         Returns: Json
       }
       lms_enroll: { Args: { _course_id: string }; Returns: string }
+      lms_get_quiz_questions: {
+        Args: { _quiz_id: string }
+        Returns: {
+          choices: Json
+          created_at: string
+          display_order: number
+          id: string
+          question: string
+          quiz_id: string
+        }[]
+      }
       lms_process_payout: {
         Args: { _approve: boolean; _payout_id: string }
         Returns: undefined
@@ -1417,6 +1428,16 @@ export type Database = {
           document_id: string
           id: string
           similarity: number
+        }[]
+      }
+      verify_certificate: {
+        Args: { _serial: string }
+        Returns: {
+          course_id: string
+          id: string
+          issued_at: string
+          serial: string
+          student_id: string
         }[]
       }
     }
