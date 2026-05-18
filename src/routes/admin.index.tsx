@@ -354,14 +354,14 @@ function AdminDashboard() {
 
             <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
               <table className="w-full text-sm">
-                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                <thead className="bg-muted/40 text-start text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    <th className="px-4 py-3">{labels.cover}</th>
-                    <th className="px-4 py-3">{labels.title}</th>
-                    <th className="px-4 py-3">{labels.category}</th>
-                    <th className="px-4 py-3">{labels.date}</th>
-                    <th className="px-4 py-3">{labels.onHome}</th>
-                    <th className="px-4 py-3 text-right">{labels.actions}</th>
+                    <th className="px-4 py-3 text-start">{labels.cover}</th>
+                    <th className="px-4 py-3 text-start">{labels.title}</th>
+                    <th className="px-4 py-3 text-start">{labels.category}</th>
+                    <th className="px-4 py-3 text-start">{labels.date}</th>
+                    <th className="px-4 py-3 text-start">{labels.onHome}</th>
+                    <th className="px-4 py-3 text-end">{labels.actions}</th>
                   </tr>
                 </thead>
                 <tbody>
