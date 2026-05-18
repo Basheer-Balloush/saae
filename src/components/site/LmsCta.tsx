@@ -62,9 +62,7 @@ export function LmsCta() {
 
           <div className="shrink-0">
             <a
-              href="https://lms.aisyria.org"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/learning-management-system"
               className={`group inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-base transition-all hover:-translate-y-0.5 ${
                 isRtl ? "flex-row-reverse" : ""
               }`}
