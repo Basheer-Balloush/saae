@@ -266,10 +266,6 @@ function NewsDetailPage() {
               <Calendar className="h-3.5 w-3.5" strokeWidth={1.75} />
               {dateStr}
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5" strokeWidth={1.75} />
-              {readTime}
-            </span>
           </div>
         </motion.header>
 
