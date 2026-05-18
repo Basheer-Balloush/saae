@@ -162,7 +162,7 @@ async function retrieveKnowledge(question: string): Promise<string> {
   try {
     const vec = await embedOne(question);
     const { data, error } = await supabaseAdmin.rpc("match_chat_chunks", {
-      query_embedding: `[${vec.join(",")}]` as unknown as string,
+      query_embedding: `[${vec.join(",")}]`,
       match_count: 5,
     });
     if (error || !data) return "";
