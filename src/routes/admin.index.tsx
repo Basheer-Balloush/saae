@@ -15,7 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X, Globe } from "lucide-react";
+import { useLang } from "@/lib/i18n";
 import { z } from "zod";
 import {
   COMMUNITY_KEYS,
