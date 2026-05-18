@@ -722,7 +722,7 @@ function NewsForm({
                     className="text-xs text-destructive hover:underline"
                     onClick={() => setVideos((prev) => prev.filter((_, idx) => idx !== i))}
                   >
-                    Remove
+                    {labels.remove}
                   </button>
                 </div>
               ))}
