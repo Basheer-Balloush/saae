@@ -216,7 +216,6 @@ function NewsDetailPage() {
 
   const title = pickLang(article.title_ar, article.title_en, article.title, lang) || article.title;
   const bodyText = pickLang(article.content_ar, article.content_en, article.content, lang) || pickLang(article.excerpt_ar, article.excerpt_en, article.excerpt, lang) || "";
-  const readTime = estimateReadTime(bodyText, lang);
   const dateStr = formatDate(article.published_at, lang);
 
   const gallery = (article.images ?? []).filter(Boolean);
