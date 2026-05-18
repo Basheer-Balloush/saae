@@ -173,15 +173,13 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
         let cp = 0;
         switch (phase) {
           case "assembleA":
-          case "revealA":
-          case "hideA":
+          case "holdA":
             cp = 0; break;
-          case "scatterA": cp = st; break; // teal → gold while scattering
+          case "scatterA": cp = st; break;
           case "assembleB":
-          case "revealB":
-          case "hideB":
+          case "holdB":
             cp = 1; break;
-          case "scatterB": cp = 1 - st; break; // gold → teal
+          case "scatterB": cp = 1 - st; break;
         }
         const r = Math.round(rgbA[0] + (rgbB[0] - rgbA[0]) * cp);
         const g = Math.round(rgbA[1] + (rgbB[1] - rgbA[1]) * cp);
@@ -189,22 +187,15 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
 
         // alphas + motion behaviour by phase
         let particleAlpha = 0;
-        let imageAlpha = 0;
         let movingToScatter = false;
-        let usingShapeB = false; // which assemble target the particles head toward
+        let usingShapeB = false;
         switch (phase) {
           case "assembleA":
             particleAlpha = 0.88 * st;
             usingShapeB = false;
             break;
-          case "revealA":
-            particleAlpha = 0.88 * (1 - st);
-            imageAlpha = st;
-            usingShapeB = false;
-            break;
-          case "hideA":
-            particleAlpha = 0.88 * st;
-            imageAlpha = 1 - st;
+          case "holdA":
+            particleAlpha = 0.88;
             usingShapeB = false;
             break;
           case "scatterA":
@@ -215,14 +206,8 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
             particleAlpha = 0.88 * st;
             usingShapeB = true;
             break;
-          case "revealB":
-            particleAlpha = 0.88 * (1 - st);
-            imageAlpha = st;
-            usingShapeB = true;
-            break;
-          case "hideB":
-            particleAlpha = 0.88 * st;
-            imageAlpha = 1 - st;
+          case "holdB":
+            particleAlpha = 0.88;
             usingShapeB = true;
             break;
           case "scatterB":
@@ -233,13 +218,6 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
 
         ctx.clearRect(0, 0, size, size);
 
-        // draw image overlay (sharp version of the logo)
-        if (imageAlpha > 0.01) {
-          const img = phase.endsWith("A") ? imgA : imgB;
-          const fit = phase.endsWith("A") ? fitA : fitB;
-          ctx.globalAlpha = imageAlpha;
-          ctx.drawImage(img, fit.ox, fit.oy, fit.w, fit.h);
-        }
 
         // update + draw particles
         if (particleAlpha > 0.01 || phase === "assembleA" || phase === "assembleB" || movingToScatter) {
