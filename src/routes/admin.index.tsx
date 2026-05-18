@@ -63,6 +63,7 @@ const newsSchema = z.object({
 function AdminDashboard() {
   const navigate = useNavigate();
   const { user, isAdmin, loading } = useAuth();
+  const { t, toggle: toggleLang } = useLang();
   const [items, setItems] = useState<NewsRow[]>([]);
   const [editing, setEditing] = useState<NewsRow | null>(null);
   const [showForm, setShowForm] = useState(false);
