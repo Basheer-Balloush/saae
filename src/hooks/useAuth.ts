@@ -28,17 +28,17 @@ export function useAuth() {
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    supabase.auth.getSession().then(async ({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        supabase
+        const { data } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", s.user.id)
           .eq("role", "admin")
-          .maybeSingle()
-          .then(({ data }) => setIsAdmin(!!data));
+          .maybeSingle();
+        setIsAdmin(!!data);
       }
       setLoading(false);
     });
