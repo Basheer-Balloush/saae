@@ -23,7 +23,6 @@ type Req = {
   created_at: string;
   decided_at: string | null;
   course?: { title_ar: string; title_en: string | null; price: number; students_count: number; max_students: number | null };
-  student?: { full_name: string | null; email: string | null };
 };
 
 function AdminEnrollmentRequests() {
@@ -43,18 +42,14 @@ function AdminEnrollmentRequests() {
     const list = (data as Req[]) ?? [];
     if (list.length) {
       const courseIds = [...new Set(list.map((r) => r.course_id))];
-      const userIds = [...new Set(list.map((r) => r.user_id))];
-      const [{ data: courses }, { data: students }] = await Promise.all([
-        supabase.from("lms_courses").select("id,title_ar,title_en,price,students_count,max_students").in("id", courseIds),
-        supabase.from("lms_students").select("user_id,full_name,email").in("user_id", userIds),
-      ]);
+      const { data: courses } = await supabase
+        .from("lms_courses")
+        .select("id,title_ar,title_en,price,students_count,max_students")
+        .in("id", courseIds);
       const cMap = new Map((courses ?? []).map((c) => [c.id, c]));
-      const sMap = new Map((students ?? []).map((s) => [s.user_id, s]));
       list.forEach((r) => {
         const c = cMap.get(r.course_id);
-        const s = sMap.get(r.user_id);
         r.course = c ? { title_ar: c.title_ar, title_en: c.title_en, price: Number(c.price), students_count: c.students_count, max_students: c.max_students } : undefined;
-        r.student = s ? { full_name: s.full_name, email: s.email } : undefined;
       });
     }
     setReqs(list);
