@@ -176,22 +176,16 @@ function AdminHome() {
       desc: ar ? "إدارة الأدوار" : "Manage roles",
     },
     {
-      to: "/learning-management-system/admin/payouts",
-      label: ar ? "طلبات السحب" : "Payouts",
-      icon: ArrowDownToLine,
-      desc: ar ? "تحويلات المدرّسين" : "Instructor payouts",
+      to: "/learning-management-system/admin/enrollment-requests",
+      label: ar ? "طلبات الاشتراك" : "Enrollment requests",
+      icon: Inbox,
+      desc: ar ? "طلبات الدفع اليدوي" : "Manual payment requests",
     },
     {
       to: "/learning-management-system/admin/coupons",
       label: ar ? "الكوبونات" : "Coupons",
       icon: Ticket,
       desc: ar ? "أكواد الخصم" : "Discount codes",
-    },
-    {
-      to: "/learning-management-system/admin/wallet",
-      label: ar ? "المحافظ والإعدادات" : "Wallets",
-      icon: Wallet,
-      desc: ar ? "العمولة والحد الأدنى" : "Commission & limits",
     },
     {
       to: "/learning-management-system/admin/reviews",
