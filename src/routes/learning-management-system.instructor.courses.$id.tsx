@@ -22,6 +22,7 @@ type Course = {
   description_ar: string | null; description_en: string | null;
   cover_url: string | null; level: string; price: number; is_free: boolean;
   status: string; category_id: string | null; instructor_id: string;
+  enrollment_open: boolean; max_students: number | null;
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; video_url: string | null; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number };
@@ -73,6 +74,7 @@ function CourseBuilder() {
       description_ar: course.description_ar, description_en: course.description_en,
       level: course.level as "beginner" | "intermediate" | "advanced", price: course.price, is_free: course.is_free,
       category_id: course.category_id, cover_url: course.cover_url,
+      enrollment_open: course.enrollment_open, max_students: course.max_students,
     }).eq("id", course.id);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
@@ -228,7 +230,39 @@ function CourseBuilder() {
         </div>
       </section>
 
-      {/* Curriculum */}
+      {/* Enrollment management */}
+      <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
+        <h2 className="font-bold text-foreground">{lang === "ar" ? "إدارة التسجيل" : "Enrollment management"}</h2>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <Label className="cursor-pointer" htmlFor="enroll-open">{lang === "ar" ? "التسجيل مفتوح" : "Enrollment open"}</Label>
+            <p className="text-xs text-muted-foreground">{lang === "ar" ? "أغلق التسجيل لمنع طلبات جديدة" : "Close enrollment to stop new requests."}</p>
+          </div>
+          <input
+            id="enroll-open"
+            type="checkbox"
+            className="h-5 w-5"
+            checked={course.enrollment_open}
+            onChange={(e) => update({ enrollment_open: e.target.checked })}
+          />
+        </div>
+        <div>
+          <Label>{lang === "ar" ? "الحد الأقصى لعدد الطلاب (اتركه فارغاً = غير محدود)" : "Max students (empty = unlimited)"}</Label>
+          <Input
+            type="number"
+            min={1}
+            value={course.max_students ?? ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              update({ max_students: v === "" ? null : Math.max(1, parseInt(v) || 0) });
+            }}
+            placeholder={lang === "ar" ? "غير محدود" : "Unlimited"}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
+        </p>
+      </section>
       <section className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-foreground">{tr.syllabus}</h2>

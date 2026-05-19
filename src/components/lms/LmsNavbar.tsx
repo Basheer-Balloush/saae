@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, X, Moon, Sun, Globe, LogOut, BookOpen, LayoutDashboard, ShieldCheck, GraduationCap } from "lucide-react";
+import { Menu, X, Moon, Sun, Globe, LogOut, BookOpen, LayoutDashboard, ShieldCheck, GraduationCap, ArrowLeft, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
@@ -115,6 +115,14 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
 
         {/* Right cluster: lang / theme / auth / mobile menu */}
         <div className="flex items-center gap-2">
+          <Link
+            to="/"
+            className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary md:inline-flex"
+            aria-label={lang === "ar" ? "العودة للموقع" : "Back to site"}
+          >
+            {lang === "ar" ? <ArrowRight className="h-3.5 w-3.5" /> : <ArrowLeft className="h-3.5 w-3.5" />}
+            <span>{lang === "ar" ? "الموقع" : "Site"}</span>
+          </Link>
           <button
             onClick={toggleLang}
             className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary md:inline-flex"
@@ -174,6 +182,15 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
                 {l.label}
               </Link>
             ))}
+
+            <Link
+              to="/"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+            >
+              {lang === "ar" ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
+              {lang === "ar" ? "العودة للموقع الرئيسي" : "Back to main site"}
+            </Link>
 
             {isAuthed ? (
               <button
