@@ -254,22 +254,19 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
             }
 
             try {
-              await sendLovableEmail(
+              const resendKey = process.env.RESEND_API_KEY
+              if (!resendKey) {
+                throw new Error('RESEND_API_KEY is not configured')
+              }
+              await sendViaResend(
                 {
-                  run_id: payload.run_id,
                   to: payload.to,
-                  from: payload.from,
-                  sender_domain: payload.sender_domain,
                   subject: payload.subject,
                   html: payload.html,
                   text: payload.text,
-                  purpose: payload.purpose,
-                  label: payload.label,
-                  idempotency_key: payload.idempotency_key,
-                  unsubscribe_token: payload.unsubscribe_token,
-                  message_id: payload.message_id,
                 },
-                { apiKey, sendUrl: process.env.LOVABLE_SEND_URL }
+                apiKey,
+                resendKey,
               )
 
               // Log success
