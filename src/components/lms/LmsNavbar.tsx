@@ -115,6 +115,14 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
 
         {/* Right cluster: lang / theme / auth / mobile menu */}
         <div className="flex items-center gap-2">
+          <Link
+            to="/"
+            className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary md:inline-flex"
+            aria-label={lang === "ar" ? "العودة للموقع" : "Back to site"}
+          >
+            {lang === "ar" ? <ArrowRight className="h-3.5 w-3.5" /> : <ArrowLeft className="h-3.5 w-3.5" />}
+            <span>{lang === "ar" ? "الموقع" : "Site"}</span>
+          </Link>
           <button
             onClick={toggleLang}
             className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary md:inline-flex"
