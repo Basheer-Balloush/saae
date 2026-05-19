@@ -62,7 +62,7 @@ function AdminEnrollmentRequests() {
     setBusy(req.id);
     try {
       const fn = action === "approve" ? "lms_approve_enrollment_request" : "lms_reject_enrollment_request";
-      const { error } = await supabase.rpc(fn, { _request_id: req.id, _admin_notes: noteDraft[req.id] || null });
+      const { error } = await supabase.rpc(fn, { _request_id: req.id, _admin_notes: noteDraft[req.id] || undefined });
       if (error) throw error;
       toast.success(ar ? (action === "approve" ? "تمت الموافقة" : "تم الرفض") : (action === "approve" ? "Approved" : "Rejected"));
       await load();
