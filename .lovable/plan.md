@@ -1,43 +1,42 @@
 ## المشكلة
 
-لما تفتح رابط الموقع (مثلاً `aisyria.org`)، الصفحة لحظياً بتظهر عند قسم الشركاء، وبعدين بتطلع لفوق. ده مزعج بصرياً.
+إيميلات تسجيل الدخول وتأكيد الحساب تطلع من `no-reply@auth.lovable.cloud` بدل `noreply@aisyria.org`.
 
-## السبب
+**السبب:** Resend جاهز ودومين `aisyria.org` متحقق عنده، بس Supabase Auth ما بيعرف عنو — هو لسا عم يستخدم خدمة الإيميل الافتراضية. ما في طريقة برمجية لتعديل إعدادات SMTP في Supabase من خلال Lovable، والواجهة بتاعت Auth Settings ما فيها قسم SMTP.
 
-في `src/routes/index.tsx` ترتيب الأقسام: `FeaturedNews → Partners → Achievements → Communities`. عند تحميل الصفحة:
+## الحل المقترح: تفعيل Lovable Emails
 
-1. السيرفر يرسم HTML كامل (SSR) — كل الأقسام مرتفعة، بما فيها Partners.
-2. المتصفح (بسبب browser scroll restoration / bfcache) يستعيد آخر مكان كان فيه المستخدم بزيارة سابقة — غالباً عند Partners أو تحته.
-3. بعدها بمللي ثوان، TanStack Router مع `scrollRestoration: true` يقفز لأعلى الصفحة.
+Lovable Emails هي الخدمة المدمجة الرسمية اللي:
+- بتستبدل إيميلات Supabase الافتراضية تلقائياً (تأكيد التسجيل، استعادة كلمة السر، magic link، إلخ)
+- بترسل من دومينك `noreply@aisyria.org`
+- بتدعم قوالب React Email مخصصة بهوية الموقع
+- ما بتحتاج SMTP يدوي ولا أي إعداد إضافي
 
-النتيجة: ومضة من Partners ثم قفزة للأعلى.
+## الخطوات
 
-## الحل
+### 1. إعداد دومين الإرسال
+- فتح حوار إعداد الإيميل (`Set up email domain`)
+- اختيار `aisyria.org` كدومين أساسي مع subdomain (مثلاً `notify.aisyria.org`)
+- إضافة NS records عند مزود الدومين تبعك (يلي بيظهروا بالحوار)
+- انتظار التحقق من DNS (لحد 72 ساعة، عادة أسرع بكتير)
 
-تعديلين صغيرين على `src/routes/index.tsx`:
+### 2. تجهيز قوالب Auth Emails
+- إنشاء قوالب React Email للإيميلات الستة (signup, magic-link, recovery, invite, email-change, reauthentication)
+- تطبيق ستايل الموقع (ألوان، خط، شعار) بحيث تكون متناسقة مع هوية aisyria
 
-1. **تعطيل استعادة سكرول المتصفح للصفحة الرئيسية** عبر ضبط `history.scrollRestoration = "manual"` بمجرد التحميل، إذا ما كان فيه hash بالـ URL.
-2. **القفز الفوري لأعلى الصفحة (`window.scrollTo(0, 0)`) في أول رسمة** قبل ما المتصفح يحاول يستعيد مكان قديم، فقط لما يكون فيه ما في hash. لو فيه hash (مثلاً `/#partners`) السلوك الحالي يبقى كما هو ويتم التمرير للقسم المطلوب.
+### 3. التفعيل التلقائي
+- بمجرد ما يتحقق DNS، Lovable Emails بتتفعل وحدها
+- Supabase Auth بيوقف يستخدم الخدمة الافتراضية وبيبعت كل شي عبر Lovable Emails من `noreply@aisyria.org`
+- ممكن متابعة الحالة من **Cloud → Emails**
 
-التعديل محدود بملف واحد فقط ولا يلمس باقي الأقسام ولا الترتيب ولا أي ستايل.
+## تنبيه مهم بخصوص Resend الحالي
 
-## القسم التقني
+لما نفعّل Lovable Emails على subdomain (مثلاً `notify.aisyria.org`):
+- إذا Resend عندك مظبط على نفس الـ subdomain → رح يصير تعارض، لازم تختار واحد
+- إذا Resend مظبط على الدومين الجذر `aisyria.org` أو subdomain تاني → الاثنين بيشتغلوا سوا بدون مشاكل
 
-```tsx
-// في بداية مكوّن Index، قبل الـ useEffect الموجود
-useEffect(() => {
-  if (typeof window === "undefined") return;
-  // إيقاف استعادة سكرول المتصفح للصفحة الرئيسية
-  const prev = window.history.scrollRestoration;
-  window.history.scrollRestoration = "manual";
-  // إذا فتح المستخدم الجذر بدون hash، اضمن أنه يبدأ من الأعلى فوراً
-  if (!location.hash) {
-    window.scrollTo(0, 0);
-  }
-  return () => {
-    window.history.scrollRestoration = prev;
-  };
-}, []);
-```
+بتنصح أتركلك Resend شغال لأي إيميلات تطبيقية تانية بتحب تستخدمو فيها، وLovable Emails بتاخد إيميلات الـ Auth تلقائياً.
 
-لا تغييرات على `src/router.tsx` أو على ترتيب أقسام الصفحة.
+## البديل الوحيد لو ما بدك تستخدم Lovable Emails
+
+الطريقة الوحيدة التانية = فتح Supabase Dashboard يدوياً وتظبيط SMTP Custom بتفاصيل Resend. بس هاد الشي خارج عن صلاحيات Lovable وما فيني أعملو إلك — لازم تعملو إنت.
