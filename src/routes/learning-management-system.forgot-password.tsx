@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { localizeAuthError } from "@/lib/auth-error-i18n";
+import { sendLmsPasswordReset } from "@/lib/lms-auth.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +24,7 @@ function ForgotPage() {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const sendPasswordReset = useServerFn(sendLmsPasswordReset);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,10 +35,7 @@ function ForgotPage() {
     }
     setSubmitting(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
-        redirectTo: `${window.location.origin}/learning-management-system/reset-password`,
-      });
-      if (error) throw error;
+      await sendPasswordReset({ data: { email: parsed.data, lang } });
       setSent(true);
       toast.success(tr.resetLinkSent);
     } catch (err: unknown) {

@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { localizeAuthError } from "@/lib/auth-error-i18n";
+import { signUpLmsUser } from "@/lib/lms-auth.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +36,7 @@ function LmsSignup() {
   const [asInstructor, setAsInstructor] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  const signUpUser = useServerFn(signUpLmsUser);
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/learning-management-system/student" });
@@ -50,27 +52,7 @@ function LmsSignup() {
     }
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: parsed.data.email,
-        password: parsed.data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/learning-management-system/student`,
-          data: { full_name: parsed.data.fullName, lang },
-        },
-      });
-      if (error) throw error;
-      const uid = data.user?.id;
-      if (uid) {
-        // Default student role (best-effort; admin manages real grants)
-        await supabase.from("user_roles").insert({ user_id: uid, role: "lms_student" as never });
-        if (asInstructor) {
-          await supabase.from("lms_instructors").insert({
-            user_id: uid,
-            full_name: parsed.data.fullName,
-            approved: false,
-          });
-        }
-      }
+      await signUpUser({ data: { ...parsed.data, asInstructor, lang } });
       setSentTo(parsed.data.email);
       toast.success(tr.signedUp);
     } catch (err: unknown) {
