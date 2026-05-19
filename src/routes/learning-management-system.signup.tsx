@@ -113,6 +113,18 @@ function LmsSignup() {
                 ? "افتح الرابط لتفعيل حسابك."
                 : "Open the link to activate your account."}
             </p>
+            {asInstructor && (
+              <div className="mt-2 w-full rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
+                <p className="font-semibold">
+                  {lang === "ar" ? "⏳ طلبك كمدرّس قيد المراجعة" : "⏳ Your instructor request is under review"}
+                </p>
+                <p className="mt-1 text-xs opacity-90">
+                  {lang === "ar"
+                    ? "بعد تأكيد البريد، سيقوم فريق الإدارة بمراجعة طلبك والموافقة عليه قبل أن تتمكن من نشر الدورات."
+                    : "After confirming your email, our admin team will review and approve your request before you can publish courses."}
+                </p>
+              </div>
+            )}
             <Link
               to="/learning-management-system/login"
               className="mt-2 text-sm text-primary hover:underline font-medium"
