@@ -1,90 +1,71 @@
-# خطة العمل: حذف نظام المحفظة + تكامل Paymera eGate
+# خطة العمل
 
-## الجزء 1: حذف نظام المحفظة والأرباح بالكامل
+## 1) زر "العودة للموقع" داخل LMS navbar
+- في `src/components/lms/LmsNavbar.tsx` أضيف زر/لينك "← العودة للموقع" يوجّه إلى `/` (الصفحة الرئيسية للـ CMS).
+- يظهر دائماً (ليس مشروطاً بـ referrer لأن referrer غير موثوق بعد reload).
 
-### Frontend (حذف الملفات والروابط)
-- حذف `src/routes/learning-management-system.student.wallet.tsx`
-- حذف `src/routes/learning-management-system.instructor.earnings.tsx`
-- حذف `src/routes/learning-management-system.admin.wallet.tsx`
-- حذف `src/routes/learning-management-system.admin.payouts.tsx`
-- إزالة أي روابط لهذه الصفحات من:
-  - `src/components/lms/LmsNavbar.tsx`
-  - `src/routes/learning-management-system.student.index.tsx`
-  - `src/routes/learning-management-system.instructor.index.tsx`
-  - `src/routes/learning-management-system.admin.index.tsx`
+## 2) حذف نظام المحفظة والأرباح بالكامل
+- حذف الصفحات:
+  - `src/routes/learning-management-system.student.wallet.tsx`
+  - `src/routes/learning-management-system.instructor.earnings.tsx`
+  - `src/routes/learning-management-system.admin.wallet.tsx`
+  - `src/routes/learning-management-system.admin.payouts.tsx`
+- إزالة كل الروابط لهذه الصفحات من `LmsNavbar.tsx` ولوحات student/instructor/admin index.
+- Migration لحذف: جداول `lms_wallets`, `lms_transactions`, `lms_payouts`, `lms_instructor_earnings`، النوع `lms_payout_status`، والدوال `lms_admin_topup`, `lms_request_payout`, `lms_process_payout`.
 
-### Database (Migration)
-حذف الجداول والدوال المرتبطة:
-- `lms_wallets`
-- `lms_transactions`
-- `lms_payouts`
-- `lms_instructor_earnings`
-- النوع `lms_payout_status`
-- الدوال: `lms_admin_topup`, `lms_request_payout`, `lms_process_payout`
-- إبقاء `lms_settings` (لأنها قد تحتوي إعدادات عامة)
+## 3) تكامل بوابة Paymera eGate (Test)
+- secrets مطلوبة: `PAYMERA_USERNAME`, `PAYMERA_PASSWORD`, `PAYMERA_TERMINAL_ID`, `PAYMERA_BASE_URL=https://egate-t.paymera.cc`.
+- جدول جديد `lms_payments` يحفظ كل عملية (paymera_payment_id, user_id, course_id, amount, status, rrn, raw_response...).
+- Server functions (`src/lib/paymera.functions.ts` + `paymera.server.ts`):
+  - `initiateCoursePayment({ courseId })` ينشئ عملية ويرجّع URL التحويل.
+  - `checkPaymentStatus({ paymentId })` يستعلم ويسجّل المستخدم إذا نجح.
+- Webhook في `src/routes/api/public/paymera-trigger.ts` لاستقبال triggerURL.
+- صفحة رجوع `learning-management-system.payment.callback.tsx`.
 
----
+## 4) خياران للدفع: إلكتروني + يدوي
+**على صفحة الكورس** المدفوع، يظهر للطالب زرّان:
+- **دفع إلكتروني** → يفتح تدفّق Paymera (نقطة 3) ويسجّله تلقائياً عند النجاح.
+- **دفع يدوي (طلب اشتراك)** → ينشئ طلباً قيد المراجعة، الأدمن يوافق يدوياً بعد استلام المبلغ.
 
-## الجزء 2: تكامل Paymera eGate (Test environment)
+**جدول جديد `lms_enrollment_requests`:**
+- `id, course_id, user_id, payment_method ('manual'|'online'), status ('pending'|'approved'|'rejected'|'cancelled'), notes (للطالب), admin_notes, created_at, decided_at, decided_by`
+- RLS: الطالب يقرأ/ينشئ طلباته فقط، الأدمن يقرأ/يحدّث الكل، المدرّب يقرأ طلبات كورساته.
+- عند موافقة الأدمن: trigger أو RPC يُنشئ `lms_enrollments` ويزيد `students_count`.
 
-### 2.1 الـ Secrets المطلوبة (سأطلبها منك)
-- `PAYMERA_USERNAME` — اسم المستخدم من Paymera
-- `PAYMERA_PASSWORD` — كلمة المرور
-- `PAYMERA_TERMINAL_ID` — رقم الـ Terminal
-- `PAYMERA_BASE_URL` — `https://egate-t.paymera.cc` (للاختبار)
+**صفحة جديدة `learning-management-system.admin.enrollment-requests.tsx`:**
+- قائمة الطلبات المعلّقة مع زر موافقة/رفض + حقل ملاحظات.
 
-### 2.2 جدول جديد بقاعدة البيانات: `lms_payments`
-الحقول:
-- `id` (UUID)
-- `paymera_payment_id` (text, unique) — الـ ID الراجع من Paymera
-- `user_id` (uuid) — المشتري
-- `course_id` (uuid) — الكورس المطلوب
-- `amount` (numeric) — المبلغ بالليرة السورية
-- `status` (text) — `pending` / `accepted` / `failed` / `canceled`
-- `rrn` (text) — رقم العملية من البنك
-- `notes` (text)
-- `raw_response` (jsonb) — آخر استجابة من Paymera
-- `created_at`, `updated_at`
+**في صفحة الطالب:** سكشن "طلباتي" يظهر حالة كل طلب.
 
-**RLS:**
-- المستخدم يقرأ مدفوعاته فقط
-- الـ admin يقرأ الكل
-- الكتابة فقط عبر server functions (service role)
+## 5) إدارة التسجيل والسعة للمدرّب
+**Migration على `lms_courses`:**
+- `enrollment_open boolean DEFAULT true` — فتح/إغلاق التسجيل.
+- `max_students integer NULL` — العدد الأقصى (NULL = غير محدود).
 
-### 2.3 Backend Files
+**في `src/routes/learning-management-system.instructor.courses.$id.tsx`:**
+- Toggle "فتح/إغلاق التسجيل".
+- Input للعدد الأقصى للطلاب.
 
-**`src/lib/paymera.server.ts`** — wrapper للـ APIs:
-- `createPayment(amount, notes)` → POST `/api/create-payment`
-- `getPaymentStatus(paymentId)` → GET `/api/get-payment-status/{id}`
-- `cancelPayment(paymentId)` → POST `/api/cancel-payment`
-- يستخدم Basic Auth من env vars
+**Validation:**
+- زر الاشتراك (إلكتروني أو يدوي) معطّل/مخفي إذا `enrollment_open=false` أو `students_count >= max_students`.
+- نفس التحقق على مستوى server function/RPC لمنع التحايل.
+- موافقة الأدمن على طلب يدوي ترفض إذا الكورس امتلأ.
 
-**`src/lib/paymera.functions.ts`** — server functions تنادى من الفرونت:
-- `initiateCoursePayment({ courseId })` — يتحقق من السعر، ينشئ payment بـ Paymera، يحفظ سجل، يرجّع URL للتحويل
-- `checkPaymentStatus({ paymentId })` — يستعلم عن الحالة من Paymera ويحدث الجدول؛ إذا `accepted` يسجّل المستخدم بالكورس تلقائياً (insert في `lms_enrollments` عبر service role)
-
-**`src/routes/api/public/paymera-trigger.ts`** — webhook:
-- يستقبل نداء `triggerURL` من Paymera بعد كل عملية
-- يستعلم عن الحالة ويحدث `lms_payments`
-- إذا نجحت، ينشئ `lms_enrollments` للمستخدم
-
-### 2.4 Frontend
-- **`src/routes/learning-management-system.payment.callback.tsx`** — صفحة الرجوع:
-  - تستقبل `?paymentId=...` من URL
-  - تستعلم عن الحالة عبر `checkPaymentStatus`
-  - تعرض: نجاح / فشل / إلغاء / قيد المعالجة (polling)
-  - زر "اذهب للكورس" إذا نجح
-- **تعديل صفحة الكورس** `learning-management-system.courses.$id.tsx`:
-  - زر "اشترك الآن" للكورسات المدفوعة → ينادي `initiateCoursePayment` → يحوّل لـ Paymera URL
-
-### 2.5 تحويل الأسعار
-أسعار الكورسات حالياً `numeric` بالـ DB — Paymera يتوقع عدداً صحيحاً بالليرة السورية. سنرسلها كـ `Math.round(price)`.
+## 6) صفحة 404 — زر "Go home"
+الزر الحالي في `src/routes/__root.tsx` يوجّه إلى `/` (الصفحة الرئيسية للموقع) — هذا صحيح أصلاً. سأتأكد فقط من:
+- النص ثنائي اللغة (ar/en).
+- إصلاح أي روابط داخلية مكسورة وُجدت أثناء التطوير (محذوفة بعد إزالة المحفظة).
 
 ---
 
-## ملاحظات تقنية (للمرجع)
+## تفاصيل تقنية (مرجع)
 
-- جميع نداءات Paymera من **server-side فقط** (التوكنات لا تصل المتصفح أبداً)
-- الإنرولمنت يتم **فقط** بعد تأكيد الحالة من Paymera (لا نثق بـ callback URL وحده، بل نتحقق من `get-payment-status`)
-- الـ `triggerURL` و `callbackURL` يجب أن يحتويا الـ `paymentId` كـ query param لربط العملية
-- بيئة الإنتاج تتطلب IP ثابت — هذا للتفعيل لاحقاً
+**ترتيب التنفيذ المقترح:**
+1. Migration واحد كبير: حذف جداول المحفظة + إنشاء `lms_payments` + `lms_enrollment_requests` + إضافة `enrollment_open`/`max_students` على `lms_courses`.
+2. حذف ملفات المحفظة + تنظيف الروابط.
+3. زر العودة في navbar + تحسين 404.
+4. صفحة المدرّب: toggle + سعة.
+5. تدفق الدفع اليدوي + صفحة طلبات الأدمن.
+6. تكامل Paymera (يتطلب secrets منك أولاً).
+
+**ملاحظة:** سأطلب الـ secrets الخاصة بـ Paymera عندما نصل لخطوة التكامل الفعلي؛ باقي الأقسام تتنفذ قبلها.
