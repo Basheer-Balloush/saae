@@ -1,6 +1,38 @@
-import { sendLovableEmail } from '@lovable.dev/email-js'
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
+
+const FROM_ADDRESS = 'Aisyria <noreply@aisyria.org>'
+const RESEND_GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
+
+async function sendViaResend(payload: {
+  to: string
+  subject: string
+  html?: string
+  text?: string
+}, apiKey: string, resendKey: string): Promise<void> {
+  const response = await fetch(`${RESEND_GATEWAY_URL}/emails`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'X-Connection-Api-Key': resendKey,
+    },
+    body: JSON.stringify({
+      from: FROM_ADDRESS,
+      to: [payload.to],
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text,
+    }),
+  })
+
+  if (!response.ok) {
+    const body = await response.text()
+    const err = new Error(`Resend API error [${response.status}]: ${body}`) as Error & { status: number }
+    err.status = response.status
+    throw err
+  }
+}
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
