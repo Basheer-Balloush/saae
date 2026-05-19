@@ -370,50 +370,65 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
 
   const courseName = lang === "ar" ? course.name_ar : course.name_en || course.name_ar;
 
-  const exportRegistrants = () => {
-    const rows = registrants.map((r) => ({
-      [tr.fullName]: r.full_name,
-      [tr.emailField]: r.email || "",
-      [tr.phone]: r.phone || "",
-      [tr.paymentStatus]: paymentLabel(r.payment_status),
-      [tr.attendanceCount]: `${attendanceFor(r.id)} / ${sessions.length}`,
-    }));
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, tr.registrants.slice(0, 31));
-    XLSX.writeFile(wb, `${courseName}-${tr.registrants}.xlsx`);
+  const downloadBlob = (buffer: ArrayBuffer, filename: string) => {
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
-  const exportSessions = (selectedIds: string[]) => {
+  const sanitizeSheetName = (name: string, fallback: string) => {
+    const cleaned = (name || fallback).replace(/[\\\/\?\*\[\]:]/g, "-").trim().slice(0, 31);
+    return cleaned || fallback;
+  };
+
+  const exportRegistrants = async () => {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet(sanitizeSheetName(tr.registrants, "Sheet1"));
+    ws.addRow([tr.fullName, tr.emailField, tr.phone, tr.paymentStatus, tr.attendanceCount]);
+    registrants.forEach((r) => {
+      ws.addRow([
+        r.full_name,
+        r.email || "",
+        r.phone || "",
+        paymentLabel(r.payment_status),
+        `${attendanceFor(r.id)} / ${sessions.length}`,
+      ]);
+    });
+    const buffer = await wb.xlsx.writeBuffer();
+    downloadBlob(buffer as ArrayBuffer, `${courseName}-${tr.registrants}.xlsx`);
+  };
+
+  const exportSessions = async (selectedIds: string[]) => {
     try {
-      const wb = XLSX.utils.book_new();
+      const wb = new ExcelJS.Workbook();
       const chosen = sessions.filter((s) => selectedIds.includes(s.id));
       if (chosen.length === 0) return;
       const used = new Set<string>();
       chosen.forEach((s, idx) => {
-        const rows = registrants.map((r) => {
-          const att = attendance.find((a) => a.session_id === s.id && a.registrant_id === r.id);
-          return {
-            [tr.fullName]: r.full_name,
-            [tr.present]: att?.present ? tr.present : tr.absent,
-          };
-        });
-        const ws = XLSX.utils.json_to_sheet(
-          rows.length > 0 ? rows : [{ [tr.fullName]: "", [tr.present]: "" }],
-        );
-        const base = (s.title || `Session ${idx + 1}`)
-          .replace(/[\\\/\?\*\[\]:]/g, "-")
-          .trim()
-          .slice(0, 28) || `Session ${idx + 1}`;
+        const base = sanitizeSheetName(s.title || `Session ${idx + 1}`, `Session ${idx + 1}`).slice(0, 28);
         let name = base;
         let n = 2;
         while (used.has(name.toLowerCase())) {
-          name = `${base.slice(0, 28)} ${n++}`;
+          name = `${base} ${n++}`;
         }
         used.add(name.toLowerCase());
-        XLSX.utils.book_append_sheet(wb, ws, name);
+        const ws = wb.addWorksheet(name);
+        ws.addRow([tr.fullName, tr.present]);
+        registrants.forEach((r) => {
+          const att = attendance.find((a) => a.session_id === s.id && a.registrant_id === r.id);
+          ws.addRow([r.full_name, att?.present ? tr.present : tr.absent]);
+        });
       });
-      XLSX.writeFile(wb, `${courseName}-${tr.sessions}.xlsx`);
+      const buffer = await wb.xlsx.writeBuffer();
+      downloadBlob(buffer as ArrayBuffer, `${courseName}-${tr.sessions}.xlsx`);
     } catch (e) {
       toast.error((e as Error).message);
     }
