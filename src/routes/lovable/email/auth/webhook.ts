@@ -11,13 +11,15 @@ import { RecoveryEmail } from '@/lib/email-templates/recovery'
 import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
-const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Confirm your email',
-  invite: "You've been invited",
-  magiclink: 'Your login link',
-  recovery: 'Reset your password',
-  email_change: 'Confirm your new email',
-  reauthentication: 'Your verification code',
+type Lang = 'ar' | 'en'
+
+const EMAIL_SUBJECTS: Record<string, Record<Lang, string>> = {
+  signup: { ar: 'تأكيد بريدك الإلكتروني', en: 'Confirm your email' },
+  invite: { ar: 'تمت دعوتك', en: "You've been invited" },
+  magiclink: { ar: 'رابط تسجيل الدخول', en: 'Your login link' },
+  recovery: { ar: 'إعادة تعيين كلمة المرور', en: 'Reset your password' },
+  email_change: { ar: 'تأكيد بريدك الإلكتروني الجديد', en: 'Confirm your new email' },
+  reauthentication: { ar: 'رمز التحقق', en: 'Your verification code' },
 }
 
 // Template mapping
@@ -31,10 +33,26 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "saae"
+const SITE_NAMES: Record<Lang, string> = {
+  ar: 'الجمعية السورية للذكاء الاصطناعي وريادة الأعمال',
+  en: 'Syrian Association for AI & Entrepreneurship',
+}
 const SENDER_DOMAIN = "notify.aisyria.org"
 const ROOT_DOMAIN = "aisyria.org"
 const FROM_DOMAIN = "aisyria.org"
+
+function detectLang(payload: any): Lang {
+  const candidates = [
+    payload?.data?.user?.user_metadata?.lang,
+    payload?.data?.user_metadata?.lang,
+    payload?.data?.metadata?.lang,
+    payload?.data?.lang,
+  ]
+  for (const c of candidates) {
+    if (c === 'ar' || c === 'en') return c
+  }
+  return 'ar'
+}
 
 function redactEmail(email: string | null | undefined): string {
   if (!email) return '***'
