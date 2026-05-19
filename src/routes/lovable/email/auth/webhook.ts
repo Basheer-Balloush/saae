@@ -149,6 +149,9 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           )
         }
 
+        const lang: Lang = detectLang(payload)
+        const SITE_NAME = SITE_NAMES[lang]
+
         // Build template props from payload.data (HookData structure)
         const templateProps = {
           siteName: SITE_NAME,
@@ -157,8 +160,9 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           confirmationUrl: payload.data.url,
           token: payload.data.token,
           email: payload.data.email,
-          oldEmail: payload.data.old_email,
+          oldEmail: (payload.data as any).old_email,
           newEmail: payload.data.new_email,
+          lang,
         }
 
         // Render React Email to HTML and plain text
