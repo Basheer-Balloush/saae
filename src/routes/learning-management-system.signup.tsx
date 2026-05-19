@@ -55,7 +55,7 @@ function LmsSignup() {
         password: parsed.data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/learning-management-system/student`,
-          data: { full_name: parsed.data.fullName },
+          data: { full_name: parsed.data.fullName, lang },
         },
       });
       if (error) throw error;
