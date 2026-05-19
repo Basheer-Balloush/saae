@@ -1,11 +1,33 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Check, X, Plus, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Check,
+  X,
+  Plus,
+  Trash2,
+  Users,
+  BookOpen,
+  GraduationCap,
+  FolderTree,
+  BarChart3,
+  Wallet,
+  Ticket,
+  Star,
+  ArrowDownToLine,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  FileText,
+  ChevronRight,
+  Mail,
+  Sparkles,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/learning-management-system/admin/")({
@@ -13,46 +35,92 @@ export const Route = createFileRoute("/learning-management-system/admin/")({
   component: AdminHome,
 });
 
-type Instructor = { user_id: string; full_name: string; specialty: string | null; approved: boolean; bio: string | null };
-type Course = { id: string; title_ar: string; status: string; instructor_id: string; rejection_reason: string | null };
+type Instructor = {
+  user_id: string;
+  full_name: string;
+  specialty: string | null;
+  approved: boolean;
+  bio: string | null;
+  created_at?: string;
+};
+type Course = {
+  id: string;
+  title_ar: string;
+  status: string;
+  instructor_id: string;
+  rejection_reason: string | null;
+  created_at?: string;
+};
 type Category = { id: string; name_ar: string; name_en: string | null; slug: string; display_order: number };
 
 function AdminHome() {
   const { lang } = useLang();
+  const ar = lang === "ar";
   const tr = lmsT[lang];
-  const [tab, setTab] = useState<"instructors" | "courses" | "categories">("courses");
+  const [tab, setTab] = useState<"overview" | "instructors" | "courses" | "categories">("overview");
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [studentsCount, setStudentsCount] = useState(0);
 
   const load = async () => {
-    const [{ data: ins }, { data: cs }, { data: cats }] = await Promise.all([
-      supabase.from("lms_instructors").select("user_id,full_name,specialty,approved,bio").order("created_at", { ascending: false }),
-      supabase.from("lms_courses").select("id,title_ar,status,instructor_id,rejection_reason").order("created_at", { ascending: false }),
+    const [{ data: ins }, { data: cs }, { data: cats }, { count: stCount }] = await Promise.all([
+      supabase.from("lms_instructors").select("user_id,full_name,specialty,approved,bio,created_at").order("created_at", { ascending: false }),
+      supabase.from("lms_courses").select("id,title_ar,status,instructor_id,rejection_reason,created_at").order("created_at", { ascending: false }),
       supabase.from("lms_categories").select("*").order("display_order"),
+      supabase.from("lms_enrollments").select("*", { count: "exact", head: true }),
     ]);
     setInstructors((ins as Instructor[]) ?? []);
     setCourses((cs as Course[]) ?? []);
     setCategories((cats as Category[]) ?? []);
+    setStudentsCount(stCount ?? 0);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
+
+  const pendingInstructors = useMemo(() => instructors.filter((i) => !i.approved), [instructors]);
+  const approvedInstructors = useMemo(() => instructors.filter((i) => i.approved), [instructors]);
+  const pendingCourses = useMemo(() => courses.filter((c) => c.status === "pending"), [courses]);
+  const publishedCourses = useMemo(() => courses.filter((c) => c.status === "published"), [courses]);
 
   const approveInstructor = async (uid: string, approve: boolean) => {
     const { error } = await supabase.from("lms_instructors").update({ approved: approve }).eq("user_id", uid);
-    if (error) { toast.error(error.message); return; }
-    if (approve) {
-      // grant lms_instructor role (admin-only insert via RLS)
-      await supabase.from("user_roles").insert({ user_id: uid, role: "lms_instructor" as never });
+    if (error) {
+      toast.error(error.message);
+      return;
     }
-    toast.success("OK"); load();
+    if (approve) {
+      await supabase.from("user_roles").insert({ user_id: uid, role: "lms_instructor" as never });
+      toast.success(ar ? "تمت الموافقة وتفعيل صلاحيات التدريس" : "Approved and instructor role granted");
+    } else {
+      await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", "lms_instructor" as never);
+      toast.success(ar ? "تم إلغاء الموافقة" : "Approval revoked");
+    }
+    load();
+  };
+
+  const rejectInstructor = async (uid: string) => {
+    if (!confirm(ar ? "رفض هذا الطلب وحذفه نهائياً؟" : "Reject and remove this request?")) return;
+    const { error } = await supabase.from("lms_instructors").delete().eq("user_id", uid);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(ar ? "تم رفض الطلب" : "Request rejected");
+    load();
   };
 
   const setCourseStatus = async (cid: string, status: "draft" | "pending" | "published" | "rejected", reason?: string) => {
     const patch: { status: typeof status; rejection_reason?: string | null } = { status };
     if (status === "rejected") patch.rejection_reason = reason ?? null;
     const { error } = await supabase.from("lms_courses").update(patch).eq("id", cid);
-    if (error) { toast.error(error.message); return; }
-    toast.success("OK"); load();
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("OK");
+    load();
   };
 
   const [newCat, setNewCat] = useState({ name_ar: "", name_en: "", slug: "" });
@@ -60,142 +128,569 @@ function AdminHome() {
     e.preventDefault();
     if (!newCat.name_ar || !newCat.slug) return;
     const { error } = await supabase.from("lms_categories").insert({
-      name_ar: newCat.name_ar, name_en: newCat.name_en || null, slug: newCat.slug,
+      name_ar: newCat.name_ar,
+      name_en: newCat.name_en || null,
+      slug: newCat.slug,
       display_order: categories.length,
     });
-    if (error) { toast.error(error.message); return; }
-    setNewCat({ name_ar: "", name_en: "", slug: "" }); load();
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setNewCat({ name_ar: "", name_en: "", slug: "" });
+    load();
   };
   const deleteCategory = async (id: string) => {
-    if (!confirm(lang === "ar" ? "حذف؟" : "Delete?")) return;
-    await supabase.from("lms_categories").delete().eq("id", id); load();
+    if (!confirm(ar ? "حذف؟" : "Delete?")) return;
+    await supabase.from("lms_categories").delete().eq("id", id);
+    load();
   };
 
-  const sideLinks: { to: string; label: string }[] = [
-    { to: "/learning-management-system/admin/analytics", label: lang === "ar" ? "تحليلات" : "Analytics" },
-    { to: "/learning-management-system/admin/users", label: lang === "ar" ? "المستخدمون" : "Users" },
-    { to: "/learning-management-system/admin/payouts", label: lang === "ar" ? "طلبات السحب" : "Payouts" },
-    { to: "/learning-management-system/admin/coupons", label: lang === "ar" ? "الكوبونات" : "Coupons" },
-    { to: "/learning-management-system/admin/wallet", label: lang === "ar" ? "المحافظ والإعدادات" : "Wallets & Settings" },
-    { to: "/learning-management-system/admin/reviews", label: lang === "ar" ? "التقييمات" : "Reviews" },
+  const tabs: { id: typeof tab; label: string; icon: typeof Users; badge?: number }[] = [
+    { id: "overview", label: ar ? "نظرة عامة" : "Overview", icon: Sparkles },
+    {
+      id: "instructors",
+      label: ar ? "المدرّسون" : "Instructors",
+      icon: GraduationCap,
+      badge: pendingInstructors.length || undefined,
+    },
+    {
+      id: "courses",
+      label: ar ? "الدورات" : "Courses",
+      icon: BookOpen,
+      badge: pendingCourses.length || undefined,
+    },
+    { id: "categories", label: ar ? "التصنيفات" : "Categories", icon: FolderTree },
   ];
-  const tabLabels: Record<"courses" | "instructors" | "categories", string> = {
-    courses: lang === "ar" ? "الدورات" : "Courses",
-    instructors: lang === "ar" ? "المدرّسون" : "Instructors",
-    categories: lang === "ar" ? "التصنيفات" : "Categories",
-  };
+
+  const sideLinks: { to: string; label: string; icon: typeof Users; desc: string }[] = [
+    {
+      to: "/learning-management-system/admin/analytics",
+      label: ar ? "التحليلات" : "Analytics",
+      icon: BarChart3,
+      desc: ar ? "إحصاءات وأداء" : "Stats & performance",
+    },
+    {
+      to: "/learning-management-system/admin/users",
+      label: ar ? "المستخدمون" : "Users",
+      icon: Users,
+      desc: ar ? "إدارة الأدوار" : "Manage roles",
+    },
+    {
+      to: "/learning-management-system/admin/payouts",
+      label: ar ? "طلبات السحب" : "Payouts",
+      icon: ArrowDownToLine,
+      desc: ar ? "تحويلات المدرّسين" : "Instructor payouts",
+    },
+    {
+      to: "/learning-management-system/admin/coupons",
+      label: ar ? "الكوبونات" : "Coupons",
+      icon: Ticket,
+      desc: ar ? "أكواد الخصم" : "Discount codes",
+    },
+    {
+      to: "/learning-management-system/admin/wallet",
+      label: ar ? "المحافظ والإعدادات" : "Wallets",
+      icon: Wallet,
+      desc: ar ? "العمولة والحد الأدنى" : "Commission & limits",
+    },
+    {
+      to: "/learning-management-system/admin/reviews",
+      label: ar ? "التقييمات" : "Reviews",
+      icon: Star,
+      desc: ar ? "تقييمات الطلاب" : "Student ratings",
+    },
+  ];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
-      <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tr.navAdmin}</h1>
-
-      <div className="mt-6 grid gap-6 md:grid-cols-[220px_1fr]">
-        <aside className="rounded-xl border border-border bg-card p-3 h-fit">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-2 py-1">
-            {lang === "ar" ? "الأقسام" : "Sections"}
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-background">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
+        {/* Header */}
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
+              {ar ? "لوحة الإدارة" : "Admin Console"}
+            </p>
+            <h1 className="mt-1 text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+              {tr.navAdmin}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {ar
+                ? "إدارة المنصّة التعليمية ومراجعة الطلبات الواردة"
+                : "Manage the learning platform and review incoming requests"}
+            </p>
           </div>
-          <nav className="mt-1 flex flex-col">
-            {(["courses", "instructors", "categories"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`text-start px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  tab === t ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-                }`}
-              >
-                {tabLabels[t]}
-              </button>
-            ))}
-          </nav>
-          <div className="my-3 h-px bg-border" />
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-2 py-1">
-            {lang === "ar" ? "الإدارة" : "Manage"}
-          </div>
-          <nav className="mt-1 flex flex-col">
-            {sideLinks.map((l) => (
-              <Link
-                key={l.to}
-                to={l.to}
-                className="text-start px-3 py-2 rounded-md text-sm font-medium text-foreground hover:bg-muted"
-              >
-                {l.label}
-              </Link>
-            ))}
-          </nav>
-        </aside>
-
-        <div>
-      {tab === "courses" && (
-        <div className="mt-6 space-y-3">
-          {courses.map((c) => {
-            const statusLabel = lang === "ar"
-              ? ({ draft: "مسودّة", pending: "بانتظار المراجعة", published: "منشورة", rejected: "مرفوضة" } as const)[c.status as "draft" | "pending" | "published" | "rejected"] ?? c.status
-              : c.status;
-            return (
-            <div key={c.id} className="rounded-xl border border-border bg-card p-4 flex items-center justify-between gap-3">
-              <div>
-                <div className="font-bold text-foreground">{c.title_ar}</div>
-                <div className="text-xs text-muted-foreground">{statusLabel}</div>
-              </div>
-              <div className="flex gap-2">
-                {c.status === "pending" && (
-                  <>
-                    <Button size="sm" onClick={() => setCourseStatus(c.id, "published")}><Check className="h-4 w-4 mx-1" />{lang === "ar" ? "نشر" : "Publish"}</Button>
-                    <Button size="sm" variant="destructive" onClick={() => {
-                      const r = prompt(lang === "ar" ? "السبب؟" : "Reason?"); if (r !== null) setCourseStatus(c.id, "rejected", r);
-                    }}><X className="h-4 w-4 mx-1" />{lang === "ar" ? "رفض" : "Reject"}</Button>
-                  </>
-                )}
-                {c.status === "published" && (
-                  <Button size="sm" variant="outline" onClick={() => setCourseStatus(c.id, "draft")}>{lang === "ar" ? "إلغاء النشر" : "Unpublish"}</Button>
-                )}
-              </div>
+          {pendingInstructors.length + pendingCourses.length > 0 && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 px-4 py-2 text-sm font-semibold text-amber-800 dark:text-amber-200">
+              <Mail className="h-4 w-4" />
+              {ar
+                ? `${pendingInstructors.length + pendingCourses.length} طلب بانتظار مراجعتك`
+                : `${pendingInstructors.length + pendingCourses.length} pending review`}
             </div>
-            );
-          })}
-        </div>
-      )}
+          )}
+        </header>
 
-      {tab === "instructors" && (
-        <div className="mt-6 space-y-3">
-          {instructors.map((i) => (
-            <div key={i.user_id} className="rounded-xl border border-border bg-card p-4 flex items-center justify-between gap-3">
-              <div>
-                <div className="font-bold text-foreground">{i.full_name}</div>
-                <div className="text-xs text-muted-foreground">{i.specialty || "—"} · {i.approved ? (lang === "ar" ? "موافَق عليه" : "approved") : (lang === "ar" ? "بانتظار الموافقة" : "pending")}</div>
-              </div>
-              <div className="flex gap-2">
-                {!i.approved ? (
-                  <Button size="sm" onClick={() => approveInstructor(i.user_id, true)}><Check className="h-4 w-4 mx-1" />{lang === "ar" ? "موافقة" : "Approve"}</Button>
-                ) : (
-                  <Button size="sm" variant="outline" onClick={() => approveInstructor(i.user_id, false)}>{lang === "ar" ? "إلغاء الموافقة" : "Revoke"}</Button>
-                )}
-              </div>
+        {/* Stats */}
+        <div className="mt-8 grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            icon={Mail}
+            label={ar ? "طلبات مدرّسين" : "Instructor requests"}
+            value={pendingInstructors.length}
+            tone={pendingInstructors.length ? "amber" : "neutral"}
+            hint={ar ? "بانتظار الموافقة" : "Pending approval"}
+          />
+          <StatCard
+            icon={FileText}
+            label={ar ? "دورات للمراجعة" : "Courses to review"}
+            value={pendingCourses.length}
+            tone={pendingCourses.length ? "amber" : "neutral"}
+            hint={ar ? "بانتظار النشر" : "Pending publish"}
+          />
+          <StatCard
+            icon={GraduationCap}
+            label={ar ? "مدرّسون نشطون" : "Active instructors"}
+            value={approvedInstructors.length}
+            tone="primary"
+            hint={ar ? "موافَق عليهم" : "Approved"}
+          />
+          <StatCard
+            icon={BookOpen}
+            label={ar ? "دورات منشورة" : "Published courses"}
+            value={publishedCourses.length}
+            tone="primary"
+            hint={`${studentsCount} ${ar ? "تسجيل طالب" : "enrollments"}`}
+          />
+        </div>
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-[260px_1fr]">
+          {/* Sidebar */}
+          <aside className="space-y-4">
+            <nav className="rounded-2xl border border-border bg-card p-2 shadow-sm">
+              {tabs.map((t) => {
+                const Icon = t.icon;
+                const active = tab === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setTab(t.id)}
+                    className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                      active
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Icon className="h-4 w-4" />
+                      {t.label}
+                    </span>
+                    {t.badge ? (
+                      <span
+                        className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
+                          active ? "bg-primary-foreground/20 text-primary-foreground" : "bg-amber-500 text-white"
+                        }`}
+                      >
+                        {t.badge}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className="rounded-2xl border border-border bg-card p-3 shadow-sm">
+              <p className="px-2 pt-1 pb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                {ar ? "الإدارة المتقدّمة" : "Advanced"}
+              </p>
+              {sideLinks.map((l) => {
+                const Icon = l.icon;
+                return (
+                  <Link
+                    key={l.to}
+                    to={l.to}
+                    className="group flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-foreground hover:bg-muted transition-colors"
+                  >
+                    <span className="flex items-center gap-3 min-w-0">
+                      <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 text-primary shrink-0">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold leading-tight">{l.label}</span>
+                        <span className="block text-[11px] text-muted-foreground leading-tight">{l.desc}</span>
+                      </span>
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary rtl:rotate-180 shrink-0" />
+                  </Link>
+                );
+              })}
             </div>
-          ))}
-        </div>
-      )}
+          </aside>
 
-      {tab === "categories" && (
-        <div className="mt-6 space-y-4">
-          <form onSubmit={addCategory} className="grid sm:grid-cols-4 gap-2">
-            <Input placeholder={lang === "ar" ? "الاسم (عربي)" : "Name (AR)"} value={newCat.name_ar} onChange={(e) => setNewCat({ ...newCat, name_ar: e.target.value })} required />
-            <Input placeholder={lang === "ar" ? "الاسم (إنجليزي)" : "Name (EN)"} value={newCat.name_en} onChange={(e) => setNewCat({ ...newCat, name_en: e.target.value })} />
-            <Input placeholder={lang === "ar" ? "المعرّف" : "slug"} value={newCat.slug} onChange={(e) => setNewCat({ ...newCat, slug: e.target.value })} required />
-            <Button type="submit"><Plus className="h-4 w-4 mx-1" />{lang === "ar" ? "إضافة" : "Add"}</Button>
-          </form>
-          <div className="space-y-2">
-            {categories.map((c) => (
-              <div key={c.id} className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2">
-                <span className="text-sm">{c.name_ar} {c.name_en && <span className="text-muted-foreground">· {c.name_en}</span>} <span className="text-xs text-muted-foreground">({c.slug})</span></span>
-                <Button size="sm" variant="ghost" onClick={() => deleteCategory(c.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+          {/* Main */}
+          <main className="min-w-0">
+            {tab === "overview" && (
+              <div className="space-y-6">
+                {/* Pending instructor requests highlight */}
+                <Section
+                  title={ar ? "طلبات مدرّسين بانتظار الموافقة" : "Instructor requests pending approval"}
+                  count={pendingInstructors.length}
+                  emptyText={ar ? "لا توجد طلبات حالياً." : "No pending requests."}
+                  action={
+                    pendingInstructors.length > 3 ? (
+                      <button onClick={() => setTab("instructors")} className="text-xs font-bold text-primary hover:underline">
+                        {ar ? "عرض الكل" : "View all"}
+                      </button>
+                    ) : null
+                  }
+                >
+                  {pendingInstructors.slice(0, 3).map((i) => (
+                    <InstructorRequestCard
+                      key={i.user_id}
+                      ins={i}
+                      ar={ar}
+                      onApprove={() => approveInstructor(i.user_id, true)}
+                      onReject={() => rejectInstructor(i.user_id)}
+                    />
+                  ))}
+                </Section>
+
+                {/* Pending courses highlight */}
+                <Section
+                  title={ar ? "دورات بانتظار المراجعة" : "Courses pending review"}
+                  count={pendingCourses.length}
+                  emptyText={ar ? "لا توجد دورات بانتظار النشر." : "No courses awaiting review."}
+                  action={
+                    pendingCourses.length > 3 ? (
+                      <button onClick={() => setTab("courses")} className="text-xs font-bold text-primary hover:underline">
+                        {ar ? "عرض الكل" : "View all"}
+                      </button>
+                    ) : null
+                  }
+                >
+                  {pendingCourses.slice(0, 3).map((c) => (
+                    <CourseRow
+                      key={c.id}
+                      c={c}
+                      ar={ar}
+                      onPublish={() => setCourseStatus(c.id, "published")}
+                      onReject={() => {
+                        const r = prompt(ar ? "سبب الرفض؟" : "Rejection reason?");
+                        if (r !== null) setCourseStatus(c.id, "rejected", r);
+                      }}
+                    />
+                  ))}
+                </Section>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            )}
+
+            {tab === "instructors" && (
+              <div className="space-y-6">
+                <Section
+                  title={ar ? "طلبات جديدة" : "New requests"}
+                  count={pendingInstructors.length}
+                  emptyText={ar ? "لا توجد طلبات حالياً." : "No pending requests."}
+                >
+                  {pendingInstructors.map((i) => (
+                    <InstructorRequestCard
+                      key={i.user_id}
+                      ins={i}
+                      ar={ar}
+                      onApprove={() => approveInstructor(i.user_id, true)}
+                      onReject={() => rejectInstructor(i.user_id)}
+                    />
+                  ))}
+                </Section>
+
+                <Section
+                  title={ar ? "المدرّسون المعتمَدون" : "Approved instructors"}
+                  count={approvedInstructors.length}
+                  emptyText={ar ? "لا يوجد مدرّسون معتمَدون." : "No approved instructors."}
+                >
+                  {approvedInstructors.map((i) => (
+                    <div
+                      key={i.user_id}
+                      className="rounded-xl border border-border bg-card p-4 flex flex-wrap items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 shrink-0">
+                          <CheckCircle2 className="h-5 w-5" />
+                        </span>
+                        <div className="min-w-0">
+                          <div className="font-bold text-foreground truncate">{i.full_name}</div>
+                          <div className="text-xs text-muted-foreground truncate">{i.specialty || (ar ? "بدون تخصّص" : "No specialty")}</div>
+                        </div>
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => approveInstructor(i.user_id, false)}>
+                        {ar ? "إلغاء الموافقة" : "Revoke"}
+                      </Button>
+                    </div>
+                  ))}
+                </Section>
+              </div>
+            )}
+
+            {tab === "courses" && (
+              <div className="space-y-6">
+                <Section
+                  title={ar ? "بانتظار المراجعة" : "Pending review"}
+                  count={pendingCourses.length}
+                  emptyText={ar ? "لا توجد دورات بانتظار النشر." : "No courses awaiting review."}
+                >
+                  {pendingCourses.map((c) => (
+                    <CourseRow
+                      key={c.id}
+                      c={c}
+                      ar={ar}
+                      onPublish={() => setCourseStatus(c.id, "published")}
+                      onReject={() => {
+                        const r = prompt(ar ? "سبب الرفض؟" : "Rejection reason?");
+                        if (r !== null) setCourseStatus(c.id, "rejected", r);
+                      }}
+                    />
+                  ))}
+                </Section>
+
+                <Section
+                  title={ar ? "جميع الدورات" : "All courses"}
+                  count={courses.length}
+                  emptyText={ar ? "لا توجد دورات." : "No courses yet."}
+                >
+                  {courses
+                    .filter((c) => c.status !== "pending")
+                    .map((c) => (
+                      <div
+                        key={c.id}
+                        className="rounded-xl border border-border bg-card p-4 flex flex-wrap items-center justify-between gap-3"
+                      >
+                        <div className="min-w-0">
+                          <div className="font-bold text-foreground truncate">{c.title_ar}</div>
+                          <StatusBadge status={c.status} ar={ar} />
+                        </div>
+                        {c.status === "published" ? (
+                          <Button size="sm" variant="outline" onClick={() => setCourseStatus(c.id, "draft")}>
+                            {ar ? "إلغاء النشر" : "Unpublish"}
+                          </Button>
+                        ) : c.status === "draft" || c.status === "rejected" ? (
+                          <Button size="sm" onClick={() => setCourseStatus(c.id, "published")}>
+                            {ar ? "نشر" : "Publish"}
+                          </Button>
+                        ) : null}
+                      </div>
+                    ))}
+                </Section>
+              </div>
+            )}
+
+            {tab === "categories" && (
+              <Section title={ar ? "إدارة التصنيفات" : "Manage categories"} count={categories.length}>
+                <form
+                  onSubmit={addCategory}
+                  className="grid sm:grid-cols-[1fr_1fr_1fr_auto] gap-2 rounded-xl border border-border bg-card p-4"
+                >
+                  <Input
+                    placeholder={ar ? "الاسم (عربي)" : "Name (AR)"}
+                    value={newCat.name_ar}
+                    onChange={(e) => setNewCat({ ...newCat, name_ar: e.target.value })}
+                    required
+                  />
+                  <Input
+                    placeholder={ar ? "الاسم (إنجليزي)" : "Name (EN)"}
+                    value={newCat.name_en}
+                    onChange={(e) => setNewCat({ ...newCat, name_en: e.target.value })}
+                  />
+                  <Input
+                    placeholder={ar ? "المعرّف" : "slug"}
+                    value={newCat.slug}
+                    onChange={(e) => setNewCat({ ...newCat, slug: e.target.value })}
+                    required
+                  />
+                  <Button type="submit">
+                    <Plus className="h-4 w-4 mx-1" />
+                    {ar ? "إضافة" : "Add"}
+                  </Button>
+                </form>
+                {categories.map((c) => (
+                  <div
+                    key={c.id}
+                    className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3"
+                  >
+                    <span className="text-sm">
+                      <span className="font-semibold text-foreground">{c.name_ar}</span>
+                      {c.name_en && <span className="text-muted-foreground"> · {c.name_en}</span>}
+                      <span className="ml-2 text-xs text-muted-foreground">({c.slug})</span>
+                    </span>
+                    <Button size="sm" variant="ghost" onClick={() => deleteCategory(c.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </Section>
+            )}
+          </main>
         </div>
       </div>
     </div>
+  );
+}
+
+/* ---------- helpers ---------- */
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  hint,
+  tone,
+}: {
+  icon: typeof Users;
+  label: string;
+  value: number;
+  hint?: string;
+  tone: "primary" | "amber" | "neutral";
+}) {
+  const tones = {
+    primary: "from-primary/10 to-primary/5 border-primary/20 text-primary",
+    amber: "from-amber-500/15 to-amber-500/5 border-amber-500/30 text-amber-600",
+    neutral: "from-muted to-background border-border text-muted-foreground",
+  } as const;
+  return (
+    <div className={`rounded-2xl border bg-gradient-to-br ${tones[tone]} p-4 sm:p-5 shadow-sm`}>
+      <div className="flex items-center justify-between">
+        <span className={`inline-flex h-9 w-9 items-center justify-center rounded-xl bg-background/70`}>
+          <Icon className="h-4.5 w-4.5" />
+        </span>
+        <span className="text-3xl font-extrabold tracking-tight text-foreground tabular-nums">{value}</span>
+      </div>
+      <p className="mt-3 text-sm font-bold text-foreground">{label}</p>
+      {hint && <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+function Section({
+  title,
+  count,
+  emptyText,
+  action,
+  children,
+}: {
+  title: string;
+  count?: number;
+  emptyText?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const items = Array.isArray(children) ? children.filter(Boolean) : [children].filter(Boolean);
+  const isEmpty = items.length === 0 || count === 0;
+  return (
+    <section className="space-y-3">
+      <div className="flex items-end justify-between gap-2">
+        <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+          {title}
+          {typeof count === "number" && count > 0 && (
+            <Badge variant="secondary" className="text-[10px]">
+              {count}
+            </Badge>
+          )}
+        </h2>
+        {action}
+      </div>
+      {isEmpty && emptyText ? (
+        <p className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
+          {emptyText}
+        </p>
+      ) : (
+        <div className="space-y-2.5">{children}</div>
+      )}
+    </section>
+  );
+}
+
+function InstructorRequestCard({
+  ins,
+  ar,
+  onApprove,
+  onReject,
+}: {
+  ins: Instructor;
+  ar: boolean;
+  onApprove: () => void;
+  onReject: () => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-50/80 to-card dark:from-amber-950/20 dark:to-card p-4 sm:p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-start gap-3 min-w-0 flex-1">
+          <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 shrink-0">
+            <Clock className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <div className="font-bold text-foreground truncate text-base">{ins.full_name}</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              {ar ? "طلب تفعيل حساب مدرّس" : "Instructor activation request"}
+            </div>
+            {ins.specialty && <div className="mt-1 text-xs text-foreground">{ins.specialty}</div>}
+            {ins.bio && <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{ins.bio}</p>}
+          </div>
+        </div>
+        <div className="flex gap-2 shrink-0">
+          <Button size="sm" onClick={onApprove} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Check className="h-4 w-4 mx-1" />
+            {ar ? "موافقة" : "Approve"}
+          </Button>
+          <Button size="sm" variant="outline" onClick={onReject}>
+            <X className="h-4 w-4 mx-1" />
+            {ar ? "رفض" : "Reject"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CourseRow({
+  c,
+  ar,
+  onPublish,
+  onReject,
+}: {
+  c: Course;
+  ar: boolean;
+  onPublish: () => void;
+  onReject: () => void;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="min-w-0">
+        <div className="font-bold text-foreground truncate">{c.title_ar}</div>
+        <StatusBadge status={c.status} ar={ar} />
+      </div>
+      <div className="flex gap-2">
+        <Button size="sm" onClick={onPublish}>
+          <Check className="h-4 w-4 mx-1" />
+          {ar ? "نشر" : "Publish"}
+        </Button>
+        <Button size="sm" variant="destructive" onClick={onReject}>
+          <X className="h-4 w-4 mx-1" />
+          {ar ? "رفض" : "Reject"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function StatusBadge({ status, ar }: { status: string; ar: boolean }) {
+  const map: Record<string, { cls: string; ar: string; en: string; Icon: typeof Clock }> = {
+    draft: { cls: "bg-muted text-muted-foreground", ar: "مسودّة", en: "Draft", Icon: FileText },
+    pending: { cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300", ar: "بانتظار المراجعة", en: "Pending", Icon: Clock },
+    published: { cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300", ar: "منشورة", en: "Published", Icon: CheckCircle2 },
+    rejected: { cls: "bg-destructive/15 text-destructive", ar: "مرفوضة", en: "Rejected", Icon: XCircle },
+  };
+  const m = map[status] ?? map.draft;
+  const Icon = m.Icon;
+  return (
+    <span className={`mt-1 inline-flex items-center gap-1 text-[11px] font-bold rounded-full px-2 py-0.5 ${m.cls}`}>
+      <Icon className="h-3 w-3" />
+      {ar ? m.ar : m.en}
+    </span>
   );
 }
