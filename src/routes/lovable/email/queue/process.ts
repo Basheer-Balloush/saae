@@ -1,6 +1,38 @@
-import { sendLovableEmail } from '@lovable.dev/email-js'
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
+
+const FROM_ADDRESS = 'Aisyria <noreply@aisyria.org>'
+const RESEND_GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
+
+async function sendViaResend(payload: {
+  to: string
+  subject: string
+  html?: string
+  text?: string
+}, apiKey: string, resendKey: string): Promise<void> {
+  const response = await fetch(`${RESEND_GATEWAY_URL}/emails`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'X-Connection-Api-Key': resendKey,
+    },
+    body: JSON.stringify({
+      from: FROM_ADDRESS,
+      to: [payload.to],
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text,
+    }),
+  })
+
+  if (!response.ok) {
+    const body = await response.text()
+    const err = new Error(`Resend API error [${response.status}]: ${body}`) as Error & { status: number }
+    err.status = response.status
+    throw err
+  }
+}
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
@@ -222,22 +254,19 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
             }
 
             try {
-              await sendLovableEmail(
+              const resendKey = process.env.RESEND_API_KEY
+              if (!resendKey) {
+                throw new Error('RESEND_API_KEY is not configured')
+              }
+              await sendViaResend(
                 {
-                  run_id: payload.run_id,
                   to: payload.to,
-                  from: payload.from,
-                  sender_domain: payload.sender_domain,
                   subject: payload.subject,
                   html: payload.html,
                   text: payload.text,
-                  purpose: payload.purpose,
-                  label: payload.label,
-                  idempotency_key: payload.idempotency_key,
-                  unsubscribe_token: payload.unsubscribe_token,
-                  message_id: payload.message_id,
                 },
-                { apiKey, sendUrl: process.env.LOVABLE_SEND_URL }
+                apiKey,
+                resendKey,
               )
 
               // Log success
