@@ -107,6 +107,7 @@ function Player() {
 
   if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
 
+  const safeHref = (url: string) => (/^https?:\/\//i.test(url) ? url : "#");
   const attachments = Array.isArray(current?.attachments) ? (current!.attachments as { name: string; url: string }[]) : [];
 
   return (
