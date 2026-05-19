@@ -19,11 +19,16 @@ function InstructorLayout() {
   useEffect(() => {
     if (loading) return;
     if (!user) { navigate({ to: "/learning-management-system/login" }); return; }
+    // If the user already has the lms_instructor or lms_admin role granted, they're approved.
+    if (role === "lms_instructor" || role === "lms_admin") {
+      setApproved(true);
+      return;
+    }
     (async () => {
       const { data } = await supabase.from("lms_instructors").select("approved").eq("user_id", user.id).maybeSingle();
       setApproved(data?.approved ?? false);
     })();
-  }, [loading, user, navigate]);
+  }, [loading, user, role, navigate]);
 
   if (loading || !user || approved === null) {
     return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
