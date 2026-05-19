@@ -261,52 +261,77 @@ function CourseDetails() {
               </span>
             )}
           </div>
-          {enrolled ? (
-            <Link to="/learning-management-system/student/player/$courseId" params={{ courseId: course.id }}>
-              <Button className="w-full mt-4" size="lg">{tr.goToCourse}</Button>
-            </Link>
-          ) : (
-            <>
-              {!course.is_free && user && (
-                <>
-                  <Input
-                    placeholder={lang === "ar" ? "كود خصم (اختياري)" : "Coupon code (optional)"}
-                    value={coupon}
-                    onChange={(e) => setCoupon(e.target.value.toUpperCase())}
-                    className="mt-4"
-                  />
-                  {balance !== null && (
-                    <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Wallet className="h-3.5 w-3.5" />
-                      {lang === "ar" ? "رصيدك:" : "Your balance:"}{" "}
-                      <span dir="ltr" className="inline-flex flex-row items-center gap-1 font-semibold text-foreground">
-                        {lang === "ar" ? (
-                          <>
-                            <span dir="rtl">ل.س</span>
-                            <span>{balance.toLocaleString()}</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>{balance.toLocaleString()}</span>
-                            <span>SYP</span>
-                          </>
-                        )}
-                      </span>
-                      {balance < Number(course.price) && (
-                        <Link to="/learning-management-system/student/wallet" className="text-primary underline mx-1">
-                          {lang === "ar" ? "اشحن" : "Top up"}
-                        </Link>
-                      )}
+          {(() => {
+            const full = course.max_students !== null && course.students_count >= course.max_students;
+            const closed = !course.enrollment_open;
+            if (enrolled) {
+              return (
+                <Link to="/learning-management-system/student/player/$courseId" params={{ courseId: course.id }}>
+                  <Button className="w-full mt-4" size="lg">{tr.goToCourse}</Button>
+                </Link>
+              );
+            }
+            if (pendingRequest) {
+              return (
+                <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 p-4 text-center">
+                  <Clock className="h-5 w-5 mx-auto text-amber-600" />
+                  <p className="mt-2 text-sm font-semibold text-amber-800 dark:text-amber-200">
+                    {ar ? "طلبك قيد المراجعة" : "Your request is pending"}
+                  </p>
+                </div>
+              );
+            }
+            if (closed || full) {
+              return (
+                <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                  {full ? (ar ? "اكتمل العدد" : "Course is full") : (ar ? "التسجيل مغلق حالياً" : "Enrollment is closed")}
+                </div>
+              );
+            }
+            if (course.is_free) {
+              return (
+                <Button className="w-full mt-4" size="lg" onClick={onFreeEnroll} disabled={busy}>
+                  {busy && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
+                  {tr.enroll}
+                </Button>
+              );
+            }
+            return (
+              <div className="mt-4 space-y-2">
+                <Button className="w-full" size="lg" onClick={onOnlinePay} disabled={busy}>
+                  <CreditCard className="h-4 w-4 mx-2" />
+                  {ar ? "ادفع إلكترونياً" : "Pay online"}
+                </Button>
+                {manualOpen ? (
+                  <div className="rounded-xl border border-border bg-card p-3 space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      {ar ? "سيتم إرسال طلب للأدمن. بعد دفع المبلغ وموافقة الإدارة سيُفعَّل اشتراكك." : "A request will be sent to the admin. After payment & approval, you'll be enrolled."}
+                    </p>
+                    <Textarea
+                      placeholder={ar ? "ملاحظات (اختياري — طريقة التواصل، رقم تحويل...)" : "Notes (optional)"}
+                      value={manualNotes}
+                      onChange={(e) => setManualNotes(e.target.value)}
+                      rows={3}
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={onManualSubmit} disabled={busy} className="flex-1">
+                        {busy && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
+                        {ar ? "إرسال" : "Submit"}
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setManualOpen(false)}>
+                        {ar ? "إلغاء" : "Cancel"}
+                      </Button>
                     </div>
-                  )}
-                </>
-              )}
-              <Button className="w-full mt-4" size="lg" onClick={onEnroll} disabled={enrolling}>
-                {enrolling && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-                {enrolling ? tr.enrolling : (course.is_free ? tr.enroll : (lang === "ar" ? "سجّل الآن" : "Enroll Now"))}
-              </Button>
-            </>
-          )}
+                  </div>
+                ) : (
+                  <Button className="w-full" size="lg" variant="outline" onClick={() => requireAuth() && setManualOpen(true)}>
+                    <Receipt className="h-4 w-4 mx-2" />
+                    {ar ? "طلب اشتراك (دفع يدوي)" : "Request enrollment (manual payment)"}
+                  </Button>
+                )}
+              </div>
+            );
+          })()}
           {instructor && (
             <div className="mt-6 pt-6 border-t border-border">
               <div className="text-xs text-muted-foreground">{tr.byInstructor}</div>
