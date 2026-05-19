@@ -74,8 +74,8 @@ function StudentHome() {
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tr.welcomeBack}</h1>
           <p className="mt-2 text-muted-foreground">{tr.continueLesson}</p>
         </div>
-        <Link to="/learning-management-system/student/wallet">
-          <Button variant="outline" size="sm">💳 {lang === "ar" ? "محفظتي" : "My Wallet"}</Button>
+        <Link to="/learning-management-system/student/requests">
+          <Button variant="outline" size="sm">📋 {lang === "ar" ? "طلبات الاشتراك" : "My requests"}</Button>
         </Link>
       </div>
 
