@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, X, Moon, Sun, Globe, LogOut, BookOpen, LayoutDashboard, ShieldCheck, GraduationCap } from "lucide-react";
+import { Menu, X, Moon, Sun, Globe, LogOut, BookOpen, LayoutDashboard, ShieldCheck, GraduationCap, ArrowLeft, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
