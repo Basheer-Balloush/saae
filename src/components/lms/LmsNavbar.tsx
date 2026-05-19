@@ -183,6 +183,15 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
               </Link>
             ))}
 
+            <Link
+              to="/"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+            >
+              {lang === "ar" ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
+              {lang === "ar" ? "العودة للموقع الرئيسي" : "Back to main site"}
+            </Link>
+
             {isAuthed ? (
               <button
                 onClick={() => { setOpen(false); onSignOut(); }}
