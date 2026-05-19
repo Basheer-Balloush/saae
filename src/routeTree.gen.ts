@@ -37,6 +37,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system.student.index'
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
 import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system.admin.index'
+import { Route as LearningManagementSystemStudentRequestsRouteImport } from './routes/learning-management-system.student.requests'
 import { Route as LearningManagementSystemInstructorsIdRouteImport } from './routes/learning-management-system.instructors.$id'
 import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/learning-management-system.courses.$id'
 import { Route as LearningManagementSystemCertificateIdRouteImport } from './routes/learning-management-system.certificate.$id'
@@ -210,6 +211,12 @@ const LearningManagementSystemAdminIndexRoute =
     path: '/',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const LearningManagementSystemStudentRequestsRoute =
+  LearningManagementSystemStudentRequestsRouteImport.update({
+    id: '/requests',
+    path: '/requests',
+    getParentRoute: () => LearningManagementSystemStudentRoute,
+  } as any)
 const LearningManagementSystemInstructorsIdRoute =
   LearningManagementSystemInstructorsIdRouteImport.update({
     id: '/instructors/$id',
@@ -333,6 +340,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructors/$id': typeof LearningManagementSystemInstructorsIdRoute
+  '/learning-management-system/student/requests': typeof LearningManagementSystemStudentRequestsRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
@@ -373,6 +381,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructors/$id': typeof LearningManagementSystemInstructorsIdRoute
+  '/learning-management-system/student/requests': typeof LearningManagementSystemStudentRequestsRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentIndexRoute
@@ -419,6 +428,7 @@ export interface FileRoutesById {
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructors/$id': typeof LearningManagementSystemInstructorsIdRoute
+  '/learning-management-system/student/requests': typeof LearningManagementSystemStudentRequestsRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
@@ -466,6 +476,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructors/$id'
+    | '/learning-management-system/student/requests'
     | '/learning-management-system/admin/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/student/'
@@ -506,6 +517,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructors/$id'
+    | '/learning-management-system/student/requests'
     | '/learning-management-system/admin'
     | '/learning-management-system/instructor'
     | '/learning-management-system/student'
@@ -551,6 +563,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructors/$id'
+    | '/learning-management-system/student/requests'
     | '/learning-management-system/admin/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/student/'
@@ -780,6 +793,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemAdminIndexRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
     }
+    '/learning-management-system/student/requests': {
+      id: '/learning-management-system/student/requests'
+      path: '/requests'
+      fullPath: '/learning-management-system/student/requests'
+      preLoaderRoute: typeof LearningManagementSystemStudentRequestsRouteImport
+      parentRoute: typeof LearningManagementSystemStudentRoute
+    }
     '/learning-management-system/instructors/$id': {
       id: '/learning-management-system/instructors/$id'
       path: '/instructors/$id'
@@ -956,6 +976,7 @@ const LearningManagementSystemInstructorRouteWithChildren =
   )
 
 interface LearningManagementSystemStudentRouteChildren {
+  LearningManagementSystemStudentRequestsRoute: typeof LearningManagementSystemStudentRequestsRoute
   LearningManagementSystemStudentIndexRoute: typeof LearningManagementSystemStudentIndexRoute
   LearningManagementSystemStudentPlayerCourseIdRoute: typeof LearningManagementSystemStudentPlayerCourseIdRoute
   LearningManagementSystemStudentQuizCourseIdRoute: typeof LearningManagementSystemStudentQuizCourseIdRoute
@@ -963,6 +984,8 @@ interface LearningManagementSystemStudentRouteChildren {
 
 const LearningManagementSystemStudentRouteChildren: LearningManagementSystemStudentRouteChildren =
   {
+    LearningManagementSystemStudentRequestsRoute:
+      LearningManagementSystemStudentRequestsRoute,
     LearningManagementSystemStudentIndexRoute:
       LearningManagementSystemStudentIndexRoute,
     LearningManagementSystemStudentPlayerCourseIdRoute:
