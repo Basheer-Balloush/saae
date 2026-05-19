@@ -102,9 +102,8 @@ function AdminEnrollmentRequests() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="font-semibold text-foreground">{cTitle}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      {r.student?.full_name || r.student?.email || r.user_id}
-                      {r.student?.email && r.student.full_name && <span> · {r.student.email}</span>}
+                    <div className="text-xs text-muted-foreground mt-0.5 font-mono">
+                      {r.user_id}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       {ar ? "السعر" : "Price"}: {r.course ? `${r.course.price.toLocaleString()} ${ar ? "ل.س" : "SYP"}` : "—"}
