@@ -61,9 +61,6 @@ function InstructorHome() {
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tr.navInstructor}</h1>
-        <Link to="/learning-management-system/instructor/earnings">
-          <Button variant="outline" size="sm">{lang === "ar" ? "أرباحي" : "Earnings"}</Button>
-        </Link>
       </div>
       <div className="flex items-center justify-between mt-4">
         <Dialog open={open} onOpenChange={setOpen}>
