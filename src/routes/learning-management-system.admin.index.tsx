@@ -10,10 +10,8 @@ import {
   GraduationCap,
   FolderTree,
   BarChart3,
-  Wallet,
   Ticket,
   Star,
-  ArrowDownToLine,
   Clock,
   CheckCircle2,
   XCircle,
@@ -21,6 +19,7 @@ import {
   ChevronRight,
   Mail,
   Sparkles,
+  Inbox,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
