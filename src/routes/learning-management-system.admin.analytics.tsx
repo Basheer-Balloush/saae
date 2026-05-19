@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, BookOpen, GraduationCap, DollarSign, Award, ShoppingCart, ArrowLeft } from "lucide-react";
+import { Users, BookOpen, GraduationCap, Award, ShoppingCart, ArrowLeft, Inbox } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 
@@ -11,56 +11,48 @@ export const Route = createFileRoute("/learning-management-system/admin/analytic
 
 type Stat = { label: string; value: string | number; icon: React.ElementType; color: string };
 type TopCourse = { id: string; title_ar: string; students_count: number; rating_avg: number };
+type RecentPayment = { id: string; status: string; amount: number; created_at: string };
 
 function Analytics() {
   const { lang } = useLang();
   const ar = lang === "ar";
   const [stats, setStats] = useState<Stat[]>([]);
   const [topCourses, setTopCourses] = useState<TopCourse[]>([]);
-  const [recentTx, setRecentTx] = useState<{ id: string; type: string; amount: number; created_at: string }[]>([]);
+  const [recentPayments, setRecentPayments] = useState<RecentPayment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       const [
-        { count: usersCount },
         { count: coursesCount },
         { count: publishedCount },
         { count: instructorsCount },
         { count: enrollmentsCount },
         { count: certsCount },
-        { data: txAll },
+        { count: pendingReqs },
         { data: top },
         { data: recent },
       ] = await Promise.all([
-        supabase.from("lms_wallets").select("*", { count: "exact", head: true }),
         supabase.from("lms_courses").select("*", { count: "exact", head: true }),
         supabase.from("lms_courses").select("*", { count: "exact", head: true }).eq("status", "published"),
         supabase.from("lms_instructors").select("*", { count: "exact", head: true }).eq("approved", true),
         supabase.from("lms_enrollments").select("*", { count: "exact", head: true }),
         supabase.from("lms_certificates").select("*", { count: "exact", head: true }),
-        supabase.from("lms_transactions").select("amount,type"),
+        supabase.from("lms_enrollment_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("lms_courses").select("id,title_ar,students_count,rating_avg").order("students_count", { ascending: false }).limit(5),
-        supabase.from("lms_transactions").select("id,type,amount,created_at").order("created_at", { ascending: false }).limit(10),
+        supabase.from("lms_payments").select("id,status,amount,created_at").order("created_at", { ascending: false }).limit(10),
       ]);
 
-      const gmv = (txAll ?? []).filter((t) => t.type === "purchase").reduce((s, t) => s + Math.abs(Number(t.amount)), 0);
-      const commission = (txAll ?? []).filter((t) => t.type === "earning").reduce((s, t) => {
-        return s; // not needed
-      }, 0);
-      void commission;
-
       setStats([
-        { label: ar ? "المستخدمون" : "Users", value: usersCount ?? 0, icon: Users, color: "text-blue-500" },
         { label: ar ? "المدربون" : "Instructors", value: instructorsCount ?? 0, icon: GraduationCap, color: "text-purple-500" },
         { label: ar ? "إجمالي الدورات" : "Total Courses", value: coursesCount ?? 0, icon: BookOpen, color: "text-amber-500" },
         { label: ar ? "منشورة" : "Published", value: publishedCount ?? 0, icon: BookOpen, color: "text-emerald-500" },
         { label: ar ? "اشتراكات" : "Enrollments", value: enrollmentsCount ?? 0, icon: ShoppingCart, color: "text-pink-500" },
         { label: ar ? "شهادات صادرة" : "Certificates", value: certsCount ?? 0, icon: Award, color: "text-yellow-500" },
-        { label: ar ? "إجمالي المبيعات" : "Gross Sales", value: gmv.toLocaleString(), icon: DollarSign, color: "text-emerald-600" },
+        { label: ar ? "طلبات معلّقة" : "Pending requests", value: pendingReqs ?? 0, icon: Inbox, color: "text-blue-500" },
       ]);
       setTopCourses((top as TopCourse[]) ?? []);
-      setRecentTx((recent as typeof recentTx) ?? []);
+      setRecentPayments((recent as RecentPayment[]) ?? []);
       setLoading(false);
     })();
   }, [ar]);
@@ -110,20 +102,20 @@ function Analytics() {
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-5">
-          <h2 className="font-bold text-foreground mb-4">{ar ? "آخر العمليات" : "Recent Transactions"}</h2>
+          <h2 className="font-bold text-foreground mb-4">{ar ? "آخر المدفوعات" : "Recent Payments"}</h2>
           <div className="space-y-2">
-            {recentTx.map((t) => (
+            {recentPayments.map((t) => (
               <div key={t.id} className="flex items-center justify-between text-sm border-b border-border/50 pb-2">
                 <div>
-                  <div className="font-semibold text-foreground capitalize">{t.type}</div>
+                  <div className="font-semibold text-foreground capitalize">{t.status}</div>
                   <div className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleString()}</div>
                 </div>
-                <span className={`font-bold ${Number(t.amount) >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
-                  {Number(t.amount) >= 0 ? "+" : ""}{Number(t.amount).toLocaleString()}
+                <span className="font-bold text-emerald-600">
+                  {Number(t.amount).toLocaleString()}
                 </span>
               </div>
             ))}
-            {recentTx.length === 0 && <p className="text-sm text-muted-foreground">—</p>}
+            {recentPayments.length === 0 && <p className="text-sm text-muted-foreground">—</p>}
           </div>
         </div>
       </div>

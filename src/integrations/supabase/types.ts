@@ -706,10 +706,12 @@ export type Database = {
           created_at: string
           description_ar: string | null
           description_en: string | null
+          enrollment_open: boolean
           id: string
           instructor_id: string
           is_free: boolean
           level: Database["public"]["Enums"]["lms_course_level"]
+          max_students: number | null
           price: number
           rating_avg: number
           rejection_reason: string | null
@@ -725,10 +727,12 @@ export type Database = {
           created_at?: string
           description_ar?: string | null
           description_en?: string | null
+          enrollment_open?: boolean
           id?: string
           instructor_id: string
           is_free?: boolean
           level?: Database["public"]["Enums"]["lms_course_level"]
+          max_students?: number | null
           price?: number
           rating_avg?: number
           rejection_reason?: string | null
@@ -744,10 +748,12 @@ export type Database = {
           created_at?: string
           description_ar?: string | null
           description_en?: string | null
+          enrollment_open?: boolean
           id?: string
           instructor_id?: string
           is_free?: boolean
           level?: Database["public"]["Enums"]["lms_course_level"]
+          max_students?: number | null
           price?: number
           rating_avg?: number
           rejection_reason?: string | null
@@ -771,6 +777,56 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "lms_instructors"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      lms_enrollment_requests: {
+        Row: {
+          admin_notes: string | null
+          course_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          notes: string | null
+          payment_method: Database["public"]["Enums"]["lms_payment_method"]
+          status: Database["public"]["Enums"]["lms_enroll_req_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          course_id: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: Database["public"]["Enums"]["lms_payment_method"]
+          status?: Database["public"]["Enums"]["lms_enroll_req_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          course_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: Database["public"]["Enums"]["lms_payment_method"]
+          status?: Database["public"]["Enums"]["lms_enroll_req_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_enrollment_requests_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -808,39 +864,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      lms_instructor_earnings: {
-        Row: {
-          commission: number
-          course_id: string
-          created_at: string
-          gross: number
-          id: string
-          instructor_id: string
-          net: number
-          student_id: string
-        }
-        Insert: {
-          commission: number
-          course_id: string
-          created_at?: string
-          gross: number
-          id?: string
-          instructor_id: string
-          net: number
-          student_id: string
-        }
-        Update: {
-          commission?: number
-          course_id?: string
-          created_at?: string
-          gross?: number
-          id?: string
-          instructor_id?: string
-          net?: number
-          student_id?: string
-        }
-        Relationships: []
       }
       lms_instructors: {
         Row: {
@@ -969,38 +992,55 @@ export type Database = {
           },
         ]
       }
-      lms_payouts: {
+      lms_payments: {
         Row: {
           amount: number
+          course_id: string
           created_at: string
           id: string
-          instructor_id: string
-          method: string | null
           notes: string | null
-          processed_at: string | null
-          status: Database["public"]["Enums"]["lms_payout_status"]
+          paymera_payment_id: string | null
+          raw_response: Json | null
+          rrn: string | null
+          status: string
+          updated_at: string
+          user_id: string
         }
         Insert: {
           amount: number
+          course_id: string
           created_at?: string
           id?: string
-          instructor_id: string
-          method?: string | null
           notes?: string | null
-          processed_at?: string | null
-          status?: Database["public"]["Enums"]["lms_payout_status"]
+          paymera_payment_id?: string | null
+          raw_response?: Json | null
+          rrn?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
         }
         Update: {
           amount?: number
+          course_id?: string
           created_at?: string
           id?: string
-          instructor_id?: string
-          method?: string | null
           notes?: string | null
-          processed_at?: string | null
-          status?: Database["public"]["Enums"]["lms_payout_status"]
+          paymera_payment_id?: string | null
+          raw_response?: Json | null
+          rrn?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lms_payments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lms_questions: {
         Row: {
@@ -1267,57 +1307,6 @@ export type Database = {
           },
         ]
       }
-      lms_transactions: {
-        Row: {
-          amount: number
-          course_id: string | null
-          created_at: string
-          id: string
-          meta: Json
-          type: Database["public"]["Enums"]["lms_tx_type"]
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          course_id?: string | null
-          created_at?: string
-          id?: string
-          meta?: Json
-          type: Database["public"]["Enums"]["lms_tx_type"]
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          course_id?: string | null
-          created_at?: string
-          id?: string
-          meta?: Json
-          type?: Database["public"]["Enums"]["lms_tx_type"]
-          user_id?: string
-        }
-        Relationships: []
-      }
-      lms_wallets: {
-        Row: {
-          balance: number
-          pending_payout: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          balance?: number
-          pending_payout?: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          balance?: number
-          pending_payout?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       members: {
         Row: {
           bio_ar: string | null
@@ -1508,8 +1497,8 @@ export type Database = {
         Returns: boolean
       }
       is_lms_admin: { Args: { _user_id: string }; Returns: boolean }
-      lms_admin_topup: {
-        Args: { _amount: number; _notes?: string; _user_id: string }
+      lms_approve_enrollment_request: {
+        Args: { _admin_notes?: string; _request_id: string }
         Returns: undefined
       }
       lms_checkout: {
@@ -1530,6 +1519,10 @@ export type Database = {
       }
       lms_process_payout: {
         Args: { _approve: boolean; _payout_id: string }
+        Returns: undefined
+      }
+      lms_reject_enrollment_request: {
+        Args: { _admin_notes?: string; _request_id: string }
         Returns: undefined
       }
       lms_request_payout: {
@@ -1589,7 +1582,8 @@ export type Database = {
         | "lms_admin"
       lms_course_level: "beginner" | "intermediate" | "advanced"
       lms_course_status: "draft" | "pending" | "rejected" | "published"
-      lms_payout_status: "pending" | "approved" | "rejected" | "paid"
+      lms_enroll_req_status: "pending" | "approved" | "rejected" | "cancelled"
+      lms_payment_method: "manual" | "online"
       lms_tx_type:
         | "topup"
         | "purchase"
@@ -1736,7 +1730,8 @@ export const Constants = {
       ],
       lms_course_level: ["beginner", "intermediate", "advanced"],
       lms_course_status: ["draft", "pending", "rejected", "published"],
-      lms_payout_status: ["pending", "approved", "rejected", "paid"],
+      lms_enroll_req_status: ["pending", "approved", "rejected", "cancelled"],
+      lms_payment_method: ["manual", "online"],
       lms_tx_type: [
         "topup",
         "purchase",

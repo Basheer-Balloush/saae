@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, Wallet } from "lucide-react";
+import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, CreditCard, Receipt, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { CourseReviews } from "@/components/lms/CourseReviews";
 
@@ -104,6 +104,7 @@ type Course = {
   description_ar: string | null; description_en: string | null;
   cover_url: string | null; level: string; price: number; is_free: boolean;
   students_count: number; rating_avg: number; instructor_id: string;
+  enrollment_open: boolean; max_students: number | null;
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; duration_seconds: number; is_preview: boolean; display_order: number };
@@ -115,15 +116,17 @@ function CourseDetails() {
   const { user } = useLmsAuth();
   const { lang } = useLang();
   const tr = lmsT[lang];
+  const ar = lang === "ar";
   const [course, setCourse] = useState<Course | null>(null);
   const [instructor, setInstructor] = useState<Instructor | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [enrolled, setEnrolled] = useState(false);
+  const [pendingRequest, setPendingRequest] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [enrolling, setEnrolling] = useState(false);
-  const [coupon, setCoupon] = useState("");
-  const [balance, setBalance] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
+  const [manualNotes, setManualNotes] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -144,53 +147,56 @@ function CourseDetails() {
           setLessons((lss as Lesson[]) ?? []);
         }
         if (user) {
-          const [{ data: e }, { data: w }] = await Promise.all([
+          const [{ data: e }, { data: req }] = await Promise.all([
             supabase.from("lms_enrollments").select("id").eq("course_id", id).eq("student_id", user.id).maybeSingle(),
-            supabase.from("lms_wallets").select("balance").eq("user_id", user.id).maybeSingle(),
+            supabase.from("lms_enrollment_requests").select("id").eq("course_id", id).eq("user_id", user.id).eq("status", "pending").maybeSingle(),
           ]);
           setEnrolled(!!e);
-          setBalance(w ? Number((w as { balance: number }).balance) : 0);
+          setPendingRequest(!!req);
         }
       }
       setLoading(false);
     })();
   }, [id, user]);
 
-  const onEnroll = async () => {
-    if (!user) {
-      navigate({ to: "/learning-management-system/login" });
-      return;
-    }
-    setEnrolling(true);
+  const requireAuth = () => {
+    if (!user) { navigate({ to: "/learning-management-system/login" }); return false; }
+    return true;
+  };
+
+  const onFreeEnroll = async () => {
+    if (!requireAuth()) return;
+    setBusy(true);
     try {
-      const { error } = await supabase.rpc("lms_checkout", { _course_id: id, _coupon: coupon || undefined });
+      const { error } = await supabase.rpc("lms_checkout", { _course_id: id });
       if (error) throw error;
       setEnrolled(true);
       toast.success(tr.enrollmentSuccess);
-      // refresh balance
-      const { data: w } = await supabase.from("lms_wallets").select("balance").eq("user_id", user.id).maybeSingle();
-      setBalance(w ? Number((w as { balance: number }).balance) : 0);
     } catch (err: unknown) {
-      const rawMsg =
-        (err && typeof err === "object" && "message" in err && typeof (err as { message: unknown }).message === "string")
-          ? (err as { message: string }).message
-          : "";
-      const map: Record<string, string> = {
-        "insufficient balance": lang === "ar" ? "رصيدك غير كافٍ" : "Insufficient balance",
-        "already enrolled": lang === "ar" ? "أنت مسجَّل في هذه الدورة" : "Already enrolled",
-        "invalid coupon": lang === "ar" ? "كود الخصم غير صالح" : "Invalid coupon",
-        "coupon expired": lang === "ar" ? "انتهت صلاحية كود الخصم" : "Coupon expired",
-        "coupon exhausted": lang === "ar" ? "استُنفد كود الخصم" : "Coupon exhausted",
-        "coupon not valid for this course": lang === "ar" ? "كود الخصم لا يصلح لهذه الدورة" : "Coupon not valid for this course",
-        "course not published": lang === "ar" ? "الدورة غير منشورة" : "Course not published",
-        "course not found": lang === "ar" ? "الدورة غير موجودة" : "Course not found",
-        "unauthenticated": lang === "ar" ? "يجب تسجيل الدخول أوّلاً" : "You must sign in first",
-      };
-      const key = Object.keys(map).find((k) => rawMsg.toLowerCase().includes(k));
-      toast.error(key ? map[key] : (rawMsg || (lang === "ar" ? "تعذّر إتمام العمليّة" : "Operation failed")));
-    } finally {
-      setEnrolling(false);
-    }
+      toast.error(err instanceof Error ? err.message : "Error");
+    } finally { setBusy(false); }
+  };
+
+  const onOnlinePay = () => {
+    if (!requireAuth()) return;
+    toast.info(ar ? "الدفع الإلكتروني عبر بوابة Paymera — قيد التفعيل" : "Paymera online payment — coming soon");
+  };
+
+  const onManualSubmit = async () => {
+    if (!requireAuth() || !user) return;
+    setBusy(true);
+    try {
+      const { error } = await supabase.from("lms_enrollment_requests").insert({
+        course_id: id, user_id: user.id, payment_method: "manual", notes: manualNotes || null,
+      });
+      if (error) throw error;
+      setPendingRequest(true);
+      setManualOpen(false);
+      setManualNotes("");
+      toast.success(ar ? "تم إرسال طلبك. سيتواصل معك الأدمن قريباً." : "Request submitted. The admin will contact you.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    } finally { setBusy(false); }
   };
 
   if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
@@ -255,52 +261,77 @@ function CourseDetails() {
               </span>
             )}
           </div>
-          {enrolled ? (
-            <Link to="/learning-management-system/student/player/$courseId" params={{ courseId: course.id }}>
-              <Button className="w-full mt-4" size="lg">{tr.goToCourse}</Button>
-            </Link>
-          ) : (
-            <>
-              {!course.is_free && user && (
-                <>
-                  <Input
-                    placeholder={lang === "ar" ? "كود خصم (اختياري)" : "Coupon code (optional)"}
-                    value={coupon}
-                    onChange={(e) => setCoupon(e.target.value.toUpperCase())}
-                    className="mt-4"
-                  />
-                  {balance !== null && (
-                    <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Wallet className="h-3.5 w-3.5" />
-                      {lang === "ar" ? "رصيدك:" : "Your balance:"}{" "}
-                      <span dir="ltr" className="inline-flex flex-row items-center gap-1 font-semibold text-foreground">
-                        {lang === "ar" ? (
-                          <>
-                            <span dir="rtl">ل.س</span>
-                            <span>{balance.toLocaleString()}</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>{balance.toLocaleString()}</span>
-                            <span>SYP</span>
-                          </>
-                        )}
-                      </span>
-                      {balance < Number(course.price) && (
-                        <Link to="/learning-management-system/student/wallet" className="text-primary underline mx-1">
-                          {lang === "ar" ? "اشحن" : "Top up"}
-                        </Link>
-                      )}
+          {(() => {
+            const full = course.max_students !== null && course.students_count >= course.max_students;
+            const closed = !course.enrollment_open;
+            if (enrolled) {
+              return (
+                <Link to="/learning-management-system/student/player/$courseId" params={{ courseId: course.id }}>
+                  <Button className="w-full mt-4" size="lg">{tr.goToCourse}</Button>
+                </Link>
+              );
+            }
+            if (pendingRequest) {
+              return (
+                <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 p-4 text-center">
+                  <Clock className="h-5 w-5 mx-auto text-amber-600" />
+                  <p className="mt-2 text-sm font-semibold text-amber-800 dark:text-amber-200">
+                    {ar ? "طلبك قيد المراجعة" : "Your request is pending"}
+                  </p>
+                </div>
+              );
+            }
+            if (closed || full) {
+              return (
+                <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                  {full ? (ar ? "اكتمل العدد" : "Course is full") : (ar ? "التسجيل مغلق حالياً" : "Enrollment is closed")}
+                </div>
+              );
+            }
+            if (course.is_free) {
+              return (
+                <Button className="w-full mt-4" size="lg" onClick={onFreeEnroll} disabled={busy}>
+                  {busy && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
+                  {tr.enroll}
+                </Button>
+              );
+            }
+            return (
+              <div className="mt-4 space-y-2">
+                <Button className="w-full" size="lg" onClick={onOnlinePay} disabled={busy}>
+                  <CreditCard className="h-4 w-4 mx-2" />
+                  {ar ? "ادفع إلكترونياً" : "Pay online"}
+                </Button>
+                {manualOpen ? (
+                  <div className="rounded-xl border border-border bg-card p-3 space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      {ar ? "سيتم إرسال طلب للأدمن. بعد دفع المبلغ وموافقة الإدارة سيُفعَّل اشتراكك." : "A request will be sent to the admin. After payment & approval, you'll be enrolled."}
+                    </p>
+                    <Textarea
+                      placeholder={ar ? "ملاحظات (اختياري — طريقة التواصل، رقم تحويل...)" : "Notes (optional)"}
+                      value={manualNotes}
+                      onChange={(e) => setManualNotes(e.target.value)}
+                      rows={3}
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={onManualSubmit} disabled={busy} className="flex-1">
+                        {busy && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
+                        {ar ? "إرسال" : "Submit"}
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setManualOpen(false)}>
+                        {ar ? "إلغاء" : "Cancel"}
+                      </Button>
                     </div>
-                  )}
-                </>
-              )}
-              <Button className="w-full mt-4" size="lg" onClick={onEnroll} disabled={enrolling}>
-                {enrolling && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-                {enrolling ? tr.enrolling : (course.is_free ? tr.enroll : (lang === "ar" ? "سجّل الآن" : "Enroll Now"))}
-              </Button>
-            </>
-          )}
+                  </div>
+                ) : (
+                  <Button className="w-full" size="lg" variant="outline" onClick={() => requireAuth() && setManualOpen(true)}>
+                    <Receipt className="h-4 w-4 mx-2" />
+                    {ar ? "طلب اشتراك (دفع يدوي)" : "Request enrollment (manual payment)"}
+                  </Button>
+                )}
+              </div>
+            );
+          })()}
           {instructor && (
             <div className="mt-6 pt-6 border-t border-border">
               <div className="text-xs text-muted-foreground">{tr.byInstructor}</div>
