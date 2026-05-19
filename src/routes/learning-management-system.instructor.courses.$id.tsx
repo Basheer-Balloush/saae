@@ -230,7 +230,39 @@ function CourseBuilder() {
         </div>
       </section>
 
-      {/* Curriculum */}
+      {/* Enrollment management */}
+      <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
+        <h2 className="font-bold text-foreground">{lang === "ar" ? "إدارة التسجيل" : "Enrollment management"}</h2>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <Label className="cursor-pointer" htmlFor="enroll-open">{lang === "ar" ? "التسجيل مفتوح" : "Enrollment open"}</Label>
+            <p className="text-xs text-muted-foreground">{lang === "ar" ? "أغلق التسجيل لمنع طلبات جديدة" : "Close enrollment to stop new requests."}</p>
+          </div>
+          <input
+            id="enroll-open"
+            type="checkbox"
+            className="h-5 w-5"
+            checked={course.enrollment_open}
+            onChange={(e) => update({ enrollment_open: e.target.checked })}
+          />
+        </div>
+        <div>
+          <Label>{lang === "ar" ? "الحد الأقصى لعدد الطلاب (اتركه فارغاً = غير محدود)" : "Max students (empty = unlimited)"}</Label>
+          <Input
+            type="number"
+            min={1}
+            value={course.max_students ?? ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              update({ max_students: v === "" ? null : Math.max(1, parseInt(v) || 0) });
+            }}
+            placeholder={lang === "ar" ? "غير محدود" : "Unlimited"}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
+        </p>
+      </section>
       <section className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-foreground">{tr.syllabus}</h2>
