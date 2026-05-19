@@ -104,6 +104,7 @@ type Course = {
   description_ar: string | null; description_en: string | null;
   cover_url: string | null; level: string; price: number; is_free: boolean;
   students_count: number; rating_avg: number; instructor_id: string;
+  enrollment_open: boolean; max_students: number | null;
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; duration_seconds: number; is_preview: boolean; display_order: number };
@@ -115,15 +116,17 @@ function CourseDetails() {
   const { user } = useLmsAuth();
   const { lang } = useLang();
   const tr = lmsT[lang];
+  const ar = lang === "ar";
   const [course, setCourse] = useState<Course | null>(null);
   const [instructor, setInstructor] = useState<Instructor | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [enrolled, setEnrolled] = useState(false);
+  const [pendingRequest, setPendingRequest] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [enrolling, setEnrolling] = useState(false);
-  const [coupon, setCoupon] = useState("");
-  const [balance, setBalance] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
+  const [manualNotes, setManualNotes] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -144,53 +147,56 @@ function CourseDetails() {
           setLessons((lss as Lesson[]) ?? []);
         }
         if (user) {
-          const [{ data: e }, { data: w }] = await Promise.all([
+          const [{ data: e }, { data: req }] = await Promise.all([
             supabase.from("lms_enrollments").select("id").eq("course_id", id).eq("student_id", user.id).maybeSingle(),
-            supabase.from("lms_wallets").select("balance").eq("user_id", user.id).maybeSingle(),
+            supabase.from("lms_enrollment_requests").select("id").eq("course_id", id).eq("user_id", user.id).eq("status", "pending").maybeSingle(),
           ]);
           setEnrolled(!!e);
-          setBalance(w ? Number((w as { balance: number }).balance) : 0);
+          setPendingRequest(!!req);
         }
       }
       setLoading(false);
     })();
   }, [id, user]);
 
-  const onEnroll = async () => {
-    if (!user) {
-      navigate({ to: "/learning-management-system/login" });
-      return;
-    }
-    setEnrolling(true);
+  const requireAuth = () => {
+    if (!user) { navigate({ to: "/learning-management-system/login" }); return false; }
+    return true;
+  };
+
+  const onFreeEnroll = async () => {
+    if (!requireAuth()) return;
+    setBusy(true);
     try {
-      const { error } = await supabase.rpc("lms_checkout", { _course_id: id, _coupon: coupon || undefined });
+      const { error } = await supabase.rpc("lms_checkout", { _course_id: id });
       if (error) throw error;
       setEnrolled(true);
       toast.success(tr.enrollmentSuccess);
-      // refresh balance
-      const { data: w } = await supabase.from("lms_wallets").select("balance").eq("user_id", user.id).maybeSingle();
-      setBalance(w ? Number((w as { balance: number }).balance) : 0);
     } catch (err: unknown) {
-      const rawMsg =
-        (err && typeof err === "object" && "message" in err && typeof (err as { message: unknown }).message === "string")
-          ? (err as { message: string }).message
-          : "";
-      const map: Record<string, string> = {
-        "insufficient balance": lang === "ar" ? "رصيدك غير كافٍ" : "Insufficient balance",
-        "already enrolled": lang === "ar" ? "أنت مسجَّل في هذه الدورة" : "Already enrolled",
-        "invalid coupon": lang === "ar" ? "كود الخصم غير صالح" : "Invalid coupon",
-        "coupon expired": lang === "ar" ? "انتهت صلاحية كود الخصم" : "Coupon expired",
-        "coupon exhausted": lang === "ar" ? "استُنفد كود الخصم" : "Coupon exhausted",
-        "coupon not valid for this course": lang === "ar" ? "كود الخصم لا يصلح لهذه الدورة" : "Coupon not valid for this course",
-        "course not published": lang === "ar" ? "الدورة غير منشورة" : "Course not published",
-        "course not found": lang === "ar" ? "الدورة غير موجودة" : "Course not found",
-        "unauthenticated": lang === "ar" ? "يجب تسجيل الدخول أوّلاً" : "You must sign in first",
-      };
-      const key = Object.keys(map).find((k) => rawMsg.toLowerCase().includes(k));
-      toast.error(key ? map[key] : (rawMsg || (lang === "ar" ? "تعذّر إتمام العمليّة" : "Operation failed")));
-    } finally {
-      setEnrolling(false);
-    }
+      toast.error(err instanceof Error ? err.message : "Error");
+    } finally { setBusy(false); }
+  };
+
+  const onOnlinePay = () => {
+    if (!requireAuth()) return;
+    toast.info(ar ? "الدفع الإلكتروني عبر بوابة Paymera — قيد التفعيل" : "Paymera online payment — coming soon");
+  };
+
+  const onManualSubmit = async () => {
+    if (!requireAuth() || !user) return;
+    setBusy(true);
+    try {
+      const { error } = await supabase.from("lms_enrollment_requests").insert({
+        course_id: id, user_id: user.id, payment_method: "manual", notes: manualNotes || null,
+      });
+      if (error) throw error;
+      setPendingRequest(true);
+      setManualOpen(false);
+      setManualNotes("");
+      toast.success(ar ? "تم إرسال طلبك. سيتواصل معك الأدمن قريباً." : "Request submitted. The admin will contact you.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    } finally { setBusy(false); }
   };
 
   if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
