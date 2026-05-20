@@ -5,6 +5,39 @@ import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 import { supabase } from "@/integrations/supabase/client";
 
+// --- In-memory sliding-window rate limiter (per-instance) ---
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+const RATE_LIMIT_MAX = 15; // 15 requests per minute
+const RATE_LIMIT_HOUR_WINDOW_MS = 3_600_000; // 1 hour
+const RATE_LIMIT_HOUR_MAX = 120; // 120 requests per hour
+
+interface RateEntry { timestamps: number[] }
+const rateMap = new Map<string, RateEntry>();
+
+function isRateLimited(key: string): { limited: boolean; retryAfter?: number } {
+  const now = Date.now();
+  let entry = rateMap.get(key);
+  if (!entry) {
+    entry = { timestamps: [] };
+    rateMap.set(key, entry);
+  }
+  // Clean old timestamps
+  entry.timestamps = entry.timestamps.filter((t) => now - t < RATE_LIMIT_HOUR_WINDOW_MS);
+  // Check hour window
+  if (entry.timestamps.length >= RATE_LIMIT_HOUR_MAX) {
+    const oldest = entry.timestamps[entry.timestamps.length - RATE_LIMIT_HOUR_MAX];
+    return { limited: true, retryAfter: Math.ceil((oldest + RATE_LIMIT_HOUR_WINDOW_MS - now) / 1000) };
+  }
+  // Check minute window
+  const recent = entry.timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  if (recent.length >= RATE_LIMIT_MAX) {
+    const oldest = recent[0];
+    return { limited: true, retryAfter: Math.ceil((oldest + RATE_LIMIT_WINDOW_MS - now) / 1000) };
+  }
+  entry.timestamps.push(now);
+  return { limited: false };
+}
+
 type ChatRequestBody = { messages?: unknown };
 
 const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعية الرسمي للجمعية السورية للذكاء الاصطناعي وريادة الأعمال (SAAE / SAAIE).
