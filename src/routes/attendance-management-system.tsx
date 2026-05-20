@@ -19,8 +19,12 @@ export const Route = createFileRoute("/attendance-management-system")({
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-title", content: "AMS" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { property: "og:title", content: "Attendance Management System — SAAE" },
+      { property: "og:description", content: "Internal attendance tool for SAAE staff to track sessions, registrants and reports." },
+      { property: "og:url", content: "https://aisyria.org/attendance-management-system" },
     ],
     links: [
+      { rel: "canonical", href: "https://aisyria.org/attendance-management-system" },
       { rel: "manifest", href: "/ams-manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/ams-icon-192.png" },
     ],
