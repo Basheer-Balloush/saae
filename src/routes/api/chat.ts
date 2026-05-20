@@ -271,11 +271,11 @@ export const Route = createFileRoute("/api/chat")({
           }
         }
 
-        const sessionId =
-          typeof body.sessionId === "string" && body.sessionId.length >= 6 && body.sessionId.length <= 128
-            ? body.sessionId
+        const chatSessionId =
+          typeof bodyRaw.sessionId === "string" && bodyRaw.sessionId.length >= 6 && bodyRaw.sessionId.length <= 128
+            ? bodyRaw.sessionId
             : null;
-        const lang = typeof body.lang === "string" ? body.lang.slice(0, 8) : null;
+        const lang = typeof bodyRaw.lang === "string" ? bodyRaw.lang.slice(0, 8) : null;
         const userAgent = request.headers.get("user-agent")?.slice(0, 300) ?? null;
 
         let conversationId: string | null = null;
