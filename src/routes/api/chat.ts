@@ -279,8 +279,8 @@ export const Route = createFileRoute("/api/chat")({
         const userAgent = request.headers.get("user-agent")?.slice(0, 300) ?? null;
 
         let conversationId: string | null = null;
-        if (sessionId) {
-          conversationId = await upsertConversation(sessionId, lang, userAgent);
+        if (chatSessionId) {
+          conversationId = await upsertConversation(chatSessionId, lang, userAgent);
         }
 
         // Persist the latest user message (if last is from user)
