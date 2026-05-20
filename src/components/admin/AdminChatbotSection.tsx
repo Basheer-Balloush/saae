@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toUserMessage } from "@/lib/safe-error";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Loader2, Trash2, Upload, Eye, RefreshCw, MessageSquare, Users, Building2, BookOpen, BarChart3 } from "lucide-react";
@@ -180,7 +181,7 @@ function StatsPanel({ tr }: { tr: (typeof T)["ar"] }) {
   useEffect(() => {
     fetchStats()
       .then((s) => setStats(s))
-      .catch((e) => toast.error(e.message))
+      .catch((e) => toast.error(toUserMessage(e)))
       .finally(() => setLoading(false));
   }, [fetchStats]);
 
@@ -232,7 +233,7 @@ function ConversationsPanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "
     setLoading(true);
     fetchConvs()
       .then((r) => setItems(r.conversations as Conversation[]))
-      .catch((e) => toast.error(e.message))
+      .catch((e) => toast.error(toUserMessage(e)))
       .finally(() => setLoading(false));
   };
   useEffect(() => { load(); /* eslint-disable-next-line */ }, []);
@@ -242,7 +243,7 @@ function ConversationsPanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "
     setMsgsLoading(true);
     fetchMsgs({ data: { conversationId: id } })
       .then((r) => setMsgs(r.messages as Message[]))
-      .catch((e) => toast.error(e.message))
+      .catch((e) => toast.error(toUserMessage(e)))
       .finally(() => setMsgsLoading(false));
   };
 
@@ -332,7 +333,7 @@ function LeadsPanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "en" }) {
   const [tab, setTab] = useState<"ind" | "comp">("ind");
 
   useEffect(() => {
-    fetchLeads().then(setData).catch((e) => toast.error(e.message)).finally(() => setLoading(false));
+    fetchLeads().then(setData).catch((e) => toast.error(toUserMessage(e))).finally(() => setLoading(false));
   }, [fetchLeads]);
 
   if (loading) return <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />;
@@ -439,7 +440,7 @@ function KnowledgePanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "en" 
     setLoading(true);
     fetchDocs()
       .then((r) => setDocs(r.documents as Doc[]))
-      .catch((e) => toast.error(e.message))
+      .catch((e) => toast.error(toUserMessage(e)))
       .finally(() => setLoading(false));
   };
   useEffect(() => { load(); /* eslint-disable-next-line */ }, []);

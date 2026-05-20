@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Clock, Check, X as XIcon, Ban, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,7 +62,7 @@ function StudentRequestsPage() {
     setBusy(id);
     const { error } = await supabase.from("lms_enrollment_requests").update({ status: "cancelled" }).eq("id", id);
     setBusy(null);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(ar ? "تم الإلغاء" : "Cancelled");
     load();
   };

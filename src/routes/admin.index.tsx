@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -244,7 +245,7 @@ function AdminDashboard() {
       .order("published_at", { ascending: false })
       .order("created_at", { ascending: false })
       .then(({ data, error }) => {
-        if (error) toast.error(error.message);
+        if (error) toast.error(toUserMessage(error));
         else setItems((data ?? []) as NewsRow[]);
       });
   }, [isAdmin, refreshKey]);
@@ -254,7 +255,7 @@ function AdminDashboard() {
   const handleDelete = async (id: string) => {
     if (!confirm(labels.deleteNewsConfirm)) return;
     const { error } = await supabase.from("news").delete().eq("id", id);
-    if (error) toast.error(error.message);
+    if (error) toast.error(toUserMessage(error));
     else {
       toast.success(labels.deleted);
       refresh();
@@ -263,7 +264,7 @@ function AdminDashboard() {
 
   const toggleHome = async (row: NewsRow, value: boolean) => {
     const { error } = await supabase.from("news").update({ show_on_home: value }).eq("id", row.id);
-    if (error) toast.error(error.message);
+    if (error) toast.error(toUserMessage(error));
     else {
       setItems((prev) => prev.map((p) => (p.id === row.id ? { ...p, show_on_home: value } : p)));
     }
@@ -509,7 +510,7 @@ function NewsForm({
       setImageUrl(url);
       toast.success(labels.coverUploaded);
     } catch (err: any) {
-      toast.error(err.message ?? labels.uploadFailed);
+      toast.error(toUserMessage(err));
     } finally {
       setUploading(false);
     }
@@ -525,7 +526,7 @@ function NewsForm({
       setImages((prev) => [...prev, ...urls]);
       toast.success(labels.imagesUploaded(urls.length));
     } catch (err: any) {
-      toast.error(err.message ?? labels.uploadFailed);
+      toast.error(toUserMessage(err));
     } finally {
       setUploading(false);
     }
@@ -541,7 +542,7 @@ function NewsForm({
       setVideos((prev) => [...prev, ...urls]);
       toast.success(labels.videosUploaded(urls.length));
     } catch (err: any) {
-      toast.error(err.message ?? labels.uploadFailed);
+      toast.error(toUserMessage(err));
     } finally {
       setUploading(false);
     }
@@ -595,7 +596,7 @@ function NewsForm({
       }
       onSaved();
     } catch (err: any) {
-      toast.error(err.message ?? labels.saveFailed);
+      toast.error(toUserMessage(err));
     } finally {
       setSaving(false);
     }
@@ -819,7 +820,7 @@ function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar"
       .order("category", { ascending: true })
       .order("display_order", { ascending: true })
       .then(({ data, error }) => {
-        if (error) toast.error(error.message);
+        if (error) toast.error(toUserMessage(error));
         else setList((data ?? []) as MemberRow[]);
       });
   }, [bump]);
@@ -827,7 +828,7 @@ function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar"
   const remove = async (id: string) => {
     if (!confirm(labels.deleteMemberConfirm)) return;
     const { error } = await supabase.from("members").delete().eq("id", id);
-    if (error) toast.error(error.message);
+    if (error) toast.error(toUserMessage(error));
     else { toast.success(labels.deleted); setBump((k) => k + 1); }
   };
 
@@ -932,7 +933,7 @@ function MemberForm({
       setPhotoUrl(url);
       toast.success(labels.photoUploaded);
     } catch (err: any) {
-      toast.error(err.message ?? labels.uploadFailed);
+      toast.error(toUserMessage(err));
     } finally {
       setUploading(false);
     }
@@ -968,7 +969,7 @@ function MemberForm({
       }
       onSaved();
     } catch (err: any) {
-      toast.error(err.message ?? labels.saveFailed);
+      toast.error(toUserMessage(err));
     } finally {
       setSaving(false);
     }

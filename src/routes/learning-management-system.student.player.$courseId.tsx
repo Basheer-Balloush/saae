@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, PlayCircle, Circle, Paperclip, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,7 +78,7 @@ function Player() {
         const path = current.video_url.slice("private:".length);
         const { data, error } = await supabase.storage.from("lms-private").createSignedUrl(path, 60 * 60 * 2);
         if (!active) return;
-        if (error) { toast.error(error.message); setVideoSrc(null); return; }
+        if (error) { toast.error(toUserMessage(error)); setVideoSrc(null); return; }
         setVideoSrc(data?.signedUrl ?? null);
       } else {
         setVideoSrc(current.video_url);
@@ -94,7 +95,7 @@ function Player() {
       is_completed: true,
       completed_at: new Date().toISOString(),
     }, { onConflict: "lesson_id,student_id" });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     setProgress((p) => {
       const next = p.filter((x) => x.lesson_id !== current.id);
       next.push({ lesson_id: current.id, is_completed: true });

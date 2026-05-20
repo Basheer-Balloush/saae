@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useState } from "react";
 import { Plus, Edit3, Users, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,7 +53,7 @@ function InstructorHome() {
       title_en: titleEn.trim() || null,
     }).select("id").maybeSingle();
     setCreating(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     setOpen(false); setTitleAr(""); setTitleEn("");
     if (data) window.location.href = `/learning-management-system/instructor/courses/${data.id}`;
   };

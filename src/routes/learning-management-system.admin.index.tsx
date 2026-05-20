@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useMemo, useState } from "react";
 import {
   Check,
@@ -86,7 +87,7 @@ function AdminHome() {
   const approveInstructor = async (uid: string, approve: boolean) => {
     const { error } = await supabase.from("lms_instructors").update({ approved: approve }).eq("user_id", uid);
     if (error) {
-      toast.error(error.message);
+      toast.error(toUserMessage(error));
       return;
     }
     if (approve) {
@@ -103,7 +104,7 @@ function AdminHome() {
     if (!confirm(ar ? "رفض هذا الطلب وحذفه نهائياً؟" : "Reject and remove this request?")) return;
     const { error } = await supabase.from("lms_instructors").delete().eq("user_id", uid);
     if (error) {
-      toast.error(error.message);
+      toast.error(toUserMessage(error));
       return;
     }
     toast.success(ar ? "تم رفض الطلب" : "Request rejected");
@@ -115,7 +116,7 @@ function AdminHome() {
     if (status === "rejected") patch.rejection_reason = reason ?? null;
     const { error } = await supabase.from("lms_courses").update(patch).eq("id", cid);
     if (error) {
-      toast.error(error.message);
+      toast.error(toUserMessage(error));
       return;
     }
     toast.success("OK");
@@ -133,7 +134,7 @@ function AdminHome() {
       display_order: categories.length,
     });
     if (error) {
-      toast.error(error.message);
+      toast.error(toUserMessage(error));
       return;
     }
     setNewCat({ name_ar: "", name_en: "", slug: "" });

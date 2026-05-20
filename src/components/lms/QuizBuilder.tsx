@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toUserMessage } from "@/lib/safe-error";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
@@ -39,7 +40,7 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
       .insert({ course_id: courseId, title: lang === "ar" ? "الاختبار النهائي" : "Final test", pass_score: 60 })
       .select("*").maybeSingle();
     setCreating(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     setQuiz(data as Quiz);
   };
 
@@ -59,7 +60,7 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
       correct_index: 0,
       display_order: questions.length,
     }).select("*").maybeSingle();
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     if (data) setQuestions([...questions, data as Question]);
   };
 

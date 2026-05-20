@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useState } from "react";
 import { Plus, Trash2, Ticket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +38,7 @@ function AdminCoupons() {
       percent_off: parseInt(pct) || 10,
       max_uses: maxUses ? parseInt(maxUses) : null,
     });
-    if (error) toast.error(error.message);
+    if (error) toast.error(toUserMessage(error));
     else { toast.success(lang === "ar" ? "تم إنشاء الكوبون" : "Coupon created"); setCode(""); setMaxUses(""); load(); }
   };
 

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { toUserMessage } from "@/lib/safe-error";
 import { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
 import { ArrowLeft, ArrowRight, Plus, Trash2, Users, CalendarDays, Loader2, Eye, FileSpreadsheet } from "lucide-react";
@@ -90,7 +91,7 @@ function AmsDashboard() {
     const { error } = await supabase.from("ams_courses").delete().eq("id", deleting.id);
     setDeletingBusy(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(toUserMessage(error));
       return;
     }
     toast.success(tr.saved);
@@ -104,7 +105,7 @@ function AmsDashboard() {
       .select("*")
       .order("created_at", { ascending: false });
     if (error) {
-      toast.error(error.message);
+      toast.error(toUserMessage(error));
       return;
     }
     setCourses(data ?? []);
@@ -260,7 +261,7 @@ function AddCourseDialog({ onCreated }: { onCreated: () => void }) {
     });
     setSaving(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(toUserMessage(error));
       return;
     }
     toast.success(tr.saved);
@@ -326,8 +327,8 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
       supabase.from("ams_registrants").select("*").eq("course_id", course.id).order("created_at"),
       supabase.from("ams_sessions").select("*").eq("course_id", course.id).order("session_date", { ascending: false }),
     ]);
-    if (r.error) toast.error(r.error.message);
-    if (s.error) toast.error(s.error.message);
+    if (r.error) toast.error(toUserMessage(r.error));
+    if (s.error) toast.error(toUserMessage(s.error));
     const sessIds = (s.data ?? []).map((x) => x.id);
     let att: Array<{ registrant_id: string; session_id: string; present: boolean }> = [];
     if (sessIds.length > 0) {
@@ -335,7 +336,7 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
         .from("ams_attendance")
         .select("registrant_id, session_id, present")
         .in("session_id", sessIds);
-      if (a.error) toast.error(a.error.message);
+      if (a.error) toast.error(toUserMessage(a.error));
       att = (a.data as typeof att) ?? [];
     }
     setRegistrants((r.data as Registrant[]) ?? []);
@@ -354,14 +355,14 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
   const deleteRegistrant = async (id: string) => {
     if (!confirm(tr.confirmDelete)) return;
     const { error } = await supabase.from("ams_registrants").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(toUserMessage(error));
     load();
   };
 
   const deleteSession = async (id: string) => {
     if (!confirm(tr.confirmDelete)) return;
     const { error } = await supabase.from("ams_sessions").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(toUserMessage(error));
     load();
   };
 
@@ -794,7 +795,7 @@ function AddRegistrantDialog({ courseId, onCreated }: { courseId: string; onCrea
       payment_status: parsed.data.payment_status,
     });
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(toUserMessage(error));
     toast.success(tr.saved);
     setFullName("");
     setEmail("");
@@ -922,7 +923,7 @@ function AddSessionDialog({ courseId, onCreated }: { courseId: string; onCreated
       session_date: parsed.data.session_date,
     });
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(toUserMessage(error));
     toast.success(tr.saved);
     setTitle("");
     setOpen(false);
@@ -989,7 +990,7 @@ function SessionAttendanceDialog({
         .select("registrant_id, present")
         .eq("session_id", session.id);
       if (error) {
-        toast.error(error.message);
+        toast.error(toUserMessage(error));
         setLoading(false);
         return;
       }
@@ -1010,7 +1011,7 @@ function SessionAttendanceDialog({
         { onConflict: "session_id,registrant_id" },
       );
     setSavingId(null);
-    if (error) toast.error(error.message);
+    if (error) toast.error(toUserMessage(error));
   };
 
   return (
