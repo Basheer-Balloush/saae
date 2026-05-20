@@ -26,6 +26,25 @@ export const Route = createFileRoute("/contact")({
     links: [
       { rel: "canonical", href: "https://aisyria.org/contact" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: "Syrian Association for AI & Entrepreneurship (SAAE)",
+          url: "https://aisyria.org/contact",
+          telephone: "+963 930 763 547",
+          email: "info@aisyria.org",
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "Damascus",
+            addressCountry: "SY",
+          },
+          areaServed: "SY",
+        }),
+      },
+    ],
   }),
   component: ContactPage,
 });
