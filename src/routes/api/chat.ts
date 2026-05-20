@@ -5,6 +5,39 @@ import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 import { supabase } from "@/integrations/supabase/client";
 
+// --- In-memory sliding-window rate limiter (per-instance) ---
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+const RATE_LIMIT_MAX = 15; // 15 requests per minute
+const RATE_LIMIT_HOUR_WINDOW_MS = 3_600_000; // 1 hour
+const RATE_LIMIT_HOUR_MAX = 120; // 120 requests per hour
+
+interface RateEntry { timestamps: number[] }
+const rateMap = new Map<string, RateEntry>();
+
+function isRateLimited(key: string): { limited: boolean; retryAfter?: number } {
+  const now = Date.now();
+  let entry = rateMap.get(key);
+  if (!entry) {
+    entry = { timestamps: [] };
+    rateMap.set(key, entry);
+  }
+  // Clean old timestamps
+  entry.timestamps = entry.timestamps.filter((t) => now - t < RATE_LIMIT_HOUR_WINDOW_MS);
+  // Check hour window
+  if (entry.timestamps.length >= RATE_LIMIT_HOUR_MAX) {
+    const oldest = entry.timestamps[entry.timestamps.length - RATE_LIMIT_HOUR_MAX];
+    return { limited: true, retryAfter: Math.ceil((oldest + RATE_LIMIT_HOUR_WINDOW_MS - now) / 1000) };
+  }
+  // Check minute window
+  const recent = entry.timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  if (recent.length >= RATE_LIMIT_MAX) {
+    const oldest = recent[0];
+    return { limited: true, retryAfter: Math.ceil((oldest + RATE_LIMIT_WINDOW_MS - now) / 1000) };
+  }
+  entry.timestamps.push(now);
+  return { limited: false };
+}
+
 type ChatRequestBody = { messages?: unknown };
 
 const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعية الرسمي للجمعية السورية للذكاء الاصطناعي وريادة الأعمال (SAAE / SAAIE).
@@ -194,8 +227,26 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
-        const body = (await request.json()) as ChatBody;
-        const { messages } = body;
+        // Rate limit by IP + session (or just IP if no session)
+        const clientIp =
+          request.headers.get("cf-connecting-ip") ||
+          request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+          "unknown";
+        const bodyRaw = (await request.json()) as ChatBody;
+        const sessionId =
+          typeof bodyRaw.sessionId === "string" && bodyRaw.sessionId.length >= 6 && bodyRaw.sessionId.length <= 128
+            ? bodyRaw.sessionId
+            : "no-session";
+        const rateKey = `${clientIp}:${sessionId}`;
+        const rateCheck = isRateLimited(rateKey);
+        if (rateCheck.limited) {
+          return new Response("Rate limit exceeded. Please slow down.", {
+            status: 429,
+            headers: { "Retry-After": String(rateCheck.retryAfter ?? 60) },
+          });
+        }
+
+        const { messages } = bodyRaw;
         if (!Array.isArray(messages)) {
           return new Response("Messages are required", { status: 400 });
         }
@@ -220,16 +271,16 @@ export const Route = createFileRoute("/api/chat")({
           }
         }
 
-        const sessionId =
-          typeof body.sessionId === "string" && body.sessionId.length >= 6 && body.sessionId.length <= 128
-            ? body.sessionId
+        const chatSessionId =
+          typeof bodyRaw.sessionId === "string" && bodyRaw.sessionId.length >= 6 && bodyRaw.sessionId.length <= 128
+            ? bodyRaw.sessionId
             : null;
-        const lang = typeof body.lang === "string" ? body.lang.slice(0, 8) : null;
+        const lang = typeof bodyRaw.lang === "string" ? bodyRaw.lang.slice(0, 8) : null;
         const userAgent = request.headers.get("user-agent")?.slice(0, 300) ?? null;
 
         let conversationId: string | null = null;
-        if (sessionId) {
-          conversationId = await upsertConversation(sessionId, lang, userAgent);
+        if (chatSessionId) {
+          conversationId = await upsertConversation(chatSessionId, lang, userAgent);
         }
 
         // Persist the latest user message (if last is from user)
