@@ -227,8 +227,26 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
-        const body = (await request.json()) as ChatBody;
-        const { messages } = body;
+        // Rate limit by IP + session (or just IP if no session)
+        const clientIp =
+          request.headers.get("cf-connecting-ip") ||
+          request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+          "unknown";
+        const bodyRaw = (await request.json()) as ChatBody;
+        const sessionId =
+          typeof bodyRaw.sessionId === "string" && bodyRaw.sessionId.length >= 6 && bodyRaw.sessionId.length <= 128
+            ? bodyRaw.sessionId
+            : "no-session";
+        const rateKey = `${clientIp}:${sessionId}`;
+        const rateCheck = isRateLimited(rateKey);
+        if (rateCheck.limited) {
+          return new Response("Rate limit exceeded. Please slow down.", {
+            status: 429,
+            headers: { "Retry-After": String(rateCheck.retryAfter ?? 60) },
+          });
+        }
+
+        const { messages } = bodyRaw;
         if (!Array.isArray(messages)) {
           return new Response("Messages are required", { status: 400 });
         }
