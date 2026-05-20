@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { toUserMessage } from "@/lib/safe-error";
 import { supabase } from "@/integrations/supabase/client";
 import { ClipboardList, CheckCircle2, Clock, Award } from "lucide-react";
 import { FileUploader } from "./FileUploader";
@@ -51,7 +52,7 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
       .select("id,course_id,lesson_id,title_ar,title_en,description_ar,description_en,brief_file_path,max_grade,due_date")
       .eq("lesson_id", lessonId)
       .order("created_at", { ascending: true });
-    if (error) { toast.error(error.message); setLoading(false); return; }
+    if (error) { toast.error(toUserMessage(error)); setLoading(false); return; }
     const list = (aData as Assignment[]) ?? [];
     setAssignments(list);
     if (list.length) {
@@ -87,14 +88,14 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
           graded_at: null,
         })
         .eq("id", existing.id);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(toUserMessage(error)); return; }
     } else {
       const { error } = await supabase.from("lms_submissions").insert({
         assignment_id: assignment.id,
         student_id: user.id,
         file_path: filePath,
       });
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(toUserMessage(error)); return; }
     }
     load();
   };

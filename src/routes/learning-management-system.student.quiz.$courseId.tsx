@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useState } from "react";
 import { Award, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,7 +53,7 @@ function QuizPage() {
     setSubmitting(true);
     const { data, error } = await supabase.rpc("lms_submit_quiz" as never, { _quiz_id: quiz.id, _answers: answerArr } as never);
     setSubmitting(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     setResult(data as Result);
   };
 

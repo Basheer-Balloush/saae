@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { toUserMessage } from "@/lib/safe-error";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp, Loader2, ClipboardList } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -116,7 +117,7 @@ function InstructorAssignments() {
       created_by: user.id,
     });
     setCreating(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(t(lang, "تم إنشاء الوظيفة", "Assignment created"));
     setForm({ lesson_id: "", title_ar: "", title_en: "", description_ar: "", description_en: "", max_grade: "100", due_date: "" });
     load();
@@ -125,13 +126,13 @@ function InstructorAssignments() {
   const handleDelete = async (id: string) => {
     if (!confirm(t(lang, "حذف هذه الوظيفة وكل تسليماتها؟", "Delete this assignment and all submissions?"))) return;
     const { error } = await supabase.from("lms_assignments").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     load();
   };
 
   const handleBriefUploaded = async (assignmentId: string, path: string) => {
     const { error } = await supabase.from("lms_assignments").update({ brief_file_path: path }).eq("id", assignmentId);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     load();
   };
 
@@ -277,7 +278,7 @@ function AssignmentRow({
       .select("*")
       .eq("assignment_id", assignment.id)
       .order("submitted_at", { ascending: false });
-    if (error) { toast.error(error.message); setLoadingSubs(false); return; }
+    if (error) { toast.error(toUserMessage(error)); setLoadingSubs(false); return; }
     const list = (data as Submission[]) ?? [];
     setSubs(list);
     // Best-effort student name lookup from instructors table or user metadata
@@ -383,7 +384,7 @@ function SubmissionRow({
     setDownloading(true);
     const { data, error } = await supabase.storage.from("lms-assignments").createSignedUrl(submission.file_path, 60 * 10);
     setDownloading(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     if (data?.signedUrl) window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   };
 
@@ -405,7 +406,7 @@ function SubmissionRow({
       })
       .eq("id", submission.id);
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(t(lang, "تم حفظ التقييم", "Grade saved"));
     onChanged();
   };

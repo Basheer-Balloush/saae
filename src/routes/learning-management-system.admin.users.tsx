@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Shield, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +29,7 @@ function UsersPage() {
 
   const load = async () => {
     const { data, error } = await supabase.from("user_roles").select("*").order("created_at", { ascending: false });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     const list = (data as RoleRow[]) ?? [];
     setRoles(list);
     const uids = Array.from(new Set(list.map((r) => r.user_id)));
@@ -45,14 +46,14 @@ function UsersPage() {
     e.preventDefault();
     if (!grantUid) return;
     const { error } = await supabase.from("user_roles").insert({ user_id: grantUid, role: grantRole as never });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     setGrantUid(""); toast.success("OK"); load();
   };
 
   const revoke = async (id: string) => {
     if (!confirm(ar ? "إزالة الدور؟" : "Revoke role?")) return;
     const { error } = await supabase.from("user_roles").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     load();
   };
 

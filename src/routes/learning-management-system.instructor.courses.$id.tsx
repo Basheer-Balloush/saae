@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useState } from "react";
 import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,13 +78,13 @@ function CourseBuilder() {
       enrollment_open: course.enrollment_open, max_students: course.max_students,
     }).eq("id", course.id);
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(lang === "ar" ? "تم الحفظ" : "Saved");
   };
 
   const submitForReview = async () => {
     const { error } = await supabase.from("lms_courses").update({ status: "pending" }).eq("id", course.id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     setCourse({ ...course, status: "pending" });
     toast.success(lang === "ar" ? "تم الإرسال للمراجعة" : "Submitted for review");
   };
@@ -93,7 +94,7 @@ function CourseBuilder() {
     setUploading(true);
     const path = `${user.id}/${course.id}/cover-${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("lms-media").upload(path, file, { upsert: true });
-    if (error) { setUploading(false); toast.error(error.message); return; }
+    if (error) { setUploading(false); toast.error(toUserMessage(error)); return; }
     const { data: pub } = supabase.storage.from("lms-media").getPublicUrl(path);
     update({ cover_url: pub.publicUrl });
     await supabase.from("lms_courses").update({ cover_url: pub.publicUrl }).eq("id", course.id);
@@ -107,14 +108,14 @@ function CourseBuilder() {
     const { data, error } = await supabase.from("lms_sections")
       .insert({ course_id: course.id, title, display_order: sections.length })
       .select("*").maybeSingle();
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     if (data) setSections([...sections, data as Section]);
   };
 
   const deleteSection = async (sid: string) => {
     if (!confirm(lang === "ar" ? "حذف القسم؟" : "Delete section?")) return;
     const { error } = await supabase.from("lms_sections").delete().eq("id", sid);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     setSections(sections.filter((s) => s.id !== sid));
     setLessons(lessons.filter((l) => l.section_id !== sid));
   };
@@ -126,7 +127,7 @@ function CourseBuilder() {
     const { data, error } = await supabase.from("lms_lessons")
       .insert({ section_id: sid, title, display_order: order })
       .select("*").maybeSingle();
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     if (data) setLessons([...lessons, data as Lesson]);
   };
 
@@ -146,7 +147,7 @@ function CourseBuilder() {
     const path = `${user.id}/${course.id}/${lesson.id}-${Date.now()}.${file.name.split(".").pop()}`;
     toast.info(lang === "ar" ? "جاري رفع الفيديو..." : "Uploading video...");
     const { error } = await supabase.storage.from("lms-private").upload(path, file, { upsert: true });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     // Store the storage path with prefix; the player resolves a fresh short-lived signed URL on demand
     await updateLesson(lesson.id, { video_url: `private:${path}` });
     toast.success(lang === "ar" ? "تم رفع الفيديو" : "Video uploaded");

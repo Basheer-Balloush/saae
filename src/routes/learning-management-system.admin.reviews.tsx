@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useState } from "react";
 import { Star, Trash2, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,7 +34,7 @@ function AdminReviews() {
       .from("lms_reviews")
       .select("id,rating,comment,created_at,student_id,course_id, course:lms_courses(title_ar,title_en)")
       .order("created_at", { ascending: false });
-    if (error) toast.error(error.message);
+    if (error) toast.error(toUserMessage(error));
     setReviews((data as unknown as Review[]) ?? []);
     setLoading(false);
   };
@@ -42,7 +43,7 @@ function AdminReviews() {
   const remove = async (id: string) => {
     if (!confirm(isAr ? "حذف هذا التقييم؟" : "Delete this review?")) return;
     const { error } = await supabase.from("lms_reviews").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(isAr ? "تم الحذف" : "Deleted");
     setReviews((r) => r.filter((x) => x.id !== id));
   };

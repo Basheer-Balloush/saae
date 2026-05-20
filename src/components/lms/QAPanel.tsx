@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { toUserMessage } from "@/lib/safe-error";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,7 +36,7 @@ export function QAPanel({ lessonId, user, isInstructor, lang }: Props) {
       .eq("lesson_id", lessonId)
       .order("created_at", { ascending: false });
     if (error) {
-      toast.error(error.message);
+      toast.error(toUserMessage(error));
       setLoading(false);
       return;
     }
@@ -70,7 +71,7 @@ export function QAPanel({ lessonId, user, isInstructor, lang }: Props) {
       body: newQ.trim(),
     });
     setPosting(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     setNewQ("");
     load();
   };
@@ -84,7 +85,7 @@ export function QAPanel({ lessonId, user, isInstructor, lang }: Props) {
       body,
       is_instructor_answer: isInstructor,
     });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     setReplyDraft((d) => ({ ...d, [questionId]: "" }));
     load();
   };
@@ -92,14 +93,14 @@ export function QAPanel({ lessonId, user, isInstructor, lang }: Props) {
   const deleteQuestion = async (id: string) => {
     if (!confirm(t(lang, "حذف هذا السؤال؟", "Delete this question?"))) return;
     const { error } = await supabase.from("lms_questions").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     load();
   };
 
   const deleteAnswer = async (id: string) => {
     if (!confirm(t(lang, "حذف هذا الرد؟", "Delete this answer?"))) return;
     const { error } = await supabase.from("lms_answers").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(toUserMessage(error)); return; }
     load();
   };
 
