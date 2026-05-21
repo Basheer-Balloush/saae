@@ -135,6 +135,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM4Y7E9Y96" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-MM4Y7E9Y96');`,
+          }}
+        />
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <HeadContent />
       </head>
