@@ -132,6 +132,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');var l=localStorage.getItem('saae-lang')||'en';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
+  const lmsRedirect = `(function(){try{if(location.hostname==='lms.aisyria.org'&&!location.pathname.startsWith('/learning-management-system')){location.replace('/learning-management-system'+location.pathname+location.search+location.hash);}}catch(e){}})();`;
   return (
     <html lang="en">
       <head>
