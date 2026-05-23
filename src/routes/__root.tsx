@@ -7,6 +7,7 @@ import {
   useLocation,
   HeadContent,
   Scripts,
+  redirect,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { toast } from "sonner";
