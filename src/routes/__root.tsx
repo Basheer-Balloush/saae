@@ -136,6 +136,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: lmsRedirect }} />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM4Y7E9Y96" />
         <script
           dangerouslySetInnerHTML={{
