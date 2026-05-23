@@ -7,6 +7,7 @@ import {
   useLocation,
   HeadContent,
   Scripts,
+  redirect,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -78,6 +79,21 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: ({ location }) => {
+    // Redirect lms.aisyria.org subdomain to /learning-management-system
+    const host =
+      typeof window !== "undefined"
+        ? window.location.hostname
+        : (globalThis as any)?.process?.env?.HOST ?? "";
+    if (
+      host === "lms.aisyria.org" &&
+      !location.pathname.startsWith("/learning-management-system")
+    ) {
+      throw redirect({
+        to: "/learning-management-system",
+      });
+    }
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
