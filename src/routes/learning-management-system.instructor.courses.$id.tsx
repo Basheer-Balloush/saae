@@ -227,7 +227,7 @@ function CourseBuilder() {
               </span>
             </div>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex gap-2 shrink-0 flex-wrap">
             <Button onClick={saveCourse} variant="outline" disabled={saving}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
               {lang === "ar" ? "حفظ" : "Save"}
@@ -235,6 +235,10 @@ function CourseBuilder() {
             {course.status === "draft" && (
               <Button onClick={submitForReview}><Send className="h-4 w-4 mx-1" />{lang === "ar" ? "إرسال للمراجعة" : "Submit"}</Button>
             )}
+            <Button variant="destructive" onClick={() => setConfirmDeleteCourse(true)} disabled={deletingCourse}>
+              <Trash2 className="h-4 w-4 mx-1" />
+              {lang === "ar" ? "حذف الدورة" : "Delete course"}
+            </Button>
           </div>
         </div>
       </div>
