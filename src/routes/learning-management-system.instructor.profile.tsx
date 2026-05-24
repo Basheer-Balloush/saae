@@ -37,15 +37,13 @@ function InstructorProfileEdit() {
     (async () => {
       const { data } = await supabase
         .from("lms_instructors")
-        .select("full_name,bio,specialty,linkedin_url,github_url,avatar_url")
+        .select("full_name,bio,specialty,avatar_url")
         .eq("user_id", user.id)
         .maybeSingle();
       if (data) {
         setFullName(data.full_name ?? "");
         setBio(data.bio ?? "");
         setSpecialty(data.specialty ?? "");
-        setLinkedinUrl(data.linkedin_url ?? "");
-        setGithubUrl(data.github_url ?? "");
         setAvatarUrl(data.avatar_url ?? null);
       }
       setLoading(false);
