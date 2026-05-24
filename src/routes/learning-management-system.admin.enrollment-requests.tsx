@@ -34,6 +34,7 @@ function AdminEnrollmentRequests() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
+  const [viewing, setViewing] = useState<{ requestId: string; courseId: string } | null>(null);
 
   const load = async () => {
     setLoading(true);
