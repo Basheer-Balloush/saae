@@ -23,7 +23,7 @@ type Req = {
   admin_notes: string | null;
   created_at: string;
   decided_at: string | null;
-  course?: { title_ar: string; title_en: string | null; price: number; students_count: number; max_students: number | null };
+  course?: { title_ar: string; title_en: string | null; price: number; students_count: number; enrollment_deadline: string | null };
 };
 
 function AdminEnrollmentRequests() {
