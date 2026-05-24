@@ -297,6 +297,10 @@ const METRICS_BY_KEY: Record<CommunityKey, Metric[]> = {
     { value: "+80", label: { ar: "مدرّب معتمد", en: "Certified Trainers" } },
     { value: "+150", label: { ar: "ورشة تدريبية", en: "Training Workshops" } },
   ],
+  media: [
+    { value: "+40", label: { ar: "صانع محتوى", en: "Content Creators" } },
+    { value: "+200", label: { ar: "مادة إعلامية منشورة", en: "Published Media Pieces" } },
+  ],
 };
 
 export const Route = createFileRoute("/communities/$key")({
