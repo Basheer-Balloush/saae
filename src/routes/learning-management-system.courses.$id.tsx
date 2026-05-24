@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { CourseReviews } from "@/components/lms/CourseReviews";
+import { EnrollmentFormDialog } from "@/components/lms/EnrollmentFormDialog";
 
 export const Route = createFileRoute("/learning-management-system/courses/$id")({
   loader: async ({ params }) => {
