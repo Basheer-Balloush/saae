@@ -30,8 +30,6 @@ function InstructorProfileEdit() {
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
   const [specialty, setSpecialty] = useState("");
-  const [linkedinUrl, setLinkedinUrl] = useState("");
-  const [githubUrl, setGithubUrl] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
