@@ -49,6 +49,15 @@ function CourseBuilder() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // In-app dialog state replacing native prompt()/confirm()
+  const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
+  const [sectionTitleDraft, setSectionTitleDraft] = useState("");
+  const [lessonDialog, setLessonDialog] = useState<{ open: boolean; sectionId: string | null; title: string }>({ open: false, sectionId: null, title: "" });
+  const [confirmDelete, setConfirmDelete] = useState<
+    | { type: "section"; id: string }
+    | { type: "lesson"; id: string }
+    | null
+  >(null);
 
   const load = async () => {
     const [{ data: c }, { data: cats }] = await Promise.all([
