@@ -48,7 +48,24 @@ const PARTNERS = [
 
 export function Partners() {
   const { t } = useLang();
-  const loop = [...PARTNERS, ...PARTNERS];
+
+  const renderPartnerSet = (setIndex: number) => (
+    <div className="partners-set flex shrink-0 items-center gap-16 pr-16">
+      {PARTNERS.map((p) => (
+        <div
+          key={`${p.name}-${setIndex}`}
+          className="flex h-36 w-52 flex-none items-center justify-center sm:w-60"
+        >
+          <img
+            src={p.logo}
+            alt={p.name}
+            decoding="async"
+            className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105`}
+          />
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <section id="partners" className="relative bg-surface py-24 lg:py-28">
@@ -60,59 +77,46 @@ export function Partners() {
           transition={{ duration: 0.6 }}
           className="mx-auto text-center"
         >
-          <h2 className="whitespace-nowrap text-display-2 text-foreground">
-            {t.partners.title}
-          </h2>
+          <h2 className="whitespace-nowrap text-display-2 text-foreground">{t.partners.title}</h2>
         </motion.div>
       </div>
 
       <div
         className="partners-marquee group relative mt-14 overflow-hidden"
         style={{
-          maskImage:
-            "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
+          maskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
           WebkitMaskImage:
             "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
         }}
       >
-        <div className="partners-track flex w-max items-center gap-16 py-4">
-          {loop.map((p, i) => (
-            <div
-              key={`${p.name}-${i}`}
-              className="flex flex-none items-center justify-center"
-            >
-              <img
-                src={p.logo}
-                alt={p.name}
-                loading="lazy"
-                decoding="async"
-                className={`${p.sizeClass} w-auto object-contain transition-transform duration-300 hover:scale-105`}
-              />
-            </div>
-          ))}
+        <div className="partners-track flex w-max items-center py-4">
+          {renderPartnerSet(0)}
+          {renderPartnerSet(1)}
+          {renderPartnerSet(2)}
         </div>
       </div>
 
       <style>{`
         @keyframes partners-scroll {
-          0% { transform: translate3d(0, 0, 0); }
-          100% { transform: translate3d(-50%, 0, 0); }
+          0% { transform: translate3d(-33.333333%, 0, 0); }
+          100% { transform: translate3d(-66.666666%, 0, 0); }
         }
         .partners-track {
-          animation: partners-scroll 40s linear infinite;
+          animation: partners-scroll 55s linear infinite;
           will-change: transform;
           backface-visibility: hidden;
+          transform: translate3d(-33.333333%, 0, 0);
         }
 
         .partners-marquee:hover .partners-track {
           animation-play-state: paused;
         }
         [dir="rtl"] .partners-track {
-          animation: partners-scroll-rtl 40s linear infinite;
+          animation: partners-scroll-rtl 55s linear infinite;
         }
         @keyframes partners-scroll-rtl {
-          0% { transform: translate3d(-50%, 0, 0); }
-          100% { transform: translate3d(0, 0, 0); }
+          0% { transform: translate3d(-66.666666%, 0, 0); }
+          100% { transform: translate3d(-33.333333%, 0, 0); }
         }
       `}</style>
     </section>
