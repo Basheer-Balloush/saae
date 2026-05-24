@@ -195,6 +195,15 @@ function CourseBuilder() {
     toast.success(lang === "ar" ? "تم رفع الفيديو" : "Video uploaded");
   };
 
+  const deleteWholeCourse = async () => {
+    setDeletingCourse(true);
+    const { error } = await supabase.rpc("lms_delete_course", { _course_id: course.id });
+    setDeletingCourse(false);
+    if (error) { toast.error(toUserMessage(error)); return; }
+    toast.success(lang === "ar" ? "تم حذف الدورة" : "Course deleted");
+    navigate({ to: "/learning-management-system/instructor" });
+  };
+
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-8">
       {/* Header bar */}
