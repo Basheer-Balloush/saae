@@ -331,6 +331,23 @@ function CourseBuilder() {
             {lang === "ar" ? "بعد هذا التاريخ لن يتمكن الطلاب من التسجيل." : "After this date students cannot enroll."}
           </p>
         </div>
+        <div>
+          <Label>{lang === "ar" ? "الحد الأقصى للطلاب (اختياري)" : "Max students (optional)"}</Label>
+          <Input
+            type="number"
+            min={0}
+            value={course.max_students ?? ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              update({ max_students: v === "" ? null : Math.max(0, parseInt(v, 10) || 0) });
+            }}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            {lang === "ar"
+              ? `المسجلون حالياً: ${course.students_count}. اتركه فارغاً لعدم وجود حد.`
+              : `Currently enrolled: ${course.students_count}. Leave empty for no limit.`}
+          </p>
+        </div>
         <p className="text-xs text-muted-foreground">
           {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
         </p>
