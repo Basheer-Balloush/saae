@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, Receipt, Clock } from "lucide-react";
+import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -319,7 +319,6 @@ function CourseDetails() {
                   onClick={() => { if (requireAuth()) { hasForm ? setFormDialogOpen(true) : setManualOpen(true); } }}
                   disabled={busy}
                 >
-                  <Receipt className="h-4 w-4 mx-2" />
                   {tr.enroll}
                 </Button>
                 <p className="text-xs text-muted-foreground text-center leading-relaxed">
