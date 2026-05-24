@@ -130,16 +130,6 @@ function InstructorProfileEdit() {
           <Label>{ar ? "نبذة عنك" : "Bio"}</Label>
           <Textarea rows={4} value={bio} onChange={(e) => setBio(e.target.value)} />
         </div>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <Label>LinkedIn</Label>
-            <Input value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://" />
-          </div>
-          <div>
-            <Label>GitHub</Label>
-            <Input value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} placeholder="https://" />
-          </div>
-        </div>
 
         <Button type="submit" disabled={saving} className="w-full sm:w-auto">
           {saving && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
