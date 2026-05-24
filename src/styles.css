@@ -77,8 +77,12 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+html {
+  color-scheme: light only;
+}
+
 :root {
-  color-scheme: light;
+  color-scheme: light only;
   --radius: 0.625rem;
 
   /* Backgrounds */
