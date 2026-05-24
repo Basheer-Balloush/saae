@@ -195,24 +195,39 @@ function CourseBuilder() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-8">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <button onClick={() => navigate({ to: "/learning-management-system/instructor" })} className="text-xs text-muted-foreground hover:text-primary">
-            ← {lang === "ar" ? "كل الدورات" : "All courses"}
-          </button>
-          <h1 className="mt-1 text-2xl font-bold text-foreground">{lang === "ar" ? "تحرير الدورة" : "Edit course"}</h1>
-          <span className="text-xs text-muted-foreground">{lang === "ar" ? "الحالة" : "Status"}: <b>{course.status}</b></span>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={saveCourse} variant="outline" disabled={saving}>
-            {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
-            {lang === "ar" ? "حفظ" : "Save"}
-          </Button>
-          {course.status === "draft" && (
-            <Button onClick={submitForReview}><Send className="h-4 w-4 mx-1" />{lang === "ar" ? "إرسال للمراجعة" : "Submit"}</Button>
-          )}
+      {/* Header bar */}
+      <div className="rounded-2xl border border-border bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm px-4 sm:px-5 py-4">
+        <button
+          onClick={() => navigate({ to: "/learning-management-system/instructor" })}
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
+        >
+          <ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" />
+          {lang === "ar" ? "كل الدورات" : "All courses"}
+        </button>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-foreground truncate">
+              {lang === "ar" ? "تحرير الدورة" : "Edit course"}
+            </h1>
+            <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{lang === "ar" ? "الحالة" : "Status"}:</span>
+              <span className="inline-flex items-center rounded-full border border-border bg-background px-2 py-0.5 font-semibold text-foreground">
+                {course.status}
+              </span>
+            </div>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Button onClick={saveCourse} variant="outline" disabled={saving}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
+              {lang === "ar" ? "حفظ" : "Save"}
+            </Button>
+            {course.status === "draft" && (
+              <Button onClick={submitForReview}><Send className="h-4 w-4 mx-1" />{lang === "ar" ? "إرسال للمراجعة" : "Submit"}</Button>
+            )}
+          </div>
         </div>
       </div>
+
 
       {/* Details */}
       <section className="rounded-2xl border border-border bg-card p-5 space-y-3">
