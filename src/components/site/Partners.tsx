@@ -70,7 +70,7 @@ export function Partners() {
                 alt={p.name}
                 loading="lazy"
                 decoding="async"
-                className={`${p.sizeClass} w-auto object-contain transition-transform hover:scale-105`}
+                className={`${p.sizeClass} w-auto object-contain opacity-70 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0 hover:scale-105`}
               />
             </div>
           ))}
@@ -79,12 +79,15 @@ export function Partners() {
 
       <style>{`
         @keyframes partners-scroll {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
+          from { transform: translate3d(0, 0, 0); }
+          to { transform: translate3d(-50%, 0, 0); }
         }
         .partners-track {
-          animation: partners-scroll 45s linear infinite;
+          animation: partners-scroll 60s linear infinite;
+          will-change: transform;
+          backface-visibility: hidden;
         }
+
         .partners-marquee:hover .partners-track {
           animation-play-state: paused;
         }
