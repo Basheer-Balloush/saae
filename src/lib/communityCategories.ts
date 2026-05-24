@@ -6,6 +6,7 @@ export const COMMUNITY_KEYS = [
   "software",
   "economy",
   "trainers",
+  "media",
 ] as const;
 
 export type CommunityKey = (typeof COMMUNITY_KEYS)[number];
@@ -18,6 +19,7 @@ export const COMMUNITY_LABELS_AR: Record<CommunityKey, string> = {
   software: "مجتمع البرمجيات",
   economy: "مجتمع الاقتصاد الذكي",
   trainers: "مجتمع المدربين",
+  media: "المجتمع الإعلامي",
 };
 
 export const COMMUNITY_LABELS_EN: Record<CommunityKey, string> = {
@@ -28,6 +30,7 @@ export const COMMUNITY_LABELS_EN: Record<CommunityKey, string> = {
   software: "Software Community",
   economy: "Smart Economy Community",
   trainers: "Trainers Community",
+  media: "Media Community",
 };
 
 export function communityLabel(key: string, lang: "ar" | "en"): string {
