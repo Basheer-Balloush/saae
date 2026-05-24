@@ -58,6 +58,8 @@ function CourseBuilder() {
     | { type: "lesson"; id: string }
     | null
   >(null);
+  const [confirmDeleteCourse, setConfirmDeleteCourse] = useState(false);
+  const [deletingCourse, setDeletingCourse] = useState(false);
 
   const load = async () => {
     const [{ data: c }, { data: cats }] = await Promise.all([
