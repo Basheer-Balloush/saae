@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { CourseReviews } from "@/components/lms/CourseReviews";
+import { EnrollmentFormDialog } from "@/components/lms/EnrollmentFormDialog";
 
 export const Route = createFileRoute("/learning-management-system/courses/$id")({
   loader: async ({ params }) => {
@@ -127,6 +128,8 @@ function CourseDetails() {
   const [busy, setBusy] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
   const [manualNotes, setManualNotes] = useState("");
+  const [hasForm, setHasForm] = useState(false);
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -146,6 +149,13 @@ function CourseDetails() {
             .order("display_order");
           setLessons((lss as Lesson[]) ?? []);
         }
+        const { data: cf } = await supabase
+          .from("lms_course_forms")
+          .select("id")
+          .eq("course_id", id)
+          .eq("is_active", true)
+          .maybeSingle();
+        setHasForm(!!cf);
         if (user) {
           const [{ data: e }, { data: req }] = await Promise.all([
             supabase.from("lms_enrollments").select("id").eq("course_id", id).eq("student_id", user.id).maybeSingle(),
@@ -166,6 +176,7 @@ function CourseDetails() {
 
   const onFreeEnroll = async () => {
     if (!requireAuth()) return;
+    if (hasForm) { setFormDialogOpen(true); return; }
     setBusy(true);
     try {
       const { error } = await supabase.rpc("lms_checkout", { _course_id: id });
@@ -184,6 +195,7 @@ function CourseDetails() {
 
   const onManualSubmit = async () => {
     if (!requireAuth() || !user) return;
+    if (hasForm) { setFormDialogOpen(true); return; }
     setBusy(true);
     try {
       const { error } = await supabase.from("lms_enrollment_requests").insert({
@@ -356,6 +368,13 @@ function CourseDetails() {
           )}
         </aside>
       </div>
+      <EnrollmentFormDialog
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        courseId={id}
+        notes={manualNotes || null}
+        onSubmitted={() => { setPendingRequest(true); setManualOpen(false); setManualNotes(""); }}
+      />
     </div>
   );
 }

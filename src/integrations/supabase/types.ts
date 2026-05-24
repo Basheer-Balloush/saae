@@ -699,6 +699,80 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_course_form_fields: {
+        Row: {
+          created_at: string
+          display_order: number
+          field_type: string
+          form_id: string
+          help_text: string | null
+          id: string
+          label_ar: string
+          label_en: string | null
+          options: Json
+          validation: Json
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          field_type: string
+          form_id: string
+          help_text?: string | null
+          id?: string
+          label_ar: string
+          label_en?: string | null
+          options?: Json
+          validation?: Json
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          field_type?: string
+          form_id?: string
+          help_text?: string | null
+          id?: string
+          label_ar?: string
+          label_en?: string | null
+          options?: Json
+          validation?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_course_form_fields_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "lms_course_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_course_forms: {
+        Row: {
+          course_id: string
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lms_courses: {
         Row: {
           category_id: string | null
@@ -777,6 +851,41 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "lms_instructors"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      lms_enrollment_form_responses: {
+        Row: {
+          answers: Json
+          course_id: string
+          created_at: string
+          id: string
+          request_id: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          course_id: string
+          created_at?: string
+          id?: string
+          request_id: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          course_id?: string
+          created_at?: string
+          id?: string
+          request_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_enrollment_form_responses_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: true
+            referencedRelation: "lms_enrollment_requests"
+            referencedColumns: ["id"]
           },
         ]
       }
