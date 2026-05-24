@@ -170,9 +170,9 @@ export function CourseFormBuilder({ courseId }: { courseId: string }) {
           validation: f.validation,
         };
         if (f.id.startsWith(NEW_PREFIX)) {
-          await supabase.from("lms_course_form_fields").insert(payload);
+          await supabase.from("lms_course_form_fields").insert(payload as never);
         } else {
-          await supabase.from("lms_course_form_fields").update(payload).eq("id", f.id);
+          await supabase.from("lms_course_form_fields").update(payload as never).eq("id", f.id);
         }
       }
       await supabase.from("lms_course_forms").update({ updated_at: new Date().toISOString() }).eq("id", form.id);
