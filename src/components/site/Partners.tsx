@@ -13,6 +13,12 @@ import yarmoukLogo from "@/assets/partner-yarmouk.png";
 import damascusLogo from "@/assets/partner-damascus.png";
 import abqarLogo from "@/assets/partner-abqar.png";
 import lmipLogo from "@/assets/partner-lmip.png";
+import peopleLogo from "@/assets/partner-people.png";
+import azbooksLogo from "@/assets/partner-azbooks.png";
+import syrianTelecomLogo from "@/assets/partner-syriantelecom.png";
+import ihsanLogo from "@/assets/partner-ihsan.png";
+import mosalLogo from "@/assets/partner-mosal.png";
+import cubesLogo from "@/assets/partner-cubes.png";
 
 const PARTNERS = [
   { name: "Sarrdeh Tech", logo: sarrdehLogo, sizeClass: "h-24" },
@@ -28,6 +34,12 @@ const PARTNERS = [
   { name: "Damascus University", logo: damascusLogo, sizeClass: "h-28" },
   { name: "Kawkab Abqar", logo: abqarLogo, sizeClass: "h-24" },
   { name: "LMIP", logo: lmipLogo, sizeClass: "h-24" },
+  { name: "People", logo: peopleLogo, sizeClass: "h-24" },
+  { name: "A-Z Books", logo: azbooksLogo, sizeClass: "h-24" },
+  { name: "Syrian Telecom", logo: syrianTelecomLogo, sizeClass: "h-24" },
+  { name: "Al-Ihsan Medical", logo: ihsanLogo, sizeClass: "h-24" },
+  { name: "Ministry of Social Affairs and Labor", logo: mosalLogo, sizeClass: "h-24" },
+  { name: "Cubes", logo: cubesLogo, sizeClass: "h-24" },
 ];
 
 export function Partners() {
@@ -70,7 +82,7 @@ export function Partners() {
                 alt={p.name}
                 loading="lazy"
                 decoding="async"
-                className={`${p.sizeClass} w-auto object-contain opacity-70 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0 hover:scale-105`}
+                className={`${p.sizeClass} w-auto object-contain transition-transform duration-300 hover:scale-105`}
               />
             </div>
           ))}
