@@ -188,10 +188,8 @@ function CourseDetails() {
     } finally { setBusy(false); }
   };
 
-  const onOnlinePay = () => {
-    if (!requireAuth()) return;
-    toast.info(ar ? "الدفع الإلكتروني عبر بوابة Paymera — قيد التفعيل" : "Paymera online payment — coming soon");
-  };
+
+
 
   const onManualSubmit = async () => {
     if (!requireAuth() || !user) return;
