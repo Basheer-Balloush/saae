@@ -91,11 +91,11 @@ export function Partners() {
 
       <style>{`
         @keyframes partners-scroll {
-          from { transform: translate3d(0, 0, 0); }
-          to { transform: translate3d(-50%, 0, 0); }
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
         }
         .partners-track {
-          animation: partners-scroll 60s linear infinite;
+          animation: partners-scroll 40s linear infinite;
           will-change: transform;
           backface-visibility: hidden;
         }
@@ -104,7 +104,11 @@ export function Partners() {
           animation-play-state: paused;
         }
         [dir="rtl"] .partners-track {
-          animation-direction: reverse;
+          animation: partners-scroll-rtl 40s linear infinite;
+        }
+        @keyframes partners-scroll-rtl {
+          0% { transform: translate3d(-50%, 0, 0); }
+          100% { transform: translate3d(0, 0, 0); }
         }
       `}</style>
     </section>
