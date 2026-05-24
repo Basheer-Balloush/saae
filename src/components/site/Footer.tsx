@@ -122,8 +122,11 @@ export function Footer() {
                 <img
                   src={locationMap}
                   alt="Damascus"
-                  className="h-full w-full object-cover grayscale"
+                  width={640}
+                  height={360}
                   loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover grayscale"
                 />
                 <span
                   className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
