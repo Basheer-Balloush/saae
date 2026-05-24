@@ -82,7 +82,7 @@ export function Partners() {
                 alt={p.name}
                 loading="lazy"
                 decoding="async"
-                className={`${p.sizeClass} w-auto object-contain opacity-70 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0 hover:scale-105`}
+                className={`${p.sizeClass} w-auto object-contain transition-transform duration-300 hover:scale-105`}
               />
             </div>
           ))}
