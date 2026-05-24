@@ -19,6 +19,8 @@ import syrianTelecomLogo from "@/assets/partner-syriantelecom.png";
 import ihsanLogo from "@/assets/partner-ihsan.png";
 import mosalLogo from "@/assets/partner-mosal.png";
 import cubesLogo from "@/assets/partner-cubes.png";
+import baukantLogo from "@/assets/partner-baukant.png";
+import baccaLogo from "@/assets/partner-bacca.png";
 
 const PARTNERS = [
   { name: "Sarrdeh Tech", logo: sarrdehLogo, sizeClass: "h-24" },
@@ -40,6 +42,8 @@ const PARTNERS = [
   { name: "Al-Ihsan Medical", logo: ihsanLogo, sizeClass: "h-24" },
   { name: "Ministry of Social Affairs and Labor", logo: mosalLogo, sizeClass: "h-24" },
   { name: "Cubes", logo: cubesLogo, sizeClass: "h-24" },
+  { name: "Baukant", logo: baukantLogo, sizeClass: "h-24" },
+  { name: "BACCA", logo: baccaLogo, sizeClass: "h-20" },
 ];
 
 export function Partners() {
