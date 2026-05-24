@@ -169,7 +169,7 @@ export const lmsT: Record<Lang, {
     noCourses: "لا توجد دورات حاليّاً",
     byInstructor: "بواسطة",
     students: "طالب",
-    enroll: "Enroll",
+    enroll: "تسجيل",
     enrolling: "جارٍ التسجيل...",
     enrolled: "أنت مسجَّل",
     goToCourse: "ابدأ التعلّم",
