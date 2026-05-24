@@ -780,6 +780,7 @@ export type Database = {
           created_at: string
           description_ar: string | null
           description_en: string | null
+          enrollment_deadline: string | null
           enrollment_open: boolean
           id: string
           instructor_id: string
@@ -801,6 +802,7 @@ export type Database = {
           created_at?: string
           description_ar?: string | null
           description_en?: string | null
+          enrollment_deadline?: string | null
           enrollment_open?: boolean
           id?: string
           instructor_id: string
@@ -822,6 +824,7 @@ export type Database = {
           created_at?: string
           description_ar?: string | null
           description_en?: string | null
+          enrollment_deadline?: string | null
           enrollment_open?: boolean
           id?: string
           instructor_id?: string
@@ -1614,6 +1617,7 @@ export type Database = {
         Args: { _coupon?: string; _course_id: string }
         Returns: Json
       }
+      lms_delete_course: { Args: { _course_id: string }; Returns: undefined }
       lms_enroll: { Args: { _course_id: string }; Returns: string }
       lms_get_quiz_questions: {
         Args: { _quiz_id: string }

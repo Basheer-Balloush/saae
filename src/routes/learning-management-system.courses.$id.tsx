@@ -105,7 +105,7 @@ type Course = {
   description_ar: string | null; description_en: string | null;
   cover_url: string | null; level: string; price: number; is_free: boolean;
   students_count: number; rating_avg: number; instructor_id: string;
-  enrollment_open: boolean; max_students: number | null;
+  enrollment_open: boolean; enrollment_deadline: string | null;
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; duration_seconds: number; is_preview: boolean; display_order: number };
@@ -272,7 +272,7 @@ function CourseDetails() {
             )}
           </div>
           {(() => {
-            const full = course.max_students !== null && course.students_count >= course.max_students;
+            const deadlinePassed = !!course.enrollment_deadline && new Date(course.enrollment_deadline) < new Date();
             const closed = !course.enrollment_open;
             if (enrolled) {
               return (
@@ -291,10 +291,10 @@ function CourseDetails() {
                 </div>
               );
             }
-            if (closed || full) {
+            if (closed || deadlinePassed) {
               return (
                 <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
-                  {full ? (ar ? "اكتمل العدد" : "Course is full") : (ar ? "التسجيل مغلق حالياً" : "Enrollment is closed")}
+                  {deadlinePassed ? (ar ? "انتهى موعد التسجيل" : "Enrollment deadline passed") : (ar ? "التسجيل مغلق حالياً" : "Enrollment is closed")}
                 </div>
               );
             }

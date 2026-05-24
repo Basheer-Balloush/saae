@@ -31,7 +31,7 @@ type Course = {
   description_ar: string | null; description_en: string | null;
   cover_url: string | null; level: string; price: number; is_free: boolean;
   status: string; category_id: string | null; instructor_id: string;
-  enrollment_open: boolean; max_students: number | null;
+  enrollment_open: boolean; enrollment_deadline: string | null;
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; video_url: string | null; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number };
@@ -58,6 +58,8 @@ function CourseBuilder() {
     | { type: "lesson"; id: string }
     | null
   >(null);
+  const [confirmDeleteCourse, setConfirmDeleteCourse] = useState(false);
+  const [deletingCourse, setDeletingCourse] = useState(false);
 
   const load = async () => {
     const [{ data: c }, { data: cats }] = await Promise.all([
@@ -92,7 +94,7 @@ function CourseBuilder() {
       description_ar: course.description_ar, description_en: course.description_en,
       level: course.level as "beginner" | "intermediate" | "advanced", price: course.price, is_free: course.is_free,
       category_id: course.category_id, cover_url: course.cover_url,
-      enrollment_open: course.enrollment_open, max_students: course.max_students,
+      enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline,
     }).eq("id", course.id);
     setSaving(false);
     if (error) { toast.error(toUserMessage(error)); return; }
@@ -193,6 +195,15 @@ function CourseBuilder() {
     toast.success(lang === "ar" ? "تم رفع الفيديو" : "Video uploaded");
   };
 
+  const deleteWholeCourse = async () => {
+    setDeletingCourse(true);
+    const { error } = await supabase.rpc("lms_delete_course", { _course_id: course.id });
+    setDeletingCourse(false);
+    if (error) { toast.error(toUserMessage(error)); return; }
+    toast.success(lang === "ar" ? "تم حذف الدورة" : "Course deleted");
+    navigate({ to: "/learning-management-system/instructor" });
+  };
+
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-8">
       {/* Header bar */}
@@ -216,7 +227,7 @@ function CourseBuilder() {
               </span>
             </div>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex gap-2 shrink-0 flex-wrap">
             <Button onClick={saveCourse} variant="outline" disabled={saving}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
               {lang === "ar" ? "حفظ" : "Save"}
@@ -224,6 +235,10 @@ function CourseBuilder() {
             {course.status === "draft" && (
               <Button onClick={submitForReview}><Send className="h-4 w-4 mx-1" />{lang === "ar" ? "إرسال للمراجعة" : "Submit"}</Button>
             )}
+            <Button variant="destructive" onClick={() => setConfirmDeleteCourse(true)} disabled={deletingCourse}>
+              <Trash2 className="h-4 w-4 mx-1" />
+              {lang === "ar" ? "حذف الدورة" : "Delete course"}
+            </Button>
           </div>
         </div>
       </div>
@@ -303,17 +318,18 @@ function CourseBuilder() {
           />
         </div>
         <div>
-          <Label>{lang === "ar" ? "الحد الأقصى لعدد الطلاب (اتركه فارغاً = غير محدود)" : "Max students (empty = unlimited)"}</Label>
+          <Label>{lang === "ar" ? "آخر موعد للتسجيل (اختياري)" : "Enrollment deadline (optional)"}</Label>
           <Input
-            type="number"
-            min={1}
-            value={course.max_students ?? ""}
+            type="datetime-local"
+            value={course.enrollment_deadline ? course.enrollment_deadline.slice(0, 16) : ""}
             onChange={(e) => {
               const v = e.target.value;
-              update({ max_students: v === "" ? null : Math.max(1, parseInt(v) || 0) });
+              update({ enrollment_deadline: v ? new Date(v).toISOString() : null });
             }}
-            placeholder={lang === "ar" ? "غير محدود" : "Unlimited"}
           />
+          <p className="text-xs text-muted-foreground mt-1">
+            {lang === "ar" ? "بعد هذا التاريخ لن يتمكن الطلاب من التسجيل." : "After this date students cannot enroll."}
+          </p>
         </div>
         <p className="text-xs text-muted-foreground">
           {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
@@ -452,6 +468,31 @@ function CourseBuilder() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {lang === "ar" ? "حذف" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={confirmDeleteCourse} onOpenChange={setConfirmDeleteCourse}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {lang === "ar" ? "حذف الدورة بالكامل؟" : "Delete entire course?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {lang === "ar"
+                ? "سيتم حذف كل الأقسام، الدروس، الاختبارات، الواجبات، التقييمات، الشهادات، التسجيلات والطلبات. لا يمكن التراجع."
+                : "All sections, lessons, quizzes, assignments, reviews, certificates, enrollments and requests will be permanently removed. This cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{lang === "ar" ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={deleteWholeCourse}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingCourse && <Loader2 className="h-4 w-4 animate-spin mx-1" />}
+              {lang === "ar" ? "حذف الدورة" : "Delete course"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
