@@ -135,6 +135,10 @@ export const translations: Record<Lang, Dict> = {
           title: "Trainers Community",
           desc: "A community bringing trainers together to develop training practices.",
         },
+        media: {
+          title: "Media Community",
+          desc: "A community of journalists and content creators covering AI and SAAE's stories.",
+        },
       },
     },
     achievements: {
