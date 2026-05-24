@@ -3,6 +3,15 @@ import { createStart, createMiddleware } from "@tanstack/react-start";
 import { renderErrorPage } from "./lib/error-page";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
 
+const lmsSubdomainRedirectMiddleware = createMiddleware().server(async ({ next, request }) => {
+  const url = new URL(request.url);
+  if (url.hostname === "lms.aisyria.org" && !url.pathname.startsWith("/learning-management-system")) {
+    url.pathname = "/learning-management-system";
+    return Response.redirect(url.toString(), 302);
+  }
+  return next();
+});
+
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
     return await next();
@@ -19,6 +28,6 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
 });
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorMiddleware],
+  requestMiddleware: [lmsSubdomainRedirectMiddleware, errorMiddleware],
   functionMiddleware: [attachSupabaseAuth],
 }));
