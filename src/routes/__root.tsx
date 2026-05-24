@@ -7,7 +7,6 @@ import {
   useLocation,
   HeadContent,
   Scripts,
-  redirect,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -79,22 +78,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  beforeLoad: ({ location }) => {
-    // Redirect lms.aisyria.org subdomain to /learning-management-system
-    const host =
-      typeof window !== "undefined"
-        ? window.location.hostname
-        : (globalThis as any)?.process?.env?.HOST ?? "";
-    if (
-      host === "lms.aisyria.org" &&
-      !location.pathname.startsWith("/learning-management-system")
-    ) {
-      throw redirect({
-        to: "/learning-management-system",
-      });
-    }
-  },
   head: () => ({
+
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -148,11 +133,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');var l=localStorage.getItem('saae-lang')||'en';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
-  const lmsRedirect = `(function(){try{if(location.hostname==='lms.aisyria.org'&&!location.pathname.startsWith('/learning-management-system')){location.replace('/learning-management-system'+location.pathname+location.search+location.hash);}}catch(e){}})();`;
   return (
     <html lang="en">
       <head>
-        <script dangerouslySetInnerHTML={{ __html: lmsRedirect }} />
+
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM4Y7E9Y96" />
         <script
           dangerouslySetInnerHTML={{

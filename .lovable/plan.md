@@ -1,71 +1,47 @@
-# خطة العمل
+## Goal
 
-## 1) زر "العودة للموقع" داخل LMS navbar
-- في `src/components/lms/LmsNavbar.tsx` أضيف زر/لينك "← العودة للموقع" يوجّه إلى `/` (الصفحة الرئيسية للـ CMS).
-- يظهر دائماً (ليس مشروطاً بـ referrer لأن referrer غير موثوق بعد reload).
+When a visitor opens `https://lms.aisyria.org/`, serve the `/learning-management-system` page **without changing the URL in the browser** (no visible redirect). The address bar stays `lms.aisyria.org/`.
 
-## 2) حذف نظام المحفظة والأرباح بالكامل
-- حذف الصفحات:
-  - `src/routes/learning-management-system.student.wallet.tsx`
-  - `src/routes/learning-management-system.instructor.earnings.tsx`
-  - `src/routes/learning-management-system.admin.wallet.tsx`
-  - `src/routes/learning-management-system.admin.payouts.tsx`
-- إزالة كل الروابط لهذه الصفحات من `LmsNavbar.tsx` ولوحات student/instructor/admin index.
-- Migration لحذف: جداول `lms_wallets`, `lms_transactions`, `lms_payouts`, `lms_instructor_earnings`، النوع `lms_payout_status`، والدوال `lms_admin_topup`, `lms_request_payout`, `lms_process_payout`.
+This replaces the current behavior, which 302-redirects to `aisyria.org/learning-management-system` (URL changes).
 
-## 3) تكامل بوابة Paymera eGate (Test)
-- secrets مطلوبة: `PAYMERA_USERNAME`, `PAYMERA_PASSWORD`, `PAYMERA_TERMINAL_ID`, `PAYMERA_BASE_URL=https://egate-t.paymera.cc`.
-- جدول جديد `lms_payments` يحفظ كل عملية (paymera_payment_id, user_id, course_id, amount, status, rrn, raw_response...).
-- Server functions (`src/lib/paymera.functions.ts` + `paymera.server.ts`):
-  - `initiateCoursePayment({ courseId })` ينشئ عملية ويرجّع URL التحويل.
-  - `checkPaymentStatus({ paymentId })` يستعلم ويسجّل المستخدم إذا نجح.
-- Webhook في `src/routes/api/public/paymera-trigger.ts` لاستقبال triggerURL.
-- صفحة رجوع `learning-management-system.payment.callback.tsx`.
+## Approach: internal URL rewrite at the server edge
 
-## 4) خياران للدفع: إلكتروني + يدوي
-**على صفحة الكورس** المدفوع، يظهر للطالب زرّان:
-- **دفع إلكتروني** → يفتح تدفّق Paymera (نقطة 3) ويسجّله تلقائياً عند النجاح.
-- **دفع يدوي (طلب اشتراك)** → ينشئ طلباً قيد المراجعة، الأدمن يوافق يدوياً بعد استلام المبلغ.
+The only way to keep the subdomain visible while serving different content is an **internal rewrite** (not a redirect). The server sees `/` but routes as if the path were `/learning-management-system`.
 
-**جدول جديد `lms_enrollment_requests`:**
-- `id, course_id, user_id, payment_method ('manual'|'online'), status ('pending'|'approved'|'rejected'|'cancelled'), notes (للطالب), admin_notes, created_at, decided_at, decided_by`
-- RLS: الطالب يقرأ/ينشئ طلباته فقط، الأدمن يقرأ/يحدّث الكل، المدرّب يقرأ طلبات كورساته.
-- عند موافقة الأدمن: trigger أو RPC يُنشئ `lms_enrollments` ويزيد `students_count`.
+### Step 1 — Replace the redirect middleware in `src/start.ts`
 
-**صفحة جديدة `learning-management-system.admin.enrollment-requests.tsx`:**
-- قائمة الطلبات المعلّقة مع زر موافقة/رفض + حقل ملاحظات.
+Current `lmsSubdomainRedirectMiddleware` returns `Response.redirect(...)` — change to an in-place URL rewrite:
 
-**في صفحة الطالب:** سكشن "طلباتي" يظهر حالة كل طلب.
+- Read `x-forwarded-host` / `host` header.
+- If host is `lms.aisyria.org`:
+  - If pathname is `/` (or doesn't already start with `/learning-management-system`), construct a **new `Request`** with the same method, headers, and body, but with the URL's pathname rewritten to `/learning-management-system` (preserve query + hash).
+  - Pass the rewritten request forward so the TanStack router matches the LMS route and renders its HTML, but the browser never sees a 3xx — it just gets the LMS page at `/`.
+- All other hosts: `return next()` unchanged.
 
-## 5) إدارة التسجيل والسعة للمدرّب
-**Migration على `lms_courses`:**
-- `enrollment_open boolean DEFAULT true` — فتح/إغلاق التسجيل.
-- `max_students integer NULL` — العدد الأقصى (NULL = غير محدود).
+Technical note: TanStack request middleware exposes `request` in the handler args. The rewrite is done by mutating the URL on a cloned `Request` and re-dispatching via the same handler chain (or by directly invoking the router's SSR handler with the rewritten request). Exact wiring will be verified during implementation.
 
-**في `src/routes/learning-management-system.instructor.courses.$id.tsx`:**
-- Toggle "فتح/إغلاق التسجيل".
-- Input للعدد الأقصى للطلاب.
+### Step 2 — Remove the client-side redirect script in `src/routes/__root.tsx`
 
-**Validation:**
-- زر الاشتراك (إلكتروني أو يدوي) معطّل/مخفي إذا `enrollment_open=false` أو `students_count >= max_students`.
-- نفس التحقق على مستوى server function/RPC لمنع التحايل.
-- موافقة الأدمن على طلب يدوي ترفض إذا الكورس امتلأ.
+The inline `lmsRedirect` script in `RootShell` does `location.replace('/learning-management-system...')`, which forces the URL to change in the browser. Remove it so the URL stays `lms.aisyria.org/`.
 
-## 6) صفحة 404 — زر "Go home"
-الزر الحالي في `src/routes/__root.tsx` يوجّه إلى `/` (الصفحة الرئيسية للموقع) — هذا صحيح أصلاً. سأتأكد فقط من:
-- النص ثنائي اللغة (ar/en).
-- إصلاح أي روابط داخلية مكسورة وُجدت أثناء التطوير (محذوفة بعد إزالة المحفظة).
+### Step 3 — Remove the `beforeLoad` redirect in `__root.tsx`
 
----
+The `beforeLoad` hook also throws `redirect({ to: "/learning-management-system" })` for `lms.aisyria.org`. Remove it — the server rewrite handles routing, and we don't want the client router to navigate away from `/`.
 
-## تفاصيل تقنية (مرجع)
+### Step 4 — Ensure internal links from the LMS still work
 
-**ترتيب التنفيذ المقترح:**
-1. Migration واحد كبير: حذف جداول المحفظة + إنشاء `lms_payments` + `lms_enrollment_requests` + إضافة `enrollment_open`/`max_students` على `lms_courses`.
-2. حذف ملفات المحفظة + تنظيف الروابط.
-3. زر العودة في navbar + تحسين 404.
-4. صفحة المدرّب: toggle + سعة.
-5. تدفق الدفع اليدوي + صفحة طلبات الأدمن.
-6. تكامل Paymera (يتطلب secrets منك أولاً).
+The LMS routes (`/learning-management-system/courses/...`, etc.) are linked with absolute paths inside the app. On `lms.aisyria.org`, clicking those would still show `/learning-management-system/...` in the URL — which contradicts "keep subdomain clean."
 
-**ملاحظة:** سأطلب الـ secrets الخاصة بـ Paymera عندما نصل لخطوة التكامل الفعلي؛ باقي الأقسام تتنفذ قبلها.
+**Question for you:** do you want the clean URL **only on the homepage** (`lms.aisyria.org/` → shows LMS home, but inner pages show `/learning-management-system/...`)? Or should **every** LMS page on the subdomain hide the `/learning-management-system` prefix (e.g. `lms.aisyria.org/courses/123` instead of `lms.aisyria.org/learning-management-system/courses/123`)?
+
+The second option is much bigger work: it requires path stripping on every request from the subdomain plus matching Link rewrites in the LMS components. The first option is what your message literally describes ("if pathname is `/`, redirect to `/learning-management-system`") and matches the plan above.
+
+## Files to change
+
+- `src/start.ts` — swap redirect for rewrite
+- `src/routes/__root.tsx` — remove `lmsRedirect` inline script and `beforeLoad` redirect
+
+## Risks
+
+- Server-side rewrite must run before TanStack's router resolves the route, otherwise the `/` route renders instead of LMS. The middleware order in `requestMiddleware` will place the rewrite first.
+- If a future feature needs to detect the original path (`/`), it will see the rewritten path (`/learning-management-system`). Acceptable for this use case.
