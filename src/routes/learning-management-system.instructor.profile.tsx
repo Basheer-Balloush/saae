@@ -30,8 +30,6 @@ function InstructorProfileEdit() {
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
   const [specialty, setSpecialty] = useState("");
-  const [linkedinUrl, setLinkedinUrl] = useState("");
-  const [githubUrl, setGithubUrl] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,15 +37,13 @@ function InstructorProfileEdit() {
     (async () => {
       const { data } = await supabase
         .from("lms_instructors")
-        .select("full_name,bio,specialty,linkedin_url,github_url,avatar_url")
+        .select("full_name,bio,specialty,avatar_url")
         .eq("user_id", user.id)
         .maybeSingle();
       if (data) {
         setFullName(data.full_name ?? "");
         setBio(data.bio ?? "");
         setSpecialty(data.specialty ?? "");
-        setLinkedinUrl(data.linkedin_url ?? "");
-        setGithubUrl(data.github_url ?? "");
         setAvatarUrl(data.avatar_url ?? null);
       }
       setLoading(false);
@@ -84,8 +80,6 @@ function InstructorProfileEdit() {
       full_name: fullName.trim(),
       bio: bio.trim() || null,
       specialty: specialty.trim() || null,
-      linkedin_url: linkedinUrl.trim() || null,
-      github_url: githubUrl.trim() || null,
       avatar_url: avatarUrl,
     };
     const { error } = await supabase.from("lms_instructors").upsert(payload, { onConflict: "user_id" });
@@ -135,16 +129,6 @@ function InstructorProfileEdit() {
         <div>
           <Label>{ar ? "نبذة عنك" : "Bio"}</Label>
           <Textarea rows={4} value={bio} onChange={(e) => setBio(e.target.value)} />
-        </div>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <Label>LinkedIn</Label>
-            <Input value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://" />
-          </div>
-          <div>
-            <Label>GitHub</Label>
-            <Input value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} placeholder="https://" />
-          </div>
         </div>
 
         <Button type="submit" disabled={saving} className="w-full sm:w-auto">
