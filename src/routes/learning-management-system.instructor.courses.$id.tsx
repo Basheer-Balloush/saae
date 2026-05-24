@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useState } from "react";
-import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList } from "lucide-react";
+import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -13,6 +13,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { QuizBuilder } from "@/components/lms/QuizBuilder";
 import { CourseFormBuilder } from "@/components/lms/CourseFormBuilder";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/learning-management-system/instructor/courses/$id")({
   head: () => ({ meta: [{ title: "LMS · Edit course" }] }),
@@ -42,6 +49,15 @@ function CourseBuilder() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // In-app dialog state replacing native prompt()/confirm()
+  const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
+  const [sectionTitleDraft, setSectionTitleDraft] = useState("");
+  const [lessonDialog, setLessonDialog] = useState<{ open: boolean; sectionId: string | null; title: string }>({ open: false, sectionId: null, title: "" });
+  const [confirmDelete, setConfirmDelete] = useState<
+    | { type: "section"; id: string }
+    | { type: "lesson"; id: string }
+    | null
+  >(null);
 
   const load = async () => {
     const [{ data: c }, { data: cats }] = await Promise.all([
@@ -103,33 +119,50 @@ function CourseBuilder() {
     toast.success(lang === "ar" ? "تم رفع الغلاف" : "Cover uploaded");
   };
 
-  const addSection = async () => {
-    const title = prompt(lang === "ar" ? "عنوان القسم" : "Section title");
-    if (!title) return;
+  const openAddSection = () => {
+    setSectionTitleDraft("");
+    setSectionDialogOpen(true);
+  };
+
+  const confirmAddSection = async () => {
+    const title = sectionTitleDraft.trim();
+    if (!title) {
+      toast.error(lang === "ar" ? "أدخل عنوان القسم" : "Enter a section title");
+      return;
+    }
     const { data, error } = await supabase.from("lms_sections")
       .insert({ course_id: course.id, title, display_order: sections.length })
       .select("*").maybeSingle();
     if (error) { toast.error(toUserMessage(error)); return; }
     if (data) setSections([...sections, data as Section]);
+    setSectionDialogOpen(false);
   };
 
-  const deleteSection = async (sid: string) => {
-    if (!confirm(lang === "ar" ? "حذف القسم؟" : "Delete section?")) return;
+  const doDeleteSection = async (sid: string) => {
     const { error } = await supabase.from("lms_sections").delete().eq("id", sid);
     if (error) { toast.error(toUserMessage(error)); return; }
     setSections(sections.filter((s) => s.id !== sid));
     setLessons(lessons.filter((l) => l.section_id !== sid));
   };
 
-  const addLesson = async (sid: string) => {
-    const title = prompt(lang === "ar" ? "عنوان الدرس" : "Lesson title");
-    if (!title) return;
+  const openAddLesson = (sid: string) => {
+    setLessonDialog({ open: true, sectionId: sid, title: "" });
+  };
+
+  const confirmAddLesson = async () => {
+    const sid = lessonDialog.sectionId;
+    const title = lessonDialog.title.trim();
+    if (!sid || !title) {
+      toast.error(lang === "ar" ? "أدخل عنوان الدرس" : "Enter a lesson title");
+      return;
+    }
     const order = lessons.filter((l) => l.section_id === sid).length;
     const { data, error } = await supabase.from("lms_lessons")
       .insert({ section_id: sid, title, display_order: order })
       .select("*").maybeSingle();
     if (error) { toast.error(toUserMessage(error)); return; }
     if (data) setLessons([...lessons, data as Lesson]);
+    setLessonDialog({ open: false, sectionId: null, title: "" });
   };
 
   const updateLesson = async (lid: string, patch: Partial<Lesson>) => {
@@ -137,10 +170,16 @@ function CourseBuilder() {
     await supabase.from("lms_lessons").update(patch).eq("id", lid);
   };
 
-  const deleteLesson = async (lid: string) => {
-    if (!confirm(lang === "ar" ? "حذف الدرس؟" : "Delete lesson?")) return;
+  const doDeleteLesson = async (lid: string) => {
     await supabase.from("lms_lessons").delete().eq("id", lid);
     setLessons(lessons.filter((l) => l.id !== lid));
+  };
+
+  const runConfirmedDelete = async () => {
+    if (!confirmDelete) return;
+    if (confirmDelete.type === "section") await doDeleteSection(confirmDelete.id);
+    else await doDeleteLesson(confirmDelete.id);
+    setConfirmDelete(null);
   };
 
   const uploadVideo = async (lesson: Lesson, file: File) => {
@@ -156,24 +195,39 @@ function CourseBuilder() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-8">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <button onClick={() => navigate({ to: "/learning-management-system/instructor" })} className="text-xs text-muted-foreground hover:text-primary">
-            ← {lang === "ar" ? "كل الدورات" : "All courses"}
-          </button>
-          <h1 className="mt-1 text-2xl font-bold text-foreground">{lang === "ar" ? "تحرير الدورة" : "Edit course"}</h1>
-          <span className="text-xs text-muted-foreground">{lang === "ar" ? "الحالة" : "Status"}: <b>{course.status}</b></span>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={saveCourse} variant="outline" disabled={saving}>
-            {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
-            {lang === "ar" ? "حفظ" : "Save"}
-          </Button>
-          {course.status === "draft" && (
-            <Button onClick={submitForReview}><Send className="h-4 w-4 mx-1" />{lang === "ar" ? "إرسال للمراجعة" : "Submit"}</Button>
-          )}
+      {/* Header bar */}
+      <div className="rounded-2xl border border-border bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm px-4 sm:px-5 py-4">
+        <button
+          onClick={() => navigate({ to: "/learning-management-system/instructor" })}
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
+        >
+          <ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" />
+          {lang === "ar" ? "كل الدورات" : "All courses"}
+        </button>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-foreground truncate">
+              {lang === "ar" ? "تحرير الدورة" : "Edit course"}
+            </h1>
+            <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{lang === "ar" ? "الحالة" : "Status"}:</span>
+              <span className="inline-flex items-center rounded-full border border-border bg-background px-2 py-0.5 font-semibold text-foreground">
+                {course.status}
+              </span>
+            </div>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Button onClick={saveCourse} variant="outline" disabled={saving}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
+              {lang === "ar" ? "حفظ" : "Save"}
+            </Button>
+            {course.status === "draft" && (
+              <Button onClick={submitForReview}><Send className="h-4 w-4 mx-1" />{lang === "ar" ? "إرسال للمراجعة" : "Submit"}</Button>
+            )}
+          </div>
         </div>
       </div>
+
 
       {/* Details */}
       <section className="rounded-2xl border border-border bg-card p-5 space-y-3">
@@ -268,7 +322,7 @@ function CourseBuilder() {
       <section className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-foreground">{tr.syllabus}</h2>
-          <Button size="sm" onClick={addSection}><Plus className="h-4 w-4 mx-1" />{lang === "ar" ? "قسم" : "Section"}</Button>
+          <Button size="sm" onClick={openAddSection}><Plus className="h-4 w-4 mx-1" />{lang === "ar" ? "قسم" : "Section"}</Button>
         </div>
         <div className="mt-4 space-y-4">
           {sections.length === 0 && <p className="text-sm text-muted-foreground">{lang === "ar" ? "لا توجد أقسام بعد" : "No sections yet"}</p>}
@@ -277,8 +331,8 @@ function CourseBuilder() {
               <div className="flex items-center justify-between gap-2 px-4 py-2.5 bg-muted/40">
                 <span className="font-semibold text-foreground">{s.title}</span>
                 <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => addLesson(s.id)}><Plus className="h-4 w-4" /></Button>
-                  <Button size="sm" variant="ghost" onClick={() => deleteSection(s.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => openAddLesson(s.id)}><Plus className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: "section", id: s.id })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                 </div>
               </div>
               <ul className="divide-y divide-border">
@@ -291,7 +345,7 @@ function CourseBuilder() {
                         <input type="checkbox" checked={l.is_preview} onChange={(e) => updateLesson(l.id, { is_preview: e.target.checked })} />
                         {lang === "ar" ? "معاينة" : "Preview"}
                       </label>
-                      <Button size="sm" variant="ghost" onClick={() => deleteLesson(l.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: "lesson", id: l.id })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
                     <div className="flex items-center gap-2 text-xs">
                       <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
@@ -324,6 +378,84 @@ function CourseBuilder() {
       <QuizBuilder courseId={course.id} />
 
       <CourseFormBuilder courseId={course.id} />
+
+      {/* Add Section dialog */}
+      <Dialog open={sectionDialogOpen} onOpenChange={setSectionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{lang === "ar" ? "إضافة قسم" : "Add section"}</DialogTitle>
+            <DialogDescription>
+              {lang === "ar" ? "أدخل عنوان القسم الجديد." : "Enter a title for the new section."}
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            autoFocus
+            value={sectionTitleDraft}
+            onChange={(e) => setSectionTitleDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAddSection(); } }}
+            placeholder={lang === "ar" ? "مثال: مقدمة" : "e.g. Introduction"}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSectionDialogOpen(false)}>
+              {lang === "ar" ? "إلغاء" : "Cancel"}
+            </Button>
+            <Button onClick={confirmAddSection}>{lang === "ar" ? "إضافة" : "Add"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Lesson dialog */}
+      <Dialog
+        open={lessonDialog.open}
+        onOpenChange={(open) => setLessonDialog((s) => ({ ...s, open }))}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{lang === "ar" ? "إضافة درس" : "Add lesson"}</DialogTitle>
+            <DialogDescription>
+              {lang === "ar" ? "أدخل عنوان الدرس الجديد." : "Enter a title for the new lesson."}
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            autoFocus
+            value={lessonDialog.title}
+            onChange={(e) => setLessonDialog((s) => ({ ...s, title: e.target.value }))}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAddLesson(); } }}
+            placeholder={lang === "ar" ? "مثال: الدرس الأول" : "e.g. Lesson 1"}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLessonDialog({ open: false, sectionId: null, title: "" })}>
+              {lang === "ar" ? "إلغاء" : "Cancel"}
+            </Button>
+            <Button onClick={confirmAddLesson}>{lang === "ar" ? "إضافة" : "Add"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirm */}
+      <AlertDialog open={!!confirmDelete} onOpenChange={(open) => { if (!open) setConfirmDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmDelete?.type === "section"
+                ? (lang === "ar" ? "حذف القسم؟" : "Delete section?")
+                : (lang === "ar" ? "حذف الدرس؟" : "Delete lesson?")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {lang === "ar" ? "لا يمكن التراجع عن هذا الإجراء." : "This action cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{lang === "ar" ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={runConfirmedDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {lang === "ar" ? "حذف" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
