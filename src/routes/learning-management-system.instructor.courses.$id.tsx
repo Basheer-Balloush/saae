@@ -361,6 +361,40 @@ function CourseBuilder() {
           {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
         </p>
       </section>
+
+      {/* Enrollment requests (form answers) */}
+      <section className="rounded-2xl border border-border bg-card p-5 space-y-3">
+        <h2 className="font-bold text-foreground">{lang === "ar" ? "طلبات التسجيل وبياناتها" : "Enrollment requests & form data"}</h2>
+        {enrollReqs.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{lang === "ar" ? "لا توجد طلبات بعد." : "No requests yet."}</p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {enrollReqs.map((r) => (
+              <li key={r.id} className="py-3 flex flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-xs font-mono text-muted-foreground truncate max-w-[260px]">{r.user_id}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    <span className={`inline-block rounded-full px-2 py-0.5 me-1 ${
+                      r.status === "pending" ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200" :
+                      r.status === "approved" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200" :
+                      r.status === "rejected" ? "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200" :
+                      "bg-muted text-muted-foreground"
+                    }`}>
+                      {lang === "ar" ? ({ pending: "قيد المراجعة", approved: "موافَق", rejected: "مرفوض", cancelled: "ملغى" } as Record<string, string>)[r.status] ?? r.status : r.status}
+                    </span>
+                    {new Date(r.created_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => setViewing({ requestId: r.id, courseId: course.id })}>
+                  <FileText className="h-4 w-4 mx-1" />
+                  {lang === "ar" ? "عرض بيانات التسجيل" : "View form answers"}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       <section className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-foreground">{tr.syllabus}</h2>
