@@ -319,7 +319,6 @@ function CourseDetails() {
                   onClick={() => { if (requireAuth()) { hasForm ? setFormDialogOpen(true) : setManualOpen(true); } }}
                   disabled={busy}
                 >
-                  <Receipt className="h-4 w-4 mx-2" />
                   {tr.enroll}
                 </Button>
                 <p className="text-xs text-muted-foreground text-center leading-relaxed">
