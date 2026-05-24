@@ -13,7 +13,7 @@ type Dict = {
   };
   communities: {
     eyebrow: string; title: string; subtitle: string; cta: string; discover: string;
-    cards: Record<"data" | "architecture" | "medical" | "research" | "software" | "economy" | "trainers", { title: string; desc: string }>;
+    cards: Record<"data" | "architecture" | "medical" | "research" | "software" | "economy" | "trainers" | "media", { title: string; desc: string }>;
   };
   achievements: { eyebrow: string; title: string; body: string; stats: { value: string; label: string }[] };
   partners: { eyebrow: string; title: string };
