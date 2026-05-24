@@ -13,7 +13,7 @@ type Dict = {
   };
   communities: {
     eyebrow: string; title: string; subtitle: string; cta: string; discover: string;
-    cards: Record<"data" | "architecture" | "medical" | "research" | "software" | "economy" | "trainers", { title: string; desc: string }>;
+    cards: Record<"data" | "architecture" | "medical" | "research" | "software" | "economy" | "trainers" | "media", { title: string; desc: string }>;
   };
   achievements: { eyebrow: string; title: string; body: string; stats: { value: string; label: string }[] };
   partners: { eyebrow: string; title: string };
@@ -134,6 +134,10 @@ export const translations: Record<Lang, Dict> = {
         trainers: {
           title: "Trainers Community",
           desc: "A community bringing trainers together to develop training practices.",
+        },
+        media: {
+          title: "Media Community",
+          desc: "A community of journalists and content creators covering AI and SAAE's stories.",
         },
       },
     },
@@ -294,6 +298,10 @@ export const translations: Record<Lang, Dict> = {
         trainers: {
           title: "مجتمع المدربين",
           desc: "مجتمعٌ يجمع المدرّبين لتطوير الممارسات التدريبية.",
+        },
+        media: {
+          title: "المجتمع الإعلامي",
+          desc: "مجتمعٌ يجمع الصحفيين وصنّاع المحتوى لتغطية الذكاء الاصطناعي وقصص الجمعية.",
         },
       },
     },

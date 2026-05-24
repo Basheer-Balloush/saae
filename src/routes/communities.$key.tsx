@@ -28,6 +28,7 @@ const HERO_IMG: Record<CommunityKey, string> = {
   software: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1600&q=80",
   economy: "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=80",
   trainers: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1600&q=80",
+  media: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1600&q=80",
 };
 
 type ActivityItem = { id: string; date: string; category: string; title: string; desc: string };
@@ -61,6 +62,10 @@ const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
   trainers: {
     ar: "نبني شبكةً من المدرّبين المعتمدين الذين يقودون تجارب التعلّم في الجمعية بمعايير جودةٍ موحَّدة.",
     en: "Building a network of certified trainers who lead the association's learning experiences with unified quality standards.",
+  },
+  media: {
+    ar: "نُوصِل رسالة الجمعية ومجتمعاتها إلى الجمهور السوري والعربي عبر محتوىً إعلاميٍّ موثوق يواكب ثورة الذكاء الاصطناعي.",
+    en: "Carrying SAAE's message and its communities to Syrian and Arab audiences through trusted media content that keeps pace with the AI revolution.",
   },
 };
 
@@ -228,6 +233,29 @@ const DETAILS: Record<CommunityKey, DetailBlock[]> = {
       },
     },
   ],
+  media: [
+    {
+      label: { ar: "المحور", en: "Focus" },
+      text: {
+        ar: "إنتاج محتوىً إعلاميٍّ متخصّص يُعرِّف الجمهور بالذكاء الاصطناعي وتطبيقاته في الواقع السوري.",
+        en: "Producing specialized media content that introduces audiences to AI and its applications in the Syrian context.",
+      },
+    },
+    {
+      label: { ar: "المنصّة", en: "Platform" },
+      text: {
+        ar: "تجمع الصحفيين وصنّاع المحتوى لتغطية أنشطة الجمعية ومجتمعاتها وإيصال قصصها.",
+        en: "Brings journalists and content creators together to cover SAAE's activities and tell the stories of its communities.",
+      },
+    },
+    {
+      label: { ar: "الهدف", en: "Objective" },
+      text: {
+        ar: "بناء خطابٍ إعلاميٍّ سوريٍّ موثوقٍ حول الذكاء الاصطناعي وأثره في المجتمع والاقتصاد.",
+        en: "Building a trusted Syrian media narrative around AI and its impact on society and the economy.",
+      },
+    },
+  ],
 };
 
 function formatNewsDate(iso: string): string {
@@ -268,6 +296,10 @@ const METRICS_BY_KEY: Record<CommunityKey, Metric[]> = {
   trainers: [
     { value: "+80", label: { ar: "مدرّب معتمد", en: "Certified Trainers" } },
     { value: "+150", label: { ar: "ورشة تدريبية", en: "Training Workshops" } },
+  ],
+  media: [
+    { value: "+40", label: { ar: "صانع محتوى", en: "Content Creators" } },
+    { value: "+200", label: { ar: "مادة إعلامية منشورة", en: "Published Media Pieces" } },
   ],
 };
 
