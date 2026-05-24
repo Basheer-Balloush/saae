@@ -322,7 +322,7 @@ function CourseBuilder() {
       <section className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-foreground">{tr.syllabus}</h2>
-          <Button size="sm" onClick={addSection}><Plus className="h-4 w-4 mx-1" />{lang === "ar" ? "قسم" : "Section"}</Button>
+          <Button size="sm" onClick={openAddSection}><Plus className="h-4 w-4 mx-1" />{lang === "ar" ? "قسم" : "Section"}</Button>
         </div>
         <div className="mt-4 space-y-4">
           {sections.length === 0 && <p className="text-sm text-muted-foreground">{lang === "ar" ? "لا توجد أقسام بعد" : "No sections yet"}</p>}
