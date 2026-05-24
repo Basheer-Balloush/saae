@@ -77,17 +77,14 @@ export function Partners() {
           transition={{ duration: 0.6 }}
           className="mx-auto text-center"
         >
-          <h2 className="whitespace-nowrap text-display-2 text-foreground">
-            {t.partners.title}
-          </h2>
+          <h2 className="whitespace-nowrap text-display-2 text-foreground">{t.partners.title}</h2>
         </motion.div>
       </div>
 
       <div
         className="partners-marquee group relative mt-14 overflow-hidden"
         style={{
-          maskImage:
-            "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
+          maskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
           WebkitMaskImage:
             "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
         }}
