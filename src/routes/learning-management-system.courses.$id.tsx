@@ -128,6 +128,8 @@ function CourseDetails() {
   const [busy, setBusy] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
   const [manualNotes, setManualNotes] = useState("");
+  const [hasForm, setHasForm] = useState(false);
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
