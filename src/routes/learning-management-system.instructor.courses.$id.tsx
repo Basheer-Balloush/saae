@@ -31,7 +31,7 @@ type Course = {
   description_ar: string | null; description_en: string | null;
   cover_url: string | null; level: string; price: number; is_free: boolean;
   status: string; category_id: string | null; instructor_id: string;
-  enrollment_open: boolean; max_students: number | null;
+  enrollment_open: boolean; enrollment_deadline: string | null;
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; video_url: string | null; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number };
