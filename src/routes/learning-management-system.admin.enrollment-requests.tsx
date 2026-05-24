@@ -46,12 +46,12 @@ function AdminEnrollmentRequests() {
       const courseIds = [...new Set(list.map((r) => r.course_id))];
       const { data: courses } = await supabase
         .from("lms_courses")
-        .select("id,title_ar,title_en,price,students_count,enrollment_deadline")
+        .select("id,title_ar,title_en,price,students_count,enrollment_deadline,max_students")
         .in("id", courseIds);
       const cMap = new Map((courses ?? []).map((c) => [c.id, c]));
       list.forEach((r) => {
         const c = cMap.get(r.course_id);
-        r.course = c ? { title_ar: c.title_ar, title_en: c.title_en, price: Number(c.price), students_count: c.students_count, enrollment_deadline: c.enrollment_deadline } : undefined;
+        r.course = c ? { title_ar: c.title_ar, title_en: c.title_en, price: Number(c.price), students_count: c.students_count, enrollment_deadline: c.enrollment_deadline, max_students: c.max_students } : undefined;
       });
     }
     setReqs(list);
