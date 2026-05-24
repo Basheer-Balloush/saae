@@ -110,7 +110,7 @@ function AdminEnrollmentRequests() {
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       {ar ? "السعر" : "Price"}: {r.course ? `${r.course.price.toLocaleString()} ${ar ? "ل.س" : "SYP"}` : "—"}
-                      {" · "}{ar ? "العدد" : "Enrolled"}: {r.course?.students_count ?? "—"}{r.course?.enrollment_deadline ? ` · ${ar ? "آخر موعد" : "Deadline"}: ${new Date(r.course.enrollment_deadline).toLocaleDateString(ar ? "ar" : "en")}` : ""}
+                      {" · "}{ar ? "العدد" : "Enrolled"}: {r.course?.students_count ?? "—"}{r.course?.max_students != null ? ` / ${r.course.max_students}` : ""}{r.course?.enrollment_deadline ? ` · ${ar ? "آخر موعد" : "Deadline"}: ${new Date(r.course.enrollment_deadline).toLocaleDateString(ar ? "ar" : "en")}` : ""}
                       {" · "}{new Date(r.created_at).toLocaleDateString(ar ? "ar" : "en")}
                     </div>
                   </div>
