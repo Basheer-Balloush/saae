@@ -178,6 +178,15 @@ function AdminEnrollmentRequests() {
           })}
         </div>
       )}
+
+      {viewing && (
+        <EnrollmentResponseViewer
+          open={!!viewing}
+          onOpenChange={(v) => { if (!v) setViewing(null); }}
+          requestId={viewing.requestId}
+          courseId={viewing.courseId}
+        />
+      )}
     </div>
   );
 }
