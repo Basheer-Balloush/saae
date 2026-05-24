@@ -82,6 +82,7 @@ export function Partners() {
       </div>
 
       <div
+        dir="ltr"
         className="partners-marquee group relative mt-14 overflow-hidden"
         style={{
           maskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
@@ -97,26 +98,24 @@ export function Partners() {
       </div>
 
       <style>{`
-        @keyframes partners-scroll {
-          0% { transform: translate3d(-33.333333%, 0, 0); }
-          100% { transform: translate3d(-66.666666%, 0, 0); }
-        }
         .partners-track {
           animation: partners-scroll 55s linear infinite;
+          direction: ltr;
           will-change: transform;
           backface-visibility: hidden;
           transform: translate3d(-33.333333%, 0, 0);
+          transform-style: preserve-3d;
+        }
+        @keyframes partners-scroll {
+          from { transform: translate3d(-33.333333%, 0, 0); }
+          to { transform: translate3d(-66.666666%, 0, 0); }
         }
 
         .partners-marquee:hover .partners-track {
           animation-play-state: paused;
         }
         [dir="rtl"] .partners-track {
-          animation: partners-scroll-rtl 55s linear infinite;
-        }
-        @keyframes partners-scroll-rtl {
-          0% { transform: translate3d(-66.666666%, 0, 0); }
-          100% { transform: translate3d(-33.333333%, 0, 0); }
+          animation-name: partners-scroll;
         }
       `}</style>
     </section>
