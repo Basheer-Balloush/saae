@@ -119,33 +119,50 @@ function CourseBuilder() {
     toast.success(lang === "ar" ? "تم رفع الغلاف" : "Cover uploaded");
   };
 
-  const addSection = async () => {
-    const title = prompt(lang === "ar" ? "عنوان القسم" : "Section title");
-    if (!title) return;
+  const openAddSection = () => {
+    setSectionTitleDraft("");
+    setSectionDialogOpen(true);
+  };
+
+  const confirmAddSection = async () => {
+    const title = sectionTitleDraft.trim();
+    if (!title) {
+      toast.error(lang === "ar" ? "أدخل عنوان القسم" : "Enter a section title");
+      return;
+    }
     const { data, error } = await supabase.from("lms_sections")
       .insert({ course_id: course.id, title, display_order: sections.length })
       .select("*").maybeSingle();
     if (error) { toast.error(toUserMessage(error)); return; }
     if (data) setSections([...sections, data as Section]);
+    setSectionDialogOpen(false);
   };
 
-  const deleteSection = async (sid: string) => {
-    if (!confirm(lang === "ar" ? "حذف القسم؟" : "Delete section?")) return;
+  const doDeleteSection = async (sid: string) => {
     const { error } = await supabase.from("lms_sections").delete().eq("id", sid);
     if (error) { toast.error(toUserMessage(error)); return; }
     setSections(sections.filter((s) => s.id !== sid));
     setLessons(lessons.filter((l) => l.section_id !== sid));
   };
 
-  const addLesson = async (sid: string) => {
-    const title = prompt(lang === "ar" ? "عنوان الدرس" : "Lesson title");
-    if (!title) return;
+  const openAddLesson = (sid: string) => {
+    setLessonDialog({ open: true, sectionId: sid, title: "" });
+  };
+
+  const confirmAddLesson = async () => {
+    const sid = lessonDialog.sectionId;
+    const title = lessonDialog.title.trim();
+    if (!sid || !title) {
+      toast.error(lang === "ar" ? "أدخل عنوان الدرس" : "Enter a lesson title");
+      return;
+    }
     const order = lessons.filter((l) => l.section_id === sid).length;
     const { data, error } = await supabase.from("lms_lessons")
       .insert({ section_id: sid, title, display_order: order })
       .select("*").maybeSingle();
     if (error) { toast.error(toUserMessage(error)); return; }
     if (data) setLessons([...lessons, data as Lesson]);
+    setLessonDialog({ open: false, sectionId: null, title: "" });
   };
 
   const updateLesson = async (lid: string, patch: Partial<Lesson>) => {
@@ -153,10 +170,16 @@ function CourseBuilder() {
     await supabase.from("lms_lessons").update(patch).eq("id", lid);
   };
 
-  const deleteLesson = async (lid: string) => {
-    if (!confirm(lang === "ar" ? "حذف الدرس؟" : "Delete lesson?")) return;
+  const doDeleteLesson = async (lid: string) => {
     await supabase.from("lms_lessons").delete().eq("id", lid);
     setLessons(lessons.filter((l) => l.id !== lid));
+  };
+
+  const runConfirmedDelete = async () => {
+    if (!confirmDelete) return;
+    if (confirmDelete.type === "section") await doDeleteSection(confirmDelete.id);
+    else await doDeleteLesson(confirmDelete.id);
+    setConfirmDelete(null);
   };
 
   const uploadVideo = async (lesson: Lesson, file: File) => {
