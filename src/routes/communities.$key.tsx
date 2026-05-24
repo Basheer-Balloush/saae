@@ -63,6 +63,10 @@ const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
     ar: "نبني شبكةً من المدرّبين المعتمدين الذين يقودون تجارب التعلّم في الجمعية بمعايير جودةٍ موحَّدة.",
     en: "Building a network of certified trainers who lead the association's learning experiences with unified quality standards.",
   },
+  media: {
+    ar: "نُوصِل رسالة الجمعية ومجتمعاتها إلى الجمهور السوري والعربي عبر محتوىً إعلاميٍّ موثوق يواكب ثورة الذكاء الاصطناعي.",
+    en: "Carrying SAAE's message and its communities to Syrian and Arab audiences through trusted media content that keeps pace with the AI revolution.",
+  },
 };
 
 type DetailBlock = { label: { ar: string; en: string }; text: { ar: string; en: string } };
