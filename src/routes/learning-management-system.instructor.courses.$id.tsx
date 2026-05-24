@@ -378,6 +378,84 @@ function CourseBuilder() {
       <QuizBuilder courseId={course.id} />
 
       <CourseFormBuilder courseId={course.id} />
+
+      {/* Add Section dialog */}
+      <Dialog open={sectionDialogOpen} onOpenChange={setSectionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{lang === "ar" ? "إضافة قسم" : "Add section"}</DialogTitle>
+            <DialogDescription>
+              {lang === "ar" ? "أدخل عنوان القسم الجديد." : "Enter a title for the new section."}
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            autoFocus
+            value={sectionTitleDraft}
+            onChange={(e) => setSectionTitleDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAddSection(); } }}
+            placeholder={lang === "ar" ? "مثال: مقدمة" : "e.g. Introduction"}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSectionDialogOpen(false)}>
+              {lang === "ar" ? "إلغاء" : "Cancel"}
+            </Button>
+            <Button onClick={confirmAddSection}>{lang === "ar" ? "إضافة" : "Add"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Lesson dialog */}
+      <Dialog
+        open={lessonDialog.open}
+        onOpenChange={(open) => setLessonDialog((s) => ({ ...s, open }))}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{lang === "ar" ? "إضافة درس" : "Add lesson"}</DialogTitle>
+            <DialogDescription>
+              {lang === "ar" ? "أدخل عنوان الدرس الجديد." : "Enter a title for the new lesson."}
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            autoFocus
+            value={lessonDialog.title}
+            onChange={(e) => setLessonDialog((s) => ({ ...s, title: e.target.value }))}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAddLesson(); } }}
+            placeholder={lang === "ar" ? "مثال: الدرس الأول" : "e.g. Lesson 1"}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLessonDialog({ open: false, sectionId: null, title: "" })}>
+              {lang === "ar" ? "إلغاء" : "Cancel"}
+            </Button>
+            <Button onClick={confirmAddLesson}>{lang === "ar" ? "إضافة" : "Add"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirm */}
+      <AlertDialog open={!!confirmDelete} onOpenChange={(open) => { if (!open) setConfirmDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmDelete?.type === "section"
+                ? (lang === "ar" ? "حذف القسم؟" : "Delete section?")
+                : (lang === "ar" ? "حذف الدرس؟" : "Delete lesson?")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {lang === "ar" ? "لا يمكن التراجع عن هذا الإجراء." : "This action cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{lang === "ar" ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={runConfirmedDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {lang === "ar" ? "حذف" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
