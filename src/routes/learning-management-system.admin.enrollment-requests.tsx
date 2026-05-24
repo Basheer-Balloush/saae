@@ -149,22 +149,43 @@ function AdminEnrollmentRequests() {
                       onChange={(e) => setNoteDraft({ ...noteDraft, [r.id]: e.target.value })}
                       rows={2}
                     />
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={() => decide(r, "approve")} disabled={busy === r.id} className="flex-1">
+                    <div className="flex gap-2 flex-wrap">
+                      <Button size="sm" variant="secondary" onClick={() => setViewing({ requestId: r.id, courseId: r.course_id })}>
+                        <FileText className="h-4 w-4 mx-1" />
+                        {ar ? "عرض بيانات التسجيل" : "View form answers"}
+                      </Button>
+                      <Button size="sm" onClick={() => decide(r, "approve")} disabled={busy === r.id} className="flex-1 min-w-[100px]">
                         {busy === r.id ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Check className="h-4 w-4 mx-1" />}
                         {ar ? "موافقة" : "Approve"}
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => decide(r, "reject")} disabled={busy === r.id} className="flex-1">
+                      <Button size="sm" variant="outline" onClick={() => decide(r, "reject")} disabled={busy === r.id} className="flex-1 min-w-[100px]">
                         <X className="h-4 w-4 mx-1" />
                         {ar ? "رفض" : "Reject"}
                       </Button>
                     </div>
                   </div>
                 )}
+                {r.status !== "pending" && (
+                  <div className="pt-2 border-t border-border">
+                    <Button size="sm" variant="secondary" onClick={() => setViewing({ requestId: r.id, courseId: r.course_id })}>
+                      <FileText className="h-4 w-4 mx-1" />
+                      {ar ? "عرض بيانات التسجيل" : "View form answers"}
+                    </Button>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
+      )}
+
+      {viewing && (
+        <EnrollmentResponseViewer
+          open={!!viewing}
+          onOpenChange={(v) => { if (!v) setViewing(null); }}
+          requestId={viewing.requestId}
+          courseId={viewing.courseId}
+        />
       )}
     </div>
   );

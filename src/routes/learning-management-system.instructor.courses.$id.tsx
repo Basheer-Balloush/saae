@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useState } from "react";
-import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList, ArrowRight } from "lucide-react";
+import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList, ArrowRight, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { QuizBuilder } from "@/components/lms/QuizBuilder";
 import { CourseFormBuilder } from "@/components/lms/CourseFormBuilder";
+import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -60,6 +61,8 @@ function CourseBuilder() {
   >(null);
   const [confirmDeleteCourse, setConfirmDeleteCourse] = useState(false);
   const [deletingCourse, setDeletingCourse] = useState(false);
+  const [enrollReqs, setEnrollReqs] = useState<Array<{ id: string; user_id: string; status: string; payment_method: string; notes: string | null; created_at: string }>>([]);
+  const [viewing, setViewing] = useState<{ requestId: string; courseId: string } | null>(null);
 
   const load = async () => {
     const [{ data: c }, { data: cats }] = await Promise.all([
@@ -79,6 +82,12 @@ function CourseBuilder() {
         setLessons((lss as Lesson[]) ?? []);
       }
     }
+    const { data: reqs } = await supabase
+      .from("lms_enrollment_requests")
+      .select("id,user_id,status,payment_method,notes,created_at")
+      .eq("course_id", id)
+      .order("created_at", { ascending: false });
+    setEnrollReqs((reqs as Array<{ id: string; user_id: string; status: string; payment_method: string; notes: string | null; created_at: string }>) ?? []);
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [id]);
@@ -352,6 +361,40 @@ function CourseBuilder() {
           {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
         </p>
       </section>
+
+      {/* Enrollment requests (form answers) */}
+      <section className="rounded-2xl border border-border bg-card p-5 space-y-3">
+        <h2 className="font-bold text-foreground">{lang === "ar" ? "طلبات التسجيل وبياناتها" : "Enrollment requests & form data"}</h2>
+        {enrollReqs.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{lang === "ar" ? "لا توجد طلبات بعد." : "No requests yet."}</p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {enrollReqs.map((r) => (
+              <li key={r.id} className="py-3 flex flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-xs font-mono text-muted-foreground truncate max-w-[260px]">{r.user_id}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    <span className={`inline-block rounded-full px-2 py-0.5 me-1 ${
+                      r.status === "pending" ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200" :
+                      r.status === "approved" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200" :
+                      r.status === "rejected" ? "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200" :
+                      "bg-muted text-muted-foreground"
+                    }`}>
+                      {lang === "ar" ? ({ pending: "قيد المراجعة", approved: "موافَق", rejected: "مرفوض", cancelled: "ملغى" } as Record<string, string>)[r.status] ?? r.status : r.status}
+                    </span>
+                    {new Date(r.created_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => setViewing({ requestId: r.id, courseId: course.id })}>
+                  <FileText className="h-4 w-4 mx-1" />
+                  {lang === "ar" ? "عرض بيانات التسجيل" : "View form answers"}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       <section className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-foreground">{tr.syllabus}</h2>
@@ -514,6 +557,15 @@ function CourseBuilder() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {viewing && (
+        <EnrollmentResponseViewer
+          open={!!viewing}
+          onOpenChange={(v) => { if (!v) setViewing(null); }}
+          requestId={viewing.requestId}
+          courseId={viewing.courseId}
+        />
+      )}
     </div>
   );
 }
