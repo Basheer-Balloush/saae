@@ -21,16 +21,40 @@ const IMG = {
 };
 
 type Slide = { key: string; img: string; cat: string; title: string; date: string; id?: string };
+export type HomeNewsRow = {
+  id: string;
+  title: string | null;
+  title_ar: string | null;
+  title_en: string | null;
+  image_url: string | null;
+  category: string;
+  published_at: string;
+};
 
-export function FeaturedNews() {
+function mapNewsRows(rows: HomeNewsRow[], lang: "ar" | "en"): Slide[] {
+  return rows.map((r) => ({
+    key: r.id,
+    id: r.id,
+    img: r.image_url || IMG.featured,
+    cat: communityLabel(r.category, lang),
+    title: (lang === "ar" ? (r.title_ar ?? r.title_en) : (r.title_en ?? r.title_ar)) ?? r.title ?? "",
+    date: r.published_at,
+  }));
+}
+
+export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const { t, dir, lang } = useLang();
   const cats = t.news.categories;
   const items = t.news.items;
 
-  const [slides, setSlides] = useState<Slide[] | null>(null);
+  const [slides, setSlides] = useState<Slide[] | null>(() => initialNews ? mapNewsRows(initialNews, lang) : null);
   const rowRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (initialNews) {
+      setSlides(mapNewsRows(initialNews, lang));
+      return;
+    }
     supabase
       .from("news")
       .select("id,title,title_ar,title_en,image_url,category,published_at")
@@ -39,17 +63,9 @@ export function FeaturedNews() {
       .order("created_at", { ascending: false })
       .limit(8)
       .then(({ data }) => {
-        const mapped: Slide[] = (data ?? []).map((r: any) => ({
-          key: r.id,
-          id: r.id,
-          img: r.image_url || IMG.featured,
-          cat: communityLabel(r.category, lang),
-          title: (lang === "ar" ? (r.title_ar ?? r.title_en) : (r.title_en ?? r.title_ar)) ?? r.title,
-          date: r.published_at,
-        }));
-        setSlides(mapped);
+        setSlides(mapNewsRows((data ?? []) as HomeNewsRow[], lang));
       });
-  }, [lang]);
+  }, [initialNews, lang]);
 
   // Restore marquee position when returning from a news detail page.
   useEffect(() => {

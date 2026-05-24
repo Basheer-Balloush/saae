@@ -1,14 +1,26 @@
 import { useEffect } from "react";
 import { createFileRoute, useLocation } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
-import { FeaturedNews } from "@/components/site/FeaturedNews";
+import { FeaturedNews, type HomeNewsRow } from "@/components/site/FeaturedNews";
 import { Communities } from "@/components/site/Communities";
 import { LmsCta } from "@/components/site/LmsCta";
 import { Achievements } from "@/components/site/Achievements";
 import { Partners } from "@/components/site/Partners";
 import { Footer } from "@/components/site/Footer";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    const { data } = await supabase
+      .from("news")
+      .select("id,title,title_ar,title_en,image_url,category,published_at")
+      .eq("show_on_home", true)
+      .order("published_at", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(8);
+
+    return { news: (data ?? []) as HomeNewsRow[] };
+  },
   head: () => ({
     meta: [
       { title: "SAAE — Syrian Association for AI & Entrepreneurship" },
@@ -38,6 +50,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const location = useLocation();
+  const { news } = Route.useLoaderData();
 
   // Prevent the browser's scroll restoration from flashing a previous
   // position (e.g. Partners section) before TanStack Router scrolls to top.
@@ -87,7 +100,7 @@ function Index() {
     <div id="home" className="min-h-screen bg-background text-foreground">
       <Navbar />
       <main>
-        <FeaturedNews />
+        <FeaturedNews initialNews={news} />
         <Partners />
         <Achievements />
         <Communities />
