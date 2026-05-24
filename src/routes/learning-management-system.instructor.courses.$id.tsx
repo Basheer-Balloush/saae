@@ -31,7 +31,7 @@ type Course = {
   description_ar: string | null; description_en: string | null;
   cover_url: string | null; level: string; price: number; is_free: boolean;
   status: string; category_id: string | null; instructor_id: string;
-  enrollment_open: boolean; enrollment_deadline: string | null;
+  enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null; students_count: number;
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; video_url: string | null; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number };
@@ -94,7 +94,7 @@ function CourseBuilder() {
       description_ar: course.description_ar, description_en: course.description_en,
       level: course.level as "beginner" | "intermediate" | "advanced", price: course.price, is_free: course.is_free,
       category_id: course.category_id, cover_url: course.cover_url,
-      enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline,
+      enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline, max_students: course.max_students,
     }).eq("id", course.id);
     setSaving(false);
     if (error) { toast.error(toUserMessage(error)); return; }
@@ -329,6 +329,23 @@ function CourseBuilder() {
           />
           <p className="text-xs text-muted-foreground mt-1">
             {lang === "ar" ? "بعد هذا التاريخ لن يتمكن الطلاب من التسجيل." : "After this date students cannot enroll."}
+          </p>
+        </div>
+        <div>
+          <Label>{lang === "ar" ? "الحد الأقصى للطلاب (اختياري)" : "Max students (optional)"}</Label>
+          <Input
+            type="number"
+            min={0}
+            value={course.max_students ?? ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              update({ max_students: v === "" ? null : Math.max(0, parseInt(v, 10) || 0) });
+            }}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            {lang === "ar"
+              ? `المسجلون حالياً: ${course.students_count}. اتركه فارغاً لعدم وجود حد.`
+              : `Currently enrolled: ${course.students_count}. Leave empty for no limit.`}
           </p>
         </div>
         <p className="text-xs text-muted-foreground">

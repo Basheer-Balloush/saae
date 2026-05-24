@@ -23,7 +23,7 @@ type Req = {
   admin_notes: string | null;
   created_at: string;
   decided_at: string | null;
-  course?: { title_ar: string; title_en: string | null; price: number; students_count: number; enrollment_deadline: string | null };
+  course?: { title_ar: string; title_en: string | null; price: number; students_count: number; enrollment_deadline: string | null; max_students: number | null };
 };
 
 function AdminEnrollmentRequests() {
@@ -46,12 +46,12 @@ function AdminEnrollmentRequests() {
       const courseIds = [...new Set(list.map((r) => r.course_id))];
       const { data: courses } = await supabase
         .from("lms_courses")
-        .select("id,title_ar,title_en,price,students_count,enrollment_deadline")
+        .select("id,title_ar,title_en,price,students_count,enrollment_deadline,max_students")
         .in("id", courseIds);
       const cMap = new Map((courses ?? []).map((c) => [c.id, c]));
       list.forEach((r) => {
         const c = cMap.get(r.course_id);
-        r.course = c ? { title_ar: c.title_ar, title_en: c.title_en, price: Number(c.price), students_count: c.students_count, enrollment_deadline: c.enrollment_deadline } : undefined;
+        r.course = c ? { title_ar: c.title_ar, title_en: c.title_en, price: Number(c.price), students_count: c.students_count, enrollment_deadline: c.enrollment_deadline, max_students: c.max_students } : undefined;
       });
     }
     setReqs(list);
@@ -99,6 +99,7 @@ function AdminEnrollmentRequests() {
           {reqs.map((r) => {
             const cTitle = r.course ? (ar ? r.course.title_ar : r.course.title_en || r.course.title_ar) : r.course_id;
             const deadlinePassed = !!r.course?.enrollment_deadline && new Date(r.course.enrollment_deadline) < new Date();
+            const isFull = r.course?.max_students != null && (r.course?.students_count ?? 0) >= r.course.max_students;
             return (
               <div key={r.id} className="rounded-xl border border-border bg-card p-4 space-y-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -109,7 +110,7 @@ function AdminEnrollmentRequests() {
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       {ar ? "السعر" : "Price"}: {r.course ? `${r.course.price.toLocaleString()} ${ar ? "ل.س" : "SYP"}` : "—"}
-                      {" · "}{ar ? "العدد" : "Enrolled"}: {r.course?.students_count ?? "—"}{r.course?.enrollment_deadline ? ` · ${ar ? "آخر موعد" : "Deadline"}: ${new Date(r.course.enrollment_deadline).toLocaleDateString(ar ? "ar" : "en")}` : ""}
+                      {" · "}{ar ? "العدد" : "Enrolled"}: {r.course?.students_count ?? "—"}{r.course?.max_students != null ? ` / ${r.course.max_students}` : ""}{r.course?.enrollment_deadline ? ` · ${ar ? "آخر موعد" : "Deadline"}: ${new Date(r.course.enrollment_deadline).toLocaleDateString(ar ? "ar" : "en")}` : ""}
                       {" · "}{new Date(r.created_at).toLocaleDateString(ar ? "ar" : "en")}
                     </div>
                   </div>
@@ -141,6 +142,7 @@ function AdminEnrollmentRequests() {
                 {r.status === "pending" && (
                   <div className="space-y-2 pt-2 border-t border-border">
                     {deadlinePassed && <p className="text-xs text-amber-600">{ar ? "تنبيه: انتهى موعد التسجيل" : "Warning: enrollment deadline passed"}</p>}
+                    {isFull && <p className="text-xs text-amber-600">{ar ? "تنبيه: اكتمل العدد" : "Warning: course is full"}</p>}
                     <Textarea
                       placeholder={ar ? "ملاحظات للإدارة (اختياري)" : "Admin notes (optional)"}
                       value={noteDraft[r.id] ?? ""}
