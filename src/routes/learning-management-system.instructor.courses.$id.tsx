@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { QuizBuilder } from "@/components/lms/QuizBuilder";
 import { CourseFormBuilder } from "@/components/lms/CourseFormBuilder";
+import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
