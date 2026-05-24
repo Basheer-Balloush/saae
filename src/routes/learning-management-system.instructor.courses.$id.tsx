@@ -303,17 +303,18 @@ function CourseBuilder() {
           />
         </div>
         <div>
-          <Label>{lang === "ar" ? "الحد الأقصى لعدد الطلاب (اتركه فارغاً = غير محدود)" : "Max students (empty = unlimited)"}</Label>
+          <Label>{lang === "ar" ? "آخر موعد للتسجيل (اختياري)" : "Enrollment deadline (optional)"}</Label>
           <Input
-            type="number"
-            min={1}
-            value={course.max_students ?? ""}
+            type="datetime-local"
+            value={course.enrollment_deadline ? course.enrollment_deadline.slice(0, 16) : ""}
             onChange={(e) => {
               const v = e.target.value;
-              update({ max_students: v === "" ? null : Math.max(1, parseInt(v) || 0) });
+              update({ enrollment_deadline: v ? new Date(v).toISOString() : null });
             }}
-            placeholder={lang === "ar" ? "غير محدود" : "Unlimited"}
           />
+          <p className="text-xs text-muted-foreground mt-1">
+            {lang === "ar" ? "بعد هذا التاريخ لن يتمكن الطلاب من التسجيل." : "After this date students cannot enroll."}
+          </p>
         </div>
         <p className="text-xs text-muted-foreground">
           {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
