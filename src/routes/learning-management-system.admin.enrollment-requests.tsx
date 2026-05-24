@@ -140,7 +140,7 @@ function AdminEnrollmentRequests() {
 
                 {r.status === "pending" && (
                   <div className="space-y-2 pt-2 border-t border-border">
-                    {full && <p className="text-xs text-red-600">{ar ? "تنبيه: اكتمل العدد — لا يمكن الموافقة" : "Warning: course is full — cannot approve"}</p>}
+                    {deadlinePassed && <p className="text-xs text-amber-600">{ar ? "تنبيه: انتهى موعد التسجيل" : "Warning: enrollment deadline passed"}</p>}
                     <Textarea
                       placeholder={ar ? "ملاحظات للإدارة (اختياري)" : "Admin notes (optional)"}
                       value={noteDraft[r.id] ?? ""}
