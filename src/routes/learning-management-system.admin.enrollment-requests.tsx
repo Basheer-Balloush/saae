@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2, Check, X, Clock } from "lucide-react";
+import { Loader2, Check, X, Clock, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 
 export const Route = createFileRoute("/learning-management-system/admin/enrollment-requests")({
   head: () => ({ meta: [{ title: "LMS · Enrollment requests" }] }),
