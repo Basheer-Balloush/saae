@@ -85,6 +85,8 @@ export function Navbar() {
                 key={i}
                 src={v.src}
                 alt={v.alt}
+                width={180}
+                height={44}
                 className={cn(
                   "h-10 w-auto sm:h-11 transition-opacity duration-150",
                   v.show ? "opacity-100" : "opacity-0 absolute inset-0 pointer-events-none",

@@ -32,6 +32,10 @@ export function Footer() {
             <img
               src={logo}
               alt="SAAE"
+              width={180}
+              height={48}
+              loading="lazy"
+              decoding="async"
               className="h-12 w-auto brightness-0 invert"
             />
             <p
