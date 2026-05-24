@@ -41,6 +41,10 @@ export function Partners() {
               <img
                 src={p.logo}
                 alt={p.name}
+                width={160}
+                height={64}
+                loading="lazy"
+                decoding="async"
                 className={`${p.sizeClass} w-auto object-contain transition-transform hover:scale-105`}
               />
             </motion.div>
