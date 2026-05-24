@@ -149,6 +149,13 @@ function CourseDetails() {
             .order("display_order");
           setLessons((lss as Lesson[]) ?? []);
         }
+        const { data: cf } = await supabase
+          .from("lms_course_forms")
+          .select("id")
+          .eq("course_id", id)
+          .eq("is_active", true)
+          .maybeSingle();
+        setHasForm(!!cf);
         if (user) {
           const [{ data: e }, { data: req }] = await Promise.all([
             supabase.from("lms_enrollments").select("id").eq("course_id", id).eq("student_id", user.id).maybeSingle(),
