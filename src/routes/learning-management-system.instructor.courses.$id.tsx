@@ -322,6 +322,8 @@ function CourseBuilder() {
       </div>
 
       <QuizBuilder courseId={course.id} />
+
+      <CourseFormBuilder courseId={course.id} />
     </div>
   );
 }
