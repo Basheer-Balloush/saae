@@ -150,7 +150,16 @@ export function CourseFormBuilder({ courseId }: { courseId: string }) {
       // Upsert
       for (let i = 0; i < fields.length; i++) {
         const f = fields[i];
-        const payload = {
+        const payload: {
+          form_id: string;
+          display_order: number;
+          field_type: string;
+          label_ar: string;
+          label_en: string | null;
+          help_text: string | null;
+          options: string[];
+          validation: Record<string, unknown>;
+        } = {
           form_id: form.id,
           display_order: i,
           field_type: f.field_type,
