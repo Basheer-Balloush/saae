@@ -99,6 +99,7 @@ function AdminEnrollmentRequests() {
           {reqs.map((r) => {
             const cTitle = r.course ? (ar ? r.course.title_ar : r.course.title_en || r.course.title_ar) : r.course_id;
             const deadlinePassed = !!r.course?.enrollment_deadline && new Date(r.course.enrollment_deadline) < new Date();
+            const isFull = r.course?.max_students != null && (r.course?.students_count ?? 0) >= r.course.max_students;
             return (
               <div key={r.id} className="rounded-xl border border-border bg-card p-4 space-y-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
