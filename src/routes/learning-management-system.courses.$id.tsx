@@ -194,6 +194,7 @@ function CourseDetails() {
 
   const onManualSubmit = async () => {
     if (!requireAuth() || !user) return;
+    if (hasForm) { setFormDialogOpen(true); return; }
     setBusy(true);
     try {
       const { error } = await supabase.from("lms_enrollment_requests").insert({
