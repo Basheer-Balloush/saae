@@ -148,7 +148,7 @@ function AdminEnrollmentRequests() {
                       rows={2}
                     />
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={() => decide(r, "approve")} disabled={busy === r.id || full} className="flex-1">
+                      <Button size="sm" onClick={() => decide(r, "approve")} disabled={busy === r.id} className="flex-1">
                         {busy === r.id ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Check className="h-4 w-4 mx-1" />}
                         {ar ? "موافقة" : "Approve"}
                       </Button>
