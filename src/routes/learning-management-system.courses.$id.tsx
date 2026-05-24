@@ -368,6 +368,13 @@ function CourseDetails() {
           )}
         </aside>
       </div>
+      <EnrollmentFormDialog
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        courseId={id}
+        notes={manualNotes || null}
+        onSubmitted={() => { setPendingRequest(true); setManualOpen(false); setManualNotes(""); }}
+      />
     </div>
   );
 }
