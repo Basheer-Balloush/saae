@@ -16,6 +16,7 @@ export function Communities() {
     { icon: Code2, ...c.software, key: "software" },
     { icon: TrendingUp, ...c.economy, key: "economy" },
     { icon: GraduationCap, ...c.trainers, key: "trainers" },
+    { icon: Newspaper, ...c.media, key: "media" },
   ];
 
   const isRtl = dir === "rtl";
