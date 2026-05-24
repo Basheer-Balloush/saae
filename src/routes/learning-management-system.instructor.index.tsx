@@ -62,6 +62,13 @@ function InstructorHome() {
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tr.navInstructor}</h1>
+        <Link
+          to="/learning-management-system/instructor/profile"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs hover:border-primary hover:text-primary"
+        >
+          <Edit3 className="h-3.5 w-3.5" />
+          {lang === "ar" ? "تعديل الملف الشخصي" : "Edit profile"}
+        </Link>
       </div>
       <div className="flex items-center justify-between mt-4">
         <Dialog open={open} onOpenChange={setOpen}>
