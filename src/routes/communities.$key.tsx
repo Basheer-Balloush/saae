@@ -233,6 +233,29 @@ const DETAILS: Record<CommunityKey, DetailBlock[]> = {
       },
     },
   ],
+  media: [
+    {
+      label: { ar: "المحور", en: "Focus" },
+      text: {
+        ar: "إنتاج محتوىً إعلاميٍّ متخصّص يُعرِّف الجمهور بالذكاء الاصطناعي وتطبيقاته في الواقع السوري.",
+        en: "Producing specialized media content that introduces audiences to AI and its applications in the Syrian context.",
+      },
+    },
+    {
+      label: { ar: "المنصّة", en: "Platform" },
+      text: {
+        ar: "تجمع الصحفيين وصنّاع المحتوى لتغطية أنشطة الجمعية ومجتمعاتها وإيصال قصصها.",
+        en: "Brings journalists and content creators together to cover SAAE's activities and tell the stories of its communities.",
+      },
+    },
+    {
+      label: { ar: "الهدف", en: "Objective" },
+      text: {
+        ar: "بناء خطابٍ إعلاميٍّ سوريٍّ موثوقٍ حول الذكاء الاصطناعي وأثره في المجتمع والاقتصاد.",
+        en: "Building a trusted Syrian media narrative around AI and its impact on society and the economy.",
+      },
+    },
+  ],
 };
 
 function formatNewsDate(iso: string): string {
