@@ -3,6 +3,7 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
+  redirect,
   useRouter,
   useLocation,
   HeadContent,
@@ -78,6 +79,15 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: ({ location }) => {
+    if (
+      typeof window !== "undefined" &&
+      window.location.hostname === "lms.aisyria.org" &&
+      location.pathname === "/"
+    ) {
+      throw redirect({ to: "/learning-management-system" });
+    }
+  },
   head: () => ({
 
     meta: [
