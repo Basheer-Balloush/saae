@@ -472,6 +472,31 @@ function CourseBuilder() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={confirmDeleteCourse} onOpenChange={setConfirmDeleteCourse}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {lang === "ar" ? "حذف الدورة بالكامل؟" : "Delete entire course?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {lang === "ar"
+                ? "سيتم حذف كل الأقسام، الدروس، الاختبارات، الواجبات، التقييمات، الشهادات، التسجيلات والطلبات. لا يمكن التراجع."
+                : "All sections, lessons, quizzes, assignments, reviews, certificates, enrollments and requests will be permanently removed. This cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{lang === "ar" ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={deleteWholeCourse}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingCourse && <Loader2 className="h-4 w-4 animate-spin mx-1" />}
+              {lang === "ar" ? "حذف الدورة" : "Delete course"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
