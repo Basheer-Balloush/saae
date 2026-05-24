@@ -331,8 +331,8 @@ function CourseBuilder() {
               <div className="flex items-center justify-between gap-2 px-4 py-2.5 bg-muted/40">
                 <span className="font-semibold text-foreground">{s.title}</span>
                 <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => addLesson(s.id)}><Plus className="h-4 w-4" /></Button>
-                  <Button size="sm" variant="ghost" onClick={() => deleteSection(s.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => openAddLesson(s.id)}><Plus className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: "section", id: s.id })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                 </div>
               </div>
               <ul className="divide-y divide-border">
