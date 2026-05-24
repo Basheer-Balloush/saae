@@ -80,8 +80,6 @@ function InstructorProfileEdit() {
       full_name: fullName.trim(),
       bio: bio.trim() || null,
       specialty: specialty.trim() || null,
-      linkedin_url: linkedinUrl.trim() || null,
-      github_url: githubUrl.trim() || null,
       avatar_url: avatarUrl,
     };
     const { error } = await supabase.from("lms_instructors").upsert(payload, { onConflict: "user_id" });
