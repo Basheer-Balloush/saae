@@ -248,15 +248,24 @@ export function CourseFormBuilder({ courseId }: { courseId: string }) {
                   </div>
                   <GripVertical className="h-4 w-4 text-muted-foreground" />
                   <span className="text-xs font-semibold text-muted-foreground">#{i + 1}</span>
-                  <select
-                    className="ms-auto h-8 rounded-md border border-input bg-background px-2 text-xs"
-                    value={f.field_type}
-                    onChange={(e) => updateField(f.id, { field_type: e.target.value as FieldType, options: ["single_choice","multi_choice","dropdown"].includes(e.target.value) ? f.options : [] })}
-                  >
-                    {(["short_text","long_text","number","single_choice","multi_choice","yes_no","date","file","dropdown"] as FieldType[]).map((t) => (
-                      <option key={t} value={t}>{fieldTypeLabel(t)}</option>
-                    ))}
-                  </select>
+                  <div className="ms-auto">
+                    <Select
+                      value={f.field_type}
+                      onValueChange={(val) => updateField(f.id, {
+                        field_type: val as FieldType,
+                        options: ["single_choice","multi_choice","dropdown"].includes(val) ? f.options : [],
+                      })}
+                    >
+                      <SelectTrigger className="h-8 w-[170px] text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(["short_text","long_text","number","single_choice","multi_choice","yes_no","date","file","dropdown"] as FieldType[]).map((t) => (
+                          <SelectItem key={t} value={t} className="text-xs">{fieldTypeLabel(t)}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Button size="sm" variant="ghost" onClick={() => removeField(f.id)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
