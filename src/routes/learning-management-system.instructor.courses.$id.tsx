@@ -94,7 +94,7 @@ function CourseBuilder() {
       description_ar: course.description_ar, description_en: course.description_en,
       level: course.level as "beginner" | "intermediate" | "advanced", price: course.price, is_free: course.is_free,
       category_id: course.category_id, cover_url: course.cover_url,
-      enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline,
+      enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline, max_students: course.max_students,
     }).eq("id", course.id);
     setSaving(false);
     if (error) { toast.error(toUserMessage(error)); return; }
