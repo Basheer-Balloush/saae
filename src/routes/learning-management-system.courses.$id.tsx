@@ -273,6 +273,7 @@ function CourseDetails() {
           </div>
           {(() => {
             const deadlinePassed = !!course.enrollment_deadline && new Date(course.enrollment_deadline) < new Date();
+            const isFull = course.max_students != null && course.students_count >= course.max_students;
             const closed = !course.enrollment_open;
             if (enrolled) {
               return (
@@ -291,10 +292,14 @@ function CourseDetails() {
                 </div>
               );
             }
-            if (closed || deadlinePassed) {
+            if (closed || deadlinePassed || isFull) {
               return (
                 <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
-                  {deadlinePassed ? (ar ? "انتهى موعد التسجيل" : "Enrollment deadline passed") : (ar ? "التسجيل مغلق حالياً" : "Enrollment is closed")}
+                  {isFull
+                    ? (ar ? "اكتمل العدد" : "Course is full")
+                    : deadlinePassed
+                    ? (ar ? "انتهى موعد التسجيل" : "Enrollment deadline passed")
+                    : (ar ? "التسجيل مغلق حالياً" : "Enrollment is closed")}
                 </div>
               );
             }
