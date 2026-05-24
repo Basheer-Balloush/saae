@@ -79,22 +79,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  beforeLoad: ({ location }) => {
-    // Redirect lms.aisyria.org subdomain to /learning-management-system
-    const host =
-      typeof window !== "undefined"
-        ? window.location.hostname
-        : (globalThis as any)?.process?.env?.HOST ?? "";
-    if (
-      host === "lms.aisyria.org" &&
-      !location.pathname.startsWith("/learning-management-system")
-    ) {
-      throw redirect({
-        to: "/learning-management-system",
-      });
-    }
-  },
   head: () => ({
+
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
