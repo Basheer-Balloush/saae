@@ -338,7 +338,7 @@ function CourseDetails() {
                 ) : (
                   <Button className="w-full" size="lg" variant="outline" onClick={() => requireAuth() && setManualOpen(true)}>
                     <Receipt className="h-4 w-4 mx-2" />
-                    {ar ? "طلب اشتراك (دفع يدوي)" : "Request enrollment (manual payment)"}
+                    {ar ? "الدفع في المقر (يدوي)" : "Pay in person (manual)"}
                   </Button>
                 )}
               </div>
