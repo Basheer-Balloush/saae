@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, CreditCard, Receipt, Clock } from "lucide-react";
+import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, Receipt, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -188,10 +188,8 @@ function CourseDetails() {
     } finally { setBusy(false); }
   };
 
-  const onOnlinePay = () => {
-    if (!requireAuth()) return;
-    toast.info(ar ? "الدفع الإلكتروني عبر بوابة Paymera — قيد التفعيل" : "Paymera online payment — coming soon");
-  };
+
+
 
   const onManualSubmit = async () => {
     if (!requireAuth() || !user) return;
@@ -309,18 +307,25 @@ function CourseDetails() {
               );
             }
             return (
-              <div className="mt-4 space-y-2">
-                <Button className="w-full" size="lg" onClick={onOnlinePay} disabled={busy}>
-                  <CreditCard className="h-4 w-4 mx-2" />
-                  {ar ? "ادفع إلكترونياً" : "Pay online"}
+              <div className="mt-4 space-y-3">
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => { if (requireAuth()) { hasForm ? setFormDialogOpen(true) : setManualOpen(true); } }}
+                  disabled={busy}
+                >
+                  <Receipt className="h-4 w-4 mx-2" />
+                  {ar ? "تسجيل في الدورة" : "Register for course"}
                 </Button>
-                {manualOpen ? (
+                <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                  {ar
+                    ? "سجّل وعبّئ النموذج. بعد قبولك في الدورة سيتم التواصل معك لترتيب الدفع."
+                    : "Register and fill the form. Once accepted, we'll contact you to arrange payment."}
+                </p>
+                {manualOpen && !hasForm && (
                   <div className="rounded-xl border border-border bg-card p-3 space-y-2">
-                    <p className="text-xs text-muted-foreground">
-                      {ar ? "سيتم إرسال طلب للأدمن. بعد دفع المبلغ وموافقة الإدارة سيُفعَّل اشتراكك." : "A request will be sent to the admin. After payment & approval, you'll be enrolled."}
-                    </p>
                     <Textarea
-                      placeholder={ar ? "ملاحظات (اختياري — طريقة التواصل، رقم تحويل...)" : "Notes (optional)"}
+                      placeholder={ar ? "ملاحظات (اختياري)" : "Notes (optional)"}
                       value={manualNotes}
                       onChange={(e) => setManualNotes(e.target.value)}
                       rows={3}
@@ -335,11 +340,6 @@ function CourseDetails() {
                       </Button>
                     </div>
                   </div>
-                ) : (
-                  <Button className="w-full" size="lg" variant="outline" onClick={() => requireAuth() && setManualOpen(true)}>
-                    <Receipt className="h-4 w-4 mx-2" />
-                    {ar ? "الدفع في المقر (يدوي)" : "Pay in person (manual)"}
-                  </Button>
                 )}
               </div>
             );
