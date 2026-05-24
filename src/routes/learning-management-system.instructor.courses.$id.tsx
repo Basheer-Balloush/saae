@@ -82,6 +82,12 @@ function CourseBuilder() {
         setLessons((lss as Lesson[]) ?? []);
       }
     }
+    const { data: reqs } = await supabase
+      .from("lms_enrollment_requests")
+      .select("id,user_id,status,payment_method,notes,created_at")
+      .eq("course_id", id)
+      .order("created_at", { ascending: false });
+    setEnrollReqs((reqs as Array<{ id: string; user_id: string; status: string; payment_method: string; notes: string | null; created_at: string }>) ?? []);
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [id]);
