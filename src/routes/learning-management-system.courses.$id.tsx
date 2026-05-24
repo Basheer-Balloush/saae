@@ -320,7 +320,7 @@ function CourseDetails() {
                   disabled={busy}
                 >
                   <Receipt className="h-4 w-4 mx-2" />
-                  {ar ? "تسجيل في الدورة" : "Register for course"}
+                  {tr.enroll}
                 </Button>
                 <p className="text-xs text-muted-foreground text-center leading-relaxed">
                   {ar
