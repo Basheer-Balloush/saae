@@ -176,6 +176,7 @@ function CourseDetails() {
 
   const onFreeEnroll = async () => {
     if (!requireAuth()) return;
+    if (hasForm) { setFormDialogOpen(true); return; }
     setBusy(true);
     try {
       const { error } = await supabase.rpc("lms_checkout", { _course_id: id });
