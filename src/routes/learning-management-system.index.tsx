@@ -61,8 +61,29 @@ const CATEGORY_SURFACES = [
 export const Route = createFileRoute("/learning-management-system/")({
   head: () => ({
     meta: [
-      { title: "Learning Platform — Home" },
-      { name: "description", content: "Discover thousands of courses and grow your skills." },
+      { title: "SAAE Learning Platform — Courses & Skills" },
+      {
+        name: "description",
+        content:
+          "SAAE Learning Platform — Arabic-first online courses in AI, programming, design, business and more. Learn from expert instructors and earn certificates.",
+      },
+      { property: "og:title", content: "SAAE Learning Platform — Courses & Skills" },
+      {
+        property: "og:description",
+        content:
+          "Browse AI, programming, design and business courses on the SAAE Learning Platform. Arabic-first, instructor-led, certificate-ready.",
+      },
+      { property: "og:url", content: "https://aisyria.org/learning-management-system" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:title", content: "SAAE Learning Platform — Courses & Skills" },
+      {
+        name: "twitter:description",
+        content:
+          "Browse AI, programming, design and business courses on the SAAE Learning Platform.",
+      },
+    ],
+    links: [
+      { rel: "canonical", href: "https://aisyria.org/learning-management-system" },
     ],
   }),
   component: LmsHome,
