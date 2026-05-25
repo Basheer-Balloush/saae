@@ -67,7 +67,7 @@ export function AssistantFab() {
                 onClick={dismissGreeting}
                 aria-label="Dismiss"
                 className={`absolute top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground ${
-                  isRtl ? "right-1.5" : "left-1.5"
+                  isRtl ? "left-1.5" : "right-1.5"
                 }`}
               >
                 <X className="h-3 w-3" />
