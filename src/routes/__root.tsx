@@ -201,11 +201,46 @@ function FormValidationHandler() {
   return null;
 }
 
-function ScrollToTop() {
+function ScrollRestoration() {
   const location = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    const key = "saae-scroll-positions";
+    const read = (): Record<string, number> => {
+      try { return JSON.parse(sessionStorage.getItem(key) || "{}"); } catch { return {}; }
+    };
+    const write = (m: Record<string, number>) => {
+      try { sessionStorage.setItem(key, JSON.stringify(m)); } catch {}
+    };
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const m = read();
+        m[window.location.pathname] = window.scrollY;
+        write(m);
+        ticking = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const key = "saae-scroll-positions";
+    let saved = 0;
+    try {
+      const m = JSON.parse(sessionStorage.getItem(key) || "{}");
+      saved = typeof m[location.pathname] === "number" ? m[location.pathname] : 0;
+    } catch {}
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: saved, left: 0, behavior: "auto" });
+    });
   }, [location.pathname]);
+
   return null;
 }
 
