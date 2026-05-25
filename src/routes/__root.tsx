@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 import appCss from "../styles.css?url";
 import { LanguageProvider, useLang } from "@/lib/i18n";
