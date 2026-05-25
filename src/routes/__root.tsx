@@ -96,6 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "SAAE — Syrian Association for AI & Entrepreneurship" },
       { name: "description", content: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال — نشر ثقافة الذكاء الاصطناعي وريادة الأعمال في سوريا عبر مجتمعات تقنية متخصصة." },
+      { name: "google-site-verification", content: "-R7QfJtnlnCi-R9h33rfJJDjraUk3I1Quul6-TL4eYI" },
       { name: "author", content: "Syrian Association for AI & Entrepreneurship" },
       { property: "og:site_name", content: "SAAE" },
       { property: "og:title", content: "SAAE — Syrian Association for AI & Entrepreneurship" },
