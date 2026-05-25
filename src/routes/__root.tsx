@@ -256,7 +256,7 @@ function RootComponent() {
       <ThemeProvider>
         <LanguageProvider>
           <FormValidationHandler />
-          <ScrollToTop />
+          <ScrollRestoration />
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
