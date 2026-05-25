@@ -59,7 +59,7 @@ export function AssistantFab() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.9 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="relative mb-1 max-w-[14rem] rounded-2xl border border-border bg-card px-4 py-2.5 pe-7 text-sm font-medium text-foreground shadow-lift"
+              className={`relative mb-1 max-w-[14rem] rounded-2xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-lift ${isRtl ? "ps-7" : "pe-7"}`}
               dir={dir}
             >
               <button
