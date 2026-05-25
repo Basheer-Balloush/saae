@@ -48,7 +48,7 @@ export function AssistantFab() {
     <>
       <div
         className={`fixed bottom-6 z-40 flex items-end gap-3 ${
-          isRtl ? "left-6 flex-row-reverse" : "right-6"
+          isRtl ? "right-6" : "left-6 flex-row-reverse"
         }`}
       >
         <AnimatePresence>
