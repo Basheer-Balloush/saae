@@ -14,7 +14,15 @@ import { Loader2 } from "lucide-react";
 import logo from "@/assets/saae-logo.png";
 
 export const Route = createFileRoute("/attendance-management-system/login")({
-  head: () => ({ meta: [{ title: "AMS · Sign in" }] }),
+  head: () => ({
+    meta: [
+      { title: "AMS Sign In — SAAE Attendance" },
+      { name: "description", content: "Sign in to the SAAE Attendance Management System for instructors." },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "AMS Sign In — SAAE Attendance" },
+      { property: "og:description", content: "Sign in to the SAAE Attendance Management System." },
+    ],
+  }),
   component: AmsLogin,
 });
 

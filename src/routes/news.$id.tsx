@@ -28,9 +28,10 @@ export const Route = createFileRoute("/news/$id")({
       if (!data) return { meta: null };
       const title = (data.title_en ?? data.title_ar ?? data.title ?? "News") as string;
       const rawDesc = (data.excerpt_en ?? data.excerpt_ar ?? data.excerpt ?? "") as string;
-      const description = rawDesc && rawDesc.length >= 50
-        ? rawDesc.slice(0, 300)
-        : `${title} — ${rawDesc || "خبر من الجمعية السورية للذكاء الصنعي وريادة الأعمال (SAAE)."}`.slice(0, 300);
+      const fullDesc = rawDesc && rawDesc.length >= 50
+        ? rawDesc
+        : `${title} — ${rawDesc || "خبر من الجمعية السورية للذكاء الصنعي وريادة الأعمال (SAAE)."}`;
+      const description = fullDesc.length > 160 ? `${fullDesc.slice(0, 157).trimEnd()}…` : fullDesc;
       return {
         meta: {
           title,

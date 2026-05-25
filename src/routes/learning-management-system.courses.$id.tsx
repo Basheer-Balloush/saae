@@ -24,9 +24,10 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
       if (!data) return { meta: null };
       const title = (data.title_en ?? data.title_ar ?? "Course") as string;
       const rawDesc = (data.description_en ?? data.description_ar ?? "") as string;
-      const description = rawDesc && rawDesc.length >= 50
-        ? rawDesc.slice(0, 300)
-        : `${title} — course on the SAAE Learning Platform.`.slice(0, 300);
+      const fullDesc = rawDesc && rawDesc.length >= 50
+        ? rawDesc
+        : `${title} — course on the SAAE Learning Platform.`;
+      const description = fullDesc.length > 160 ? `${fullDesc.slice(0, 157).trimEnd()}…` : fullDesc;
       return {
         meta: {
           title,

@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "SAAE — Syrian Association for AI & Entrepreneurship" },
+      { title: "SAAE Homepage — Syrian Association for AI & Entrepreneurship" },
       {
         name: "description",
         content:

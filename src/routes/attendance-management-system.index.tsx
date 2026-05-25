@@ -48,6 +48,16 @@ import {
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/attendance-management-system/")({
+  head: () => ({
+    meta: [
+      { title: "Attendance Management System — SAAE" },
+      { name: "description", content: "Private SAAE attendance management dashboard for instructors to track courses, sessions, and student attendance." },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "Attendance Management System — SAAE" },
+      { property: "og:description", content: "Private SAAE attendance dashboard for instructors." },
+      { property: "og:url", content: "https://aisyria.org/attendance-management-system" },
+    ],
+  }),
   component: AmsDashboard,
 });
 
