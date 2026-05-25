@@ -82,7 +82,7 @@ export function AssistantFab() {
               <span
                 aria-hidden
                 className={`absolute bottom-3 h-3 w-3 rotate-45 border-e border-t border-border bg-card ${
-                  isRtl ? "-left-1.5" : "-right-1.5"
+                  isRtl ? "-right-1.5" : "-left-1.5"
                 }`}
               />
             </motion.div>
