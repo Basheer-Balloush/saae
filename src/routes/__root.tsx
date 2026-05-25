@@ -213,7 +213,17 @@ function RootComponent() {
       <ThemeProvider>
         <LanguageProvider>
           <FormValidationHandler />
-          <Outlet />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
           {!isAms && !isLms && !isAdmin && <AssistantFab />}
           <Toaster richColors position="top-center" />
         </LanguageProvider>
