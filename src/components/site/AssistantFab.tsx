@@ -48,7 +48,7 @@ export function AssistantFab() {
     <>
       <div
         className={`fixed bottom-6 z-40 flex items-end gap-3 ${
-          isRtl ? "right-6" : "left-6 flex-row-reverse"
+          isRtl ? "right-6 flex-row-reverse" : "left-6"
         }`}
       >
         <AnimatePresence>
@@ -67,7 +67,7 @@ export function AssistantFab() {
                 onClick={dismissGreeting}
                 aria-label="Dismiss"
                 className={`absolute top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground ${
-                  isRtl ? "right-1.5" : "left-1.5"
+                  isRtl ? "left-1.5" : "right-1.5"
                 }`}
               >
                 <X className="h-3 w-3" />
@@ -82,7 +82,7 @@ export function AssistantFab() {
               <span
                 aria-hidden
                 className={`absolute bottom-3 h-3 w-3 rotate-45 border-e border-t border-border bg-card ${
-                  isRtl ? "-right-1.5" : "-left-1.5"
+                  isRtl ? "-left-1.5" : "-right-1.5"
                 }`}
               />
             </motion.div>
