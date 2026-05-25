@@ -137,7 +137,8 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
                     alt={c.title}
                     width={800}
                     height={600}
-                    loading="lazy"
+                    loading={i === 0 ? "eager" : "lazy"}
+                    fetchPriority={i === 0 ? "high" : "auto"}
                     decoding="async"
                     className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
                   />
