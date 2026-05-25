@@ -48,7 +48,7 @@ export function AssistantFab() {
     <>
       <div
         className={`fixed bottom-6 z-40 flex items-end gap-3 ${
-          isRtl ? "left-6 flex-row-reverse" : "right-6"
+          isRtl ? "right-6" : "left-6 flex-row-reverse"
         }`}
       >
         <AnimatePresence>
@@ -59,7 +59,7 @@ export function AssistantFab() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.9 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="relative mb-1 max-w-[14rem] rounded-2xl border border-border bg-card px-4 py-2.5 pe-7 text-sm font-medium text-foreground shadow-lift"
+              className={`relative mb-1 max-w-[14rem] rounded-2xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-lift ${isRtl ? "ps-7" : "pe-7"}`}
               dir={dir}
             >
               <button
@@ -67,7 +67,7 @@ export function AssistantFab() {
                 onClick={dismissGreeting}
                 aria-label="Dismiss"
                 className={`absolute top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground ${
-                  isRtl ? "left-1.5" : "right-1.5"
+                  isRtl ? "right-1.5" : "left-1.5"
                 }`}
               >
                 <X className="h-3 w-3" />
@@ -82,7 +82,7 @@ export function AssistantFab() {
               <span
                 aria-hidden
                 className={`absolute -bottom-1.5 h-3 w-3 rotate-45 border-b border-e border-border bg-card ${
-                  isRtl ? "left-6" : "right-6"
+                  isRtl ? "right-6" : "left-6"
                 }`}
               />
             </motion.div>
