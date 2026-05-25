@@ -125,7 +125,7 @@ function Player() {
               className="w-full h-full"
             />
           ) : (
-            <div className="text-white/60 text-sm">{tr.selectLesson}</div>
+            <div className="text-white/85 text-sm">{tr.selectLesson}</div>
           )}
         </div>
 
