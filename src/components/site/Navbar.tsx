@@ -8,6 +8,7 @@ import logo from "@/assets/saae-logo-horizontal.png";
 import logoEnLight from "@/assets/saae-logo-en-light.png";
 import logoEnDark from "@/assets/saae-logo-en-dark.png";
 import logoArDark from "@/assets/saae-logo-ar-dark.png";
+import logoArLight from "@/assets/saae-logo-ar-light.png";
 
 const sections = ["home", "about", "news", "contact"] as const;
 
@@ -74,11 +75,13 @@ export function Navbar() {
             const isEnLight = lang === "en" && theme === "light";
             const isEnDark = lang === "en" && theme === "dark";
             const isArDark = lang === "ar" && theme === "dark";
+            const isArLight = lang === "ar" && theme === "light";
             const variants = [
               { src: logoEnLight, show: isEnLight, alt: "SAAIE — Syrian Association for AI & Entrepreneurship" },
               { src: logoEnDark, show: isEnDark, alt: "SAAIE — Syrian Association for AI & Entrepreneurship" },
               { src: logoArDark, show: isArDark, alt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
-              { src: logo, show: !(isEnLight || isEnDark || isArDark), alt: "SAAIE" },
+              { src: logoArLight, show: isArLight, alt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
+              { src: logo, show: !(isEnLight || isEnDark || isArDark || isArLight), alt: "SAAIE" },
             ];
             return variants.map((v, i) => (
               <img
