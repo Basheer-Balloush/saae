@@ -12,7 +12,15 @@ import { toast } from "sonner";
 import { Loader2, Globe, Sun, Moon } from "lucide-react";
 
 export const Route = createFileRoute("/admin/login")({
-  head: () => ({ meta: [{ title: "Admin · Sign in" }] }),
+  head: () => ({
+    meta: [
+      { title: "Admin Sign In — SAAE" },
+      { name: "description", content: "Sign in to the SAAE content management admin console." },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "Admin Sign In — SAAE" },
+      { property: "og:description", content: "Sign in to the SAAE admin console." },
+    ],
+  }),
   component: AdminLogin,
 });
 

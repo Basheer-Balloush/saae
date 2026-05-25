@@ -14,7 +14,15 @@ import { Loader2 } from "lucide-react";
 import logo from "@/assets/saae-logo.png";
 
 export const Route = createFileRoute("/learning-management-system/forgot-password")({
-  head: () => ({ meta: [{ title: "LMS · Forgot password" }] }),
+  head: () => ({
+    meta: [
+      { title: "Forgot Password — SAAE Learning Platform" },
+      { name: "description", content: "Reset your SAAE Learning Platform password by requesting a secure email link." },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "Forgot Password — SAAE Learning Platform" },
+      { property: "og:description", content: "Reset your SAAE Learning Platform password." },
+    ],
+  }),
   component: ForgotPage,
 });
 

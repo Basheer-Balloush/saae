@@ -6,8 +6,11 @@ import { useAuth } from "@/hooks/useAuth";
 export const Route = createFileRoute("/super-admin")({
   head: () => ({
     meta: [
-      { title: "Super Admin Dashboard" },
-      { name: "description", content: "Super admin dashboard for all systems." },
+      { title: "Super Admin — SAAE" },
+      { name: "description", content: "Private SAAE super-admin console for managing the CMS, LMS, and AMS systems." },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "Super Admin — SAAE" },
+      { property: "og:description", content: "Private SAAE super-admin console." },
     ],
   }),
   component: SuperAdminDashboard,
