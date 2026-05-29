@@ -7,6 +7,7 @@ import stepupLogo from "@/assets/partner-stepup.png";
 import aleppoLogo from "@/assets/partner-aleppo.png";
 import circlesLogo from "@/assets/partner-circles.png";
 import sdoLogo from "@/assets/partner-sdo.png";
+import sdoLogoLight from "@/assets/partner-sdo-light.png";
 import dLogo from "@/assets/partner-d.png";
 import joblinkLogo from "@/assets/partner-joblink.png";
 import yarmoukLogo from "@/assets/partner-yarmouk.png";
@@ -29,7 +30,7 @@ const PARTNERS = [
   { name: "Step Up", logo: stepupLogo, sizeClass: "h-24" },
   { name: "Aleppo Governorate", logo: aleppoLogo, sizeClass: "h-28" },
   { name: "Circles", logo: circlesLogo, sizeClass: "h-24" },
-  { name: "Syrian Development Organization", logo: sdoLogo, sizeClass: "h-28" },
+  { name: "Syrian Development Organization", logo: sdoLogo, logoLight: sdoLogoLight, sizeClass: "h-28" },
   { name: "D", logo: dLogo, sizeClass: "h-20" },
   { name: "JobLink", logo: joblinkLogo, sizeClass: "h-24" },
   { name: "Yarmouk Private University", logo: yarmoukLogo, sizeClass: "h-28" },
@@ -56,12 +57,29 @@ export function Partners() {
           key={`${p.name}-${setIndex}`}
           className="flex h-36 w-52 flex-none items-center justify-center sm:w-60"
         >
-          <img
-            src={p.logo}
-            alt={p.name}
-            decoding="async"
-            className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105`}
-          />
+          {(p as { logoLight?: string }).logoLight ? (
+            <>
+              <img
+                src={(p as { logoLight: string }).logoLight}
+                alt={p.name}
+                decoding="async"
+                className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105 block dark:hidden`}
+              />
+              <img
+                src={p.logo}
+                alt={p.name}
+                decoding="async"
+                className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105 hidden dark:block`}
+              />
+            </>
+          ) : (
+            <img
+              src={p.logo}
+              alt={p.name}
+              decoding="async"
+              className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105`}
+            />
+          )}
         </div>
       ))}
     </div>
