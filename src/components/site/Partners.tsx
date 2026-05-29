@@ -30,7 +30,7 @@ const PARTNERS = [
   { name: "Step Up", logo: stepupLogo, sizeClass: "h-24" },
   { name: "Aleppo Governorate", logo: aleppoLogo, sizeClass: "h-28" },
   { name: "Circles", logo: circlesLogo, sizeClass: "h-24" },
-  { name: "Syrian Development Organization", logo: sdoLogo, logoLight: sdoLogoLight, sizeClass: "h-28" },
+  { name: "Syrian Development Organization", logo: sdoLogo, logoLight: sdoLogoLight, sizeClass: "h-36" },
   { name: "D", logo: dLogo, sizeClass: "h-20" },
   { name: "JobLink", logo: joblinkLogo, sizeClass: "h-24" },
   { name: "Yarmouk Private University", logo: yarmoukLogo, sizeClass: "h-28" },
