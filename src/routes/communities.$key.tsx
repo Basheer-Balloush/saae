@@ -127,8 +127,8 @@ const DETAILS: Record<CommunityKey, DetailBlock[]> = {
     {
       label: { ar: "المحور", en: "Focus" },
       text: {
-        ar: "دمج التقنيات الحديثة بالعمارة والهندسة والتخطيط العمراني.",
-        en: "Integrating modern technology with architecture, engineering and urban planning.",
+        ar: "دمج التقنيات الحديثة في التخطيط والتطوير العمراني.",
+        en: "Integrating modern technology into urban planning and development.",
       },
     },
     {
@@ -141,8 +141,8 @@ const DETAILS: Record<CommunityKey, DetailBlock[]> = {
     {
       label: { ar: "أنشطةٌ بارزة", en: "Key Activities" },
       text: {
-        ar: "برامجُ مميَّزةٌ مثل «Archathon» المتخصِّص بتحليل البيانات والابتكار المعماري.",
-        en: "Signature programs such as 'Archathon', focused on data analysis and architectural innovation.",
+        ar: "برامجُ مميَّزةٌ مثل «Archathon» المتخصِّص بتحليل البيانات والابتكار العمراني.",
+        en: "Signature programs such as 'Archathon', focused on data analysis and urban innovation.",
       },
     },
   ],
