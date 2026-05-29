@@ -332,13 +332,30 @@ function ConversationsPanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "
 
 function LeadsPanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "en" }) {
   const fetchLeads = useServerFn(listLeads);
+  const fetchMsgs = useServerFn(getConversationMessages);
   const [data, setData] = useState<Awaited<ReturnType<typeof listLeads>> | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"ind" | "comp">("ind");
+  const [openConvId, setOpenConvId] = useState<string | null>(null);
+  const [msgs, setMsgs] = useState<Message[]>([]);
+  const [msgsLoading, setMsgsLoading] = useState(false);
 
   useEffect(() => {
     fetchLeads().then(setData).catch((e) => toast.error(toUserMessage(e))).finally(() => setLoading(false));
   }, [fetchLeads]);
+
+  const openChat = (conversationId: string | null | undefined) => {
+    if (!conversationId) {
+      toast.error(tr.noChatLinked);
+      return;
+    }
+    setOpenConvId(conversationId);
+    setMsgsLoading(true);
+    fetchMsgs({ data: { conversationId } })
+      .then((r) => setMsgs(r.messages as Message[]))
+      .catch((e) => toast.error(toUserMessage(e)))
+      .finally(() => setMsgsLoading(false));
+  };
 
   if (loading) return <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />;
   if (!data) return null;
@@ -356,7 +373,7 @@ function LeadsPanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "en" }) {
 
       {tab === "ind" ? (
         <div className="overflow-x-auto rounded-xl border border-border bg-card">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="w-full min-w-[820px] text-sm">
             <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 text-start">{tr.name}</th>
@@ -365,28 +382,39 @@ function LeadsPanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "en" }) {
                 <th className="px-3 py-2 text-start">{tr.specialty}</th>
                 <th className="px-3 py-2 text-start">{tr.description}</th>
                 <th className="px-3 py-2 text-start">{tr.date}</th>
+                <th className="px-3 py-2 text-end">{tr.actions}</th>
               </tr>
             </thead>
             <tbody>
               {data.individuals.length === 0 && (
-                <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
+                <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
               )}
-              {data.individuals.map((r) => (
-                <tr key={r.id} className="border-t border-border">
-                  <td className="px-3 py-2 font-medium">{r.full_name}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.email ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.phone ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.specialty ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.short_description ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}</td>
-                </tr>
-              ))}
+              {data.individuals.map((r) => {
+                const convId = (r as { conversation_id?: string | null }).conversation_id ?? null;
+                return (
+                  <tr key={r.id} className="border-t border-border">
+                    <td className="px-3 py-2 font-medium">{r.full_name}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.email ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.phone ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.specialty ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.short_description ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}</td>
+                    <td className="px-3 py-2">
+                      <div className="flex justify-end">
+                        <Button size="sm" variant="outline" disabled={!convId} onClick={() => openChat(convId)}>
+                          <MessageSquare className="h-4 w-4" /> {tr.viewChat}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="w-full min-w-[820px] text-sm">
             <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 text-start">{tr.company}</th>
@@ -395,26 +423,63 @@ function LeadsPanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "en" }) {
                 <th className="px-3 py-2 text-start">{tr.email}</th>
                 <th className="px-3 py-2 text-start">{tr.phone}</th>
                 <th className="px-3 py-2 text-start">{tr.date}</th>
+                <th className="px-3 py-2 text-end">{tr.actions}</th>
               </tr>
             </thead>
             <tbody>
               {data.companies.length === 0 && (
-                <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
+                <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
               )}
-              {data.companies.map((r) => (
-                <tr key={r.id} className="border-t border-border">
-                  <td className="px-3 py-2 font-medium">{r.company_name}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.work_field ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.contact_name ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.contact_email ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.contact_phone ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}</td>
-                </tr>
-              ))}
+              {data.companies.map((r) => {
+                const convId = (r as { conversation_id?: string | null }).conversation_id ?? null;
+                return (
+                  <tr key={r.id} className="border-t border-border">
+                    <td className="px-3 py-2 font-medium">{r.company_name}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.work_field ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.contact_name ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.contact_email ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.contact_phone ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}</td>
+                    <td className="px-3 py-2">
+                      <div className="flex justify-end">
+                        <Button size="sm" variant="outline" disabled={!convId} onClick={() => openChat(convId)}>
+                          <MessageSquare className="h-4 w-4" /> {tr.viewChat}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
+
+      <Dialog open={!!openConvId} onOpenChange={(o) => !o && setOpenConvId(null)}>
+        <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{tr.conversations}</DialogTitle>
+          </DialogHeader>
+          {msgsLoading ? (
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+          ) : (
+            <div className="space-y-3">
+              {msgs.map((m) => {
+                const isUser = m.role === "user";
+                return (
+                  <div key={m.id} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm ${
+                      isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                    }`}>
+                      {m.content || <em className="opacity-60">[{m.role}]</em>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
