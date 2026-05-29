@@ -23,12 +23,13 @@ const HERO_IMG: Record<CommunityKey, string> = {
   data: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80",
   architecture: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80",
   medical: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1600&q=80",
-  
+
   research: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1600&q=80",
   software: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1600&q=80",
   economy: "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=80",
   trainers: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1600&q=80",
   media: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1600&q=80",
+  quality: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1600&q=80",
 };
 
 type ActivityItem = { id: string; date: string; category: string; title: string; desc: string };
@@ -66,6 +67,10 @@ const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
   media: {
     ar: "نُوصِل رسالة الجمعية ومجتمعاتها إلى الجمهور السوري والعربي عبر محتوىً إعلاميٍّ موثوق يواكب ثورة الذكاء الاصطناعي.",
     en: "Carrying SAAE's message and its communities to Syrian and Arab audiences through trusted media content that keeps pace with the AI revolution.",
+  },
+  quality: {
+    ar: "نبني ثقافةً رياديةً قائمةً على معايير الجودة والتميز المؤسسي لضمان استدامة المشاريع وتأثيرها.",
+    en: "Building an entrepreneurial culture rooted in quality standards and institutional excellence to ensure project sustainability and impact.",
   },
 };
 
@@ -256,6 +261,29 @@ const DETAILS: Record<CommunityKey, DetailBlock[]> = {
       },
     },
   ],
+  quality: [
+    {
+      label: { ar: "المحور", en: "Focus" },
+      text: {
+        ar: "تطوير معايير الجودة الريادية وضمان استدامة المشاريع الناشئة في البيئة السورية.",
+        en: "Developing entrepreneurial quality standards and ensuring the sustainability of startups in the Syrian environment.",
+      },
+    },
+    {
+      label: { ar: "المنصّة", en: "Platform" },
+      text: {
+        ar: "تجمع رواد الأعمال والمختصّين لبناء منهجيات عملٍ ومراجعة أداءٍ تضمن التميز المؤسسي.",
+        en: "Connects entrepreneurs and specialists to build operational methodologies and performance reviews that ensure institutional excellence.",
+      },
+    },
+    {
+      label: { ar: "الهدف", en: "Objective" },
+      text: {
+        ar: "تأسيس ثقافة الجودة في ريادة الأعمال السورية وتقديم أدواتٍ قابلةٍ للتطبيق في الميدان.",
+        en: "Establishing a quality culture in Syrian entrepreneurship and providing tools applicable in the field.",
+      },
+    },
+  ],
 };
 
 function formatNewsDate(iso: string): string {
@@ -300,6 +328,10 @@ const METRICS_BY_KEY: Record<CommunityKey, Metric[]> = {
   media: [
     { value: "+40", label: { ar: "صانع محتوى", en: "Content Creators" } },
     { value: "+200", label: { ar: "مادة إعلامية منشورة", en: "Published Media Pieces" } },
+  ],
+  quality: [
+    { value: "+25", label: { ar: "مشروع ناشئ مدعوم", en: "Supported Startups" } },
+    { value: "+60", label: { ar: "أداة جودة مطوَّرة", en: "Quality Tools Developed" } },
   ],
 };
 
