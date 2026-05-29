@@ -139,6 +139,10 @@ export const translations: Record<Lang, Dict> = {
           title: "Media Community",
           desc: "A community of journalists and content creators covering AI and SAAE's stories.",
         },
+        quality: {
+          title: "Quality Entrepreneurship Community",
+          desc: "A community dedicated to quality standards and entrepreneurial excellence in building sustainable ventures.",
+        },
       },
     },
     achievements: {
@@ -302,6 +306,10 @@ export const translations: Record<Lang, Dict> = {
         media: {
           title: "المجتمع الإعلامي",
           desc: "مجتمعٌ يجمع الصحفيين وصنّاع المحتوى لتغطية الذكاء الاصطناعي وقصص الجمعية.",
+        },
+        quality: {
+          title: "مجتمع الجودة الريادي",
+          desc: "مجتمعٌ مهتمٌّ بمعايير الجودة والتميز الريادي في بناء مشاريع مستدامة.",
         },
       },
     },
