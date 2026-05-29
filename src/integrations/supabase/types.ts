@@ -308,6 +308,7 @@ export type Database = {
           contact_email: string | null
           contact_name: string | null
           contact_phone: string | null
+          conversation_id: string | null
           country: string | null
           created_at: string
           employee_count: string | null
@@ -327,6 +328,7 @@ export type Database = {
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
+          conversation_id?: string | null
           country?: string | null
           created_at?: string
           employee_count?: string | null
@@ -346,6 +348,7 @@ export type Database = {
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
+          conversation_id?: string | null
           country?: string | null
           created_at?: string
           employee_count?: string | null
@@ -359,7 +362,15 @@ export type Database = {
           uses_ai?: boolean | null
           work_field?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "company_leads_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contact_messages: {
         Row: {
@@ -490,6 +501,7 @@ export type Database = {
       individual_leads: {
         Row: {
           address: string | null
+          conversation_id: string | null
           created_at: string
           email: string | null
           full_name: string
@@ -503,6 +515,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          conversation_id?: string | null
           created_at?: string
           email?: string | null
           full_name: string
@@ -516,6 +529,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          conversation_id?: string | null
           created_at?: string
           email?: string | null
           full_name?: string
@@ -527,7 +541,15 @@ export type Database = {
           specialty?: string | null
           work_field?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "individual_leads_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lms_answers: {
         Row: {
