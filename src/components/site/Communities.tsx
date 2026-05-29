@@ -11,12 +11,13 @@ export function Communities() {
     { icon: Database, ...c.data, key: "data" },
     { icon: Building2, ...c.architecture, key: "architecture" },
     { icon: Stethoscope, ...c.medical, key: "medical" },
-    
+
     { icon: FlaskConical, ...c.research, key: "research" },
     { icon: Code2, ...c.software, key: "software" },
     { icon: TrendingUp, ...c.economy, key: "economy" },
     { icon: GraduationCap, ...c.trainers, key: "trainers" },
     { icon: Newspaper, ...c.media, key: "media" },
+    { icon: Award, ...c.quality, key: "quality" },
   ];
 
   const isRtl = dir === "rtl";
