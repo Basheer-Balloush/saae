@@ -14,7 +14,7 @@ export type CommunityKey = (typeof COMMUNITY_KEYS)[number];
 
 export const COMMUNITY_LABELS_AR: Record<CommunityKey, string> = {
   data: "مجتمع البيانات",
-  architecture: "المجتمع المعماري الذكي",
+  architecture: "المجتمع العمراني الذكي",
   medical: "مجتمع الرعاية الصحية",
   research: "المجتمع البحثي الذكي",
   software: "مجتمع البرمجيات",
@@ -26,7 +26,7 @@ export const COMMUNITY_LABELS_AR: Record<CommunityKey, string> = {
 
 export const COMMUNITY_LABELS_EN: Record<CommunityKey, string> = {
   data: "Data Community",
-  architecture: "Smart Architecture Community",
+  architecture: "Smart Urban Community",
   medical: "Healthcare Community",
   research: "Smart Research Community",
   software: "Software Community",

@@ -112,8 +112,8 @@ export const translations: Record<Lang, Dict> = {
           desc: "A community dedicated to data and its role in shaping decisions and building knowledge.",
         },
         architecture: {
-          title: "Smart Architecture Community",
-          desc: "A community concerned with architecture and urban planning in the modern era.",
+          title: "Smart Urban Community",
+          desc: "A community concerned with urban planning and development in the modern era.",
         },
         medical: {
           title: "Healthcare Community",
@@ -280,8 +280,8 @@ export const translations: Record<Lang, Dict> = {
           desc: "مجتمعٌ مهتمٌّ بالبيانات ودورها في صياغة القرار وبناء المعرفة.",
         },
         architecture: {
-          title: "المجتمع المعماري الذكي",
-          desc: "مجتمعٌ يُعنى بالعمارة والتخطيط العمراني في العصر الحديث.",
+          title: "المجتمع العمراني الذكي",
+          desc: "مجتمعٌ يُعنى بالتخطيط والتطوير العمراني في العصر الحديث.",
         },
         medical: {
           title: "مجتمع الرعاية الصحية",
