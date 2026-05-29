@@ -329,6 +329,10 @@ const METRICS_BY_KEY: Record<CommunityKey, Metric[]> = {
     { value: "+40", label: { ar: "صانع محتوى", en: "Content Creators" } },
     { value: "+200", label: { ar: "مادة إعلامية منشورة", en: "Published Media Pieces" } },
   ],
+  quality: [
+    { value: "+25", label: { ar: "مشروع ناشئ مدعوم", en: "Supported Startups" } },
+    { value: "+60", label: { ar: "أداة جودة مطوَّرة", en: "Quality Tools Developed" } },
+  ],
 };
 
 export const Route = createFileRoute("/communities/$key")({
