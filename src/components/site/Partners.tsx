@@ -55,7 +55,7 @@ export function Partners() {
       {PARTNERS.map((p) => (
         <div
           key={`${p.name}-${setIndex}`}
-          className="flex h-36 w-52 flex-none items-center justify-center rounded-lg border border-border/40 bg-muted p-3 sm:w-60"
+          className="flex h-36 w-52 flex-none items-center justify-center sm:w-60"
         >
           {(p as { logoLight?: string }).logoLight ? (
             <>
@@ -63,13 +63,13 @@ export function Partners() {
                 src={(p as { logoLight: string }).logoLight}
                 alt={p.name}
                 decoding="async"
-                className={`${p.sizeClass} max-h-28 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105 block dark:hidden`}
+                className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105 block dark:hidden`}
               />
               <img
                 src={p.logo}
                 alt={p.name}
                 decoding="async"
-                className={`${p.sizeClass} max-h-28 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105 hidden dark:block`}
+                className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105 hidden dark:block`}
               />
             </>
           ) : (
@@ -77,7 +77,7 @@ export function Partners() {
               src={p.logo}
               alt={p.name}
               decoding="async"
-              className={`${p.sizeClass} max-h-28 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105`}
+              className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105`}
             />
           )}
         </div>
