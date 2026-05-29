@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Database, Building2, Stethoscope, FlaskConical, Code2, TrendingUp, GraduationCap, Newspaper, ArrowUpRight } from "lucide-react";
+import { Database, Building2, Stethoscope, FlaskConical, Code2, TrendingUp, GraduationCap, Newspaper, ArrowUpRight, Award } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import type { CommunityKey } from "@/lib/communityCategories";
