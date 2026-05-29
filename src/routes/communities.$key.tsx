@@ -68,6 +68,10 @@ const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
     ar: "نُوصِل رسالة الجمعية ومجتمعاتها إلى الجمهور السوري والعربي عبر محتوىً إعلاميٍّ موثوق يواكب ثورة الذكاء الاصطناعي.",
     en: "Carrying SAAE's message and its communities to Syrian and Arab audiences through trusted media content that keeps pace with the AI revolution.",
   },
+  quality: {
+    ar: "نبني ثقافةً رياديةً قائمةً على معايير الجودة والتميز المؤسسي لضمان استدامة المشاريع وتأثيرها.",
+    en: "Building an entrepreneurial culture rooted in quality standards and institutional excellence to ensure project sustainability and impact.",
+  },
 };
 
 type DetailBlock = { label: { ar: string; en: string }; text: { ar: string; en: string } };
@@ -254,6 +258,29 @@ const DETAILS: Record<CommunityKey, DetailBlock[]> = {
       text: {
         ar: "بناء خطابٍ إعلاميٍّ سوريٍّ موثوقٍ حول الذكاء الاصطناعي وأثره في المجتمع والاقتصاد.",
         en: "Building a trusted Syrian media narrative around AI and its impact on society and the economy.",
+      },
+    },
+  ],
+  quality: [
+    {
+      label: { ar: "المحور", en: "Focus" },
+      text: {
+        ar: "تطوير معايير الجودة الريادية وضمان استدامة المشاريع الناشئة في البيئة السورية.",
+        en: "Developing entrepreneurial quality standards and ensuring the sustainability of startups in the Syrian environment.",
+      },
+    },
+    {
+      label: { ar: "المنصّة", en: "Platform" },
+      text: {
+        ar: "تجمع رواد الأعمال والمختصّين لبناء منهجيات عملٍ ومراجعة أداءٍ تضمن التميز المؤسسي.",
+        en: "Connects entrepreneurs and specialists to build operational methodologies and performance reviews that ensure institutional excellence.",
+      },
+    },
+    {
+      label: { ar: "الهدف", en: "Objective" },
+      text: {
+        ar: "تأسيس ثقافة الجودة في ريادة الأعمال السورية وتقديم أدواتٍ قابلةٍ للتطبيق في الميدان.",
+        en: "Establishing a quality culture in Syrian entrepreneurship and providing tools applicable in the field.",
       },
     },
   ],
