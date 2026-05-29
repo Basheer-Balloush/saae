@@ -327,6 +327,7 @@ export const Route = createFileRoute("/api/chat")({
                   work_field: input.work_field ?? null,
                   short_description: input.short_description ?? null,
                   raw: input,
+                  conversation_id: conversationId,
                 })
                 .select("id")
                 .single();
@@ -370,6 +371,7 @@ export const Route = createFileRoute("/api/chat")({
                   contact_email: input.contact_email ?? null,
                   contact_phone: input.contact_phone ?? null,
                   raw: input,
+                  conversation_id: conversationId,
                 })
                 .select("id")
                 .single();
