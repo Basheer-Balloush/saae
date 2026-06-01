@@ -164,7 +164,7 @@ export function EnrollmentFormDialog({
         .insert({ request_id: req.id, course_id: courseId, user_id: user.id, answers });
       if (respErr) throw respErr;
 
-      toast.success(ar ? "تم إرسال طلبك. سيتواصل معك الأدمن قريباً." : "Request submitted.");
+      toast.success(ar ? "تم إرسال طلبك. سيتم التواصل معك قريباً." : "Request submitted. We will contact you soon.");
       onSubmitted();
       onOpenChange(false);
     } catch (e) {
