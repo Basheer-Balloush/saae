@@ -154,6 +154,7 @@ function MembersSection({ category }: { category: "board" | "executive" }) {
 
 /* ---------- HERO ---------- */
 function Hero({ Arrow }: { Arrow: typeof ArrowRight }) {
+  const { lang } = useLang();
   return (
     <section className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0">
@@ -164,7 +165,7 @@ function Hero({ Arrow }: { Arrow: typeof ArrowRight }) {
 
       <div className="relative mx-auto max-w-5xl px-6 pb-16 pt-12 text-center lg:px-10 lg:pb-24 lg:pt-20">
         <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-          من نحن
+          {lang === "ar" ? "من نحن" : "About SAAE"}
         </h1>
         <p className="mx-auto mt-6 max-w-3xl text-base leading-loose text-muted-foreground sm:text-lg">
           الجمعية السورية للذكاء الصنعي وريادة الأعمال هي منظمة شبابية ومجتمعية

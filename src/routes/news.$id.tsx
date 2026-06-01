@@ -455,7 +455,7 @@ function NewsDetailPage() {
                         {rTitle}
                       </h3>
                       <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold" style={{ color: TEAL }}>
-                        {lang === "ar" ? "اقرأ المزيد" : "Read more"}
+                        {lang === "ar" ? "اقرأ المقال كاملاً" : "Read full article"}
                         <ArrowUpRight className={`h-3.5 w-3.5 ${isRtl ? "-scale-x-100" : ""}`} />
                       </span>
                     </div>
