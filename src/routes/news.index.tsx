@@ -163,9 +163,9 @@ function NewsPage() {
                         </span>
                         <span className="text-muted-foreground">{n.published_at}</span>
                       </div>
-                      <h3 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
+                      <h2 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
                         {title}
-                      </h3>
+                      </h2>
                       {excerpt ? (
                         <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
                           {excerpt}

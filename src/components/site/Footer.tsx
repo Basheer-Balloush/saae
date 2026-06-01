@@ -31,7 +31,7 @@ export function Footer() {
           <div className="lg:col-span-5">
             <img
               src={logo}
-              alt="SAAE"
+              alt="SAAE official logo"
               width={180}
               height={48}
               loading="lazy"
@@ -121,7 +121,7 @@ export function Footer() {
               >
                 <img
                   src={locationMap}
-                  alt="Damascus"
+                  alt="Damascus headquarters location map"
                   width={640}
                   height={360}
                   loading="lazy"
