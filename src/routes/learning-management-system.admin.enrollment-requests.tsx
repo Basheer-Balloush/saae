@@ -69,6 +69,14 @@ function AdminEnrollmentRequests() {
       const fn = action === "approve" ? "lms_approve_enrollment_request" : "lms_reject_enrollment_request";
       const { error } = await supabase.rpc(fn, { _request_id: req.id, _admin_notes: noteDraft[req.id] || undefined });
       if (error) throw error;
+      if (action === "approve") {
+        try {
+          await sendApprovedEmail({ data: { requestId: req.id, lang: ar ? "ar" : "en" } });
+        } catch (mailErr) {
+          console.error("Failed to send approval email", mailErr);
+          toast.warning(ar ? "تمت الموافقة لكن تعذّر إرسال البريد الإلكتروني" : "Approved but failed to send notification email");
+        }
+      }
       toast.success(ar ? (action === "approve" ? "تمت الموافقة" : "تم الرفض") : (action === "approve" ? "Approved" : "Rejected"));
       await load();
     } catch (e: unknown) {
