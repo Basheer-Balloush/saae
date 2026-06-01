@@ -97,6 +97,16 @@ function CourseBuilder() {
   const update = (patch: Partial<Course>) => setCourse({ ...course, ...patch });
 
   const saveCourse = async () => {
+    // Validate slug locally
+    const slugVal = (course.slug ?? "").trim();
+    if (slugVal && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slugVal)) {
+      toast.error(lang === "ar" ? "الرابط يجب أن يحتوي فقط على أحرف إنجليزية صغيرة وأرقام وشرطات" : "Slug may only contain lowercase letters, digits, and hyphens");
+      return;
+    }
+    if (slugVal && (slugVal.length < 3 || slugVal.length > 60)) {
+      toast.error(lang === "ar" ? "طول الرابط يجب أن يكون بين 3 و 60 حرفاً" : "Slug must be between 3 and 60 characters");
+      return;
+    }
     setSaving(true);
     const { error } = await supabase.from("lms_courses").update({
       title_ar: course.title_ar, title_en: course.title_en,
@@ -104,9 +114,18 @@ function CourseBuilder() {
       level: course.level as "beginner" | "intermediate" | "advanced", price: course.price, is_free: course.is_free,
       category_id: course.category_id, cover_url: course.cover_url,
       enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline, max_students: course.max_students,
-    }).eq("id", course.id);
+      slug: slugVal || null,
+    } as never).eq("id", course.id);
     setSaving(false);
-    if (error) { toast.error(toUserMessage(error)); return; }
+    if (error) {
+      const msg = toUserMessage(error);
+      if (/duplicate|unique|slug/i.test(msg)) {
+        toast.error(lang === "ar" ? "هذا الرابط مستخدم من قِبل دورة أخرى" : "This slug is already used by another course");
+      } else {
+        toast.error(msg);
+      }
+      return;
+    }
     toast.success(lang === "ar" ? "تم الحفظ" : "Saved");
   };
 
