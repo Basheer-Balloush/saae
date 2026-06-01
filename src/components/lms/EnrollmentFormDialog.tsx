@@ -108,8 +108,18 @@ export function EnrollmentFormDialog({
   const submit = async () => {
     if (!user) return;
     // Validate base fields
-    if (!fullName.trim()) {
+    const trimmedName = fullName.trim();
+    if (!trimmedName) {
       toast.error(ar ? "الاسم الكامل مطلوب" : "Full name is required");
+      return;
+    }
+    // Must be Arabic letters only (allow spaces and Arabic diacritics)
+    if (!/^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]+$/.test(trimmedName)) {
+      toast.error(ar ? "يجب إدخال الاسم باللغة العربية فقط" : "Name must be in Arabic only");
+      return;
+    }
+    if (trimmedName.replace(/\s/g, "").length < 2) {
+      toast.error(ar ? "الاسم قصير جداً" : "Name is too short");
       return;
     }
     if (!phone.trim()) {
