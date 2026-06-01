@@ -26,6 +26,8 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/learning-management-system/login", changefreq: "monthly", priority: "0.4" },
           { path: "/learning-management-system/signup", changefreq: "monthly", priority: "0.4" },
           { path: "/learning-management-system/forgot-password", changefreq: "yearly", priority: "0.2" },
+          { path: "/learning-management-system/reset-password", changefreq: "yearly", priority: "0.2" },
+          { path: "/learning-management-system/verify", changefreq: "yearly", priority: "0.2" },
           { path: "/attendance-management-system", changefreq: "monthly", priority: "0.4" },
           { path: "/attendance-management-system/login", changefreq: "yearly", priority: "0.2" },
         ];
