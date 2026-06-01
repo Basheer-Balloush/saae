@@ -117,11 +117,8 @@ function CourseBuilder() {
       enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline, max_students: course.max_students,
       slug: slugVal || null,
     };
-    // Only admins can change pricing (DB trigger enforces this)
-    if (isAdmin) {
-      payload.price = course.price;
-      payload.is_free = course.is_free;
-    }
+    payload.price = course.is_free ? 0 : course.price;
+    payload.is_free = course.is_free;
     const { error } = await supabase.from("lms_courses").update(payload as never).eq("id", course.id);
     setSaving(false);
     if (error) {
@@ -332,19 +329,14 @@ function CourseBuilder() {
           <div><Label>{tr.filterPrice}</Label>
             <div className="flex items-center gap-2 h-10">
               <label className="flex items-center gap-1 text-sm">
-                <input type="checkbox" checked={course.is_free} disabled={!isAdmin}
+                <input type="checkbox" checked={course.is_free}
                   onChange={(e) => update({ is_free: e.target.checked })} />{tr.free}
               </label>
               {!course.is_free && (
-                <Input type="number" min={0} step={0.01} value={course.price} disabled={!isAdmin}
+                <Input type="number" min={0} step={0.01} value={course.price}
                   onChange={(e) => update({ price: parseFloat(e.target.value) || 0 })} className="h-8" />
               )}
             </div>
-            {!isAdmin && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                {lang === "ar" ? "السعر يحدّده الإدارة فقط" : "Pricing is set by admins only"}
-              </p>
-            )}
           </div>
         </div>
 
