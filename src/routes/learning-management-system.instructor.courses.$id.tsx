@@ -41,7 +41,8 @@ type Category = { id: string; name_ar: string; name_en: string | null };
 function CourseBuilder() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { user } = useLmsAuth();
+  const { user, role } = useLmsAuth();
+  const isAdmin = role === "lms_admin";
   const { lang } = useLang();
   const tr = lmsT[lang];
   const [course, setCourse] = useState<Course | null>(null);
@@ -108,14 +109,20 @@ function CourseBuilder() {
       return;
     }
     setSaving(true);
-    const { error } = await supabase.from("lms_courses").update({
+    const payload: Record<string, unknown> = {
       title_ar: course.title_ar, title_en: course.title_en,
       description_ar: course.description_ar, description_en: course.description_en,
-      level: course.level as "beginner" | "intermediate" | "advanced", price: course.price, is_free: course.is_free,
+      level: course.level as "beginner" | "intermediate" | "advanced",
       category_id: course.category_id, cover_url: course.cover_url,
       enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline, max_students: course.max_students,
       slug: slugVal || null,
-    } as never).eq("id", course.id);
+    };
+    // Only admins can change pricing (DB trigger enforces this)
+    if (isAdmin) {
+      payload.price = course.price;
+      payload.is_free = course.is_free;
+    }
+    const { error } = await supabase.from("lms_courses").update(payload as never).eq("id", course.id);
     setSaving(false);
     if (error) {
       const msg = toUserMessage(error);
@@ -324,9 +331,20 @@ function CourseBuilder() {
           </div>
           <div><Label>{tr.filterPrice}</Label>
             <div className="flex items-center gap-2 h-10">
-              <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={course.is_free} onChange={(e) => update({ is_free: e.target.checked })} />{tr.free}</label>
-              {!course.is_free && <Input type="number" min={0} step={0.01} value={course.price} onChange={(e) => update({ price: parseFloat(e.target.value) || 0 })} className="h-8" />}
+              <label className="flex items-center gap-1 text-sm">
+                <input type="checkbox" checked={course.is_free} disabled={!isAdmin}
+                  onChange={(e) => update({ is_free: e.target.checked })} />{tr.free}
+              </label>
+              {!course.is_free && (
+                <Input type="number" min={0} step={0.01} value={course.price} disabled={!isAdmin}
+                  onChange={(e) => update({ price: parseFloat(e.target.value) || 0 })} className="h-8" />
+              )}
             </div>
+            {!isAdmin && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {lang === "ar" ? "السعر يحدّده الإدارة فقط" : "Pricing is set by admins only"}
+              </p>
+            )}
           </div>
         </div>
 
