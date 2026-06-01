@@ -61,13 +61,13 @@ export function Partners() {
             <>
               <img
                 src={(p as { logoLight: string }).logoLight}
-                alt={p.name}
+                alt={`${p.name} logo`}
                 decoding="async"
                 className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105 block dark:hidden`}
               />
               <img
                 src={p.logo}
-                alt={p.name}
+                alt={`${p.name} logo`}
                 decoding="async"
                 className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105 hidden dark:block`}
               />
@@ -75,7 +75,7 @@ export function Partners() {
           ) : (
             <img
               src={p.logo}
-              alt={p.name}
+              alt={`${p.name} logo`}
               decoding="async"
               className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105`}
             />
