@@ -229,11 +229,28 @@ export function CourseFormBuilder({ courseId }: { courseId: string }) {
         )}
       </div>
 
+      {/* Locked base fields — always shown to students */}
+      <div className="rounded-xl border border-dashed border-border bg-muted/30 p-3 space-y-2">
+        <div className="text-xs font-semibold text-foreground">
+          {ar ? "حقول أساسية (تظهر دائماً للطالب)" : "Base fields (always shown to students)"}
+        </div>
+        <ul className="text-xs text-muted-foreground space-y-1 ps-4 list-disc">
+          <li>{ar ? "الاسم الكامل — مطلوب" : "Full name — required"}</li>
+          <li>{ar ? "رقم الهاتف — مطلوب" : "Phone number — required"}</li>
+          <li>{ar ? "البريد الإلكتروني — يُعبّأ تلقائياً من حساب الطالب" : "Email — auto-filled from the student's account"}</li>
+        </ul>
+        <p className="text-[11px] text-muted-foreground">
+          {ar
+            ? "هذه الحقول لا يمكن تعديلها أو حذفها. أضف حقولك المخصصة بالأسفل."
+            : "These fields can't be edited or removed. Add your custom fields below."}
+        </p>
+      </div>
+
       {form && (
         <div className="space-y-3">
           {fields.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-4 border border-dashed border-border rounded-lg">
-              {ar ? "لا توجد حقول بعد. أضف أول حقل." : "No fields yet. Add your first field."}
+              {ar ? "لا توجد حقول مخصصة بعد. أضف أول حقل." : "No custom fields yet. Add your first field."}
             </p>
           )}
 
