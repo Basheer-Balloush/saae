@@ -110,7 +110,7 @@ type Course = {
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; duration_seconds: number; is_preview: boolean; display_order: number };
-type Instructor = { user_id: string; full_name: string; avatar_url: string | null; bio: string | null };
+type Instructor = { user_id: string; full_name: string; avatar_url: string | null; specialty: string | null };
 
 function CourseDetails() {
   const { id } = Route.useParams();
@@ -138,7 +138,7 @@ function CourseDetails() {
       setCourse(c as Course | null);
       if (c) {
         const [{ data: ins }, { data: secs }] = await Promise.all([
-          supabase.from("lms_instructors").select("user_id,full_name,avatar_url,bio").eq("user_id", c.instructor_id).maybeSingle(),
+          supabase.from("lms_instructors").select("user_id,full_name,avatar_url,specialty").eq("user_id", c.instructor_id).maybeSingle(),
           supabase.from("lms_sections").select("id,title,display_order").eq("course_id", id).order("display_order"),
         ]);
         setInstructor(ins as Instructor | null);
@@ -366,7 +366,7 @@ function CourseDetails() {
                 )}
                 <div>
                   <div className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">{instructor.full_name}</div>
-                  {instructor.bio && <div className="text-xs text-muted-foreground line-clamp-2">{instructor.bio}</div>}
+                  {instructor.specialty && <div className="text-xs text-muted-foreground line-clamp-2">{instructor.specialty}</div>}
                 </div>
               </Link>
             </div>
