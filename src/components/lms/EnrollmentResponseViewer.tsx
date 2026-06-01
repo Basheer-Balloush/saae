@@ -96,16 +96,24 @@ export function EnrollmentResponseViewer({
           </p>
         ) : (
           <div className="space-y-3">
-            {fields.map((f) => {
-              const ans = answers.find((a) => a.field_id === f.id);
-              const label = ar ? f.label_ar : f.label_en || f.label_ar;
-              return (
-                <div key={f.id} className="rounded-md border border-border p-3 bg-background">
-                  <div className="text-xs font-semibold text-muted-foreground mb-1">{label}</div>
-                  <div className="text-sm text-foreground">{renderValue(f, ans?.value)}</div>
-                </div>
-              );
-            })}
+            {(() => {
+              const baseFields: Field[] = [
+                { id: "__base_full_name", field_type: "short_text", label_ar: "الاسم الكامل", label_en: "Full name" },
+                { id: "__base_phone", field_type: "short_text", label_ar: "رقم الهاتف", label_en: "Phone number" },
+                { id: "__base_email", field_type: "short_text", label_ar: "البريد الإلكتروني", label_en: "Email" },
+              ];
+              const allFields = [...baseFields, ...fields.filter((f) => !f.id.startsWith("__base_"))];
+              return allFields.map((f) => {
+                const ans = answers.find((a) => a.field_id === f.id);
+                const label = ar ? f.label_ar : f.label_en || f.label_ar;
+                return (
+                  <div key={f.id} className="rounded-md border border-border p-3 bg-background">
+                    <div className="text-xs font-semibold text-muted-foreground mb-1">{label}</div>
+                    <div className="text-sm text-foreground">{renderValue(f, ans?.value)}</div>
+                  </div>
+                );
+              });
+            })()}
           </div>
         )}
       </DialogContent>
