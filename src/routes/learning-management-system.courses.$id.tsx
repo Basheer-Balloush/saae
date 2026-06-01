@@ -179,16 +179,8 @@ function CourseDetails() {
 
   const onFreeEnroll = async () => {
     if (!requireAuth()) return;
-    if (hasForm) { setFormDialogOpen(true); return; }
-    setBusy(true);
-    try {
-      const { error } = await supabase.rpc("lms_checkout", { _course_id: course?.id ?? id });
-      if (error) throw error;
-      setEnrolled(true);
-      toast.success(tr.enrollmentSuccess);
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Error");
-    } finally { setBusy(false); }
+    // Always open the enrollment form (base fields are always required).
+    setFormDialogOpen(true);
   };
 
 
@@ -196,21 +188,10 @@ function CourseDetails() {
 
   const onManualSubmit = async () => {
     if (!requireAuth() || !user) return;
-    if (hasForm) { setFormDialogOpen(true); return; }
-    setBusy(true);
-    try {
-      const { error } = await supabase.from("lms_enrollment_requests").insert({
-        course_id: course?.id ?? id, user_id: user.id, payment_method: "manual", notes: manualNotes || null,
-      });
-      if (error) throw error;
-      setPendingRequest(true);
-      setManualOpen(false);
-      setManualNotes("");
-      toast.success(ar ? "تم إرسال طلبك. سيتواصل معك الأدمن قريباً." : "Request submitted. The admin will contact you.");
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Error");
-    } finally { setBusy(false); }
+    // Always open the enrollment form (base fields are always required).
+    setFormDialogOpen(true);
   };
+
 
   if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
   if (!course) return <p className="text-center py-20 text-muted-foreground">404</p>;
