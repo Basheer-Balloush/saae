@@ -111,7 +111,7 @@ function InstructorProfile() {
       ) : (
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map((c) => (
-            <Link key={c.id} to="/learning-management-system/courses/$id" params={{ id: c.id }}>
+            <Link key={c.id} to="/learning-management-system/courses/$id" params={{ id: (c as { slug?: string | null }).slug ?? c.id }}>
               <CourseCard course={c} />
             </Link>
           ))}
