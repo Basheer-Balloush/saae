@@ -121,7 +121,7 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
           className="mb-12 grid gap-8 lg:mb-16 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12"
         >
         <div className="order-2 max-w-2xl lg:order-1">
-            <h1 className="mt-4 text-display-2 leading-[1.5] text-foreground">{t.news.title}</h1>
+            <h2 id="news-heading" className="mt-4 text-display-2 leading-[1.5] text-foreground">{t.news.title}</h2>
             <p className="mt-5 max-w-xl text-body text-muted-foreground">{t.news.subtitle}</p>
           </div>
           <div className={`order-1 flex justify-center lg:order-2 ${dir === "rtl" ? "lg:justify-start lg:-ml-8 lg:pl-0" : "lg:justify-end lg:-mr-8 lg:pr-0"}`}>
