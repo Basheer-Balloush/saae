@@ -25,6 +25,13 @@ type AnswerValue = string | number | boolean | string[] | null;
 
 const MAX_FILE_MB = 10;
 
+// Synthetic field IDs for the always-on base fields
+export const BASE_FIELD_IDS = {
+  fullName: "__base_full_name",
+  phone: "__base_phone",
+  email: "__base_email",
+} as const;
+
 export function EnrollmentFormDialog({
   open, onOpenChange, courseId, notes, onSubmitted,
 }: {
@@ -41,6 +48,11 @@ export function EnrollmentFormDialog({
   const [fields, setFields] = useState<Field[]>([]);
   const [values, setValues] = useState<Record<string, AnswerValue>>({});
   const [busy, setBusy] = useState(false);
+
+  // Base fields
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const userEmail = user?.email ?? "";
 
   useEffect(() => {
     if (!open) return;
@@ -71,9 +83,13 @@ export function EnrollmentFormDialog({
         setFields([]);
       }
       setValues({});
+      // Prefill from auth user_metadata if available
+      const meta = (user?.user_metadata ?? {}) as { full_name?: string; name?: string; phone?: string };
+      setFullName(meta.full_name ?? meta.name ?? "");
+      setPhone(meta.phone ?? "");
       setLoading(false);
     })();
-  }, [open, courseId]);
+  }, [open, courseId, user]);
 
   const setVal = (id: string, v: AnswerValue) => setValues((p) => ({ ...p, [id]: v }));
 
@@ -91,7 +107,20 @@ export function EnrollmentFormDialog({
 
   const submit = async () => {
     if (!user) return;
-    // validate all required
+    // Validate base fields
+    if (!fullName.trim()) {
+      toast.error(ar ? "الاسم الكامل مطلوب" : "Full name is required");
+      return;
+    }
+    if (!phone.trim()) {
+      toast.error(ar ? "رقم الهاتف مطلوب" : "Phone number is required");
+      return;
+    }
+    if (!userEmail) {
+      toast.error(ar ? "الإيميل غير متوفر في حسابك" : "Email is missing from your account");
+      return;
+    }
+    // validate all required custom fields
     for (const f of fields) {
       const v = values[f.id];
       const empty =
@@ -113,13 +142,17 @@ export function EnrollmentFormDialog({
       if (reqErr) throw reqErr;
       if (!req) throw new Error("Request not created");
 
-      if (fields.length > 0) {
-        const answers = fields.map((f) => ({ field_id: f.id, value: values[f.id] ?? null }));
-        const { error: respErr } = await supabase
-          .from("lms_enrollment_form_responses")
-          .insert({ request_id: req.id, course_id: courseId, user_id: user.id, answers });
-        if (respErr) throw respErr;
-      }
+      const baseAnswers = [
+        { field_id: BASE_FIELD_IDS.fullName, value: fullName.trim() },
+        { field_id: BASE_FIELD_IDS.phone, value: phone.trim() },
+        { field_id: BASE_FIELD_IDS.email, value: userEmail },
+      ];
+      const customAnswers = fields.map((f) => ({ field_id: f.id, value: values[f.id] ?? null }));
+      const answers = [...baseAnswers, ...customAnswers];
+      const { error: respErr } = await supabase
+        .from("lms_enrollment_form_responses")
+        .insert({ request_id: req.id, course_id: courseId, user_id: user.id, answers });
+      if (respErr) throw respErr;
 
       toast.success(ar ? "تم إرسال طلبك. سيتواصل معك الأدمن قريباً." : "Request submitted.");
       onSubmitted();
@@ -218,6 +251,29 @@ export function EnrollmentFormDialog({
           <p className="text-sm text-muted-foreground text-center py-6">{ar ? "جاري التحميل..." : "Loading..."}</p>
         ) : (
           <div className="space-y-4">
+            {/* Base fields — always present */}
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">
+                {ar ? "الاسم الكامل" : "Full name"} <span className="text-destructive">*</span>
+              </Label>
+              <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">
+                {ar ? "رقم الهاتف" : "Phone number"} <span className="text-destructive">*</span>
+              </Label>
+              <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">
+                {ar ? "البريد الإلكتروني" : "Email"} <span className="text-destructive">*</span>
+              </Label>
+              <Input type="email" value={userEmail} readOnly className="bg-muted/40" />
+              <p className="text-xs text-muted-foreground">
+                {ar ? "مأخوذ من حسابك تلقائياً" : "Pulled automatically from your account"}
+              </p>
+            </div>
+
             {fields.map(renderField)}
             <div className="flex gap-2 pt-2 border-t border-border">
               <Button onClick={submit} disabled={busy} className="flex-1">
