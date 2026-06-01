@@ -167,8 +167,9 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
               </>
             );
             return (
-              <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id! }} onClick={saveOffset} className={cardClass}>
+              <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id! }} onClick={saveOffset} aria-label={`${t.news.readMore}: ${c.title}`} className={cardClass}>
                 {inner}
+
               </Link>
             );
           })}
