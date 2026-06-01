@@ -378,7 +378,7 @@ function CourseDetails() {
       <EnrollmentFormDialog
         open={formDialogOpen}
         onOpenChange={setFormDialogOpen}
-        courseId={id}
+        courseId={course?.id ?? id}
         notes={manualNotes || null}
         onSubmitted={() => { setPendingRequest(true); setManualOpen(false); setManualNotes(""); }}
       />
