@@ -23,6 +23,11 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/news", changefreq: "daily", priority: "0.9" },
           { path: "/learning-management-system", changefreq: "weekly", priority: "0.8" },
           { path: "/learning-management-system/catalog", changefreq: "daily", priority: "0.8" },
+          { path: "/learning-management-system/login", changefreq: "monthly", priority: "0.4" },
+          { path: "/learning-management-system/signup", changefreq: "monthly", priority: "0.4" },
+          { path: "/learning-management-system/forgot-password", changefreq: "yearly", priority: "0.2" },
+          { path: "/attendance-management-system", changefreq: "monthly", priority: "0.4" },
+          { path: "/attendance-management-system/login", changefreq: "yearly", priority: "0.2" },
         ];
 
         for (const key of COMMUNITY_KEYS) {
