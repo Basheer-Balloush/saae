@@ -335,14 +335,52 @@ function CourseBuilder() {
         </div>
 
 
-        <div className="grid sm:grid-cols-3 gap-3">
-          <div><Label>{tr.filterCategory}</Label>
-            <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-              value={course.category_id ?? ""} onChange={(e) => update({ category_id: e.target.value || null })}>
-              <option value="">--</option>
-              {categories.map((c) => <option key={c.id} value={c.id}>{lang === "ar" ? c.name_ar : c.name_en || c.name_ar}</option>)}
-            </select>
+        <div className="space-y-2">
+          <Label>{tr.filterCategory}</Label>
+          <p className="text-xs text-muted-foreground">
+            {lang === "ar" ? "يمكنك اختيار أكثر من فئة للدورة" : "You can select multiple categories for this course"}
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded-md border border-input bg-background p-3 max-h-56 overflow-auto">
+            {categories.length === 0 && (
+              <p className="text-xs text-muted-foreground col-span-full">
+                {lang === "ar" ? "لا توجد فئات متاحة" : "No categories available"}
+              </p>
+            )}
+            {categories.map((c) => {
+              const checked = selectedCategoryIds.includes(c.id);
+              return (
+                <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer rounded px-2 py-1 hover:bg-accent">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => {
+                      setSelectedCategoryIds((prev) =>
+                        e.target.checked ? [...prev, c.id] : prev.filter((id) => id !== c.id),
+                      );
+                    }}
+                  />
+                  <span>{lang === "ar" ? c.name_ar : c.name_en || c.name_ar}</span>
+                </label>
+              );
+            })}
           </div>
+          {selectedCategoryIds.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {selectedCategoryIds.map((cid) => {
+                const cat = categories.find((c) => c.id === cid);
+                if (!cat) return null;
+                return (
+                  <span key={cid} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs px-2 py-0.5">
+                    {lang === "ar" ? cat.name_ar : cat.name_en || cat.name_ar}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+
           <div><Label>{tr.filterLevel}</Label>
             <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
               value={course.level} onChange={(e) => update({ level: e.target.value })}>
