@@ -81,7 +81,7 @@ export function Navbar() {
               { src: logoEnDark, show: isEnDark, alt: "SAAIE — Syrian Association for AI & Entrepreneurship" },
               { src: logoArDark, show: isArDark, alt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
               { src: logoArLight, show: isArLight, alt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
-              { src: logo, show: !(isEnLight || isEnDark || isArDark || isArLight), alt: "SAAIE logo" },
+              { src: logo, show: !(isEnLight || isEnDark || isArDark || isArLight), alt: "Syrian Association for AI & Entrepreneurship logo" },
             ];
             return variants.map((v, i) => (
               <img
