@@ -31,6 +31,7 @@ type Req = {
 function AdminEnrollmentRequests() {
   const { lang } = useLang();
   const ar = lang === "ar";
+  const sendApprovedEmail = useServerFn(sendEnrollmentApprovedEmail);
   const [reqs, setReqs] = useState<Req[]>([]);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "cancelled" | "all">("pending");
   const [loading, setLoading] = useState(true);
