@@ -721,6 +721,39 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_course_categories: {
+        Row: {
+          category_id: string
+          course_id: string
+          created_at: string
+        }
+        Insert: {
+          category_id: string
+          course_id: string
+          created_at?: string
+        }
+        Update: {
+          category_id?: string
+          course_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_course_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "lms_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_course_categories_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lms_course_form_fields: {
         Row: {
           created_at: string
