@@ -319,7 +319,7 @@ function CourseDetails() {
                 <Button
                   className="w-full"
                   size="lg"
-                  onClick={() => { if (requireAuth()) { hasForm ? setFormDialogOpen(true) : setManualOpen(true); } }}
+                  onClick={() => { if (requireAuth()) { setFormDialogOpen(true); } }}
                   disabled={busy}
                 >
                   {tr.enroll}
