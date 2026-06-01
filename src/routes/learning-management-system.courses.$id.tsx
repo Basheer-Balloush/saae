@@ -182,7 +182,7 @@ function CourseDetails() {
     if (hasForm) { setFormDialogOpen(true); return; }
     setBusy(true);
     try {
-      const { error } = await supabase.rpc("lms_checkout", { _course_id: id });
+      const { error } = await supabase.rpc("lms_checkout", { _course_id: course?.id ?? id });
       if (error) throw error;
       setEnrolled(true);
       toast.success(tr.enrollmentSuccess);
