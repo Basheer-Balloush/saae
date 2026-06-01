@@ -67,12 +67,14 @@ function CourseBuilder() {
   const [viewing, setViewing] = useState<{ requestId: string; courseId: string } | null>(null);
 
   const load = async () => {
-    const [{ data: c }, { data: cats }] = await Promise.all([
+    const [{ data: c }, { data: cats }, { data: links }] = await Promise.all([
       supabase.from("lms_courses").select("*").eq("id", id).maybeSingle(),
       supabase.from("lms_categories").select("id,name_ar,name_en").order("display_order"),
+      supabase.from("lms_course_categories").select("category_id").eq("course_id", id),
     ]);
     setCourse(c as Course | null);
     setCategories((cats as Category[]) ?? []);
+    setSelectedCategoryIds(((links as { category_id: string }[]) ?? []).map((l) => l.category_id));
     if (c) {
       const { data: secs } = await supabase.from("lms_sections").select("id,title,display_order").eq("course_id", id).order("display_order");
       const sList = (secs as Section[]) ?? [];
