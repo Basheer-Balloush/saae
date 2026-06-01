@@ -812,6 +812,7 @@ export type Database = {
           price: number
           rating_avg: number
           rejection_reason: string | null
+          slug: string | null
           status: Database["public"]["Enums"]["lms_course_status"]
           students_count: number
           title_ar: string
@@ -834,6 +835,7 @@ export type Database = {
           price?: number
           rating_avg?: number
           rejection_reason?: string | null
+          slug?: string | null
           status?: Database["public"]["Enums"]["lms_course_status"]
           students_count?: number
           title_ar: string
@@ -856,6 +858,7 @@ export type Database = {
           price?: number
           rating_avg?: number
           rejection_reason?: string | null
+          slug?: string | null
           status?: Database["public"]["Enums"]["lms_course_status"]
           students_count?: number
           title_ar?: string
@@ -1664,6 +1667,7 @@ export type Database = {
         Args: { _amount: number; _method?: string; _notes?: string }
         Returns: string
       }
+      lms_slugify: { Args: { _input: string }; Returns: string }
       lms_submit_quiz: {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json

@@ -14,14 +14,12 @@ import { EnrollmentFormDialog } from "@/components/lms/EnrollmentFormDialog";
 export const Route = createFileRoute("/learning-management-system/courses/$id")({
   loader: async ({ params }) => {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
-    if (!isUuid) return { meta: null as null | { title: string; description: string; image: string | null; price: number; isFree: boolean; rating: number } };
     try {
-      const { data } = await supabase
+      const q = supabase
         .from("lms_courses")
-        .select("title_ar,title_en,description_ar,description_en,cover_url,price,is_free,rating_avg")
-        .eq("id", params.id)
-        .maybeSingle();
-      if (!data) return { meta: null };
+        .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,price,is_free,rating_avg");
+      const { data } = await (isUuid ? q.eq("id", params.id) : q.eq("slug", params.id)).maybeSingle();
+      if (!data) return { meta: null as null | { title: string; description: string; image: string | null; price: number; isFree: boolean; rating: number; canonicalSlug: string } };
       const title = (data.title_en ?? data.title_ar ?? "Course") as string;
       const rawDesc = (data.description_en ?? data.description_ar ?? "") as string;
       const fullDesc = rawDesc && rawDesc.length >= 50
@@ -36,6 +34,7 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
           price: Number(data.price ?? 0),
           isFree: Boolean(data.is_free),
           rating: Number(data.rating_avg ?? 0),
+          canonicalSlug: ((data as { slug?: string | null }).slug ?? (data.id as string)) as string,
         },
       };
     } catch {
@@ -44,7 +43,7 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
   },
   head: ({ params, loaderData }) => {
     const m = loaderData?.meta;
-    const url = `https://aisyria.org/learning-management-system/courses/${params.id}`;
+    const url = `https://aisyria.org/learning-management-system/courses/${m?.canonicalSlug ?? params.id}`;
     const title = m?.title ? `${m.title} — SAAE Learning Platform` : "Course — SAAE Learning Platform";
     const description = m?.description ?? "Course on the SAAE Learning Platform — learn from expert instructors and grow your skills.";
     const image = m?.image ?? undefined;
@@ -134,12 +133,15 @@ function CourseDetails() {
 
   useEffect(() => {
     (async () => {
-      const { data: c } = await supabase.from("lms_courses").select("*").eq("id", id).maybeSingle();
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      const baseQ = supabase.from("lms_courses").select("*");
+      const { data: c } = await (isUuid ? baseQ.eq("id", id) : baseQ.eq("slug", id)).maybeSingle();
       setCourse(c as Course | null);
       if (c) {
+        const realCourseId = (c as { id: string }).id;
         const [{ data: ins }, { data: secs }] = await Promise.all([
           supabase.from("lms_instructors").select("user_id,full_name,avatar_url,specialty").eq("user_id", c.instructor_id).maybeSingle(),
-          supabase.from("lms_sections").select("id,title,display_order").eq("course_id", id).order("display_order"),
+          supabase.from("lms_sections").select("id,title,display_order").eq("course_id", realCourseId).order("display_order"),
         ]);
         setInstructor(ins as Instructor | null);
         setSections((secs as Section[]) ?? []);
@@ -153,14 +155,14 @@ function CourseDetails() {
         const { data: cf } = await supabase
           .from("lms_course_forms")
           .select("id")
-          .eq("course_id", id)
+          .eq("course_id", realCourseId)
           .eq("is_active", true)
           .maybeSingle();
         setHasForm(!!cf);
         if (user) {
           const [{ data: e }, { data: req }] = await Promise.all([
-            supabase.from("lms_enrollments").select("id").eq("course_id", id).eq("student_id", user.id).maybeSingle(),
-            supabase.from("lms_enrollment_requests").select("id").eq("course_id", id).eq("user_id", user.id).eq("status", "pending").maybeSingle(),
+            supabase.from("lms_enrollments").select("id").eq("course_id", realCourseId).eq("student_id", user.id).maybeSingle(),
+            supabase.from("lms_enrollment_requests").select("id").eq("course_id", realCourseId).eq("user_id", user.id).eq("status", "pending").maybeSingle(),
           ]);
           setEnrolled(!!e);
           setPendingRequest(!!req);
@@ -180,7 +182,7 @@ function CourseDetails() {
     if (hasForm) { setFormDialogOpen(true); return; }
     setBusy(true);
     try {
-      const { error } = await supabase.rpc("lms_checkout", { _course_id: id });
+      const { error } = await supabase.rpc("lms_checkout", { _course_id: course?.id ?? id });
       if (error) throw error;
       setEnrolled(true);
       toast.success(tr.enrollmentSuccess);
@@ -198,7 +200,7 @@ function CourseDetails() {
     setBusy(true);
     try {
       const { error } = await supabase.from("lms_enrollment_requests").insert({
-        course_id: id, user_id: user.id, payment_method: "manual", notes: manualNotes || null,
+        course_id: course?.id ?? id, user_id: user.id, payment_method: "manual", notes: manualNotes || null,
       });
       if (error) throw error;
       setPendingRequest(true);
@@ -376,7 +378,7 @@ function CourseDetails() {
       <EnrollmentFormDialog
         open={formDialogOpen}
         onOpenChange={setFormDialogOpen}
-        courseId={id}
+        courseId={course?.id ?? id}
         notes={manualNotes || null}
         onSubmitted={() => { setPendingRequest(true); setManualOpen(false); setManualNotes(""); }}
       />

@@ -49,7 +49,7 @@ function InstructorProfile() {
         supabase.from("lms_instructors").select("*").eq("user_id", id).maybeSingle(),
         supabase
           .from("lms_courses")
-          .select("id,title_ar,title_en,description_ar,description_en,cover_url,level,price,is_free,students_count,rating_avg")
+          .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,level,price,is_free,students_count,rating_avg")
           .eq("instructor_id", id)
           .eq("status", "published")
           .order("created_at", { ascending: false }),
@@ -111,7 +111,7 @@ function InstructorProfile() {
       ) : (
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map((c) => (
-            <Link key={c.id} to="/learning-management-system/courses/$id" params={{ id: c.id }}>
+            <Link key={c.id} to="/learning-management-system/courses/$id" params={{ id: (c as { slug?: string | null }).slug ?? c.id }}>
               <CourseCard course={c} />
             </Link>
           ))}

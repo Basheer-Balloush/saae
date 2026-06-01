@@ -5,6 +5,7 @@ import { lmsT } from "@/lib/lms-i18n";
 
 export type CourseCardData = {
   id: string;
+  slug?: string | null;
   title_ar: string;
   title_en: string | null;
   description_ar: string | null;
@@ -26,7 +27,7 @@ export function CourseCard({ course }: { course: CourseCardData }) {
   return (
     <Link
       to="/learning-management-system/courses/$id"
-      params={{ id: course.id }}
+      params={{ id: course.slug ?? course.id }}
       className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all hover:border-primary hover:shadow-soft"
     >
       <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center overflow-hidden">

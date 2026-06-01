@@ -39,14 +39,15 @@ export const Route = createFileRoute("/sitemap.xml")({
         try {
           const { data } = await supabaseAdmin
             .from("lms_courses")
-            .select("id,updated_at")
+            .select("id,slug,updated_at")
             .eq("status", "published")
             .order("created_at", { ascending: false })
             .limit(1000);
           for (const row of data ?? []) {
+            const r = row as { id: string; slug?: string | null; updated_at?: string };
             entries.push({
-              path: `/learning-management-system/courses/${row.id}`,
-              lastmod: (row as { updated_at?: string }).updated_at ?? undefined,
+              path: `/learning-management-system/courses/${r.slug ?? r.id}`,
+              lastmod: r.updated_at ?? undefined,
               changefreq: "weekly",
               priority: "0.6",
             });

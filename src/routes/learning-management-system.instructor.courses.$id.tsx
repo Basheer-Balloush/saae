@@ -28,7 +28,7 @@ export const Route = createFileRoute("/learning-management-system/instructor/cou
 });
 
 type Course = {
-  id: string; title_ar: string; title_en: string | null;
+  id: string; slug: string | null; title_ar: string; title_en: string | null;
   description_ar: string | null; description_en: string | null;
   cover_url: string | null; level: string; price: number; is_free: boolean;
   status: string; category_id: string | null; instructor_id: string;
@@ -97,6 +97,16 @@ function CourseBuilder() {
   const update = (patch: Partial<Course>) => setCourse({ ...course, ...patch });
 
   const saveCourse = async () => {
+    // Validate slug locally
+    const slugVal = (course.slug ?? "").trim();
+    if (slugVal && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slugVal)) {
+      toast.error(lang === "ar" ? "الرابط يجب أن يحتوي فقط على أحرف إنجليزية صغيرة وأرقام وشرطات" : "Slug may only contain lowercase letters, digits, and hyphens");
+      return;
+    }
+    if (slugVal && (slugVal.length < 3 || slugVal.length > 60)) {
+      toast.error(lang === "ar" ? "طول الرابط يجب أن يكون بين 3 و 60 حرفاً" : "Slug must be between 3 and 60 characters");
+      return;
+    }
     setSaving(true);
     const { error } = await supabase.from("lms_courses").update({
       title_ar: course.title_ar, title_en: course.title_en,
@@ -104,9 +114,18 @@ function CourseBuilder() {
       level: course.level as "beginner" | "intermediate" | "advanced", price: course.price, is_free: course.is_free,
       category_id: course.category_id, cover_url: course.cover_url,
       enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline, max_students: course.max_students,
-    }).eq("id", course.id);
+      slug: slugVal || null,
+    } as never).eq("id", course.id);
     setSaving(false);
-    if (error) { toast.error(toUserMessage(error)); return; }
+    if (error) {
+      const msg = toUserMessage(error);
+      if (/duplicate|unique|slug/i.test(msg)) {
+        toast.error(lang === "ar" ? "هذا الرابط مستخدم من قِبل دورة أخرى" : "This slug is already used by another course");
+      } else {
+        toast.error(msg);
+      }
+      return;
+    }
     toast.success(lang === "ar" ? "تم الحفظ" : "Saved");
   };
 
@@ -266,6 +285,26 @@ function CourseBuilder() {
           <Textarea rows={3} value={course.description_ar ?? ""} onChange={(e) => update({ description_ar: e.target.value })} /></div>
         <div><Label>{lang === "ar" ? "الوصف (إنجليزي)" : "Description (EN)"}</Label>
           <Textarea rows={3} value={course.description_en ?? ""} onChange={(e) => update({ description_en: e.target.value })} /></div>
+
+        <div>
+          <Label>{lang === "ar" ? "الرابط المخصّص للدورة (Slug)" : "Custom course URL (Slug)"}</Label>
+          <Input
+            value={course.slug ?? ""}
+            onChange={(e) => update({ slug: e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") })}
+            placeholder="my-course-name"
+            dir="ltr"
+            className="font-mono"
+          />
+          <p className="mt-1 text-xs text-muted-foreground" dir="ltr">
+            aisyria.org/learning-management-system/courses/<span className="font-semibold text-foreground">{course.slug || "..."}</span>
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {lang === "ar"
+              ? "أحرف إنجليزية صغيرة وأرقام وشرطات فقط (3–60 حرفاً). يجب أن يكون فريداً."
+              : "Lowercase letters, digits, and hyphens only (3–60 chars). Must be unique."}
+          </p>
+        </div>
+
 
         <div className="grid sm:grid-cols-3 gap-3">
           <div><Label>{tr.filterCategory}</Label>
