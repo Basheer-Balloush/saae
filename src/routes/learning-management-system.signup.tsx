@@ -137,19 +137,23 @@ function LmsSignup() {
                 <Label htmlFor="email">{tr.email}</Label>
                 <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" />
               </div>
-              <div className="relative">
+              <div>
                 <Label htmlFor="password">{tr.password}</Label>
-                <Input id="password" type={showPassword ? "text" : "password"} autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} dir="ltr" />
-                <button type="button" tabIndex={-1} onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-[28px] text-muted-foreground hover:text-foreground" aria-label={showPassword ? "Hide password" : "Show password"}>
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+                <div className="relative mt-2">
+                  <Input id="password" type={showPassword ? "text" : "password"} autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} dir="ltr" className="pr-10" />
+                  <button type="button" tabIndex={-1} onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground" aria-label={showPassword ? "Hide password" : "Show password"}>
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
-              <div className="relative">
+              <div>
                 <Label htmlFor="confirmPassword">{lang === "ar" ? "تأكيد كلمة المرور" : "Confirm password"}</Label>
-                <Input id="confirmPassword" type={showConfirm ? "text" : "password"} autoComplete="new-password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} dir="ltr" />
-                <button type="button" tabIndex={-1} onClick={() => setShowConfirm((v) => !v)} className="absolute right-3 top-[28px] text-muted-foreground hover:text-foreground" aria-label={showConfirm ? "Hide password" : "Show password"}>
-                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+                <div className="relative mt-2">
+                  <Input id="confirmPassword" type={showConfirm ? "text" : "password"} autoComplete="new-password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} dir="ltr" className="pr-10" />
+                  <button type="button" tabIndex={-1} onClick={() => setShowConfirm((v) => !v)} className="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground" aria-label={showConfirm ? "Hide password" : "Show password"}>
+                    {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               <div className="flex flex-col gap-2 rounded-xl border border-border p-3 bg-muted/30">
                 <label className="flex items-center gap-2 cursor-pointer text-sm">
