@@ -286,6 +286,26 @@ function CourseBuilder() {
         <div><Label>{lang === "ar" ? "الوصف (إنجليزي)" : "Description (EN)"}</Label>
           <Textarea rows={3} value={course.description_en ?? ""} onChange={(e) => update({ description_en: e.target.value })} /></div>
 
+        <div>
+          <Label>{lang === "ar" ? "الرابط المخصّص للدورة (Slug)" : "Custom course URL (Slug)"}</Label>
+          <Input
+            value={course.slug ?? ""}
+            onChange={(e) => update({ slug: e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") })}
+            placeholder="my-course-name"
+            dir="ltr"
+            className="font-mono"
+          />
+          <p className="mt-1 text-xs text-muted-foreground" dir="ltr">
+            aisyria.org/learning-management-system/courses/<span className="font-semibold text-foreground">{course.slug || "..."}</span>
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {lang === "ar"
+              ? "أحرف إنجليزية صغيرة وأرقام وشرطات فقط (3–60 حرفاً). يجب أن يكون فريداً."
+              : "Lowercase letters, digits, and hyphens only (3–60 chars). Must be unique."}
+          </p>
+        </div>
+
+
         <div className="grid sm:grid-cols-3 gap-3">
           <div><Label>{tr.filterCategory}</Label>
             <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
