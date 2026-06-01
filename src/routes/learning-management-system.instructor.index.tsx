@@ -134,11 +134,13 @@ function InstructorHome() {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    draft: "bg-muted text-muted-foreground",
-    pending: "bg-amber-500/15 text-amber-600",
-    published: "bg-emerald-500/15 text-emerald-600",
-    rejected: "bg-destructive/15 text-destructive",
+  const { lang } = useLang();
+  const map: Record<string, { cls: string; label: string }> = {
+    draft: { cls: "bg-muted text-muted-foreground", label: lang === "ar" ? "مسودّة" : "Draft" },
+    pending: { cls: "bg-amber-500/15 text-amber-600", label: lang === "ar" ? "بانتظار المراجعة" : "Pending" },
+    published: { cls: "bg-emerald-500/15 text-emerald-600", label: lang === "ar" ? "منشورة" : "Published" },
+    rejected: { cls: "bg-destructive/15 text-destructive", label: lang === "ar" ? "مرفوضة" : "Rejected" },
   };
-  return <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${map[status] ?? map.draft}`}>{status}</span>;
+  const m = map[status] ?? map.draft;
+  return <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${m.cls}`}>{m.label}</span>;
 }
