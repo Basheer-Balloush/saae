@@ -150,7 +150,7 @@ function AdminHome() {
     { id: "overview", label: ar ? "نظرة عامة" : "Overview", icon: Sparkles },
     {
       id: "instructors",
-      label: ar ? "المدرّسون" : "Instructors",
+      label: ar ? "المدرّبون" : "Instructors",
       icon: GraduationCap,
       badge: pendingInstructors.length || undefined,
     },
@@ -228,7 +228,7 @@ function AdminHome() {
         <div className="mt-8 grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
           <StatCard
             icon={Mail}
-            label={ar ? "طلبات مدرّسين" : "Instructor requests"}
+            label={ar ? "طلبات مدرّبين" : "Instructor requests"}
             value={pendingInstructors.length}
             tone={pendingInstructors.length ? "amber" : "neutral"}
             hint={ar ? "بانتظار الموافقة" : "Pending approval"}
@@ -242,7 +242,7 @@ function AdminHome() {
           />
           <StatCard
             icon={GraduationCap}
-            label={ar ? "مدرّسون نشطون" : "Active instructors"}
+            label={ar ? "مدرّبون نشطون" : "Active instructors"}
             value={approvedInstructors.length}
             tone="primary"
             hint={ar ? "موافَق عليهم" : "Approved"}
@@ -325,7 +325,7 @@ function AdminHome() {
               <div className="space-y-6">
                 {/* Pending instructor requests highlight */}
                 <Section
-                  title={ar ? "طلبات مدرّسين بانتظار الموافقة" : "Instructor requests pending approval"}
+                  title={ar ? "طلبات مدرّبين بانتظار الموافقة" : "Instructor requests pending approval"}
                   count={pendingInstructors.length}
                   emptyText={ar ? "لا توجد طلبات حالياً." : "No pending requests."}
                   action={
@@ -395,9 +395,9 @@ function AdminHome() {
                 </Section>
 
                 <Section
-                  title={ar ? "المدرّسون المعتمَدون" : "Approved instructors"}
+                  title={ar ? "المدرّبون المعتمَدون" : "Approved instructors"}
                   count={approvedInstructors.length}
-                  emptyText={ar ? "لا يوجد مدرّسون معتمَدون." : "No approved instructors."}
+                  emptyText={ar ? "لا يوجد مدرّبون معتمَدون." : "No approved instructors."}
                 >
                   {approvedInstructors.map((i) => (
                     <div
@@ -620,7 +620,7 @@ function InstructorRequestCard({
           <div className="min-w-0">
             <div className="font-bold text-foreground truncate text-base">{ins.full_name}</div>
             <div className="text-xs text-muted-foreground mt-0.5">
-              {ar ? "طلب تفعيل حساب مدرّس" : "Instructor activation request"}
+              {ar ? "طلب تفعيل حساب مدرّب" : "Instructor activation request"}
             </div>
             {ins.specialty && <div className="mt-1 text-xs text-foreground">{ins.specialty}</div>}
             {ins.bio && <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{ins.bio}</p>}

@@ -37,7 +37,7 @@ function InstructorLayout() {
     return (
       <div className="mx-auto max-w-xl px-6 py-20 text-center">
         <h1 className="text-xl font-bold text-foreground">
-          {lang === "ar" ? "حسابك كمدرّس قيد المراجعة" : "Your instructor account is pending review"}
+          {lang === "ar" ? "حسابك كمدرّب قيد المراجعة" : "Your instructor account is pending review"}
         </h1>
         <p className="mt-3 text-muted-foreground">
           {lang === "ar" ? "سيتم تفعيله من قبل الإدارة قريباً." : "An admin will activate it shortly."}

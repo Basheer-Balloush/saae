@@ -233,7 +233,7 @@ function LmsHome() {
               </h2>
               <p className="mt-6 max-w-lg text-body text-muted-foreground">
                 {lang === "ar"
-                  ? "منصة تعليمية متنامية تجمع المتعلّمين والمدرّسين حول محتوى عربي عالي الجودة في الذكاء الاصطناعي وريادة الأعمال."
+                  ? "منصة تعليمية متنامية تجمع المتعلّمين والمدرّبين حول محتوى عربي عالي الجودة في الذكاء الاصطناعي وريادة الأعمال."
                   : "A growing learning platform bringing learners and instructors together around high-quality Arabic content in AI and entrepreneurship."}
               </p>
               <div className="mt-8 h-[3px] w-20 bg-gradient-brand" />
