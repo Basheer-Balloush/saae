@@ -31,7 +31,7 @@ export function Footer() {
           <div className="lg:col-span-5">
             <img
               src={logo}
-              alt="SAAE official logo"
+              alt="Syrian Association for AI & Entrepreneurship logo"
               width={180}
               height={48}
               loading="lazy"
