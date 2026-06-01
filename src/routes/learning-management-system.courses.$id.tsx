@@ -133,12 +133,15 @@ function CourseDetails() {
 
   useEffect(() => {
     (async () => {
-      const { data: c } = await supabase.from("lms_courses").select("*").eq("id", id).maybeSingle();
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      const baseQ = supabase.from("lms_courses").select("*");
+      const { data: c } = await (isUuid ? baseQ.eq("id", id) : baseQ.eq("slug", id)).maybeSingle();
       setCourse(c as Course | null);
       if (c) {
+        const realCourseId = (c as { id: string }).id;
         const [{ data: ins }, { data: secs }] = await Promise.all([
           supabase.from("lms_instructors").select("user_id,full_name,avatar_url,specialty").eq("user_id", c.instructor_id).maybeSingle(),
-          supabase.from("lms_sections").select("id,title,display_order").eq("course_id", id).order("display_order"),
+          supabase.from("lms_sections").select("id,title,display_order").eq("course_id", realCourseId).order("display_order"),
         ]);
         setInstructor(ins as Instructor | null);
         setSections((secs as Section[]) ?? []);
@@ -152,14 +155,14 @@ function CourseDetails() {
         const { data: cf } = await supabase
           .from("lms_course_forms")
           .select("id")
-          .eq("course_id", id)
+          .eq("course_id", realCourseId)
           .eq("is_active", true)
           .maybeSingle();
         setHasForm(!!cf);
         if (user) {
           const [{ data: e }, { data: req }] = await Promise.all([
-            supabase.from("lms_enrollments").select("id").eq("course_id", id).eq("student_id", user.id).maybeSingle(),
-            supabase.from("lms_enrollment_requests").select("id").eq("course_id", id).eq("user_id", user.id).eq("status", "pending").maybeSingle(),
+            supabase.from("lms_enrollments").select("id").eq("course_id", realCourseId).eq("student_id", user.id).maybeSingle(),
+            supabase.from("lms_enrollment_requests").select("id").eq("course_id", realCourseId).eq("user_id", user.id).eq("status", "pending").maybeSingle(),
           ]);
           setEnrolled(!!e);
           setPendingRequest(!!req);
