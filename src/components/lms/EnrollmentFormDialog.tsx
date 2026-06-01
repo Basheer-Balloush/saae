@@ -83,20 +83,10 @@ export function EnrollmentFormDialog({
         setFields([]);
       }
       setValues({});
-      // Try to prefill name from profile
-      if (user) {
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("full_name,phone")
-          .eq("id", user.id)
-          .maybeSingle();
-        const p = prof as { full_name?: string | null; phone?: string | null } | null;
-        setFullName(p?.full_name ?? "");
-        setPhone(p?.phone ?? "");
-      } else {
-        setFullName("");
-        setPhone("");
-      }
+      // Prefill from auth user_metadata if available
+      const meta = (user?.user_metadata ?? {}) as { full_name?: string; name?: string; phone?: string };
+      setFullName(meta.full_name ?? meta.name ?? "");
+      setPhone(meta.phone ?? "");
       setLoading(false);
     })();
   }, [open, courseId, user]);
