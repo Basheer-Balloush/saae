@@ -43,7 +43,7 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
   },
   head: ({ params, loaderData }) => {
     const m = loaderData?.meta;
-    const url = `https://aisyria.org/learning-management-system/courses/${params.id}`;
+    const url = `https://aisyria.org/learning-management-system/courses/${m?.canonicalSlug ?? params.id}`;
     const title = m?.title ? `${m.title} — SAAE Learning Platform` : "Course — SAAE Learning Platform";
     const description = m?.description ?? "Course on the SAAE Learning Platform — learn from expert instructors and grow your skills.";
     const image = m?.image ?? undefined;
