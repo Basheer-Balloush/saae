@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Check, X, Clock, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
+import { sendEnrollmentApprovedEmail } from "@/lib/lms-enrollment-email.functions";
 
 export const Route = createFileRoute("/learning-management-system/admin/enrollment-requests")({
   head: () => ({ meta: [{ title: "LMS · Enrollment requests" }] }),
@@ -29,6 +31,7 @@ type Req = {
 function AdminEnrollmentRequests() {
   const { lang } = useLang();
   const ar = lang === "ar";
+  const sendApprovedEmail = useServerFn(sendEnrollmentApprovedEmail);
   const [reqs, setReqs] = useState<Req[]>([]);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "cancelled" | "all">("pending");
   const [loading, setLoading] = useState(true);
@@ -66,6 +69,14 @@ function AdminEnrollmentRequests() {
       const fn = action === "approve" ? "lms_approve_enrollment_request" : "lms_reject_enrollment_request";
       const { error } = await supabase.rpc(fn, { _request_id: req.id, _admin_notes: noteDraft[req.id] || undefined });
       if (error) throw error;
+      if (action === "approve") {
+        try {
+          await sendApprovedEmail({ data: { requestId: req.id, lang: ar ? "ar" : "en" } });
+        } catch (mailErr) {
+          console.error("Failed to send approval email", mailErr);
+          toast.warning(ar ? "تمت الموافقة لكن تعذّر إرسال البريد الإلكتروني" : "Approved but failed to send notification email");
+        }
+      }
       toast.success(ar ? (action === "approve" ? "تمت الموافقة" : "تم الرفض") : (action === "approve" ? "Approved" : "Rejected"));
       await load();
     } catch (e: unknown) {
