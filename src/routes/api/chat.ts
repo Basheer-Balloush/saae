@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
-import { supabase } from "@/integrations/supabase/client";
+
 
 // --- In-memory sliding-window rate limiter (per-instance) ---
 const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
@@ -302,6 +302,12 @@ export const Route = createFileRoute("/api/chat")({
         const gateway = createLovableAiGatewayProvider(key);
         const model = gateway("google/gemini-3-flash-preview");
 
+        // Ensure a conversation exists so leads can be linked even if sessionId was missing
+        if (!conversationId) {
+          const fallbackSession = chatSessionId ?? `auto_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+          conversationId = await upsertConversation(fallbackSession, lang, userAgent);
+        }
+
         const tools = {
           submit_individual_lead: tool({
             description:
@@ -316,7 +322,7 @@ export const Route = createFileRoute("/api/chat")({
               short_description: z.string().nullable().optional(),
             }),
             execute: async (input) => {
-              const { error, data } = await supabase
+              const { error, data } = await supabaseAdmin
                 .from("individual_leads")
                 .insert({
                   full_name: input.full_name,
@@ -331,7 +337,11 @@ export const Route = createFileRoute("/api/chat")({
                 })
                 .select("id")
                 .single();
-              if (error) return { ok: false, error: error.message };
+              if (error) {
+                console.error("[chat] submit_individual_lead failed", error.message, { conversationId });
+                return { ok: false, error: error.message };
+              }
+              console.log("[chat] individual_lead saved", { id: data?.id, conversationId });
               return { ok: true, id: data?.id };
             },
           }),
@@ -354,7 +364,7 @@ export const Route = createFileRoute("/api/chat")({
               contact_phone: z.string().nullable().optional(),
             }),
             execute: async (input) => {
-              const { error, data } = await supabase
+              const { error, data } = await supabaseAdmin
                 .from("company_leads")
                 .insert({
                   company_name: input.company_name,
@@ -375,7 +385,11 @@ export const Route = createFileRoute("/api/chat")({
                 })
                 .select("id")
                 .single();
-              if (error) return { ok: false, error: error.message };
+              if (error) {
+                console.error("[chat] submit_company_lead failed", error.message, { conversationId });
+                return { ok: false, error: error.message };
+              }
+              console.log("[chat] company_lead saved", { id: data?.id, conversationId });
               return { ok: true, id: data?.id };
             },
           }),
