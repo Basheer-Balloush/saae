@@ -28,7 +28,7 @@ export const Route = createFileRoute("/learning-management-system/instructor/cou
 });
 
 type Course = {
-  id: string; title_ar: string; title_en: string | null;
+  id: string; slug: string | null; title_ar: string; title_en: string | null;
   description_ar: string | null; description_en: string | null;
   cover_url: string | null; level: string; price: number; is_free: boolean;
   status: string; category_id: string | null; instructor_id: string;
