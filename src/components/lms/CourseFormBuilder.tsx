@@ -230,15 +230,50 @@ export function CourseFormBuilder({ courseId }: { courseId: string }) {
       </div>
 
       {/* Locked base fields — always shown to students */}
-      <div className="rounded-xl border border-dashed border-border bg-muted/30 p-3 space-y-2">
+      <div className="space-y-2">
         <div className="text-xs font-semibold text-foreground">
           {ar ? "حقول أساسية (تظهر دائماً للطالب)" : "Base fields (always shown to students)"}
         </div>
-        <ul className="text-xs text-muted-foreground space-y-1 ps-4 list-disc">
-          <li>{ar ? "الاسم الكامل — مطلوب" : "Full name — required"}</li>
-          <li>{ar ? "رقم الهاتف — مطلوب" : "Phone number — required"}</li>
-          <li>{ar ? "البريد الإلكتروني — يُعبّأ تلقائياً من حساب الطالب" : "Email — auto-filled from the student's account"}</li>
-        </ul>
+        {[
+          {
+            label: ar ? "الاسم الكامل" : "Full name",
+            type: ar ? "نص قصير" : "Short text",
+            note: ar ? "مطلوب" : "Required",
+            placeholder: ar ? "اكتب اسمك الكامل" : "Your full name",
+          },
+          {
+            label: ar ? "رقم الهاتف" : "Phone number",
+            type: ar ? "رقم" : "Number",
+            note: ar ? "مطلوب" : "Required",
+            placeholder: ar ? "مثال: 09xxxxxxxx" : "e.g. 09xxxxxxxx",
+          },
+          {
+            label: ar ? "البريد الإلكتروني" : "Email",
+            type: ar ? "بريد إلكتروني" : "Email",
+            note: ar ? "يُعبّأ تلقائياً من حساب الطالب" : "Auto-filled from the student's account",
+            placeholder: "student@example.com",
+          },
+        ].map((bf, idx) => (
+          <div key={idx} className="rounded-xl border border-border p-3 space-y-2 bg-muted/30">
+            <div className="flex items-center gap-2">
+              <GripVertical className="h-4 w-4 text-muted-foreground/50" />
+              <span className="text-xs font-semibold text-muted-foreground">#{idx + 1}</span>
+              <span className="text-xs px-2 py-0.5 rounded-md bg-background border border-border text-muted-foreground">
+                {bf.type}
+              </span>
+              <span className="ms-auto text-[11px] px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
+                {ar ? "حقل نظامي مقفول" : "Locked system field"}
+              </span>
+            </div>
+            <div>
+              <Label className="text-xs">
+                {bf.label} <span className="text-destructive">*</span>
+              </Label>
+              <Input value="" placeholder={bf.placeholder} disabled readOnly />
+            </div>
+            <p className="text-[11px] text-muted-foreground">{bf.note}</p>
+          </div>
+        ))}
         <p className="text-[11px] text-muted-foreground">
           {ar
             ? "هذه الحقول لا يمكن تعديلها أو حذفها. أضف حقولك المخصصة بالأسفل."
