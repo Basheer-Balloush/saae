@@ -105,7 +105,13 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const row = [...slides, ...slides];
 
   return (
-    <section id="news" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32">
+    <section id="news" aria-labelledby="news-heading" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32">
+      <h1 className="sr-only">
+        {lang === "ar"
+          ? "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال — نبني مستقبل سوريا الرقمي"
+          : "Syrian Association for AI & Entrepreneurship — Building Syria's Digital Future"}
+      </h1>
+
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
