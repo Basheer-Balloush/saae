@@ -93,7 +93,7 @@ function InstructorProfileEdit() {
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-8 sm:py-12">
       <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-        {ar ? "الملف الشخصي للمدرّس" : "Instructor profile"}
+        {ar ? "الملف الشخصي للمدرّب" : "Instructor profile"}
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">
         {ar ? "هذه المعلومات تظهر للطلاب على صفحات الدورات." : "This information shows to students on course pages."}
