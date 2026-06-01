@@ -14,14 +14,12 @@ import { EnrollmentFormDialog } from "@/components/lms/EnrollmentFormDialog";
 export const Route = createFileRoute("/learning-management-system/courses/$id")({
   loader: async ({ params }) => {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
-    if (!isUuid) return { meta: null as null | { title: string; description: string; image: string | null; price: number; isFree: boolean; rating: number } };
     try {
-      const { data } = await supabase
+      const q = supabase
         .from("lms_courses")
-        .select("title_ar,title_en,description_ar,description_en,cover_url,price,is_free,rating_avg")
-        .eq("id", params.id)
-        .maybeSingle();
-      if (!data) return { meta: null };
+        .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,price,is_free,rating_avg");
+      const { data } = await (isUuid ? q.eq("id", params.id) : q.eq("slug", params.id)).maybeSingle();
+      if (!data) return { meta: null as null | { title: string; description: string; image: string | null; price: number; isFree: boolean; rating: number; canonicalSlug: string } };
       const title = (data.title_en ?? data.title_ar ?? "Course") as string;
       const rawDesc = (data.description_en ?? data.description_ar ?? "") as string;
       const fullDesc = rawDesc && rawDesc.length >= 50
@@ -36,6 +34,7 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
           price: Number(data.price ?? 0),
           isFree: Boolean(data.is_free),
           rating: Number(data.rating_avg ?? 0),
+          canonicalSlug: ((data as { slug?: string | null }).slug ?? (data.id as string)) as string,
         },
       };
     } catch {
