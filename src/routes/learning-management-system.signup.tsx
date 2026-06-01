@@ -51,15 +51,20 @@ function LmsSignup() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = schema.safeParse({ fullName, email, password });
+    const parsed = schema.safeParse({ fullName, email, password, confirmPassword });
     if (!parsed.success) {
-      const code = parsed.error.issues[0].path[0];
-      toast.error(code === "email" ? tr.invalidEmail : tr.passwordMin);
+      const issue = parsed.error.issues[0];
+      const code = issue.path[0];
+      if (code === "confirmPassword" || issue.message.includes("match")) {
+        toast.error(lang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
+      } else {
+        toast.error(code === "email" ? tr.invalidEmail : tr.passwordMin);
+      }
       return;
     }
     setSubmitting(true);
     try {
-      await signUpUser({ data: { ...parsed.data, asInstructor, lang } });
+      await signUpUser({ data: { fullName: parsed.data.fullName, email: parsed.data.email, password: parsed.data.password, asInstructor, lang } });
       setSentTo(parsed.data.email);
       toast.success(tr.signedUp);
     } catch (err: unknown) {
