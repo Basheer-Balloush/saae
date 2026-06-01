@@ -200,7 +200,7 @@ function CourseDetails() {
     setBusy(true);
     try {
       const { error } = await supabase.from("lms_enrollment_requests").insert({
-        course_id: id, user_id: user.id, payment_method: "manual", notes: manualNotes || null,
+        course_id: course?.id ?? id, user_id: user.id, payment_method: "manual", notes: manualNotes || null,
       });
       if (error) throw error;
       setPendingRequest(true);
