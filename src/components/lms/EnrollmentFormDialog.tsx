@@ -108,8 +108,18 @@ export function EnrollmentFormDialog({
   const submit = async () => {
     if (!user) return;
     // Validate base fields
-    if (!fullName.trim()) {
+    const trimmedName = fullName.trim();
+    if (!trimmedName) {
       toast.error(ar ? "الاسم الكامل مطلوب" : "Full name is required");
+      return;
+    }
+    // Must be Arabic letters only (allow spaces and Arabic diacritics)
+    if (!/^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]+$/.test(trimmedName)) {
+      toast.error(ar ? "يجب إدخال الاسم باللغة العربية فقط" : "Name must be in Arabic only");
+      return;
+    }
+    if (trimmedName.replace(/\s/g, "").length < 2) {
+      toast.error(ar ? "الاسم قصير جداً" : "Name is too short");
       return;
     }
     if (!phone.trim()) {
@@ -256,7 +266,10 @@ export function EnrollmentFormDialog({
               <Label className="text-sm font-medium">
                 {ar ? "الاسم الكامل" : "Full name"} <span className="text-destructive">*</span>
               </Label>
-              <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
+              <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={ar ? "مثال: محمد أحمد" : "مثال: محمد أحمد"} dir="rtl" />
+              <p className="text-xs text-muted-foreground">
+                {ar ? "يجب إدخال الاسم باللغة العربية فقط" : "Name must be entered in Arabic only"}
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm font-medium">
