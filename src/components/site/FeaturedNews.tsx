@@ -105,7 +105,13 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const row = [...slides, ...slides];
 
   return (
-    <section id="news" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32">
+    <section id="news" aria-labelledby="news-heading" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32">
+      <h1 className="sr-only">
+        {lang === "ar"
+          ? "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال — نبني مستقبل سوريا الرقمي"
+          : "Syrian Association for AI & Entrepreneurship — Building Syria's Digital Future"}
+      </h1>
+
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -115,7 +121,7 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
           className="mb-12 grid gap-8 lg:mb-16 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12"
         >
         <div className="order-2 max-w-2xl lg:order-1">
-            <h1 className="mt-4 text-display-2 leading-[1.5] text-foreground">{t.news.title}</h1>
+            <h2 id="news-heading" className="mt-4 text-display-2 leading-[1.5] text-foreground">{t.news.title}</h2>
             <p className="mt-5 max-w-xl text-body text-muted-foreground">{t.news.subtitle}</p>
           </div>
           <div className={`order-1 flex justify-center lg:order-2 ${dir === "rtl" ? "lg:justify-start lg:-ml-8 lg:pl-0" : "lg:justify-end lg:-mr-8 lg:pr-0"}`}>
@@ -161,8 +167,9 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
               </>
             );
             return (
-              <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id! }} onClick={saveOffset} className={cardClass}>
+              <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id! }} onClick={saveOffset} aria-label={`${t.news.readMore}: ${c.title}`} className={cardClass}>
                 {inner}
+
               </Link>
             );
           })}
