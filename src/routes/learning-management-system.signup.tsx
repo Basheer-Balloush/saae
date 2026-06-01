@@ -23,6 +23,10 @@ const schema = z.object({
   fullName: z.string().trim().min(2).max(120),
   email: z.string().trim().email().max(255),
   password: z.string().min(6).max(72),
+  confirmPassword: z.string().min(6).max(72),
+}).refine((d) => d.password === d.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 function LmsSignup() {
