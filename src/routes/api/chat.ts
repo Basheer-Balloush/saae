@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
-import { supabase } from "@/integrations/supabase/client";
+
 
 // --- In-memory sliding-window rate limiter (per-instance) ---
 const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
