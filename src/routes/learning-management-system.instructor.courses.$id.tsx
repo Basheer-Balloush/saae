@@ -116,15 +116,15 @@ function CourseBuilder() {
       title_ar: course.title_ar, title_en: course.title_en,
       description_ar: course.description_ar, description_en: course.description_en,
       level: course.level as "beginner" | "intermediate" | "advanced",
-      category_id: course.category_id, cover_url: course.cover_url,
+      cover_url: course.cover_url,
       enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline, max_students: course.max_students,
       slug: slugVal || null,
     };
     payload.price = course.is_free ? 0 : course.price;
     payload.is_free = course.is_free;
     const { error } = await supabase.from("lms_courses").update(payload as never).eq("id", course.id);
-    setSaving(false);
     if (error) {
+      setSaving(false);
       const msg = toUserMessage(error);
       if (/duplicate|unique|slug/i.test(msg)) {
         toast.error(lang === "ar" ? "هذا الرابط مستخدم من قِبل دورة أخرى" : "This slug is already used by another course");
@@ -133,8 +133,30 @@ function CourseBuilder() {
       }
       return;
     }
+    // Sync many-to-many categories
+    const { data: existing } = await supabase
+      .from("lms_course_categories").select("category_id").eq("course_id", course.id);
+    const existingIds = new Set(((existing as { category_id: string }[]) ?? []).map((r) => r.category_id));
+    const selectedSet = new Set(selectedCategoryIds);
+    const toAdd = selectedCategoryIds.filter((cid) => !existingIds.has(cid));
+    const toRemove = [...existingIds].filter((cid) => !selectedSet.has(cid));
+    if (toRemove.length) {
+      await supabase.from("lms_course_categories")
+        .delete().eq("course_id", course.id).in("category_id", toRemove);
+    }
+    if (toAdd.length) {
+      const { error: insErr } = await supabase.from("lms_course_categories")
+        .insert(toAdd.map((cid) => ({ course_id: course.id, category_id: cid })));
+      if (insErr) {
+        setSaving(false);
+        toast.error(toUserMessage(insErr));
+        return;
+      }
+    }
+    setSaving(false);
     toast.success(lang === "ar" ? "تم الحفظ" : "Saved");
   };
+
 
   const submitForReview = async () => {
     const { error } = await supabase.from("lms_courses").update({ status: "pending" }).eq("id", course.id);
