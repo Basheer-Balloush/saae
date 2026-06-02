@@ -19,8 +19,13 @@ export const Route = createFileRoute("/learning-management-system/signup")({
   component: LmsSignup,
 });
 
+const ARABIC_NAME_RE = /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]+$/;
+
 const schema = z.object({
-  fullName: z.string().trim().min(2).max(120),
+  fullName: z.string().trim().min(2).max(120).refine(
+    (v) => ARABIC_NAME_RE.test(v) && v.replace(/\s/g, "").length >= 2,
+    { message: "ARABIC_ONLY" },
+  ),
   email: z.string().trim().email().max(255),
   password: z.string().min(6).max(72),
   confirmPassword: z.string().min(6).max(72),
