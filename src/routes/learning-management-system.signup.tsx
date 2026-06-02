@@ -19,8 +19,13 @@ export const Route = createFileRoute("/learning-management-system/signup")({
   component: LmsSignup,
 });
 
+const ARABIC_NAME_RE = /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]+$/;
+
 const schema = z.object({
-  fullName: z.string().trim().min(2).max(120),
+  fullName: z.string().trim().min(2).max(120).refine(
+    (v) => ARABIC_NAME_RE.test(v) && v.replace(/\s/g, "").length >= 2,
+    { message: "ARABIC_ONLY" },
+  ),
   email: z.string().trim().email().max(255),
   password: z.string().min(6).max(72),
   confirmPassword: z.string().min(6).max(72),
@@ -55,7 +60,9 @@ function LmsSignup() {
     if (!parsed.success) {
       const issue = parsed.error.issues[0];
       const code = issue.path[0];
-      if (code === "confirmPassword" || issue.message.includes("match")) {
+      if (code === "fullName") {
+        toast.error(lang === "ar" ? "يجب إدخال الاسم الكامل باللغة العربية فقط" : "Full name must be in Arabic only");
+      } else if (code === "confirmPassword" || issue.message.includes("match")) {
         toast.error(lang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
       } else {
         toast.error(code === "email" ? tr.invalidEmail : tr.passwordMin);
@@ -131,7 +138,10 @@ function LmsSignup() {
             <form onSubmit={onSubmit} className="mt-5 space-y-3">
               <div>
                 <Label htmlFor="name">{tr.fullName}</Label>
-                <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} dir="rtl" placeholder="مثال: محمد أحمد" />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {lang === "ar" ? "يجب إدخال الاسم باللغة العربية فقط" : "Name must be entered in Arabic only"}
+                </p>
               </div>
               <div>
                 <Label htmlFor="email">{tr.email}</Label>
