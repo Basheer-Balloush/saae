@@ -60,7 +60,9 @@ function LmsSignup() {
     if (!parsed.success) {
       const issue = parsed.error.issues[0];
       const code = issue.path[0];
-      if (code === "confirmPassword" || issue.message.includes("match")) {
+      if (code === "fullName") {
+        toast.error(lang === "ar" ? "يجب إدخال الاسم الكامل باللغة العربية فقط" : "Full name must be in Arabic only");
+      } else if (code === "confirmPassword" || issue.message.includes("match")) {
         toast.error(lang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
       } else {
         toast.error(code === "email" ? tr.invalidEmail : tr.passwordMin);
