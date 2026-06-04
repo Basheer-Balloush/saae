@@ -86,9 +86,15 @@ function InstructorProfileEdit() {
     setSaving(true);
     const payload = {
       user_id: user.id,
-      full_name: fullName.trim(),
-      bio: bio.trim() || null,
-      specialty: specialty.trim() || null,
+      full_name: (fullNameAr || fullNameEn || fullName).trim(),
+      full_name_ar: fullNameAr.trim() || null,
+      full_name_en: fullNameEn.trim() || null,
+      bio: (bioAr || bioEn).trim() || null,
+      bio_ar: bioAr.trim() || null,
+      bio_en: bioEn.trim() || null,
+      specialty: (specialtyAr || specialtyEn).trim() || null,
+      specialty_ar: specialtyAr.trim() || null,
+      specialty_en: specialtyEn.trim() || null,
       avatar_url: avatarUrl,
     };
     const { error } = await supabase.from("lms_instructors").upsert(payload, { onConflict: "user_id" });
@@ -114,7 +120,7 @@ function InstructorProfileEdit() {
             <img src={avatarUrl} alt="avatar" className="h-20 w-20 rounded-2xl object-cover border border-border" />
           ) : (
             <div className="h-20 w-20 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
-              {(fullName || "?").charAt(0)}
+              {(fullNameAr || fullNameEn || fullName || "?").charAt(0)}
             </div>
           )}
           <div>
@@ -127,18 +133,39 @@ function InstructorProfileEdit() {
           </div>
         </div>
 
-        <div>
-          <Label>{ar ? "الاسم الكامل" : "Full name"}</Label>
-          <Input required value={fullName} onChange={(e) => setFullName(e.target.value)} />
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <Label>الاسم الكامل (عربي)</Label>
+            <Input dir="rtl" required value={fullNameAr} onChange={(e) => { setFullNameAr(e.target.value); setFullName(e.target.value); }} />
+          </div>
+          <div>
+            <Label>Full name (English)</Label>
+            <Input dir="ltr" value={fullNameEn} onChange={(e) => setFullNameEn(e.target.value)} />
+          </div>
         </div>
-        <div>
-          <Label>{ar ? "الاختصاص" : "Specialty"}</Label>
-          <Input value={specialty} onChange={(e) => setSpecialty(e.target.value)} />
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <Label>الاختصاص (عربي)</Label>
+            <Input dir="rtl" value={specialtyAr} onChange={(e) => setSpecialtyAr(e.target.value)} />
+          </div>
+          <div>
+            <Label>Specialty (English)</Label>
+            <Input dir="ltr" value={specialtyEn} onChange={(e) => setSpecialtyEn(e.target.value)} />
+          </div>
         </div>
-        <div>
-          <Label>{ar ? "نبذة عنك" : "Bio"}</Label>
-          <Textarea rows={4} value={bio} onChange={(e) => setBio(e.target.value)} />
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <Label>نبذة (عربي)</Label>
+            <Textarea dir="rtl" rows={4} value={bioAr} onChange={(e) => setBioAr(e.target.value)} />
+          </div>
+          <div>
+            <Label>Bio (English)</Label>
+            <Textarea dir="ltr" rows={4} value={bioEn} onChange={(e) => setBioEn(e.target.value)} />
+          </div>
         </div>
+
 
         <Button type="submit" disabled={saving} className="w-full sm:w-auto">
           {saving && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
