@@ -40,9 +40,13 @@ function getStrengthInfo(score: number, lang: "ar" | "en") {
 }
 
 const schema = z.object({
-  fullName: z.string().trim().min(2).max(120).refine(
-    (v) => ARABIC_NAME_RE.test(v) && v.replace(/\s/g, "").length >= 2,
-    { message: "ARABIC_ONLY" },
+  fullName: z.string().trim().min(5).max(120).refine(
+    (v) => {
+      if (!ARABIC_NAME_RE.test(v)) return false;
+      const parts = v.split(/\s+/).filter((p) => p.length >= 2);
+      return parts.length >= 3;
+    },
+    { message: "ARABIC_TRIPLE" },
   ),
   email: z.string().trim().email().max(255),
   password: z.string().min(6).max(72),
@@ -82,7 +86,7 @@ function LmsSignup() {
       const issue = parsed.error.issues[0];
       const code = issue.path[0];
       if (code === "fullName") {
-        toast.error(lang === "ar" ? "يجب إدخال الاسم الكامل باللغة العربية فقط" : "Full name must be in Arabic only");
+        toast.error(lang === "ar" ? "يجب إدخال الاسم الثلاثي باللغة العربية (ثلاث كلمات على الأقل)" : "Enter your triple name in Arabic (at least three words)");
       } else if (code === "confirmPassword" || issue.message.includes("match")) {
         toast.error(lang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
       } else {
@@ -158,10 +162,10 @@ function LmsSignup() {
           <>
             <form onSubmit={onSubmit} className="mt-5 space-y-3">
               <div>
-                <Label htmlFor="name">{tr.fullName}</Label>
-                <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} dir="rtl" placeholder="مثال: محمد أحمد" />
+                <Label htmlFor="name">{lang === "ar" ? "الاسم الثلاثي" : "Triple name"}</Label>
+                <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} dir="rtl" placeholder="مثال: محمد أحمد خالد" />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {lang === "ar" ? "يجب إدخال الاسم باللغة العربية فقط" : "Name must be entered in Arabic only"}
+                  {lang === "ar" ? "ثلاث كلمات باللغة العربية فقط (الاسم، اسم الأب، الكنية)" : "Three Arabic words only (first, father, family)"}
                 </p>
               </div>
               <div>
