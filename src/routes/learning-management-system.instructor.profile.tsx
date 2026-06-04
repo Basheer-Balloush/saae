@@ -28,8 +28,12 @@ function InstructorProfileEdit() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [fullName, setFullName] = useState("");
-  const [bio, setBio] = useState("");
-  const [specialty, setSpecialty] = useState("");
+  const [fullNameAr, setFullNameAr] = useState("");
+  const [fullNameEn, setFullNameEn] = useState("");
+  const [bioAr, setBioAr] = useState("");
+  const [bioEn, setBioEn] = useState("");
+  const [specialtyAr, setSpecialtyAr] = useState("");
+  const [specialtyEn, setSpecialtyEn] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,14 +41,19 @@ function InstructorProfileEdit() {
     (async () => {
       const { data } = await supabase
         .from("lms_instructors")
-        .select("full_name,bio,specialty,avatar_url")
+        .select("full_name,full_name_ar,full_name_en,bio,bio_ar,bio_en,specialty,specialty_ar,specialty_en,avatar_url")
         .eq("user_id", user.id)
         .maybeSingle();
       if (data) {
-        setFullName(data.full_name ?? "");
-        setBio(data.bio ?? "");
-        setSpecialty(data.specialty ?? "");
-        setAvatarUrl(data.avatar_url ?? null);
+        const d = data as Record<string, string | null>;
+        setFullName(d.full_name ?? "");
+        setFullNameAr(d.full_name_ar ?? d.full_name ?? "");
+        setFullNameEn(d.full_name_en ?? "");
+        setBioAr(d.bio_ar ?? d.bio ?? "");
+        setBioEn(d.bio_en ?? "");
+        setSpecialtyAr(d.specialty_ar ?? d.specialty ?? "");
+        setSpecialtyEn(d.specialty_en ?? "");
+        setAvatarUrl(d.avatar_url ?? null);
       }
       setLoading(false);
     })();
