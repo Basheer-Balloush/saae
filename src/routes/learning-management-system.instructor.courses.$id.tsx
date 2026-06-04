@@ -693,6 +693,28 @@ function CourseBuilder() {
                       value={l.content_md ?? ""}
                       onChange={(e) => setLessons(lessons.map((x) => x.id === l.id ? { ...x, content_md: e.target.value } : x))}
                       onBlur={() => updateLesson(l.id, { content_md: l.content_md })} />
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 text-xs">
+                        <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
+                          <Plus className="h-3.5 w-3.5" />
+                          <span>{lang === "ar" ? "أضف مرفقات" : "Add attachments"}</span>
+                          <input type="file" multiple className="hidden" onChange={(e) => { uploadAttachments(l, e.target.files); e.target.value = ""; }} />
+                        </label>
+                        <span className="text-muted-foreground">{lang === "ar" ? "PDF / صور / مستندات — حتى 25 ميجابايت لكل ملف" : "PDF / images / docs — up to 25MB each"}</span>
+                      </div>
+                      {Array.isArray(l.attachments) && l.attachments.length > 0 && (
+                        <ul className="flex flex-wrap gap-1.5">
+                          {l.attachments.map((a, i) => (
+                            <li key={i} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-1 text-xs">
+                              <a href={a.url} target="_blank" rel="noreferrer" className="truncate max-w-[200px] text-foreground hover:text-primary">{a.name}</a>
+                              <button type="button" onClick={() => removeAttachment(l, i)} className="text-muted-foreground hover:text-destructive" aria-label="remove">
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   </li>
                 ))}
               </ul>
