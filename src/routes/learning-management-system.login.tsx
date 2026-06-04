@@ -30,6 +30,7 @@ function LmsLogin() {
   const tr = lmsT[lang];
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
