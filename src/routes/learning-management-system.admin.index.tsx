@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { AdminInstructorEditDialog } from "@/components/lms/AdminInstructorEditDialog";
 
 export const Route = createFileRoute("/learning-management-system/admin/")({
   head: () => ({ meta: [{ title: "LMS · Admin" }] }),
@@ -66,6 +67,7 @@ function AdminHome() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [studentsCount, setStudentsCount] = useState(0);
+  const [editInstructorId, setEditInstructorId] = useState<string | null>(null);
 
   const load = async () => {
     const [{ data: ins }, { data: cs }, { data: cats }, { count: stCount }] = await Promise.all([
@@ -445,9 +447,15 @@ function AdminHome() {
                           <div className="text-xs text-muted-foreground truncate">{i.specialty || (ar ? "بدون تخصّص" : "No specialty")}</div>
                         </div>
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => approveInstructor(i.user_id, false)}>
-                        {ar ? "إلغاء الموافقة" : "Revoke"}
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" variant="outline" onClick={() => setEditInstructorId(i.user_id)}>
+                          <Pencil className="h-3.5 w-3.5 mx-1" />
+                          {ar ? "تعديل" : "Edit"}
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => approveInstructor(i.user_id, false)}>
+                          {ar ? "إلغاء الموافقة" : "Revoke"}
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </Section>
@@ -630,6 +638,15 @@ function AdminHome() {
           </main>
         </div>
       </div>
+      {editInstructorId && (
+        <AdminInstructorEditDialog
+          userId={editInstructorId}
+          open={!!editInstructorId}
+          onOpenChange={(v) => !v && setEditInstructorId(null)}
+          onSaved={load}
+          ar={ar}
+        />
+      )}
     </div>
   );
 }
