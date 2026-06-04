@@ -150,6 +150,34 @@ function AdminHome() {
     load();
   };
 
+  // ---- Admin create course on behalf of an approved instructor ----
+  const [newCourseOpen, setNewCourseOpen] = useState(false);
+  const [newCourse, setNewCourse] = useState({ title_ar: "", title_en: "", instructor_id: "" });
+  const [creatingCourse, setCreatingCourse] = useState(false);
+  const createCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCourse.title_ar.trim() || !newCourse.instructor_id) return;
+    setCreatingCourse(true);
+    const { data, error } = await supabase
+      .from("lms_courses")
+      .insert({
+        instructor_id: newCourse.instructor_id,
+        title_ar: newCourse.title_ar.trim(),
+        title_en: newCourse.title_en.trim() || null,
+      })
+      .select("id")
+      .maybeSingle();
+    setCreatingCourse(false);
+    if (error) {
+      toast.error(toUserMessage(error));
+      return;
+    }
+    toast.success(ar ? "تم إنشاء الدورة" : "Course created");
+    setNewCourseOpen(false);
+    setNewCourse({ title_ar: "", title_en: "", instructor_id: "" });
+    if (data) window.location.href = `/learning-management-system/instructor/courses/${data.id}`;
+  };
+
   const tabs: { id: typeof tab; label: string; icon: typeof Users; badge?: number }[] = [
     { id: "overview", label: ar ? "نظرة عامة" : "Overview", icon: Sparkles },
     {
