@@ -145,7 +145,7 @@ function CourseDetails() {
       if (c) {
         const realCourseId = (c as { id: string }).id;
         const [{ data: ins }, { data: secs }] = await Promise.all([
-          supabase.from("lms_instructors").select("user_id,full_name,avatar_url,specialty").eq("user_id", c.instructor_id).maybeSingle(),
+          supabase.from("lms_instructors").select("user_id,full_name,full_name_ar,full_name_en,avatar_url,specialty,specialty_ar,specialty_en").eq("user_id", c.instructor_id).maybeSingle(),
           supabase.from("lms_sections").select("id,title,display_order").eq("course_id", realCourseId).order("display_order"),
         ]);
         setInstructor(ins as Instructor | null);
