@@ -32,13 +32,10 @@ function InstructorLayout() {
       const isApproved = data?.approved ?? (role === "lms_instructor" || role === "lms_admin");
       setApproved(isApproved);
       const d = (data ?? {}) as Record<string, string | null>;
-      const complete =
-        !!(d.full_name_ar || d.full_name_en || d.full_name) &&
-        !!(d.specialty_ar || d.specialty_en || d.specialty) &&
-        !!(d.bio_ar || d.bio_en || d.bio);
-      setProfileComplete(role === "lms_admin" ? true : complete);
+      const hasName = !!(d.full_name_ar || d.full_name_en || d.full_name);
+      setProfileComplete(role === "lms_admin" ? true : hasName);
     })();
-  }, [loading, user, role, navigate]);
+  }, [loading, user, role, navigate, location.pathname]);
 
   useEffect(() => {
     if (approved && profileComplete === false && location.pathname !== PROFILE_PATH) {
