@@ -33,6 +33,11 @@ type Course = {
   cover_url: string | null; level: string; price: number; is_free: boolean;
   status: string; category_id: string | null; instructor_id: string;
   enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null; students_count: number;
+  start_date: string | null; end_date: string | null;
+  schedule_days: string[] | null;
+  schedule_time_from: string | null; schedule_time_to: string | null;
+  location_ar: string | null; location_en: string | null;
+  duration_hours: number | null;
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; video_url: string | null; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number };
