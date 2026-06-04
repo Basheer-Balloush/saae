@@ -53,6 +53,102 @@ function AdminEnrollmentRequests() {
   const [busy, setBusy] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
   const [viewing, setViewing] = useState<{ requestId: string; courseId: string } | null>(null);
+  const [exporting, setExporting] = useState(false);
+
+  const exportXlsx = async () => {
+    if (!selectedCourseId) return;
+    setExporting(true);
+    try {
+      const { data: allReqs, error } = await supabase
+        .from("lms_enrollment_requests")
+        .select("*")
+        .eq("course_id", selectedCourseId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const list = (allReqs as Req[]) ?? [];
+
+      const { data: formRow } = await supabase
+        .from("lms_course_forms").select("id").eq("course_id", selectedCourseId).maybeSingle();
+      type FieldRow = { id: string; field_type: string; label_ar: string; label_en: string | null; display_order: number };
+      let fields: FieldRow[] = [];
+      if (formRow) {
+        const { data: ff } = await supabase
+          .from("lms_course_form_fields")
+          .select("id,field_type,label_ar,label_en,display_order")
+          .eq("form_id", formRow.id)
+          .order("display_order");
+        fields = (ff as FieldRow[]) ?? [];
+      }
+
+      type RespRow = { request_id: string; answers: { field_id: string; value: unknown }[] | null };
+      const ids = list.map((r) => r.id);
+      let responses: RespRow[] = [];
+      if (ids.length) {
+        const { data: rr } = await supabase
+          .from("lms_enrollment_form_responses")
+          .select("request_id,answers")
+          .in("request_id", ids);
+        responses = (rr as RespRow[]) ?? [];
+      }
+      const respByReq = new Map(responses.map((r) => [r.request_id, r.answers ?? []]));
+
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet(ar ? "طلبات التسجيل" : "Enrollment requests");
+      const headers = [
+        ar ? "تاريخ الطلب" : "Created at",
+        ar ? "الحالة" : "Status",
+        ar ? "معرّف المستخدم" : "User ID",
+        ar ? "طريقة الدفع" : "Payment method",
+        ar ? "ملاحظات الطالب" : "Student notes",
+        ar ? "ملاحظات الإدارة" : "Admin notes",
+        ar ? "تاريخ القرار" : "Decided at",
+        ...fields.map((f) => (ar ? f.label_ar : (f.label_en || f.label_ar))),
+      ];
+      ws.addRow(headers);
+      ws.getRow(1).font = { bold: true };
+
+      for (const r of list) {
+        const ans = respByReq.get(r.id) ?? [];
+        const ansMap = new Map(ans.map((a) => [a.field_id, a.value]));
+        const fieldCells = fields.map((f) => {
+          const v = ansMap.get(f.id);
+          if (v === null || v === undefined || v === "") return "";
+          if (Array.isArray(v)) return v.join(", ");
+          if (typeof v === "boolean") return v ? (ar ? "نعم" : "Yes") : (ar ? "لا" : "No");
+          if (typeof v === "object") return JSON.stringify(v);
+          return String(v);
+        });
+        ws.addRow([
+          new Date(r.created_at).toLocaleString(ar ? "ar" : "en"),
+          r.status,
+          r.user_id,
+          r.payment_method,
+          r.notes ?? "",
+          r.admin_notes ?? "",
+          r.decided_at ? new Date(r.decided_at).toLocaleString(ar ? "ar" : "en") : "",
+          ...fieldCells,
+        ]);
+      }
+      ws.columns.forEach((col) => { col.width = 22; });
+
+      const buf = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const courseTitle = selectedCourse ? (ar ? selectedCourse.title_ar : (selectedCourse.title_en || selectedCourse.title_ar)) : "course";
+      a.href = url;
+      a.download = `enrollment-requests-${courseTitle}-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success(ar ? "تم التصدير" : "Exported");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Export failed");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const loadCourses = async () => {
     setLoadingCourses(true);
