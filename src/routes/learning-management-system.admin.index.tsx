@@ -638,6 +638,15 @@ function AdminHome() {
           </main>
         </div>
       </div>
+      {editInstructorId && (
+        <AdminInstructorEditDialog
+          userId={editInstructorId}
+          open={!!editInstructorId}
+          onOpenChange={(v) => !v && setEditInstructorId(null)}
+          onSaved={load}
+          ar={ar}
+        />
+      )}
     </div>
   );
 }
