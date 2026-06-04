@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -22,6 +22,7 @@ function InstructorProfileEdit() {
   const { lang } = useLang();
   const tr = lmsT[lang];
   const ar = lang === "ar";
+  const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
@@ -101,6 +102,7 @@ function InstructorProfileEdit() {
     setSaving(false);
     if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(ar ? "تم الحفظ" : "Saved");
+    navigate({ to: "/learning-management-system/instructor" });
   };
 
   if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
