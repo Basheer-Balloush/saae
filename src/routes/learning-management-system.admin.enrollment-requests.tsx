@@ -1,12 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Check, X, Clock, FileText, ArrowLeft, ArrowRight, ChevronRight, Download } from "lucide-react";
+import { Loader2, Check, X, Clock, FileText, ArrowLeft, ArrowRight, ChevronRight, Download, Mail } from "lucide-react";
 import ExcelJS from "exceljs";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import { sendEnrollmentApprovedEmail } from "@/lib/lms-enrollment-email.functions";
@@ -54,6 +57,49 @@ function AdminEnrollmentRequests() {
   const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
   const [viewing, setViewing] = useState<{ requestId: string; courseId: string } | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailSubjectAr, setEmailSubjectAr] = useState("");
+  const [emailSubjectEn, setEmailSubjectEn] = useState("");
+  const [emailBodyAr, setEmailBodyAr] = useState("");
+  const [emailBodyEn, setEmailBodyEn] = useState("");
+
+  const openEmailDialog = async () => {
+    if (!selectedCourseId) return;
+    setEmailDialogOpen(true);
+    setEmailLoading(true);
+    const { data, error } = await supabase
+      .from("lms_courses")
+      .select("approval_email_subject_ar,approval_email_subject_en,approval_email_body_ar,approval_email_body_en")
+      .eq("id", selectedCourseId)
+      .maybeSingle();
+    setEmailLoading(false);
+    if (error) { toast.error(error.message); return; }
+    const d = (data ?? {}) as Record<string, string | null>;
+    setEmailSubjectAr(d.approval_email_subject_ar ?? "");
+    setEmailSubjectEn(d.approval_email_subject_en ?? "");
+    setEmailBodyAr(d.approval_email_body_ar ?? "");
+    setEmailBodyEn(d.approval_email_body_en ?? "");
+  };
+
+  const saveEmailTemplate = async () => {
+    if (!selectedCourseId) return;
+    setEmailSaving(true);
+    const { error } = await supabase
+      .from("lms_courses")
+      .update({
+        approval_email_subject_ar: emailSubjectAr.trim() || null,
+        approval_email_subject_en: emailSubjectEn.trim() || null,
+        approval_email_body_ar: emailBodyAr.trim() || null,
+        approval_email_body_en: emailBodyEn.trim() || null,
+      })
+      .eq("id", selectedCourseId);
+    setEmailSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(ar ? "تم الحفظ" : "Saved");
+    setEmailDialogOpen(false);
+  };
 
   const exportXlsx = async () => {
     if (!selectedCourseId) return;
@@ -309,6 +355,10 @@ function AdminEnrollmentRequests() {
             <p className="text-sm text-muted-foreground">{ar ? "راجع وافق أو ارفض طلبات التسجيل." : "Review, approve, or reject enrollment requests."}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" variant="outline" onClick={openEmailDialog}>
+              <Mail className="h-4 w-4 mx-1" />
+              {ar ? "بريد التأكيد" : "Confirmation email"}
+            </Button>
             <Button size="sm" variant="outline" onClick={exportXlsx} disabled={exporting}>
               {exporting ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Download className="h-4 w-4 mx-1" />}
               {ar ? "تصدير Excel" : "Export Excel"}
@@ -418,6 +468,52 @@ function AdminEnrollmentRequests() {
           courseId={viewing.courseId}
         />
       )}
+
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{ar ? "بريد تأكيد التسجيل" : "Enrollment confirmation email"}</DialogTitle>
+          </DialogHeader>
+          {emailLoading ? (
+            <p className="py-8 text-center text-muted-foreground">{ar ? "جاري التحميل..." : "Loading..."}</p>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-xs text-muted-foreground">
+                {ar
+                  ? "اترك الحقول فارغة لاستخدام النص الافتراضي. المتغيرات المتاحة: {{student_name}}, {{course_title}}, {{site_name}}, {{course_url}}"
+                  : "Leave fields empty to use the default content. Available variables: {{student_name}}, {{course_title}}, {{site_name}}, {{course_url}}"}
+              </p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label>الموضوع (عربي)</Label>
+                  <Input dir="rtl" value={emailSubjectAr} onChange={(e) => setEmailSubjectAr(e.target.value)} placeholder={`تمت الموافقة على تسجيلك في {{course_title}}`} />
+                </div>
+                <div>
+                  <Label>Subject (English)</Label>
+                  <Input dir="ltr" value={emailSubjectEn} onChange={(e) => setEmailSubjectEn(e.target.value)} placeholder={`Your enrollment in {{course_title}} has been approved`} />
+                </div>
+              </div>
+              <div>
+                <Label>نص الرسالة (عربي)</Label>
+                <Textarea dir="rtl" rows={6} value={emailBodyAr} onChange={(e) => setEmailBodyAr(e.target.value)} placeholder={`مرحباً {{student_name}}،\n\nيسعدنا إخبارك بأنه قد تمت الموافقة على طلب تسجيلك في دورة "{{course_title}}".`} />
+              </div>
+              <div>
+                <Label>Body (English)</Label>
+                <Textarea dir="ltr" rows={6} value={emailBodyEn} onChange={(e) => setEmailBodyEn(e.target.value)} placeholder={`Hi {{student_name}},\n\nYour enrollment in "{{course_title}}" has been approved.`} />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEmailDialogOpen(false)} disabled={emailSaving}>
+              {ar ? "إلغاء" : "Cancel"}
+            </Button>
+            <Button onClick={saveEmailTemplate} disabled={emailSaving || emailLoading}>
+              {emailSaving && <Loader2 className="h-4 w-4 animate-spin mx-1" />}
+              {ar ? "حفظ" : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
