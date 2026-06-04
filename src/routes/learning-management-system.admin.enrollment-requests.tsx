@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Check, X, Clock, FileText } from "lucide-react";
+import { Loader2, Check, X, Clock, FileText, ArrowLeft, ArrowRight, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -28,40 +28,100 @@ type Req = {
   course?: { title_ar: string; title_en: string | null; price: number; students_count: number; enrollment_deadline: string | null; max_students: number | null };
 };
 
+type CourseSummary = {
+  id: string;
+  title_ar: string;
+  title_en: string | null;
+  price: number;
+  students_count: number;
+  enrollment_deadline: string | null;
+  max_students: number | null;
+  counts: { pending: number; approved: number; rejected: number; cancelled: number; total: number };
+};
+
 function AdminEnrollmentRequests() {
   const { lang } = useLang();
   const ar = lang === "ar";
   const sendApprovedEmail = useServerFn(sendEnrollmentApprovedEmail);
+  const [courses, setCourses] = useState<CourseSummary[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [reqs, setReqs] = useState<Req[]>([]);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "cancelled" | "all">("pending");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
   const [viewing, setViewing] = useState<{ requestId: string; courseId: string } | null>(null);
 
-  const load = async () => {
+  const loadCourses = async () => {
+    setLoadingCourses(true);
+    const { data: allReqs } = await supabase
+      .from("lms_enrollment_requests")
+      .select("course_id,status");
+    const list = (allReqs as { course_id: string; status: Req["status"] }[]) ?? [];
+    const courseIds = [...new Set(list.map((r) => r.course_id))];
+    if (!courseIds.length) {
+      setCourses([]);
+      setLoadingCourses(false);
+      return;
+    }
+    const { data: cs } = await supabase
+      .from("lms_courses")
+      .select("id,title_ar,title_en,price,students_count,enrollment_deadline,max_students")
+      .in("id", courseIds);
+    const cMap = new Map((cs ?? []).map((c) => [c.id, c]));
+    const summaries: CourseSummary[] = courseIds.map((id) => {
+      const c = cMap.get(id);
+      const reqsForCourse = list.filter((r) => r.course_id === id);
+      const counts = {
+        pending: reqsForCourse.filter((r) => r.status === "pending").length,
+        approved: reqsForCourse.filter((r) => r.status === "approved").length,
+        rejected: reqsForCourse.filter((r) => r.status === "rejected").length,
+        cancelled: reqsForCourse.filter((r) => r.status === "cancelled").length,
+        total: reqsForCourse.length,
+      };
+      return {
+        id,
+        title_ar: c?.title_ar ?? id,
+        title_en: c?.title_en ?? null,
+        price: Number(c?.price ?? 0),
+        students_count: c?.students_count ?? 0,
+        enrollment_deadline: c?.enrollment_deadline ?? null,
+        max_students: c?.max_students ?? null,
+        counts,
+      };
+    }).sort((a, b) => b.counts.pending - a.counts.pending || b.counts.total - a.counts.total);
+    setCourses(summaries);
+    setLoadingCourses(false);
+  };
+
+  const loadReqs = async (courseId: string) => {
     setLoading(true);
-    let q = supabase.from("lms_enrollment_requests").select("*").order("created_at", { ascending: false });
+    let q = supabase.from("lms_enrollment_requests").select("*").eq("course_id", courseId).order("created_at", { ascending: false });
     if (filter !== "all") q = q.eq("status", filter);
     const { data } = await q;
     const list = (data as Req[]) ?? [];
     if (list.length) {
-      const courseIds = [...new Set(list.map((r) => r.course_id))];
-      const { data: courses } = await supabase
+      const { data: c } = await supabase
         .from("lms_courses")
         .select("id,title_ar,title_en,price,students_count,enrollment_deadline,max_students")
-        .in("id", courseIds);
-      const cMap = new Map((courses ?? []).map((c) => [c.id, c]));
+        .eq("id", courseId)
+        .single();
       list.forEach((r) => {
-        const c = cMap.get(r.course_id);
-        r.course = c ? { title_ar: c.title_ar, title_en: c.title_en, price: Number(c.price), students_count: c.students_count, enrollment_deadline: c.enrollment_deadline, max_students: c.max_students } : undefined;
+        if (c) r.course = { title_ar: c.title_ar, title_en: c.title_en, price: Number(c.price), students_count: c.students_count, enrollment_deadline: c.enrollment_deadline, max_students: c.max_students };
       });
     }
     setReqs(list);
     setLoading(false);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [filter]);
+  useEffect(() => { loadCourses(); }, []);
+  useEffect(() => {
+    if (selectedCourseId) loadReqs(selectedCourseId);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [selectedCourseId, filter]);
+
+  const selectedCourse = useMemo(() => courses.find((c) => c.id === selectedCourseId) ?? null, [courses, selectedCourseId]);
 
   const decide = async (req: Req, action: "approve" | "reject") => {
     setBusy(req.id);
@@ -78,26 +138,87 @@ function AdminEnrollmentRequests() {
         }
       }
       toast.success(ar ? (action === "approve" ? "تمت الموافقة" : "تم الرفض") : (action === "approve" ? "Approved" : "Rejected"));
-      await load();
+      if (selectedCourseId) await loadReqs(selectedCourseId);
+      await loadCourses();
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Error");
     } finally { setBusy(null); }
   };
 
+  // ===== Course picker view =====
+  if (!selectedCourseId) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-6">
+        <header>
+          <h1 className="text-2xl font-bold text-foreground">{ar ? "طلبات الاشتراك" : "Enrollment requests"}</h1>
+          <p className="text-sm text-muted-foreground">{ar ? "اختر دورة لعرض طلبات التسجيل الخاصة بها." : "Pick a course to view its enrollment requests."}</p>
+        </header>
+
+        {loadingCourses ? (
+          <p className="text-center py-10 text-muted-foreground">{ar ? "جاري التحميل..." : "Loading..."}</p>
+        ) : courses.length === 0 ? (
+          <p className="text-center py-10 text-muted-foreground">{ar ? "لا توجد طلبات" : "No requests"}</p>
+        ) : (
+          <div className="space-y-2">
+            {courses.map((c) => {
+              const title = ar ? c.title_ar : c.title_en || c.title_ar;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedCourseId(c.id)}
+                  className="w-full text-start rounded-xl border border-border bg-card p-4 hover:border-primary transition-colors flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-foreground truncate">{title}</div>
+                    <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-2">
+                      <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200 font-semibold">
+                        <Clock className="h-3 w-3" />
+                        {ar ? "قيد المراجعة" : "Pending"}: {c.counts.pending}
+                      </span>
+                      <span className="inline-flex items-center rounded-full px-2 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 font-semibold">
+                        {ar ? "موافَق" : "Approved"}: {c.counts.approved}
+                      </span>
+                      <span className="inline-flex items-center rounded-full px-2 py-0.5 bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200 font-semibold">
+                        {ar ? "مرفوض" : "Rejected"}: {c.counts.rejected}
+                      </span>
+                      <span className="inline-flex items-center rounded-full px-2 py-0.5 bg-muted text-muted-foreground font-semibold">
+                        {ar ? "الإجمالي" : "Total"}: {c.counts.total}
+                      </span>
+                    </div>
+                  </div>
+                  {ar ? <ChevronRight className="h-5 w-5 text-muted-foreground rotate-180 shrink-0" /> : <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ===== Requests for a selected course =====
+  const headerTitle = selectedCourse ? (ar ? selectedCourse.title_ar : selectedCourse.title_en || selectedCourse.title_ar) : "";
+
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{ar ? "طلبات الاشتراك" : "Enrollment requests"}</h1>
-          <p className="text-sm text-muted-foreground">{ar ? "راجع وافق أو ارفض طلبات التسجيل اليدوية." : "Review, approve, or reject manual enrollment requests."}</p>
-        </div>
-        <div className="flex flex-wrap gap-1">
-          {(["pending", "approved", "rejected", "cancelled", "all"] as const).map((f) => (
-            <button key={f} onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${filter === f ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground/70 hover:border-primary"}`}>
-              {ar ? ({ pending: "قيد المراجعة", approved: "موافَق", rejected: "مرفوض", cancelled: "ملغى", all: "الكل" }[f]) : f}
-            </button>
-          ))}
+      <header className="space-y-3">
+        <Button variant="ghost" size="sm" onClick={() => { setSelectedCourseId(null); setReqs([]); }} className="-ms-2">
+          {ar ? <ArrowRight className="h-4 w-4 mx-1" /> : <ArrowLeft className="h-4 w-4 mx-1" />}
+          {ar ? "كل الدورات" : "All courses"}
+        </Button>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">{headerTitle}</h1>
+            <p className="text-sm text-muted-foreground">{ar ? "راجع وافق أو ارفض طلبات التسجيل." : "Review, approve, or reject enrollment requests."}</p>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {(["pending", "approved", "rejected", "cancelled", "all"] as const).map((f) => (
+              <button key={f} onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${filter === f ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground/70 hover:border-primary"}`}>
+                {ar ? ({ pending: "قيد المراجعة", approved: "موافَق", rejected: "مرفوض", cancelled: "ملغى", all: "الكل" }[f]) : f}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -108,17 +229,13 @@ function AdminEnrollmentRequests() {
       ) : (
         <div className="space-y-3">
           {reqs.map((r) => {
-            const cTitle = r.course ? (ar ? r.course.title_ar : r.course.title_en || r.course.title_ar) : r.course_id;
             const deadlinePassed = !!r.course?.enrollment_deadline && new Date(r.course.enrollment_deadline) < new Date();
             const isFull = r.course?.max_students != null && (r.course?.students_count ?? 0) >= r.course.max_students;
             return (
               <div key={r.id} className="rounded-xl border border-border bg-card p-4 space-y-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <div className="font-semibold text-foreground">{cTitle}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5 font-mono">
-                      {r.user_id}
-                    </div>
+                    <div className="text-xs text-muted-foreground font-mono">{r.user_id}</div>
                     <div className="text-xs text-muted-foreground mt-1">
                       {ar ? "السعر" : "Price"}: {r.course ? `${r.course.price.toLocaleString()} ${ar ? "ل.س" : "SYP"}` : "—"}
                       {" · "}{ar ? "العدد" : "Enrolled"}: {r.course?.students_count ?? "—"}{r.course?.max_students != null ? ` / ${r.course.max_students}` : ""}{r.course?.enrollment_deadline ? ` · ${ar ? "آخر موعد" : "Deadline"}: ${new Date(r.course.enrollment_deadline).toLocaleDateString(ar ? "ar" : "en")}` : ""}
