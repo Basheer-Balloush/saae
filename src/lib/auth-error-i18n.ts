@@ -15,9 +15,9 @@ const MAP: Array<{ match: RegExp; ar: string; en: string }> = [
     en: "Email not confirmed",
   },
   {
-    match: /user already registered|already exists/i,
-    ar: "هذا البريد الإلكترونيّ مسجَّل مسبقاً",
-    en: "This email is already registered",
+    match: /user already registered|already exists|already.*registered|email_exists|EMAIL_ALREADY_REGISTERED/i,
+    ar: "هذا البريد الإلكترونيّ مسجَّل مسبقاً — سجّل الدخول بدلاً من إنشاء حساب جديد",
+    en: "This email is already registered — please log in instead",
   },
   {
     match: /password should be at least/i,
