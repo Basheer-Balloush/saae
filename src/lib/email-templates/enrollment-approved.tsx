@@ -10,10 +10,19 @@ interface Props {
   courseUrl: string
   studentName?: string
   lang?: Lang
+  customBody?: string | null
 }
 
-export const EnrollmentApprovedEmail = ({ siteName, courseTitle, courseUrl, studentName, lang = 'ar' }: Props) => {
+export const EnrollmentApprovedEmail = ({ siteName, courseTitle, courseUrl, studentName, lang = 'ar', customBody }: Props) => {
   const ar = lang === 'ar'
+  const interpolate = (s: string) => s
+    .replace(/\{\{\s*student_name\s*\}\}/g, studentName ?? '')
+    .replace(/\{\{\s*course_title\s*\}\}/g, courseTitle)
+    .replace(/\{\{\s*site_name\s*\}\}/g, siteName)
+    .replace(/\{\{\s*course_url\s*\}\}/g, courseUrl)
+  const paragraphs = customBody?.trim()
+    ? interpolate(customBody).split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+    : null
   return (
     <Html lang={lang} dir={ar ? 'rtl' : 'ltr'}>
       <Head />
@@ -21,11 +30,15 @@ export const EnrollmentApprovedEmail = ({ siteName, courseTitle, courseUrl, stud
       <Body style={main}>
         <Container style={{ ...container, textAlign: ar ? 'right' : 'left' }}>
           <Heading style={h1}>{ar ? 'تمت الموافقة على تسجيلك 🎉' : 'Your enrollment is approved 🎉'}</Heading>
-          <Text style={text}>
-            {ar
-              ? `${studentName ? studentName + '، ' : ''}يسعدنا إخبارك بأنه قد تمت الموافقة على طلب تسجيلك في دورة "${courseTitle}" على منصة ${siteName}.`
-              : `${studentName ? studentName + ', ' : ''}We're happy to let you know that your enrollment request for the course "${courseTitle}" on ${siteName} has been approved.`}
-          </Text>
+          {paragraphs ? (
+            paragraphs.map((p, i) => <Text key={i} style={text}>{p}</Text>)
+          ) : (
+            <Text style={text}>
+              {ar
+                ? `${studentName ? studentName + '، ' : ''}يسعدنا إخبارك بأنه قد تمت الموافقة على طلب تسجيلك في دورة "${courseTitle}" على منصة ${siteName}.`
+                : `${studentName ? studentName + ', ' : ''}We're happy to let you know that your enrollment request for the course "${courseTitle}" on ${siteName} has been approved.`}
+            </Text>
+          )}
           <Button style={button} href={courseUrl}>
             {ar ? 'انتقل إلى الدورة' : 'Go to the course'}
           </Button>
