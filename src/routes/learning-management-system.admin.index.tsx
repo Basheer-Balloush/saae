@@ -67,6 +67,7 @@ function AdminHome() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [studentsCount, setStudentsCount] = useState(0);
+  const [editInstructorId, setEditInstructorId] = useState<string | null>(null);
 
   const load = async () => {
     const [{ data: ins }, { data: cs }, { data: cats }, { count: stCount }] = await Promise.all([
