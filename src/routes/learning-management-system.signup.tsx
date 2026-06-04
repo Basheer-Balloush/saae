@@ -69,6 +69,9 @@ function LmsSignup() {
   const [sentTo, setSentTo] = useState<string | null>(null);
   const signUpUser = useServerFn(signUpLmsUser);
 
+  const passwordStrength = useMemo(() => calculatePasswordStrength(password), [password]);
+  const strengthInfo = useMemo(() => getStrengthInfo(passwordStrength, lang), [passwordStrength, lang]);
+
   useEffect(() => {
     if (!loading && user) navigate({ to: "/learning-management-system/student" });
   }, [loading, user, navigate]);
