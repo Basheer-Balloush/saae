@@ -106,6 +106,11 @@ type Course = {
   cover_url: string | null; level: string; price: number; is_free: boolean;
   students_count: number; rating_avg: number; instructor_id: string;
   enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null;
+  start_date: string | null; end_date: string | null;
+  schedule_days: string[] | null;
+  schedule_time_from: string | null; schedule_time_to: string | null;
+  location_ar: string | null; location_en: string | null;
+  duration_hours: number | null;
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; duration_seconds: number; is_preview: boolean; display_order: number };
