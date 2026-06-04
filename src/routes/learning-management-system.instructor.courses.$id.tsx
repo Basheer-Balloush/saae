@@ -40,7 +40,8 @@ type Course = {
   duration_hours: number | null;
 };
 type Section = { id: string; title: string; display_order: number };
-type Lesson = { id: string; section_id: string; title: string; video_url: string | null; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number };
+type LessonAttachment = { name: string; url: string };
+type Lesson = { id: string; section_id: string; title: string; video_url: string | null; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number; attachments: LessonAttachment[] | null };
 type Category = { id: string; name_ar: string; name_en: string | null };
 
 function CourseBuilder() {
@@ -86,7 +87,7 @@ function CourseBuilder() {
       setSections(sList);
       if (sList.length) {
         const { data: lss } = await supabase.from("lms_lessons")
-          .select("id,section_id,title,video_url,content_md,is_preview,duration_seconds,display_order")
+          .select("id,section_id,title,video_url,content_md,is_preview,duration_seconds,display_order,attachments")
           .in("section_id", sList.map((s) => s.id)).order("display_order");
         setLessons((lss as Lesson[]) ?? []);
       }
@@ -259,6 +260,34 @@ function CourseBuilder() {
     // Store the storage path with prefix; the player resolves a fresh short-lived signed URL on demand
     await updateLesson(lesson.id, { video_url: `private:${path}` });
     toast.success(lang === "ar" ? "تم رفع الفيديو" : "Video uploaded");
+  };
+
+  const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+  const uploadAttachments = async (lesson: Lesson, files: FileList | null) => {
+    if (!user || !files || files.length === 0) return;
+    const current = Array.isArray(lesson.attachments) ? lesson.attachments : [];
+    const next = [...current];
+    toast.info(lang === "ar" ? "جاري رفع المرفقات..." : "Uploading attachments...");
+    for (const file of Array.from(files)) {
+      if (file.size > MAX_ATTACHMENT_BYTES) {
+        toast.error(`${file.name}: ${lang === "ar" ? "الحجم أكبر من 25 ميجابايت" : "larger than 25MB"}`);
+        continue;
+      }
+      const safe = file.name.replace(/[^\w.\-]+/g, "_");
+      const path = `${user.id}/${course.id}/attachments/${lesson.id}/${Date.now()}-${safe}`;
+      const { error } = await supabase.storage.from("lms-media").upload(path, file, { upsert: true, contentType: file.type || undefined });
+      if (error) { toast.error(`${file.name}: ${toUserMessage(error)}`); continue; }
+      const { data: pub } = supabase.storage.from("lms-media").getPublicUrl(path);
+      next.push({ name: file.name, url: pub.publicUrl });
+    }
+    await updateLesson(lesson.id, { attachments: next });
+    toast.success(lang === "ar" ? "تم رفع المرفقات" : "Attachments uploaded");
+  };
+
+  const removeAttachment = async (lesson: Lesson, idx: number) => {
+    const current = Array.isArray(lesson.attachments) ? lesson.attachments : [];
+    const next = current.filter((_, i) => i !== idx);
+    await updateLesson(lesson.id, { attachments: next });
   };
 
   const deleteWholeCourse = async () => {
@@ -664,6 +693,28 @@ function CourseBuilder() {
                       value={l.content_md ?? ""}
                       onChange={(e) => setLessons(lessons.map((x) => x.id === l.id ? { ...x, content_md: e.target.value } : x))}
                       onBlur={() => updateLesson(l.id, { content_md: l.content_md })} />
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 text-xs">
+                        <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
+                          <Plus className="h-3.5 w-3.5" />
+                          <span>{lang === "ar" ? "أضف مرفقات" : "Add attachments"}</span>
+                          <input type="file" multiple className="hidden" onChange={(e) => { uploadAttachments(l, e.target.files); e.target.value = ""; }} />
+                        </label>
+                        <span className="text-muted-foreground">{lang === "ar" ? "PDF / صور / مستندات — حتى 25 ميجابايت لكل ملف" : "PDF / images / docs — up to 25MB each"}</span>
+                      </div>
+                      {Array.isArray(l.attachments) && l.attachments.length > 0 && (
+                        <ul className="flex flex-wrap gap-1.5">
+                          {l.attachments.map((a, i) => (
+                            <li key={i} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-1 text-xs">
+                              <a href={a.url} target="_blank" rel="noreferrer" className="truncate max-w-[200px] text-foreground hover:text-primary">{a.name}</a>
+                              <button type="button" onClick={() => removeAttachment(l, i)} className="text-muted-foreground hover:text-destructive" aria-label="remove">
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   </li>
                 ))}
               </ul>
