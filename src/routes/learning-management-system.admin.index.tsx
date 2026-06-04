@@ -766,7 +766,15 @@ function CourseRow({
         <div className="font-bold text-foreground truncate">{c.title_ar}</div>
         <StatusBadge status={c.status} ar={ar} />
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
+        <Link
+          to="/learning-management-system/instructor/courses/$id"
+          params={{ id: c.id }}
+          className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+          {ar ? "تعديل" : "Edit"}
+        </Link>
         <Button size="sm" onClick={onPublish}>
           <Check className="h-4 w-4 mx-1" />
           {ar ? "نشر" : "Publish"}
