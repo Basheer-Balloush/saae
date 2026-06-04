@@ -21,6 +21,7 @@ import {
   Mail,
   Sparkles,
   Inbox,
+  Pencil,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
