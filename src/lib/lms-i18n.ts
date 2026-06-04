@@ -132,6 +132,11 @@ export const lmsT: Record<Lang, {
   newPassword: string;
   updatePassword: string;
   passwordUpdated: string;
+  passwordStrength: string;
+  passwordWeak: string;
+  passwordFair: string;
+  passwordGood: string;
+  passwordStrong: string;
   menu: string;
 }> = {
   ar: {
