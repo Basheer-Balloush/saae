@@ -262,7 +262,7 @@ function CourseBuilder() {
     toast.success(lang === "ar" ? "تم رفع الفيديو" : "Video uploaded");
   };
 
-  const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+  const MAX_ATTACHMENT_BYTES = 50 * 1024 * 1024;
   const uploadAttachments = async (lesson: Lesson, files: FileList | null) => {
     if (!user || !files || files.length === 0) return;
     const current = Array.isArray(lesson.attachments) ? lesson.attachments : [];
@@ -270,7 +270,7 @@ function CourseBuilder() {
     toast.info(lang === "ar" ? "جاري رفع المرفقات..." : "Uploading attachments...");
     for (const file of Array.from(files)) {
       if (file.size > MAX_ATTACHMENT_BYTES) {
-        toast.error(`${file.name}: ${lang === "ar" ? "الحجم أكبر من 25 ميجابايت" : "larger than 25MB"}`);
+        toast.error(`${file.name}: ${lang === "ar" ? "الحجم أكبر من 50 ميجابايت" : "larger than 50MB"}`);
         continue;
       }
       const safe = file.name.replace(/[^\w.\-]+/g, "_");
@@ -700,7 +700,7 @@ function CourseBuilder() {
                           <span>{lang === "ar" ? "أضف مرفقات" : "Add attachments"}</span>
                           <input type="file" multiple className="hidden" onChange={(e) => { uploadAttachments(l, e.target.files); e.target.value = ""; }} />
                         </label>
-                        <span className="text-muted-foreground">{lang === "ar" ? "PDF / صور / مستندات — حتى 25 ميجابايت لكل ملف" : "PDF / images / docs — up to 25MB each"}</span>
+                        <span className="text-muted-foreground">{lang === "ar" ? "PDF / صور / مستندات — حتى 50 ميجابايت لكل ملف" : "PDF / images / docs — up to 50MB each"}</span>
                       </div>
                       {Array.isArray(l.attachments) && l.attachments.length > 0 && (
                         <ul className="flex flex-wrap gap-1.5">
