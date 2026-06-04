@@ -21,13 +21,17 @@ import {
   Mail,
   Sparkles,
   Inbox,
+  Pencil,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/learning-management-system/admin/")({
@@ -144,6 +148,34 @@ function AdminHome() {
     if (!confirm(ar ? "حذف؟" : "Delete?")) return;
     await supabase.from("lms_categories").delete().eq("id", id);
     load();
+  };
+
+  // ---- Admin create course on behalf of an approved instructor ----
+  const [newCourseOpen, setNewCourseOpen] = useState(false);
+  const [newCourse, setNewCourse] = useState({ title_ar: "", title_en: "", instructor_id: "" });
+  const [creatingCourse, setCreatingCourse] = useState(false);
+  const createCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCourse.title_ar.trim() || !newCourse.instructor_id) return;
+    setCreatingCourse(true);
+    const { data, error } = await supabase
+      .from("lms_courses")
+      .insert({
+        instructor_id: newCourse.instructor_id,
+        title_ar: newCourse.title_ar.trim(),
+        title_en: newCourse.title_en.trim() || null,
+      })
+      .select("id")
+      .maybeSingle();
+    setCreatingCourse(false);
+    if (error) {
+      toast.error(toUserMessage(error));
+      return;
+    }
+    toast.success(ar ? "تم إنشاء الدورة" : "Course created");
+    setNewCourseOpen(false);
+    setNewCourse({ title_ar: "", title_en: "", instructor_id: "" });
+    if (data) window.location.href = `/learning-management-system/instructor/courses/${data.id}`;
   };
 
   const tabs: { id: typeof tab; label: string; icon: typeof Users; badge?: number }[] = [
@@ -424,6 +456,72 @@ function AdminHome() {
 
             {tab === "courses" && (
               <div className="space-y-6">
+                {/* Add course (admin can pick any approved instructor) */}
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-4">
+                  <div className="min-w-0">
+                    <div className="text-sm font-bold text-foreground">
+                      {ar ? "إنشاء دورة جديدة" : "Create a new course"}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {ar
+                        ? "بصلاحيات الإدارة يمكنك إنشاء دورة وتعيينها لأحد المدرّبين المعتمَدين."
+                        : "As an admin you can create a course and assign it to any approved instructor."}
+                    </p>
+                  </div>
+                  <Dialog open={newCourseOpen} onOpenChange={setNewCourseOpen}>
+                    <DialogTrigger asChild>
+                      <Button disabled={approvedInstructors.length === 0}>
+                        <Plus className="h-4 w-4 mx-1" />
+                        {ar ? "دورة جديدة" : "New course"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{ar ? "دورة جديدة" : "New course"}</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={createCourse} className="space-y-3">
+                        <div>
+                          <Label>{ar ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
+                          <Input
+                            required
+                            value={newCourse.title_ar}
+                            onChange={(e) => setNewCourse({ ...newCourse, title_ar: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <Label>{ar ? "العنوان (إنجليزي)" : "Title (English)"}</Label>
+                          <Input
+                            value={newCourse.title_en}
+                            onChange={(e) => setNewCourse({ ...newCourse, title_en: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <Label>{ar ? "المدرّب" : "Instructor"}</Label>
+                          <Select
+                            value={newCourse.instructor_id}
+                            onValueChange={(v) => setNewCourse({ ...newCourse, instructor_id: v })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={ar ? "اختر مدرّباً معتمَداً" : "Pick an approved instructor"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {approvedInstructors.map((i) => (
+                                <SelectItem key={i.user_id} value={i.user_id}>
+                                  {i.full_name}
+                                  {i.specialty ? ` · ${i.specialty}` : ""}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button type="submit" className="w-full" disabled={creatingCourse || !newCourse.instructor_id}>
+                          {ar ? "إنشاء" : "Create"}
+                        </Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
                 <Section
                   title={ar ? "بانتظار المراجعة" : "Pending review"}
                   count={pendingCourses.length}
@@ -459,15 +557,25 @@ function AdminHome() {
                           <div className="font-bold text-foreground truncate">{c.title_ar}</div>
                           <StatusBadge status={c.status} ar={ar} />
                         </div>
-                        {c.status === "published" ? (
-                          <Button size="sm" variant="outline" onClick={() => setCourseStatus(c.id, "draft")}>
-                            {ar ? "إلغاء النشر" : "Unpublish"}
-                          </Button>
-                        ) : c.status === "draft" || c.status === "rejected" ? (
-                          <Button size="sm" onClick={() => setCourseStatus(c.id, "published")}>
-                            {ar ? "نشر" : "Publish"}
-                          </Button>
-                        ) : null}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Link
+                            to="/learning-management-system/instructor/courses/$id"
+                            params={{ id: c.id }}
+                            className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                            {ar ? "تعديل" : "Edit"}
+                          </Link>
+                          {c.status === "published" ? (
+                            <Button size="sm" variant="outline" onClick={() => setCourseStatus(c.id, "draft")}>
+                              {ar ? "إلغاء النشر" : "Unpublish"}
+                            </Button>
+                          ) : c.status === "draft" || c.status === "rejected" ? (
+                            <Button size="sm" onClick={() => setCourseStatus(c.id, "published")}>
+                              {ar ? "نشر" : "Publish"}
+                            </Button>
+                          ) : null}
+                        </div>
                       </div>
                     ))}
                 </Section>
@@ -658,7 +766,15 @@ function CourseRow({
         <div className="font-bold text-foreground truncate">{c.title_ar}</div>
         <StatusBadge status={c.status} ar={ar} />
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
+        <Link
+          to="/learning-management-system/instructor/courses/$id"
+          params={{ id: c.id }}
+          className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+          {ar ? "تعديل" : "Edit"}
+        </Link>
         <Button size="sm" onClick={onPublish}>
           <Check className="h-4 w-4 mx-1" />
           {ar ? "نشر" : "Publish"}
