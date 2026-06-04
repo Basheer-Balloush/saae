@@ -14,8 +14,14 @@ export const Route = createFileRoute("/learning-management-system/instructors/$i
 type Instructor = {
   user_id: string;
   full_name: string;
+  full_name_ar: string | null;
+  full_name_en: string | null;
   bio: string | null;
+  bio_ar: string | null;
+  bio_en: string | null;
   specialty: string | null;
+  specialty_ar: string | null;
+  specialty_en: string | null;
   avatar_url: string | null;
   linkedin_url: string | null;
   github_url: string | null;
