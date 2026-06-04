@@ -262,6 +262,34 @@ function CourseBuilder() {
     toast.success(lang === "ar" ? "تم رفع الفيديو" : "Video uploaded");
   };
 
+  const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+  const uploadAttachments = async (lesson: Lesson, files: FileList | null) => {
+    if (!user || !files || files.length === 0) return;
+    const current = Array.isArray(lesson.attachments) ? lesson.attachments : [];
+    const next = [...current];
+    toast.info(lang === "ar" ? "جاري رفع المرفقات..." : "Uploading attachments...");
+    for (const file of Array.from(files)) {
+      if (file.size > MAX_ATTACHMENT_BYTES) {
+        toast.error(`${file.name}: ${lang === "ar" ? "الحجم أكبر من 25 ميجابايت" : "larger than 25MB"}`);
+        continue;
+      }
+      const safe = file.name.replace(/[^\w.\-]+/g, "_");
+      const path = `${user.id}/${course.id}/attachments/${lesson.id}/${Date.now()}-${safe}`;
+      const { error } = await supabase.storage.from("lms-media").upload(path, file, { upsert: true, contentType: file.type || undefined });
+      if (error) { toast.error(`${file.name}: ${toUserMessage(error)}`); continue; }
+      const { data: pub } = supabase.storage.from("lms-media").getPublicUrl(path);
+      next.push({ name: file.name, url: pub.publicUrl });
+    }
+    await updateLesson(lesson.id, { attachments: next });
+    toast.success(lang === "ar" ? "تم رفع المرفقات" : "Attachments uploaded");
+  };
+
+  const removeAttachment = async (lesson: Lesson, idx: number) => {
+    const current = Array.isArray(lesson.attachments) ? lesson.attachments : [];
+    const next = current.filter((_, i) => i !== idx);
+    await updateLesson(lesson.id, { attachments: next });
+  };
+
   const deleteWholeCourse = async () => {
     setDeletingCourse(true);
     const { error } = await supabase.rpc("lms_delete_course", { _course_id: course.id });
