@@ -162,10 +162,10 @@ function LmsSignup() {
           <>
             <form onSubmit={onSubmit} className="mt-5 space-y-3">
               <div>
-                <Label htmlFor="name">{tr.fullName}</Label>
-                <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} dir="rtl" placeholder="مثال: محمد أحمد" />
+                <Label htmlFor="name">{lang === "ar" ? "الاسم الثلاثي" : "Triple name"}</Label>
+                <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} dir="rtl" placeholder="مثال: محمد أحمد خالد" />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {lang === "ar" ? "يجب إدخال الاسم باللغة العربية فقط" : "Name must be entered in Arabic only"}
+                  {lang === "ar" ? "ثلاث كلمات باللغة العربية فقط (الاسم، اسم الأب، الكنية)" : "Three Arabic words only (first, father, family)"}
                 </p>
               </div>
               <div>
