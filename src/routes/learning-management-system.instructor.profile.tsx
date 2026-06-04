@@ -102,6 +102,7 @@ function InstructorProfileEdit() {
     setSaving(false);
     if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(ar ? "تم الحفظ" : "Saved");
+    navigate({ to: "/learning-management-system/instructor" });
   };
 
   if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
