@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -20,6 +20,25 @@ export const Route = createFileRoute("/learning-management-system/signup")({
 });
 
 const ARABIC_NAME_RE = /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]+$/;
+
+function calculatePasswordStrength(pw: string): number {
+  let score = 0;
+  if (pw.length >= 6) score += 1;
+  if (pw.length >= 10) score += 1;
+  if (/[a-z]/.test(pw)) score += 1;
+  if (/[A-Z]/.test(pw)) score += 1;
+  if (/[0-9]/.test(pw)) score += 1;
+  if (/[^A-Za-z0-9]/.test(pw)) score += 1;
+  return score;
+}
+
+function getStrengthInfo(score: number, lang: "ar" | "en") {
+  const t = lmsT[lang];
+  if (score <= 2) return { label: t.passwordWeak, color: "bg-red-500", width: `${(score / 6) * 100}%`, textColor: "text-red-500" };
+  if (score === 3) return { label: t.passwordFair, color: "bg-amber-500", width: `${(score / 6) * 100}%`, textColor: "text-amber-500" };
+  if (score === 4) return { label: t.passwordGood, color: "bg-primary", width: `${(score / 6) * 100}%`, textColor: "text-primary" };
+  return { label: t.passwordStrong, color: "bg-green-600", width: `${(score / 6) * 100}%`, textColor: "text-green-600" };
+}
 
 const schema = z.object({
   fullName: z.string().trim().min(2).max(120).refine(
