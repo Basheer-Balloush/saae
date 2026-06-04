@@ -83,7 +83,14 @@ export async function signUpWithResendConfirmation(input: SignupInput) {
     },
   })
 
-  if (error) throw error
+  if (error) {
+    const code = (error as { code?: string }).code
+    const status = (error as { status?: number }).status
+    if (code === 'email_exists' || status === 422 || /already.*registered/i.test(error.message)) {
+      throw new Error('EMAIL_ALREADY_REGISTERED')
+    }
+    throw error
+  }
 
   const userId = data.user?.id
   if (userId) {
