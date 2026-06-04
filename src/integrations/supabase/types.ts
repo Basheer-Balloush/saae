@@ -835,17 +835,25 @@ export type Database = {
           created_at: string
           description_ar: string | null
           description_en: string | null
+          duration_hours: number | null
+          end_date: string | null
           enrollment_deadline: string | null
           enrollment_open: boolean
           id: string
           instructor_id: string
           is_free: boolean
           level: Database["public"]["Enums"]["lms_course_level"]
+          location_ar: string | null
+          location_en: string | null
           max_students: number | null
           price: number
           rating_avg: number
           rejection_reason: string | null
+          schedule_days: string[] | null
+          schedule_time_from: string | null
+          schedule_time_to: string | null
           slug: string | null
+          start_date: string | null
           status: Database["public"]["Enums"]["lms_course_status"]
           students_count: number
           title_ar: string
@@ -858,17 +866,25 @@ export type Database = {
           created_at?: string
           description_ar?: string | null
           description_en?: string | null
+          duration_hours?: number | null
+          end_date?: string | null
           enrollment_deadline?: string | null
           enrollment_open?: boolean
           id?: string
           instructor_id: string
           is_free?: boolean
           level?: Database["public"]["Enums"]["lms_course_level"]
+          location_ar?: string | null
+          location_en?: string | null
           max_students?: number | null
           price?: number
           rating_avg?: number
           rejection_reason?: string | null
+          schedule_days?: string[] | null
+          schedule_time_from?: string | null
+          schedule_time_to?: string | null
           slug?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["lms_course_status"]
           students_count?: number
           title_ar: string
@@ -881,17 +897,25 @@ export type Database = {
           created_at?: string
           description_ar?: string | null
           description_en?: string | null
+          duration_hours?: number | null
+          end_date?: string | null
           enrollment_deadline?: string | null
           enrollment_open?: boolean
           id?: string
           instructor_id?: string
           is_free?: boolean
           level?: Database["public"]["Enums"]["lms_course_level"]
+          location_ar?: string | null
+          location_en?: string | null
           max_students?: number | null
           price?: number
           rating_avg?: number
           rejection_reason?: string | null
+          schedule_days?: string[] | null
+          schedule_time_from?: string | null
+          schedule_time_to?: string | null
           slug?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["lms_course_status"]
           students_count?: number
           title_ar?: string

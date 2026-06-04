@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, Clock } from "lucide-react";
+import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, Clock, Calendar, MapPin, Hourglass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -106,6 +106,11 @@ type Course = {
   cover_url: string | null; level: string; price: number; is_free: boolean;
   students_count: number; rating_avg: number; instructor_id: string;
   enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null;
+  start_date: string | null; end_date: string | null;
+  schedule_days: string[] | null;
+  schedule_time_from: string | null; schedule_time_to: string | null;
+  location_ar: string | null; location_en: string | null;
+  duration_hours: number | null;
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; duration_seconds: number; is_preview: boolean; display_order: number };
@@ -214,6 +219,80 @@ function CourseDetails() {
             <span className="inline-flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" />{Number(course.rating_avg).toFixed(1)}</span>
             <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold">{tr[course.level as keyof typeof tr] as string}</span>
           </div>
+
+          {(() => {
+            const dayLabels: Record<string, { ar: string; en: string }> = {
+              sat: { ar: "السبت", en: "Saturday" }, sun: { ar: "الأحد", en: "Sunday" },
+              mon: { ar: "الإثنين", en: "Monday" }, tue: { ar: "الثلاثاء", en: "Tuesday" },
+              wed: { ar: "الأربعاء", en: "Wednesday" }, thu: { ar: "الخميس", en: "Thursday" },
+              fri: { ar: "الجمعة", en: "Friday" },
+            };
+            const fmtDate = (iso: string) => new Date(iso).toLocaleDateString(ar ? "ar-EG" : "en-US", { year: "numeric", month: "long", day: "numeric" });
+            const days = (course.schedule_days ?? []).map((d) => ar ? dayLabels[d]?.ar : dayLabels[d]?.en).filter(Boolean).join(ar ? "، " : ", ");
+            const loc = ar ? (course.location_ar || course.location_en) : (course.location_en || course.location_ar);
+            const hasAny = course.start_date || course.end_date || course.schedule_time_from || days || loc || course.duration_hours;
+            if (!hasAny) return null;
+            return (
+              <div className="mt-6 rounded-2xl border border-border bg-card p-5">
+                <h2 className="font-bold text-foreground mb-3">{ar ? "تفاصيل الدورة" : "Course details"}</h2>
+                <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                  {(course.start_date || course.end_date) && (
+                    <div className="flex items-start gap-2">
+                      <Calendar className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                      <div>
+                        <div className="text-muted-foreground text-xs">{ar ? "التاريخ" : "Date"}</div>
+                        <div className="text-foreground">
+                          {course.start_date && fmtDate(course.start_date)}
+                          {course.start_date && course.end_date && (ar ? " — " : " — ")}
+                          {course.end_date && fmtDate(course.end_date)}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {(course.schedule_time_from || course.schedule_time_to) && (
+                    <div className="flex items-start gap-2">
+                      <Clock className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                      <div>
+                        <div className="text-muted-foreground text-xs">{ar ? "الوقت" : "Time"}</div>
+                        <div className="text-foreground">
+                          {course.schedule_time_from}{course.schedule_time_to ? ` — ${course.schedule_time_to}` : ""}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {days && (
+                    <div className="flex items-start gap-2">
+                      <Calendar className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                      <div>
+                        <div className="text-muted-foreground text-xs">{ar ? "الأيام" : "Days"}</div>
+                        <div className="text-foreground">{days}</div>
+                      </div>
+                    </div>
+                  )}
+                  {loc && (
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                      <div>
+                        <div className="text-muted-foreground text-xs">{ar ? "المكان" : "Location"}</div>
+                        <div className="text-foreground">{loc}</div>
+                      </div>
+                    </div>
+                  )}
+                  {course.duration_hours != null && (
+                    <div className="flex items-start gap-2">
+                      <Hourglass className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                      <div>
+                        <div className="text-muted-foreground text-xs">{ar ? "مدة الدورة" : "Duration"}</div>
+                        <div className="text-foreground">{course.duration_hours} {ar ? "ساعة" : "hours"}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
+
 
           <h2 className="mt-10 text-xl font-bold text-foreground">{tr.syllabus}</h2>
           <div className="mt-4 space-y-3">

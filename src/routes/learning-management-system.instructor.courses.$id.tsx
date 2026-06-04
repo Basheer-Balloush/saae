@@ -33,6 +33,11 @@ type Course = {
   cover_url: string | null; level: string; price: number; is_free: boolean;
   status: string; category_id: string | null; instructor_id: string;
   enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null; students_count: number;
+  start_date: string | null; end_date: string | null;
+  schedule_days: string[] | null;
+  schedule_time_from: string | null; schedule_time_to: string | null;
+  location_ar: string | null; location_en: string | null;
+  duration_hours: number | null;
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; video_url: string | null; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number };
@@ -118,6 +123,10 @@ function CourseBuilder() {
       level: course.level as "beginner" | "intermediate" | "advanced",
       cover_url: course.cover_url,
       enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline, max_students: course.max_students,
+      start_date: course.start_date, end_date: course.end_date,
+      schedule_days: course.schedule_days, schedule_time_from: course.schedule_time_from, schedule_time_to: course.schedule_time_to,
+      location_ar: course.location_ar, location_en: course.location_en,
+      duration_hours: course.duration_hours,
       slug: slugVal || null,
     };
     payload.price = course.is_free ? 0 : course.price;
@@ -478,6 +487,110 @@ function CourseBuilder() {
           {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
         </p>
       </section>
+
+      {/* Schedule & location */}
+      <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
+        <h2 className="font-bold text-foreground">{lang === "ar" ? "التاريخ والوقت والمكان" : "Schedule & location"}</h2>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <Label>{lang === "ar" ? "تاريخ البداية" : "Start date"}</Label>
+            <Input
+              type="date"
+              value={course.start_date ? new Date(course.start_date).toISOString().slice(0, 10) : ""}
+              onChange={(e) => update({ start_date: e.target.value ? new Date(e.target.value).toISOString() : null })}
+            />
+          </div>
+          <div>
+            <Label>{lang === "ar" ? "تاريخ النهاية" : "End date"}</Label>
+            <Input
+              type="date"
+              value={course.end_date ? new Date(course.end_date).toISOString().slice(0, 10) : ""}
+              onChange={(e) => update({ end_date: e.target.value ? new Date(e.target.value).toISOString() : null })}
+            />
+          </div>
+          <div>
+            <Label>{lang === "ar" ? "وقت البداية" : "Start time"}</Label>
+            <Input
+              type="time"
+              value={course.schedule_time_from ?? ""}
+              onChange={(e) => update({ schedule_time_from: e.target.value || null })}
+            />
+          </div>
+          <div>
+            <Label>{lang === "ar" ? "وقت النهاية" : "End time"}</Label>
+            <Input
+              type="time"
+              value={course.schedule_time_to ?? ""}
+              onChange={(e) => update({ schedule_time_to: e.target.value || null })}
+            />
+          </div>
+        </div>
+        <div>
+          <Label>{lang === "ar" ? "أيام الأسبوع" : "Days of week"}</Label>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {(["sat","sun","mon","tue","wed","thu","fri"] as const).map((d) => {
+              const labels: Record<string, { ar: string; en: string }> = {
+                sat: { ar: "السبت", en: "Sat" }, sun: { ar: "الأحد", en: "Sun" },
+                mon: { ar: "الإثنين", en: "Mon" }, tue: { ar: "الثلاثاء", en: "Tue" },
+                wed: { ar: "الأربعاء", en: "Wed" }, thu: { ar: "الخميس", en: "Thu" },
+                fri: { ar: "الجمعة", en: "Fri" },
+              };
+              const sel = (course.schedule_days ?? []).includes(d);
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => {
+                    const curr = course.schedule_days ?? [];
+                    update({ schedule_days: sel ? curr.filter((x) => x !== d) : [...curr, d] });
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                    sel ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input hover:bg-muted"
+                  }`}
+                >
+                  {lang === "ar" ? labels[d].ar : labels[d].en}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <Label>{lang === "ar" ? "المكان (عربي)" : "Location (Arabic)"}</Label>
+            <Input
+              value={course.location_ar ?? ""}
+              onChange={(e) => update({ location_ar: e.target.value || null })}
+              placeholder={lang === "ar" ? "مثال: دمشق - أونلاين عبر Zoom" : "مثال: دمشق - أونلاين عبر Zoom"}
+            />
+          </div>
+          <div>
+            <Label>{lang === "ar" ? "المكان (إنجليزي)" : "Location (English)"}</Label>
+            <Input
+              value={course.location_en ?? ""}
+              onChange={(e) => update({ location_en: e.target.value || null })}
+              placeholder="e.g. Damascus / Online via Zoom"
+            />
+          </div>
+          <div>
+            <Label>{lang === "ar" ? "مدة الدورة (بالساعات)" : "Course duration (hours)"}</Label>
+            <Input
+              type="number"
+              min={0}
+              step="0.5"
+              value={course.duration_hours ?? ""}
+              onChange={(e) => {
+                const v = e.target.value;
+                update({ duration_hours: v === "" ? null : Math.max(0, parseFloat(v) || 0) });
+              }}
+            />
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
+        </p>
+      </section>
+
+
 
       {/* Enrollment requests (form answers) */}
       <section className="rounded-2xl border border-border bg-card p-5 space-y-3">
