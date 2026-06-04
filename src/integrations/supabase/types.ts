@@ -1064,11 +1064,17 @@ export type Database = {
           approved: boolean
           avatar_url: string | null
           bio: string | null
+          bio_ar: string | null
+          bio_en: string | null
           created_at: string
           full_name: string
+          full_name_ar: string | null
+          full_name_en: string | null
           github_url: string | null
           linkedin_url: string | null
           specialty: string | null
+          specialty_ar: string | null
+          specialty_en: string | null
           updated_at: string
           user_id: string
         }
@@ -1076,11 +1082,17 @@ export type Database = {
           approved?: boolean
           avatar_url?: string | null
           bio?: string | null
+          bio_ar?: string | null
+          bio_en?: string | null
           created_at?: string
           full_name: string
+          full_name_ar?: string | null
+          full_name_en?: string | null
           github_url?: string | null
           linkedin_url?: string | null
           specialty?: string | null
+          specialty_ar?: string | null
+          specialty_en?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1088,11 +1100,17 @@ export type Database = {
           approved?: boolean
           avatar_url?: string | null
           bio?: string | null
+          bio_ar?: string | null
+          bio_en?: string | null
           created_at?: string
           full_name?: string
+          full_name_ar?: string | null
+          full_name_en?: string | null
           github_url?: string | null
           linkedin_url?: string | null
           specialty?: string | null
+          specialty_ar?: string | null
+          specialty_en?: string | null
           updated_at?: string
           user_id?: string
         }

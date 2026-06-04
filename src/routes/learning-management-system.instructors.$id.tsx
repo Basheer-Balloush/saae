@@ -14,8 +14,14 @@ export const Route = createFileRoute("/learning-management-system/instructors/$i
 type Instructor = {
   user_id: string;
   full_name: string;
+  full_name_ar: string | null;
+  full_name_en: string | null;
   bio: string | null;
+  bio_ar: string | null;
+  bio_en: string | null;
   specialty: string | null;
+  specialty_ar: string | null;
+  specialty_en: string | null;
   avatar_url: string | null;
   linkedin_url: string | null;
   github_url: string | null;
@@ -76,13 +82,22 @@ function InstructorProfile() {
             <img src={ins.avatar_url} alt={ins.full_name} className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl object-cover" />
           ) : (
             <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-3xl font-bold">
-              {ins.full_name.charAt(0)}
+              {(((lang === "ar" ? ins.full_name_ar : ins.full_name_en) || ins.full_name) ?? "?").charAt(0)}
             </div>
           )}
           <div className="flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{ins.full_name}</h1>
-            {ins.specialty && <p className="mt-1 text-primary font-semibold">{ins.specialty}</p>}
-            {ins.bio && <p className="mt-3 text-muted-foreground leading-relaxed">{ins.bio}</p>}
+            {(() => {
+              const name = (lang === "ar" ? ins.full_name_ar : ins.full_name_en) || ins.full_name;
+              const sp = (lang === "ar" ? ins.specialty_ar : ins.specialty_en) || ins.specialty;
+              const bio = (lang === "ar" ? ins.bio_ar : ins.bio_en) || ins.bio;
+              return (
+                <>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{name}</h1>
+                  {sp && <p className="mt-1 text-primary font-semibold">{sp}</p>}
+                  {bio && <p className="mt-3 text-muted-foreground leading-relaxed">{bio}</p>}
+                </>
+              );
+            })()}
             <div className="mt-4 flex flex-wrap gap-3">
               {ins.linkedin_url && (
                 <a href={ins.linkedin_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs hover:border-primary hover:text-primary">
