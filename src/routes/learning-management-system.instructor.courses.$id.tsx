@@ -532,7 +532,7 @@ function CourseBuilder() {
           </p>
         </div>
         <p className="text-xs text-muted-foreground">
-          {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
+          {lang === "ar" ? "التغييرات تُحفظ تلقائياً بعد الاعتماد، وإلا أرسل للمراجعة من الأعلى." : "Changes auto-save after approval; otherwise submit for review above."}
         </p>
       </section>
 
@@ -634,7 +634,7 @@ function CourseBuilder() {
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
+          {lang === "ar" ? "التغييرات تُحفظ تلقائياً بعد الاعتماد، وإلا أرسل للمراجعة من الأعلى." : "Changes auto-save after approval; otherwise submit for review above."}
         </p>
       </section>
 
