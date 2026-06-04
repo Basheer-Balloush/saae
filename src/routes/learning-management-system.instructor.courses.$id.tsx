@@ -169,6 +169,7 @@ function CourseBuilder() {
 
 
   const submitForReview = async () => {
+    await saveCourse({ silent: true });
     const { error } = await supabase.from("lms_courses").update({ status: "pending" }).eq("id", course.id);
     if (error) { toast.error(toUserMessage(error)); return; }
     setCourse({ ...course, status: "pending" });
