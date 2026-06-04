@@ -106,7 +106,7 @@ function CourseBuilder() {
 
   const update = (patch: Partial<Course>) => setCourse({ ...course, ...patch });
 
-  const saveCourse = async () => {
+  const saveCourse = async (opts?: { silent?: boolean }) => {
     // Validate slug locally
     const slugVal = (course.slug ?? "").trim();
     if (slugVal && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slugVal)) {
