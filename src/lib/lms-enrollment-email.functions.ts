@@ -67,7 +67,7 @@ export const sendEnrollmentApprovedEmail = createServerFn({ method: 'POST' })
 
     const { data: course, error: courseError } = await supabaseAdmin
       .from('lms_courses')
-      .select('id, title_ar, title_en')
+      .select('id, title_ar, title_en, approval_email_subject_ar, approval_email_subject_en, approval_email_body_ar, approval_email_body_en')
       .eq('id', req.course_id)
       .single()
     if (courseError) throw new Error(courseError.message)
@@ -83,20 +83,38 @@ export const sendEnrollmentApprovedEmail = createServerFn({ method: 'POST' })
     const siteName = SITE_NAMES[data.lang]
     const courseUrl = `${SITE_URL}/learning-management-system/courses/${course.id}`
 
+    const customBody = ar
+      ? (course.approval_email_body_ar ?? null)
+      : (course.approval_email_body_en ?? course.approval_email_body_ar ?? null)
+    const customSubject = ar
+      ? (course.approval_email_subject_ar ?? null)
+      : (course.approval_email_subject_en ?? course.approval_email_subject_ar ?? null)
+
+    const interpolate = (s: string) => s
+      .replace(/\{\{\s*student_name\s*\}\}/g, studentName ?? '')
+      .replace(/\{\{\s*course_title\s*\}\}/g, courseTitle)
+      .replace(/\{\{\s*site_name\s*\}\}/g, siteName)
+      .replace(/\{\{\s*course_url\s*\}\}/g, courseUrl)
+
     const element = React.createElement(EnrollmentApprovedEmail, {
       siteName,
       courseTitle,
       courseUrl,
       studentName,
       lang: data.lang,
+      customBody,
     })
 
     const html = await render(element)
     const text = await render(element, { plainText: true })
 
+    const subject = customSubject
+      ? interpolate(customSubject)
+      : (ar ? `تمت الموافقة على تسجيلك في ${courseTitle}` : `Your enrollment in ${courseTitle} has been approved`)
+
     await sendViaResend({
       to: email,
-      subject: ar ? `تمت الموافقة على تسجيلك في ${courseTitle}` : `Your enrollment in ${courseTitle} has been approved`,
+      subject,
       html,
       text,
     })
