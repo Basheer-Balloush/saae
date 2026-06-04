@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
-import { useEffect, useState } from "react";
-import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList, ArrowRight, FileText } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Plus, Trash2, Send, Loader2, Image as ImageIcon, ClipboardList, ArrowRight, FileText, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -106,7 +106,18 @@ function CourseBuilder() {
 
   const update = (patch: Partial<Course>) => setCourse({ ...course, ...patch });
 
-  const saveCourse = async () => {
+  // Auto-save: once the course has been submitted/approved, persist edits silently.
+  const autoSaveLoadedRef = useRef(false);
+  useEffect(() => {
+    if (!course) return;
+    if (!autoSaveLoadedRef.current) { autoSaveLoadedRef.current = true; return; }
+    if (course.status === "draft") return;
+    const t = setTimeout(() => { saveCourse({ silent: true }); }, 800);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [course, selectedCategoryIds]);
+
+  const saveCourse = async (opts?: { silent?: boolean }) => {
     // Validate slug locally
     const slugVal = (course.slug ?? "").trim();
     if (slugVal && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slugVal)) {
@@ -164,11 +175,12 @@ function CourseBuilder() {
       }
     }
     setSaving(false);
-    toast.success(lang === "ar" ? "تم الحفظ" : "Saved");
+    if (!opts?.silent) toast.success(lang === "ar" ? "تم الحفظ" : "Saved");
   };
 
 
   const submitForReview = async () => {
+    await saveCourse({ silent: true });
     const { error } = await supabase.from("lms_courses").update({ status: "pending" }).eq("id", course.id);
     if (error) { toast.error(toUserMessage(error)); return; }
     setCourse({ ...course, status: "pending" });
@@ -322,13 +334,20 @@ function CourseBuilder() {
               </span>
             </div>
           </div>
-          <div className="flex gap-2 shrink-0 flex-wrap">
-            <Button onClick={saveCourse} variant="outline" disabled={saving}>
-              {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
-              {lang === "ar" ? "حفظ" : "Save"}
-            </Button>
-            {course.status === "draft" && (
-              <Button onClick={submitForReview}><Send className="h-4 w-4 mx-1" />{lang === "ar" ? "إرسال للمراجعة" : "Submit"}</Button>
+          <div className="flex gap-2 shrink-0 flex-wrap items-center">
+            {course.status === "draft" ? (
+              <Button onClick={submitForReview} disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Send className="h-4 w-4 mx-1" />}
+                {lang === "ar" ? "إرسال للمراجعة" : "Submit for review"}
+              </Button>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground px-2">
+                {saving ? (
+                  <><Loader2 className="h-3.5 w-3.5 animate-spin" />{lang === "ar" ? "جارٍ الحفظ..." : "Saving..."}</>
+                ) : (
+                  <><Check className="h-3.5 w-3.5 text-emerald-500" />{lang === "ar" ? "يُحفظ تلقائياً" : "Auto-saved"}</>
+                )}
+              </span>
             )}
             <Button variant="destructive" onClick={() => setConfirmDeleteCourse(true)} disabled={deletingCourse}>
               <Trash2 className="h-4 w-4 mx-1" />
@@ -513,7 +532,7 @@ function CourseBuilder() {
           </p>
         </div>
         <p className="text-xs text-muted-foreground">
-          {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
+          {lang === "ar" ? "التغييرات تُحفظ تلقائياً بعد الاعتماد، وإلا أرسل للمراجعة من الأعلى." : "Changes auto-save after approval; otherwise submit for review above."}
         </p>
       </section>
 
@@ -615,7 +634,7 @@ function CourseBuilder() {
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          {lang === "ar" ? "اضغط حفظ بالأعلى لتطبيق التغييرات." : "Click Save above to apply changes."}
+          {lang === "ar" ? "التغييرات تُحفظ تلقائياً بعد الاعتماد، وإلا أرسل للمراجعة من الأعلى." : "Changes auto-save after approval; otherwise submit for review above."}
         </p>
       </section>
 
