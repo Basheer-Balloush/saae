@@ -447,9 +447,15 @@ function AdminHome() {
                           <div className="text-xs text-muted-foreground truncate">{i.specialty || (ar ? "بدون تخصّص" : "No specialty")}</div>
                         </div>
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => approveInstructor(i.user_id, false)}>
-                        {ar ? "إلغاء الموافقة" : "Revoke"}
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" variant="outline" onClick={() => setEditInstructorId(i.user_id)}>
+                          <Pencil className="h-3.5 w-3.5 mx-1" />
+                          {ar ? "تعديل" : "Edit"}
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => approveInstructor(i.user_id, false)}>
+                          {ar ? "إلغاء الموافقة" : "Revoke"}
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </Section>
