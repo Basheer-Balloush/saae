@@ -318,7 +318,9 @@ function CourseBuilder() {
             <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
               <span>{lang === "ar" ? "الحالة" : "Status"}:</span>
               <span className="inline-flex items-center rounded-full border border-border bg-background px-2 py-0.5 font-semibold text-foreground">
-                {course.status}
+                {lang === "ar"
+                  ? (({ draft: "مسودة", pending: "قيد المراجعة", published: "منشورة", rejected: "مرفوضة", archived: "مؤرشفة" } as Record<string, string>)[course.status] ?? course.status)
+                  : course.status}
               </span>
             </div>
           </div>
