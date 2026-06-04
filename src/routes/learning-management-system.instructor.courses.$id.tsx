@@ -323,13 +323,20 @@ function CourseBuilder() {
               </span>
             </div>
           </div>
-          <div className="flex gap-2 shrink-0 flex-wrap">
-            <Button onClick={saveCourse} variant="outline" disabled={saving}>
-              {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
-              {lang === "ar" ? "حفظ" : "Save"}
-            </Button>
-            {course.status === "draft" && (
-              <Button onClick={submitForReview}><Send className="h-4 w-4 mx-1" />{lang === "ar" ? "إرسال للمراجعة" : "Submit"}</Button>
+          <div className="flex gap-2 shrink-0 flex-wrap items-center">
+            {course.status === "draft" ? (
+              <Button onClick={submitForReview} disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Send className="h-4 w-4 mx-1" />}
+                {lang === "ar" ? "إرسال للمراجعة" : "Submit for review"}
+              </Button>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground px-2">
+                {saving ? (
+                  <><Loader2 className="h-3.5 w-3.5 animate-spin" />{lang === "ar" ? "جارٍ الحفظ..." : "Saving..."}</>
+                ) : (
+                  <><Check className="h-3.5 w-3.5 text-emerald-500" />{lang === "ar" ? "يُحفظ تلقائياً" : "Auto-saved"}</>
+                )}
+              </span>
             )}
             <Button variant="destructive" onClick={() => setConfirmDeleteCourse(true)} disabled={deletingCourse}>
               <Trash2 className="h-4 w-4 mx-1" />
