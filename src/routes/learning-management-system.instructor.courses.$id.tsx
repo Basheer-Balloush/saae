@@ -123,6 +123,10 @@ function CourseBuilder() {
       level: course.level as "beginner" | "intermediate" | "advanced",
       cover_url: course.cover_url,
       enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline, max_students: course.max_students,
+      start_date: course.start_date, end_date: course.end_date,
+      schedule_days: course.schedule_days, schedule_time_from: course.schedule_time_from, schedule_time_to: course.schedule_time_to,
+      location_ar: course.location_ar, location_en: course.location_en,
+      duration_hours: course.duration_hours,
       slug: slugVal || null,
     };
     payload.price = course.is_free ? 0 : course.price;
