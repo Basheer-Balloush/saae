@@ -177,6 +177,24 @@ function LmsSignup() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {password.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">{tr.passwordStrength}</span>
+                      <span className={`text-xs font-semibold ${strengthInfo.textColor}`}>{strengthInfo.label}</span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                      <div className={`h-full rounded-full transition-all duration-300 ${strengthInfo.color}`} style={{ width: strengthInfo.width }} />
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${password.length >= 6 ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>6+</span>
+                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[a-z]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>abc</span>
+                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[A-Z]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>ABC</span>
+                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[0-9]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>123</span>
+                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[^A-Za-z0-9]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>!@#</span>
+                    </div>
+                  </div>
+                )}
               </div>
               <div>
                 <Label htmlFor="confirmPassword">{lang === "ar" ? "تأكيد كلمة المرور" : "Confirm password"}</Label>
