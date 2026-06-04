@@ -323,12 +323,20 @@ function CourseBuilder() {
             </div>
           </div>
           <div className="flex gap-2 shrink-0 flex-wrap">
-            <Button onClick={saveCourse} variant="outline" disabled={saving}>
-              {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
-              {lang === "ar" ? "حفظ" : "Save"}
-            </Button>
-            {course.status === "draft" && (
-              <Button onClick={submitForReview}><Send className="h-4 w-4 mx-1" />{lang === "ar" ? "إرسال للمراجعة" : "Submit"}</Button>
+            {course.status === "published" ? (
+              <Button onClick={saveCourse} variant="outline" disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
+                {lang === "ar" ? "حفظ" : "Save"}
+              </Button>
+            ) : course.status === "pending" ? (
+              <span className="inline-flex items-center rounded-md border border-amber-400/50 bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 text-xs text-amber-900 dark:text-amber-200">
+                {lang === "ar" ? "بانتظار المراجعة" : "Pending review"}
+              </span>
+            ) : (
+              <Button onClick={async () => { await saveCourse(); await submitForReview(); }} disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Send className="h-4 w-4 mx-1" />}
+                {lang === "ar" ? "إرسال للمراجعة" : "Submit for review"}
+              </Button>
             )}
             <Button variant="destructive" onClick={() => setConfirmDeleteCourse(true)} disabled={deletingCourse}>
               <Trash2 className="h-4 w-4 mx-1" />
