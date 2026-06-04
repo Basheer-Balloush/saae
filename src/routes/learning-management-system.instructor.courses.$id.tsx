@@ -164,7 +164,7 @@ function CourseBuilder() {
       }
     }
     setSaving(false);
-    toast.success(lang === "ar" ? "تم الحفظ" : "Saved");
+    if (!opts?.silent) toast.success(lang === "ar" ? "تم الحفظ" : "Saved");
   };
 
 
