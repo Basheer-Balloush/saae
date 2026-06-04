@@ -22,6 +22,7 @@ function InstructorProfileEdit() {
   const { lang } = useLang();
   const tr = lmsT[lang];
   const ar = lang === "ar";
+  const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
