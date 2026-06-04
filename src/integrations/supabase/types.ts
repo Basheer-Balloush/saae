@@ -830,6 +830,10 @@ export type Database = {
       }
       lms_courses: {
         Row: {
+          approval_email_body_ar: string | null
+          approval_email_body_en: string | null
+          approval_email_subject_ar: string | null
+          approval_email_subject_en: string | null
           category_id: string | null
           cover_url: string | null
           created_at: string
@@ -861,6 +865,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_email_body_ar?: string | null
+          approval_email_body_en?: string | null
+          approval_email_subject_ar?: string | null
+          approval_email_subject_en?: string | null
           category_id?: string | null
           cover_url?: string | null
           created_at?: string
@@ -892,6 +900,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_email_body_ar?: string | null
+          approval_email_body_en?: string | null
+          approval_email_subject_ar?: string | null
+          approval_email_subject_en?: string | null
           category_id?: string | null
           cover_url?: string | null
           created_at?: string
