@@ -355,6 +355,10 @@ function AdminEnrollmentRequests() {
             <p className="text-sm text-muted-foreground">{ar ? "راجع وافق أو ارفض طلبات التسجيل." : "Review, approve, or reject enrollment requests."}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" variant="outline" onClick={openEmailDialog}>
+              <Mail className="h-4 w-4 mx-1" />
+              {ar ? "بريد التأكيد" : "Confirmation email"}
+            </Button>
             <Button size="sm" variant="outline" onClick={exportXlsx} disabled={exporting}>
               {exporting ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Download className="h-4 w-4 mx-1" />}
               {ar ? "تصدير Excel" : "Export Excel"}
