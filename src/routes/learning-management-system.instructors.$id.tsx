@@ -82,7 +82,7 @@ function InstructorProfile() {
             <img src={ins.avatar_url} alt={ins.full_name} className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl object-cover" />
           ) : (
             <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-3xl font-bold">
-              {(lang === "ar" ? ins.full_name_ar : ins.full_name_en) ?? ins.full_name}
+              {(((lang === "ar" ? ins.full_name_ar : ins.full_name_en) || ins.full_name) ?? "?").charAt(0)}
             </div>
           )}
           <div className="flex-1">
