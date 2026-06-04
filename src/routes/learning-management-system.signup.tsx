@@ -40,9 +40,13 @@ function getStrengthInfo(score: number, lang: "ar" | "en") {
 }
 
 const schema = z.object({
-  fullName: z.string().trim().min(2).max(120).refine(
-    (v) => ARABIC_NAME_RE.test(v) && v.replace(/\s/g, "").length >= 2,
-    { message: "ARABIC_ONLY" },
+  fullName: z.string().trim().min(5).max(120).refine(
+    (v) => {
+      if (!ARABIC_NAME_RE.test(v)) return false;
+      const parts = v.split(/\s+/).filter((p) => p.length >= 2);
+      return parts.length >= 3;
+    },
+    { message: "ARABIC_TRIPLE" },
   ),
   email: z.string().trim().email().max(255),
   password: z.string().min(6).max(72),
