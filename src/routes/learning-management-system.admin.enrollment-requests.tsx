@@ -308,13 +308,19 @@ function AdminEnrollmentRequests() {
             <h1 className="text-2xl font-bold text-foreground">{headerTitle}</h1>
             <p className="text-sm text-muted-foreground">{ar ? "راجع وافق أو ارفض طلبات التسجيل." : "Review, approve, or reject enrollment requests."}</p>
           </div>
-          <div className="flex flex-wrap gap-1">
-            {(["pending", "approved", "rejected", "cancelled", "all"] as const).map((f) => (
-              <button key={f} onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${filter === f ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground/70 hover:border-primary"}`}>
-                {ar ? ({ pending: "قيد المراجعة", approved: "موافَق", rejected: "مرفوض", cancelled: "ملغى", all: "الكل" }[f]) : f}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" variant="outline" onClick={exportXlsx} disabled={exporting}>
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Download className="h-4 w-4 mx-1" />}
+              {ar ? "تصدير Excel" : "Export Excel"}
+            </Button>
+            <div className="flex flex-wrap gap-1">
+              {(["pending", "approved", "rejected", "cancelled", "all"] as const).map((f) => (
+                <button key={f} onClick={() => setFilter(f)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${filter === f ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground/70 hover:border-primary"}`}>
+                  {ar ? ({ pending: "قيد المراجعة", approved: "موافَق", rejected: "مرفوض", cancelled: "ملغى", all: "الكل" }[f]) : f}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </header>
