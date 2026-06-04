@@ -57,6 +57,49 @@ function AdminEnrollmentRequests() {
   const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
   const [viewing, setViewing] = useState<{ requestId: string; courseId: string } | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailSubjectAr, setEmailSubjectAr] = useState("");
+  const [emailSubjectEn, setEmailSubjectEn] = useState("");
+  const [emailBodyAr, setEmailBodyAr] = useState("");
+  const [emailBodyEn, setEmailBodyEn] = useState("");
+
+  const openEmailDialog = async () => {
+    if (!selectedCourseId) return;
+    setEmailDialogOpen(true);
+    setEmailLoading(true);
+    const { data, error } = await supabase
+      .from("lms_courses")
+      .select("approval_email_subject_ar,approval_email_subject_en,approval_email_body_ar,approval_email_body_en")
+      .eq("id", selectedCourseId)
+      .maybeSingle();
+    setEmailLoading(false);
+    if (error) { toast.error(error.message); return; }
+    const d = (data ?? {}) as Record<string, string | null>;
+    setEmailSubjectAr(d.approval_email_subject_ar ?? "");
+    setEmailSubjectEn(d.approval_email_subject_en ?? "");
+    setEmailBodyAr(d.approval_email_body_ar ?? "");
+    setEmailBodyEn(d.approval_email_body_en ?? "");
+  };
+
+  const saveEmailTemplate = async () => {
+    if (!selectedCourseId) return;
+    setEmailSaving(true);
+    const { error } = await supabase
+      .from("lms_courses")
+      .update({
+        approval_email_subject_ar: emailSubjectAr.trim() || null,
+        approval_email_subject_en: emailSubjectEn.trim() || null,
+        approval_email_body_ar: emailBodyAr.trim() || null,
+        approval_email_body_en: emailBodyEn.trim() || null,
+      })
+      .eq("id", selectedCourseId);
+    setEmailSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(ar ? "تم الحفظ" : "Saved");
+    setEmailDialogOpen(false);
+  };
 
   const exportXlsx = async () => {
     if (!selectedCourseId) return;
