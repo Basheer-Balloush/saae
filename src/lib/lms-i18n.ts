@@ -134,7 +134,6 @@ export const lmsT: Record<Lang, {
   passwordUpdated: string;
   passwordStrength: string;
   passwordWeak: string;
-  passwordMedium: string;
   passwordStrong: string;
   menu: string;
 }> = {
@@ -261,7 +260,6 @@ export const lmsT: Record<Lang, {
     passwordUpdated: "تمّ تحديث كلمة المرور",
     passwordStrength: "قوة كلمة المرور",
     passwordWeak: "ضعيفة",
-    passwordMedium: "متوسطة",
     passwordStrong: "قوية",
     menu: "القائمة",
   },
@@ -388,7 +386,6 @@ export const lmsT: Record<Lang, {
     passwordUpdated: "Password updated",
     passwordStrength: "Password strength",
     passwordWeak: "Weak",
-    passwordMedium: "Medium",
     passwordStrong: "Strong",
     menu: "Menu",
   },
