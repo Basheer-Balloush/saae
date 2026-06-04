@@ -35,8 +35,7 @@ function calculatePasswordStrength(pw: string): number {
 function getStrengthInfo(score: number, lang: "ar" | "en") {
   const t = lmsT[lang];
   if (score <= 2) return { label: t.passwordWeak, color: "bg-red-500", width: `${(score / 6) * 100}%`, textColor: "text-red-500" };
-  if (score === 3) return { label: t.passwordFair, color: "bg-amber-500", width: `${(score / 6) * 100}%`, textColor: "text-amber-500" };
-  if (score === 4) return { label: t.passwordGood, color: "bg-primary", width: `${(score / 6) * 100}%`, textColor: "text-primary" };
+  if (score <= 4) return { label: t.passwordMedium, color: "bg-amber-500", width: `${(score / 6) * 100}%`, textColor: "text-amber-500" };
   return { label: t.passwordStrong, color: "bg-green-600", width: `${(score / 6) * 100}%`, textColor: "text-green-600" };
 }
 
