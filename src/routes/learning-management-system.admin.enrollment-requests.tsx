@@ -468,6 +468,52 @@ function AdminEnrollmentRequests() {
           courseId={viewing.courseId}
         />
       )}
+
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{ar ? "بريد تأكيد التسجيل" : "Enrollment confirmation email"}</DialogTitle>
+          </DialogHeader>
+          {emailLoading ? (
+            <p className="py-8 text-center text-muted-foreground">{ar ? "جاري التحميل..." : "Loading..."}</p>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-xs text-muted-foreground">
+                {ar
+                  ? "اترك الحقول فارغة لاستخدام النص الافتراضي. المتغيرات المتاحة: {{student_name}}, {{course_title}}, {{site_name}}, {{course_url}}"
+                  : "Leave fields empty to use the default content. Available variables: {{student_name}}, {{course_title}}, {{site_name}}, {{course_url}}"}
+              </p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label>الموضوع (عربي)</Label>
+                  <Input dir="rtl" value={emailSubjectAr} onChange={(e) => setEmailSubjectAr(e.target.value)} placeholder={`تمت الموافقة على تسجيلك في {{course_title}}`} />
+                </div>
+                <div>
+                  <Label>Subject (English)</Label>
+                  <Input dir="ltr" value={emailSubjectEn} onChange={(e) => setEmailSubjectEn(e.target.value)} placeholder={`Your enrollment in {{course_title}} has been approved`} />
+                </div>
+              </div>
+              <div>
+                <Label>نص الرسالة (عربي)</Label>
+                <Textarea dir="rtl" rows={6} value={emailBodyAr} onChange={(e) => setEmailBodyAr(e.target.value)} placeholder={`مرحباً {{student_name}}،\n\nيسعدنا إخبارك بأنه قد تمت الموافقة على طلب تسجيلك في دورة "{{course_title}}".`} />
+              </div>
+              <div>
+                <Label>Body (English)</Label>
+                <Textarea dir="ltr" rows={6} value={emailBodyEn} onChange={(e) => setEmailBodyEn(e.target.value)} placeholder={`Hi {{student_name}},\n\nYour enrollment in "{{course_title}}" has been approved.`} />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEmailDialogOpen(false)} disabled={emailSaving}>
+              {ar ? "إلغاء" : "Cancel"}
+            </Button>
+            <Button onClick={saveEmailTemplate} disabled={emailSaving || emailLoading}>
+              {emailSaving && <Loader2 className="h-4 w-4 animate-spin mx-1" />}
+              {ar ? "حفظ" : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
