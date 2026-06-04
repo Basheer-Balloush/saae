@@ -25,6 +25,21 @@ const MAP: Array<{ match: RegExp; ar: string; en: string }> = [
     en: "Password must be at least 6 characters",
   },
   {
+    match: /password is too weak|weak password|password strength|strength.*weak/i,
+    ar: "كلمة المرور ضعيفة — استخدم أحرفاً كبيرة وصغيرة وأرقام ورموز",
+    en: "Password is too weak — use uppercase, lowercase, numbers and symbols",
+  },
+  {
+    match: /password should contain|password must contain|missing/i,
+    ar: "كلمة المرور يجب أن تحتوي على حروف وأرقام",
+    en: "Password must contain letters and numbers",
+  },
+  {
+    match: /password has been found in|compromised|pwned/i,
+    ar: "كلمة المرور شائعة وسهلة الاختراق — اختر كلمةً أقوى",
+    en: "This password is commonly used and easily guessed — choose a stronger one",
+  },
+  {
     match: /unable to validate email address|invalid email/i,
     ar: "بريد إلكترونيّ غير صالح",
     en: "Invalid email address",
