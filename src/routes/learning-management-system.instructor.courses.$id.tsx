@@ -106,6 +106,17 @@ function CourseBuilder() {
 
   const update = (patch: Partial<Course>) => setCourse({ ...course, ...patch });
 
+  // Auto-save: once the course has been submitted/approved, persist edits silently.
+  const autoSaveLoadedRef = useRef(false);
+  useEffect(() => {
+    if (!course) return;
+    if (!autoSaveLoadedRef.current) { autoSaveLoadedRef.current = true; return; }
+    if (course.status === "draft") return;
+    const t = setTimeout(() => { saveCourse({ silent: true }); }, 800);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [course, selectedCategoryIds]);
+
   const saveCourse = async (opts?: { silent?: boolean }) => {
     // Validate slug locally
     const slugVal = (course.slug ?? "").trim();
