@@ -26,17 +26,15 @@ export function LmsFooter() {
   return (
     <footer
       id="contact"
-      className="relative"
+      className="relative pt-12 pb-8 sm:pt-16 lg:pt-[72px]"
       style={{
         backgroundColor: TEAL,
         color: INK,
         borderTop: `2px solid rgba(255,255,255,0.25)`,
-        paddingTop: "72px",
-        paddingBottom: "32px",
       }}
     >
-      <div className="mx-auto w-full max-w-[1440px] px-8 lg:px-16">
-        <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
+      <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-16">
+        <div className="grid items-start gap-10 sm:gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Col 1 — Identity */}
           <div className="lg:col-span-5">
             <img

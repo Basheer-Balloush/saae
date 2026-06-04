@@ -209,9 +209,9 @@ function LmsHome() {
       </section>
 
       {/* Stats — Achievements-style */}
-      <section className="relative overflow-hidden bg-background py-24 lg:py-32">
-        <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
+      <section className="relative overflow-hidden bg-background py-14 sm:py-20 lg:py-32">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
+          <div className="grid items-center gap-10 sm:gap-14 lg:grid-cols-12 lg:gap-16">
             {/* Headline column */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -221,7 +221,7 @@ function LmsHome() {
               className="lg:col-span-5"
             >
               <h2
-                className="mt-4 text-display-1 text-foreground"
+                className="mt-4 text-3xl sm:text-4xl lg:text-display-1 text-foreground"
                 style={{
                   fontFamily: '"Cairo", system-ui, sans-serif',
                   fontWeight: 900,
@@ -231,39 +231,36 @@ function LmsHome() {
               >
                 {lang === "ar" ? "أرقامنا تحكي قصّتنا" : "Our numbers tell our story"}
               </h2>
-              <p className="mt-6 max-w-lg text-body text-muted-foreground">
+              <p className="mt-4 sm:mt-6 max-w-lg text-sm sm:text-body text-muted-foreground">
                 {lang === "ar"
                   ? "منصة تعليمية متنامية تجمع المتعلّمين والمدرّبين حول محتوى عربي عالي الجودة في الذكاء الاصطناعي وريادة الأعمال."
                   : "A growing learning platform bringing learners and instructors together around high-quality Arabic content in AI and entrepreneurship."}
               </p>
-              <div className="mt-8 h-[3px] w-20 bg-gradient-brand" />
+              <div className="mt-6 sm:mt-8 h-[3px] w-20 bg-gradient-brand" />
             </motion.div>
 
             {/* Stat grid */}
             <div className="lg:col-span-7">
-              <div
-                className="grid grid-cols-1 sm:grid-cols-2"
-                style={{ columnGap: "32px", rowGap: "40px" }}
-              >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-x-8 sm:gap-y-10">
                 <LmsStatCard
                   value={`+${stats.courses.toLocaleString()}`}
                   label={tr.statCourses}
                   index={0}
-                  heightClass="min-h-[260px] lg:min-h-[300px]"
+                  heightClass="min-h-[160px] sm:min-h-[220px] lg:min-h-[300px]"
                   isRtl={isRtl}
                 />
                 <LmsStatCard
                   value={`+${stats.students.toLocaleString()}`}
                   label={tr.statStudents}
                   index={1}
-                  heightClass="min-h-[180px] lg:min-h-[200px]"
+                  heightClass="min-h-[140px] sm:min-h-[180px] lg:min-h-[200px]"
                   isRtl={isRtl}
                 />
                 <LmsStatCard
                   value={`+${stats.instructors.toLocaleString()}`}
                   label={tr.statInstructors}
                   index={2}
-                  heightClass="min-h-[180px] lg:min-h-[200px] sm:col-span-2"
+                  heightClass="min-h-[140px] sm:min-h-[180px] lg:min-h-[200px] sm:col-span-2"
                   isRtl={isRtl}
                 />
               </div>
