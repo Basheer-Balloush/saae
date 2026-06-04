@@ -442,7 +442,12 @@ function CourseBuilder() {
           <Label>{lang === "ar" ? "آخر موعد للتسجيل (اختياري)" : "Enrollment deadline (optional)"}</Label>
           <Input
             type="datetime-local"
-            value={course.enrollment_deadline ? course.enrollment_deadline.slice(0, 16) : ""}
+            value={(() => {
+              if (!course.enrollment_deadline) return "";
+              const d = new Date(course.enrollment_deadline);
+              const off = d.getTimezoneOffset() * 60000;
+              return new Date(d.getTime() - off).toISOString().slice(0, 16);
+            })()}
             onChange={(e) => {
               const v = e.target.value;
               update({ enrollment_deadline: v ? new Date(v).toISOString() : null });
