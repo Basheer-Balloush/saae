@@ -3,6 +3,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 const AMS_ROLES = ["attendance_user", "attendance_admin"] as const satisfies readonly ("attendance_user" | "attendance_admin")[];
+const LMS_ADMIN_ROLES = ["lms_admin", "admin"] as const satisfies readonly ("lms_admin" | "admin")[];
 
 export function useAmsAuth() {
   const [session, setSession] = useState<Session | null>(null);
@@ -11,20 +12,34 @@ export function useAmsAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkRole = async (uid: string) => {
-      const { data } = await supabase
+    const checkAccess = async (uid: string) => {
+      // 1. AMS role OR LMS admin OR general admin
+      const { data: roles } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", uid)
-        .in("role", [...AMS_ROLES]);
-      setHasAccess(!!data && data.length > 0);
+        .in("role", [...AMS_ROLES, ...LMS_ADMIN_ROLES]);
+      if (roles && roles.length > 0) {
+        setHasAccess(true);
+        return;
+      }
+      // 2. Instructor of a course linked to AMS
+      const { data: linkedCourses } = await supabase
+        .from("lms_courses")
+        .select("id, ams_courses!ams_courses_lms_course_id_fkey(id)")
+        .eq("instructor_id", uid)
+        .limit(50);
+      const hasLinked = (linkedCourses ?? []).some(
+        (c) => Array.isArray((c as { ams_courses?: unknown[] }).ams_courses) && ((c as { ams_courses: unknown[] }).ams_courses.length > 0),
+      );
+      setHasAccess(hasLinked);
     };
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        setTimeout(() => checkRole(s.user.id), 0);
+        setTimeout(() => checkAccess(s.user.id), 0);
       } else {
         setHasAccess(false);
       }
@@ -34,7 +49,7 @@ export function useAmsAuth() {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        checkRole(s.user.id).finally(() => setLoading(false));
+        checkAccess(s.user.id).finally(() => setLoading(false));
       } else {
         setLoading(false);
       }

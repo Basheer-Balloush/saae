@@ -77,6 +77,7 @@ type Registrant = {
   email: string | null;
   phone: string | null;
   payment_status: PaymentStatus;
+  lms_enrollment_id?: string | null;
 };
 
 type Session = {
@@ -184,6 +185,11 @@ function AmsDashboard() {
                   <div className="mt-1 text-xs text-muted-foreground">
                     {lang === "ar" ? c.name_en : c.name_ar}
                   </div>
+                )}
+                {(c as { lms_course_id?: string | null }).lms_course_id && (
+                  <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                    {isRtl ? "مربوطة بالمنصة التعليمية" : "Linked to LMS"}
+                  </span>
                 )}
                 <div className="mt-4 inline-flex items-center gap-1 text-xs text-primary">
                   {tr.open}
@@ -491,7 +497,14 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
                     className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background/50 px-3 py-2"
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{r.full_name}</div>
+                      <div className="font-medium text-sm truncate flex items-center gap-2">
+                        {r.full_name}
+                        {r.lms_enrollment_id && (
+                          <span className="inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary">
+                            {isRtl ? "من المنصة" : "LMS"}
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         {tr.attendanceCount}: {attendanceFor(r.id)} / {sessions.length}
                       </div>
@@ -499,14 +512,16 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
                     <Button variant="ghost" size="icon" onClick={() => setViewing(r)} aria-label={tr.view}>
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteRegistrant(r.id)}
-                      aria-label={tr.delete}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    {!r.lms_enrollment_id && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteRegistrant(r.id)}
+                        aria-label={tr.delete}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
                   </li>
                 ))}
               </ul>
