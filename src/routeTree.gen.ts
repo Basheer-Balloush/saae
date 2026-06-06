@@ -20,6 +20,7 @@ import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as LearningManagementSystemIndexRouteImport } from './routes/learning-management-system.index'
 import { Route as AttendanceManagementSystemIndexRouteImport } from './routes/attendance-management-system.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as ResourcesAiToolsRouteImport } from './routes/resources.ai-tools'
 import { Route as NewsIdRouteImport } from './routes/news.$id'
 import { Route as LearningManagementSystemVerifyRouteImport } from './routes/learning-management-system.verify'
 import { Route as LearningManagementSystemStudentRouteImport } from './routes/learning-management-system.student'
@@ -113,6 +114,11 @@ const AttendanceManagementSystemIndexRoute =
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesAiToolsRoute = ResourcesAiToolsRouteImport.update({
+  id: '/resources/ai-tools',
+  path: '/resources/ai-tools',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NewsIdRoute = NewsIdRouteImport.update({
@@ -342,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/student': typeof LearningManagementSystemStudentRouteWithChildren
   '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
   '/news/$id': typeof NewsIdRoute
+  '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
@@ -385,6 +392,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
   '/news/$id': typeof NewsIdRoute
+  '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin': typeof AdminIndexRoute
   '/attendance-management-system': typeof AttendanceManagementSystemIndexRoute
   '/learning-management-system': typeof LearningManagementSystemIndexRoute
@@ -434,6 +442,7 @@ export interface FileRoutesById {
   '/learning-management-system/student': typeof LearningManagementSystemStudentRouteWithChildren
   '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
   '/news/$id': typeof NewsIdRoute
+  '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
@@ -484,6 +493,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/student'
     | '/learning-management-system/verify'
     | '/news/$id'
+    | '/resources/ai-tools'
     | '/admin/'
     | '/attendance-management-system/'
     | '/learning-management-system/'
@@ -527,6 +537,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/signup'
     | '/learning-management-system/verify'
     | '/news/$id'
+    | '/resources/ai-tools'
     | '/admin'
     | '/attendance-management-system'
     | '/learning-management-system'
@@ -575,6 +586,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/student'
     | '/learning-management-system/verify'
     | '/news/$id'
+    | '/resources/ai-tools'
     | '/admin/'
     | '/attendance-management-system/'
     | '/learning-management-system/'
@@ -614,6 +626,7 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
   NewsIdRoute: typeof NewsIdRoute
+  ResourcesAiToolsRoute: typeof ResourcesAiToolsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -698,6 +711,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources/ai-tools': {
+      id: '/resources/ai-tools'
+      path: '/resources/ai-tools'
+      fullPath: '/resources/ai-tools'
+      preLoaderRoute: typeof ResourcesAiToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/news/$id': {
@@ -1103,6 +1123,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,
   NewsIdRoute: NewsIdRoute,
+  ResourcesAiToolsRoute: ResourcesAiToolsRoute,
   AdminIndexRoute: AdminIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
