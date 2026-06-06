@@ -858,9 +858,9 @@ function CourseBuilder() {
                           )}
                         </span>
                       )}
-                      {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && (
+                      {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && l.video_ready && (
                         <span className="text-emerald-600">
-                          ✓ {lang === "ar" ? "فيديو بث (Bunny)" : "Bunny stream"}
+                          ✓ {lang === "ar" ? "تم رفع الفيديو بنجاح" : "Video uploaded successfully"}
                         </span>
                       )}
                       {videoProgress[l.id] === undefined && l.video_provider !== "bunny" && l.video_url && (
