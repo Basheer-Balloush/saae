@@ -846,8 +846,16 @@ function CourseBuilder() {
                           onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
                       </label>
                       {videoProgress[l.id] !== undefined && (
-                        <span className="text-primary">
-                          {lang === "ar" ? "جاري الرفع" : "Uploading"} {videoProgress[l.id]}%
+                        <span className="text-primary inline-flex items-center gap-2">
+                          <span>{lang === "ar" ? "جاري الرفع" : "Uploading"} {videoProgress[l.id].pct}%</span>
+                          {videoProgress[l.id].speedMbps > 0 && (
+                            <span className="text-muted-foreground">
+                              · {videoProgress[l.id].speedMbps.toFixed(1)} Mbps
+                              {videoProgress[l.id].etaSec > 0 && (
+                                <> · {lang === "ar" ? "متبقي" : "ETA"} {videoProgress[l.id].etaSec >= 60 ? `${Math.ceil(videoProgress[l.id].etaSec / 60)} ${lang === "ar" ? "د" : "min"}` : `${videoProgress[l.id].etaSec} ${lang === "ar" ? "ث" : "s"}`}</>
+                              )}
+                            </span>
+                          )}
                         </span>
                       )}
                       {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && (
