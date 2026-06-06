@@ -310,6 +310,29 @@ export const Route = createFileRoute("/api/chat")({
           conversationId = await upsertConversation(fallbackSession, lang, userAgent);
         }
 
+        // Rebuild trusted conversation history from DB (server-side only) so that
+        // clients cannot fabricate prior `assistant`/`system` turns to bypass the
+        // system prompt. The client only supplies new user turns.
+        const { data: history } = await supabaseAdmin
+          .from("chat_messages")
+          .select("role, content, parts")
+          .eq("conversation_id", conversationId)
+          .in("role", ["user", "assistant"])
+          .order("created_at", { ascending: true })
+          .limit(50);
+
+        const trustedMessages: UIMessage[] = ((history ?? []) as Array<{
+          role: string;
+          content: string | null;
+          parts: unknown;
+        }>).map((m, i) => ({
+          id: `db-${i}`,
+          role: m.role as "user" | "assistant",
+          parts: Array.isArray(m.parts) && m.parts.length > 0
+            ? (m.parts as UIMessage["parts"])
+            : [{ type: "text", text: m.content ?? "" }],
+        }));
+
         const tools = {
           submit_individual_lead: tool({
             description:
