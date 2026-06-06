@@ -70,6 +70,8 @@ function CourseBuilder() {
   const [confirmDeleteCourse, setConfirmDeleteCourse] = useState(false);
   const [deletingCourse, setDeletingCourse] = useState(false);
   const [enrollReqs, setEnrollReqs] = useState<Array<{ id: string; user_id: string; status: string; payment_method: string; notes: string | null; created_at: string }>>([]);
+  const [enrolledStudents, setEnrolledStudents] = useState<Array<{ id: string; student_id: string; enrolled_at: string; progress: number }>>([]);
+  const [showAllStudents, setShowAllStudents] = useState(false);
   const [viewing, setViewing] = useState<{ requestId: string; courseId: string } | null>(null);
 
   const load = async () => {
