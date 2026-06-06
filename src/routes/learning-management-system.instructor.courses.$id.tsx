@@ -91,7 +91,7 @@ function CourseBuilder() {
       setSections(sList);
       if (sList.length) {
         const { data: lss } = await supabase.from("lms_lessons")
-          .select("id,section_id,title,video_url,content_md,is_preview,duration_seconds,display_order,attachments")
+          .select("id,section_id,title,video_url,video_provider,video_uid,video_ready,content_md,is_preview,duration_seconds,display_order,attachments")
           .in("section_id", sList.map((s) => s.id)).order("display_order");
         setLessons((lss as Lesson[]) ?? []);
       }
