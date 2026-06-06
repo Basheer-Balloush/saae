@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { QuizBuilder } from "@/components/lms/QuizBuilder";
 import { CourseFormBuilder } from "@/components/lms/CourseFormBuilder";
+import { createBunnyUpload, setLessonBunnyVideo } from "@/lib/bunny-stream.functions";
+import * as tus from "tus-js-client";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
