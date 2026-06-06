@@ -254,7 +254,9 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Invalid message count", { status: 400 });
         }
         const MAX_CONTENT_CHARS = 8000;
-        const allowedRoles = new Set(["user", "assistant", "system"]);
+        // Only accept "user" role from clients; "system" and "assistant" turns must
+        // come from the server side to prevent prompt-injection via fake history.
+        const allowedRoles = new Set(["user"]);
         for (const m of messages as Array<{ role?: unknown; content?: unknown; parts?: unknown }>) {
           if (!m || typeof m !== "object") {
             return new Response("Invalid message", { status: 400 });
