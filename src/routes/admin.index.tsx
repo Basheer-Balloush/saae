@@ -227,7 +227,7 @@ function AdminDashboard() {
   const [editing, setEditing] = useState<NewsRow | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [tab, setTab] = useState<"news" | "members" | "chatbot">("news");
+  const [tab, setTab] = useState<"news" | "members" | "chatbot" | "partners">("news");
 
   useEffect(() => {
     if (!loading) {
