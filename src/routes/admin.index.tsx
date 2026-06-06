@@ -113,6 +113,7 @@ const ADMIN_TEXT = {
     news: "الأخبار",
     members: "الأعضاء",
     chatbot: "الشات بوت",
+    partners: "الشركاء",
     allNews: "كل الأخبار",
     newArticle: "خبر جديد",
     cover: "الغلاف",
