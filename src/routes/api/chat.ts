@@ -425,11 +425,11 @@ export const Route = createFileRoute("/api/chat")({
           system: SYSTEM_PROMPT + extraContext,
           tools,
           stopWhen: stepCountIs(50),
-          messages: await convertToModelMessages(messages as UIMessage[]),
+          messages: await convertToModelMessages(trustedMessages),
         });
 
         return result.toUIMessageStreamResponse({
-          originalMessages: messages as UIMessage[],
+          originalMessages: trustedMessages,
           onFinish: async ({ messages: finalMessages }) => {
             if (!conversationId) return;
             // Find the latest assistant message (the one just produced)
