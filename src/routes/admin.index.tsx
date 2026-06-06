@@ -353,6 +353,15 @@ function AdminDashboard() {
           >
             {labels.chatbot}
           </button>
+          <button
+            type="button"
+            onClick={() => setTab("partners")}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              tab === "partners" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {labels.partners}
+          </button>
         </div>
 
         {tab === "news" ? (
