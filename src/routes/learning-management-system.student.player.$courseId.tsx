@@ -163,6 +163,7 @@ function Player() {
               allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
               allowFullScreen
               loading="lazy"
+              referrerPolicy="no-referrer"
               className="w-full h-full border-0"
             />
           ) : current && videoSrc ? (
