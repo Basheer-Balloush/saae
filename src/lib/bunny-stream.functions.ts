@@ -164,14 +164,18 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
       if (!enr) throw new Error("Forbidden: not enrolled");
     }
 
-    // Build Bunny token-authenticated HLS URL.
-    //   path = "/<videoId>/playlist.m3u8"
-    //   token = base64url( sha256_raw(tokenKey + path + expires) )
-    //   final = https://<cdn>/<videoId>/playlist.m3u8?token=<token>&expires=<expires>
-    const expires = Math.floor(Date.now() / 1000) + 60 * 15; // 15 minutes
-    const path = `/${l.video_uid}/playlist.m3u8`;
+    // Build Bunny token-authenticated HLS URL with a path-prefix token so the
+    // same token authorizes the playlist AND every sub-resource (variant
+    // playlists, .ts segments, thumbnails). Without token_path the segments
+    // 401/403 and playback breaks while the playlist itself loads fine.
+    //   tokenPath = "/<videoId>/"
+    //   token     = base64url(sha256_raw(tokenKey + tokenPath + expires))
+    //   final     = https://<cdn>/<videoId>/playlist.m3u8
+    //                 ?token=<token>&expires=<expires>&token_path=<encoded tokenPath>
+    const expires = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour
+    const tokenPath = `/${l.video_uid}/`;
     const raw = createHash("sha256")
-      .update(tokenKey + path + expires)
+      .update(tokenKey + tokenPath + expires)
       .digest();
     const token = raw
       .toString("base64")
@@ -179,7 +183,9 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
       .replace(/\//g, "_")
       .replace(/=+$/, "");
 
-    const playbackUrl = `https://${cdnHostname}${path}?token=${token}&expires=${expires}`;
+    const playbackUrl =
+      `https://${cdnHostname}/${l.video_uid}/playlist.m3u8` +
+      `?token=${token}&expires=${expires}&token_path=${encodeURIComponent(tokenPath)}`;
     return { playbackUrl, expires };
   });
 
