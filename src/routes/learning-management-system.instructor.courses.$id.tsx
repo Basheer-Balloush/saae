@@ -740,7 +740,7 @@ function CourseBuilder() {
             {lang === "ar" ? "إدارة الوظائف" : "Manage Assignments"}
           </Button>
         </Link>
-        <AttendanceLink courseId={course.id} lang={lang} />
+        <AttendanceLink courseId={course.id} lang={lang} isAdmin={isAdmin} />
       </div>
 
       <QuizBuilder courseId={course.id} />
