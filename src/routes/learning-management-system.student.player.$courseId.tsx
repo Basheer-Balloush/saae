@@ -152,12 +152,13 @@ function Player() {
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 grid lg:grid-cols-[1fr_320px] gap-6">
       <div>
         <div className="aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center">
-          {current?.video_url && videoSrc ? (
+          {current && videoSrc ? (
             <video
               key={current.id}
-              src={videoSrc}
+              ref={videoRef}
               controls
               controlsList="nodownload"
+              playsInline
               onEnded={markComplete}
               className="w-full h-full"
             />
