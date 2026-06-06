@@ -75,7 +75,7 @@ function StudentHome() {
           <p className="mt-2 text-muted-foreground">{tr.continueLesson}</p>
         </div>
         <Link to="/learning-management-system/student/requests">
-          <Button variant="outline" size="sm">📋 {lang === "ar" ? "طلبات الاشتراك" : "My requests"}</Button>
+          <Button variant="outline" size="sm">📋 {lang === "ar" ? "طلبات التسجيل" : "My requests"}</Button>
         </Link>
       </div>
 

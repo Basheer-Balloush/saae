@@ -293,7 +293,7 @@ function AdminEnrollmentRequests() {
     return (
       <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-6">
         <header>
-          <h1 className="text-2xl font-bold text-foreground">{ar ? "طلبات الاشتراك" : "Enrollment requests"}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{ar ? "طلبات التسجيل" : "Enrollment requests"}</h1>
           <p className="text-sm text-muted-foreground">{ar ? "اختر دورة لعرض طلبات التسجيل الخاصة بها." : "Pick a course to view its enrollment requests."}</p>
         </header>
 
