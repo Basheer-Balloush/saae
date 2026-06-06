@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, PlayCircle, Circle, Paperclip, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { QAPanel } from "@/components/lms/QAPanel";
 import { AssignmentsPanel } from "@/components/lms/AssignmentsPanel";
+import { getBunnyPlayback } from "@/lib/bunny-stream.functions";
+import Hls from "hls.js";
 
 export const Route = createFileRoute("/learning-management-system/student/player/$courseId")({
   head: () => ({ meta: [{ title: "LMS · Player" }] }),
@@ -18,7 +20,7 @@ export const Route = createFileRoute("/learning-management-system/student/player
 });
 
 type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
-type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; attachments: unknown; display_order: number };
+type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; attachments: unknown; display_order: number };
 
 const pick = (lang: "ar" | "en", ar: string | null | undefined, en: string | null | undefined, fallback: string) => {
   if (lang === "en") return en || ar || fallback;
