@@ -144,6 +144,7 @@ function AmsDashboard() {
         course={selected}
         onBack={() => {
           setSelected(null);
+          if (search.course) navigate({ search: {} });
           loadCourses();
         }}
       />
