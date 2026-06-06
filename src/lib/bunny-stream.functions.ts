@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createHash } from "crypto";
+import { createHash, createHmac } from "crypto";
 
 /**
  * Bunny Stream integration.
@@ -164,15 +164,15 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
       if (!enr) throw new Error("Forbidden: not enrolled");
     }
 
-    // Bunny Stream token authentication. The token signs the playlist path;
-    // Bunny then auto-authorizes all segment/variant requests for that video.
-    //   path  = "/<videoId>/playlist.m3u8"
-    //   token = base64url(sha256_raw(tokenKey + path + expires))
-    //   final = https://<cdn><path>?token=<token>&expires=<expires>
+    // Bunny CDN advanced token authentication for HLS.
+    // HLS segment requests are relative to the manifest path, so the token must
+    // live in the URL path and authorize the full video directory.
     const expires = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour
-    const path = `/${l.video_uid}/playlist.m3u8`;
-    const raw = createHash("sha256")
-      .update(tokenKey + path + expires)
+    const tokenPath = `/${l.video_uid}/`;
+    const path = `${tokenPath}playlist.m3u8`;
+    const signingData = `token_path=${encodeURIComponent(tokenPath)}`;
+    const raw = createHmac("sha256", tokenKey)
+      .update(tokenPath + expires + signingData)
       .digest();
     const token = raw
       .toString("base64")
@@ -180,7 +180,7 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
       .replace(/\//g, "_")
       .replace(/=+$/, "");
 
-    const playbackUrl = `https://${cdnHostname}${path}?token=${token}&expires=${expires}`;
+    const playbackUrl = `https://${cdnHostname}/bcdn_token=HS256-${token}&${signingData}&expires=${expires}${path}`;
     return { playbackUrl, expires };
   });
 
