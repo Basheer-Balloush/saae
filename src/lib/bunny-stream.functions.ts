@@ -1,14 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createHash, createHmac } from "crypto";
+import { createHash } from "crypto";
 
 /**
  * Bunny Stream integration.
  *
  * Two server functions:
  *  - createBunnyUpload: instructor-only. Creates a Bunny video and returns TUS upload credentials.
- *  - getBunnyPlayback: any enrolled student. Returns a short-lived signed HLS URL.
+ *  - getBunnyPlayback: any enrolled student. Returns a short-lived signed embed URL.
  *
  * Secrets required (all server-only):
  *   BUNNY_STREAM_LIBRARY_ID
@@ -109,7 +109,7 @@ export const createBunnyUpload = createServerFn({ method: "POST" })
   });
 
 /**
- * Authenticated: return a short-lived signed HLS playback URL for the lesson's Bunny video.
+ * Authenticated: return a short-lived signed Bunny embed URL for the lesson's video.
  * Requires the student to be enrolled in the course (or be the instructor / admin).
  */
 export const getBunnyPlayback = createServerFn({ method: "POST" })
@@ -119,7 +119,7 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { cdnHostname, tokenKey } = getBunnyEnv();
+    const { libraryId, tokenKey } = getBunnyEnv();
 
     // Load the lesson + course context.
     const { data: lesson, error } = await supabase
@@ -164,23 +164,15 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
       if (!enr) throw new Error("Forbidden: not enrolled");
     }
 
-    // Bunny CDN advanced token authentication for HLS.
-    // HLS segment requests are relative to the manifest path, so the token must
-    // live in the URL path and authorize the full video directory.
+    // Bunny Stream embed token authentication. Direct HLS URLs are blocked when
+    // "Block direct url file access" is enabled, so students must use the
+    // secure iframe player instead of the raw CDN playlist.
     const expires = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour
-    const tokenPath = `/${l.video_uid}/`;
-    const path = `${tokenPath}playlist.m3u8`;
-    const signingData = `token_path=${encodeURIComponent(tokenPath)}`;
-    const raw = createHmac("sha256", tokenKey)
-      .update(tokenPath + expires + signingData)
-      .digest();
-    const token = raw
-      .toString("base64")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
+    const token = createHash("sha256")
+      .update(tokenKey + l.video_uid + expires)
+      .digest("hex");
 
-    const playbackUrl = `https://${cdnHostname}/bcdn_token=HS256-${token}&${signingData}&expires=${expires}${path}`;
+    const playbackUrl = `https://iframe.mediadelivery.net/embed/${libraryId}/${l.video_uid}?token=${token}&expires=${expires}`;
     return { playbackUrl, expires };
   });
 
