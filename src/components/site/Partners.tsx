@@ -12,11 +12,8 @@ const bundledLogos = import.meta.glob("@/assets/partner-*.png", {
 
 function resolveLogo(url: string): string {
   if (!url) return url;
-  if (url.startsWith("/src/assets/")) {
-    const key = url.replace("/src/", "/src/");
-    // import.meta.glob uses paths relative to project root with leading "/"
-    const match = Object.entries(bundledLogos).find(([k]) => k.endsWith(url.replace("/src/assets/", "/assets/")));
-    return match ? match[1] : url;
+  if (url.startsWith("/src/assets/") && bundledLogos[url]) {
+    return bundledLogos[url];
   }
   return url;
 }
