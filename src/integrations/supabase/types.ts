@@ -61,6 +61,7 @@ export type Database = {
           created_at: string
           created_by: string
           id: string
+          lms_course_id: string | null
           name_ar: string
           name_en: string | null
           updated_at: string
@@ -69,6 +70,7 @@ export type Database = {
           created_at?: string
           created_by: string
           id?: string
+          lms_course_id?: string | null
           name_ar: string
           name_en?: string | null
           updated_at?: string
@@ -77,11 +79,20 @@ export type Database = {
           created_at?: string
           created_by?: string
           id?: string
+          lms_course_id?: string | null
           name_ar?: string
           name_en?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ams_courses_lms_course_id_fkey"
+            columns: ["lms_course_id"]
+            isOneToOne: true
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ams_registrants: {
         Row: {
@@ -90,6 +101,7 @@ export type Database = {
           email: string | null
           full_name: string
           id: string
+          lms_enrollment_id: string | null
           payment_status: Database["public"]["Enums"]["ams_payment_status"]
           phone: string | null
           updated_at: string
@@ -100,6 +112,7 @@ export type Database = {
           email?: string | null
           full_name: string
           id?: string
+          lms_enrollment_id?: string | null
           payment_status?: Database["public"]["Enums"]["ams_payment_status"]
           phone?: string | null
           updated_at?: string
@@ -110,6 +123,7 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          lms_enrollment_id?: string | null
           payment_status?: Database["public"]["Enums"]["ams_payment_status"]
           phone?: string | null
           updated_at?: string
@@ -120,6 +134,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "ams_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ams_registrants_lms_enrollment_id_fkey"
+            columns: ["lms_enrollment_id"]
+            isOneToOne: true
+            referencedRelation: "lms_enrollments"
             referencedColumns: ["id"]
           },
         ]
@@ -1689,6 +1710,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_ams_course: { Args: { _course_id: string }; Returns: boolean }
+      can_access_ams_registrant: {
+        Args: { _registrant_id: string }
+        Returns: boolean
+      }
+      can_access_ams_session: {
+        Args: { _session_id: string }
+        Returns: boolean
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1721,6 +1751,10 @@ export type Database = {
         Returns: boolean
       }
       is_lms_admin: { Args: { _user_id: string }; Returns: boolean }
+      link_lms_course_to_ams: {
+        Args: { _lms_course_id: string }
+        Returns: string
+      }
       lms_approve_enrollment_request: {
         Args: { _admin_notes?: string; _request_id: string }
         Returns: undefined
@@ -1740,6 +1774,18 @@ export type Database = {
           id: string
           question: string
           quiz_id: string
+        }[]
+      }
+      lms_list_courses_with_ams_link: {
+        Args: never
+        Returns: {
+          ams_course_id: string
+          course_id: string
+          instructor_id: string
+          registrants_count: number
+          status: Database["public"]["Enums"]["lms_course_status"]
+          title_ar: string
+          title_en: string
         }[]
       }
       lms_process_payout: {
@@ -1784,6 +1830,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      unlink_lms_course_from_ams: {
+        Args: { _ams_course_id: string }
+        Returns: undefined
       }
       verify_certificate: {
         Args: { _serial: string }

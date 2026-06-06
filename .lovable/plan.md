@@ -1,92 +1,44 @@
-# خطة معالجة الحِمل على فيديوهات الدورات
+# ربط نظام الحضور بنظام التعليم
 
-## الوضع الحالي (المشكلة)
-- الفيديوهات تُرفع إلى **Supabase Storage** في bucket خاص `lms-private`.
-- المشغّل في `src/routes/learning-management-system.student.player.$courseId.tsx` يطلب `createSignedUrl` (ساعتان) ويُشغّل عبر `<video>` كملف واحد كامل.
-- لا يوجد **HLS / تقطيع / Adaptive Bitrate / CDN فيديو متخصص**.
+## الفكرة العامة
+نظام الحضور (AMS) يبقى كما هو، لكن نضيف إمكانية ربط أي دورة منه بدورة من المنصة التعليمية (LMS). عند الربط:
+- الطلاب المسجّلون والمعتمَدون في دورة LMS يظهرون تلقائياً كمسجّلين في دورة الحضور.
+- المدرّب صاحب دورة LMS وأدمن المنصة التعليمية يقدران يدخلان لإدارة الجلسات والحضور، حتى لو ما عندهم دور AMS.
+- المدرّب يقدر يضيف مسجّلين إضافيين يدوياً (مثلاً طلاب خارج المنصة).
 
-نتيجة: مع عشرات المشاهدين بنفس الوقت → تقطيع، تأخير تحميل، استهلاك Bandwidth مكلف، وSupabase Storage غير مصمّم لبث فيديو واسع.
+## ما الذي سيتغيّر
 
----
+### 1. قاعدة البيانات
+- إضافة عمود `lms_course_id` (اختياري، فريد) على `ams_courses` يربطها بدورة LMS.
+- إضافة عمود `lms_enrollment_id` (اختياري) على `ams_registrants` للتمييز بين المسجّل المتزامن من LMS والمضاف يدوياً.
+- دالة مساعدة جديدة `can_access_ams_course(course_id)` ترجع true إذا:
+  - المستخدم عنده دور AMS (كما هو الآن)، أو
+  - الدورة مربوطة بـ LMS والمستخدم هو مدرّب تلك الدورة، أو
+  - المستخدم أدمن LMS / أدمن عام.
+- تحديث سياسات RLS على `ams_courses` و `ams_sessions` و `ams_registrants` و `ams_attendance` لتستخدم الدالة الجديدة بدلاً من `has_ams_access` فقط.
+- دالة `lms_sync_ams_registrants(course_id)` تُشغَّل تلقائياً عند إضافة/حذف تسجيل LMS، فتضيف المسجّل في `ams_registrants` (أو تحذفه) عندما تكون دورة LMS مربوطة بدورة AMS.
 
-## الحل المقترح: Bunny Stream
-أرخص وأبسط CDN فيديو احترافي يدعم:
-- تحويل تلقائي إلى **HLS متعدد الجودات** (240p → 1080p).
-- **CDN عالمي** مع مشغّل جاهز (iframe) أو HLS مباشر.
-- **حماية** عبر Signed URLs / Token Authentication / منع التحميل.
-- التسعير ~ $0.005/GB بث + $0.005/دقيقة تخزين (أرخص بكثير من Cloudflare Stream).
+### 2. واجهة الأدمن (LMS)
+- في صفحة إدارة الدورات بلوحة أدمن LMS: زر "ربط بنظام الحضور" بجانب كل دورة منشورة.
+  - عند الضغط: إنشاء `ams_courses` جديدة (إذا لم تكن موجودة) ووضع `lms_course_id`.
+  - مزامنة فورية لكل الطلاب المعتمَدين كمسجّلين.
+  - زر "إلغاء الربط" لإزالة الربط (يحذف المسجّلين المتزامنين فقط، يبقي المضافين يدوياً والجلسات).
 
-البديل الأرخص: **YouTube Unlisted** كاحتياط (مجاني تماماً لكن أقل تحكم وحماية).
+### 3. واجهة نظام الحضور (AMS)
+- بطاقة الدورة تعرض شارة "مربوطة بـ LMS" مع اسم دورة LMS، عند وجود ربط.
+- المسجّلون المتزامنون من LMS يظهرون مع شارة صغيرة "من المنصة" ولا يمكن حذفهم يدوياً من AMS (لمنع كسر المزامنة).
+- زر "إضافة مسجّل يدوي" يبقى متاح للجميع.
+- صفحة AMS لا تطلب دور AMS صراحةً للمدرّب أو أدمن LMS — تعتمد على الدالة الجديدة.
 
----
+## التفاصيل التقنية
+- ميجريشن واحدة: إضافة الأعمدة + الدالة `can_access_ams_course` + استبدال سياسات RLS الأربعة على جداول AMS + ترايغر مزامنة على `lms_enrollments` (INSERT/DELETE) يحدث الجدول المرتبط فقط.
+- ميجريشن: دالة RPC `link_lms_course_to_ams(_lms_course_id)` تنشئ ams_course وتزامن المسجّلين دفعة واحدة (SECURITY DEFINER، تتحقق من أدمن LMS).
+- ميجريشن: دالة RPC `unlink_lms_course_from_ams(_ams_course_id)` تحذف المسجّلين الذين عندهم `lms_enrollment_id` وتفك الربط.
+- صفحة أدمن LMS الموجودة `learning-management-system.admin.index.tsx` (أو صفحة جديدة `admin.attendance-link.tsx`) لإدارة الربط.
+- تحديث `attendance-management-system.index.tsx` لإظهار شارة الربط وتعطيل حذف المسجّلين المتزامنين.
+- تحديث `attendance-management-system.login.tsx` بحيث المدرّب وأدمن LMS لا يُمنعان من الدخول حتى لو ما عندهم دور AMS صريح (التحقق صار على مستوى الدورة لا على مستوى الدخول).
 
-## مراحل التنفيذ
-
-### المرحلة 1 — البنية التحتية والإعدادات
-1. إنشاء حساب على Bunny.net وتفعيل **Stream Library**.
-2. الحصول على: `BUNNY_STREAM_LIBRARY_ID`, `BUNNY_STREAM_API_KEY`, `BUNNY_STREAM_CDN_HOSTNAME`, `BUNNY_TOKEN_AUTH_KEY`.
-3. تخزينها كأسرار في Lovable Cloud عبر `add_secret`.
-
-### المرحلة 2 — تعديل قاعدة البيانات
-إضافة أعمدة جديدة لـ `lms_lessons`:
-- `bunny_video_id text` — معرّف الفيديو في Bunny.
-- `video_provider text default 'supabase'` — `'supabase'` أو `'bunny'`.
-- `video_duration_seconds int`.
-- `video_status text` — `pending | processing | ready | failed`.
-
-(الإبقاء على `video_url` للتوافق العكسي مع الفيديوهات القديمة).
-
-### المرحلة 3 — رفع الفيديو (المُدرّب)
-في صفحة `learning-management-system.instructor.courses.$id.tsx`:
-1. إنشاء **server function** `createBunnyVideo` → ينشئ فيديو فارغ في Bunny ويرجع `video_id` + `upload_url`.
-2. الرفع المباشر من المتصفح إلى Bunny (TUS resumable upload) — لا يمر عبر سيرفرنا.
-3. حفظ `bunny_video_id` في الدرس مع `video_provider='bunny'`.
-4. عرض حالة المعالجة (Bunny يحوّلها إلى HLS تلقائياً خلال دقائق).
-
-### المرحلة 4 — تشغيل الفيديو (الطالب)
-في `learning-management-system.student.player.$courseId.tsx`:
-1. **server function** `getBunnyPlaybackToken` محمي بـ `requireSupabaseAuth`:
-   - يتحقق أن الطالب مسجّل في الدورة.
-   - يولّد **Signed Token** لـ Bunny (HMAC SHA256 + expiration + IP).
-   - يُرجع `iframe_url` موقّع صالح لمدة 4 ساعات.
-2. استبدال `<video>` بـ `<iframe>` من Bunny (يتعامل مع HLS + ABR + مشغّل احترافي تلقائياً).
-3. للفيديوهات القديمة (`video_provider='supabase'`) → الإبقاء على المنطق الحالي.
-
-### المرحلة 5 — الأمان
-- **منع التنزيل** من إعدادات Bunny Library.
-- **Token Authentication** إلزامي + IP locking + expiration قصير.
-- **Referer restriction** على دومين الموقع فقط.
-- عدم كشف `bunny_video_id` للعملاء بدون التحقق من التسجيل.
-
-### المرحلة 6 — Webhook لتحديث حالة المعالجة
-- Route عام `src/routes/api/public/bunny-webhook.ts` يستقبل أحداث Bunny (video ready / failed).
-- يتحقق من التوقيع ثم يحدّث `video_status` و `video_duration_seconds`.
-
-### المرحلة 7 — الترحيل (اختياري للفيديوهات الحالية)
-- زر في لوحة الأدمن "ترحيل الفيديوهات القديمة إلى Bunny" يقوم بتنزيل من Supabase ورفع إلى Bunny دفعة دفعة.
-- يمكن تركها كما هي والاكتفاء بتطبيق Bunny للفيديوهات الجديدة فقط.
-
----
-
-## النتيجة المتوقعة
-| المعيار | الآن (Supabase) | بعد Bunny |
-|---|---|---|
-| عدد المشاهدين المتزامنين | عشرات | آلاف |
-| التحميل التكيفي (ABR) | ❌ | ✅ |
-| CDN عالمي | ❌ | ✅ |
-| التكلفة لكل 1000 مشاهد | مرتفعة | منخفضة جداً |
-| جودة المشغّل | عادي | احترافي |
-
----
-
-## الأسرار المطلوبة
-سأطلبها بعد موافقتك على الخطة:
-- `BUNNY_STREAM_LIBRARY_ID`
-- `BUNNY_STREAM_API_KEY`
-- `BUNNY_STREAM_CDN_HOSTNAME`
-- `BUNNY_TOKEN_AUTH_KEY`
-
----
-
-## ملاحظة مهمة
-ممكن البدء بـ **المرحلة 1 → 4** فقط (الأساسيات) ثم إضافة الباقي تدريجياً. هل تريد البدء بـ Bunny أم تفضل بديل آخر (Cloudflare Stream أو YouTube Unlisted)؟
+## ما يبقى كما هو
+- بنية AMS الحالية (جلسات، حضور، تقارير Excel).
+- سياسات الدورات غير المربوطة (تبقى مقصورة على ذوي دور AMS).
+- نظام التسجيل والموافقة في LMS لا يتغيّر.

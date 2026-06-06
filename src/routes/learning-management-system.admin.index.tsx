@@ -22,6 +22,7 @@ import {
   Sparkles,
   Inbox,
   Pencil,
+  CalendarDays,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
@@ -227,6 +228,12 @@ function AdminHome() {
       label: ar ? "التقييمات" : "Reviews",
       icon: Star,
       desc: ar ? "تقييمات الطلاب" : "Student ratings",
+    },
+    {
+      to: "/learning-management-system/admin/attendance-link",
+      label: ar ? "ربط الحضور" : "Attendance link",
+      icon: CalendarDays,
+      desc: ar ? "ربط الدورات بنظام الحضور" : "Link courses to attendance",
     },
   ];
 

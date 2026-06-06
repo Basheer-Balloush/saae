@@ -46,6 +46,7 @@ import { Route as LearningManagementSystemAdminUsersRouteImport } from './routes
 import { Route as LearningManagementSystemAdminReviewsRouteImport } from './routes/learning-management-system.admin.reviews'
 import { Route as LearningManagementSystemAdminEnrollmentRequestsRouteImport } from './routes/learning-management-system.admin.enrollment-requests'
 import { Route as LearningManagementSystemAdminCouponsRouteImport } from './routes/learning-management-system.admin.coupons'
+import { Route as LearningManagementSystemAdminAttendanceLinkRouteImport } from './routes/learning-management-system.admin.attendance-link'
 import { Route as LearningManagementSystemAdminAnalyticsRouteImport } from './routes/learning-management-system.admin.analytics'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -266,6 +267,12 @@ const LearningManagementSystemAdminCouponsRoute =
     path: '/coupons',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const LearningManagementSystemAdminAttendanceLinkRoute =
+  LearningManagementSystemAdminAttendanceLinkRouteImport.update({
+    id: '/attendance-link',
+    path: '/attendance-link',
+    getParentRoute: () => LearningManagementSystemAdminRoute,
+  } as any)
 const LearningManagementSystemAdminAnalyticsRoute =
   LearningManagementSystemAdminAnalyticsRouteImport.update({
     id: '/analytics',
@@ -340,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
+  '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
@@ -382,6 +390,7 @@ export interface FileRoutesByTo {
   '/learning-management-system': typeof LearningManagementSystemIndexRoute
   '/news': typeof NewsIndexRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
+  '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
@@ -430,6 +439,7 @@ export interface FileRoutesById {
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
+  '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
@@ -479,6 +489,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/'
     | '/news/'
     | '/learning-management-system/admin/analytics'
+    | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
     | '/learning-management-system/admin/reviews'
@@ -521,6 +532,7 @@ export interface FileRouteTypes {
     | '/learning-management-system'
     | '/news'
     | '/learning-management-system/admin/analytics'
+    | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
     | '/learning-management-system/admin/reviews'
@@ -568,6 +580,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/'
     | '/news/'
     | '/learning-management-system/admin/analytics'
+    | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
     | '/learning-management-system/admin/reviews'
@@ -869,6 +882,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemAdminCouponsRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
     }
+    '/learning-management-system/admin/attendance-link': {
+      id: '/learning-management-system/admin/attendance-link'
+      path: '/attendance-link'
+      fullPath: '/learning-management-system/admin/attendance-link'
+      preLoaderRoute: typeof LearningManagementSystemAdminAttendanceLinkRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRoute
+    }
     '/learning-management-system/admin/analytics': {
       id: '/learning-management-system/admin/analytics'
       path: '/analytics'
@@ -946,6 +966,7 @@ const AttendanceManagementSystemRouteWithChildren =
 
 interface LearningManagementSystemAdminRouteChildren {
   LearningManagementSystemAdminAnalyticsRoute: typeof LearningManagementSystemAdminAnalyticsRoute
+  LearningManagementSystemAdminAttendanceLinkRoute: typeof LearningManagementSystemAdminAttendanceLinkRoute
   LearningManagementSystemAdminCouponsRoute: typeof LearningManagementSystemAdminCouponsRoute
   LearningManagementSystemAdminEnrollmentRequestsRoute: typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   LearningManagementSystemAdminReviewsRoute: typeof LearningManagementSystemAdminReviewsRoute
@@ -957,6 +978,8 @@ const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminR
   {
     LearningManagementSystemAdminAnalyticsRoute:
       LearningManagementSystemAdminAnalyticsRoute,
+    LearningManagementSystemAdminAttendanceLinkRoute:
+      LearningManagementSystemAdminAttendanceLinkRoute,
     LearningManagementSystemAdminCouponsRoute:
       LearningManagementSystemAdminCouponsRoute,
     LearningManagementSystemAdminEnrollmentRequestsRoute:
