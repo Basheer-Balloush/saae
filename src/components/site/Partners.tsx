@@ -1,89 +1,91 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useLang } from "@/lib/i18n";
-import sarrdehLogo from "@/assets/partner-sarrdeh.png";
-import devistaLogo from "@/assets/partner-devista.png";
-import ilmhubLogo from "@/assets/partner-ilmhub.png";
-import stepupLogo from "@/assets/partner-stepup.png";
-import aleppoLogo from "@/assets/partner-aleppo.png";
-import circlesLogo from "@/assets/partner-circles.png";
-import sdoLogo from "@/assets/partner-sdo.png";
-import sdoLogoLight from "@/assets/partner-sdo-light.png";
-import dLogo from "@/assets/partner-d.png";
-import joblinkLogo from "@/assets/partner-joblink.png";
-import yarmoukLogo from "@/assets/partner-yarmouk.png";
-import damascusLogo from "@/assets/partner-damascus.png";
-import abqarLogo from "@/assets/partner-abqar.png";
-import lmipLogo from "@/assets/partner-lmip.png";
-import peopleLogo from "@/assets/partner-people.png";
-import azbooksLogo from "@/assets/partner-azbooks.png";
-import syrianTelecomLogo from "@/assets/partner-syriantelecom.png";
-import ihsanLogo from "@/assets/partner-ihsan.png";
-import mosalLogo from "@/assets/partner-mosal.png";
-import cubesLogo from "@/assets/partner-cubes.png";
-import baukantLogo from "@/assets/partner-baukant.png";
-import baccaLogo from "@/assets/partner-bacca.png";
+import { supabase } from "@/integrations/supabase/client";
 
-const PARTNERS = [
-  { name: "Sarrdeh Tech", logo: sarrdehLogo, sizeClass: "h-24" },
-  { name: "Devista Consulting", logo: devistaLogo, sizeClass: "h-24" },
-  { name: "ILM Hub", logo: ilmhubLogo, sizeClass: "h-32" },
-  { name: "Step Up", logo: stepupLogo, sizeClass: "h-24" },
-  { name: "Aleppo Governorate", logo: aleppoLogo, sizeClass: "h-28" },
-  { name: "Circles", logo: circlesLogo, sizeClass: "h-24" },
-  { name: "Syrian Development Organization", logo: sdoLogo, logoLight: sdoLogoLight, sizeClass: "h-36" },
-  { name: "D", logo: dLogo, sizeClass: "h-20" },
-  { name: "JobLink", logo: joblinkLogo, sizeClass: "h-24" },
-  { name: "Yarmouk Private University", logo: yarmoukLogo, sizeClass: "h-28" },
-  { name: "Damascus University", logo: damascusLogo, sizeClass: "h-28" },
-  { name: "Kawkab Abqar", logo: abqarLogo, sizeClass: "h-24" },
-  { name: "LMIP", logo: lmipLogo, sizeClass: "h-24" },
-  { name: "People", logo: peopleLogo, sizeClass: "h-24" },
-  { name: "A-Z Books", logo: azbooksLogo, sizeClass: "h-24" },
-  { name: "Syrian Telecom", logo: syrianTelecomLogo, sizeClass: "h-24" },
-  { name: "Al-Ihsan Medical", logo: ihsanLogo, sizeClass: "h-24" },
-  { name: "Ministry of Social Affairs and Labor", logo: mosalLogo, sizeClass: "h-24" },
-  { name: "Cubes", logo: cubesLogo, sizeClass: "h-24" },
-  { name: "Baukant", logo: baukantLogo, sizeClass: "h-24" },
-  { name: "BACCA", logo: baccaLogo, sizeClass: "h-20" },
-];
+// Eager import of bundled partner assets so legacy /src/assets/... seed rows
+// still resolve to real built URLs at runtime.
+const bundledLogos = import.meta.glob("@/assets/partner-*.png", {
+  eager: true,
+  import: "default",
+}) as Record<string, string>;
+
+function resolveLogo(url: string): string {
+  if (!url) return url;
+  if (url.startsWith("/src/assets/")) {
+    const key = url.replace("/src/", "/src/");
+    // import.meta.glob uses paths relative to project root with leading "/"
+    const match = Object.entries(bundledLogos).find(([k]) => k.endsWith(url.replace("/src/assets/", "/assets/")));
+    return match ? match[1] : url;
+  }
+  return url;
+}
+
+type Partner = {
+  id: string;
+  name: string;
+  logo_url: string;
+  logo_light_url: string | null;
+  size_class: string;
+};
 
 export function Partners() {
   const { t } = useLang();
+  const [partners, setPartners] = useState<Partner[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("partners")
+      .select("id,name,logo_url,logo_light_url,size_class")
+      .eq("show_on_home", true)
+      .order("display_order", { ascending: true })
+      .then(({ data }) => {
+        setPartners(
+          ((data ?? []) as Partner[]).map((p) => ({
+            ...p,
+            logo_url: resolveLogo(p.logo_url),
+            logo_light_url: p.logo_light_url ? resolveLogo(p.logo_light_url) : null,
+          })),
+        );
+      });
+  }, []);
 
   const renderPartnerSet = (setIndex: number) => (
     <div className="partners-set flex shrink-0 items-center gap-16 pr-16">
-      {PARTNERS.map((p) => (
+      {partners.map((p) => (
         <div
-          key={`${p.name}-${setIndex}`}
+          key={`${p.id}-${setIndex}`}
           className="flex h-36 w-52 flex-none items-center justify-center sm:w-60"
         >
-          {(p as { logoLight?: string }).logoLight ? (
+          {p.logo_light_url ? (
             <>
               <img
-                src={(p as { logoLight: string }).logoLight}
+                src={p.logo_light_url}
                 alt={`${p.name} partner logo`}
                 decoding="async"
-                className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105 block dark:hidden`}
+                className={`${p.size_class} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105 block dark:hidden`}
               />
               <img
-                src={p.logo}
+                src={p.logo_url}
                 alt={`${p.name} partner logo`}
                 decoding="async"
-                className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105 hidden dark:block`}
+                className={`${p.size_class} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105 hidden dark:block`}
               />
             </>
           ) : (
             <img
-              src={p.logo}
+              src={p.logo_url}
               alt={`${p.name} partner logo`}
               decoding="async"
-              className={`${p.sizeClass} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105`}
+              className={`${p.size_class} max-h-32 max-w-full w-auto object-contain transition-transform duration-300 hover:scale-105`}
             />
           )}
         </div>
       ))}
     </div>
   );
+
+  if (partners.length === 0) return null;
 
   return (
     <section id="partners" className="relative bg-surface py-24 lg:py-28">
