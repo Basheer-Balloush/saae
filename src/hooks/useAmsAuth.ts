@@ -30,7 +30,7 @@ export function useAmsAuth() {
         .eq("instructor_id", uid)
         .limit(50);
       const hasLinked = (linkedCourses ?? []).some(
-        (c) => Array.isArray((c as { ams_courses?: unknown[] }).ams_courses) && ((c as { ams_courses: unknown[] }).ams_courses.length > 0),
+        (c) => (c as { ams_courses: { id: string } | { id: string }[] | null }).ams_courses != null,
       );
       setHasAccess(hasLinked);
     };
