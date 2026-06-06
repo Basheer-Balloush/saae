@@ -286,7 +286,7 @@ function CourseBuilder() {
             filetype: file.type || "video/mp4",
             title: lesson.title || file.name,
           },
-          chunkSize: 50 * 1024 * 1024,
+          chunkSize: 5 * 1024 * 1024,
           onError: (err) => reject(err),
           onProgress: (sent, total) => {
             const pct = total ? Math.round((sent / total) * 100) : 0;
