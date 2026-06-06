@@ -254,7 +254,9 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Invalid message count", { status: 400 });
         }
         const MAX_CONTENT_CHARS = 8000;
-        const allowedRoles = new Set(["user", "assistant", "system"]);
+        // Only accept "user" role from clients; "system" and "assistant" turns must
+        // come from the server side to prevent prompt-injection via fake history.
+        const allowedRoles = new Set(["user"]);
         for (const m of messages as Array<{ role?: unknown; content?: unknown; parts?: unknown }>) {
           if (!m || typeof m !== "object") {
             return new Response("Invalid message", { status: 400 });
@@ -307,6 +309,29 @@ export const Route = createFileRoute("/api/chat")({
           const fallbackSession = chatSessionId ?? `auto_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
           conversationId = await upsertConversation(fallbackSession, lang, userAgent);
         }
+
+        // Rebuild trusted conversation history from DB (server-side only) so that
+        // clients cannot fabricate prior `assistant`/`system` turns to bypass the
+        // system prompt. The client only supplies new user turns.
+        const { data: history } = await supabaseAdmin
+          .from("chat_messages")
+          .select("role, content, parts")
+          .eq("conversation_id", conversationId as string)
+          .in("role", ["user", "assistant"])
+          .order("created_at", { ascending: true })
+          .limit(50);
+
+        const trustedMessages: UIMessage[] = ((history ?? []) as Array<{
+          role: string;
+          content: string | null;
+          parts: unknown;
+        }>).map((m, i) => ({
+          id: `db-${i}`,
+          role: m.role as "user" | "assistant",
+          parts: Array.isArray(m.parts) && m.parts.length > 0
+            ? (m.parts as UIMessage["parts"])
+            : [{ type: "text", text: m.content ?? "" }],
+        }));
 
         const tools = {
           submit_individual_lead: tool({
@@ -400,11 +425,11 @@ export const Route = createFileRoute("/api/chat")({
           system: SYSTEM_PROMPT + extraContext,
           tools,
           stopWhen: stepCountIs(50),
-          messages: await convertToModelMessages(messages as UIMessage[]),
+          messages: await convertToModelMessages(trustedMessages),
         });
 
         return result.toUIMessageStreamResponse({
-          originalMessages: messages as UIMessage[],
+          originalMessages: trustedMessages,
           onFinish: async ({ messages: finalMessages }) => {
             if (!conversationId) return;
             // Find the latest assistant message (the one just produced)
