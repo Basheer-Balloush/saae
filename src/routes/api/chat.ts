@@ -316,7 +316,7 @@ export const Route = createFileRoute("/api/chat")({
         const { data: history } = await supabaseAdmin
           .from("chat_messages")
           .select("role, content, parts")
-          .eq("conversation_id", conversationId)
+          .eq("conversation_id", conversationId as string)
           .in("role", ["user", "assistant"])
           .order("created_at", { ascending: true })
           .limit(50);
