@@ -1660,6 +1660,42 @@ export type Database = {
         }
         Relationships: []
       }
+      partners: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          logo_light_url: string | null
+          logo_url: string
+          name: string
+          show_on_home: boolean
+          size_class: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          logo_light_url?: string | null
+          logo_url: string
+          name: string
+          show_on_home?: boolean
+          size_class?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          logo_light_url?: string | null
+          logo_url?: string
+          name?: string
+          show_on_home?: boolean
+          size_class?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
