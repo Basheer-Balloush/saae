@@ -43,7 +43,7 @@ type Course = {
 };
 type Section = { id: string; title: string; display_order: number };
 type LessonAttachment = { name: string; url: string };
-type Lesson = { id: string; section_id: string; title: string; video_url: string | null; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number; attachments: LessonAttachment[] | null };
+type Lesson = { id: string; section_id: string; title: string; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number; attachments: LessonAttachment[] | null };
 type Category = { id: string; name_ar: string; name_en: string | null };
 
 function CourseBuilder() {
