@@ -447,6 +447,8 @@ function AdminDashboard() {
           </>
         ) : tab === "members" ? (
           <MembersAdmin labels={labels} lang={lang} />
+        ) : tab === "partners" ? (
+          <PartnersAdmin lang={lang} />
         ) : (
           <AdminChatbotSection lang={lang} />
         )}
