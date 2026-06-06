@@ -1092,3 +1092,311 @@ function MemberForm({
     </div>
   );
 }
+
+// ----- Partners admin -----
+
+type PartnerRow = {
+  id: string;
+  name: string;
+  logo_url: string;
+  logo_light_url: string | null;
+  size_class: string;
+  display_order: number;
+  show_on_home: boolean;
+};
+
+const SIZE_OPTIONS = ["h-16", "h-20", "h-24", "h-28", "h-32", "h-36", "h-40"] as const;
+
+async function uploadPartnerLogo(file: File): Promise<string> {
+  const ext = file.name.split(".").pop() || "png";
+  const path = `partners/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from("news-images").upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: file.type || undefined,
+  });
+  if (error) throw error;
+  const { data } = supabase.storage.from("news-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+function PartnersAdmin({ lang }: { lang: "en" | "ar" }) {
+  const ar = lang === "ar";
+  const [rows, setRows] = useState<PartnerRow[]>([]);
+  const [editing, setEditing] = useState<PartnerRow | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [bump, setBump] = useState(0);
+
+  useEffect(() => {
+    supabase
+      .from("partners")
+      .select("*")
+      .order("display_order", { ascending: true })
+      .then(({ data, error }) => {
+        if (error) toast.error(toUserMessage(error));
+        else setRows((data ?? []) as PartnerRow[]);
+      });
+  }, [bump]);
+
+  const remove = async (id: string) => {
+    if (!confirm(ar ? "هل تريد حذف هذا الشريك؟" : "Delete this partner?")) return;
+    const { error } = await supabase.from("partners").delete().eq("id", id);
+    if (error) toast.error(toUserMessage(error));
+    else { toast.success(ar ? "تم الحذف" : "Deleted"); setBump((k) => k + 1); }
+  };
+
+  const toggleHome = async (row: PartnerRow, value: boolean) => {
+    const { error } = await supabase.from("partners").update({ show_on_home: value }).eq("id", row.id);
+    if (error) toast.error(toUserMessage(error));
+    else setRows((prev) => prev.map((p) => (p.id === row.id ? { ...p, show_on_home: value } : p)));
+  };
+
+  return (
+    <>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-foreground">
+          {ar ? "الشركاء" : "Partners"} ({rows.length})
+        </h2>
+        <Button onClick={() => { setEditing(null); setShowForm(true); }}>
+          <Plus className="h-4 w-4" /> {ar ? "شريك جديد" : "New partner"}
+        </Button>
+      </div>
+
+      <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-card">
+        <table className="w-full min-w-[720px] text-sm">
+          <thead className="bg-muted/40 text-start text-xs uppercase tracking-wide text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3 text-start">{ar ? "اللوغو (داكن)" : "Logo (dark)"}</th>
+              <th className="px-4 py-3 text-start">{ar ? "اللوغو (فاتح)" : "Logo (light)"}</th>
+              <th className="px-4 py-3 text-start">{ar ? "الاسم" : "Name"}</th>
+              <th className="px-4 py-3 text-start">{ar ? "الحجم" : "Size"}</th>
+              <th className="px-4 py-3 text-start">{ar ? "الترتيب" : "Order"}</th>
+              <th className="px-4 py-3 text-start">{ar ? "ظاهر" : "Visible"}</th>
+              <th className="px-4 py-3 text-end">{ar ? "إجراءات" : "Actions"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                  {ar ? "لا يوجد شركاء بعد." : "No partners yet."}
+                </td>
+              </tr>
+            )}
+            {rows.map((r) => (
+              <tr key={r.id} className="border-t border-border">
+                <td className="px-4 py-3">
+                  <div className="flex h-12 w-20 items-center justify-center rounded bg-zinc-900 p-1">
+                    <img src={r.logo_url} alt="" className="max-h-full max-w-full object-contain" />
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  {r.logo_light_url ? (
+                    <div className="flex h-12 w-20 items-center justify-center rounded bg-white p-1">
+                      <img src={r.logo_light_url} alt="" className="max-h-full max-w-full object-contain" />
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-3 font-medium text-foreground">{r.name}</td>
+                <td className="px-4 py-3 text-muted-foreground">{r.size_class}</td>
+                <td className="px-4 py-3 text-muted-foreground">{r.display_order}</td>
+                <td className="px-4 py-3">
+                  <Switch checked={r.show_on_home} onCheckedChange={(v) => toggleHome(r, v)} />
+                </td>
+                <td className="px-4 py-3 text-end">
+                  <Button variant="ghost" size="sm" onClick={() => { setEditing(r); setShowForm(true); }}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => remove(r.id)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {showForm && (
+        <PartnerForm
+          initial={editing}
+          lang={lang}
+          onClose={() => setShowForm(false)}
+          onSaved={() => { setShowForm(false); setBump((k) => k + 1); }}
+        />
+      )}
+    </>
+  );
+}
+
+function PartnerForm({
+  initial, lang, onClose, onSaved,
+}: {
+  initial: PartnerRow | null;
+  lang: "en" | "ar";
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const ar = lang === "ar";
+  const [name, setName] = useState(initial?.name ?? "");
+  const [logoUrl, setLogoUrl] = useState(initial?.logo_url ?? "");
+  const [logoLightUrl, setLogoLightUrl] = useState(initial?.logo_light_url ?? "");
+  const [sizeClass, setSizeClass] = useState(initial?.size_class ?? "h-24");
+  const [displayOrder, setDisplayOrder] = useState(initial?.display_order ?? 0);
+  const [showOnHome, setShowOnHome] = useState(initial?.show_on_home ?? true);
+  const [uploading, setUploading] = useState<"dark" | "light" | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const handleUpload = async (file: File, which: "dark" | "light") => {
+    setUploading(which);
+    try {
+      const url = await uploadPartnerLogo(file);
+      if (which === "dark") setLogoUrl(url);
+      else setLogoLightUrl(url);
+      toast.success(ar ? "تم رفع الصورة" : "Logo uploaded");
+    } catch (e) {
+      toast.error(toUserMessage(e));
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !logoUrl) {
+      toast.error(ar ? "الاسم واللوغو الداكن مطلوبان" : "Name and dark logo are required");
+      return;
+    }
+    setSaving(true);
+    const payload = {
+      name: name.trim(),
+      logo_url: logoUrl,
+      logo_light_url: logoLightUrl || null,
+      size_class: sizeClass,
+      display_order: displayOrder,
+      show_on_home: showOnHome,
+    };
+    const { error } = initial
+      ? await supabase.from("partners").update(payload).eq("id", initial.id)
+      : await supabase.from("partners").insert(payload);
+    setSaving(false);
+    if (error) { toast.error(toUserMessage(error)); return; }
+    toast.success(ar ? (initial ? "تم التحديث" : "تم الإنشاء") : (initial ? "Updated" : "Created"));
+    onSaved();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-border bg-card p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-foreground">
+            {initial ? (ar ? "تعديل شريك" : "Edit partner") : (ar ? "شريك جديد" : "New partner")}
+          </h3>
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={submit} className="space-y-4">
+          <div>
+            <Label>{ar ? "الاسم" : "Name"}</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} required />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <Label>{ar ? "اللوغو (للوضع الداكن)" : "Logo (for dark mode)"}</Label>
+              <div className="mt-2 flex items-center gap-3">
+                <div className="flex h-16 w-24 items-center justify-center rounded border border-border bg-zinc-900 p-1">
+                  {logoUrl ? (
+                    <img src={logoUrl} alt="" className="max-h-full max-w-full object-contain" />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
+                </div>
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-xs hover:bg-muted">
+                  {uploading === "dark" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                  <span>{ar ? "رفع" : "Upload"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f, "dark"); e.target.value = ""; }}
+                  />
+                </label>
+                {logoUrl && (
+                  <button type="button" className="text-xs text-destructive hover:underline" onClick={() => setLogoUrl("")}>
+                    {ar ? "إزالة" : "Remove"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <Label>{ar ? "اللوغو (للوضع الفاتح — اختياري)" : "Logo (for light mode — optional)"}</Label>
+              <div className="mt-2 flex items-center gap-3">
+                <div className="flex h-16 w-24 items-center justify-center rounded border border-border bg-white p-1">
+                  {logoLightUrl ? (
+                    <img src={logoLightUrl} alt="" className="max-h-full max-w-full object-contain" />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
+                </div>
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-xs hover:bg-muted">
+                  {uploading === "light" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                  <span>{ar ? "رفع" : "Upload"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f, "light"); e.target.value = ""; }}
+                  />
+                </label>
+                {logoLightUrl && (
+                  <button type="button" className="text-xs text-destructive hover:underline" onClick={() => setLogoLightUrl("")}>
+                    {ar ? "إزالة" : "Remove"}
+                  </button>
+                )}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {ar ? "اتركه فارغاً لاستخدام نفس اللوغو في الوضعين." : "Leave empty to use the same logo in both modes."}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <Label>{ar ? "الحجم" : "Size"}</Label>
+              <Select value={sizeClass} onValueChange={setSizeClass}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {SIZE_OPTIONS.map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>{ar ? "ترتيب العرض" : "Display order"}</Label>
+              <Input type="number" value={displayOrder} onChange={(e) => setDisplayOrder(parseInt(e.target.value, 10) || 0)} />
+            </div>
+            <div className="flex items-end gap-2">
+              <Switch checked={showOnHome} onCheckedChange={setShowOnHome} id="partner-show" />
+              <Label htmlFor="partner-show">{ar ? "إظهار في الرئيسية" : "Show on home"}</Label>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={onClose}>{ar ? "إلغاء" : "Cancel"}</Button>
+            <Button type="submit" disabled={saving || uploading !== null}>
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+              {initial ? (ar ? "حفظ التعديلات" : "Save changes") : (ar ? "إنشاء" : "Create")}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
