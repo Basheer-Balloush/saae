@@ -181,7 +181,15 @@ const ADMIN_TEXT = {
 type AdminLabels = (typeof ADMIN_TEXT)[keyof typeof ADMIN_TEXT];
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "Admin Dashboard" }] }),
+  head: () => ({
+    meta: [
+      { title: "Admin Dashboard" },
+      { name: "description", content: "Private admin dashboard for managing site content, news, communities, and chatbot settings." },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "Admin Dashboard" },
+      { property: "og:description", content: "Private admin dashboard for managing site content, news, communities, and chatbot settings." },
+    ],
+  }),
   component: AdminDashboard,
 });
 
