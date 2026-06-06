@@ -862,9 +862,11 @@ function CourseBuilder() {
   );
 }
 
-function AttendanceLink({ courseId, lang }: { courseId: string; lang: "ar" | "en" }) {
+function AttendanceLink({ courseId, lang, isAdmin }: { courseId: string; lang: "ar" | "en"; isAdmin: boolean }) {
   const [amsId, setAmsId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+
   useEffect(() => {
     let active = true;
     (async () => {
@@ -881,8 +883,39 @@ function AttendanceLink({ courseId, lang }: { courseId: string; lang: "ar" | "en
     return () => { active = false; };
   }, [courseId]);
 
+  const handleLink = async () => {
+    setBusy(true);
+    const { data, error } = await supabase.rpc("link_lms_course_to_ams", { _lms_course_id: courseId });
+    setBusy(false);
+    if (error) { toast.error(toUserMessage(error)); return; }
+    setAmsId(data as string);
+    toast.success(lang === "ar" ? "تم تفعيل نظام الحضور" : "Attendance enabled");
+  };
+
+  const handleUnlink = async () => {
+    if (!amsId) return;
+    if (!confirm(lang === "ar"
+      ? "إلغاء ربط نظام الحضور؟ سيُحذف الطلاب المتزامنون."
+      : "Unlink attendance? Synced students will be removed.")) return;
+    setBusy(true);
+    const { error } = await supabase.rpc("unlink_lms_course_from_ams", { _ams_course_id: amsId });
+    setBusy(false);
+    if (error) { toast.error(toUserMessage(error)); return; }
+    setAmsId(null);
+    toast.success(lang === "ar" ? "تم إلغاء الربط" : "Unlinked");
+  };
+
   if (loading) return null;
+
   if (!amsId) {
+    if (isAdmin) {
+      return (
+        <Button variant="outline" onClick={handleLink} disabled={busy}>
+          {busy ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <ClipboardList className="h-4 w-4 mx-1" />}
+          {lang === "ar" ? "تفعيل نظام الحضور" : "Enable Attendance"}
+        </Button>
+      );
+    }
     return (
       <span className="text-xs text-muted-foreground self-center px-2">
         {lang === "ar"
@@ -891,12 +924,20 @@ function AttendanceLink({ courseId, lang }: { courseId: string; lang: "ar" | "en
       </span>
     );
   }
+
   return (
-    <Link to="/attendance-management-system" search={{ course: amsId }}>
-      <Button variant="outline">
-        <ClipboardList className="h-4 w-4 mx-1" />
-        {lang === "ar" ? "الحضور والجلسات" : "Attendance & Sessions"}
-      </Button>
-    </Link>
+    <div className="flex items-center gap-2">
+      <Link to="/attendance-management-system" search={{ course: amsId }}>
+        <Button variant="outline">
+          <ClipboardList className="h-4 w-4 mx-1" />
+          {lang === "ar" ? "الحضور والجلسات" : "Attendance & Sessions"}
+        </Button>
+      </Link>
+      {isAdmin && (
+        <Button variant="ghost" size="sm" onClick={handleUnlink} disabled={busy}>
+          {lang === "ar" ? "إلغاء الربط" : "Unlink"}
+        </Button>
+      )}
+    </div>
   );
 }
