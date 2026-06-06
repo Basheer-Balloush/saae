@@ -264,13 +264,69 @@ function CourseBuilder() {
 
   const uploadVideo = async (lesson: Lesson, file: File) => {
     if (!user) return;
-    const path = `${user.id}/${course.id}/${lesson.id}-${Date.now()}.${file.name.split(".").pop()}`;
-    toast.info(lang === "ar" ? "جاري رفع الفيديو..." : "Uploading video...");
-    const { error } = await supabase.storage.from("lms-private").upload(path, file, { upsert: true });
-    if (error) { toast.error(toUserMessage(error)); return; }
-    // Store the storage path with prefix; the player resolves a fresh short-lived signed URL on demand
-    await updateLesson(lesson.id, { video_url: `private:${path}` });
-    toast.success(lang === "ar" ? "تم رفع الفيديو" : "Video uploaded");
+    try {
+      setVideoProgress((p) => ({ ...p, [lesson.id]: 0 }));
+      toast.info(lang === "ar" ? "جاري تجهيز الرفع..." : "Preparing upload...");
+
+      const creds = await createBunnyUpload({
+        data: { lessonId: lesson.id, title: lesson.title || file.name },
+      });
+
+      await new Promise<void>((resolve, reject) => {
+        const upload = new tus.Upload(file, {
+          endpoint: creds.tusEndpoint,
+          retryDelays: [0, 3000, 5000, 10000, 20000],
+          headers: {
+            AuthorizationSignature: creds.authorizationSignature,
+            AuthorizationExpire: String(creds.authorizationExpire),
+            VideoId: creds.videoId,
+            LibraryId: String(creds.libraryId),
+          },
+          metadata: {
+            filetype: file.type || "video/mp4",
+            title: lesson.title || file.name,
+          },
+          chunkSize: 50 * 1024 * 1024,
+          onError: (err) => reject(err),
+          onProgress: (sent, total) => {
+            const pct = total ? Math.round((sent / total) * 100) : 0;
+            setVideoProgress((p) => ({ ...p, [lesson.id]: pct }));
+          },
+          onSuccess: () => resolve(),
+        });
+        upload.start();
+      });
+
+      await setLessonBunnyVideo({
+        data: { lessonId: lesson.id, videoId: creds.videoId },
+      });
+
+      setLessons((curr) =>
+        curr.map((x) =>
+          x.id === lesson.id
+            ? { ...x, video_provider: "bunny", video_uid: creds.videoId, video_ready: true, video_url: null }
+            : x,
+        ),
+      );
+      setVideoProgress((p) => {
+        const { [lesson.id]: _omit, ...rest } = p;
+        void _omit;
+        return rest;
+      });
+      toast.success(
+        lang === "ar"
+          ? "تم رفع الفيديو — جاري المعالجة على Bunny (1-3 دقائق)"
+          : "Video uploaded — Bunny is encoding (1-3 minutes)",
+      );
+    } catch (e) {
+      console.error("[bunny upload]", e);
+      setVideoProgress((p) => {
+        const { [lesson.id]: _omit, ...rest } = p;
+        void _omit;
+        return rest;
+      });
+      toast.error(toUserMessage(e));
+    }
   };
 
   const MAX_ATTACHMENT_BYTES = 50 * 1024 * 1024;
