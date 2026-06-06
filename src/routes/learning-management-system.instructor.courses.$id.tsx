@@ -672,6 +672,68 @@ function CourseBuilder() {
         )}
       </section>
 
+      {/* Approved / enrolled students */}
+      <section className="rounded-2xl border border-border bg-card p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="font-bold text-foreground">{lang === "ar" ? "الطلاب المسجلون" : "Enrolled students"}</h2>
+          <span className="text-xs text-muted-foreground">
+            {lang === "ar" ? `العدد: ${enrolledStudents.length}` : `Count: ${enrolledStudents.length}`}
+          </span>
+        </div>
+        {enrolledStudents.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{lang === "ar" ? "لا يوجد طلاب مسجلون بعد." : "No enrolled students yet."}</p>
+        ) : (
+          <>
+            <ul className="divide-y divide-border">
+              {enrolledStudents.slice(0, 5).map((s) => (
+                <li key={s.id} className="py-3 flex flex-wrap items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="text-xs font-mono text-muted-foreground truncate max-w-[260px]">{s.student_id}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {new Date(s.enrolled_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}
+                      <span className="inline-block rounded-full px-2 py-0.5 ms-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
+                        {Math.round(Number(s.progress))}%
+                      </span>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {enrolledStudents.length > 5 && (
+              <div className="flex justify-center pt-2">
+                <Button variant="outline" size="sm" onClick={() => setShowAllStudents(true)}>
+                  {lang === "ar" ? `عرض الكل (${enrolledStudents.length})` : `Show all (${enrolledStudents.length})`}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+
+      {/* All students dialog */}
+      <Dialog open={showAllStudents} onOpenChange={setShowAllStudents}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{lang === "ar" ? "الطلاب المسجلون" : "Enrolled students"}</DialogTitle>
+          </DialogHeader>
+          <ul className="divide-y divide-border">
+            {enrolledStudents.map((s) => (
+              <li key={s.id} className="py-3 flex flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-xs font-mono text-muted-foreground truncate max-w-[320px]">{s.student_id}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {new Date(s.enrolled_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}
+                    <span className="inline-block rounded-full px-2 py-0.5 ms-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
+                      {Math.round(Number(s.progress))}%
+                    </span>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </DialogContent>
+      </Dialog>
+
       <section className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-foreground">{tr.syllabus}</h2>
