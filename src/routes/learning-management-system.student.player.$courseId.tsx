@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, PlayCircle, Circle, Paperclip, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { QAPanel } from "@/components/lms/QAPanel";
 import { AssignmentsPanel } from "@/components/lms/AssignmentsPanel";
+import { getBunnyPlayback } from "@/lib/bunny-stream.functions";
+import Hls from "hls.js";
 
 export const Route = createFileRoute("/learning-management-system/student/player/$courseId")({
   head: () => ({ meta: [{ title: "LMS · Player" }] }),
@@ -18,7 +20,7 @@ export const Route = createFileRoute("/learning-management-system/student/player
 });
 
 type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
-type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; attachments: unknown; display_order: number };
+type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; attachments: unknown; display_order: number };
 
 const pick = (lang: "ar" | "en", ar: string | null | undefined, en: string | null | undefined, fallback: string) => {
   if (lang === "en") return en || ar || fallback;
@@ -51,7 +53,7 @@ function Player() {
       if (secs && secs.length) {
         const ids = secs.map((s) => s.id);
         const [{ data: lss }, { data: prs }] = await Promise.all([
-          supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids).order("display_order"),
+          supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids).order("display_order"),
           supabase.from("lms_lesson_progress").select("lesson_id,is_completed").eq("student_id", user.id),
         ]);
         const list = (lss as Lesson[]) ?? [];
@@ -69,16 +71,29 @@ function Player() {
   const currentTitle = current ? pick(lang, current.title_ar, current.title_en, current.title) : "";
   const currentContent = current ? pick(lang, current.content_md_ar, current.content_md_en, current.content_md ?? "") : "";
 
-  // Resolve private video paths to fresh short-lived signed URLs
+  // Resolve playback source for the current lesson (Bunny HLS or legacy Supabase signed URL)
   useEffect(() => {
     let active = true;
+    setVideoSrc(null);
     (async () => {
-      if (!current?.video_url) { setVideoSrc(null); return; }
+      if (!current) return;
+      if (current.video_provider === "bunny" && current.video_uid) {
+        try {
+          const res = await getBunnyPlayback({ data: { lessonId: current.id } });
+          if (!active) return;
+          setVideoSrc(res.playbackUrl);
+        } catch (e) {
+          if (!active) return;
+          toast.error(toUserMessage(e));
+        }
+        return;
+      }
+      if (!current.video_url) return;
       if (current.video_url.startsWith("private:")) {
         const path = current.video_url.slice("private:".length);
         const { data, error } = await supabase.storage.from("lms-private").createSignedUrl(path, 60 * 60 * 2);
         if (!active) return;
-        if (error) { toast.error(toUserMessage(error)); setVideoSrc(null); return; }
+        if (error) { toast.error(toUserMessage(error)); return; }
         setVideoSrc(data?.signedUrl ?? null);
       } else {
         setVideoSrc(current.video_url);
@@ -86,6 +101,28 @@ function Player() {
     })();
     return () => { active = false; };
   }, [current]);
+
+  // Attach HLS source to <video> when current lesson is a Bunny stream
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoSrc) return;
+    const isHls = videoSrc.includes(".m3u8");
+    if (!isHls) { video.src = videoSrc; return; }
+    // Safari supports HLS natively
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = videoSrc;
+      return;
+    }
+    if (Hls.isSupported()) {
+      const hls = new Hls({ enableWorker: true });
+      hls.loadSource(videoSrc);
+      hls.attachMedia(video);
+      return () => { hls.destroy(); };
+    }
+    // Fallback
+    video.src = videoSrc;
+  }, [videoSrc]);
 
   const markComplete = async () => {
     if (!user || !current) return;
@@ -115,12 +152,13 @@ function Player() {
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 grid lg:grid-cols-[1fr_320px] gap-6">
       <div>
         <div className="aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center">
-          {current?.video_url && videoSrc ? (
+          {current && videoSrc ? (
             <video
               key={current.id}
-              src={videoSrc}
+              ref={videoRef}
               controls
               controlsList="nodownload"
+              playsInline
               onEnded={markComplete}
               className="w-full h-full"
             />

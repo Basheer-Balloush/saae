@@ -1193,6 +1193,10 @@ export type Database = {
           title: string
           title_ar: string | null
           title_en: string | null
+          video_duration_sec: number | null
+          video_provider: string
+          video_ready: boolean
+          video_uid: string | null
           video_url: string | null
         }
         Insert: {
@@ -1209,6 +1213,10 @@ export type Database = {
           title: string
           title_ar?: string | null
           title_en?: string | null
+          video_duration_sec?: number | null
+          video_provider?: string
+          video_ready?: boolean
+          video_uid?: string | null
           video_url?: string | null
         }
         Update: {
@@ -1225,6 +1233,10 @@ export type Database = {
           title?: string
           title_ar?: string | null
           title_en?: string | null
+          video_duration_sec?: number | null
+          video_provider?: string
+          video_ready?: boolean
+          video_uid?: string | null
           video_url?: string | null
         }
         Relationships: [

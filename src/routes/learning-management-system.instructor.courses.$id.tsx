@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { QuizBuilder } from "@/components/lms/QuizBuilder";
 import { CourseFormBuilder } from "@/components/lms/CourseFormBuilder";
+import { createBunnyUpload, setLessonBunnyVideo } from "@/lib/bunny-stream.functions";
+import * as tus from "tus-js-client";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -41,7 +43,7 @@ type Course = {
 };
 type Section = { id: string; title: string; display_order: number };
 type LessonAttachment = { name: string; url: string };
-type Lesson = { id: string; section_id: string; title: string; video_url: string | null; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number; attachments: LessonAttachment[] | null };
+type Lesson = { id: string; section_id: string; title: string; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number; attachments: LessonAttachment[] | null };
 type Category = { id: string; name_ar: string; name_en: string | null };
 
 function CourseBuilder() {
@@ -58,6 +60,7 @@ function CourseBuilder() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [videoProgress, setVideoProgress] = useState<Record<string, number>>({});
   // In-app dialog state replacing native prompt()/confirm()
   const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
   const [sectionTitleDraft, setSectionTitleDraft] = useState("");
@@ -89,7 +92,7 @@ function CourseBuilder() {
       setSections(sList);
       if (sList.length) {
         const { data: lss } = await supabase.from("lms_lessons")
-          .select("id,section_id,title,video_url,content_md,is_preview,duration_seconds,display_order,attachments")
+          .select("id,section_id,title,video_url,video_provider,video_uid,video_ready,content_md,is_preview,duration_seconds,display_order,attachments")
           .in("section_id", sList.map((s) => s.id)).order("display_order");
         setLessons((lss as Lesson[]) ?? []);
       }
@@ -261,13 +264,69 @@ function CourseBuilder() {
 
   const uploadVideo = async (lesson: Lesson, file: File) => {
     if (!user) return;
-    const path = `${user.id}/${course.id}/${lesson.id}-${Date.now()}.${file.name.split(".").pop()}`;
-    toast.info(lang === "ar" ? "جاري رفع الفيديو..." : "Uploading video...");
-    const { error } = await supabase.storage.from("lms-private").upload(path, file, { upsert: true });
-    if (error) { toast.error(toUserMessage(error)); return; }
-    // Store the storage path with prefix; the player resolves a fresh short-lived signed URL on demand
-    await updateLesson(lesson.id, { video_url: `private:${path}` });
-    toast.success(lang === "ar" ? "تم رفع الفيديو" : "Video uploaded");
+    try {
+      setVideoProgress((p) => ({ ...p, [lesson.id]: 0 }));
+      toast.info(lang === "ar" ? "جاري تجهيز الرفع..." : "Preparing upload...");
+
+      const creds = await createBunnyUpload({
+        data: { lessonId: lesson.id, title: lesson.title || file.name },
+      });
+
+      await new Promise<void>((resolve, reject) => {
+        const upload = new tus.Upload(file, {
+          endpoint: creds.tusEndpoint,
+          retryDelays: [0, 3000, 5000, 10000, 20000],
+          headers: {
+            AuthorizationSignature: creds.authorizationSignature,
+            AuthorizationExpire: String(creds.authorizationExpire),
+            VideoId: creds.videoId,
+            LibraryId: String(creds.libraryId),
+          },
+          metadata: {
+            filetype: file.type || "video/mp4",
+            title: lesson.title || file.name,
+          },
+          chunkSize: 50 * 1024 * 1024,
+          onError: (err) => reject(err),
+          onProgress: (sent, total) => {
+            const pct = total ? Math.round((sent / total) * 100) : 0;
+            setVideoProgress((p) => ({ ...p, [lesson.id]: pct }));
+          },
+          onSuccess: () => resolve(),
+        });
+        upload.start();
+      });
+
+      await setLessonBunnyVideo({
+        data: { lessonId: lesson.id, videoId: creds.videoId },
+      });
+
+      setLessons((curr) =>
+        curr.map((x) =>
+          x.id === lesson.id
+            ? { ...x, video_provider: "bunny", video_uid: creds.videoId, video_ready: true, video_url: null }
+            : x,
+        ),
+      );
+      setVideoProgress((p) => {
+        const { [lesson.id]: _omit, ...rest } = p;
+        void _omit;
+        return rest;
+      });
+      toast.success(
+        lang === "ar"
+          ? "تم رفع الفيديو — جاري المعالجة على Bunny (1-3 دقائق)"
+          : "Video uploaded — Bunny is encoding (1-3 minutes)",
+      );
+    } catch (e) {
+      console.error("[bunny upload]", e);
+      setVideoProgress((p) => {
+        const { [lesson.id]: _omit, ...rest } = p;
+        void _omit;
+        return rest;
+      });
+      toast.error(toUserMessage(e));
+    }
   };
 
   const MAX_ATTACHMENT_BYTES = 50 * 1024 * 1024;
@@ -762,12 +821,28 @@ function CourseBuilder() {
                       </label>
                       <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: "lesson", id: l.id })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
-                    <div className="flex items-center gap-2 text-xs">
+                    <div className="flex items-center gap-2 text-xs flex-wrap">
                       <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
                         <span>{lang === "ar" ? "اختر فيديو" : "Choose video"}</span>
-                        <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
+                        <input type="file" accept="video/*" className="hidden"
+                          disabled={videoProgress[l.id] !== undefined}
+                          onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
                       </label>
-                      {l.video_url && <span className="text-emerald-600">✓ {lang === "ar" ? "تم رفع الفيديو" : "video"}</span>}
+                      {videoProgress[l.id] !== undefined && (
+                        <span className="text-primary">
+                          {lang === "ar" ? "جاري الرفع" : "Uploading"} {videoProgress[l.id]}%
+                        </span>
+                      )}
+                      {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && (
+                        <span className="text-emerald-600">
+                          ✓ {lang === "ar" ? "فيديو بث (Bunny)" : "Bunny stream"}
+                        </span>
+                      )}
+                      {videoProgress[l.id] === undefined && l.video_provider !== "bunny" && l.video_url && (
+                        <span className="text-amber-600">
+                          ⚠ {lang === "ar" ? "فيديو قديم — أعد رفعه للحصول على بث سريع" : "Legacy video — re-upload for fast streaming"}
+                        </span>
+                      )}
                     </div>
                     <Textarea rows={2} placeholder={lang === "ar" ? "محتوى الدرس (Markdown)" : "Lesson content (Markdown)"}
                       value={l.content_md ?? ""}
