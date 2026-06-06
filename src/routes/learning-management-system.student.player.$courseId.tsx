@@ -71,16 +71,29 @@ function Player() {
   const currentTitle = current ? pick(lang, current.title_ar, current.title_en, current.title) : "";
   const currentContent = current ? pick(lang, current.content_md_ar, current.content_md_en, current.content_md ?? "") : "";
 
-  // Resolve private video paths to fresh short-lived signed URLs
+  // Resolve playback source for the current lesson (Bunny HLS or legacy Supabase signed URL)
   useEffect(() => {
     let active = true;
+    setVideoSrc(null);
     (async () => {
-      if (!current?.video_url) { setVideoSrc(null); return; }
+      if (!current) return;
+      if (current.video_provider === "bunny" && current.video_uid) {
+        try {
+          const res = await getBunnyPlayback({ data: { lessonId: current.id } });
+          if (!active) return;
+          setVideoSrc(res.playbackUrl);
+        } catch (e) {
+          if (!active) return;
+          toast.error(toUserMessage(e));
+        }
+        return;
+      }
+      if (!current.video_url) return;
       if (current.video_url.startsWith("private:")) {
         const path = current.video_url.slice("private:".length);
         const { data, error } = await supabase.storage.from("lms-private").createSignedUrl(path, 60 * 60 * 2);
         if (!active) return;
-        if (error) { toast.error(toUserMessage(error)); setVideoSrc(null); return; }
+        if (error) { toast.error(toUserMessage(error)); return; }
         setVideoSrc(data?.signedUrl ?? null);
       } else {
         setVideoSrc(current.video_url);
@@ -88,6 +101,28 @@ function Player() {
     })();
     return () => { active = false; };
   }, [current]);
+
+  // Attach HLS source to <video> when current lesson is a Bunny stream
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoSrc) return;
+    const isHls = videoSrc.includes(".m3u8");
+    if (!isHls) { video.src = videoSrc; return; }
+    // Safari supports HLS natively
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = videoSrc;
+      return;
+    }
+    if (Hls.isSupported()) {
+      const hls = new Hls({ enableWorker: true });
+      hls.loadSource(videoSrc);
+      hls.attachMedia(video);
+      return () => { hls.destroy(); };
+    }
+    // Fallback
+    video.src = videoSrc;
+  }, [videoSrc]);
 
   const markComplete = async () => {
     if (!user || !current) return;
