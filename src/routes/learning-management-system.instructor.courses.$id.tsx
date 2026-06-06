@@ -60,7 +60,7 @@ function CourseBuilder() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [videoProgress, setVideoProgress] = useState<Record<string, number>>({});
+  const [videoProgress, setVideoProgress] = useState<Record<string, { pct: number; speedMbps: number; etaSec: number }>>({});
   // In-app dialog state replacing native prompt()/confirm()
   const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
   const [sectionTitleDraft, setSectionTitleDraft] = useState("");
@@ -265,17 +265,23 @@ function CourseBuilder() {
   const uploadVideo = async (lesson: Lesson, file: File) => {
     if (!user) return;
     try {
-      setVideoProgress((p) => ({ ...p, [lesson.id]: 0 }));
+      setVideoProgress((p) => ({ ...p, [lesson.id]: { pct: 0, speedMbps: 0, etaSec: 0 } }));
       toast.info(lang === "ar" ? "جاري تجهيز الرفع..." : "Preparing upload...");
 
       const creds = await createBunnyUpload({
         data: { lessonId: lesson.id, title: lesson.title || file.name },
       });
 
+      const startedAt = Date.now();
+      let lastSent = 0;
+      let lastAt = startedAt;
+      let smoothedSpeed = 0; // bytes/sec
+
       await new Promise<void>((resolve, reject) => {
         const upload = new tus.Upload(file, {
           endpoint: creds.tusEndpoint,
           retryDelays: [0, 3000, 5000, 10000, 20000],
+          parallelUploads: 4,
           headers: {
             AuthorizationSignature: creds.authorizationSignature,
             AuthorizationExpire: String(creds.authorizationExpire),
@@ -286,16 +292,27 @@ function CourseBuilder() {
             filetype: file.type || "video/mp4",
             title: lesson.title || file.name,
           },
-          chunkSize: 5 * 1024 * 1024,
           onError: (err) => reject(err),
           onProgress: (sent, total) => {
+            const now = Date.now();
+            const dt = (now - lastAt) / 1000;
+            if (dt >= 0.5) {
+              const instSpeed = (sent - lastSent) / Math.max(dt, 0.001);
+              smoothedSpeed = smoothedSpeed === 0 ? instSpeed : smoothedSpeed * 0.7 + instSpeed * 0.3;
+              lastSent = sent;
+              lastAt = now;
+            }
             const pct = total ? Math.round((sent / total) * 100) : 0;
-            setVideoProgress((p) => ({ ...p, [lesson.id]: pct }));
+            const remaining = Math.max(total - sent, 0);
+            const etaSec = smoothedSpeed > 0 ? Math.round(remaining / smoothedSpeed) : 0;
+            const speedMbps = (smoothedSpeed * 8) / (1024 * 1024);
+            setVideoProgress((p) => ({ ...p, [lesson.id]: { pct, speedMbps, etaSec } }));
           },
           onSuccess: () => resolve(),
         });
         upload.start();
       });
+
 
       await setLessonBunnyVideo({
         data: { lessonId: lesson.id, videoId: creds.videoId },
@@ -829,8 +846,16 @@ function CourseBuilder() {
                           onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
                       </label>
                       {videoProgress[l.id] !== undefined && (
-                        <span className="text-primary">
-                          {lang === "ar" ? "جاري الرفع" : "Uploading"} {videoProgress[l.id]}%
+                        <span className="text-primary inline-flex items-center gap-2">
+                          <span>{lang === "ar" ? "جاري الرفع" : "Uploading"} {videoProgress[l.id].pct}%</span>
+                          {videoProgress[l.id].speedMbps > 0 && (
+                            <span className="text-muted-foreground">
+                              · {videoProgress[l.id].speedMbps.toFixed(1)} Mbps
+                              {videoProgress[l.id].etaSec > 0 && (
+                                <> · {lang === "ar" ? "متبقي" : "ETA"} {videoProgress[l.id].etaSec >= 60 ? `${Math.ceil(videoProgress[l.id].etaSec / 60)} ${lang === "ar" ? "د" : "min"}` : `${videoProgress[l.id].etaSec} ${lang === "ar" ? "ث" : "s"}`}</>
+                              )}
+                            </span>
+                          )}
                         </span>
                       )}
                       {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && (
