@@ -58,6 +58,9 @@ export const Route = createFileRoute("/attendance-management-system/")({
       { property: "og:url", content: "https://aisyria.org/attendance-management-system" },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    course: typeof search.course === "string" ? search.course : undefined,
+  }),
   component: AmsDashboard,
 });
 
