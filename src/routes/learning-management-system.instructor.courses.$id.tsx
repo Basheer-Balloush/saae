@@ -821,12 +821,28 @@ function CourseBuilder() {
                       </label>
                       <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: "lesson", id: l.id })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
-                    <div className="flex items-center gap-2 text-xs">
+                    <div className="flex items-center gap-2 text-xs flex-wrap">
                       <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
                         <span>{lang === "ar" ? "اختر فيديو" : "Choose video"}</span>
-                        <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
+                        <input type="file" accept="video/*" className="hidden"
+                          disabled={videoProgress[l.id] !== undefined}
+                          onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
                       </label>
-                      {l.video_url && <span className="text-emerald-600">✓ {lang === "ar" ? "تم رفع الفيديو" : "video"}</span>}
+                      {videoProgress[l.id] !== undefined && (
+                        <span className="text-primary">
+                          {lang === "ar" ? "جاري الرفع" : "Uploading"} {videoProgress[l.id]}%
+                        </span>
+                      )}
+                      {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && (
+                        <span className="text-emerald-600">
+                          ✓ {lang === "ar" ? "فيديو بث (Bunny)" : "Bunny stream"}
+                        </span>
+                      )}
+                      {videoProgress[l.id] === undefined && l.video_provider !== "bunny" && l.video_url && (
+                        <span className="text-amber-600">
+                          ⚠ {lang === "ar" ? "فيديو قديم — أعد رفعه للحصول على بث سريع" : "Legacy video — re-upload for fast streaming"}
+                        </span>
+                      )}
                     </div>
                     <Textarea rows={2} placeholder={lang === "ar" ? "محتوى الدرس (Markdown)" : "Lesson content (Markdown)"}
                       value={l.content_md ?? ""}
