@@ -100,6 +100,12 @@ function CourseBuilder() {
       .eq("course_id", id)
       .order("created_at", { ascending: false });
     setEnrollReqs((reqs as Array<{ id: string; user_id: string; status: string; payment_method: string; notes: string | null; created_at: string }>) ?? []);
+    const { data: ens } = await supabase
+      .from("lms_enrollments")
+      .select("id,student_id,enrolled_at,progress")
+      .eq("course_id", id)
+      .order("enrolled_at", { ascending: false });
+    setEnrolledStudents((ens as Array<{ id: string; student_id: string; enrolled_at: string; progress: number }>) ?? []);
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [id]);
