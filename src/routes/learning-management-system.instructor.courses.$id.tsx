@@ -733,13 +733,14 @@ function CourseBuilder() {
         </div>
       </section>
 
-      <div className="mt-6">
+      <div className="mt-6 flex flex-wrap gap-2">
         <Link to="/learning-management-system/instructor/assignments/$courseId" params={{ courseId: course.id }}>
           <Button variant="outline">
             <ClipboardList className="h-4 w-4 mx-1" />
             {lang === "ar" ? "إدارة الوظائف" : "Manage Assignments"}
           </Button>
         </Link>
+        <AttendanceLink courseId={course.id} lang={lang} />
       </div>
 
       <QuizBuilder courseId={course.id} />
