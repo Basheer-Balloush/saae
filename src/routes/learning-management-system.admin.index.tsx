@@ -213,7 +213,7 @@ function AdminHome() {
     },
     {
       to: "/learning-management-system/admin/enrollment-requests",
-      label: ar ? "طلبات الاشتراك" : "Enrollment requests",
+      label: ar ? "طلبات التسجيل" : "Enrollment requests",
       icon: Inbox,
       desc: ar ? "طلبات الدفع اليدوي" : "Manual payment requests",
     },
