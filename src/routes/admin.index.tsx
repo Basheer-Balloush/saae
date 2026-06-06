@@ -40,6 +40,7 @@ const ADMIN_TEXT = {
     news: "News",
     members: "Members",
     chatbot: "Chatbot",
+    partners: "Partners",
     allNews: "All news",
     newArticle: "New article",
     cover: "Cover",
