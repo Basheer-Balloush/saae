@@ -861,3 +861,42 @@ function CourseBuilder() {
     </div>
   );
 }
+
+function AttendanceLink({ courseId, lang }: { courseId: string; lang: "ar" | "en" }) {
+  const [amsId, setAmsId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from("ams_courses")
+        .select("id")
+        .eq("lms_course_id", courseId)
+        .maybeSingle();
+      if (active) {
+        setAmsId((data as { id: string } | null)?.id ?? null);
+        setLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, [courseId]);
+
+  if (loading) return null;
+  if (!amsId) {
+    return (
+      <span className="text-xs text-muted-foreground self-center px-2">
+        {lang === "ar"
+          ? "نظام الحضور غير مفعّل — اطلب من الأدمن ربط الدورة"
+          : "Attendance not enabled — ask admin to link this course"}
+      </span>
+    );
+  }
+  return (
+    <Link to="/attendance-management-system" search={{ course: amsId }}>
+      <Button variant="outline">
+        <ClipboardList className="h-4 w-4 mx-1" />
+        {lang === "ar" ? "الحضور والجلسات" : "Attendance & Sessions"}
+      </Button>
+    </Link>
+  );
+}
