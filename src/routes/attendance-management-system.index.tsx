@@ -58,6 +58,9 @@ export const Route = createFileRoute("/attendance-management-system/")({
       { property: "og:url", content: "https://aisyria.org/attendance-management-system" },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    course: typeof search.course === "string" ? search.course : undefined,
+  }),
   component: AmsDashboard,
 });
 
@@ -91,6 +94,8 @@ function AmsDashboard() {
   const { lang } = useLang();
   const isRtl = lang === "ar";
   const tr = amsT[lang];
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [courses, setCourses] = useState<Course[] | null>(null);
   const [selected, setSelected] = useState<Course | null>(null);
   const [deleting, setDeleting] = useState<Course | null>(null);
@@ -126,12 +131,20 @@ function AmsDashboard() {
     loadCourses();
   }, [loadCourses]);
 
+  // Auto-select when ?course=<id> is provided
+  useEffect(() => {
+    if (!search.course || !courses || selected) return;
+    const match = courses.find((c) => c.id === search.course);
+    if (match) setSelected(match);
+  }, [search.course, courses, selected]);
+
   if (selected) {
     return (
       <CourseDetail
         course={selected}
         onBack={() => {
           setSelected(null);
+          if (search.course) navigate({ search: {} });
           loadCourses();
         }}
       />
