@@ -139,7 +139,7 @@ function CourseDetails() {
   useEffect(() => {
     (async () => {
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-      const baseQ = supabase.from("lms_courses").select("*");
+      const baseQ = supabase.from("lms_courses").select("id,instructor_id,category_id,title_ar,title_en,description_ar,description_en,level,price,is_free,cover_url,status,rating_avg,students_count,created_at,updated_at,enrollment_open,max_students,enrollment_deadline,slug,start_date,end_date,schedule_days,schedule_time_from,schedule_time_to,location_ar,location_en,duration_hours");
       const { data: c } = await (isUuid ? baseQ.eq("id", id) : baseQ.eq("slug", id)).maybeSingle();
       setCourse(c as Course | null);
       if (c) {
