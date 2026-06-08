@@ -285,6 +285,53 @@ function AdminEnrollmentRequests() {
 
   const selectedCourse = useMemo(() => courses.find((c) => c.id === selectedCourseId) ?? null, [courses, selectedCourseId]);
 
+  const openWhatsAppForRequest = async (req: Req) => {
+    // Fetch form response answers (phone + name) and course template + title
+    const [{ data: respRow }, { data: courseRow }] = await Promise.all([
+      supabase
+        .from("lms_enrollment_form_responses")
+        .select("answers")
+        .eq("request_id", req.id)
+        .maybeSingle(),
+      supabase
+        .from("lms_courses")
+        .select("title_ar,title_en,slug,approval_whatsapp_message_ar,approval_whatsapp_message_en")
+        .eq("id", req.course_id)
+        .maybeSingle(),
+    ]);
+    const answers = (respRow?.answers as { field_id: string; value: unknown }[] | null) ?? [];
+    const get = (id: string) => {
+      const a = answers.find((x) => x.field_id === id);
+      return typeof a?.value === "string" ? a.value : "";
+    };
+    const phoneRaw = get(BASE_FIELD_IDS.phone);
+    const studentName = get(BASE_FIELD_IDS.fullName);
+    const phone = normalizePhone(phoneRaw);
+    if (!phone) {
+      toast.warning(ar ? "لا يوجد رقم هاتف صالح للطالب" : "Student has no valid phone number");
+      return;
+    }
+    const c = (courseRow ?? {}) as Record<string, string | null>;
+    const courseTitle = ar ? (c.title_ar || c.title_en || "") : (c.title_en || c.title_ar || "");
+    const siteName = ar ? "الجمعية السورية للذكاء الاصطناعي" : "AI Syria";
+    const courseUrl = c.slug
+      ? `${typeof window !== "undefined" ? window.location.origin : ""}/learning-management-system/courses/${c.slug}`
+      : "";
+    const defaultAr = `مرحباً ${studentName || ""}،\nيسعدنا إخبارك بأنه قد تمت الموافقة على تسجيلك في دورة "${courseTitle}".\nمرحباً بك في ${siteName}.`;
+    const defaultEn = `Hi ${studentName || ""},\nYour enrollment in "${courseTitle}" has been approved.\nWelcome to ${siteName}.`;
+    const tpl = ar
+      ? (c.approval_whatsapp_message_ar || defaultAr)
+      : (c.approval_whatsapp_message_en || defaultEn);
+    const message = renderTemplate(tpl, {
+      student_name: studentName,
+      course_title: courseTitle,
+      site_name: siteName,
+      course_url: courseUrl,
+    });
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const decide = async (req: Req, action: "approve" | "reject") => {
     setBusy(req.id);
     try {
