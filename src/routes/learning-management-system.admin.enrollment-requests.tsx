@@ -77,6 +77,8 @@ function AdminEnrollmentRequests() {
   const [emailSubjectEn, setEmailSubjectEn] = useState("");
   const [emailBodyAr, setEmailBodyAr] = useState("");
   const [emailBodyEn, setEmailBodyEn] = useState("");
+  const [waMsgAr, setWaMsgAr] = useState("");
+  const [waMsgEn, setWaMsgEn] = useState("");
 
   const openEmailDialog = async () => {
     if (!selectedCourseId) return;
