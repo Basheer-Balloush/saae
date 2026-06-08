@@ -298,6 +298,12 @@ function AdminEnrollmentRequests() {
           console.error("Failed to send approval email", mailErr);
           toast.warning(ar ? "تمت الموافقة لكن تعذّر إرسال البريد الإلكتروني" : "Approved but failed to send notification email");
         }
+        // Open WhatsApp with prefilled message
+        try {
+          await openWhatsAppForRequest(req);
+        } catch (waErr) {
+          console.error("Failed to open WhatsApp", waErr);
+        }
       }
       toast.success(ar ? (action === "approve" ? "تمت الموافقة" : "تم الرفض") : (action === "approve" ? "Approved" : "Rejected"));
       if (selectedCourseId) await loadReqs(selectedCourseId);
