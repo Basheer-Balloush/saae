@@ -13,6 +13,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import { sendEnrollmentApprovedEmail } from "@/lib/lms-enrollment-email.functions";
+import { BASE_FIELD_IDS } from "@/components/lms/EnrollmentFormDialog";
+
+function renderTemplate(tpl: string, vars: Record<string, string>): string {
+  return tpl.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, k) => vars[k] ?? "");
+}
+
+function normalizePhone(raw: string): string {
+  let p = (raw || "").trim().replace(/[\s\-()]/g, "");
+  if (p.startsWith("+")) p = p.slice(1);
+  else if (p.startsWith("00")) p = p.slice(2);
+  else if (p.startsWith("0")) p = "963" + p.slice(1); // default Syria
+  return p.replace(/\D/g, "");
+}
 
 export const Route = createFileRoute("/learning-management-system/admin/enrollment-requests")({
   head: () => ({ meta: [{ title: "LMS · Enrollment requests" }] }),
