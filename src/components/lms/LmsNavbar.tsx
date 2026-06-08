@@ -11,6 +11,7 @@ import logo from "@/assets/saae-logo-horizontal.png";
 import logoEnLight from "@/assets/saae-logo-en-light.png";
 import logoEnDark from "@/assets/saae-logo-en-dark.png";
 import logoArDark from "@/assets/saae-logo-ar-dark.png";
+import logoArLight from "@/assets/saae-logo-ar-light.png";
 
 type Props = {
   role: LmsRole;
