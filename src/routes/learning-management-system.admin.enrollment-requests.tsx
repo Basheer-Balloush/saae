@@ -573,6 +573,25 @@ function AdminEnrollmentRequests() {
                 <Label>Body (English)</Label>
                 <Textarea dir="ltr" rows={6} value={emailBodyEn} onChange={(e) => setEmailBodyEn(e.target.value)} placeholder={`Hi {{student_name}},\n\nYour enrollment in "{{course_title}}" has been approved.`} />
               </div>
+
+              <div className="pt-4 border-t border-border">
+                <h3 className="text-sm font-semibold mb-2">{ar ? "رسالة واتساب" : "WhatsApp message"}</h3>
+                <p className="text-xs text-muted-foreground mb-3">
+                  {ar
+                    ? "تُفتح واتساب تلقائياً بعد الموافقة على الطلب مع تعبئة هذه الرسالة لرقم هاتف الطالب."
+                    : "WhatsApp opens automatically after approval with this message prefilled to the student's phone."}
+                </p>
+                <div className="space-y-3">
+                  <div>
+                    <Label>نص رسالة واتساب (عربي)</Label>
+                    <Textarea dir="rtl" rows={5} value={waMsgAr} onChange={(e) => setWaMsgAr(e.target.value)} placeholder={`مرحباً {{student_name}}،\nتمت الموافقة على تسجيلك في "{{course_title}}". أهلاً بك في {{site_name}}.`} />
+                  </div>
+                  <div>
+                    <Label>WhatsApp message (English)</Label>
+                    <Textarea dir="ltr" rows={5} value={waMsgEn} onChange={(e) => setWaMsgEn(e.target.value)} placeholder={`Hi {{student_name}}, your enrollment in "{{course_title}}" has been approved. Welcome to {{site_name}}.`} />
+                  </div>
+                </div>
+              </div>
             </div>
           )}
           <DialogFooter>
