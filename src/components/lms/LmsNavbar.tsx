@@ -11,6 +11,7 @@ import logo from "@/assets/saae-logo-horizontal.png";
 import logoEnLight from "@/assets/saae-logo-en-light.png";
 import logoEnDark from "@/assets/saae-logo-en-dark.png";
 import logoArDark from "@/assets/saae-logo-ar-dark.png";
+import logoArLight from "@/assets/saae-logo-ar-light.png";
 
 type Props = {
   role: LmsRole;
@@ -74,11 +75,13 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
             const isEnLight = lang === "en" && theme === "light";
             const isEnDark = lang === "en" && theme === "dark";
             const isArDark = lang === "ar" && theme === "dark";
+            const isArLight = lang === "ar" && theme === "light";
             const variants = [
               { src: logoEnLight, show: isEnLight, alt: "SAAE — Learning Platform" },
               { src: logoEnDark, show: isEnDark, alt: "SAAE — Learning Platform" },
               { src: logoArDark, show: isArDark, alt: "منصة التعلم — SAAE" },
-              { src: logo, show: !(isEnLight || isEnDark || isArDark), alt: "SAAE" },
+              { src: logoArLight, show: isArLight, alt: "منصة التعلم — SAAE" },
+              { src: logo, show: !(isEnLight || isEnDark || isArDark || isArLight), alt: "SAAE" },
             ];
             return variants.map((v, i) => (
               <img

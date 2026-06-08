@@ -9,6 +9,7 @@ import logo from "@/assets/saae-logo-horizontal.png";
 import logoEnLight from "@/assets/saae-logo-en-light.png";
 import logoEnDark from "@/assets/saae-logo-en-dark.png";
 import logoArDark from "@/assets/saae-logo-ar-dark.png";
+import logoArLight from "@/assets/saae-logo-ar-light.png";
 
 type Props = {
   onSignOut?: () => void;
@@ -32,11 +33,13 @@ export function AmsNavbar({ onSignOut, showSignOut, extra }: Props) {
   const isEnLight = lang === "en" && theme === "light";
   const isEnDark = lang === "en" && theme === "dark";
   const isArDark = lang === "ar" && theme === "dark";
+  const isArLight = lang === "ar" && theme === "light";
   const variants = [
     { src: logoEnLight, show: isEnLight, alt: "SAAIE" },
     { src: logoEnDark, show: isEnDark, alt: "SAAIE" },
     { src: logoArDark, show: isArDark, alt: "SAAIE" },
-    { src: logo, show: !(isEnLight || isEnDark || isArDark), alt: "SAAIE" },
+    { src: logoArLight, show: isArLight, alt: "SAAIE" },
+    { src: logo, show: !(isEnLight || isEnDark || isArDark || isArLight), alt: "SAAIE" },
   ];
 
   return (
