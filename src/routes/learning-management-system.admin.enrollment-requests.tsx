@@ -110,6 +110,8 @@ function AdminEnrollmentRequests() {
         approval_email_subject_en: emailSubjectEn.trim() || null,
         approval_email_body_ar: emailBodyAr.trim() || null,
         approval_email_body_en: emailBodyEn.trim() || null,
+        approval_whatsapp_message_ar: waMsgAr.trim() || null,
+        approval_whatsapp_message_en: waMsgEn.trim() || null,
       })
       .eq("id", selectedCourseId);
     setEmailSaving(false);
