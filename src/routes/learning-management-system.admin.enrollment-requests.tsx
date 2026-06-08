@@ -13,6 +13,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import { sendEnrollmentApprovedEmail } from "@/lib/lms-enrollment-email.functions";
+import { BASE_FIELD_IDS } from "@/components/lms/EnrollmentFormDialog";
+
+function renderTemplate(tpl: string, vars: Record<string, string>): string {
+  return tpl.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, k) => vars[k] ?? "");
+}
+
+function normalizePhone(raw: string): string {
+  let p = (raw || "").trim().replace(/[\s\-()]/g, "");
+  if (p.startsWith("+")) p = p.slice(1);
+  else if (p.startsWith("00")) p = p.slice(2);
+  else if (p.startsWith("0")) p = "963" + p.slice(1); // default Syria
+  return p.replace(/\D/g, "");
+}
 
 export const Route = createFileRoute("/learning-management-system/admin/enrollment-requests")({
   head: () => ({ meta: [{ title: "LMS · Enrollment requests" }] }),
@@ -64,6 +77,8 @@ function AdminEnrollmentRequests() {
   const [emailSubjectEn, setEmailSubjectEn] = useState("");
   const [emailBodyAr, setEmailBodyAr] = useState("");
   const [emailBodyEn, setEmailBodyEn] = useState("");
+  const [waMsgAr, setWaMsgAr] = useState("");
+  const [waMsgEn, setWaMsgEn] = useState("");
 
   const openEmailDialog = async () => {
     if (!selectedCourseId) return;
@@ -71,7 +86,7 @@ function AdminEnrollmentRequests() {
     setEmailLoading(true);
     const { data, error } = await supabase
       .from("lms_courses")
-      .select("approval_email_subject_ar,approval_email_subject_en,approval_email_body_ar,approval_email_body_en")
+      .select("approval_email_subject_ar,approval_email_subject_en,approval_email_body_ar,approval_email_body_en,approval_whatsapp_message_ar,approval_whatsapp_message_en")
       .eq("id", selectedCourseId)
       .maybeSingle();
     setEmailLoading(false);
@@ -81,6 +96,8 @@ function AdminEnrollmentRequests() {
     setEmailSubjectEn(d.approval_email_subject_en ?? "");
     setEmailBodyAr(d.approval_email_body_ar ?? "");
     setEmailBodyEn(d.approval_email_body_en ?? "");
+    setWaMsgAr(d.approval_whatsapp_message_ar ?? "");
+    setWaMsgEn(d.approval_whatsapp_message_en ?? "");
   };
 
   const saveEmailTemplate = async () => {
@@ -93,6 +110,8 @@ function AdminEnrollmentRequests() {
         approval_email_subject_en: emailSubjectEn.trim() || null,
         approval_email_body_ar: emailBodyAr.trim() || null,
         approval_email_body_en: emailBodyEn.trim() || null,
+        approval_whatsapp_message_ar: waMsgAr.trim() || null,
+        approval_whatsapp_message_en: waMsgEn.trim() || null,
       })
       .eq("id", selectedCourseId);
     setEmailSaving(false);
@@ -266,6 +285,53 @@ function AdminEnrollmentRequests() {
 
   const selectedCourse = useMemo(() => courses.find((c) => c.id === selectedCourseId) ?? null, [courses, selectedCourseId]);
 
+  const openWhatsAppForRequest = async (req: Req) => {
+    // Fetch form response answers (phone + name) and course template + title
+    const [{ data: respRow }, { data: courseRow }] = await Promise.all([
+      supabase
+        .from("lms_enrollment_form_responses")
+        .select("answers")
+        .eq("request_id", req.id)
+        .maybeSingle(),
+      supabase
+        .from("lms_courses")
+        .select("title_ar,title_en,slug,approval_whatsapp_message_ar,approval_whatsapp_message_en")
+        .eq("id", req.course_id)
+        .maybeSingle(),
+    ]);
+    const answers = (respRow?.answers as { field_id: string; value: unknown }[] | null) ?? [];
+    const get = (id: string) => {
+      const a = answers.find((x) => x.field_id === id);
+      return typeof a?.value === "string" ? a.value : "";
+    };
+    const phoneRaw = get(BASE_FIELD_IDS.phone);
+    const studentName = get(BASE_FIELD_IDS.fullName);
+    const phone = normalizePhone(phoneRaw);
+    if (!phone) {
+      toast.warning(ar ? "لا يوجد رقم هاتف صالح للطالب" : "Student has no valid phone number");
+      return;
+    }
+    const c = (courseRow ?? {}) as Record<string, string | null>;
+    const courseTitle = ar ? (c.title_ar || c.title_en || "") : (c.title_en || c.title_ar || "");
+    const siteName = ar ? "الجمعية السورية للذكاء الاصطناعي" : "AI Syria";
+    const courseUrl = c.slug
+      ? `${typeof window !== "undefined" ? window.location.origin : ""}/learning-management-system/courses/${c.slug}`
+      : "";
+    const defaultAr = `مرحباً ${studentName || ""}،\nيسعدنا إخبارك بأنه قد تمت الموافقة على تسجيلك في دورة "${courseTitle}".\nمرحباً بك في ${siteName}.`;
+    const defaultEn = `Hi ${studentName || ""},\nYour enrollment in "${courseTitle}" has been approved.\nWelcome to ${siteName}.`;
+    const tpl = ar
+      ? (c.approval_whatsapp_message_ar || defaultAr)
+      : (c.approval_whatsapp_message_en || defaultEn);
+    const message = renderTemplate(tpl, {
+      student_name: studentName,
+      course_title: courseTitle,
+      site_name: siteName,
+      course_url: courseUrl,
+    });
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const decide = async (req: Req, action: "approve" | "reject") => {
     setBusy(req.id);
     try {
@@ -278,6 +344,12 @@ function AdminEnrollmentRequests() {
         } catch (mailErr) {
           console.error("Failed to send approval email", mailErr);
           toast.warning(ar ? "تمت الموافقة لكن تعذّر إرسال البريد الإلكتروني" : "Approved but failed to send notification email");
+        }
+        // Open WhatsApp with prefilled message
+        try {
+          await openWhatsAppForRequest(req);
+        } catch (waErr) {
+          console.error("Failed to open WhatsApp", waErr);
         }
       }
       toast.success(ar ? (action === "approve" ? "تمت الموافقة" : "تم الرفض") : (action === "approve" ? "Approved" : "Rejected"));
@@ -357,7 +429,7 @@ function AdminEnrollmentRequests() {
           <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" variant="outline" onClick={openEmailDialog}>
               <Mail className="h-4 w-4 mx-1" />
-              {ar ? "بريد التأكيد" : "Confirmation email"}
+              {ar ? "رسائل التأكيد" : "Confirmation messages"}
             </Button>
             <Button size="sm" variant="outline" onClick={exportXlsx} disabled={exporting}>
               {exporting ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Download className="h-4 w-4 mx-1" />}
@@ -472,7 +544,7 @@ function AdminEnrollmentRequests() {
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{ar ? "بريد تأكيد التسجيل" : "Enrollment confirmation email"}</DialogTitle>
+            <DialogTitle>{ar ? "رسائل تأكيد التسجيل" : "Enrollment confirmation messages"}</DialogTitle>
           </DialogHeader>
           {emailLoading ? (
             <p className="py-8 text-center text-muted-foreground">{ar ? "جاري التحميل..." : "Loading..."}</p>
@@ -500,6 +572,25 @@ function AdminEnrollmentRequests() {
               <div>
                 <Label>Body (English)</Label>
                 <Textarea dir="ltr" rows={6} value={emailBodyEn} onChange={(e) => setEmailBodyEn(e.target.value)} placeholder={`Hi {{student_name}},\n\nYour enrollment in "{{course_title}}" has been approved.`} />
+              </div>
+
+              <div className="pt-4 border-t border-border">
+                <h3 className="text-sm font-semibold mb-2">{ar ? "رسالة واتساب" : "WhatsApp message"}</h3>
+                <p className="text-xs text-muted-foreground mb-3">
+                  {ar
+                    ? "تُفتح واتساب تلقائياً بعد الموافقة على الطلب مع تعبئة هذه الرسالة لرقم هاتف الطالب."
+                    : "WhatsApp opens automatically after approval with this message prefilled to the student's phone."}
+                </p>
+                <div className="space-y-3">
+                  <div>
+                    <Label>نص رسالة واتساب (عربي)</Label>
+                    <Textarea dir="rtl" rows={5} value={waMsgAr} onChange={(e) => setWaMsgAr(e.target.value)} placeholder={`مرحباً {{student_name}}،\nتمت الموافقة على تسجيلك في "{{course_title}}". أهلاً بك في {{site_name}}.`} />
+                  </div>
+                  <div>
+                    <Label>WhatsApp message (English)</Label>
+                    <Textarea dir="ltr" rows={5} value={waMsgEn} onChange={(e) => setWaMsgEn(e.target.value)} placeholder={`Hi {{student_name}}, your enrollment in "{{course_title}}" has been approved. Welcome to {{site_name}}.`} />
+                  </div>
+                </div>
               </div>
             </div>
           )}
