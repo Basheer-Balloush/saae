@@ -86,7 +86,7 @@ function AdminEnrollmentRequests() {
     setEmailLoading(true);
     const { data, error } = await supabase
       .from("lms_courses")
-      .select("approval_email_subject_ar,approval_email_subject_en,approval_email_body_ar,approval_email_body_en")
+      .select("approval_email_subject_ar,approval_email_subject_en,approval_email_body_ar,approval_email_body_en,approval_whatsapp_message_ar,approval_whatsapp_message_en")
       .eq("id", selectedCourseId)
       .maybeSingle();
     setEmailLoading(false);
@@ -96,6 +96,8 @@ function AdminEnrollmentRequests() {
     setEmailSubjectEn(d.approval_email_subject_en ?? "");
     setEmailBodyAr(d.approval_email_body_ar ?? "");
     setEmailBodyEn(d.approval_email_body_en ?? "");
+    setWaMsgAr(d.approval_whatsapp_message_ar ?? "");
+    setWaMsgEn(d.approval_whatsapp_message_en ?? "");
   };
 
   const saveEmailTemplate = async () => {
