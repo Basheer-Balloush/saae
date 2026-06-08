@@ -544,7 +544,7 @@ function AdminEnrollmentRequests() {
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{ar ? "بريد تأكيد التسجيل" : "Enrollment confirmation email"}</DialogTitle>
+            <DialogTitle>{ar ? "رسائل تأكيد التسجيل" : "Enrollment confirmation messages"}</DialogTitle>
           </DialogHeader>
           {emailLoading ? (
             <p className="py-8 text-center text-muted-foreground">{ar ? "جاري التحميل..." : "Loading..."}</p>
