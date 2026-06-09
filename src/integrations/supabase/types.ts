@@ -849,6 +849,42 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_course_instructors: {
+        Row: {
+          added_by: string | null
+          course_id: string
+          created_at: string
+          instructor_user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          course_id: string
+          created_at?: string
+          instructor_user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          course_id?: string
+          created_at?: string
+          instructor_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_course_instructors_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_course_instructors_instructor_user_id_fkey"
+            columns: ["instructor_user_id"]
+            isOneToOne: false
+            referencedRelation: "lms_instructors"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       lms_courses: {
         Row: {
           approval_email_body_ar: string | null
