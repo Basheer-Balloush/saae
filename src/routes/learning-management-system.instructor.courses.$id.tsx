@@ -16,6 +16,7 @@ import { CourseFormBuilder } from "@/components/lms/CourseFormBuilder";
 import { createBunnyUpload, setLessonBunnyVideo } from "@/lib/bunny-stream.functions";
 import * as tus from "tus-js-client";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
+import { CourseCoInstructors } from "@/components/lms/CourseCoInstructors";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -552,6 +553,12 @@ function CourseBuilder() {
             </label>
           </div>
         </div>
+
+        {(isAdmin || (user && user.id === course.instructor_id)) && (
+          <div className="pt-3 border-t border-border">
+            <CourseCoInstructors courseId={course.id} ownerId={course.instructor_id} ar={lang === "ar"} />
+          </div>
+        )}
       </section>
 
       {/* Enrollment management */}

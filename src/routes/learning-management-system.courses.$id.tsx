@@ -125,6 +125,7 @@ function CourseDetails() {
   const ar = lang === "ar";
   const [course, setCourse] = useState<Course | null>(null);
   const [instructor, setInstructor] = useState<Instructor | null>(null);
+  const [coInstructors, setCoInstructors] = useState<Instructor[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [enrolled, setEnrolled] = useState(false);
@@ -150,6 +151,23 @@ function CourseDetails() {
         ]);
         setInstructor(ins as Instructor | null);
         setSections((secs as Section[]) ?? []);
+        // Co-instructors
+        const { data: coLinks } = await supabase
+          .from("lms_course_instructors")
+          .select("instructor_user_id")
+          .eq("course_id", realCourseId);
+        const coIds = ((coLinks as { instructor_user_id: string }[]) ?? [])
+          .map((l) => l.instructor_user_id)
+          .filter((uid) => uid !== c.instructor_id);
+        if (coIds.length) {
+          const { data: coIns } = await supabase
+            .from("lms_instructors")
+            .select("user_id,full_name,full_name_ar,full_name_en,avatar_url,specialty,specialty_ar,specialty_en")
+            .in("user_id", coIds);
+          setCoInstructors((coIns as Instructor[]) ?? []);
+        } else {
+          setCoInstructors([]);
+        }
         if (secs && secs.length) {
           const { data: lss } = await supabase.from("lms_lessons")
             .select("id,section_id,title,duration_seconds,is_preview,display_order")
@@ -412,28 +430,40 @@ function CourseDetails() {
             );
           })()}
           {instructor && (() => {
-            const insName = (ar ? instructor.full_name_ar : instructor.full_name_en) || instructor.full_name;
-            const insSpec = (ar ? instructor.specialty_ar : instructor.specialty_en) || instructor.specialty;
+            const allInstructors = [instructor, ...coInstructors];
             return (
               <div className="mt-6 pt-6 border-t border-border">
-                <div className="text-xs text-muted-foreground">{tr.byInstructor}</div>
-                <Link
-                  to="/learning-management-system/instructors/$id"
-                  params={{ id: instructor.user_id }}
-                  className="mt-2 flex items-center gap-3 group"
-                >
-                  {instructor.avatar_url ? (
-                    <img src={instructor.avatar_url} alt={insName} className="h-10 w-10 rounded-full object-cover" />
-                  ) : (
-                    <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
-                      {insName.charAt(0)}
-                    </div>
-                  )}
-                  <div>
-                    <div className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">{insName}</div>
-                    {insSpec && <div className="text-xs text-muted-foreground line-clamp-2">{insSpec}</div>}
-                  </div>
-                </Link>
+                <div className="text-xs text-muted-foreground">
+                  {allInstructors.length > 1
+                    ? (ar ? "المدرّبون" : "Instructors")
+                    : tr.byInstructor}
+                </div>
+                <div className="mt-2 space-y-3">
+                  {allInstructors.map((ins) => {
+                    const insName = (ar ? ins.full_name_ar : ins.full_name_en) || ins.full_name;
+                    const insSpec = (ar ? ins.specialty_ar : ins.specialty_en) || ins.specialty;
+                    return (
+                      <Link
+                        key={ins.user_id}
+                        to="/learning-management-system/instructors/$id"
+                        params={{ id: ins.user_id }}
+                        className="flex items-center gap-3 group"
+                      >
+                        {ins.avatar_url ? (
+                          <img src={ins.avatar_url} alt={insName} className="h-10 w-10 rounded-full object-cover" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                            {insName.charAt(0)}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors truncate">{insName}</div>
+                          {insSpec && <div className="text-xs text-muted-foreground line-clamp-2">{insSpec}</div>}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
             );
           })()}
