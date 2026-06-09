@@ -137,6 +137,7 @@ export const lmsT: Record<Lang, {
   passwordMedium: string;
   passwordStrong: string;
   menu: string;
+  courseFinished: string;
 }> = {
   ar: {
     brand: "منصّة التعلّم",
