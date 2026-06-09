@@ -264,6 +264,7 @@ export const lmsT: Record<Lang, {
     passwordMedium: "متوسطة",
     passwordStrong: "قوية",
     menu: "القائمة",
+    courseFinished: "انتهت الدورة",
   },
   en: {
     brand: "Learning Platform",
@@ -391,5 +392,6 @@ export const lmsT: Record<Lang, {
     passwordMedium: "Medium",
     passwordStrong: "Strong",
     menu: "Menu",
+    courseFinished: "Course finished",
   },
 };
