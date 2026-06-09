@@ -372,6 +372,14 @@ function CourseDetails() {
                 </Link>
               );
             }
+            if (isFinished) {
+              return (
+                <div className="mt-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 p-4 text-center text-sm text-emerald-700 dark:text-emerald-300 font-semibold">
+                  <CheckCircle className="h-5 w-5 mx-auto mb-1" />
+                  {tr.courseFinished}
+                </div>
+              );
+            }
             if (pendingRequest) {
               return (
                 <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 p-4 text-center">
