@@ -151,6 +151,23 @@ function CourseDetails() {
         ]);
         setInstructor(ins as Instructor | null);
         setSections((secs as Section[]) ?? []);
+        // Co-instructors
+        const { data: coLinks } = await supabase
+          .from("lms_course_instructors")
+          .select("instructor_user_id")
+          .eq("course_id", realCourseId);
+        const coIds = ((coLinks as { instructor_user_id: string }[]) ?? [])
+          .map((l) => l.instructor_user_id)
+          .filter((uid) => uid !== c.instructor_id);
+        if (coIds.length) {
+          const { data: coIns } = await supabase
+            .from("lms_instructors")
+            .select("user_id,full_name,full_name_ar,full_name_en,avatar_url,specialty,specialty_ar,specialty_en")
+            .in("user_id", coIds);
+          setCoInstructors((coIns as Instructor[]) ?? []);
+        } else {
+          setCoInstructors([]);
+        }
         if (secs && secs.length) {
           const { data: lss } = await supabase.from("lms_lessons")
             .select("id,section_id,title,duration_seconds,is_preview,display_order")
