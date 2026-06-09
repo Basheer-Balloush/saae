@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, Clock, Calendar, MapPin, Hourglass } from "lucide-react";
+import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, Clock, Calendar, MapPin, Hourglass, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -221,6 +221,7 @@ function CourseDetails() {
 
   const title = lang === "ar" ? course.title_ar : course.title_en || course.title_ar;
   const desc = lang === "ar" ? course.description_ar : course.description_en;
+  const isFinished = !!course.end_date && new Date(course.end_date) < new Date();
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
@@ -229,7 +230,15 @@ function CourseDetails() {
           <div className="aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
             {course.cover_url ? <img src={course.cover_url} alt={title} className="w-full h-full object-cover" /> : <BookOpen className="h-20 w-20 text-primary/40" />}
           </div>
-          <h1 className="mt-6 text-3xl font-bold text-foreground">{title}</h1>
+          <div className="mt-6 flex items-start gap-3 flex-wrap">
+            <h1 className="text-3xl font-bold text-foreground">{title}</h1>
+            {isFinished && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-3 py-1 text-sm font-semibold">
+                <CheckCircle className="h-3.5 w-3.5" />
+                {tr.courseFinished}
+              </span>
+            )}
+          </div>
           {desc && <p className="mt-3 text-muted-foreground leading-relaxed">{desc}</p>}
 
           <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -361,6 +370,14 @@ function CourseDetails() {
                 <Link to="/learning-management-system/student/player/$courseId" params={{ courseId: course.id }}>
                   <Button className="w-full mt-4" size="lg">{tr.goToCourse}</Button>
                 </Link>
+              );
+            }
+            if (isFinished) {
+              return (
+                <div className="mt-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 p-4 text-center text-sm text-emerald-700 dark:text-emerald-300 font-semibold">
+                  <CheckCircle className="h-5 w-5 mx-auto mb-1" />
+                  {tr.courseFinished}
+                </div>
               );
             }
             if (pendingRequest) {
