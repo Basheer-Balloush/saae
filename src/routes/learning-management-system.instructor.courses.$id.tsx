@@ -553,6 +553,12 @@ function CourseBuilder() {
             </label>
           </div>
         </div>
+
+        {(isAdmin || (user && user.id === course.instructor_id)) && (
+          <div className="pt-3 border-t border-border">
+            <CourseCoInstructors courseId={course.id} ownerId={course.instructor_id} ar={lang === "ar"} />
+          </div>
+        )}
       </section>
 
       {/* Enrollment management */}
