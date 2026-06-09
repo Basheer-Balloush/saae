@@ -125,6 +125,7 @@ function CourseDetails() {
   const ar = lang === "ar";
   const [course, setCourse] = useState<Course | null>(null);
   const [instructor, setInstructor] = useState<Instructor | null>(null);
+  const [coInstructors, setCoInstructors] = useState<Instructor[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [enrolled, setEnrolled] = useState(false);
