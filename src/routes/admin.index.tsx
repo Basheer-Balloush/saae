@@ -232,7 +232,7 @@ function AdminDashboard() {
   const { lang, dir, toggle: toggleLang } = useLang();
   const { theme, toggle: toggleTheme } = useTheme();
   const labels = ADMIN_TEXT[lang];
-  const communityLabels = lang === "ar" ? COMMUNITY_LABELS_AR : COMMUNITY_LABELS_EN;
+  void COMMUNITY_LABELS_AR; void COMMUNITY_LABELS_EN;
   const [items, setItems] = useState<NewsRow[]>([]);
   const [editing, setEditing] = useState<NewsRow | null>(null);
   const [showForm, setShowForm] = useState(false);
