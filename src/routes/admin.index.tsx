@@ -427,7 +427,10 @@ function AdminDashboard() {
                       </td>
                       <td className="px-4 py-3 font-medium text-foreground">{lang === "ar" ? row.title_ar || row.title_en || row.title : row.title_en || row.title_ar || row.title}</td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {communityLabels[row.category as CommunityKey] ?? row.category}
+                        {(row.categories && row.categories.length > 0 ? row.categories : [row.category])
+                          .filter(Boolean)
+                          .map((c) => communityLabel(c, lang))
+                          .join(lang === "ar" ? "، " : ", ")}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">{row.published_at}</td>
                       <td className="px-4 py-3">
