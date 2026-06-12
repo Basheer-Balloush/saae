@@ -80,12 +80,20 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  beforeLoad: ({ location }) => {
-    if (
-      typeof window !== "undefined" &&
-      window.location.hostname === "lms.aisyria.org" &&
-      location.pathname === "/"
-    ) {
+  beforeLoad: async ({ location }) => {
+    let hostname: string | null = null;
+    if (typeof window !== "undefined") {
+      hostname = window.location.hostname;
+    } else {
+      try {
+        const mod = await import("@tanstack/react-start/server");
+        const host = mod.getRequestHost?.({ xForwardedHost: true });
+        hostname = host ? String(host).split(":")[0] : null;
+      } catch {
+        hostname = null;
+      }
+    }
+    if (hostname === "lms.aisyria.org" && location.pathname === "/") {
       throw redirect({ to: "/learning-management-system" });
     }
   },
