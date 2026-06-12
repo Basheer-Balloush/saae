@@ -9,6 +9,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { createIsomorphicFn } from "@tanstack/react-start";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -79,20 +80,22 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  beforeLoad: async ({ location }) => {
-    let hostname: string | null = null;
-    if (typeof window !== "undefined") {
-      hostname = window.location.hostname;
-    } else {
-      try {
-        const mod = await import("@tanstack/react-start/server");
-        const host = mod.getRequestHost?.({ xForwardedHost: true });
-        hostname = host ? String(host).split(":")[0] : null;
-      } catch {
-        hostname = null;
-      }
+const getHostname = createIsomorphicFn()
+  .client(() => window.location.hostname)
+  .server(() => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getRequestHost } = require("@tanstack/react-start/server") as typeof import("@tanstack/react-start/server");
+      const host = getRequestHost({ xForwardedHost: true });
+      return host ? String(host).split(":")[0] : null;
+    } catch {
+      return null;
     }
+  });
+
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: ({ location }) => {
+    const hostname = getHostname();
     if (hostname === "lms.aisyria.org" && location.pathname === "/") {
       throw redirect({ to: "/learning-management-system" });
     }
