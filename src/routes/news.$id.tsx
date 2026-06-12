@@ -136,6 +136,7 @@ const STATIC_ARTICLE: NewsArticle = {
   images: null,
   videos: null,
   category: "research",
+  categories: ["research"],
   published_at: new Date().toISOString(),
 };
 
