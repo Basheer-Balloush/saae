@@ -532,7 +532,7 @@ function NewsForm({
   const [videos, setVideos] = useState<string[]>(initial?.videos ?? []);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const communityLabels = lang === "ar" ? COMMUNITY_LABELS_AR : COMMUNITY_LABELS_EN;
+  
 
   const handleCoverUpload = async (file: File) => {
     setUploading(true);
