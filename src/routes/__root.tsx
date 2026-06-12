@@ -9,6 +9,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { createIsomorphicFn } from "@tanstack/react-start";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
