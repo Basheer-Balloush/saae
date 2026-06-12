@@ -515,9 +515,14 @@ function NewsForm({
   const [excerptEn, setExcerptEn] = useState(initial?.excerpt_en ?? initial?.excerpt ?? "");
   const [contentAr, setContentAr] = useState(initial?.content_ar ?? initial?.content ?? "");
   const [contentEn, setContentEn] = useState(initial?.content_en ?? initial?.content ?? "");
-  const [category, setCategory] = useState<CommunityKey>(
-    (initial?.category as CommunityKey) ?? "data",
-  );
+  const [categories, setCategories] = useState<NewsCategoryKey[]>(() => {
+    const initArr = (initial?.categories && initial.categories.length > 0
+      ? initial.categories
+      : initial?.category
+        ? [initial.category]
+        : ["data"]) as NewsCategoryKey[];
+    return initArr.filter((c) => (NEWS_CATEGORY_KEYS as readonly string[]).includes(c));
+  });
   const [publishedAt, setPublishedAt] = useState(
     initial?.published_at ?? new Date().toISOString().slice(0, 10),
   );
