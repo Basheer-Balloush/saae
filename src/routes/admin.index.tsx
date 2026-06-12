@@ -22,10 +22,11 @@ import { AdminChatbotSection } from "@/components/admin/AdminChatbotSection";
 import { useTheme } from "@/lib/theme";
 import { z } from "zod";
 import {
-  COMMUNITY_KEYS,
+  NEWS_CATEGORY_KEYS,
   COMMUNITY_LABELS_AR,
   COMMUNITY_LABELS_EN,
-  type CommunityKey,
+  communityLabel,
+  type NewsCategoryKey,
 } from "@/lib/communityCategories";
 
 
