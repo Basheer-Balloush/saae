@@ -81,11 +81,21 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: ({ location }) => {
-    if (
-      typeof window !== "undefined" &&
-      window.location.hostname === "lms.aisyria.org" &&
-      location.pathname === "/"
-    ) {
+    let hostname: string | null = null;
+    if (typeof window !== "undefined") {
+      hostname = window.location.hostname;
+    } else {
+      try {
+        // Server-side: read Host header from the incoming request
+        const { getHeaders } = require("@tanstack/react-start/server");
+        const headers = getHeaders();
+        const host = headers?.host || headers?.["x-forwarded-host"] || "";
+        hostname = String(host).split(":")[0] || null;
+      } catch {
+        hostname = null;
+      }
+    }
+    if (hostname === "lms.aisyria.org" && location.pathname === "/") {
       throw redirect({ to: "/learning-management-system" });
     }
   },
