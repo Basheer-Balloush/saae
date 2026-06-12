@@ -147,20 +147,16 @@ function LmsHome() {
         .order("display_order");
       setCategories((cats as Category[]) ?? []);
 
-      const [{ count: cCount }, { count: eCount }, { count: iCount }, { data: courseRows }] =
-        await Promise.all([
-          supabase
-            .from("lms_courses")
-            .select("*", { count: "exact", head: true })
-            .eq("status", "published"),
-          supabase.from("lms_enrollments").select("*", { count: "exact", head: true }),
-          supabase
-            .from("lms_instructors")
-            .select("*", { count: "exact", head: true })
-            .eq("approved", true),
-          supabase.from("lms_courses").select("category_id").eq("status", "published"),
-        ]);
-      setStats({ courses: cCount ?? 0, students: eCount ?? 0, instructors: iCount ?? 0 });
+      const [{ data: statsRows }, { data: courseRows }] = await Promise.all([
+        supabase.rpc("lms_public_stats"),
+        supabase.from("lms_courses").select("category_id").eq("status", "published"),
+      ]);
+      const s = (statsRows as { courses: number; students: number; instructors: number }[] | null)?.[0];
+      setStats({
+        courses: Number(s?.courses ?? 0),
+        students: Number(s?.students ?? 0),
+        instructors: Number(s?.instructors ?? 0),
+      });
 
       const counts: Record<string, number> = {};
       ((courseRows as { category_id: string | null }[]) ?? []).forEach((r) => {
