@@ -218,10 +218,11 @@ function NewsDetailPage() {
         if (error) console.warn("News fetch error:", error.message);
         if (data) {
           setArticle(data as NewsArticle);
+          const cats: string[] = (data as any).categories?.length ? (data as any).categories : [data.category];
           supabase
             .from("news")
-            .select("id,title,title_ar,title_en,image_url,published_at")
-            .eq("category", data.category)
+            .select("id,title,title_ar,title_en,image_url,published_at,category,categories")
+            .or(`category.in.(${cats.join(",")}),categories.ov.{${cats.join(",")}}`)
             .neq("id", id)
             .order("published_at", { ascending: false })
             .limit(3)
