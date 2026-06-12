@@ -62,7 +62,7 @@ function NewsPage() {
   useEffect(() => {
     supabase
       .from("news")
-      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,published_at")
+      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,categories,published_at")
       .order("published_at", { ascending: false })
       .order("created_at", { ascending: false })
       .then(({ data }) => {
