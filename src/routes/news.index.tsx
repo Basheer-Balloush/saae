@@ -158,10 +158,12 @@ function NewsPage() {
                       />
                     </div>
                     <div className="flex flex-1 flex-col p-6">
-                      <div className="flex items-center gap-3 text-xs">
-                        <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
-                          {communityLabel(n.category, lang)}
-                        </span>
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        {((n.categories && n.categories.length > 0 ? n.categories : [n.category]).filter(Boolean)).map((c) => (
+                          <span key={c} className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
+                            {communityLabel(c, lang)}
+                          </span>
+                        ))}
                         <span className="text-muted-foreground">{n.published_at}</span>
                       </div>
                       <h2 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
