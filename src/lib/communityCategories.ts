@@ -8,7 +8,6 @@ export const COMMUNITY_KEYS = [
   "trainers",
   "media",
   "quality",
-  "society",
 ] as const;
 
 export type CommunityKey = (typeof COMMUNITY_KEYS)[number];
@@ -23,7 +22,6 @@ export const COMMUNITY_LABELS_AR: Record<CommunityKey, string> = {
   trainers: "مجتمع المدربين",
   media: "المجتمع الإعلامي",
   quality: "مجتمع الجودة الريادي",
-  society: "المجتمع",
 };
 
 export const COMMUNITY_LABELS_EN: Record<CommunityKey, string> = {
@@ -36,12 +34,29 @@ export const COMMUNITY_LABELS_EN: Record<CommunityKey, string> = {
   trainers: "Trainers Community",
   media: "Media Community",
   quality: "Quality Entrepreneurship Community",
+};
+
+// News-only extra categories (not full communities with their own pages)
+export const EXTRA_NEWS_CATEGORY_KEYS = ["society"] as const;
+
+export const NEWS_CATEGORY_KEYS = [
+  ...COMMUNITY_KEYS,
+  ...EXTRA_NEWS_CATEGORY_KEYS,
+] as const;
+
+export type NewsCategoryKey = (typeof NEWS_CATEGORY_KEYS)[number];
+
+const EXTRA_LABELS_AR: Record<(typeof EXTRA_NEWS_CATEGORY_KEYS)[number], string> = {
+  society: "المجتمع",
+};
+const EXTRA_LABELS_EN: Record<(typeof EXTRA_NEWS_CATEGORY_KEYS)[number], string> = {
   society: "Society",
 };
 
 export function communityLabel(key: string, lang: "ar" | "en"): string {
   const map = lang === "ar" ? COMMUNITY_LABELS_AR : COMMUNITY_LABELS_EN;
-  return (map as Record<string, string>)[key] ?? key;
+  const extra = lang === "ar" ? EXTRA_LABELS_AR : EXTRA_LABELS_EN;
+  return (map as Record<string, string>)[key] ?? (extra as Record<string, string>)[key] ?? key;
 }
 
 /**
