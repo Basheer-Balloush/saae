@@ -209,6 +209,7 @@ type NewsRow = {
   images: string[] | null;
   videos: string[] | null;
   category: string;
+  categories: string[] | null;
   published_at: string;
   show_on_home: boolean;
 };
@@ -220,7 +221,7 @@ const newsSchema = z.object({
   excerpt_en: z.string().trim().max(500).optional().or(z.literal("")),
   content_ar: z.string().trim().max(20000).optional().or(z.literal("")),
   content_en: z.string().trim().max(20000).optional().or(z.literal("")),
-  category: z.enum(COMMUNITY_KEYS),
+  categories: z.array(z.enum(NEWS_CATEGORY_KEYS)).min(1, "Select at least one category"),
   published_at: z.string().min(1),
   show_on_home: z.boolean(),
 });
