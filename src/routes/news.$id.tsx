@@ -103,6 +103,7 @@ type NewsArticle = {
   images: string[] | null;
   videos: string[] | null;
   category: string;
+  categories: string[] | null;
   published_at: string;
 };
 
