@@ -1653,6 +1653,7 @@ export type Database = {
       }
       news: {
         Row: {
+          categories: string[]
           category: string
           content: string | null
           content_ar: string | null
@@ -1673,6 +1674,7 @@ export type Database = {
           videos: string[]
         }
         Insert: {
+          categories?: string[]
           category: string
           content?: string | null
           content_ar?: string | null
@@ -1693,6 +1695,7 @@ export type Database = {
           videos?: string[]
         }
         Update: {
+          categories?: string[]
           category?: string
           content?: string | null
           content_ar?: string | null
