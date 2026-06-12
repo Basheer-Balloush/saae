@@ -292,12 +292,17 @@ function NewsDetailPage() {
 
       <main className="pt-28 pb-24 lg:pt-32 lg:pb-32">
         <motion.header {...fade} className="mx-auto max-w-[850px] px-6 text-center">
-          <span
-            className="inline-block rounded-full px-5 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white"
-            style={{ backgroundColor: GREEN }}
-          >
-            {communityLabel(article.category, lang)}
-          </span>
+          <div className="flex flex-wrap justify-center gap-2">
+            {((article.categories && article.categories.length > 0 ? article.categories : [article.category]).filter(Boolean)).map((c) => (
+              <span
+                key={c}
+                className="inline-block rounded-full px-5 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white"
+                style={{ backgroundColor: GREEN }}
+              >
+                {communityLabel(c, lang)}
+              </span>
+            ))}
+          </div>
 
           <h1
             className="mx-auto mt-7 max-w-3xl leading-[1.35]"
