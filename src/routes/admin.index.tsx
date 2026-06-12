@@ -588,7 +588,7 @@ function NewsForm({
       excerpt_en: excerptEn,
       content_ar: contentAr,
       content_en: contentEn,
-      category,
+      categories,
       published_at: publishedAt,
       show_on_home: showOnHome,
     });
