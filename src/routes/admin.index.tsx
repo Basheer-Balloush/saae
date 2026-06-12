@@ -683,18 +683,35 @@ function NewsForm({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>{labels.communityCategory}</Label>
-              <Select value={category} onValueChange={(v) => setCategory(v as CommunityKey)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {COMMUNITY_KEYS.map((k) => (
-                    <SelectItem key={k} value={k}>
-                      {communityLabels[k]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="mt-2 flex flex-wrap gap-2 rounded-md border border-input bg-background p-3">
+                {NEWS_CATEGORY_KEYS.map((k) => {
+                  const checked = categories.includes(k);
+                  return (
+                    <label
+                      key={k}
+                      className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                        checked
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card text-foreground hover:bg-accent"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        checked={checked}
+                        onChange={(e) => {
+                          setCategories((prev) =>
+                            e.target.checked
+                              ? Array.from(new Set([...prev, k]))
+                              : prev.filter((c) => c !== k),
+                          );
+                        }}
+                      />
+                      {communityLabel(k, lang)}
+                    </label>
+                  );
+                })}
+              </div>
             </div>
             <div>
               <Label htmlFor="date">{labels.date}</Label>
