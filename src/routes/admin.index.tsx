@@ -22,10 +22,11 @@ import { AdminChatbotSection } from "@/components/admin/AdminChatbotSection";
 import { useTheme } from "@/lib/theme";
 import { z } from "zod";
 import {
-  COMMUNITY_KEYS,
+  NEWS_CATEGORY_KEYS,
   COMMUNITY_LABELS_AR,
   COMMUNITY_LABELS_EN,
-  type CommunityKey,
+  communityLabel,
+  type NewsCategoryKey,
 } from "@/lib/communityCategories";
 
 
@@ -208,6 +209,7 @@ type NewsRow = {
   images: string[] | null;
   videos: string[] | null;
   category: string;
+  categories: string[] | null;
   published_at: string;
   show_on_home: boolean;
 };
@@ -219,7 +221,7 @@ const newsSchema = z.object({
   excerpt_en: z.string().trim().max(500).optional().or(z.literal("")),
   content_ar: z.string().trim().max(20000).optional().or(z.literal("")),
   content_en: z.string().trim().max(20000).optional().or(z.literal("")),
-  category: z.enum(COMMUNITY_KEYS),
+  categories: z.array(z.enum(NEWS_CATEGORY_KEYS)).min(1, "Select at least one category"),
   published_at: z.string().min(1),
   show_on_home: z.boolean(),
 });
@@ -230,7 +232,7 @@ function AdminDashboard() {
   const { lang, dir, toggle: toggleLang } = useLang();
   const { theme, toggle: toggleTheme } = useTheme();
   const labels = ADMIN_TEXT[lang];
-  const communityLabels = lang === "ar" ? COMMUNITY_LABELS_AR : COMMUNITY_LABELS_EN;
+  void COMMUNITY_LABELS_AR; void COMMUNITY_LABELS_EN;
   const [items, setItems] = useState<NewsRow[]>([]);
   const [editing, setEditing] = useState<NewsRow | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -425,7 +427,10 @@ function AdminDashboard() {
                       </td>
                       <td className="px-4 py-3 font-medium text-foreground">{lang === "ar" ? row.title_ar || row.title_en || row.title : row.title_en || row.title_ar || row.title}</td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {communityLabels[row.category as CommunityKey] ?? row.category}
+                        {(row.categories && row.categories.length > 0 ? row.categories : [row.category])
+                          .filter(Boolean)
+                          .map((c) => communityLabel(c, lang))
+                          .join(lang === "ar" ? "، " : ", ")}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">{row.published_at}</td>
                       <td className="px-4 py-3">
@@ -510,9 +515,14 @@ function NewsForm({
   const [excerptEn, setExcerptEn] = useState(initial?.excerpt_en ?? initial?.excerpt ?? "");
   const [contentAr, setContentAr] = useState(initial?.content_ar ?? initial?.content ?? "");
   const [contentEn, setContentEn] = useState(initial?.content_en ?? initial?.content ?? "");
-  const [category, setCategory] = useState<CommunityKey>(
-    (initial?.category as CommunityKey) ?? "data",
-  );
+  const [categories, setCategories] = useState<NewsCategoryKey[]>(() => {
+    const initArr = (initial?.categories && initial.categories.length > 0
+      ? initial.categories
+      : initial?.category
+        ? [initial.category]
+        : ["data"]) as NewsCategoryKey[];
+    return initArr.filter((c) => (NEWS_CATEGORY_KEYS as readonly string[]).includes(c));
+  });
   const [publishedAt, setPublishedAt] = useState(
     initial?.published_at ?? new Date().toISOString().slice(0, 10),
   );
@@ -522,7 +532,7 @@ function NewsForm({
   const [videos, setVideos] = useState<string[]>(initial?.videos ?? []);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const communityLabels = lang === "ar" ? COMMUNITY_LABELS_AR : COMMUNITY_LABELS_EN;
+  
 
   const handleCoverUpload = async (file: File) => {
     setUploading(true);
@@ -578,7 +588,7 @@ function NewsForm({
       excerpt_en: excerptEn,
       content_ar: contentAr,
       content_en: contentEn,
-      category,
+      categories,
       published_at: publishedAt,
       show_on_home: showOnHome,
     });
@@ -599,7 +609,8 @@ function NewsForm({
         excerpt_en: parsed.data.excerpt_en || null,
         content_ar: parsed.data.content_ar || null,
         content_en: parsed.data.content_en || null,
-        category: parsed.data.category,
+        category: parsed.data.categories[0],
+        categories: parsed.data.categories,
         published_at: parsed.data.published_at,
         show_on_home: parsed.data.show_on_home,
         image_url: imageUrl || null,
@@ -672,18 +683,35 @@ function NewsForm({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>{labels.communityCategory}</Label>
-              <Select value={category} onValueChange={(v) => setCategory(v as CommunityKey)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {COMMUNITY_KEYS.map((k) => (
-                    <SelectItem key={k} value={k}>
-                      {communityLabels[k]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="mt-2 flex flex-wrap gap-2 rounded-md border border-input bg-background p-3">
+                {NEWS_CATEGORY_KEYS.map((k) => {
+                  const checked = categories.includes(k);
+                  return (
+                    <label
+                      key={k}
+                      className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                        checked
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card text-foreground hover:bg-accent"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        checked={checked}
+                        onChange={(e) => {
+                          setCategories((prev) =>
+                            e.target.checked
+                              ? Array.from(new Set([...prev, k]))
+                              : prev.filter((c) => c !== k),
+                          );
+                        }}
+                      />
+                      {communityLabel(k, lang)}
+                    </label>
+                  );
+                })}
+              </div>
             </div>
             <div>
               <Label htmlFor="date">{labels.date}</Label>

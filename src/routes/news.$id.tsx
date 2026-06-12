@@ -103,6 +103,7 @@ type NewsArticle = {
   images: string[] | null;
   videos: string[] | null;
   category: string;
+  categories: string[] | null;
   published_at: string;
 };
 
@@ -135,6 +136,7 @@ const STATIC_ARTICLE: NewsArticle = {
   images: null,
   videos: null,
   category: "research",
+  categories: ["research"],
   published_at: new Date().toISOString(),
 };
 
@@ -218,10 +220,11 @@ function NewsDetailPage() {
         if (error) console.warn("News fetch error:", error.message);
         if (data) {
           setArticle(data as NewsArticle);
+          const cats: string[] = (data as any).categories?.length ? (data as any).categories : [data.category];
           supabase
             .from("news")
-            .select("id,title,title_ar,title_en,image_url,published_at")
-            .eq("category", data.category)
+            .select("id,title,title_ar,title_en,image_url,published_at,category,categories")
+            .or(`category.in.(${cats.join(",")}),categories.ov.{${cats.join(",")}}`)
             .neq("id", id)
             .order("published_at", { ascending: false })
             .limit(3)
@@ -289,12 +292,17 @@ function NewsDetailPage() {
 
       <main className="pt-28 pb-24 lg:pt-32 lg:pb-32">
         <motion.header {...fade} className="mx-auto max-w-[850px] px-6 text-center">
-          <span
-            className="inline-block rounded-full px-5 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white"
-            style={{ backgroundColor: GREEN }}
-          >
-            {communityLabel(article.category, lang)}
-          </span>
+          <div className="flex flex-wrap justify-center gap-2">
+            {((article.categories && article.categories.length > 0 ? article.categories : [article.category]).filter(Boolean)).map((c) => (
+              <span
+                key={c}
+                className="inline-block rounded-full px-5 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white"
+                style={{ backgroundColor: GREEN }}
+              >
+                {communityLabel(c, lang)}
+              </span>
+            ))}
+          </div>
 
           <h1
             className="mx-auto mt-7 max-w-3xl leading-[1.35]"

@@ -403,8 +403,8 @@ function CommunityPage() {
     setLoadingNews(true);
     supabase
       .from("news")
-      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,category,published_at")
-      .eq("category", k)
+      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,category,categories,published_at")
+      .or(`category.eq.${k},categories.cs.{${k}}`)
       .order("published_at", { ascending: false })
       .limit(10)
       .then(({ data, error }) => {
