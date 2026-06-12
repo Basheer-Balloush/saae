@@ -40,6 +40,7 @@ type NewsRow = {
   excerpt_en: string | null;
   image_url: string | null;
   category: string;
+  categories: string[] | null;
   published_at: string;
 };
 
