@@ -1885,6 +1885,14 @@ export type Database = {
         Args: { _approve: boolean; _payout_id: string }
         Returns: undefined
       }
+      lms_public_stats: {
+        Args: never
+        Returns: {
+          courses: number
+          instructors: number
+          students: number
+        }[]
+      }
       lms_reject_enrollment_request: {
         Args: { _admin_notes?: string; _request_id: string }
         Returns: undefined
