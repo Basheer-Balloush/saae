@@ -237,69 +237,14 @@ function NewsDetailPage() {
     }
   };
 
-  const [article, setArticle] = useState<NewsArticle | null>(null);
-  const [related, setRelated] = useState<RelatedItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const loaderData = Route.useLoaderData();
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  const article: NewsArticle | null = isUuid
+    ? ((loaderData.article as unknown as NewsArticle | null) ?? null)
+    : STATIC_ARTICLE;
+  const related: RelatedItem[] = (loaderData.related as unknown as RelatedItem[]) ?? [];
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
 
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-    if (!isUuid) {
-      // Avoid extended skeleton flash (<50ms) — show static fallback immediately
-      setArticle(STATIC_ARTICLE);
-      setRelated([]);
-      setLoading(false);
-      return () => { cancelled = true; };
-    }
-
-    supabase
-      .from("news")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        if (error) console.warn("News fetch error:", error.message);
-        if (data) {
-          setArticle(data as NewsArticle);
-          const cats: string[] = (data as any).categories?.length ? (data as any).categories : [data.category];
-          supabase
-            .from("news")
-            .select("id,title,title_ar,title_en,image_url,published_at,category,categories")
-            .or(`category.in.(${cats.join(",")}),categories.ov.{${cats.join(",")}}`)
-            .neq("id", id)
-            .order("published_at", { ascending: false })
-            .limit(3)
-            .then(({ data: rel }) => {
-              if (cancelled) return;
-              setRelated((rel ?? []) as RelatedItem[]);
-            });
-        } else {
-          setArticle(null);
-        }
-        setLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, [id, lang]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="pt-32 pb-32">
-          <div className="mx-auto max-w-[850px] px-6">
-            <div className="h-6 w-32 animate-pulse rounded bg-muted/40" />
-            <div className="mt-6 h-12 w-3/4 animate-pulse rounded bg-muted/40" />
-            <div className="mt-4 h-5 w-48 animate-pulse rounded bg-muted/40" />
-            <div className="mt-10 aspect-[16/9] animate-pulse rounded-lg bg-muted/40" />
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
 
   if (!article) {
     return (
