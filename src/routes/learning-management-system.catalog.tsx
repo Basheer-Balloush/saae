@@ -90,10 +90,11 @@ function Catalog() {
           label={tr.filterCategory}
           options={[
             { value: "all", label: tr.all },
-            ...categories.map((c) => ({
+            ...(categories as Category[]).map((c: Category) => ({
               value: c.id,
               label: lang === "ar" ? c.name_ar : c.name_en || c.name_ar,
             })),
+
           ]}
         />
         <FilterSelect
