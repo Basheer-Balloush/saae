@@ -59,7 +59,9 @@ function Catalog() {
   const { lang } = useLang();
   const tr = lmsT[lang];
   const dir: "rtl" | "ltr" = lang === "ar" ? "rtl" : "ltr";
-  const { courses, categories } = Route.useLoaderData();
+  const data = Route.useLoaderData();
+  const courses = data.courses as CourseCardData[];
+  const categories = data.categories as Category[];
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("all");
   const [level, setLevel] = useState<string>("all");
@@ -76,6 +78,7 @@ function Catalog() {
       return true;
     });
   }, [courses, q, cat, level, price]);
+
 
 
 
