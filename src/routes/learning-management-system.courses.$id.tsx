@@ -161,77 +161,32 @@ function CourseDetails() {
   const { lang } = useLang();
   const tr = lmsT[lang];
   const ar = lang === "ar";
-  const [course, setCourse] = useState<Course | null>(null);
-  const [instructor, setInstructor] = useState<Instructor | null>(null);
-  const [coInstructors, setCoInstructors] = useState<Instructor[]>([]);
-  const [sections, setSections] = useState<Section[]>([]);
-  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const { course, instructor, coInstructors, sections, lessons, hasForm } = Route.useLoaderData();
   const [enrolled, setEnrolled] = useState(false);
   const [pendingRequest, setPendingRequest] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
   const [manualNotes, setManualNotes] = useState("");
-  const [hasForm, setHasForm] = useState(false);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
 
   useEffect(() => {
+    if (!course || !user) {
+      setEnrolled(false);
+      setPendingRequest(false);
+      return;
+    }
+    let cancelled = false;
     (async () => {
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-      const baseQ = supabase.from("lms_courses").select("id,instructor_id,category_id,title_ar,title_en,description_ar,description_en,level,price,is_free,cover_url,status,rating_avg,students_count,created_at,updated_at,enrollment_open,max_students,enrollment_deadline,slug,start_date,end_date,schedule_days,schedule_time_from,schedule_time_to,location_ar,location_en,duration_hours");
-      const { data: c } = await (isUuid ? baseQ.eq("id", id) : baseQ.eq("slug", id)).maybeSingle();
-      setCourse(c as Course | null);
-      if (c) {
-        const realCourseId = (c as { id: string }).id;
-        const [{ data: ins }, { data: secs }] = await Promise.all([
-          supabase.from("lms_instructors").select("user_id,full_name,full_name_ar,full_name_en,avatar_url,specialty,specialty_ar,specialty_en").eq("user_id", c.instructor_id).maybeSingle(),
-          supabase.from("lms_sections").select("id,title,display_order").eq("course_id", realCourseId).order("display_order"),
-        ]);
-        setInstructor(ins as Instructor | null);
-        setSections((secs as Section[]) ?? []);
-        // Co-instructors
-        const { data: coLinks } = await supabase
-          .from("lms_course_instructors")
-          .select("instructor_user_id")
-          .eq("course_id", realCourseId);
-        const coIds = ((coLinks as { instructor_user_id: string }[]) ?? [])
-          .map((l) => l.instructor_user_id)
-          .filter((uid) => uid !== c.instructor_id);
-        if (coIds.length) {
-          const { data: coIns } = await supabase
-            .from("lms_instructors")
-            .select("user_id,full_name,full_name_ar,full_name_en,avatar_url,specialty,specialty_ar,specialty_en")
-            .in("user_id", coIds);
-          setCoInstructors((coIns as Instructor[]) ?? []);
-        } else {
-          setCoInstructors([]);
-        }
-        if (secs && secs.length) {
-          const { data: lss } = await supabase.from("lms_lessons")
-            .select("id,section_id,title,duration_seconds,is_preview,display_order")
-            .in("section_id", secs.map((s) => s.id))
-            .order("display_order");
-          setLessons((lss as Lesson[]) ?? []);
-        }
-        const { data: cf } = await supabase
-          .from("lms_course_forms")
-          .select("id")
-          .eq("course_id", realCourseId)
-          .eq("is_active", true)
-          .maybeSingle();
-        setHasForm(!!cf);
-        if (user) {
-          const [{ data: e }, { data: req }] = await Promise.all([
-            supabase.from("lms_enrollments").select("id").eq("course_id", realCourseId).eq("student_id", user.id).maybeSingle(),
-            supabase.from("lms_enrollment_requests").select("id").eq("course_id", realCourseId).eq("user_id", user.id).eq("status", "pending").maybeSingle(),
-          ]);
-          setEnrolled(!!e);
-          setPendingRequest(!!req);
-        }
-      }
-      setLoading(false);
+      const [{ data: e }, { data: req }] = await Promise.all([
+        supabase.from("lms_enrollments").select("id").eq("course_id", course.id).eq("student_id", user.id).maybeSingle(),
+        supabase.from("lms_enrollment_requests").select("id").eq("course_id", course.id).eq("user_id", user.id).eq("status", "pending").maybeSingle(),
+      ]);
+      if (cancelled) return;
+      setEnrolled(!!e);
+      setPendingRequest(!!req);
     })();
-  }, [id, user]);
+    return () => { cancelled = true; };
+  }, [course, user]);
 
   const requireAuth = () => {
     if (!user) { navigate({ to: "/learning-management-system/login" }); return false; }
@@ -240,22 +195,16 @@ function CourseDetails() {
 
   const onFreeEnroll = async () => {
     if (!requireAuth()) return;
-    // Always open the enrollment form (base fields are always required).
     setFormDialogOpen(true);
   };
-
-
-
 
   const onManualSubmit = async () => {
     if (!requireAuth() || !user) return;
-    // Always open the enrollment form (base fields are always required).
     setFormDialogOpen(true);
   };
 
-
-  if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
   if (!course) return <p className="text-center py-20 text-muted-foreground">404</p>;
+
 
   const title = lang === "ar" ? course.title_ar : course.title_en || course.title_ar;
   const desc = lang === "ar" ? course.description_ar : course.description_en;
