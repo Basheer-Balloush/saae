@@ -161,7 +161,7 @@ function CourseDetails() {
   const { lang } = useLang();
   const tr = lmsT[lang];
   const ar = lang === "ar";
-  const { course, instructor, coInstructors, sections, lessons, hasForm } = Route.useLoaderData();
+  const { course, instructor, coInstructors, sections, lessons, hasForm } = Route.useLoaderData() as CourseLoaderData;
   const [enrolled, setEnrolled] = useState(false);
   const [pendingRequest, setPendingRequest] = useState(false);
   const [busy, setBusy] = useState(false);
