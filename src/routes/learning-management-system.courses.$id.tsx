@@ -11,38 +11,92 @@ import { toast } from "sonner";
 import { CourseReviews } from "@/components/lms/CourseReviews";
 import { EnrollmentFormDialog } from "@/components/lms/EnrollmentFormDialog";
 
+type Course = {
+  id: string; title_ar: string; title_en: string | null;
+  description_ar: string | null; description_en: string | null;
+  cover_url: string | null; level: string; price: number; is_free: boolean;
+  students_count: number; rating_avg: number; instructor_id: string;
+  enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null;
+  start_date: string | null; end_date: string | null;
+  schedule_days: string[] | null;
+  schedule_time_from: string | null; schedule_time_to: string | null;
+  location_ar: string | null; location_en: string | null;
+  duration_hours: number | null;
+  slug?: string | null;
+};
+type Section = { id: string; title: string; display_order: number };
+type Lesson = { id: string; section_id: string; title: string; duration_seconds: number; is_preview: boolean; display_order: number };
+type Instructor = { user_id: string; full_name: string; full_name_ar: string | null; full_name_en: string | null; avatar_url: string | null; specialty: string | null; specialty_ar: string | null; specialty_en: string | null };
+
+type CourseLoaderData = {
+  course: Course | null;
+  instructor: Instructor | null;
+  coInstructors: Instructor[];
+  sections: Section[];
+  lessons: Lesson[];
+  hasForm: boolean;
+};
+
 export const Route = createFileRoute("/learning-management-system/courses/$id")({
-  loader: async ({ params }) => {
+  loader: async ({ params }): Promise<CourseLoaderData> => {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
-    try {
-      const q = supabase
-        .from("lms_courses")
-        .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,price,is_free,rating_avg");
-      const { data } = await (isUuid ? q.eq("id", params.id) : q.eq("slug", params.id)).maybeSingle();
-      if (!data) return { meta: null as null | { title: string; description: string; image: string | null; price: number; isFree: boolean; rating: number; canonicalSlug: string } };
-      const title = (data.title_en ?? data.title_ar ?? "Course") as string;
-      const rawDesc = (data.description_en ?? data.description_ar ?? "") as string;
-      const fullDesc = rawDesc && rawDesc.length >= 50
-        ? rawDesc
-        : `${title} — course on the SAAE Learning Platform.`;
-      const description = fullDesc.length > 160 ? `${fullDesc.slice(0, 157).trimEnd()}…` : fullDesc;
-      return {
-        meta: {
-          title,
-          description,
-          image: (data.cover_url as string | null) ?? null,
-          price: Number(data.price ?? 0),
-          isFree: Boolean(data.is_free),
-          rating: Number(data.rating_avg ?? 0),
-          canonicalSlug: ((data as { slug?: string | null }).slug ?? (data.id as string)) as string,
-        },
-      };
-    } catch {
-      return { meta: null };
+    const baseQ = supabase.from("lms_courses").select("id,instructor_id,category_id,title_ar,title_en,description_ar,description_en,level,price,is_free,cover_url,status,rating_avg,students_count,created_at,updated_at,enrollment_open,max_students,enrollment_deadline,slug,start_date,end_date,schedule_days,schedule_time_from,schedule_time_to,location_ar,location_en,duration_hours");
+    const { data: c } = await (isUuid ? baseQ.eq("id", params.id) : baseQ.eq("slug", params.id)).maybeSingle();
+    if (!c) return { course: null, instructor: null, coInstructors: [], sections: [], lessons: [], hasForm: false };
+    const course = c as unknown as Course;
+    const realCourseId = course.id;
+
+    const [{ data: ins }, { data: secs }, { data: coLinks }, { data: cf }] = await Promise.all([
+      supabase.from("lms_instructors").select("user_id,full_name,full_name_ar,full_name_en,avatar_url,specialty,specialty_ar,specialty_en").eq("user_id", course.instructor_id).maybeSingle(),
+      supabase.from("lms_sections").select("id,title,display_order").eq("course_id", realCourseId).order("display_order"),
+      supabase.from("lms_course_instructors").select("instructor_user_id").eq("course_id", realCourseId),
+      supabase.from("lms_course_forms").select("id").eq("course_id", realCourseId).eq("is_active", true).maybeSingle(),
+    ]);
+    const sections = ((secs as unknown) as Section[]) ?? [];
+    let lessons: Lesson[] = [];
+    if (sections.length) {
+      const { data: lss } = await supabase.from("lms_lessons")
+        .select("id,section_id,title,duration_seconds,is_preview,display_order")
+        .in("section_id", sections.map((s) => s.id))
+        .order("display_order");
+      lessons = ((lss as unknown) as Lesson[]) ?? [];
     }
+    const coIds = (((coLinks as unknown) as { instructor_user_id: string }[]) ?? [])
+      .map((l) => l.instructor_user_id)
+      .filter((uid) => uid !== course.instructor_id);
+    let coInstructors: Instructor[] = [];
+    if (coIds.length) {
+      const { data: coIns } = await supabase
+        .from("lms_instructors")
+        .select("user_id,full_name,full_name_ar,full_name_en,avatar_url,specialty,specialty_ar,specialty_en")
+        .in("user_id", coIds);
+      coInstructors = ((coIns as unknown) as Instructor[]) ?? [];
+    }
+    return {
+      course,
+      instructor: ((ins as unknown) as Instructor | null) ?? null,
+      coInstructors,
+      sections,
+      lessons,
+      hasForm: !!cf,
+    };
   },
   head: ({ params, loaderData }) => {
-    const m = loaderData?.meta;
+    const c = loaderData?.course;
+    const m = c ? {
+      title: (c.title_en ?? c.title_ar ?? "Course") as string,
+      description: (() => {
+        const title = (c.title_en ?? c.title_ar ?? "Course") as string;
+        const rawDesc = (c.description_en ?? c.description_ar ?? "") as string;
+        const fullDesc = rawDesc && rawDesc.length >= 50 ? rawDesc : `${title} — course on the SAAE Learning Platform.`;
+        return fullDesc.length > 160 ? `${fullDesc.slice(0, 157).trimEnd()}…` : fullDesc;
+      })(),
+      image: c.cover_url ?? null,
+      price: Number(c.price ?? 0),
+      isFree: Boolean(c.is_free),
+      rating: Number(c.rating_avg ?? 0),
+      canonicalSlug: (c.slug ?? c.id) as string,
+    } : null;
     const url = `https://aisyria.org/learning-management-system/courses/${m?.canonicalSlug ?? params.id}`;
     const title = m?.title ? `${m.title} — SAAE Learning Platform` : "Course — SAAE Learning Platform";
     const description = m?.description ?? "Course on the SAAE Learning Platform — learn from expert instructors and grow your skills.";
@@ -99,22 +153,6 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
   },
   component: CourseDetails,
 });
-
-type Course = {
-  id: string; title_ar: string; title_en: string | null;
-  description_ar: string | null; description_en: string | null;
-  cover_url: string | null; level: string; price: number; is_free: boolean;
-  students_count: number; rating_avg: number; instructor_id: string;
-  enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null;
-  start_date: string | null; end_date: string | null;
-  schedule_days: string[] | null;
-  schedule_time_from: string | null; schedule_time_to: string | null;
-  location_ar: string | null; location_en: string | null;
-  duration_hours: number | null;
-};
-type Section = { id: string; title: string; display_order: number };
-type Lesson = { id: string; section_id: string; title: string; duration_seconds: number; is_preview: boolean; display_order: number };
-type Instructor = { user_id: string; full_name: string; full_name_ar: string | null; full_name_en: string | null; avatar_url: string | null; specialty: string | null; specialty_ar: string | null; specialty_en: string | null };
 
 function CourseDetails() {
   const { id } = Route.useParams();
