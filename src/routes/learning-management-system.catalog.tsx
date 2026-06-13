@@ -63,7 +63,7 @@ function Catalog() {
 
 
   const filtered = useMemo(() => {
-    return courses.filter((c) => {
+    return (courses as CourseCardData[]).filter((c: CourseCardData) => {
       if (q && !(`${c.title_ar} ${c.title_en ?? ""}`.toLowerCase().includes(q.toLowerCase()))) return false;
       if (cat !== "all" && (c as unknown as { category_id: string }).category_id !== cat) return false;
       if (level !== "all" && c.level !== level) return false;
@@ -72,6 +72,7 @@ function Catalog() {
       return true;
     });
   }, [courses, q, cat, level, price]);
+
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
