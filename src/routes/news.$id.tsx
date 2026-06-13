@@ -15,19 +15,61 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
+type NewsArticleLoader = {
+  id: string;
+  title: string;
+  title_ar: string | null;
+  title_en: string | null;
+  excerpt: string | null;
+  excerpt_ar: string | null;
+  excerpt_en: string | null;
+  content: string | null;
+  content_ar: string | null;
+  content_en: string | null;
+  image_url: string | null;
+  images: string[] | null;
+  videos: string[] | null;
+  category: string;
+  categories: string[] | null;
+  published_at: string;
+};
+
+type RelatedItemLoader = {
+  id: string;
+  title: string;
+  title_ar: string | null;
+  title_en: string | null;
+  image_url: string | null;
+  published_at: string;
+};
+
 export const Route = createFileRoute("/news/$id")({
-  loader: async ({ params }) => {
+  loader: async ({ params }): Promise<{
+    meta: null | { title: string; description: string; image: string | null; publishedAt: string | null };
+    article: NewsArticleLoader | null;
+    related: RelatedItemLoader[];
+  }> => {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
-    if (!isUuid) return { meta: null as null | { title: string; description: string; image: string | null; publishedAt: string | null } };
+    if (!isUuid) return { meta: null, article: null, related: [] };
     try {
       const { data } = await supabase
         .from("news")
-        .select("title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,published_at")
+        .select("*")
         .eq("id", params.id)
         .maybeSingle();
-      if (!data) return { meta: null };
-      const title = (data.title_en ?? data.title_ar ?? data.title ?? "News") as string;
-      const rawDesc = (data.excerpt_en ?? data.excerpt_ar ?? data.excerpt ?? "") as string;
+      if (!data) return { meta: null, article: null, related: [] };
+      const article = data as unknown as NewsArticleLoader;
+      const cats: string[] = (article.categories && article.categories.length > 0) ? article.categories : [article.category];
+      const { data: rel } = await supabase
+        .from("news")
+        .select("id,title,title_ar,title_en,image_url,published_at,category,categories")
+        .or(`category.in.(${cats.join(",")}),categories.ov.{${cats.join(",")}}`)
+        .neq("id", params.id)
+        .order("published_at", { ascending: false })
+        .limit(3);
+
+      const title = (article.title_en ?? article.title_ar ?? article.title ?? "News") as string;
+      const rawDesc = (article.excerpt_en ?? article.excerpt_ar ?? article.excerpt ?? "") as string;
       const fullDesc = rawDesc && rawDesc.length >= 50
         ? rawDesc
         : `${title} — ${rawDesc || "خبر من الجمعية السورية للذكاء الصنعي وريادة الأعمال (SAAE)."}`;
@@ -36,12 +78,14 @@ export const Route = createFileRoute("/news/$id")({
         meta: {
           title,
           description,
-          image: (data.image_url as string | null) ?? null,
-          publishedAt: (data.published_at as string | null) ?? null,
+          image: article.image_url ?? null,
+          publishedAt: article.published_at ?? null,
         },
+        article,
+        related: (rel ?? []) as unknown as RelatedItemLoader[],
       };
     } catch {
-      return { meta: null };
+      return { meta: null, article: null, related: [] };
     }
   },
   head: ({ params, loaderData }) => {
