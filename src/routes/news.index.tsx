@@ -9,6 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { communityLabel } from "@/lib/communityCategories";
 
 export const Route = createFileRoute("/news/")({
+  loader: async () => {
+    const { data } = await supabase
+      .from("news")
+      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,categories,published_at")
+      .order("published_at", { ascending: false })
+      .order("created_at", { ascending: false });
+    return { items: (data ?? []) as NewsRow[] };
+  },
   head: () => ({
     meta: [
       { title: "الأخبار والنشاطات — SAAE" },
@@ -29,6 +37,7 @@ export const Route = createFileRoute("/news/")({
   }),
   component: NewsPage,
 });
+
 
 type NewsRow = {
   id: string;
@@ -55,22 +64,12 @@ function pick(ar: string | null, en: string | null, fallback: string | null, lan
 function NewsPage() {
   const { t, dir, lang } = useLang();
   const isRtl = dir === "rtl";
-  const [items, setItems] = useState<NewsRow[] | null>(null);
+  const { items } = Route.useLoaderData();
   const location = useLocation();
   const [highlightId, setHighlightId] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase
-      .from("news")
-      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,categories,published_at")
-      .order("published_at", { ascending: false })
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setItems((data ?? []) as NewsRow[]);
-      });
-  }, []);
 
-  useEffect(() => {
     const hash = location.hash?.replace(/^#/, "");
     if (!hash || !items || items.length === 0) return;
     let cancelled = false;
