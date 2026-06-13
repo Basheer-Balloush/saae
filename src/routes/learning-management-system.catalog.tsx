@@ -14,8 +14,10 @@ import {
 } from "@/components/ui/select";
 import { CourseCard, type CourseCardData } from "@/components/lms/CourseCard";
 
+type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
+
 export const Route = createFileRoute("/learning-management-system/catalog")({
-  loader: async () => {
+  loader: async (): Promise<{ courses: CourseCardData[]; categories: Category[] }> => {
     const [{ data: cs }, { data: cats }] = await Promise.all([
       supabase
         .from("lms_courses")
@@ -25,10 +27,11 @@ export const Route = createFileRoute("/learning-management-system/catalog")({
       supabase.from("lms_categories").select("id,name_ar,name_en,slug").order("display_order"),
     ]);
     return {
-      courses: ((cs as (CourseCardData & { category_id: string })[]) ?? []) as CourseCardData[],
-      categories: (cats as Category[]) ?? [],
+      courses: ((cs as unknown) as CourseCardData[]) ?? [],
+      categories: ((cats as unknown) as Category[]) ?? [],
     };
   },
+
   head: () => {
     const url = "https://aisyria.org/learning-management-system/catalog";
     const title = "Course Catalog — SAAE Learning Platform";
@@ -49,7 +52,8 @@ export const Route = createFileRoute("/learning-management-system/catalog")({
   component: Catalog,
 });
 
-type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
+
+
 
 function Catalog() {
   const { lang } = useLang();
