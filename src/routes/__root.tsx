@@ -19,6 +19,8 @@ import { LanguageProvider, useLang } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "@/components/ui/sonner";
 import { AssistantFab } from "@/components/site/AssistantFab";
+import { RouteProgress } from "@/components/site/RouteProgress";
+
 
 function NotFoundComponent() {
   const isAr = (typeof document !== "undefined" && document.documentElement.lang === "ar");
@@ -281,19 +283,21 @@ function RootComponent() {
         <LanguageProvider>
           <FormValidationHandler />
           <ScrollRestoration />
-          <AnimatePresence mode="wait">
+          <RouteProgress />
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.12, ease: "easeOut" }}
             >
               <Outlet />
             </motion.div>
           </AnimatePresence>
           {!isAms && !isLms && !isAdmin && <AssistantFab />}
           <Toaster richColors position="top-center" />
+
         </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
