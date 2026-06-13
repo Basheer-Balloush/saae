@@ -24,10 +24,10 @@ export const Route = createFileRoute("/news/")({
         name: "description",
         content: "آخر الأخبار والنشاطات والفعاليات للجمعية السورية للذكاء الصنعي وريادة الأعمال ومجتمعاتها المتخصصة.",
       },
-      { property: "og:title", content: "الأخبار والنشاطات — SAAE" },
+      { property: "og:title", content: "أخبار الجمعية السورية للذكاء الصنعي وريادة الأعمال" },
       {
         property: "og:description",
-        content: "آخر الأخبار والنشاطات والفعاليات للجمعية السورية للذكاء الصنعي وريادة الأعمال ومجتمعاتها المتخصصة.",
+        content: "تابع أحدث الفعاليات والأنشطة والمبادرات التي تنظمها SAAE ومجتمعاتها المتخصصة في الذكاء الصنعي وريادة الأعمال.",
       },
       { property: "og:url", content: "https://aisyria.org/news" },
     ],
