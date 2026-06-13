@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
@@ -15,6 +15,20 @@ import {
 import { CourseCard, type CourseCardData } from "@/components/lms/CourseCard";
 
 export const Route = createFileRoute("/learning-management-system/catalog")({
+  loader: async () => {
+    const [{ data: cs }, { data: cats }] = await Promise.all([
+      supabase
+        .from("lms_courses")
+        .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,level,price,is_free,students_count,rating_avg,category_id")
+        .eq("status", "published")
+        .order("created_at", { ascending: false }),
+      supabase.from("lms_categories").select("id,name_ar,name_en,slug").order("display_order"),
+    ]);
+    return {
+      courses: ((cs as (CourseCardData & { category_id: string })[]) ?? []) as CourseCardData[],
+      categories: (cats as Category[]) ?? [],
+    };
+  },
   head: () => {
     const url = "https://aisyria.org/learning-management-system/catalog";
     const title = "Course Catalog — SAAE Learning Platform";
@@ -41,29 +55,12 @@ function Catalog() {
   const { lang } = useLang();
   const tr = lmsT[lang];
   const dir: "rtl" | "ltr" = lang === "ar" ? "rtl" : "ltr";
-  const [courses, setCourses] = useState<CourseCardData[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { courses, categories } = Route.useLoaderData();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("all");
   const [level, setLevel] = useState<string>("all");
   const [price, setPrice] = useState<string>("all");
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      const [{ data: cs }, { data: cats }] = await Promise.all([
-        supabase
-          .from("lms_courses")
-          .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,level,price,is_free,students_count,rating_avg,category_id")
-          .eq("status", "published")
-          .order("created_at", { ascending: false }),
-        supabase.from("lms_categories").select("id,name_ar,name_en,slug").order("display_order"),
-      ]);
-      setCourses(((cs as (CourseCardData & { category_id: string })[]) ?? []) as CourseCardData[]);
-      setCategories((cats as Category[]) ?? []);
-      setLoading(false);
-    })();
-  }, []);
 
   const filtered = useMemo(() => {
     return courses.filter((c) => {
@@ -123,15 +120,14 @@ function Catalog() {
         />
       </div>
 
-      {loading ? (
-        <p className="mt-10 text-center text-muted-foreground">{tr.loading}</p>
-      ) : filtered.length === 0 ? (
+      {filtered.length === 0 ? (
         <p className="mt-16 text-center text-muted-foreground">{tr.noCourses}</p>
       ) : (
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {filtered.map((c) => <CourseCard key={c.id} course={c} />)}
         </div>
       )}
+
     </div>
   );
 }
