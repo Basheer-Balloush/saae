@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
@@ -14,7 +14,24 @@ import {
 } from "@/components/ui/select";
 import { CourseCard, type CourseCardData } from "@/components/lms/CourseCard";
 
+type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
+
 export const Route = createFileRoute("/learning-management-system/catalog")({
+  loader: async (): Promise<{ courses: CourseCardData[]; categories: Category[] }> => {
+    const [{ data: cs }, { data: cats }] = await Promise.all([
+      supabase
+        .from("lms_courses")
+        .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,level,price,is_free,students_count,rating_avg,category_id")
+        .eq("status", "published")
+        .order("created_at", { ascending: false }),
+      supabase.from("lms_categories").select("id,name_ar,name_en,slug").order("display_order"),
+    ]);
+    return {
+      courses: ((cs as unknown) as CourseCardData[]) ?? [],
+      categories: ((cats as unknown) as Category[]) ?? [],
+    };
+  },
+
   head: () => {
     const url = "https://aisyria.org/learning-management-system/catalog";
     const title = "Course Catalog — SAAE Learning Platform";
@@ -35,35 +52,21 @@ export const Route = createFileRoute("/learning-management-system/catalog")({
   component: Catalog,
 });
 
-type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
+
+
 
 function Catalog() {
   const { lang } = useLang();
   const tr = lmsT[lang];
   const dir: "rtl" | "ltr" = lang === "ar" ? "rtl" : "ltr";
-  const [courses, setCourses] = useState<CourseCardData[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const data = Route.useLoaderData();
+  const courses = data.courses as CourseCardData[];
+  const categories = data.categories as Category[];
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("all");
   const [level, setLevel] = useState<string>("all");
   const [price, setPrice] = useState<string>("all");
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      const [{ data: cs }, { data: cats }] = await Promise.all([
-        supabase
-          .from("lms_courses")
-          .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,level,price,is_free,students_count,rating_avg,category_id")
-          .eq("status", "published")
-          .order("created_at", { ascending: false }),
-        supabase.from("lms_categories").select("id,name_ar,name_en,slug").order("display_order"),
-      ]);
-      setCourses(((cs as (CourseCardData & { category_id: string })[]) ?? []) as CourseCardData[]);
-      setCategories((cats as Category[]) ?? []);
-      setLoading(false);
-    })();
-  }, []);
 
   const filtered = useMemo(() => {
     return courses.filter((c) => {
@@ -75,6 +78,9 @@ function Catalog() {
       return true;
     });
   }, [courses, q, cat, level, price]);
+
+
+
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
@@ -96,6 +102,8 @@ function Catalog() {
               value: c.id,
               label: lang === "ar" ? c.name_ar : c.name_en || c.name_ar,
             })),
+
+
           ]}
         />
         <FilterSelect
@@ -123,15 +131,14 @@ function Catalog() {
         />
       </div>
 
-      {loading ? (
-        <p className="mt-10 text-center text-muted-foreground">{tr.loading}</p>
-      ) : filtered.length === 0 ? (
+      {filtered.length === 0 ? (
         <p className="mt-16 text-center text-muted-foreground">{tr.noCourses}</p>
       ) : (
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {filtered.map((c) => <CourseCard key={c.id} course={c} />)}
         </div>
       )}
+
     </div>
   );
 }

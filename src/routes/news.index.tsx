@@ -9,6 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { communityLabel } from "@/lib/communityCategories";
 
 export const Route = createFileRoute("/news/")({
+  loader: async () => {
+    const { data } = await supabase
+      .from("news")
+      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,categories,published_at")
+      .order("published_at", { ascending: false })
+      .order("created_at", { ascending: false });
+    return { items: (data ?? []) as NewsRow[] };
+  },
   head: () => ({
     meta: [
       { title: "الأخبار والنشاطات — SAAE" },
@@ -29,6 +37,7 @@ export const Route = createFileRoute("/news/")({
   }),
   component: NewsPage,
 });
+
 
 type NewsRow = {
   id: string;
@@ -55,22 +64,12 @@ function pick(ar: string | null, en: string | null, fallback: string | null, lan
 function NewsPage() {
   const { t, dir, lang } = useLang();
   const isRtl = dir === "rtl";
-  const [items, setItems] = useState<NewsRow[] | null>(null);
+  const items = Route.useLoaderData().items as NewsRow[];
   const location = useLocation();
   const [highlightId, setHighlightId] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase
-      .from("news")
-      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,categories,published_at")
-      .order("published_at", { ascending: false })
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setItems((data ?? []) as NewsRow[]);
-      });
-  }, []);
 
-  useEffect(() => {
     const hash = location.hash?.replace(/^#/, "");
     if (!hash || !items || items.length === 0) return;
     let cancelled = false;
@@ -116,16 +115,8 @@ function NewsPage() {
             </p>
           </motion.div>
 
-          {items === null ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-[380px] animate-pulse rounded-2xl border border-border bg-muted/40"
-                />
-              ))}
-            </div>
-          ) : items.length === 0 ? (
+          {items.length === 0 ? (
+
             <div className="rounded-2xl border border-border bg-card p-12 text-center">
               <p className="text-body text-muted-foreground">
                 {lang === "ar" ? "لا توجد أخبار حالياً." : "No news yet."}

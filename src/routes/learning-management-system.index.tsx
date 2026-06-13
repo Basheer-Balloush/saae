@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import {
@@ -59,6 +59,30 @@ const CATEGORY_SURFACES = [
 ];
 
 export const Route = createFileRoute("/learning-management-system/")({
+  loader: async () => {
+    const { data: cats } = await supabase
+      .from("lms_categories")
+      .select("id, name_ar, name_en, slug")
+      .order("display_order");
+    const [{ data: statsRows }, { data: courseRows }] = await Promise.all([
+      supabase.rpc("lms_public_stats"),
+      supabase.from("lms_courses").select("category_id").eq("status", "published"),
+    ]);
+    const s = (statsRows as { courses: number; students: number; instructors: number }[] | null)?.[0];
+    const counts: Record<string, number> = {};
+    ((courseRows as { category_id: string | null }[]) ?? []).forEach((r) => {
+      if (r.category_id) counts[r.category_id] = (counts[r.category_id] ?? 0) + 1;
+    });
+    return {
+      categories: (cats ?? []) as Category[],
+      stats: {
+        courses: Number(s?.courses ?? 0),
+        students: Number(s?.students ?? 0),
+        instructors: Number(s?.instructors ?? 0),
+      },
+      coursesByCategory: counts,
+    };
+  },
   head: () => ({
     meta: [
       { title: "SAAE Learning Platform — Courses & Skills" },
@@ -89,6 +113,7 @@ export const Route = createFileRoute("/learning-management-system/")({
   component: LmsHome,
 });
 
+
 type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
 
 function LmsHome() {
@@ -97,9 +122,10 @@ function LmsHome() {
   const tr = lmsT[lang];
   const navigate = useNavigate();
   const { user, role } = useLmsAuth();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [stats, setStats] = useState({ courses: 0, students: 0, instructors: 0 });
-  const [coursesByCategory, setCoursesByCategory] = useState<Record<string, number>>({});
+  const loaderData = Route.useLoaderData();
+  const categories = loaderData.categories as Category[];
+  const stats = loaderData.stats as { courses: number; students: number; instructors: number };
+  const coursesByCategory = loaderData.coursesByCategory as Record<string, number>;
   const [applying, setApplying] = useState(false);
 
   const handleBecomeInstructor = async () => {
@@ -139,32 +165,7 @@ function LmsHome() {
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      const { data: cats } = await supabase
-        .from("lms_categories")
-        .select("id, name_ar, name_en, slug")
-        .order("display_order");
-      setCategories((cats as Category[]) ?? []);
 
-      const [{ data: statsRows }, { data: courseRows }] = await Promise.all([
-        supabase.rpc("lms_public_stats"),
-        supabase.from("lms_courses").select("category_id").eq("status", "published"),
-      ]);
-      const s = (statsRows as { courses: number; students: number; instructors: number }[] | null)?.[0];
-      setStats({
-        courses: Number(s?.courses ?? 0),
-        students: Number(s?.students ?? 0),
-        instructors: Number(s?.instructors ?? 0),
-      });
-
-      const counts: Record<string, number> = {};
-      ((courseRows as { category_id: string | null }[]) ?? []).forEach((r) => {
-        if (r.category_id) counts[r.category_id] = (counts[r.category_id] ?? 0) + 1;
-      });
-      setCoursesByCategory(counts);
-    })();
-  }, []);
 
   return (
     <div className="flex flex-col">
