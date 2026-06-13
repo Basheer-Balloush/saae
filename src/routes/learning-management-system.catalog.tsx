@@ -67,7 +67,7 @@ function Catalog() {
 
 
   const filtered = useMemo(() => {
-    return (courses as CourseCardData[]).filter((c: CourseCardData) => {
+    return courses.filter((c) => {
       if (q && !(`${c.title_ar} ${c.title_en ?? ""}`.toLowerCase().includes(q.toLowerCase()))) return false;
       if (cat !== "all" && (c as unknown as { category_id: string }).category_id !== cat) return false;
       if (level !== "all" && c.level !== level) return false;
@@ -76,6 +76,7 @@ function Catalog() {
       return true;
     });
   }, [courses, q, cat, level, price]);
+
 
 
   return (
@@ -94,10 +95,11 @@ function Catalog() {
           label={tr.filterCategory}
           options={[
             { value: "all", label: tr.all },
-            ...(categories as Category[]).map((c: Category) => ({
+            ...categories.map((c) => ({
               value: c.id,
               label: lang === "ar" ? c.name_ar : c.name_en || c.name_ar,
             })),
+
 
           ]}
         />
