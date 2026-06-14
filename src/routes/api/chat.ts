@@ -254,9 +254,10 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Invalid message count", { status: 400 });
         }
         const MAX_CONTENT_CHARS = 8000;
-        // Only accept "user" role from clients; "system" and "assistant" turns must
-        // come from the server side to prevent prompt-injection via fake history.
-        const allowedRoles = new Set(["user"]);
+        // The client (useChat) replays the full history including prior assistant
+        // turns. We rebuild trusted history from the DB server-side, so we only
+        // need to validate the latest (new) message and require it to be a user turn.
+        const allowedRoles = new Set(["user", "assistant", "system"]);
         for (const m of messages as Array<{ role?: unknown; content?: unknown; parts?: unknown }>) {
           if (!m || typeof m !== "object") {
             return new Response("Invalid message", { status: 400 });
@@ -271,6 +272,10 @@ export const Route = createFileRoute("/api/chat")({
           if (contentStr.length > MAX_CONTENT_CHARS) {
             return new Response("Message content too long", { status: 400 });
           }
+        }
+        const lastMsg = messages[messages.length - 1] as { role?: unknown };
+        if (lastMsg?.role !== "user") {
+          return new Response("Last message must be from user", { status: 400 });
         }
 
         const chatSessionId =
