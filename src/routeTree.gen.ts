@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegistrationRouteImport } from './routes/registration'
+import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-initiative'
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
@@ -71,6 +72,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const RegistrationRoute = RegistrationRouteImport.update({
   id: '/registration',
   path: '/registration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OneMillionInitiativeRoute = OneMillionInitiativeRouteImport.update({
+  id: '/one-million-initiative',
+  path: '/one-million-initiative',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearningManagementSystemRoute =
@@ -338,6 +344,7 @@ export interface FileRoutesByFullPath {
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
+  '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
@@ -386,6 +393,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
@@ -434,6 +442,7 @@ export interface FileRoutesById {
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
+  '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
@@ -486,6 +495,7 @@ export interface FileRouteTypes {
     | '/attendance-management-system'
     | '/contact'
     | '/learning-management-system'
+    | '/one-million-initiative'
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
@@ -534,6 +544,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/one-million-initiative'
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
@@ -581,6 +592,7 @@ export interface FileRouteTypes {
     | '/attendance-management-system'
     | '/contact'
     | '/learning-management-system'
+    | '/one-million-initiative'
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
@@ -632,6 +644,7 @@ export interface RootRouteChildren {
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
+  OneMillionInitiativeRoute: typeof OneMillionInitiativeRoute
   RegistrationRoute: typeof RegistrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
@@ -668,6 +681,13 @@ declare module '@tanstack/react-router' {
       path: '/registration'
       fullPath: '/registration'
       preLoaderRoute: typeof RegistrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/one-million-initiative': {
+      id: '/one-million-initiative'
+      path: '/one-million-initiative'
+      fullPath: '/one-million-initiative'
+      preLoaderRoute: typeof OneMillionInitiativeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learning-management-system': {
@@ -1137,6 +1157,7 @@ const rootRouteChildren: RootRouteChildren = {
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
+  OneMillionInitiativeRoute: OneMillionInitiativeRoute,
   RegistrationRoute: RegistrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,
