@@ -5,6 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 const AMS_ROLES = ["attendance_user", "attendance_admin"] as const satisfies readonly ("attendance_user" | "attendance_admin")[];
 const LMS_ADMIN_ROLES = ["lms_admin", "admin"] as const satisfies readonly ("lms_admin" | "admin")[];
 
+// Tab-scoped access cache to avoid repeated DB hits on TOKEN_REFRESHED.
+const accessCache = new Map<string, boolean>();
+
 export function useAmsAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -13,6 +16,10 @@ export function useAmsAuth() {
 
   useEffect(() => {
     const checkAccess = async (uid: string) => {
+      if (accessCache.has(uid)) {
+        setHasAccess(accessCache.get(uid)!);
+        return;
+      }
       // 1. AMS role OR LMS admin OR general admin
       const { data: roles } = await supabase
         .from("user_roles")
@@ -20,6 +27,7 @@ export function useAmsAuth() {
         .eq("user_id", uid)
         .in("role", [...AMS_ROLES, ...LMS_ADMIN_ROLES]);
       if (roles && roles.length > 0) {
+        accessCache.set(uid, true);
         setHasAccess(true);
         return;
       }
@@ -32,16 +40,19 @@ export function useAmsAuth() {
       const hasLinked = (linkedCourses ?? []).some(
         (c) => (c as { ams_courses: { id: string } | { id: string }[] | null }).ams_courses != null,
       );
+      accessCache.set(uid, hasLinked);
       setHasAccess(hasLinked);
     };
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       setSession(s);
       setUser(s?.user ?? null);
-      if (s?.user) {
-        setTimeout(() => checkAccess(s.user.id), 0);
-      } else {
+      if (event === "SIGNED_OUT") {
+        accessCache.clear();
         setHasAccess(false);
+      } else if (s?.user) {
+        setTimeout(() => checkAccess(s.user.id), 0);
       }
     });
 
