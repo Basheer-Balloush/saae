@@ -107,7 +107,7 @@ function Hero() {
       </div>
 
       <div className="relative mx-auto max-w-6xl px-6 pb-16 pt-12 text-center lg:px-10 lg:pb-24 lg:pt-20">
-        <div className="mx-auto mb-10 flex max-w-3xl items-center justify-center rounded-3xl border border-border bg-card/40 p-6 backdrop-blur-sm sm:p-8">
+        <div className="mx-auto mb-10 flex max-w-3xl items-center justify-center rounded-3xl border border-border/50 bg-slate-900/60 p-6 backdrop-blur-sm sm:p-8">
           <img
             src={ministryLogo.url}
             alt="وزارة الاتصالات وتقانة المعلومات"
