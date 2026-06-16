@@ -116,6 +116,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "icon", type: "image/png", href: "/favicon.png" },
       { rel: "apple-touch-icon", href: "/favicon.png" },
+      // Preconnect to the data + asset origins used on almost every page
+      // so the browser opens the TCP/TLS connection in parallel with the
+      // initial HTML parse. Cuts first-image / first-query latency by
+      // 100-300ms on cold loads — critical at high concurrency.
+      { rel: "preconnect", href: "https://bcfctxfulwyrslingscm.supabase.co", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://bcfctxfulwyrslingscm.supabase.co" },
+      { rel: "dns-prefetch", href: "https://video.bunnycdn.com" },
+      { rel: "dns-prefetch", href: "https://images.unsplash.com" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
