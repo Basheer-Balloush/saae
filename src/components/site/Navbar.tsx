@@ -188,54 +188,55 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
       {open && (
         <div className="border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
-            {sections.map((s) => {
-              if (s === "about") {
+            {!minimal &&
+              sections.map((s) => {
+                if (s === "about") {
+                  return (
+                    <Link
+                      key={s}
+                      to="/about"
+                      onClick={() => setOpen(false)}
+                      className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                    >
+                      {t.nav[s]}
+                    </Link>
+                  );
+                }
+                if (s === "news") {
+                  return (
+                    <Link
+                      key={s}
+                      to="/news"
+                      onClick={() => setOpen(false)}
+                      className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                    >
+                      {t.nav[s]}
+                    </Link>
+                  );
+                }
+                if (s === "contact") {
+                  return (
+                    <Link
+                      key={s}
+                      to="/contact"
+                      onClick={() => setOpen(false)}
+                      className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                    >
+                      {t.nav[s]}
+                    </Link>
+                  );
+                }
                 return (
-                  <Link
+                  <a
                     key={s}
-                    to="/about"
+                    href={hashHref(s)}
                     onClick={() => setOpen(false)}
                     className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                   >
                     {t.nav[s]}
-                  </Link>
+                  </a>
                 );
-              }
-              if (s === "news") {
-                return (
-                  <Link
-                    key={s}
-                    to="/news"
-                    onClick={() => setOpen(false)}
-                    className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
-                  >
-                    {t.nav[s]}
-                  </Link>
-                );
-              }
-              if (s === "contact") {
-                return (
-                  <Link
-                    key={s}
-                    to="/contact"
-                    onClick={() => setOpen(false)}
-                    className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
-                  >
-                    {t.nav[s]}
-                  </Link>
-                );
-              }
-              return (
-                <a
-                  key={s}
-                  href={hashHref(s)}
-                  onClick={() => setOpen(false)}
-                  className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
-                >
-                  {t.nav[s]}
-                </a>
-              );
-            })}
+              })}
             <div className="mt-3 flex items-center gap-2">
               <button
                 onClick={toggleLang}
