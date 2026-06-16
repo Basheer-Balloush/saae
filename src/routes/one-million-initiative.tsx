@@ -88,8 +88,6 @@ function OneMillionInitiativePage() {
         >
           <Collaboration />
         </Section>
-
-        <CTA />
       </main>
       <Footer />
     </div>
