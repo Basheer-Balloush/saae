@@ -280,12 +280,7 @@ function OneMillionInitiativePage() {
           <GoalsGrid goals={c.goals} />
         </Section>
 
-        <Section
-          eyebrow={c.s2.eyebrow}
-          title={c.s2.title}
-          icon={GraduationCap}
-          variant="muted"
-        >
+        <Section eyebrow={c.s2.eyebrow} title={c.s2.title} icon={GraduationCap}>
           <MethodologyGrid intro={c.methodologyIntro} items={c.methodology} />
         </Section>
 
