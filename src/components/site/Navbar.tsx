@@ -12,7 +12,7 @@ import logoArLight from "@/assets/saae-logo-ar-light.png";
 
 const sections = ["home", "about", "news", "contact"] as const;
 
-export function Navbar() {
+export function Navbar({ minimal = false }: { minimal?: boolean }) {
   const { t, lang, toggle: toggleLang } = useLang();
   const { theme, toggle: toggleTheme } = useTheme();
   const location = useLocation();
@@ -101,61 +101,63 @@ export function Navbar() {
           })()}
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:flex">
-          {sections.map((s) => {
-            const isContactRoute = location.pathname.startsWith("/contact");
-            const isActive =
-              s === "contact"
-                ? isContactRoute
-                : s === "news"
-                ? isNewsRoute
-                : s === "about"
-                ? isAbout
-                : !isAbout && !isNewsRoute && !isContactRoute && active === s;
-            const linkClass = cn(
-              "relative text-sm font-medium transition-colors",
-              isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
-            );
-            const underline = (
-              <span
-                className={cn(
-                  "pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center rounded-full bg-secondary transition-transform duration-300",
-                  isActive ? "scale-x-100" : "scale-x-0",
-                )}
-              />
-            );
-            if (s === "about") {
+        {!minimal && (
+          <nav className="hidden items-center gap-7 lg:flex">
+            {sections.map((s) => {
+              const isContactRoute = location.pathname.startsWith("/contact");
+              const isActive =
+                s === "contact"
+                  ? isContactRoute
+                  : s === "news"
+                  ? isNewsRoute
+                  : s === "about"
+                  ? isAbout
+                  : !isAbout && !isNewsRoute && !isContactRoute && active === s;
+              const linkClass = cn(
+                "relative text-sm font-medium transition-colors",
+                isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
+              );
+              const underline = (
+                <span
+                  className={cn(
+                    "pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center rounded-full bg-secondary transition-transform duration-300",
+                    isActive ? "scale-x-100" : "scale-x-0",
+                  )}
+                />
+              );
+              if (s === "about") {
+                return (
+                  <Link key={s} to="/about" className={linkClass}>
+                    {t.nav[s]}
+                    {underline}
+                  </Link>
+                );
+              }
+              if (s === "news") {
+                return (
+                  <Link key={s} to="/news" className={linkClass}>
+                    {t.nav[s]}
+                    {underline}
+                  </Link>
+                );
+              }
+              if (s === "contact") {
+                return (
+                  <Link key={s} to="/contact" className={linkClass}>
+                    {t.nav[s]}
+                    {underline}
+                  </Link>
+                );
+              }
               return (
-                <Link key={s} to="/about" className={linkClass}>
+                <a key={s} href={hashHref(s)} className={linkClass}>
                   {t.nav[s]}
                   {underline}
-                </Link>
+                </a>
               );
-            }
-            if (s === "news") {
-              return (
-                <Link key={s} to="/news" className={linkClass}>
-                  {t.nav[s]}
-                  {underline}
-                </Link>
-              );
-            }
-            if (s === "contact") {
-              return (
-                <Link key={s} to="/contact" className={linkClass}>
-                  {t.nav[s]}
-                  {underline}
-                </Link>
-              );
-            }
-            return (
-              <a key={s} href={hashHref(s)} className={linkClass}>
-                {t.nav[s]}
-                {underline}
-              </a>
-            );
-          })}
-        </nav>
+            })}
+          </nav>
+        )}
 
         <div className="flex items-center gap-2">
           <button
@@ -186,54 +188,55 @@ export function Navbar() {
       {open && (
         <div className="border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
-            {sections.map((s) => {
-              if (s === "about") {
+            {!minimal &&
+              sections.map((s) => {
+                if (s === "about") {
+                  return (
+                    <Link
+                      key={s}
+                      to="/about"
+                      onClick={() => setOpen(false)}
+                      className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                    >
+                      {t.nav[s]}
+                    </Link>
+                  );
+                }
+                if (s === "news") {
+                  return (
+                    <Link
+                      key={s}
+                      to="/news"
+                      onClick={() => setOpen(false)}
+                      className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                    >
+                      {t.nav[s]}
+                    </Link>
+                  );
+                }
+                if (s === "contact") {
+                  return (
+                    <Link
+                      key={s}
+                      to="/contact"
+                      onClick={() => setOpen(false)}
+                      className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                    >
+                      {t.nav[s]}
+                    </Link>
+                  );
+                }
                 return (
-                  <Link
+                  <a
                     key={s}
-                    to="/about"
+                    href={hashHref(s)}
                     onClick={() => setOpen(false)}
                     className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                   >
                     {t.nav[s]}
-                  </Link>
+                  </a>
                 );
-              }
-              if (s === "news") {
-                return (
-                  <Link
-                    key={s}
-                    to="/news"
-                    onClick={() => setOpen(false)}
-                    className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
-                  >
-                    {t.nav[s]}
-                  </Link>
-                );
-              }
-              if (s === "contact") {
-                return (
-                  <Link
-                    key={s}
-                    to="/contact"
-                    onClick={() => setOpen(false)}
-                    className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
-                  >
-                    {t.nav[s]}
-                  </Link>
-                );
-              }
-              return (
-                <a
-                  key={s}
-                  href={hashHref(s)}
-                  onClick={() => setOpen(false)}
-                  className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
-                >
-                  {t.nav[s]}
-                </a>
-              );
-            })}
+              })}
             <div className="mt-3 flex items-center gap-2">
               <button
                 onClick={toggleLang}
