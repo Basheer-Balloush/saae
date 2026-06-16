@@ -132,12 +132,6 @@ function Hero() {
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <Link
-            to="/learning-management-system"
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:scale-105"
-          >
-            ابدأ التدريب الآن
-          </Link>
-          <Link
             to="/"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-6 py-3 text-sm font-semibold text-foreground/80 backdrop-blur transition-colors hover:border-primary hover:text-primary"
           >
