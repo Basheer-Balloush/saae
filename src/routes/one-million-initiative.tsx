@@ -43,7 +43,7 @@ export const Route = createFileRoute("/one-million-initiative")({
 function OneMillionInitiativePage() {
   return (
     <div className="min-h-screen bg-background text-foreground" dir="rtl">
-      <Navbar />
+      <Navbar minimal />
       <main className="pt-20">
         <Hero />
         <Stats />
