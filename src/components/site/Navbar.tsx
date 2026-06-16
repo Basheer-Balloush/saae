@@ -12,7 +12,7 @@ import logoArLight from "@/assets/saae-logo-ar-light.png";
 
 const sections = ["home", "about", "news", "contact"] as const;
 
-export function Navbar() {
+export function Navbar({ minimal = false }: { minimal?: boolean }) {
   const { t, lang, toggle: toggleLang } = useLang();
   const { theme, toggle: toggleTheme } = useTheme();
   const location = useLocation();
