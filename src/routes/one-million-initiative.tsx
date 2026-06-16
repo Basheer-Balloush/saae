@@ -284,20 +284,15 @@ function OneMillionInitiativePage() {
           <MethodologyGrid intro={c.methodologyIntro} items={c.methodology} />
         </Section>
 
-        <Section eyebrow={c.s3.eyebrow} title={c.s3.title} icon={HeartHandshake}>
+        <Section eyebrow={c.s3.eyebrow} title={c.s3.title} icon={HeartHandshake} variant="muted">
           <EconomicModel intro={c.economicIntro} a={c.economic.a} b={c.economic.b} />
         </Section>
 
-        <Section
-          eyebrow={c.s4.eyebrow}
-          title={c.s4.title}
-          icon={BarChart3}
-          variant="muted"
-        >
+        <Section eyebrow={c.s4.eyebrow} title={c.s4.title} icon={BarChart3}>
           <Infrastructure intro={c.infraIntro} items={c.infra} />
         </Section>
 
-        <Section eyebrow={c.s5.eyebrow} title={c.s5.title} icon={Building2}>
+        <Section eyebrow={c.s5.eyebrow} title={c.s5.title} icon={Building2} variant="muted">
           <Collaboration intro={c.collabIntro} items={c.collab} />
         </Section>
       </main>
