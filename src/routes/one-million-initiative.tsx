@@ -579,3 +579,155 @@ function Collaboration({
     </>
   );
 }
+
+/* ---------- GEOGRAPHY / SYRIA MAP ---------- */
+type GeoContent = {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  mapTitle: string;
+  mapSub: string;
+  legend: string;
+};
+
+function GeographySection({ geo, dir }: { geo: GeoContent; dir: "rtl" | "ltr" }) {
+  return (
+    <>
+      <p className="mx-auto mb-12 max-w-3xl text-center text-base leading-loose text-muted-foreground">
+        {geo.lead}
+      </p>
+
+      <div className="mx-auto max-w-5xl rounded-3xl border border-border bg-gradient-to-br from-primary/5 via-card to-secondary/5 p-6 sm:p-10">
+        <div className="mb-6 text-center">
+          <h3 className="text-xl font-bold sm:text-2xl">{geo.mapTitle}</h3>
+          <p className="mt-2 text-sm text-muted-foreground">{geo.mapSub}</p>
+        </div>
+
+        <SyriaMap dir={dir} />
+
+        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <span className="relative flex h-3 w-3">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+            <span className="relative inline-flex h-3 w-3 rounded-full bg-primary" />
+          </span>
+          <span>{geo.legend}</span>
+        </div>
+      </div>
+    </>
+  );
+}
+
+const SYRIA_CITIES: ReadonlyArray<{ ar: string; en: string; x: number; y: number; delay: number }> = [
+  { ar: "حلب", en: "Aleppo", x: 141, y: 100, delay: 0 },
+  { ar: "إدلب", en: "Idlib", x: 97, y: 127, delay: 0.3 },
+  { ar: "اللاذقية", en: "Latakia", x: 24, y: 168, delay: 0.6 },
+  { ar: "طرطوس", en: "Tartus", x: 33, y: 231, delay: 0.9 },
+  { ar: "حماة", en: "Hama", x: 107, y: 207, delay: 1.2 },
+  { ar: "حمص", en: "Homs", x: 105, y: 247, delay: 1.5 },
+  { ar: "الرقة", en: "Raqqa", x: 301, y: 125, delay: 1.8 },
+  { ar: "دير الزور", en: "Deir ez-Zor", x: 398, y: 186, delay: 2.1 },
+  { ar: "الحسكة", en: "Hasakah", x: 449, y: 70, delay: 2.4 },
+  { ar: "القامشلي", en: "Qamishli", x: 491, y: 30, delay: 2.7 },
+  { ar: "دمشق", en: "Damascus", x: 78, y: 369, delay: 0.15 },
+  { ar: "القنيطرة", en: "Quneitra", x: 37, y: 408, delay: 0.45 },
+  { ar: "درعا", en: "Daraa", x: 61, y: 458, delay: 0.75 },
+  { ar: "السويداء", en: "As-Suwayda", x: 102, y: 449, delay: 1.05 },
+];
+
+function SyriaMap({ dir }: { dir: "rtl" | "ltr" }) {
+  const lang = dir === "rtl" ? "ar" : "en";
+  // Stylized Syria silhouette in a 600x500 viewBox
+  const borderPath =
+    "M 25,60 L 128,20 L 591,10 L 471,270 L 283,380 L 86,490 L 34,450 L 34,360 L 77,260 L 17,130 Z";
+
+  return (
+    <div className="relative mx-auto w-full max-w-3xl">
+      <svg
+        viewBox="0 0 600 500"
+        className="h-auto w-full"
+        role="img"
+        aria-label="Syria map"
+      >
+        <defs>
+          <linearGradient id="syria-fill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="hsl(var(--primary) / 0.18)" />
+            <stop offset="100%" stopColor="hsl(var(--secondary) / 0.18)" />
+          </linearGradient>
+          <filter id="syria-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {/* Country shape */}
+        <path
+          d={borderPath}
+          fill="url(#syria-fill)"
+          stroke="hsl(var(--primary))"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+          opacity="0.9"
+        />
+
+        {/* Connecting lines between cities (network feel) */}
+        <g stroke="hsl(var(--primary) / 0.25)" strokeWidth="0.8" strokeDasharray="3 3">
+          {SYRIA_CITIES.slice(0, -1).map((city, i) => {
+            const next = SYRIA_CITIES[(i + 1) % SYRIA_CITIES.length];
+            return (
+              <line
+                key={`l-${i}`}
+                x1={city.x}
+                y1={city.y}
+                x2={next.x}
+                y2={next.y}
+              />
+            );
+          })}
+        </g>
+
+        {/* City dots with ripple */}
+        {SYRIA_CITIES.map((city, i) => (
+          <g key={i} transform={`translate(${city.x}, ${city.y})`}>
+            <circle r="4" fill="hsl(var(--primary))" opacity="0.3">
+              <animate
+                attributeName="r"
+                values="4;22;4"
+                dur="3s"
+                begin={`${city.delay}s`}
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="opacity"
+                values="0.6;0;0.6"
+                dur="3s"
+                begin={`${city.delay}s`}
+                repeatCount="indefinite"
+              />
+            </circle>
+            <circle
+              r="5"
+              fill="hsl(var(--primary))"
+              filter="url(#syria-glow)"
+            />
+            <text
+              x={dir === "rtl" ? -8 : 8}
+              y="-8"
+              textAnchor={dir === "rtl" ? "end" : "start"}
+              className="fill-foreground"
+              style={{ fontSize: "11px", fontWeight: 600 }}
+            >
+              {city[lang]}
+            </text>
+          </g>
+        ))}
+      </svg>
+
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <MapPin className="h-0 w-0" aria-hidden />
+      </div>
+    </div>
+  );
+}
