@@ -289,7 +289,9 @@ function OneMillionInitiativePage() {
 }
 
 /* ---------- HERO ---------- */
-function Hero({ c, lang }: { c: typeof content["ar"]; lang: Lang }) {
+type PageContent = (typeof content)[Lang];
+
+function Hero({ c, lang }: { c: PageContent; lang: Lang }) {
   const ArrowIcon = lang === "ar" ? ArrowLeft : ArrowRight;
   return (
     <section className="relative overflow-hidden">
