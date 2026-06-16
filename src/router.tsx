@@ -6,9 +6,15 @@ export const getRouter = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60_000,
-        gcTime: 5 * 60_000,
+        // Aggressive caching to support thousands of concurrent users.
+        // Most public content (news, courses, members, partners) changes
+        // infrequently — keep cached data fresh for 5 minutes and in memory
+        // for 30 minutes to massively reduce DB load.
+        staleTime: 5 * 60_000,
+        gcTime: 30 * 60_000,
         refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        retry: 1,
       },
     },
   });
