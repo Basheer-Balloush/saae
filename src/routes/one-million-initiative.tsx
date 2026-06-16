@@ -271,7 +271,12 @@ function OneMillionInitiativePage() {
       <main className="pt-20">
         <Hero c={c} lang={lang as Lang} />
         <Stats items={c.stats} />
-        <Section eyebrow={c.s1.eyebrow} title={c.s1.title} icon={Target}>
+
+        <Section eyebrow={c.geo.eyebrow} title={c.geo.title} icon={Archive}>
+          <GeographySection geo={c.geo} dir={dir} />
+        </Section>
+
+        <Section eyebrow={c.s1.eyebrow} title={c.s1.title} icon={Target} variant="muted">
           <GoalsGrid goals={c.goals} />
         </Section>
 
