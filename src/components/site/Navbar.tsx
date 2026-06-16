@@ -101,61 +101,63 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
           })()}
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:flex">
-          {sections.map((s) => {
-            const isContactRoute = location.pathname.startsWith("/contact");
-            const isActive =
-              s === "contact"
-                ? isContactRoute
-                : s === "news"
-                ? isNewsRoute
-                : s === "about"
-                ? isAbout
-                : !isAbout && !isNewsRoute && !isContactRoute && active === s;
-            const linkClass = cn(
-              "relative text-sm font-medium transition-colors",
-              isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
-            );
-            const underline = (
-              <span
-                className={cn(
-                  "pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center rounded-full bg-secondary transition-transform duration-300",
-                  isActive ? "scale-x-100" : "scale-x-0",
-                )}
-              />
-            );
-            if (s === "about") {
+        {!minimal && (
+          <nav className="hidden items-center gap-7 lg:flex">
+            {sections.map((s) => {
+              const isContactRoute = location.pathname.startsWith("/contact");
+              const isActive =
+                s === "contact"
+                  ? isContactRoute
+                  : s === "news"
+                  ? isNewsRoute
+                  : s === "about"
+                  ? isAbout
+                  : !isAbout && !isNewsRoute && !isContactRoute && active === s;
+              const linkClass = cn(
+                "relative text-sm font-medium transition-colors",
+                isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
+              );
+              const underline = (
+                <span
+                  className={cn(
+                    "pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center rounded-full bg-secondary transition-transform duration-300",
+                    isActive ? "scale-x-100" : "scale-x-0",
+                  )}
+                />
+              );
+              if (s === "about") {
+                return (
+                  <Link key={s} to="/about" className={linkClass}>
+                    {t.nav[s]}
+                    {underline}
+                  </Link>
+                );
+              }
+              if (s === "news") {
+                return (
+                  <Link key={s} to="/news" className={linkClass}>
+                    {t.nav[s]}
+                    {underline}
+                  </Link>
+                );
+              }
+              if (s === "contact") {
+                return (
+                  <Link key={s} to="/contact" className={linkClass}>
+                    {t.nav[s]}
+                    {underline}
+                  </Link>
+                );
+              }
               return (
-                <Link key={s} to="/about" className={linkClass}>
+                <a key={s} href={hashHref(s)} className={linkClass}>
                   {t.nav[s]}
                   {underline}
-                </Link>
+                </a>
               );
-            }
-            if (s === "news") {
-              return (
-                <Link key={s} to="/news" className={linkClass}>
-                  {t.nav[s]}
-                  {underline}
-                </Link>
-              );
-            }
-            if (s === "contact") {
-              return (
-                <Link key={s} to="/contact" className={linkClass}>
-                  {t.nav[s]}
-                  {underline}
-                </Link>
-              );
-            }
-            return (
-              <a key={s} href={hashHref(s)} className={linkClass}>
-                {t.nav[s]}
-                {underline}
-              </a>
-            );
-          })}
-        </nav>
+            })}
+          </nav>
+        )}
 
         <div className="flex items-center gap-2">
           <button
