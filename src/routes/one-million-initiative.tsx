@@ -58,7 +58,6 @@ const content = {
     stats: [
       { value: "1,000,000", label: "مستفيد مستهدف" },
       { value: "عامان", label: "مدة التنفيذ" },
-      { value: "$1", label: "تكلفة المقعد الرمزية" },
       { value: "مجاناً", label: "للمستحقين عبر التبرعات" },
     ],
     geo: {
@@ -166,7 +165,6 @@ const content = {
     stats: [
       { value: "1,000,000", label: "Target Beneficiaries" },
       { value: "2 Years", label: "Implementation Period" },
-      { value: "$1", label: "Symbolic Seat Cost" },
       { value: "Free", label: "For Eligible Recipients via Donations" },
     ],
     geo: {
@@ -362,8 +360,15 @@ function Stats({ items }: { items: ReadonlyArray<{ value: string; label: string 
   return (
     <section className="border-y border-border bg-muted/30">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-6 py-12 lg:grid-cols-4 lg:px-10">
-        {items.map((s) => (
-          <div key={s.label} className="text-center">
+        {items.map((s, i) => (
+          <div
+            key={s.label}
+            className={
+              i === items.length - 1 && items.length % 2 !== 0
+                ? "col-span-2 text-center lg:col-span-1"
+                : "text-center"
+            }
+          >
             <div className="text-2xl font-bold text-primary sm:text-3xl lg:text-4xl">
               {s.value}
             </div>
