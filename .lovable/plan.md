@@ -1,15 +1,23 @@
-I found the reason: `https://lms.aisyria.org/` currently returns a server-level `302` redirect to `https://aisyria.org/` before the app code can run. That means the in-app redirect to `/learning-management-system` never gets a chance to execute.
+## الخطة
 
-Plan:
+### 1. توليد صورة خريطة سوريا
+- استخدام `imagegen` لتوليد صورة فنية لخريطة سوريا (PNG بخلفية شفافة) بأسلوب يتناسب مع التصميم (ألوان primary/secondary، خطوط ناعمة، شكل سيلويت للبلاد).
+- حفظها في `src/assets/syria-map.png`.
 
-1. Fix the domain routing layer
-   - Make sure `lms.aisyria.org` is attached as a direct custom domain for this same project, not configured as a redirect/alias to `aisyria.org`.
-   - Remove any external DNS/CDN page rule, redirect rule, or forwarding rule that sends `lms.aisyria.org` to `aisyria.org`.
+### 2. تحديث `GeographySection` في `src/routes/one-million-initiative.tsx`
+استبدال الـ grid الحالي بتخطيط جديد:
+- **عمود الصورة (يسار/يمين حسب الاتجاه):** الخريطة معروضة بحجم كبير مع تأثيرات حركية:
+  - دخول ناعم (`animate-fade-in` + `scale-in`)
+  - توهج خلفي (blur glow بألوان primary/secondary)
+  - نقاط متحركة (pulsing dots) فوق الخريطة تمثّل مدناً سورية رئيسية (حلب، دمشق، اللاذقية، حمص، الحسكة، دير الزور) باستخدام `absolute` positioning مع `animate-ping` و `animate-pulse`
+  - خطوط متقطّعة متحركة تربط النقاط (SVG overlay اختياري) لإيحاء "التوزيع الشامل"
+- **عمود النص:** البطاقتان الحاليتان (lead1/body1 و lead2/body2) مكدّستان عمودياً بدل grid أفقي.
 
-2. Keep the app-level redirect as fallback
-   - Keep the root route logic so when the app receives `lms.aisyria.org/`, it redirects to `/learning-management-system`.
-   - If needed, simplify the app logic to use a safer server/client host detector that does not break production builds.
+### 3. التفاصيل التقنية
+- تخطيط responsive: `grid md:grid-cols-2` — صورة + نص، يتكدّس على الموبايل.
+- النقاط المتحركة: عناصر `<span>` مطلقة الموضع بنسب مئوية تقريبية لمواقع المدن داخل الصورة، مع `animate-pulse` و overlay `animate-ping`.
+- لا تغيير على باقي الصفحة.
 
-3. Verify after publishing/config update
-   - Check that `https://lms.aisyria.org/` returns a redirect to `https://lms.aisyria.org/learning-management-system` or directly loads that page.
-   - Confirm `https://aisyria.org/` still loads the normal homepage.
+### الملفات المعدّلة
+- `src/assets/syria-map.png` (جديد، عبر imagegen)
+- `src/routes/one-million-initiative.tsx` (تعديل `GeographySection` + إضافة import للصورة)
