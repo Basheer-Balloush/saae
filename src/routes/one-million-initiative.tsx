@@ -1,3 +1,4 @@
+import syriaMapNew from "@/assets/syria-map-new.png.asset.json";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
