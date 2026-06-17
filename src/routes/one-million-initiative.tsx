@@ -585,6 +585,17 @@ function Collaboration({
 }
 
 /* ---------- GEOGRAPHY ---------- */
+const SYRIA_CITIES: ReadonlyArray<{ name: string; top: string; left: string; delay: string }> = [
+  { name: "حلب", top: "22%", left: "48%", delay: "0s" },
+  { name: "اللاذقية", top: "38%", left: "30%", delay: "0.4s" },
+  { name: "الرقة", top: "32%", left: "62%", delay: "0.8s" },
+  { name: "الحسكة", top: "26%", left: "78%", delay: "1.2s" },
+  { name: "دير الزور", top: "44%", left: "72%", delay: "1.6s" },
+  { name: "حمص", top: "52%", left: "44%", delay: "2s" },
+  { name: "دمشق", top: "72%", left: "40%", delay: "2.4s" },
+  { name: "السويداء", top: "82%", left: "48%", delay: "2.8s" },
+];
+
 function GeographySection({
   geo,
 }: {
@@ -596,27 +607,66 @@ function GeographySection({
   };
 }) {
   return (
-    <div className="mx-auto max-w-4xl">
-      <div className="grid gap-8 md:grid-cols-2">
-        <article className="rounded-3xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-soft">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <MapPin className="h-6 w-6" />
+    <div className="mx-auto max-w-6xl">
+      <div className="grid items-center gap-10 md:grid-cols-2">
+        {/* Map visual */}
+        <div className="relative animate-fade-in">
+          <div className="pointer-events-none absolute inset-0 -z-10">
+            <div className="absolute left-1/4 top-1/4 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+            <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-secondary/20 blur-3xl" />
           </div>
-          <h3 className="mt-5 text-xl font-bold">{geo.lead1}</h3>
-          <p className="mt-4 text-sm leading-loose text-muted-foreground">
-            {geo.body1}
-          </p>
-        </article>
+          <div className="relative aspect-square w-full">
+            <img
+              src={syriaMap}
+              alt="خريطة سوريا"
+              loading="lazy"
+              width={1024}
+              height={1024}
+              className="h-full w-full object-contain drop-shadow-2xl"
+            />
+            {SYRIA_CITIES.map((city) => (
+              <span
+                key={city.name}
+                className="absolute -translate-x-1/2 -translate-y-1/2"
+                style={{ top: city.top, left: city.left }}
+              >
+                <span className="relative flex h-3 w-3">
+                  <span
+                    className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"
+                    style={{ animationDelay: city.delay }}
+                  />
+                  <span className="relative inline-flex h-3 w-3 rounded-full bg-primary ring-2 ring-background" />
+                </span>
+                <span className="absolute left-1/2 top-4 -translate-x-1/2 whitespace-nowrap rounded-md bg-background/80 px-1.5 py-0.5 text-[10px] font-semibold text-foreground backdrop-blur-sm">
+                  {city.name}
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
 
-        <article className="rounded-3xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-soft">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary/10 text-secondary">
-            <Users className="h-6 w-6" />
-          </div>
-          <h3 className="mt-5 text-xl font-bold">{geo.lead2}</h3>
-          <p className="mt-4 text-sm leading-loose text-muted-foreground">
-            {geo.body2}
-          </p>
-        </article>
+        {/* Text cards */}
+        <div className="space-y-6">
+          <article className="rounded-3xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-soft">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Archive className="h-6 w-6" />
+            </div>
+            <h3 className="mt-5 text-xl font-bold">{geo.lead1}</h3>
+            <p className="mt-4 text-sm leading-loose text-muted-foreground">
+              {geo.body1}
+            </p>
+          </article>
+
+          <article className="rounded-3xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-soft">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary/10 text-secondary">
+              <MapPin className="h-6 w-6" />
+            </div>
+            <h3 className="mt-5 text-xl font-bold">{geo.lead2}</h3>
+            <p className="mt-4 text-sm leading-loose text-muted-foreground">
+              {geo.body2}
+            </p>
+          </article>
+        </div>
       </div>
     </div>
   );
