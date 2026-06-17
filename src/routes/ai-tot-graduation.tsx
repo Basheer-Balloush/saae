@@ -56,12 +56,6 @@ const c = {
     "عرض الرعاية الاستراتيجي للفعالية التقنية الأضخم محلياً — تجمع قادة القطاع وصنّاع القرار للاحتفاء بتخريج الدفعة الأولى من مدربي الذكاء الاصطناعي وإطلاق مبادرة مليون مستخدم.",
   backHome: "العودة إلى الرئيسية",
 
-  stats: [
-    { value: "الأولى", label: "ندوة وطنية للذكاء الاصطناعي" },
-    { value: "3", label: "محاور رئيسية" },
-    { value: "دفعة أولى", label: "مدربو ذكاء اصطناعي معتمدون" },
-    { value: "1,000,000", label: "مستخدم مستهدف" },
-  ],
 
   pillars: {
     eyebrow: "محتوى الفعالية",
@@ -166,7 +160,6 @@ function AiTotGraduationPage() {
       <Navbar minimal />
       <main className="pt-20">
         <Hero />
-        <Stats />
 
         <Section eyebrow={c.pillars.eyebrow} title={c.pillars.title} icon={Sparkles}>
           <PillarsGrid />
@@ -271,25 +264,6 @@ function Hero() {
   );
 }
 
-/* ---------- STATS ---------- */
-function Stats() {
-  return (
-    <section className="border-y border-border bg-muted/30">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-6 py-12 lg:grid-cols-4 lg:px-10">
-        {c.stats.map((s) => (
-          <div key={s.label} className="text-center">
-            <div className="text-2xl font-bold text-primary sm:text-3xl lg:text-4xl">
-              {s.value}
-            </div>
-            <div className="mt-2 text-xs font-medium text-muted-foreground sm:text-sm">
-              {s.label}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 /* ---------- SECTION WRAPPER ---------- */
 function Section({
