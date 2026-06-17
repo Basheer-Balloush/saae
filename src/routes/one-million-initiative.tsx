@@ -168,6 +168,16 @@ const content = {
       { value: "$1", label: "Symbolic Seat Cost" },
       { value: "Free", label: "For Eligible Recipients via Donations" },
     ],
+    geo: {
+      eyebrow: "National Geography",
+      title: "One Million Beneficiaries Across All of Syria",
+      lead1: "Archiving Syrian Knowledge Before Modernizing It",
+      body1:
+        "This initiative is built on a firm conviction: we cannot fight AI illiteracy with tools foreign to our environment. We were among the first to realize that Syrian knowledge predates what can be taught from abroad, and that the fastest path to empowerment is through documenting what we have before importing what we do not need.",
+      lead2: "Comprehensive Geographic Distribution",
+      body2:
+        "The one million beneficiaries are distributed across the entire Syrian geography — from Aleppo to Damascus, from Latakia to Qamishli — to spread digital opportunities and raise AI literacy levels in every Syrian governorate and region without exception.",
+    },
     s1: { eyebrow: "Section One", title: "Vision and National Goals" },
     s2: { eyebrow: "Section Two", title: "Academic Methodology and Quality Standards" },
     s3: { eyebrow: "Section Three", title: "Innovative Economic Model and Project Sustainability" },
