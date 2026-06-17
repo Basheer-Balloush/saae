@@ -359,7 +359,7 @@ function Hero({ c, lang }: { c: PageContent; lang: Lang }) {
 function Stats({ items }: { items: ReadonlyArray<{ value: string; label: string }> }) {
   return (
     <section className="border-y border-border bg-muted/30">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-6 py-12 lg:grid-cols-4 lg:px-10">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-6 py-12 lg:grid-cols-3 lg:px-10">
         {items.map((s, i) => (
           <div
             key={s.label}
