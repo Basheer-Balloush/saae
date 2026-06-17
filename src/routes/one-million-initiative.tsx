@@ -587,26 +587,6 @@ function Collaboration({
 }
 
 /* ---------- GEOGRAPHY ---------- */
-const SYRIA_CITIES: ReadonlyArray<{
-  name: string;
-  top: string;
-  left: string;
-  delay: string;
-  large?: boolean;
-}> = [
-  { name: "حلب", top: "22%", left: "35%", delay: "0s", large: true },
-  { name: "اللاذقية", top: "38%", left: "22%", delay: "0.3s" },
-  { name: "الرقة", top: "30%", left: "55%", delay: "0.6s" },
-  { name: "الحسكة", top: "18%", left: "72%", delay: "0.9s" },
-  { name: "دير الزور", top: "42%", left: "68%", delay: "1.2s" },
-  { name: "حمص", top: "55%", left: "30%", delay: "1.5s" },
-  { name: "طرطوس", top: "48%", left: "20%", delay: "1.8s" },
-  { name: "إدلب", top: "38%", left: "38%", delay: "2.1s" },
-  { name: "حماة", top: "48%", left: "38%", delay: "2.4s" },
-  { name: "دمشق", top: "78%", left: "50%", delay: "2.7s", large: true },
-  { name: "درعا", top: "85%", left: "35%", delay: "3.0s" },
-];
-
 function GeographySection({
   geo,
 }: {
@@ -620,47 +600,19 @@ function GeographySection({
   return (
     <div className="mx-auto max-w-6xl">
       <div className="grid items-center gap-10 md:grid-cols-2">
-        {/* Map visual with blinking dots */}
+        {/* Map visual */}
         <div className="relative animate-fade-in">
           <div className="pointer-events-none absolute inset-0 -z-10">
             <div className="absolute left-1/4 top-1/4 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
             <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-secondary/20 blur-3xl" />
           </div>
           <div className="relative mx-auto w-full max-w-lg">
-            {/* Syria map image */}
             <img
               src={syriaMapNew.url}
               alt="خريطة سوريا"
               className="w-full rounded-2xl"
               loading="lazy"
             />
-
-            {/* Blinking city dots */}
-            {SYRIA_CITIES.map((city) => (
-              <div
-                key={city.name}
-                className="absolute flex flex-col items-center gap-1"
-                style={{
-                  left: city.left,
-                  top: city.top,
-                  transform: "translate(-50%, -50%)",
-                }}
-              >
-                {/* Outer ping ring */}
-                <span
-                  className={`absolute inline-flex rounded-full bg-primary/60 ${city.large ? "h-6 w-6" : "h-3 w-3"} animate-ping`}
-                  style={{ animationDelay: city.delay }}
-                />
-                {/* Main dot */}
-                <span
-                  className={`relative inline-flex rounded-full bg-primary ring-2 ring-background ${city.large ? "h-4 w-4 ring-[3px]" : "h-2 w-2"}`}
-                />
-                {/* City label */}
-                <span className="whitespace-nowrap rounded-md bg-background/80 px-1.5 py-0.5 text-[10px] font-semibold text-foreground backdrop-blur-sm shadow-sm">
-                  {city.name}
-                </span>
-              </div>
-            ))}
           </div>
         </div>
 
