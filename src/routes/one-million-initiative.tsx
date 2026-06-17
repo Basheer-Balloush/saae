@@ -586,15 +586,19 @@ function Collaboration({
 }
 
 /* ---------- GEOGRAPHY ---------- */
-const SYRIA_CITIES: ReadonlyArray<{ name: string; top: string; left: string; delay: string }> = [
-  { name: "حلب", top: "22%", left: "48%", delay: "0s" },
-  { name: "اللاذقية", top: "38%", left: "30%", delay: "0.4s" },
-  { name: "الرقة", top: "32%", left: "62%", delay: "0.8s" },
-  { name: "الحسكة", top: "26%", left: "78%", delay: "1.2s" },
-  { name: "دير الزور", top: "44%", left: "72%", delay: "1.6s" },
-  { name: "حمص", top: "52%", left: "44%", delay: "2s" },
-  { name: "دمشق", top: "72%", left: "40%", delay: "2.4s" },
-  { name: "السويداء", top: "82%", left: "48%", delay: "2.8s" },
+const SYRIA_CITIES: ReadonlyArray<{ name: string; delay: string }> = [
+  { name: "حلب", delay: "0s" },
+  { name: "اللاذقية", delay: "0.3s" },
+  { name: "الرقة", delay: "0.6s" },
+  { name: "الحسكة", delay: "0.9s" },
+  { name: "دير الزور", delay: "1.2s" },
+  { name: "حمص", delay: "1.5s" },
+  { name: "طرطوس", delay: "1.8s" },
+  { name: "إدلب", delay: "2.1s" },
+  { name: "حماة", delay: "2.4s" },
+  { name: "دمشق", delay: "2.7s" },
+  { name: "درعا", delay: "3.0s" },
+  { name: "السويداء", delay: "3.3s" },
 ];
 
 function GeographySection({
@@ -607,44 +611,92 @@ function GeographySection({
     body2: string;
   };
 }) {
+  const count = SYRIA_CITIES.length;
+  const radius = 42; // percentage of container
   return (
     <div className="mx-auto max-w-6xl">
       <div className="grid items-center gap-10 md:grid-cols-2">
-        {/* Map visual */}
+        {/* Cities network visual */}
         <div className="relative animate-fade-in">
           <div className="pointer-events-none absolute inset-0 -z-10">
             <div className="absolute left-1/4 top-1/4 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
             <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-secondary/20 blur-3xl" />
           </div>
-          <div className="relative aspect-square w-full">
-            <img
-              src={syriaMap}
-              alt="خريطة سوريا"
-              loading="lazy"
-              width={1024}
-              height={1024}
-              className="h-full w-full object-contain drop-shadow-2xl"
-            />
-            {SYRIA_CITIES.map((city) => (
-              <span
-                key={city.name}
-                className="absolute -translate-x-1/2 -translate-y-1/2"
-                style={{ top: city.top, left: city.left }}
-              >
-                <span className="relative flex h-3 w-3">
-                  <span
-                    className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"
-                    style={{ animationDelay: city.delay }}
+          <div className="relative mx-auto aspect-square w-full max-w-md">
+            {/* Concentric rings */}
+            <div className="absolute inset-0 rounded-full border border-primary/20" />
+            <div className="absolute inset-[12%] rounded-full border border-primary/15" />
+            <div className="absolute inset-[28%] rounded-full border border-primary/10" />
+
+            {/* Connecting lines from center */}
+            <svg
+              className="absolute inset-0 h-full w-full"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              {SYRIA_CITIES.map((_, i) => {
+                const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+                const x = 50 + radius * Math.cos(angle);
+                const y = 50 + radius * Math.sin(angle);
+                return (
+                  <line
+                    key={i}
+                    x1="50"
+                    y1="50"
+                    x2={x}
+                    y2={y}
+                    stroke="currentColor"
+                    strokeWidth="0.2"
+                    className="text-primary/30"
                   />
-                  <span className="relative inline-flex h-3 w-3 rounded-full bg-primary ring-2 ring-background" />
-                </span>
-                <span className="absolute left-1/2 top-4 -translate-x-1/2 whitespace-nowrap rounded-md bg-background/80 px-1.5 py-0.5 text-[10px] font-semibold text-foreground backdrop-blur-sm">
-                  {city.name}
-                </span>
-              </span>
-            ))}
+                );
+              })}
+            </svg>
+
+            {/* Center pulse: 1,000,000 */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-center text-background shadow-2xl">
+                <span className="absolute inset-0 animate-ping rounded-full bg-primary/40" />
+                <div className="relative">
+                  <div className="text-lg font-extrabold leading-none">1,000,000</div>
+                  <div className="mt-1 text-[10px] font-semibold opacity-90">مستفيد</div>
+                </div>
+              </div>
+            </div>
+
+            {/* City nodes around the circle */}
+            {SYRIA_CITIES.map((city, i) => {
+              const angle = (i / count) * 360 - 90;
+              return (
+                <div
+                  key={city.name}
+                  className="absolute left-1/2 top-1/2 h-0 w-0"
+                  style={{ transform: `rotate(${angle}deg) translate(${radius}%)` }}
+                >
+                  <div
+                    className="-translate-x-1/2 -translate-y-1/2"
+                    style={{ transform: `rotate(${-angle}deg) translate(-50%, -50%)` }}
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="relative flex h-3 w-3">
+                        <span
+                          className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"
+                          style={{ animationDelay: city.delay }}
+                        />
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-primary ring-2 ring-background" />
+                      </span>
+                      <span className="whitespace-nowrap rounded-md bg-background/80 px-1.5 py-0.5 text-[10px] font-semibold text-foreground backdrop-blur-sm">
+                        {city.name}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
+
 
         {/* Text cards */}
         <div className="space-y-6">
