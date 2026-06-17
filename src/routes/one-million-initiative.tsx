@@ -584,3 +584,41 @@ function Collaboration({
   );
 }
 
+/* ---------- GEOGRAPHY ---------- */
+function GeographySection({
+  geo,
+}: {
+  geo: {
+    lead1: string;
+    body1: string;
+    lead2: string;
+    body2: string;
+  };
+}) {
+  return (
+    <div className="mx-auto max-w-4xl">
+      <div className="grid gap-8 md:grid-cols-2">
+        <article className="rounded-3xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-soft">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <MapPin className="h-6 w-6" />
+          </div>
+          <h3 className="mt-5 text-xl font-bold">{geo.lead1}</h3>
+          <p className="mt-4 text-sm leading-loose text-muted-foreground">
+            {geo.body1}
+          </p>
+        </article>
+
+        <article className="rounded-3xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-soft">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary/10 text-secondary">
+            <Users className="h-6 w-6" />
+          </div>
+          <h3 className="mt-5 text-xl font-bold">{geo.lead2}</h3>
+          <p className="mt-4 text-sm leading-loose text-muted-foreground">
+            {geo.body2}
+          </p>
+        </article>
+      </div>
+    </div>
+  );
+}
+
