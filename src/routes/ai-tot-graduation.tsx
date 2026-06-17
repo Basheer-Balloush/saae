@@ -251,13 +251,6 @@ function Hero() {
             <ArrowLeft className="h-4 w-4" />
             {c.backHome}
           </Link>
-          <Link
-            to="/contact"
-            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-primary to-secondary px-6 py-3 text-sm font-semibold text-background shadow-lg transition-transform hover:-translate-y-0.5"
-          >
-            <Handshake className="h-4 w-4" />
-            كن راعياً للحدث
-          </Link>
         </div>
       </div>
     </section>
