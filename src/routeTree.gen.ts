@@ -16,6 +16,7 @@ import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-i
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
+import { Route as AiTotGraduationRouteImport } from './routes/ai-tot-graduation'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
@@ -96,6 +97,11 @@ const AttendanceManagementSystemRoute =
     path: '/attendance-management-system',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AiTotGraduationRoute = AiTotGraduationRouteImport.update({
+  id: '/ai-tot-graduation',
+  path: '/ai-tot-graduation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -341,6 +347,7 @@ const LearningManagementSystemInstructorAssignmentsCourseIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai-tot-graduation': typeof AiTotGraduationRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
@@ -392,6 +399,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai-tot-graduation': typeof AiTotGraduationRoute
   '/contact': typeof ContactRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/registration': typeof RegistrationRoute
@@ -439,6 +447,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai-tot-graduation': typeof AiTotGraduationRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
@@ -492,6 +501,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/ai-tot-graduation'
     | '/attendance-management-system'
     | '/contact'
     | '/learning-management-system'
@@ -543,6 +553,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/ai-tot-graduation'
     | '/contact'
     | '/one-million-initiative'
     | '/registration'
@@ -589,6 +600,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/ai-tot-graduation'
     | '/attendance-management-system'
     | '/contact'
     | '/learning-management-system'
@@ -641,6 +653,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AiTotGraduationRoute: typeof AiTotGraduationRoute
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
@@ -709,6 +722,13 @@ declare module '@tanstack/react-router' {
       path: '/attendance-management-system'
       fullPath: '/attendance-management-system'
       preLoaderRoute: typeof AttendanceManagementSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-tot-graduation': {
+      id: '/ai-tot-graduation'
+      path: '/ai-tot-graduation'
+      fullPath: '/ai-tot-graduation'
+      preLoaderRoute: typeof AiTotGraduationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -1154,6 +1174,7 @@ const LearningManagementSystemRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AiTotGraduationRoute: AiTotGraduationRoute,
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
