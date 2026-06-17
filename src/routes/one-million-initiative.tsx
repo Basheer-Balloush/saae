@@ -666,30 +666,29 @@ function GeographySection({
 
             {/* City nodes around the circle */}
             {SYRIA_CITIES.map((city, i) => {
-              const angle = (i / count) * 360 - 90;
+              const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+              const x = 50 + radius * Math.cos(angle);
+              const y = 50 + radius * Math.sin(angle);
               return (
                 <div
                   key={city.name}
-                  className="absolute left-1/2 top-1/2 h-0 w-0"
-                  style={{ transform: `rotate(${angle}deg) translate(${radius}%)` }}
+                  className="absolute flex flex-col items-center gap-1"
+                  style={{
+                    left: `${x}%`,
+                    top: `${y}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
                 >
-                  <div
-                    className="-translate-x-1/2 -translate-y-1/2"
-                    style={{ transform: `rotate(${-angle}deg) translate(-50%, -50%)` }}
-                  >
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="relative flex h-3 w-3">
-                        <span
-                          className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"
-                          style={{ animationDelay: city.delay }}
-                        />
-                        <span className="relative inline-flex h-3 w-3 rounded-full bg-primary ring-2 ring-background" />
-                      </span>
-                      <span className="whitespace-nowrap rounded-md bg-background/80 px-1.5 py-0.5 text-[10px] font-semibold text-foreground backdrop-blur-sm">
-                        {city.name}
-                      </span>
-                    </div>
-                  </div>
+                  <span className="relative flex h-3 w-3">
+                    <span
+                      className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"
+                      style={{ animationDelay: city.delay }}
+                    />
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-primary ring-2 ring-background" />
+                  </span>
+                  <span className="whitespace-nowrap rounded-md bg-background/80 px-1.5 py-0.5 text-[10px] font-semibold text-foreground backdrop-blur-sm">
+                    {city.name}
+                  </span>
                 </div>
               );
             })}
