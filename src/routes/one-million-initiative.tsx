@@ -15,6 +15,8 @@ import {
   Sparkles,
   ArrowLeft,
   ArrowRight,
+  Archive,
+  MapPin,
 } from "lucide-react";
 
 export const Route = createFileRoute("/one-million-initiative")({
