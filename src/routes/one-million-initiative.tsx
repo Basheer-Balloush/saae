@@ -165,7 +165,6 @@ const content = {
     stats: [
       { value: "1,000,000", label: "Target Beneficiaries" },
       { value: "2 Years", label: "Implementation Period" },
-      { value: "$1", label: "Symbolic Seat Cost" },
       { value: "Free", label: "For Eligible Recipients via Donations" },
     ],
     geo: {
