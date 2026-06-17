@@ -15,6 +15,8 @@ import {
   Sparkles,
   ArrowLeft,
   ArrowRight,
+  Archive,
+  MapPin,
 } from "lucide-react";
 
 export const Route = createFileRoute("/one-million-initiative")({
@@ -58,6 +60,16 @@ const content = {
       { value: "$1", label: "تكلفة المقعد الرمزية" },
       { value: "مجاناً", label: "للمستحقين عبر التبرعات" },
     ],
+    geo: {
+      eyebrow: "الجغرافيا الوطنية",
+      title: "مليون مستفيد على كامل الجغرافيا السورية",
+      lead1: "أرشفة المعرفة السورية قبل تحديثها",
+      body1:
+        "تأسست هذه المبادرة على قناعة راسخة: لا يمكن أن نحارب الأمية في الذكاء الاصطناعي بأدوات غريبة عن بيئتنا. نحن أول من أدرك أن المعرفة السورية أقدم من أن تُدرَّس من الخارج، وأنّ أسرع طريق للتمكين يمر عبر توثيق ما نملك قبل أن نستورد ما لا نحتاجه.",
+      lead2: "توزيع جغرافي شامل",
+      body2:
+        "المليون مستفيد موزعون على كامل الجغرافيا السورية — من حلب إلى دمشق، من اللاذقية إلى القامشلي — لتعميم الفرص الرقمية ورفع مستوى محو الأمية الذكائية في كل المحافظات والمناطق السورية دون استثناء.",
+    },
     s1: { eyebrow: "القسم الأول", title: "الرؤية والأهداف الوطنية" },
     s2: { eyebrow: "القسم الثاني", title: "المنهجية الأكاديمية ومعايير الجودة" },
     s3: { eyebrow: "القسم الثالث", title: "النموذج الاقتصادي المبتكر واستدامة المشروع" },
@@ -156,6 +168,16 @@ const content = {
       { value: "$1", label: "Symbolic Seat Cost" },
       { value: "Free", label: "For Eligible Recipients via Donations" },
     ],
+    geo: {
+      eyebrow: "National Geography",
+      title: "One Million Beneficiaries Across All of Syria",
+      lead1: "Archiving Syrian Knowledge Before Modernizing It",
+      body1:
+        "This initiative is built on a firm conviction: we cannot fight AI illiteracy with tools foreign to our environment. We were among the first to realize that Syrian knowledge predates what can be taught from abroad, and that the fastest path to empowerment is through documenting what we have before importing what we do not need.",
+      lead2: "Comprehensive Geographic Distribution",
+      body2:
+        "The one million beneficiaries are distributed across the entire Syrian geography — from Aleppo to Damascus, from Latakia to Qamishli — to spread digital opportunities and raise AI literacy levels in every Syrian governorate and region without exception.",
+    },
     s1: { eyebrow: "Section One", title: "Vision and National Goals" },
     s2: { eyebrow: "Section Two", title: "Academic Methodology and Quality Standards" },
     s3: { eyebrow: "Section Three", title: "Innovative Economic Model and Project Sustainability" },
@@ -253,6 +275,10 @@ function OneMillionInitiativePage() {
       <main className="pt-20">
         <Hero c={c} lang={lang as Lang} />
         <Stats items={c.stats} />
+
+        <Section eyebrow={c.geo.eyebrow} title={c.geo.title} icon={Archive}>
+          <GeographySection geo={c.geo} />
+        </Section>
 
         <Section eyebrow={c.s1.eyebrow} title={c.s1.title} icon={Target} variant="muted">
           <GoalsGrid goals={c.goals} />
@@ -555,6 +581,44 @@ function Collaboration({
         ))}
       </div>
     </>
+  );
+}
+
+/* ---------- GEOGRAPHY ---------- */
+function GeographySection({
+  geo,
+}: {
+  geo: {
+    lead1: string;
+    body1: string;
+    lead2: string;
+    body2: string;
+  };
+}) {
+  return (
+    <div className="mx-auto max-w-4xl">
+      <div className="grid gap-8 md:grid-cols-2">
+        <article className="rounded-3xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-soft">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <MapPin className="h-6 w-6" />
+          </div>
+          <h3 className="mt-5 text-xl font-bold">{geo.lead1}</h3>
+          <p className="mt-4 text-sm leading-loose text-muted-foreground">
+            {geo.body1}
+          </p>
+        </article>
+
+        <article className="rounded-3xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-soft">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary/10 text-secondary">
+            <Users className="h-6 w-6" />
+          </div>
+          <h3 className="mt-5 text-xl font-bold">{geo.lead2}</h3>
+          <p className="mt-4 text-sm leading-loose text-muted-foreground">
+            {geo.body2}
+          </p>
+        </article>
+      </div>
+    </div>
   );
 }
 
