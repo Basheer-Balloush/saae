@@ -3,7 +3,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { useLang } from "@/lib/i18n";
 import ministryLogo from "@/assets/ministry-communications.png.asset.json";
-import syriaMap from "@/assets/syria-map.png";
+
 import {
   Target,
   GraduationCap,
