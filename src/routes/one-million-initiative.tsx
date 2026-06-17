@@ -598,6 +598,7 @@ const SYRIA_CITIES: ReadonlyArray<{ name: string; delay: string }> = [
   { name: "حماة", delay: "2.4s" },
   { name: "دمشق", delay: "2.7s" },
   { name: "درعا", delay: "3.0s" },
+  { name: "السويداء", delay: "3.3s" },
 ];
 
 function GeographySection({
