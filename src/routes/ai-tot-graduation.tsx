@@ -17,7 +17,6 @@ import {
   Building2,
   HeartHandshake,
   CheckCircle2,
-  Handshake,
 } from "lucide-react";
 
 export const Route = createFileRoute("/ai-tot-graduation")({
