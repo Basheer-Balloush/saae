@@ -613,6 +613,19 @@ function GeographySection({
 }) {
   const count = SYRIA_CITIES.length;
   const radius = 42; // percentage of container
+  const labelOffset = 9; // outward offset for labels
+  const points = SYRIA_CITIES.map((_, i) => {
+    const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+    return {
+      x: 50 + radius * Math.cos(angle),
+      y: 50 + radius * Math.sin(angle),
+      lx: 50 + (radius + labelOffset) * Math.cos(angle),
+      ly: 50 + (radius + labelOffset) * Math.sin(angle),
+      angle,
+    };
+  });
+  // chord connections: connect each node to the ones +3 and +5 ahead (mesh)
+  const chordSteps = [3, 5];
   return (
     <div className="mx-auto max-w-6xl">
       <div className="grid items-center gap-10 md:grid-cols-2">
@@ -624,34 +637,50 @@ function GeographySection({
           </div>
           <div className="relative mx-auto aspect-square w-full max-w-md">
             {/* Concentric rings */}
-            <div className="absolute inset-0 rounded-full border border-primary/20" />
-            <div className="absolute inset-[12%] rounded-full border border-primary/15" />
-            <div className="absolute inset-[28%] rounded-full border border-primary/10" />
+            <div className="absolute inset-[8%] rounded-full border border-primary/15" />
+            <div className="absolute inset-[20%] rounded-full border border-primary/10" />
 
-            {/* Connecting lines from center */}
+            {/* Network lines (spokes + chord mesh) with tech pulse */}
             <svg
-              className="absolute inset-0 h-full w-full"
+              className="absolute inset-0 h-full w-full overflow-visible text-primary"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
               aria-hidden="true"
             >
-              {SYRIA_CITIES.map((_, i) => {
-                const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
-                const x = 50 + radius * Math.cos(angle);
-                const y = 50 + radius * Math.sin(angle);
-                return (
-                  <line
-                    key={i}
-                    x1="50"
-                    y1="50"
-                    x2={x}
-                    y2={y}
-                    stroke="currentColor"
-                    strokeWidth="0.2"
-                    className="text-primary/30"
-                  />
-                );
-              })}
+              {/* spokes from center */}
+              {points.map((p, i) => (
+                <line
+                  key={`spoke-${i}`}
+                  x1="50"
+                  y1="50"
+                  x2={p.x}
+                  y2={p.y}
+                  stroke="currentColor"
+                  strokeWidth="0.25"
+                  className="text-primary/25 animate-net-pulse"
+                  style={{ animationDelay: `${i * 0.18}s` }}
+                />
+              ))}
+              {/* chord mesh */}
+              {points.flatMap((p, i) =>
+                chordSteps.map((step) => {
+                  const j = (i + step) % count;
+                  const q = points[j];
+                  return (
+                    <line
+                      key={`chord-${i}-${step}`}
+                      x1={p.x}
+                      y1={p.y}
+                      x2={q.x}
+                      y2={q.y}
+                      stroke="currentColor"
+                      strokeWidth="0.18"
+                      className="text-primary/20 animate-net-pulse"
+                      style={{ animationDelay: `${(i * 0.13 + step * 0.4) % 3.5}s` }}
+                    />
+                  );
+                }),
+              )}
             </svg>
 
             {/* Center pulse: 1,000,000 */}
@@ -665,36 +694,48 @@ function GeographySection({
               </div>
             </div>
 
-            {/* City nodes around the circle */}
+            {/* City dots — perfectly on spoke endpoints */}
             {SYRIA_CITIES.map((city, i) => {
-              const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
-              const x = 50 + radius * Math.cos(angle);
-              const y = 50 + radius * Math.sin(angle);
+              const p = points[i];
               return (
-                <div
-                  key={city.name}
-                  className="absolute flex flex-col items-center gap-1"
+                <span
+                  key={`dot-${city.name}`}
+                  className="absolute flex h-3 w-3"
                   style={{
-                    left: `${x}%`,
-                    top: `${y}%`,
+                    left: `${p.x}%`,
+                    top: `${p.y}%`,
                     transform: "translate(-50%, -50%)",
                   }}
                 >
-                  <span className="relative flex h-3 w-3">
-                    <span
-                      className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"
-                      style={{ animationDelay: city.delay }}
-                    />
-                    <span className="relative inline-flex h-3 w-3 rounded-full bg-primary ring-2 ring-background" />
-                  </span>
-                  <span className="whitespace-nowrap rounded-md bg-background/80 px-1.5 py-0.5 text-[10px] font-semibold text-foreground backdrop-blur-sm">
-                    {city.name}
-                  </span>
-                </div>
+                  <span
+                    className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"
+                    style={{ animationDelay: city.delay }}
+                  />
+                  <span className="relative inline-flex h-3 w-3 rounded-full bg-primary ring-2 ring-background" />
+                </span>
+              );
+            })}
+
+            {/* City labels — offset outward so they don't sit on the dot */}
+            {SYRIA_CITIES.map((city, i) => {
+              const p = points[i];
+              return (
+                <span
+                  key={`label-${city.name}`}
+                  className="absolute whitespace-nowrap rounded-md bg-background/80 px-1.5 py-0.5 text-[10px] font-semibold text-foreground backdrop-blur-sm"
+                  style={{
+                    left: `${p.lx}%`,
+                    top: `${p.ly}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
+                >
+                  {city.name}
+                </span>
               );
             })}
           </div>
         </div>
+
 
 
         {/* Text cards */}
