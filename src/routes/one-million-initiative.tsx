@@ -636,9 +636,34 @@ function GeographySection({
             <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-secondary/20 blur-3xl" />
           </div>
           <div className="relative mx-auto aspect-square w-full max-w-md">
-            {/* Concentric rings */}
-            <div className="absolute inset-[8%] rounded-full border border-primary/15" />
-            <div className="absolute inset-[20%] rounded-full border border-primary/10" />
+            {/* Concentric rings — now SVG circles with tech pulse */}
+            <svg
+              className="absolute inset-0 h-full w-full overflow-visible text-primary"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.35"
+                className="text-primary/20 animate-net-pulse"
+                style={{ animationDelay: "0s" }}
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r="30"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.25"
+                className="text-primary/15 animate-net-pulse"
+                style={{ animationDelay: "1.2s" }}
+              />
+            </svg>
 
             {/* Network lines (spokes + chord mesh) with tech pulse */}
             <svg
