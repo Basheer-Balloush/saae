@@ -477,4 +477,14 @@ html {
   .animate-blob-4 {
     animation: blob-4 20s ease-in-out infinite;
   }
+  @keyframes net-pulse {
+    0% { stroke-dashoffset: 40; opacity: 0.15; }
+    50% { opacity: 0.85; }
+    100% { stroke-dashoffset: 0; opacity: 0.15; }
+  }
+  .animate-net-pulse {
+    stroke-dasharray: 3 6;
+    animation: net-pulse 3.5s linear infinite;
+  }
 }
+
