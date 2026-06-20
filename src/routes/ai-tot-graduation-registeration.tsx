@@ -173,21 +173,21 @@ function Page() {
       {/* Agenda */}
       <section className="mx-auto max-w-5xl px-4 sm:px-6 py-12 sm:py-16">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-8">{t.agenda}</h2>
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
+          <table className="w-full min-w-[640px] text-sm">
             <thead className="bg-primary/10 text-foreground">
               <tr>
-                <th className="px-4 py-3 text-start font-bold">{t.time}</th>
-                <th className="px-4 py-3 text-start font-bold">{t.item}</th>
-                <th className="px-4 py-3 text-start font-bold hidden sm:table-cell">{t.speaker}</th>
+                <th className="px-3 sm:px-4 py-3 text-start font-bold whitespace-nowrap">{t.time}</th>
+                <th className="px-3 sm:px-4 py-3 text-start font-bold">{t.item}</th>
+                <th className="px-3 sm:px-4 py-3 text-start font-bold">{t.speaker}</th>
               </tr>
             </thead>
             <tbody>
               {agenda.map((row, i) => (
                 <tr key={i} className={i % 2 === 0 ? "bg-background" : "bg-muted/40"}>
-                  <td className="px-4 py-3 font-mono text-xs sm:text-sm whitespace-nowrap text-muted-foreground">{row.time}</td>
-                  <td className="px-4 py-3 font-semibold">{row.item}</td>
-                  <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{row.speaker ?? "—"}</td>
+                  <td className="px-3 sm:px-4 py-3 font-mono text-[11px] sm:text-sm whitespace-nowrap text-muted-foreground align-top">{row.time}</td>
+                  <td className="px-3 sm:px-4 py-3 font-semibold align-top">{row.item}</td>
+                  <td className="px-3 sm:px-4 py-3 text-muted-foreground align-top">{row.speaker ?? "—"}</td>
                 </tr>
               ))}
             </tbody>
