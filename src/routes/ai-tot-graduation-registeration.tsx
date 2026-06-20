@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Calendar, MapPin, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
-import ministryLogo from "@/assets/ministry-communications-logo.png";
+import { Calendar, MapPin, ArrowLeft, CheckCircle2, Loader2, Clock } from "lucide-react";
+import ministryLogo from "@/assets/ministry-communications.png.asset.json";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,7 +128,7 @@ function Page() {
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-24 text-center">
           <div className="flex flex-col items-center gap-3 mb-5">
             <img
-              src={ministryLogo}
+              src={ministryLogo.url}
               alt={ar ? "شعار وزارة الاتصال وتقانة المعلومات" : "Ministry of Communications and Information Technology logo"}
               className="h-16 sm:h-20 w-auto object-contain"
             />
@@ -147,6 +147,9 @@ function Page() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm font-semibold text-foreground">
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
               <Calendar className="h-4 w-4 text-primary" /> {t.date}
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
+              <Clock className="h-4 w-4 text-primary" /> {ar ? "10:00 ص — 2:05 م" : "10:00 AM — 2:05 PM"}
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
               <MapPin className="h-4 w-4 text-primary" /> {t.venue}
@@ -170,21 +173,21 @@ function Page() {
       {/* Agenda */}
       <section className="mx-auto max-w-5xl px-4 sm:px-6 py-12 sm:py-16">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-8">{t.agenda}</h2>
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
+          <table className="w-full min-w-[640px] text-sm">
             <thead className="bg-primary/10 text-foreground">
               <tr>
-                <th className="px-4 py-3 text-start font-bold">{t.time}</th>
-                <th className="px-4 py-3 text-start font-bold">{t.item}</th>
-                <th className="px-4 py-3 text-start font-bold hidden sm:table-cell">{t.speaker}</th>
+                <th className="px-3 sm:px-4 py-3 text-start font-bold whitespace-nowrap">{t.time}</th>
+                <th className="px-3 sm:px-4 py-3 text-start font-bold">{t.item}</th>
+                <th className="px-3 sm:px-4 py-3 text-start font-bold">{t.speaker}</th>
               </tr>
             </thead>
             <tbody>
               {agenda.map((row, i) => (
                 <tr key={i} className={i % 2 === 0 ? "bg-background" : "bg-muted/40"}>
-                  <td className="px-4 py-3 font-mono text-xs sm:text-sm whitespace-nowrap text-muted-foreground">{row.time}</td>
-                  <td className="px-4 py-3 font-semibold">{row.item}</td>
-                  <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{row.speaker ?? "—"}</td>
+                  <td className="px-3 sm:px-4 py-3 font-mono text-[11px] sm:text-sm whitespace-nowrap text-muted-foreground align-top">{row.time}</td>
+                  <td className="px-3 sm:px-4 py-3 font-semibold align-top">{row.item}</td>
+                  <td className="px-3 sm:px-4 py-3 text-muted-foreground align-top">{row.speaker ?? "—"}</td>
                 </tr>
               ))}
             </tbody>
