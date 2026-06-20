@@ -128,7 +128,7 @@ function Page() {
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-24 text-center">
           <div className="flex flex-col items-center gap-3 mb-5">
             <img
-              src={ministryLogo}
+              src={ministryLogo.url}
               alt={ar ? "شعار وزارة الاتصال وتقانة المعلومات" : "Ministry of Communications and Information Technology logo"}
               className="h-16 sm:h-20 w-auto object-contain"
             />
