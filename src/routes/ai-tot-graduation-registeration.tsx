@@ -191,12 +191,13 @@ function Page() {
   );
 }
 
+type Strings = (typeof T)["ar"] | (typeof T)["en"];
 function RegistrationDialog({
   open, onOpenChange, done, setDone, t, ar,
 }: {
   open: boolean; onOpenChange: (v: boolean) => void;
   done: boolean; setDone: (v: boolean) => void;
-  t: typeof T["ar"]; ar: boolean;
+  t: Strings; ar: boolean;
 }) {
   const submit = useServerFn(submitEventRegistration);
   const [busy, setBusy] = useState(false);
