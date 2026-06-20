@@ -128,7 +128,8 @@ function VerifyPanel({ ar, creds, onLogout }: { ar: boolean; creds: Creds; onLog
         }
         throw error;
       }
-      const row = Array.isArray(data) && data.length > 0 ? data[0] as Lookup : null;
+      const arr = data as unknown as Lookup[] | null;
+      const row = Array.isArray(arr) && arr.length > 0 ? arr[0] : null;
       setResult(row ?? "notfound");
     } catch (e) {
       toast.error(toUserMessage(e));
