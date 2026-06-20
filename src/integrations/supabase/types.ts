@@ -519,6 +519,75 @@ export type Database = {
         }
         Relationships: []
       }
+      event_registrations: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          pin_code: string | null
+          specialization: string
+          status: Database["public"]["Enums"]["event_registration_status"]
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone: string
+          pin_code?: string | null
+          specialization: string
+          status?: Database["public"]["Enums"]["event_registration_status"]
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          pin_code?: string | null
+          specialization?: string
+          status?: Database["public"]["Enums"]["event_registration_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      event_verifiers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          password_hash: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          password_hash: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          password_hash?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
       individual_leads: {
         Row: {
           address: string | null
@@ -1803,6 +1872,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_event_registration: {
+        Args: { _id: string }
+        Returns: {
+          email: string
+          full_name: string
+          phone: string
+          pin_code: string
+          specialization: string
+        }[]
+      }
       can_access_ams_course: { Args: { _course_id: string }; Returns: boolean }
       can_access_ams_registrant: {
         Args: { _registrant_id: string }
@@ -1811,6 +1890,10 @@ export type Database = {
       can_access_ams_session: {
         Args: { _session_id: string }
         Returns: boolean
+      }
+      create_event_verifier: {
+        Args: { _password: string; _username: string }
+        Returns: string
       }
       delete_email: {
         Args: { message_id: number; queue_name: string }
@@ -1906,6 +1989,15 @@ export type Database = {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json
       }
+      lookup_event_pin: {
+        Args: { _password: string; _pin: string; _username: string }
+        Returns: {
+          email: string
+          full_name: string
+          phone: string
+          specialization: string
+        }[]
+      }
       match_chat_chunks: {
         Args: { match_count?: number; query_embedding: string }
         Returns: {
@@ -1936,6 +2028,10 @@ export type Database = {
         Args: { _ams_course_id: string }
         Returns: undefined
       }
+      update_event_verifier_password: {
+        Args: { _id: string; _password: string }
+        Returns: undefined
+      }
       verify_certificate: {
         Args: { _serial: string }
         Returns: {
@@ -1945,6 +2041,10 @@ export type Database = {
           serial: string
           student_id: string
         }[]
+      }
+      verify_event_verifier_login: {
+        Args: { _password: string; _username: string }
+        Returns: string
       }
     }
     Enums: {
@@ -1957,6 +2057,7 @@ export type Database = {
         | "lms_student"
         | "lms_instructor"
         | "lms_admin"
+      event_registration_status: "pending" | "approved" | "rejected"
       lms_course_level: "beginner" | "intermediate" | "advanced"
       lms_course_status: "draft" | "pending" | "rejected" | "published"
       lms_enroll_req_status: "pending" | "approved" | "rejected" | "cancelled"
@@ -2105,6 +2206,7 @@ export const Constants = {
         "lms_instructor",
         "lms_admin",
       ],
+      event_registration_status: ["pending", "approved", "rejected"],
       lms_course_level: ["beginner", "intermediate", "advanced"],
       lms_course_status: ["draft", "pending", "rejected", "published"],
       lms_enroll_req_status: ["pending", "approved", "rejected", "cancelled"],

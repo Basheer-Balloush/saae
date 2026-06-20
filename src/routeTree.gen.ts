@@ -16,6 +16,8 @@ import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-i
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
+import { Route as AiTotVerifyRouteImport } from './routes/ai-tot-verify'
+import { Route as AiTotGraduationRegisterationRouteImport } from './routes/ai-tot-graduation-registeration'
 import { Route as AiTotGraduationRouteImport } from './routes/ai-tot-graduation'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -48,6 +50,7 @@ import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/
 import { Route as LearningManagementSystemCertificateIdRouteImport } from './routes/learning-management-system.certificate.$id'
 import { Route as LearningManagementSystemAdminUsersRouteImport } from './routes/learning-management-system.admin.users'
 import { Route as LearningManagementSystemAdminReviewsRouteImport } from './routes/learning-management-system.admin.reviews'
+import { Route as LearningManagementSystemAdminEventRegistrationsRouteImport } from './routes/learning-management-system.admin.event-registrations'
 import { Route as LearningManagementSystemAdminEnrollmentRequestsRouteImport } from './routes/learning-management-system.admin.enrollment-requests'
 import { Route as LearningManagementSystemAdminCouponsRouteImport } from './routes/learning-management-system.admin.coupons'
 import { Route as LearningManagementSystemAdminAttendanceLinkRouteImport } from './routes/learning-management-system.admin.attendance-link'
@@ -95,6 +98,17 @@ const AttendanceManagementSystemRoute =
   AttendanceManagementSystemRouteImport.update({
     id: '/attendance-management-system',
     path: '/attendance-management-system',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AiTotVerifyRoute = AiTotVerifyRouteImport.update({
+  id: '/ai-tot-verify',
+  path: '/ai-tot-verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiTotGraduationRegisterationRoute =
+  AiTotGraduationRegisterationRouteImport.update({
+    id: '/ai-tot-graduation-registeration',
+    path: '/ai-tot-graduation-registeration',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AiTotGraduationRoute = AiTotGraduationRouteImport.update({
@@ -279,6 +293,12 @@ const LearningManagementSystemAdminReviewsRoute =
     path: '/reviews',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const LearningManagementSystemAdminEventRegistrationsRoute =
+  LearningManagementSystemAdminEventRegistrationsRouteImport.update({
+    id: '/event-registrations',
+    path: '/event-registrations',
+    getParentRoute: () => LearningManagementSystemAdminRoute,
+  } as any)
 const LearningManagementSystemAdminEnrollmentRequestsRoute =
   LearningManagementSystemAdminEnrollmentRequestsRouteImport.update({
     id: '/enrollment-requests',
@@ -348,6 +368,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/ai-tot-graduation': typeof AiTotGraduationRoute
+  '/ai-tot-graduation-registeration': typeof AiTotGraduationRegisterationRoute
+  '/ai-tot-verify': typeof AiTotVerifyRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
@@ -378,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
+  '/learning-management-system/admin/event-registrations': typeof LearningManagementSystemAdminEventRegistrationsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
@@ -400,6 +423,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/ai-tot-graduation': typeof AiTotGraduationRoute
+  '/ai-tot-graduation-registeration': typeof AiTotGraduationRegisterationRoute
+  '/ai-tot-verify': typeof AiTotVerifyRoute
   '/contact': typeof ContactRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/registration': typeof RegistrationRoute
@@ -425,6 +450,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
+  '/learning-management-system/admin/event-registrations': typeof LearningManagementSystemAdminEventRegistrationsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
@@ -448,6 +474,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/ai-tot-graduation': typeof AiTotGraduationRoute
+  '/ai-tot-graduation-registeration': typeof AiTotGraduationRegisterationRoute
+  '/ai-tot-verify': typeof AiTotVerifyRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
@@ -478,6 +506,7 @@ export interface FileRoutesById {
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
+  '/learning-management-system/admin/event-registrations': typeof LearningManagementSystemAdminEventRegistrationsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
@@ -502,6 +531,8 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/ai-tot-graduation'
+    | '/ai-tot-graduation-registeration'
+    | '/ai-tot-verify'
     | '/attendance-management-system'
     | '/contact'
     | '/learning-management-system'
@@ -532,6 +563,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
+    | '/learning-management-system/admin/event-registrations'
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/certificate/$id'
@@ -554,6 +586,8 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/ai-tot-graduation'
+    | '/ai-tot-graduation-registeration'
+    | '/ai-tot-verify'
     | '/contact'
     | '/one-million-initiative'
     | '/registration'
@@ -579,6 +613,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
+    | '/learning-management-system/admin/event-registrations'
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/certificate/$id'
@@ -601,6 +636,8 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/ai-tot-graduation'
+    | '/ai-tot-graduation-registeration'
+    | '/ai-tot-verify'
     | '/attendance-management-system'
     | '/contact'
     | '/learning-management-system'
@@ -631,6 +668,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
+    | '/learning-management-system/admin/event-registrations'
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/certificate/$id'
@@ -654,6 +692,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AiTotGraduationRoute: typeof AiTotGraduationRoute
+  AiTotGraduationRegisterationRoute: typeof AiTotGraduationRegisterationRoute
+  AiTotVerifyRoute: typeof AiTotVerifyRoute
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
@@ -722,6 +762,20 @@ declare module '@tanstack/react-router' {
       path: '/attendance-management-system'
       fullPath: '/attendance-management-system'
       preLoaderRoute: typeof AttendanceManagementSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-tot-verify': {
+      id: '/ai-tot-verify'
+      path: '/ai-tot-verify'
+      fullPath: '/ai-tot-verify'
+      preLoaderRoute: typeof AiTotVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-tot-graduation-registeration': {
+      id: '/ai-tot-graduation-registeration'
+      path: '/ai-tot-graduation-registeration'
+      fullPath: '/ai-tot-graduation-registeration'
+      preLoaderRoute: typeof AiTotGraduationRegisterationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ai-tot-graduation': {
@@ -948,6 +1002,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemAdminReviewsRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
     }
+    '/learning-management-system/admin/event-registrations': {
+      id: '/learning-management-system/admin/event-registrations'
+      path: '/event-registrations'
+      fullPath: '/learning-management-system/admin/event-registrations'
+      preLoaderRoute: typeof LearningManagementSystemAdminEventRegistrationsRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRoute
+    }
     '/learning-management-system/admin/enrollment-requests': {
       id: '/learning-management-system/admin/enrollment-requests'
       path: '/enrollment-requests'
@@ -1049,6 +1110,7 @@ interface LearningManagementSystemAdminRouteChildren {
   LearningManagementSystemAdminAttendanceLinkRoute: typeof LearningManagementSystemAdminAttendanceLinkRoute
   LearningManagementSystemAdminCouponsRoute: typeof LearningManagementSystemAdminCouponsRoute
   LearningManagementSystemAdminEnrollmentRequestsRoute: typeof LearningManagementSystemAdminEnrollmentRequestsRoute
+  LearningManagementSystemAdminEventRegistrationsRoute: typeof LearningManagementSystemAdminEventRegistrationsRoute
   LearningManagementSystemAdminReviewsRoute: typeof LearningManagementSystemAdminReviewsRoute
   LearningManagementSystemAdminUsersRoute: typeof LearningManagementSystemAdminUsersRoute
   LearningManagementSystemAdminIndexRoute: typeof LearningManagementSystemAdminIndexRoute
@@ -1064,6 +1126,8 @@ const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminR
       LearningManagementSystemAdminCouponsRoute,
     LearningManagementSystemAdminEnrollmentRequestsRoute:
       LearningManagementSystemAdminEnrollmentRequestsRoute,
+    LearningManagementSystemAdminEventRegistrationsRoute:
+      LearningManagementSystemAdminEventRegistrationsRoute,
     LearningManagementSystemAdminReviewsRoute:
       LearningManagementSystemAdminReviewsRoute,
     LearningManagementSystemAdminUsersRoute:
@@ -1175,6 +1239,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AiTotGraduationRoute: AiTotGraduationRoute,
+  AiTotGraduationRegisterationRoute: AiTotGraduationRegisterationRoute,
+  AiTotVerifyRoute: AiTotVerifyRoute,
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
@@ -1196,13 +1262,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
