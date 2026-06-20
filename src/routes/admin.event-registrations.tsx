@@ -47,7 +47,7 @@ function AdminEventRegistrations() {
       supabase.rpc("list_event_verifiers" as never),
     ]);
     setRows((regs as Reg[]) ?? []);
-    setVerifiers((vs as Verifier[]) ?? []);
+    setVerifiers(((vs as unknown) as Verifier[] | null) ?? []);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
