@@ -13,7 +13,7 @@ import { toUserMessage } from "@/lib/safe-error";
 import { approveEventRegistration, rejectEventRegistration } from "@/lib/event-registrations.functions";
 
 export const Route = createFileRoute("/admin/event-registrations")({
-  head: () => ({ meta: [{ title: "LMS · AI TOT Graduation Registrations" }] }),
+  head: () => ({ meta: [{ title: "Admin · AI TOT Graduation Registrations" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AdminEventRegistrations,
 });
 
