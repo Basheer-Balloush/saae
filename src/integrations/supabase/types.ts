@@ -1931,6 +1931,14 @@ export type Database = {
         Args: { _lms_course_id: string }
         Returns: string
       }
+      list_event_verifiers: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          username: string
+        }[]
+      }
       lms_approve_enrollment_request: {
         Args: { _admin_notes?: string; _request_id: string }
         Returns: undefined

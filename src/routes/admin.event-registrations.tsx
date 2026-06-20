@@ -44,10 +44,10 @@ function AdminEventRegistrations() {
     setLoading(true);
     const [{ data: regs }, { data: vs }] = await Promise.all([
       supabase.from("event_registrations" as never).select("*").order("created_at", { ascending: false }),
-      supabase.from("event_verifiers" as never).select("id,username,created_at").order("created_at", { ascending: false }),
+      supabase.rpc("list_event_verifiers" as never),
     ]);
     setRows((regs as Reg[]) ?? []);
-    setVerifiers((vs as Verifier[]) ?? []);
+    setVerifiers(((vs as unknown) as Verifier[] | null) ?? []);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
