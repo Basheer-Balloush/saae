@@ -126,12 +126,14 @@ function Page() {
       <section className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-primary/5 pointer-events-none" />
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-24 text-center">
-          <div className="flex flex-col items-center gap-3 mb-5">
-            <img
-              src={ministryLogo.url}
-              alt={ar ? "شعار وزارة الاتصال وتقانة المعلومات" : "Ministry of Communications and Information Technology logo"}
-              className="h-16 sm:h-20 w-auto object-contain"
-            />
+          <div className="flex flex-col items-center gap-4 mb-6">
+            <div className="rounded-2xl border border-border/50 bg-[#0a0a0a] shadow-xl overflow-hidden px-6 sm:px-10 py-5 sm:py-7">
+              <img
+                src={ministryLogo.url}
+                alt={ar ? "شعار وزارة الاتصالات وتقانة المعلومات" : "Ministry of Communications and Information Technology logo"}
+                className="h-20 sm:h-28 w-auto object-contain"
+              />
+            </div>
             <p className="text-sm sm:text-base font-bold text-muted-foreground">
               {t.sponsor}
             </p>
