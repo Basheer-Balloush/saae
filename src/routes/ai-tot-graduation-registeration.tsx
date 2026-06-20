@@ -125,8 +125,17 @@ function Page() {
       <section className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-primary/5 pointer-events-none" />
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-24 text-center">
+          <div className="flex flex-col items-center gap-3 mb-5">
+            <img
+              src={ministryLogo}
+              alt={ar ? "شعار وزارة الاتصال وتقانة المعلومات" : "Ministry of Communications and Information Technology logo"}
+              className="h-16 sm:h-20 w-auto object-contain"
+            />
+            <p className="text-sm sm:text-base font-bold text-muted-foreground">
+              {t.sponsor}
+            </p>
+          </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary">
-            <Sparkles className="h-3.5 w-3.5" />
             {t.badge}
           </div>
           <h1 className="mt-5 text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground">
