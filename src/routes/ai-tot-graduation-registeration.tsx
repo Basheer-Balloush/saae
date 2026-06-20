@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Calendar, MapPin, ArrowLeft, Sparkles, CheckCircle2, Loader2 } from "lucide-react";
+import { Calendar, MapPin, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
+import ministryLogo from "@/assets/ministry-communications-logo.png";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
