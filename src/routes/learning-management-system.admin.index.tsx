@@ -235,6 +235,12 @@ function AdminHome() {
       icon: CalendarDays,
       desc: ar ? "ربط الدورات بنظام الحضور" : "Link courses to attendance",
     },
+    {
+      to: "/learning-management-system/admin/event-registrations",
+      label: ar ? "تسجيلات تخريج TOT" : "AI TOT Graduation",
+      icon: Sparkles,
+      desc: ar ? "طلبات الندوة ورموز الدخول" : "Symposium requests & PINs",
+    },
   ];
 
   return (
