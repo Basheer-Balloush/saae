@@ -40,6 +40,7 @@ import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system.login'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminEventRegistrationsRouteImport } from './routes/admin.event-registrations'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system.student.index'
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
 import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system.admin.index'
@@ -233,6 +234,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEventRegistrationsRoute = AdminEventRegistrationsRouteImport.update({
+  id: '/admin/event-registrations',
+  path: '/admin/event-registrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearningManagementSystemStudentIndexRoute =
   LearningManagementSystemStudentIndexRouteImport.update({
     id: '/',
@@ -377,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/event-registrations': typeof AdminEventRegistrationsRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
@@ -430,6 +437,7 @@ export interface FileRoutesByTo {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/event-registrations': typeof AdminEventRegistrationsRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
@@ -483,6 +491,7 @@ export interface FileRoutesById {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/event-registrations': typeof AdminEventRegistrationsRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
@@ -540,6 +549,7 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
+    | '/admin/event-registrations'
     | '/admin/login'
     | '/api/chat'
     | '/attendance-management-system/login'
@@ -593,6 +603,7 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
+    | '/admin/event-registrations'
     | '/admin/login'
     | '/api/chat'
     | '/attendance-management-system/login'
@@ -645,6 +656,7 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
+    | '/admin/event-registrations'
     | '/admin/login'
     | '/api/chat'
     | '/attendance-management-system/login'
@@ -701,6 +713,7 @@ export interface RootRouteChildren {
   RegistrationRoute: typeof RegistrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
+  AdminEventRegistrationsRoute: typeof AdminEventRegistrationsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
@@ -930,6 +943,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/event-registrations': {
+      id: '/admin/event-registrations'
+      path: '/admin/event-registrations'
+      fullPath: '/admin/event-registrations'
+      preLoaderRoute: typeof AdminEventRegistrationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learning-management-system/student/': {
@@ -1248,6 +1268,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegistrationRoute: RegistrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,
+  AdminEventRegistrationsRoute: AdminEventRegistrationsRoute,
   AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,

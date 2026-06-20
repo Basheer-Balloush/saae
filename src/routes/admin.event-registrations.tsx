@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { toUserMessage } from "@/lib/safe-error";
 import { approveEventRegistration, rejectEventRegistration } from "@/lib/event-registrations.functions";
 
-export const Route = createFileRoute("/learning-management-system/admin/event-registrations")({
+export const Route = createFileRoute("/admin/event-registrations")({
   head: () => ({ meta: [{ title: "LMS · AI TOT Graduation Registrations" }] }),
   component: AdminEventRegistrations,
 });
