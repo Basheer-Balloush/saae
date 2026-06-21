@@ -283,6 +283,10 @@ function AiTotGraduationPage() {
           <InvestGrid />
         </Section>
 
+        <Section eyebrow={c.packages.eyebrow} title={c.packages.title} icon={Handshake}>
+          <PackagesGrid />
+        </Section>
+
         <ClosingCta />
       </main>
       <Footer />
