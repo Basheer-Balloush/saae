@@ -77,39 +77,41 @@ const T = {
 } as const;
 
 const AGENDA_AR: { time: string; item: string; speaker?: string }[] = [
+  { time: "10:00 - 09:30", item: "التسجيل" },
   { time: "10:05 - 10:00", item: "كلمة الافتتاح", speaker: "المستشار وصفي الحلبي — المدير التنفيذي" },
   { time: "10:10 - 10:05", item: "تلاوة آيات من الذكر الحكيم" },
-  { time: "10:20 - 10:10", item: "كلمة رئيس مجلس الإدارة", speaker: "الأستاذ أحمد غسان المنجد" },
-  { time: "10:30 - 10:20", item: "كلمة راعي الندوة", speaker: "معالي وزير الاتصالات" },
-  { time: "10:40 - 10:30", item: "كلمة مدير التدريب", speaker: "المهندس وليد حلاوة" },
-  { time: "10:55 - 10:40", item: "كلمات خريجي دورة TOT" },
-  { time: "11:05 - 10:55", item: "قصة خريج من واقع الدورة" },
-  { time: "11:20 - 11:05", item: "إنجازات الجمعية (الماضي والحاضر والمستقبل)", speaker: "المدير التنفيذي للجمعية" },
-  { time: "11:35 - 11:20", item: "إعلان نظام المعادلة والمعايير الخاصة بالمدربين", speaker: "مدير التدريب في الجمعية" },
-  { time: "11:50 - 11:35", item: "إطلاق مبادرة مليون مستخدم سوري للذكاء الاصطناعي", speaker: "الأستاذ رامي المجاهد — مدير العلاقات العامة" },
-  { time: "12:05 - 11:50", item: "استراحة" },
-  { time: "13:05 - 12:05", item: "(جلسة حوارية) مستقبل التدريب في ظل علوم الذكاء الاصطناعي" },
-  { time: "13:15 - 13:05", item: "عرض كلمات ممثلي الجمعية في العالم" },
-  { time: "13:35 - 13:15", item: "تكريم الخريجين" },
-  { time: "14:05 - 13:35", item: "الختام" },
+  { time: "10:18 - 10:10", item: "كلمة رئيس مجلس الإدارة", speaker: "الأستاذ أحمد غسان المنجد" },
+  { time: "10:26 - 10:18", item: "كلمة راعي الندوة", speaker: "معالي وزير الاتصالات" },
+  { time: "10:34 - 10:26", item: "كلمة مدير التدريب", speaker: "المهندس وليد حلاوة — مدير التدريب في الجمعية" },
+  { time: "10:46 - 10:34", item: "كلمات خريجي دورة TOT" },
+  { time: "10:53 - 10:46", item: "قصة خريج من واقع الدورة" },
+  { time: "11:03 - 10:53", item: "إنجازات الجمعية (الماضي والحاضر والمستقبل)", speaker: "المدير التنفيذي للجمعية" },
+  { time: "11:13 - 11:03", item: "إعلان نظام المعادلة والمعايير الخاصة بالمدربين", speaker: "مدير التدريب في الجمعية" },
+  { time: "11:23 - 11:13", item: "إطلاق مبادرة مليون مستخدم سوري للذكاء الاصطناعي", speaker: "الأستاذ رامي المجاهد — مدير العلاقات العامة" },
+  { time: "11:33 - 11:23", item: "استراحة" },
+  { time: "12:18 - 11:33", item: "(جلسة حوارية) مستقبل التدريب في ظل علوم الذكاء الاصطناعي" },
+  { time: "12:25 - 12:18", item: "عرض كلمات ممثلي الجمعية في العالم" },
+  { time: "12:40 - 12:25", item: "تكريم الخريجين" },
+  { time: "13:00 - 12:40", item: "الختام" },
 ];
 
 const AGENDA_EN: { time: string; item: string; speaker?: string }[] = [
+  { time: "09:30 - 10:00", item: "Registration" },
   { time: "10:00 - 10:05", item: "Opening remarks", speaker: "Wasfi Al-Halabi — Executive Advisor" },
   { time: "10:05 - 10:10", item: "Quran recitation" },
-  { time: "10:10 - 10:20", item: "Chairman's address", speaker: "Mr. Ahmad Ghassan Al-Munajjid" },
-  { time: "10:20 - 10:30", item: "Sponsor's address", speaker: "H.E. Minister of Communications" },
-  { time: "10:30 - 10:40", item: "Training director's address", speaker: "Eng. Walid Halawa" },
-  { time: "10:40 - 10:55", item: "TOT graduates' addresses" },
-  { time: "10:55 - 11:05", item: "A graduate's story from the program" },
-  { time: "11:05 - 11:20", item: "Association achievements (past, present, future)", speaker: "Executive Director" },
-  { time: "11:20 - 11:35", item: "Announcement of the equivalency and trainer-standards system", speaker: "Training Director" },
-  { time: "11:35 - 11:50", item: "Launch of the One Million Syrian AI Users initiative", speaker: "Mr. Rami Al-Mujahed — PR Director" },
-  { time: "11:50 - 12:05", item: "Break" },
-  { time: "12:05 - 13:05", item: "Panel: The future of training in the age of AI" },
-  { time: "13:05 - 13:15", item: "Messages from the association's global representatives" },
-  { time: "13:15 - 13:35", item: "Honoring the graduates" },
-  { time: "13:35 - 14:05", item: "Closing" },
+  { time: "10:10 - 10:18", item: "Chairman's address", speaker: "Mr. Ahmad Ghassan Al-Munajjid" },
+  { time: "10:18 - 10:26", item: "Sponsor's address", speaker: "H.E. Minister of Communications" },
+  { time: "10:26 - 10:34", item: "Training director's address", speaker: "Eng. Walid Halawa" },
+  { time: "10:34 - 10:46", item: "TOT graduates' addresses" },
+  { time: "10:46 - 10:53", item: "A graduate's story from the program" },
+  { time: "10:53 - 11:03", item: "Association achievements (past, present, future)", speaker: "Executive Director" },
+  { time: "11:03 - 11:13", item: "Announcement of the equivalency and trainer-standards system", speaker: "Training Director" },
+  { time: "11:13 - 11:23", item: "Launch of the One Million Syrian AI Users initiative", speaker: "Mr. Rami Al-Mujahed — PR Director" },
+  { time: "11:23 - 11:33", item: "Break" },
+  { time: "11:33 - 12:18", item: "Panel: The future of training in the age of AI" },
+  { time: "12:18 - 12:25", item: "Messages from the association's global representatives" },
+  { time: "12:25 - 12:40", item: "Honoring the graduates" },
+  { time: "12:40 - 13:00", item: "Closing" },
 ];
 
 function Page() {
@@ -151,7 +153,7 @@ function Page() {
               <Calendar className="h-4 w-4 text-primary" /> {t.date}
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
-              <Clock className="h-4 w-4 text-primary" /> {ar ? "10:00 ص — 2:05 م" : "10:00 AM — 2:05 PM"}
+              <Clock className="h-4 w-4 text-primary" /> {ar ? "9:30 ص — 1:00 م" : "9:30 AM — 1:00 PM"}
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
               <MapPin className="h-4 w-4 text-primary" /> {t.venue}
