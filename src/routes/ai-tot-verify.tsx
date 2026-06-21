@@ -103,7 +103,7 @@ function LoginForm({ ar, onLogin }: { ar: boolean; onLogin: (s: Session) => void
   );
 }
 
-function VerifyPanel({ ar, creds, onLogout }: { ar: boolean; creds: Creds; onLogout: () => void }) {
+function VerifyPanel({ ar, session, onLogout }: { ar: boolean; session: Session; onLogout: () => void }) {
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Lookup | null | "notfound">(null);
