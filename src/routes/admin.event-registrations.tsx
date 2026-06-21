@@ -59,7 +59,11 @@ function AdminEventRegistrations() {
     setVerifiers(((vs as unknown) as Verifier[] | null) ?? []);
     setLoading(false);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
+
+  if (authLoading || !user || !isAdmin) {
+    return <div className="min-h-screen grid place-items-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  }
 
   const approve = async (r: Reg) => {
     if (!confirm(ar ? `الموافقة على تسجيل ${r.full_name}؟` : `Approve ${r.full_name}?`)) return;
