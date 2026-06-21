@@ -153,7 +153,7 @@ function Page() {
               <Calendar className="h-4 w-4 text-primary" /> {t.date}
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
-              <Clock className="h-4 w-4 text-primary" /> {ar ? "10:00 ص — 2:05 م" : "10:00 AM — 2:05 PM"}
+              <Clock className="h-4 w-4 text-primary" /> {ar ? "9:30 ص — 1:00 م" : "9:30 AM — 1:00 PM"}
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
               <MapPin className="h-4 w-4 text-primary" /> {t.venue}
