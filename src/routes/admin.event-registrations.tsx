@@ -33,6 +33,14 @@ type Verifier = { id: string; username: string; created_at: string };
 
 function AdminEventRegistrations() {
   const { lang } = useLang();
+  const navigate = useNavigate();
+  const { user, isAdmin, loading: authLoading } = useAuth();
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user) navigate({ to: "/admin/login" });
+      else if (!isAdmin) navigate({ to: "/" });
+    }
+  }, [authLoading, user, isAdmin, navigate]);
   const ar = lang === "ar";
   const [tab, setTab] = useState<"registrations" | "verifiers">("registrations");
   const [rows, setRows] = useState<Reg[]>([]);
