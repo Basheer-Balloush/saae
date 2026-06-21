@@ -117,8 +117,8 @@ function VerifyPanel({ ar, session, onLogout }: { ar: boolean; session: Session;
     setBusy(true);
     setResult(null);
     try {
-      const { data, error } = await supabase.rpc("lookup_event_pin" as never, {
-        _username: creds.username, _password: creds.password, _pin: pin,
+      const { data, error } = await supabase.rpc("lookup_event_pin_by_session" as never, {
+        _verifier_id: session.id, _pin: pin,
       } as never);
       if (error) {
         if (String(error.message).includes("Unauthorized")) {
