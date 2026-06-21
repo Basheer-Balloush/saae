@@ -27,12 +27,12 @@ type Lookup = { full_name: string; phone: string; email: string; specialization:
 function VerifyPage() {
   const { lang } = useLang();
   const ar = lang === "ar";
-  const [creds, setCreds] = useState<Creds | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     try {
-      const v = localStorage.getItem(STORAGE_KEY);
-      if (v) setCreds(JSON.parse(v));
+      const v = sessionStorage.getItem(STORAGE_KEY);
+      if (v) setSession(JSON.parse(v));
     } catch { /* ignore */ }
   }, []);
 
@@ -51,20 +51,20 @@ function VerifyPage() {
           </p>
         </div>
 
-        {!creds ? (
-          <LoginForm ar={ar} onLogin={(c) => {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(c));
-            setCreds(c);
+        {!session ? (
+          <LoginForm ar={ar} onLogin={(s) => {
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+            setSession(s);
           }} />
         ) : (
-          <VerifyPanel ar={ar} creds={creds} onLogout={() => { localStorage.removeItem(STORAGE_KEY); setCreds(null); }} />
+          <VerifyPanel ar={ar} session={session} onLogout={() => { sessionStorage.removeItem(STORAGE_KEY); setSession(null); }} />
         )}
       </div>
     </main>
   );
 }
 
-function LoginForm({ ar, onLogin }: { ar: boolean; onLogin: (c: Creds) => void }) {
+function LoginForm({ ar, onLogin }: { ar: boolean; onLogin: (s: Session) => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -79,7 +79,7 @@ function LoginForm({ ar, onLogin }: { ar: boolean; onLogin: (c: Creds) => void }
         toast.error(ar ? "بيانات الدخول غير صحيحة" : "Invalid credentials");
         return;
       }
-      onLogin({ username: username.trim(), password });
+      onLogin({ id: data as unknown as string, username: username.trim() });
     } catch (e) {
       toast.error(toUserMessage(e));
     } finally { setBusy(false); }
