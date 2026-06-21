@@ -19,20 +19,20 @@ export const Route = createFileRoute("/ai-tot-verify")({
   component: VerifyPage,
 });
 
-const STORAGE_KEY = "aitot_verifier_creds";
+const STORAGE_KEY = "aitot_verifier_session";
 
-type Creds = { username: string; password: string };
+type Session = { id: string; username: string };
 type Lookup = { full_name: string; phone: string; email: string; specialization: string };
 
 function VerifyPage() {
   const { lang } = useLang();
   const ar = lang === "ar";
-  const [creds, setCreds] = useState<Creds | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     try {
-      const v = localStorage.getItem(STORAGE_KEY);
-      if (v) setCreds(JSON.parse(v));
+      const v = sessionStorage.getItem(STORAGE_KEY);
+      if (v) setSession(JSON.parse(v));
     } catch { /* ignore */ }
   }, []);
 
@@ -51,20 +51,20 @@ function VerifyPage() {
           </p>
         </div>
 
-        {!creds ? (
-          <LoginForm ar={ar} onLogin={(c) => {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(c));
-            setCreds(c);
+        {!session ? (
+          <LoginForm ar={ar} onLogin={(s) => {
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+            setSession(s);
           }} />
         ) : (
-          <VerifyPanel ar={ar} creds={creds} onLogout={() => { localStorage.removeItem(STORAGE_KEY); setCreds(null); }} />
+          <VerifyPanel ar={ar} session={session} onLogout={() => { sessionStorage.removeItem(STORAGE_KEY); setSession(null); }} />
         )}
       </div>
     </main>
   );
 }
 
-function LoginForm({ ar, onLogin }: { ar: boolean; onLogin: (c: Creds) => void }) {
+function LoginForm({ ar, onLogin }: { ar: boolean; onLogin: (s: Session) => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -79,7 +79,7 @@ function LoginForm({ ar, onLogin }: { ar: boolean; onLogin: (c: Creds) => void }
         toast.error(ar ? "بيانات الدخول غير صحيحة" : "Invalid credentials");
         return;
       }
-      onLogin({ username: username.trim(), password });
+      onLogin({ id: data as unknown as string, username: username.trim() });
     } catch (e) {
       toast.error(toUserMessage(e));
     } finally { setBusy(false); }
@@ -103,7 +103,7 @@ function LoginForm({ ar, onLogin }: { ar: boolean; onLogin: (c: Creds) => void }
   );
 }
 
-function VerifyPanel({ ar, creds, onLogout }: { ar: boolean; creds: Creds; onLogout: () => void }) {
+function VerifyPanel({ ar, session, onLogout }: { ar: boolean; session: Session; onLogout: () => void }) {
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Lookup | null | "notfound">(null);
@@ -117,8 +117,8 @@ function VerifyPanel({ ar, creds, onLogout }: { ar: boolean; creds: Creds; onLog
     setBusy(true);
     setResult(null);
     try {
-      const { data, error } = await supabase.rpc("lookup_event_pin" as never, {
-        _username: creds.username, _password: creds.password, _pin: pin,
+      const { data, error } = await supabase.rpc("lookup_event_pin_by_session" as never, {
+        _verifier_id: session.id, _pin: pin,
       } as never);
       if (error) {
         if (String(error.message).includes("Unauthorized")) {
@@ -139,7 +139,7 @@ function VerifyPanel({ ar, creds, onLogout }: { ar: boolean; creds: Creds; onLog
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-2">
-        <span className="text-xs text-muted-foreground">{ar ? "متصل بـ" : "Signed in as"} <strong className="text-foreground">{creds.username}</strong></span>
+        <span className="text-xs text-muted-foreground">{ar ? "متصل بـ" : "Signed in as"} <strong className="text-foreground">{session.username}</strong></span>
         <Button size="sm" variant="ghost" onClick={onLogout}><LogOut className="h-3.5 w-3.5" />{ar ? "خروج" : "Sign out"}</Button>
       </div>
 
