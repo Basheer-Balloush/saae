@@ -19,9 +19,9 @@ export const Route = createFileRoute("/ai-tot-verify")({
   component: VerifyPage,
 });
 
-const STORAGE_KEY = "aitot_verifier_creds";
+const STORAGE_KEY = "aitot_verifier_session";
 
-type Creds = { username: string; password: string };
+type Session = { id: string; username: string };
 type Lookup = { full_name: string; phone: string; email: string; specialization: string };
 
 function VerifyPage() {
