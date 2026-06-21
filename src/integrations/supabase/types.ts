@@ -2006,6 +2006,15 @@ export type Database = {
           specialization: string
         }[]
       }
+      lookup_event_pin_by_session: {
+        Args: { _pin: string; _verifier_id: string }
+        Returns: {
+          email: string
+          full_name: string
+          phone: string
+          specialization: string
+        }[]
+      }
       match_chat_chunks: {
         Args: { match_count?: number; query_embedding: string }
         Returns: {
