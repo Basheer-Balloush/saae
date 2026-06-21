@@ -163,7 +163,7 @@ const c = {
         key: "diamond",
         name: "الباقة الماسية",
         price: "$1500",
-        limit: "راعٍ واحد فقط",
+        limit: "راعيين اثنين",
         icon: Crown,
         bar: "bg-primary",
         bg: "bg-primary/5",
