@@ -139,7 +139,7 @@ function VerifyPanel({ ar, session, onLogout }: { ar: boolean; session: Session;
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-2">
-        <span className="text-xs text-muted-foreground">{ar ? "متصل بـ" : "Signed in as"} <strong className="text-foreground">{creds.username}</strong></span>
+        <span className="text-xs text-muted-foreground">{ar ? "متصل بـ" : "Signed in as"} <strong className="text-foreground">{session.username}</strong></span>
         <Button size="sm" variant="ghost" onClick={onLogout}><LogOut className="h-3.5 w-3.5" />{ar ? "خروج" : "Sign out"}</Button>
       </div>
 
