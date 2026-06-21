@@ -18,6 +18,8 @@ import {
   HeartHandshake,
   CheckCircle2,
   Handshake,
+  Crown,
+  Medal,
 } from "lucide-react";
 
 export const Route = createFileRoute("/ai-tot-graduation")({
