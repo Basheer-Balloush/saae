@@ -501,6 +501,52 @@ function InvestGrid() {
   );
 }
 
+/* ---------- SPONSORSHIP PACKAGES ---------- */
+function PackagesGrid() {
+  return (
+    <div className="grid gap-6 lg:grid-cols-3">
+      {c.packages.items.map((pkg) => {
+        const Icon = pkg.icon;
+        return (
+          <article
+            key={pkg.name}
+            className={`relative flex flex-col overflow-hidden rounded-3xl border ${pkg.border} ${pkg.bg} p-7 transition-all hover:-translate-y-1 hover:shadow-soft`}
+          >
+            <div className={`absolute start-0 top-0 h-1.5 w-full ${pkg.bar}`} />
+            <div className="flex items-center gap-3">
+              <div
+                className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${pkg.iconBg} ${pkg.iconColor}`}
+              >
+                <Icon className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold">{pkg.name}</h3>
+                <p className="text-sm text-muted-foreground">{pkg.limit}</p>
+              </div>
+            </div>
+            <p className={`mt-5 text-3xl font-extrabold ${pkg.priceColor}`}>
+              {pkg.price}
+            </p>
+            <ul className="mt-6 flex flex-1 flex-col gap-3">
+              {pkg.features.map((feature, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-2 text-sm leading-relaxed text-muted-foreground"
+                >
+                  <CheckCircle2
+                    className={`h-4 w-4 flex-none ${pkg.iconColor} mt-0.5`}
+                  />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ---------- CLOSING CTA ---------- */
 function ClosingCta() {
   return (
