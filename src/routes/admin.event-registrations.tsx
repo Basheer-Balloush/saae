@@ -216,10 +216,21 @@ function VerifiersPanel({ verifiers, ar, reload }: { verifiers: Verifier[]; ar: 
     setBusy(true);
     const { error } = await supabase.rpc("create_event_verifier" as never, { _username: username.trim(), _password: password } as never);
     setBusy(false);
-    if (error) { toast.error(toUserMessage(error)); return; }
+    if (error) {
+      const msg = error.message || "";
+      if (msg.toLowerCase().includes("forbidden")) {
+        toast.error(ar ? "ليس لديك صلاحية. تأكد من تسجيل الدخول كأدمن." : "Forbidden. Make sure you are signed in as an admin.");
+      } else if (msg.toLowerCase().includes("duplicate") || msg.toLowerCase().includes("unique")) {
+        toast.error(ar ? "اسم المستخدم موجود مسبقاً" : "Username already exists");
+      } else {
+        toast.error(msg || toUserMessage(error));
+      }
+      return;
+    }
     toast.success(ar ? "تم الإنشاء" : "Created");
     setUsername(""); setPassword(""); reload();
   };
+
 
   const resetPassword = async (id: string) => {
     const pw = prompt(ar ? "كلمة المرور الجديدة:" : "New password:");
