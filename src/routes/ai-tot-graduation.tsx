@@ -211,7 +211,7 @@ const c = {
         key: "silver",
         name: "الباقة الفضية",
         price: "$500",
-        limit: "راعٍ واحد فقط",
+        limit: "راعيين اثنين",
         icon: Medal,
         bar: "bg-muted-foreground/60",
         bg: "bg-muted/40",
