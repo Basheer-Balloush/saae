@@ -944,13 +944,24 @@ function CourseBuilder() {
               {lang === "ar" ? "أدخل عنوان القسم الجديد." : "Enter a title for the new section."}
             </DialogDescription>
           </DialogHeader>
-          <Input
-            autoFocus
-            value={sectionTitleDraft}
-            onChange={(e) => setSectionTitleDraft(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAddSection(); } }}
-            placeholder={lang === "ar" ? "مثال: مقدمة" : "e.g. Introduction"}
-          />
+          <div className="space-y-2">
+            <Label>{lang === "ar" ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
+            <Input
+              autoFocus
+              dir="rtl"
+              value={sectionTitleArDraft}
+              onChange={(e) => setSectionTitleArDraft(e.target.value)}
+              placeholder="مثال: مقدمة"
+            />
+            <Label>{lang === "ar" ? "العنوان (إنكليزي)" : "Title (English)"}</Label>
+            <Input
+              dir="ltr"
+              value={sectionTitleEnDraft}
+              onChange={(e) => setSectionTitleEnDraft(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAddSection(); } }}
+              placeholder="e.g. Introduction"
+            />
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSectionDialogOpen(false)}>
               {lang === "ar" ? "إلغاء" : "Cancel"}
@@ -969,24 +980,36 @@ function CourseBuilder() {
           <DialogHeader>
             <DialogTitle>{lang === "ar" ? "إضافة درس" : "Add lesson"}</DialogTitle>
             <DialogDescription>
-              {lang === "ar" ? "أدخل عنوان الدرس الجديد." : "Enter a title for the new lesson."}
+              {lang === "ar" ? "أدخل عنوان الدرس بالعربية والإنكليزية." : "Enter the lesson title in Arabic and English."}
             </DialogDescription>
           </DialogHeader>
-          <Input
-            autoFocus
-            value={lessonDialog.title}
-            onChange={(e) => setLessonDialog((s) => ({ ...s, title: e.target.value }))}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAddLesson(); } }}
-            placeholder={lang === "ar" ? "مثال: الدرس الأول" : "e.g. Lesson 1"}
-          />
+          <div className="space-y-2">
+            <Label>{lang === "ar" ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
+            <Input
+              autoFocus
+              dir="rtl"
+              value={lessonDialog.title_ar}
+              onChange={(e) => setLessonDialog((s) => ({ ...s, title_ar: e.target.value }))}
+              placeholder="مثال: الدرس الأول"
+            />
+            <Label>{lang === "ar" ? "العنوان (إنكليزي)" : "Title (English)"}</Label>
+            <Input
+              dir="ltr"
+              value={lessonDialog.title_en}
+              onChange={(e) => setLessonDialog((s) => ({ ...s, title_en: e.target.value }))}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAddLesson(); } }}
+              placeholder="e.g. Lesson 1"
+            />
+          </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLessonDialog({ open: false, sectionId: null, title: "" })}>
+            <Button variant="outline" onClick={() => setLessonDialog({ open: false, sectionId: null, title_ar: "", title_en: "" })}>
               {lang === "ar" ? "إلغاء" : "Cancel"}
             </Button>
             <Button onClick={confirmAddLesson}>{lang === "ar" ? "إضافة" : "Add"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
 
       {/* Delete confirm */}
       <AlertDialog open={!!confirmDelete} onOpenChange={(open) => { if (!open) setConfirmDelete(null); }}>
