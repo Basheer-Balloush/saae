@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { toUserMessage } from "@/lib/safe-error";
@@ -33,6 +33,27 @@ export function AdminInstructorEditDialog({
   const [linkedin, setLinkedin] = useState("");
   const [github, setGithub] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(ar ? "حجم الصورة أكبر من 5 ميجابايت" : "Image larger than 5MB");
+      return;
+    }
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${userId}/avatar-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("lms-media").upload(path, file, { upsert: true, contentType: file.type });
+    if (error) { setUploading(false); toast.error(toUserMessage(error)); return; }
+    const { data: pub } = supabase.storage.from("lms-media").getPublicUrl(path);
+    setAvatarUrl(pub.publicUrl);
+    setUploading(false);
+    toast.success(ar ? "تم رفع الصورة" : "Image uploaded");
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -138,7 +159,26 @@ export function AdminInstructorEditDialog({
               </div>
             </div>
             <div>
-              <Label>{ar ? "رابط الصورة" : "Avatar URL"}</Label>
+              <Label>{ar ? "الصورة الشخصية" : "Avatar"}</Label>
+              <div className="mt-2 flex items-center gap-3">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="avatar" className="h-16 w-16 rounded-full object-cover border border-border" />
+                ) : (
+                  <div className="h-16 w-16 rounded-full bg-muted border border-border" />
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={onPickFile}
+                />
+                <Button type="button" variant="outline" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin mx-2" /> : <Upload className="h-4 w-4 mx-2" />}
+                  {ar ? "رفع صورة" : "Upload image"}
+                </Button>
+              </div>
+              <Label className="mt-3 block text-xs text-muted-foreground">{ar ? "أو رابط مباشر" : "Or direct URL"}</Label>
               <Input dir="ltr" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} />
             </div>
             <div className="flex justify-end gap-2 pt-2">
