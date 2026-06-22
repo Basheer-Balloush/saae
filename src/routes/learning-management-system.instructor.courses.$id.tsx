@@ -89,12 +89,12 @@ function CourseBuilder() {
     setCategories((cats as Category[]) ?? []);
     setSelectedCategoryIds(((links as { category_id: string }[]) ?? []).map((l) => l.category_id));
     if (c) {
-      const { data: secs } = await supabase.from("lms_sections").select("id,title,display_order").eq("course_id", id).order("display_order");
+      const { data: secs } = await supabase.from("lms_sections").select("id,title,title_ar,title_en,display_order").eq("course_id", id).order("display_order");
       const sList = (secs as Section[]) ?? [];
       setSections(sList);
       if (sList.length) {
         const { data: lss } = await supabase.from("lms_lessons")
-          .select("id,section_id,title,video_url,video_provider,video_uid,video_ready,content_md,is_preview,duration_seconds,display_order,attachments")
+          .select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,content_md,content_md_ar,content_md_en,is_preview,duration_seconds,display_order,attachments")
           .in("section_id", sList.map((s) => s.id)).order("display_order");
         setLessons((lss as Lesson[]) ?? []);
       }
