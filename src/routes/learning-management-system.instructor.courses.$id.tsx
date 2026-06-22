@@ -64,8 +64,9 @@ function CourseBuilder() {
   const [videoProgress, setVideoProgress] = useState<Record<string, { pct: number; speedMbps: number; etaSec: number }>>({});
   // In-app dialog state replacing native prompt()/confirm()
   const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
-  const [sectionTitleDraft, setSectionTitleDraft] = useState("");
-  const [lessonDialog, setLessonDialog] = useState<{ open: boolean; sectionId: string | null; title: string }>({ open: false, sectionId: null, title: "" });
+  const [sectionTitleArDraft, setSectionTitleArDraft] = useState("");
+  const [sectionTitleEnDraft, setSectionTitleEnDraft] = useState("");
+  const [lessonDialog, setLessonDialog] = useState<{ open: boolean; sectionId: string | null; title_ar: string; title_en: string }>({ open: false, sectionId: null, title_ar: "", title_en: "" });
   const [confirmDelete, setConfirmDelete] = useState<
     | { type: "section"; id: string }
     | { type: "lesson"; id: string }
