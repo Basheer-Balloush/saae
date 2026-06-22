@@ -42,9 +42,9 @@ type Course = {
   location_ar: string | null; location_en: string | null;
   duration_hours: number | null;
 };
-type Section = { id: string; title: string; display_order: number };
+type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
 type LessonAttachment = { name: string; url: string };
-type Lesson = { id: string; section_id: string; title: string; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; content_md: string | null; is_preview: boolean; duration_seconds: number; display_order: number; attachments: LessonAttachment[] | null };
+type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; is_preview: boolean; duration_seconds: number; display_order: number; attachments: LessonAttachment[] | null };
 type Category = { id: string; name_ar: string; name_en: string | null };
 
 function CourseBuilder() {
@@ -64,8 +64,9 @@ function CourseBuilder() {
   const [videoProgress, setVideoProgress] = useState<Record<string, { pct: number; speedMbps: number; etaSec: number }>>({});
   // In-app dialog state replacing native prompt()/confirm()
   const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
-  const [sectionTitleDraft, setSectionTitleDraft] = useState("");
-  const [lessonDialog, setLessonDialog] = useState<{ open: boolean; sectionId: string | null; title: string }>({ open: false, sectionId: null, title: "" });
+  const [sectionTitleArDraft, setSectionTitleArDraft] = useState("");
+  const [sectionTitleEnDraft, setSectionTitleEnDraft] = useState("");
+  const [lessonDialog, setLessonDialog] = useState<{ open: boolean; sectionId: string | null; title_ar: string; title_en: string }>({ open: false, sectionId: null, title_ar: "", title_en: "" });
   const [confirmDelete, setConfirmDelete] = useState<
     | { type: "section"; id: string }
     | { type: "lesson"; id: string }
@@ -88,12 +89,12 @@ function CourseBuilder() {
     setCategories((cats as Category[]) ?? []);
     setSelectedCategoryIds(((links as { category_id: string }[]) ?? []).map((l) => l.category_id));
     if (c) {
-      const { data: secs } = await supabase.from("lms_sections").select("id,title,display_order").eq("course_id", id).order("display_order");
+      const { data: secs } = await supabase.from("lms_sections").select("id,title,title_ar,title_en,display_order").eq("course_id", id).order("display_order");
       const sList = (secs as Section[]) ?? [];
       setSections(sList);
       if (sList.length) {
         const { data: lss } = await supabase.from("lms_lessons")
-          .select("id,section_id,title,video_url,video_provider,video_uid,video_ready,content_md,is_preview,duration_seconds,display_order,attachments")
+          .select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,content_md,content_md_ar,content_md_en,is_preview,duration_seconds,display_order,attachments")
           .in("section_id", sList.map((s) => s.id)).order("display_order");
         setLessons((lss as Lesson[]) ?? []);
       }
@@ -201,22 +202,30 @@ function CourseBuilder() {
   };
 
   const openAddSection = () => {
-    setSectionTitleDraft("");
+    setSectionTitleArDraft("");
+    setSectionTitleEnDraft("");
     setSectionDialogOpen(true);
   };
 
   const confirmAddSection = async () => {
-    const title = sectionTitleDraft.trim();
-    if (!title) {
+    const title_ar = sectionTitleArDraft.trim();
+    const title_en = sectionTitleEnDraft.trim();
+    const fallback = title_ar || title_en;
+    if (!fallback) {
       toast.error(lang === "ar" ? "أدخل عنوان القسم" : "Enter a section title");
       return;
     }
     const { data, error } = await supabase.from("lms_sections")
-      .insert({ course_id: course.id, title, display_order: sections.length })
+      .insert({ course_id: course.id, title: fallback, title_ar: title_ar || null, title_en: title_en || null, display_order: sections.length })
       .select("*").maybeSingle();
     if (error) { toast.error(toUserMessage(error)); return; }
     if (data) setSections([...sections, data as Section]);
     setSectionDialogOpen(false);
+  };
+
+  const updateSection = async (sid: string, patch: Partial<Section>) => {
+    setSections(sections.map((s) => s.id === sid ? { ...s, ...patch } : s));
+    await supabase.from("lms_sections").update(patch).eq("id", sid);
   };
 
   const doDeleteSection = async (sid: string) => {
@@ -227,23 +236,25 @@ function CourseBuilder() {
   };
 
   const openAddLesson = (sid: string) => {
-    setLessonDialog({ open: true, sectionId: sid, title: "" });
+    setLessonDialog({ open: true, sectionId: sid, title_ar: "", title_en: "" });
   };
 
   const confirmAddLesson = async () => {
     const sid = lessonDialog.sectionId;
-    const title = lessonDialog.title.trim();
-    if (!sid || !title) {
+    const title_ar = lessonDialog.title_ar.trim();
+    const title_en = lessonDialog.title_en.trim();
+    const fallback = title_ar || title_en;
+    if (!sid || !fallback) {
       toast.error(lang === "ar" ? "أدخل عنوان الدرس" : "Enter a lesson title");
       return;
     }
     const order = lessons.filter((l) => l.section_id === sid).length;
     const { data, error } = await supabase.from("lms_lessons")
-      .insert({ section_id: sid, title, display_order: order })
+      .insert({ section_id: sid, title: fallback, title_ar: title_ar || null, title_en: title_en || null, display_order: order })
       .select("*").maybeSingle();
     if (error) { toast.error(toUserMessage(error)); return; }
     if (data) setLessons([...lessons, data as Lesson]);
-    setLessonDialog({ open: false, sectionId: null, title: "" });
+    setLessonDialog({ open: false, sectionId: null, title_ar: "", title_en: "" });
   };
 
   const updateLesson = async (lid: string, patch: Partial<Lesson>) => {
@@ -827,7 +838,14 @@ function CourseBuilder() {
           {sections.map((s) => (
             <div key={s.id} className="rounded-xl border border-border">
               <div className="flex items-center justify-between gap-2 px-4 py-2.5 bg-muted/40">
-                <span className="font-semibold text-foreground">{s.title}</span>
+                <div className="flex flex-1 gap-2">
+                  <Input dir="rtl" placeholder="عربي" value={s.title_ar ?? ""}
+                    onChange={(e) => setSections(sections.map((x) => x.id === s.id ? { ...x, title_ar: e.target.value } : x))}
+                    onBlur={() => updateSection(s.id, { title_ar: s.title_ar, title: s.title_ar || s.title_en || s.title })} className="flex-1 h-8" />
+                  <Input dir="ltr" placeholder="English" value={s.title_en ?? ""}
+                    onChange={(e) => setSections(sections.map((x) => x.id === s.id ? { ...x, title_en: e.target.value } : x))}
+                    onBlur={() => updateSection(s.id, { title_en: s.title_en, title: s.title_ar || s.title_en || s.title })} className="flex-1 h-8" />
+                </div>
                 <div className="flex gap-1">
                   <Button size="sm" variant="ghost" onClick={() => openAddLesson(s.id)}><Plus className="h-4 w-4" /></Button>
                   <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: "section", id: s.id })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
@@ -837,8 +855,14 @@ function CourseBuilder() {
                 {lessons.filter((l) => l.section_id === s.id).map((l) => (
                   <li key={l.id} className="p-3 space-y-2">
                     <div className="flex items-center gap-2">
-                      <Input value={l.title} onChange={(e) => setLessons(lessons.map((x) => x.id === l.id ? { ...x, title: e.target.value } : x))}
-                        onBlur={() => updateLesson(l.id, { title: l.title })} className="flex-1" />
+                      <div className="flex flex-1 gap-2">
+                        <Input dir="rtl" placeholder="عنوان (عربي)" value={l.title_ar ?? ""}
+                          onChange={(e) => setLessons(lessons.map((x) => x.id === l.id ? { ...x, title_ar: e.target.value } : x))}
+                          onBlur={() => updateLesson(l.id, { title_ar: l.title_ar, title: l.title_ar || l.title_en || l.title })} className="flex-1" />
+                        <Input dir="ltr" placeholder="Title (English)" value={l.title_en ?? ""}
+                          onChange={(e) => setLessons(lessons.map((x) => x.id === l.id ? { ...x, title_en: e.target.value } : x))}
+                          onBlur={() => updateLesson(l.id, { title_en: l.title_en, title: l.title_ar || l.title_en || l.title })} className="flex-1" />
+                      </div>
                       <label className="text-xs flex items-center gap-1">
                         <input type="checkbox" checked={l.is_preview} onChange={(e) => updateLesson(l.id, { is_preview: e.target.checked })} />
                         {lang === "ar" ? "معاينة" : "Preview"}
@@ -876,10 +900,14 @@ function CourseBuilder() {
                         </span>
                       )}
                     </div>
-                    <Textarea rows={2} placeholder={lang === "ar" ? "محتوى الدرس (Markdown)" : "Lesson content (Markdown)"}
-                      value={l.content_md ?? ""}
-                      onChange={(e) => setLessons(lessons.map((x) => x.id === l.id ? { ...x, content_md: e.target.value } : x))}
-                      onBlur={() => updateLesson(l.id, { content_md: l.content_md })} />
+                    <Textarea dir="rtl" rows={2} placeholder="محتوى الدرس بالعربية (Markdown)"
+                      value={l.content_md_ar ?? ""}
+                      onChange={(e) => setLessons(lessons.map((x) => x.id === l.id ? { ...x, content_md_ar: e.target.value } : x))}
+                      onBlur={() => updateLesson(l.id, { content_md_ar: l.content_md_ar, content_md: l.content_md_ar || l.content_md_en || l.content_md })} />
+                    <Textarea dir="ltr" rows={2} placeholder="Lesson content in English (Markdown)"
+                      value={l.content_md_en ?? ""}
+                      onChange={(e) => setLessons(lessons.map((x) => x.id === l.id ? { ...x, content_md_en: e.target.value } : x))}
+                      onBlur={() => updateLesson(l.id, { content_md_en: l.content_md_en, content_md: l.content_md_ar || l.content_md_en || l.content_md })} />
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2 text-xs">
                         <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
@@ -933,13 +961,24 @@ function CourseBuilder() {
               {lang === "ar" ? "أدخل عنوان القسم الجديد." : "Enter a title for the new section."}
             </DialogDescription>
           </DialogHeader>
-          <Input
-            autoFocus
-            value={sectionTitleDraft}
-            onChange={(e) => setSectionTitleDraft(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAddSection(); } }}
-            placeholder={lang === "ar" ? "مثال: مقدمة" : "e.g. Introduction"}
-          />
+          <div className="space-y-2">
+            <Label>{lang === "ar" ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
+            <Input
+              autoFocus
+              dir="rtl"
+              value={sectionTitleArDraft}
+              onChange={(e) => setSectionTitleArDraft(e.target.value)}
+              placeholder="مثال: مقدمة"
+            />
+            <Label>{lang === "ar" ? "العنوان (إنكليزي)" : "Title (English)"}</Label>
+            <Input
+              dir="ltr"
+              value={sectionTitleEnDraft}
+              onChange={(e) => setSectionTitleEnDraft(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAddSection(); } }}
+              placeholder="e.g. Introduction"
+            />
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSectionDialogOpen(false)}>
               {lang === "ar" ? "إلغاء" : "Cancel"}
@@ -958,24 +997,36 @@ function CourseBuilder() {
           <DialogHeader>
             <DialogTitle>{lang === "ar" ? "إضافة درس" : "Add lesson"}</DialogTitle>
             <DialogDescription>
-              {lang === "ar" ? "أدخل عنوان الدرس الجديد." : "Enter a title for the new lesson."}
+              {lang === "ar" ? "أدخل عنوان الدرس بالعربية والإنكليزية." : "Enter the lesson title in Arabic and English."}
             </DialogDescription>
           </DialogHeader>
-          <Input
-            autoFocus
-            value={lessonDialog.title}
-            onChange={(e) => setLessonDialog((s) => ({ ...s, title: e.target.value }))}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAddLesson(); } }}
-            placeholder={lang === "ar" ? "مثال: الدرس الأول" : "e.g. Lesson 1"}
-          />
+          <div className="space-y-2">
+            <Label>{lang === "ar" ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
+            <Input
+              autoFocus
+              dir="rtl"
+              value={lessonDialog.title_ar}
+              onChange={(e) => setLessonDialog((s) => ({ ...s, title_ar: e.target.value }))}
+              placeholder="مثال: الدرس الأول"
+            />
+            <Label>{lang === "ar" ? "العنوان (إنكليزي)" : "Title (English)"}</Label>
+            <Input
+              dir="ltr"
+              value={lessonDialog.title_en}
+              onChange={(e) => setLessonDialog((s) => ({ ...s, title_en: e.target.value }))}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAddLesson(); } }}
+              placeholder="e.g. Lesson 1"
+            />
+          </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLessonDialog({ open: false, sectionId: null, title: "" })}>
+            <Button variant="outline" onClick={() => setLessonDialog({ open: false, sectionId: null, title_ar: "", title_en: "" })}>
               {lang === "ar" ? "إلغاء" : "Cancel"}
             </Button>
             <Button onClick={confirmAddLesson}>{lang === "ar" ? "إضافة" : "Add"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
 
       {/* Delete confirm */}
       <AlertDialog open={!!confirmDelete} onOpenChange={(open) => { if (!open) setConfirmDelete(null); }}>
