@@ -202,22 +202,30 @@ function CourseBuilder() {
   };
 
   const openAddSection = () => {
-    setSectionTitleDraft("");
+    setSectionTitleArDraft("");
+    setSectionTitleEnDraft("");
     setSectionDialogOpen(true);
   };
 
   const confirmAddSection = async () => {
-    const title = sectionTitleDraft.trim();
-    if (!title) {
+    const title_ar = sectionTitleArDraft.trim();
+    const title_en = sectionTitleEnDraft.trim();
+    const fallback = title_ar || title_en;
+    if (!fallback) {
       toast.error(lang === "ar" ? "أدخل عنوان القسم" : "Enter a section title");
       return;
     }
     const { data, error } = await supabase.from("lms_sections")
-      .insert({ course_id: course.id, title, display_order: sections.length })
+      .insert({ course_id: course.id, title: fallback, title_ar: title_ar || null, title_en: title_en || null, display_order: sections.length })
       .select("*").maybeSingle();
     if (error) { toast.error(toUserMessage(error)); return; }
     if (data) setSections([...sections, data as Section]);
     setSectionDialogOpen(false);
+  };
+
+  const updateSection = async (sid: string, patch: Partial<Section>) => {
+    setSections(sections.map((s) => s.id === sid ? { ...s, ...patch } : s));
+    await supabase.from("lms_sections").update(patch).eq("id", sid);
   };
 
   const doDeleteSection = async (sid: string) => {
@@ -228,23 +236,25 @@ function CourseBuilder() {
   };
 
   const openAddLesson = (sid: string) => {
-    setLessonDialog({ open: true, sectionId: sid, title: "" });
+    setLessonDialog({ open: true, sectionId: sid, title_ar: "", title_en: "" });
   };
 
   const confirmAddLesson = async () => {
     const sid = lessonDialog.sectionId;
-    const title = lessonDialog.title.trim();
-    if (!sid || !title) {
+    const title_ar = lessonDialog.title_ar.trim();
+    const title_en = lessonDialog.title_en.trim();
+    const fallback = title_ar || title_en;
+    if (!sid || !fallback) {
       toast.error(lang === "ar" ? "أدخل عنوان الدرس" : "Enter a lesson title");
       return;
     }
     const order = lessons.filter((l) => l.section_id === sid).length;
     const { data, error } = await supabase.from("lms_lessons")
-      .insert({ section_id: sid, title, display_order: order })
+      .insert({ section_id: sid, title: fallback, title_ar: title_ar || null, title_en: title_en || null, display_order: order })
       .select("*").maybeSingle();
     if (error) { toast.error(toUserMessage(error)); return; }
     if (data) setLessons([...lessons, data as Lesson]);
-    setLessonDialog({ open: false, sectionId: null, title: "" });
+    setLessonDialog({ open: false, sectionId: null, title_ar: "", title_en: "" });
   };
 
   const updateLesson = async (lid: string, patch: Partial<Lesson>) => {
