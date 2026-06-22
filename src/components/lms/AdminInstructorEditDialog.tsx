@@ -33,6 +33,27 @@ export function AdminInstructorEditDialog({
   const [linkedin, setLinkedin] = useState("");
   const [github, setGithub] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(ar ? "حجم الصورة أكبر من 5 ميجابايت" : "Image larger than 5MB");
+      return;
+    }
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${userId}/avatar-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("lms-media").upload(path, file, { upsert: true, contentType: file.type });
+    if (error) { setUploading(false); toast.error(toUserMessage(error)); return; }
+    const { data: pub } = supabase.storage.from("lms-media").getPublicUrl(path);
+    setAvatarUrl(pub.publicUrl);
+    setUploading(false);
+    toast.success(ar ? "تم رفع الصورة" : "Image uploaded");
+  };
 
   useEffect(() => {
     if (!open) return;
