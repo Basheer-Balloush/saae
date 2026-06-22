@@ -900,10 +900,14 @@ function CourseBuilder() {
                         </span>
                       )}
                     </div>
-                    <Textarea rows={2} placeholder={lang === "ar" ? "محتوى الدرس (Markdown)" : "Lesson content (Markdown)"}
-                      value={l.content_md ?? ""}
-                      onChange={(e) => setLessons(lessons.map((x) => x.id === l.id ? { ...x, content_md: e.target.value } : x))}
-                      onBlur={() => updateLesson(l.id, { content_md: l.content_md })} />
+                    <Textarea dir="rtl" rows={2} placeholder="محتوى الدرس بالعربية (Markdown)"
+                      value={l.content_md_ar ?? ""}
+                      onChange={(e) => setLessons(lessons.map((x) => x.id === l.id ? { ...x, content_md_ar: e.target.value } : x))}
+                      onBlur={() => updateLesson(l.id, { content_md_ar: l.content_md_ar, content_md: l.content_md_ar || l.content_md_en || l.content_md })} />
+                    <Textarea dir="ltr" rows={2} placeholder="Lesson content in English (Markdown)"
+                      value={l.content_md_en ?? ""}
+                      onChange={(e) => setLessons(lessons.map((x) => x.id === l.id ? { ...x, content_md_en: e.target.value } : x))}
+                      onBlur={() => updateLesson(l.id, { content_md_en: l.content_md_en, content_md: l.content_md_ar || l.content_md_en || l.content_md })} />
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2 text-xs">
                         <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
