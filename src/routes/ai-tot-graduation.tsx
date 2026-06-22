@@ -310,7 +310,7 @@ function AiTotGraduationPage() {
   );
 }
 
-type C = typeof CONTENT["ar"];
+type C = typeof CONTENT[keyof typeof CONTENT];
 
 function Hero({ c }: { c: C }) {
   return (
