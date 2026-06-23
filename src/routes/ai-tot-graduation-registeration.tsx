@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Calendar, MapPin, ArrowLeft, CheckCircle2, Loader2, Clock } from "lucide-react";
 import ministryLogo from "@/assets/ministry-communications.png.asset.json";
+import gloventLogo from "@/assets/glovent.jpg.asset.json";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
