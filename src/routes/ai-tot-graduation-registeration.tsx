@@ -201,6 +201,17 @@ function Page() {
           </table>
         </div>
 
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <p className="text-sm sm:text-base font-bold text-muted-foreground">{t.logistics}</p>
+          <div className="rounded-2xl border border-border/50 bg-[#0a1535] shadow-xl overflow-hidden px-6 sm:px-10 py-5 sm:py-7">
+            <img
+              src={gloventLogo.url}
+              alt={ar ? "شعار Glovent للمعارض والمؤتمرات — الراعي اللوجستي" : "Glovent Exhibitions & Conferences — Logistics Sponsor"}
+              className="h-20 sm:h-28 w-auto object-contain"
+            />
+          </div>
+        </div>
+
         <div className="mt-10 flex justify-center">
           <Button size="lg" className="text-base font-bold px-8" onClick={() => { setDone(false); setOpen(true); }}>
             {t.register}
