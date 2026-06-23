@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { useSingleDeviceSession } from "@/hooks/useSingleDeviceSession";
 import { LmsNavbar } from "@/components/lms/LmsNavbar";
 import { LmsFooter } from "@/components/lms/LmsFooter";
 
@@ -17,6 +18,8 @@ export const Route = createFileRoute("/learning-management-system")({
 function LmsLayout() {
   const navigate = useNavigate();
   const { user, role } = useLmsAuth();
+  useSingleDeviceSession(user?.id ?? null);
+
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
