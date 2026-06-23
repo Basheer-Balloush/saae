@@ -55,6 +55,7 @@ const T = {
   en: {
     badge: "Event Registration",
     sponsor: "Under the patronage of the Ministry of Communications and Information Technology",
+    logistics: "Logistics Sponsor",
     title: "First Syrian National AI Symposium",
     subtitle: "Graduation of the first cohort of AI trainers and launch of the One Million Syrian AI Users initiative.",
     venue: "National Library — Damascus",
