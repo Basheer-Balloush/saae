@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Calendar, MapPin, ArrowLeft, CheckCircle2, Loader2, Clock } from "lucide-react";
 import ministryLogo from "@/assets/ministry-communications.png.asset.json";
+import gloventLogo from "@/assets/glovent.jpg.asset.json";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ const T = {
   ar: {
     badge: "تسجيل الحضور",
     sponsor: "برعاية كريمة من وزارة الاتصالات وتقانة المعلومات",
+    logistics: "الراعي اللوجستي",
     title: "الندوة الوطنية السورية الأولى للذكاء الاصطناعي",
     subtitle: "تخريج الدفعة الأولى من مدربي الذكاء الاصطناعي وإطلاق مبادرة مليون مستخدم سوري للذكاء الاصطناعي.",
     venue: "المكتبة الوطنية — دمشق",
@@ -53,6 +55,7 @@ const T = {
   en: {
     badge: "Event Registration",
     sponsor: "Under the patronage of the Ministry of Communications and Information Technology",
+    logistics: "Logistics Sponsor",
     title: "First Syrian National AI Symposium",
     subtitle: "Graduation of the first cohort of AI trainers and launch of the One Million Syrian AI Users initiative.",
     venue: "National Library — Damascus",
@@ -196,6 +199,17 @@ function Page() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <p className="text-sm sm:text-base font-bold text-muted-foreground">{t.logistics}</p>
+          <div className="rounded-2xl border border-border/50 bg-[#0a1535] shadow-xl overflow-hidden px-6 sm:px-10 py-5 sm:py-7">
+            <img
+              src={gloventLogo.url}
+              alt={ar ? "شعار Glovent للمعارض والمؤتمرات — الراعي اللوجستي" : "Glovent Exhibitions & Conferences — Logistics Sponsor"}
+              className="h-20 sm:h-28 w-auto object-contain"
+            />
+          </div>
         </div>
 
         <div className="mt-10 flex justify-center">
