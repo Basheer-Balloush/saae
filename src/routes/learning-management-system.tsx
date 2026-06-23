@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { useSingleDeviceSession } from "@/hooks/useSingleDeviceSession";
 import { LmsNavbar } from "@/components/lms/LmsNavbar";
 import { LmsFooter } from "@/components/lms/LmsFooter";
 
