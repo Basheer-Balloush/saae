@@ -215,6 +215,17 @@ function Page() {
           </div>
         </div>
 
+        <div className="mt-8 flex flex-col items-center gap-4">
+          <p className="text-sm sm:text-base font-bold text-amber-500">{t.gold}</p>
+          <div className="rounded-2xl border border-border/50 bg-white shadow-xl overflow-hidden px-6 sm:px-10 py-5 sm:py-7">
+            <img
+              src={devistaLogo.url}
+              alt={ar ? "شعار Devista — الراعي الذهبي" : "Devista — Gold Sponsor"}
+              className="h-20 sm:h-28 w-auto object-contain"
+            />
+          </div>
+        </div>
+
         <div className="mt-10 flex justify-center">
           <Button size="lg" className="text-base font-bold px-8" onClick={() => { setDone(false); setOpen(true); }}>
             {t.register}
