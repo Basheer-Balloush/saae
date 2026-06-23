@@ -18,6 +18,8 @@ export const Route = createFileRoute("/learning-management-system")({
 function LmsLayout() {
   const navigate = useNavigate();
   const { user, role } = useLmsAuth();
+  useSingleDeviceSession(user?.id ?? null);
+
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
