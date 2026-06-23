@@ -204,25 +204,27 @@ function Page() {
           </table>
         </div>
 
-        <div className="mt-10 flex flex-col items-center gap-4">
-          <p className="text-sm sm:text-base font-bold text-muted-foreground">{t.logistics}</p>
-          <div className="rounded-2xl border border-border/50 bg-[#0a1535] shadow-xl overflow-hidden px-6 sm:px-10 py-5 sm:py-7">
-            <img
-              src={gloventLogo.url}
-              alt={ar ? "شعار Glovent للمعارض والمؤتمرات — الراعي اللوجستي" : "Glovent Exhibitions & Conferences — Logistics Sponsor"}
-              className="h-20 sm:h-28 w-auto object-contain"
-            />
+        <div className="mt-10 flex flex-wrap items-start justify-center gap-6 sm:gap-10">
+          <div className="flex flex-col items-center gap-3">
+            <div className="rounded-2xl border border-border/50 bg-[#0a1535] shadow-xl overflow-hidden px-5 sm:px-7 py-4 sm:py-5 h-24 sm:h-28 flex items-center justify-center">
+              <img
+                src={gloventLogo.url}
+                alt={ar ? "شعار Glovent للمعارض والمؤتمرات — الراعي اللوجستي" : "Glovent Exhibitions & Conferences — Logistics Sponsor"}
+                className="max-h-full w-auto object-contain"
+              />
+            </div>
+            <p className="text-xs sm:text-sm font-bold text-muted-foreground">{t.logistics}</p>
           </div>
-        </div>
 
-        <div className="mt-8 flex flex-col items-center gap-4">
-          <p className="text-sm sm:text-base font-bold text-amber-500">{t.gold}</p>
-          <div className="rounded-2xl border border-border/50 bg-white shadow-xl overflow-hidden px-6 sm:px-10 py-5 sm:py-7">
-            <img
-              src={devistaLogo.url}
-              alt={ar ? "شعار Devista — الراعي الذهبي" : "Devista — Gold Sponsor"}
-              className="h-20 sm:h-28 w-auto object-contain"
-            />
+          <div className="flex flex-col items-center gap-3">
+            <div className="rounded-2xl border border-border/50 bg-white shadow-xl overflow-hidden px-5 sm:px-7 py-4 sm:py-5 h-24 sm:h-28 flex items-center justify-center">
+              <img
+                src={devistaLogo.url}
+                alt={ar ? "شعار Devista — الراعي الذهبي" : "Devista — Gold Sponsor"}
+                className="max-h-full w-auto object-contain"
+              />
+            </div>
+            <p className="text-xs sm:text-sm font-bold text-amber-500">{t.gold}</p>
           </div>
         </div>
 
