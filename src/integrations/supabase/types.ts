@@ -641,6 +641,281 @@ export type Database = {
           },
         ]
       }
+      initiative_direct_payments: {
+        Row: {
+          amount: number
+          claim_token: string | null
+          claimed_at: string | null
+          confirmed_at: string | null
+          created_at: string
+          currency: string
+          email: string
+          full_name: string
+          id: string
+          payment_ref: string | null
+          phone: string
+          status: Database["public"]["Enums"]["initiative_payment_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          claim_token?: string | null
+          claimed_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          email: string
+          full_name: string
+          id?: string
+          payment_ref?: string | null
+          phone: string
+          status?: Database["public"]["Enums"]["initiative_payment_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          claim_token?: string | null
+          claimed_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          email?: string
+          full_name?: string
+          id?: string
+          payment_ref?: string | null
+          phone?: string
+          status?: Database["public"]["Enums"]["initiative_payment_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      initiative_donations: {
+        Row: {
+          amount: number
+          chairs_count: number
+          confirmed_at: string | null
+          created_at: string
+          currency: string
+          donor_display_name: string | null
+          donor_name: string
+          donor_type: Database["public"]["Enums"]["initiative_donor_type"]
+          email: string | null
+          id: string
+          logo_url: string | null
+          payment_ref: string | null
+          phone: string | null
+          status: Database["public"]["Enums"]["initiative_donation_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          chairs_count: number
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          donor_display_name?: string | null
+          donor_name: string
+          donor_type?: Database["public"]["Enums"]["initiative_donor_type"]
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          payment_ref?: string | null
+          phone?: string | null
+          status?: Database["public"]["Enums"]["initiative_donation_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          chairs_count?: number
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          donor_display_name?: string | null
+          donor_name?: string
+          donor_type?: Database["public"]["Enums"]["initiative_donor_type"]
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          payment_ref?: string | null
+          phone?: string | null
+          status?: Database["public"]["Enums"]["initiative_donation_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      initiative_seats: {
+        Row: {
+          assigned_at: string | null
+          created_at: string
+          direct_payment_id: string | null
+          donation_id: string
+          id: string
+          status: Database["public"]["Enums"]["initiative_seat_status"]
+          waitlist_id: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          created_at?: string
+          direct_payment_id?: string | null
+          donation_id: string
+          id?: string
+          status?: Database["public"]["Enums"]["initiative_seat_status"]
+          waitlist_id?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          created_at?: string
+          direct_payment_id?: string | null
+          donation_id?: string
+          id?: string
+          status?: Database["public"]["Enums"]["initiative_seat_status"]
+          waitlist_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "initiative_seats_donation_id_fkey"
+            columns: ["donation_id"]
+            isOneToOne: false
+            referencedRelation: "initiative_donations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "initiative_seats_waitlist_id_fkey"
+            columns: ["waitlist_id"]
+            isOneToOne: false
+            referencedRelation: "initiative_waitlist"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      initiative_settings: {
+        Row: {
+          about_ar: string
+          about_en: string
+          course_id: string | null
+          created_at: string
+          id: string
+          mission_ar: string
+          mission_en: string
+          seat_price_usd: number
+          singleton: boolean
+          total_target: number
+          updated_at: string
+          usd_to_syp_rate: number
+          values_ar: string
+          values_en: string
+        }
+        Insert: {
+          about_ar?: string
+          about_en?: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          mission_ar?: string
+          mission_en?: string
+          seat_price_usd?: number
+          singleton?: boolean
+          total_target?: number
+          updated_at?: string
+          usd_to_syp_rate?: number
+          values_ar?: string
+          values_en?: string
+        }
+        Update: {
+          about_ar?: string
+          about_en?: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          mission_ar?: string
+          mission_en?: string
+          seat_price_usd?: number
+          singleton?: boolean
+          total_target?: number
+          updated_at?: string
+          usd_to_syp_rate?: number
+          values_ar?: string
+          values_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "initiative_settings_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      initiative_waitlist: {
+        Row: {
+          claim_token: string | null
+          claimed_at: string | null
+          covered_at: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          status: Database["public"]["Enums"]["initiative_waitlist_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          claim_token?: string | null
+          claimed_at?: string | null
+          covered_at?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone: string
+          status?: Database["public"]["Enums"]["initiative_waitlist_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          claim_token?: string | null
+          claimed_at?: string | null
+          covered_at?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          status?: Database["public"]["Enums"]["initiative_waitlist_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      lms_active_sessions: {
+        Row: {
+          created_at: string
+          device_label: string | null
+          last_seen: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_label?: string | null
+          last_seen?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_label?: string | null
+          last_seen?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lms_answers: {
         Row: {
           author_id: string
@@ -1918,6 +2193,50 @@ export type Database = {
         }
         Returns: boolean
       }
+      initiative_claim_seat: {
+        Args: { _token: string; _user_id: string }
+        Returns: string
+      }
+      initiative_confirm_donation: {
+        Args: { _donation_id: string }
+        Returns: number
+      }
+      initiative_public_stats: {
+        Args: never
+        Returns: {
+          covered_unassigned: number
+          done: number
+          target: number
+          total_chairs_funded: number
+          waiting: number
+        }[]
+      }
+      initiative_submit_donation: {
+        Args: {
+          _chairs: number
+          _currency: string
+          _donor_name: string
+          _donor_type: string
+          _email: string
+          _phone: string
+        }
+        Returns: string
+      }
+      initiative_submit_waitlist: {
+        Args: { _email: string; _name: string; _phone: string }
+        Returns: string
+      }
+      initiative_top_donors: {
+        Args: { _limit?: number }
+        Returns: {
+          donor_display_name: string
+          donor_name: string
+          last_donation_at: string
+          logo_url: string
+          total_amount: number
+          total_chairs: number
+        }[]
+      }
       is_course_instructor: {
         Args: { _course_id: string; _user_id: string }
         Returns: boolean
@@ -1984,6 +2303,10 @@ export type Database = {
           students: number
         }[]
       }
+      lms_register_session: {
+        Args: { _device?: string; _session_id: string }
+        Returns: undefined
+      }
       lms_reject_enrollment_request: {
         Args: { _admin_notes?: string; _request_id: string }
         Returns: undefined
@@ -1997,6 +2320,7 @@ export type Database = {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json
       }
+      lms_validate_session: { Args: { _session_id: string }; Returns: boolean }
       lookup_event_pin: {
         Args: { _password: string; _pin: string; _username: string }
         Returns: {
@@ -2075,6 +2399,11 @@ export type Database = {
         | "lms_instructor"
         | "lms_admin"
       event_registration_status: "pending" | "approved" | "rejected"
+      initiative_donation_status: "pending" | "confirmed" | "cancelled"
+      initiative_donor_type: "individual" | "company"
+      initiative_payment_status: "pending" | "confirmed" | "cancelled"
+      initiative_seat_status: "available" | "assigned" | "claimed" | "enrolled"
+      initiative_waitlist_status: "waiting" | "covered" | "claimed" | "enrolled"
       lms_course_level: "beginner" | "intermediate" | "advanced"
       lms_course_status: "draft" | "pending" | "rejected" | "published"
       lms_enroll_req_status: "pending" | "approved" | "rejected" | "cancelled"
@@ -2224,6 +2553,11 @@ export const Constants = {
         "lms_admin",
       ],
       event_registration_status: ["pending", "approved", "rejected"],
+      initiative_donation_status: ["pending", "confirmed", "cancelled"],
+      initiative_donor_type: ["individual", "company"],
+      initiative_payment_status: ["pending", "confirmed", "cancelled"],
+      initiative_seat_status: ["available", "assigned", "claimed", "enrolled"],
+      initiative_waitlist_status: ["waiting", "covered", "claimed", "enrolled"],
       lms_course_level: ["beginner", "intermediate", "advanced"],
       lms_course_status: ["draft", "pending", "rejected", "published"],
       lms_enroll_req_status: ["pending", "approved", "rejected", "cancelled"],

@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegistrationRouteImport } from './routes/registration'
+import { Route as OneMillionInitiativeHomeRouteImport } from './routes/one-million-initiative-home'
+import { Route as OneMillionInitiativeDonorsRouteImport } from './routes/one-million-initiative-donors'
 import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-initiative'
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -36,6 +38,7 @@ import { Route as LearningManagementSystemInstructorRouteImport } from './routes
 import { Route as LearningManagementSystemForgotPasswordRouteImport } from './routes/learning-management-system.forgot-password'
 import { Route as LearningManagementSystemCatalogRouteImport } from './routes/learning-management-system.catalog'
 import { Route as LearningManagementSystemAdminRouteImport } from './routes/learning-management-system.admin'
+import { Route as InitiativeClaimRouteImport } from './routes/initiative.claim'
 import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system.login'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -51,6 +54,7 @@ import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/
 import { Route as LearningManagementSystemCertificateIdRouteImport } from './routes/learning-management-system.certificate.$id'
 import { Route as LearningManagementSystemAdminUsersRouteImport } from './routes/learning-management-system.admin.users'
 import { Route as LearningManagementSystemAdminReviewsRouteImport } from './routes/learning-management-system.admin.reviews'
+import { Route as LearningManagementSystemAdminInitiativeRouteImport } from './routes/learning-management-system.admin.initiative'
 import { Route as LearningManagementSystemAdminEnrollmentRequestsRouteImport } from './routes/learning-management-system.admin.enrollment-requests'
 import { Route as LearningManagementSystemAdminCouponsRouteImport } from './routes/learning-management-system.admin.coupons'
 import { Route as LearningManagementSystemAdminAttendanceLinkRouteImport } from './routes/learning-management-system.admin.attendance-link'
@@ -78,6 +82,18 @@ const RegistrationRoute = RegistrationRouteImport.update({
   path: '/registration',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OneMillionInitiativeHomeRoute =
+  OneMillionInitiativeHomeRouteImport.update({
+    id: '/one-million-initiative-home',
+    path: '/one-million-initiative-home',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OneMillionInitiativeDonorsRoute =
+  OneMillionInitiativeDonorsRouteImport.update({
+    id: '/one-million-initiative-donors',
+    path: '/one-million-initiative-donors',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const OneMillionInitiativeRoute = OneMillionInitiativeRouteImport.update({
   id: '/one-million-initiative',
   path: '/one-million-initiative',
@@ -212,6 +228,11 @@ const LearningManagementSystemAdminRoute =
     path: '/admin',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
+const InitiativeClaimRoute = InitiativeClaimRouteImport.update({
+  id: '/initiative/claim',
+  path: '/initiative/claim',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommunitiesKeyRoute = CommunitiesKeyRouteImport.update({
   id: '/communities/$key',
   path: '/communities/$key',
@@ -298,6 +319,12 @@ const LearningManagementSystemAdminReviewsRoute =
     path: '/reviews',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const LearningManagementSystemAdminInitiativeRoute =
+  LearningManagementSystemAdminInitiativeRouteImport.update({
+    id: '/initiative',
+    path: '/initiative',
+    getParentRoute: () => LearningManagementSystemAdminRoute,
+  } as any)
 const LearningManagementSystemAdminEnrollmentRequestsRoute =
   LearningManagementSystemAdminEnrollmentRequestsRouteImport.update({
     id: '/enrollment-requests',
@@ -373,6 +400,8 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
   '/one-million-initiative': typeof OneMillionInitiativeRoute
+  '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
+  '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
@@ -381,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
@@ -400,6 +430,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
+  '/learning-management-system/admin/initiative': typeof LearningManagementSystemAdminInitiativeRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
@@ -426,6 +457,8 @@ export interface FileRoutesByTo {
   '/ai-tot-verify': typeof AiTotVerifyRoute
   '/contact': typeof ContactRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
+  '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
+  '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
@@ -434,6 +467,7 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
@@ -450,6 +484,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
+  '/learning-management-system/admin/initiative': typeof LearningManagementSystemAdminInitiativeRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
@@ -479,6 +514,8 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
   '/one-million-initiative': typeof OneMillionInitiativeRoute
+  '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
+  '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
@@ -487,6 +524,7 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
@@ -506,6 +544,7 @@ export interface FileRoutesById {
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
+  '/learning-management-system/admin/initiative': typeof LearningManagementSystemAdminInitiativeRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
@@ -536,6 +575,8 @@ export interface FileRouteTypes {
     | '/contact'
     | '/learning-management-system'
     | '/one-million-initiative'
+    | '/one-million-initiative-donors'
+    | '/one-million-initiative-home'
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
@@ -544,6 +585,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/initiative/claim'
     | '/learning-management-system/admin'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
@@ -563,6 +605,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
+    | '/learning-management-system/admin/initiative'
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/certificate/$id'
@@ -589,6 +632,8 @@ export interface FileRouteTypes {
     | '/ai-tot-verify'
     | '/contact'
     | '/one-million-initiative'
+    | '/one-million-initiative-donors'
+    | '/one-million-initiative-home'
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
@@ -597,6 +642,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/initiative/claim'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
     | '/learning-management-system/login'
@@ -613,6 +659,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
+    | '/learning-management-system/admin/initiative'
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/certificate/$id'
@@ -641,6 +688,8 @@ export interface FileRouteTypes {
     | '/contact'
     | '/learning-management-system'
     | '/one-million-initiative'
+    | '/one-million-initiative-donors'
+    | '/one-million-initiative-home'
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
@@ -649,6 +698,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/initiative/claim'
     | '/learning-management-system/admin'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
@@ -668,6 +718,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
+    | '/learning-management-system/admin/initiative'
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/certificate/$id'
@@ -697,6 +748,8 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
   OneMillionInitiativeRoute: typeof OneMillionInitiativeRoute
+  OneMillionInitiativeDonorsRoute: typeof OneMillionInitiativeDonorsRoute
+  OneMillionInitiativeHomeRoute: typeof OneMillionInitiativeHomeRoute
   RegistrationRoute: typeof RegistrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
@@ -704,6 +757,7 @@ export interface RootRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
+  InitiativeClaimRoute: typeof InitiativeClaimRoute
   NewsIdRoute: typeof NewsIdRoute
   ResourcesAiToolsRoute: typeof ResourcesAiToolsRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -734,6 +788,20 @@ declare module '@tanstack/react-router' {
       path: '/registration'
       fullPath: '/registration'
       preLoaderRoute: typeof RegistrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/one-million-initiative-home': {
+      id: '/one-million-initiative-home'
+      path: '/one-million-initiative-home'
+      fullPath: '/one-million-initiative-home'
+      preLoaderRoute: typeof OneMillionInitiativeHomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/one-million-initiative-donors': {
+      id: '/one-million-initiative-donors'
+      path: '/one-million-initiative-donors'
+      fullPath: '/one-million-initiative-donors'
+      preLoaderRoute: typeof OneMillionInitiativeDonorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/one-million-initiative': {
@@ -904,6 +972,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemAdminRouteImport
       parentRoute: typeof LearningManagementSystemRoute
     }
+    '/initiative/claim': {
+      id: '/initiative/claim'
+      path: '/initiative/claim'
+      fullPath: '/initiative/claim'
+      preLoaderRoute: typeof InitiativeClaimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/communities/$key': {
       id: '/communities/$key'
       path: '/communities/$key'
@@ -1009,6 +1084,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemAdminReviewsRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
     }
+    '/learning-management-system/admin/initiative': {
+      id: '/learning-management-system/admin/initiative'
+      path: '/initiative'
+      fullPath: '/learning-management-system/admin/initiative'
+      preLoaderRoute: typeof LearningManagementSystemAdminInitiativeRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRoute
+    }
     '/learning-management-system/admin/enrollment-requests': {
       id: '/learning-management-system/admin/enrollment-requests'
       path: '/enrollment-requests'
@@ -1110,6 +1192,7 @@ interface LearningManagementSystemAdminRouteChildren {
   LearningManagementSystemAdminAttendanceLinkRoute: typeof LearningManagementSystemAdminAttendanceLinkRoute
   LearningManagementSystemAdminCouponsRoute: typeof LearningManagementSystemAdminCouponsRoute
   LearningManagementSystemAdminEnrollmentRequestsRoute: typeof LearningManagementSystemAdminEnrollmentRequestsRoute
+  LearningManagementSystemAdminInitiativeRoute: typeof LearningManagementSystemAdminInitiativeRoute
   LearningManagementSystemAdminReviewsRoute: typeof LearningManagementSystemAdminReviewsRoute
   LearningManagementSystemAdminUsersRoute: typeof LearningManagementSystemAdminUsersRoute
   LearningManagementSystemAdminIndexRoute: typeof LearningManagementSystemAdminIndexRoute
@@ -1125,6 +1208,8 @@ const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminR
       LearningManagementSystemAdminCouponsRoute,
     LearningManagementSystemAdminEnrollmentRequestsRoute:
       LearningManagementSystemAdminEnrollmentRequestsRoute,
+    LearningManagementSystemAdminInitiativeRoute:
+      LearningManagementSystemAdminInitiativeRoute,
     LearningManagementSystemAdminReviewsRoute:
       LearningManagementSystemAdminReviewsRoute,
     LearningManagementSystemAdminUsersRoute:
@@ -1242,6 +1327,8 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
   OneMillionInitiativeRoute: OneMillionInitiativeRoute,
+  OneMillionInitiativeDonorsRoute: OneMillionInitiativeDonorsRoute,
+  OneMillionInitiativeHomeRoute: OneMillionInitiativeHomeRoute,
   RegistrationRoute: RegistrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,
@@ -1249,6 +1336,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,
+  InitiativeClaimRoute: InitiativeClaimRoute,
   NewsIdRoute: NewsIdRoute,
   ResourcesAiToolsRoute: ResourcesAiToolsRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -1260,13 +1348,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
