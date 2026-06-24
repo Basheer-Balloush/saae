@@ -103,20 +103,27 @@ function InitiativeHome() {
     sponsor: "Donate now",
   };
 
-  const percent = Math.min((done / target) * 100, 100);
-  const renderPieLabel = ({ cx, cy, midAngle, outerRadius, percent: slicePercent, name }: any) => {
-    if (name === remainingLabel || slicePercent < 0.025) return null;
+  // Animated count-up for the center number
+  const [displayDone, setDisplayDone] = useState(0);
+  useEffect(() => {
+    const start = performance.now();
+    const from = displayDone;
+    const to = done;
+    const dur = 900;
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplayDone(Math.round(from + (to - from) * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
 
-    const radius = outerRadius * 0.62;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-      <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fill="var(--background)" className="text-sm font-bold">
-        {`${(slicePercent * 100).toFixed(slicePercent < 0.1 ? 1 : 0)}%`}
-      </text>
-    );
-  };
+  const sliceTotal = visiblePieData.reduce((s, d) => s + d.value, 0) || 1;
+  const sliceTokens = ["--primary", "--secondary", "--chart-3", "--muted-foreground"];
 
   return (
     <div className="min-h-screen bg-background">
