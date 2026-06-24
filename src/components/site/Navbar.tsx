@@ -112,7 +112,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                   ? isNewsRoute
                   : s === "about"
                   ? isAbout
-                  : !isAbout && !isNewsRoute && !isContactRoute && active === s;
+                  : isHome && !isAbout && !isNewsRoute && !isContactRoute && active === s;
               const linkClass = cn(
                 "relative text-sm font-medium transition-colors",
                 isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
