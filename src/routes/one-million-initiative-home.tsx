@@ -159,14 +159,28 @@ function InitiativeHome() {
                 <div className="h-full bg-gradient-to-r from-primary to-secondary" style={{ width: `${percent}%` }} />
               </div>
             </div>
-            <div className="h-80">
+            <div className="h-96">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={120} innerRadius={60} label={(e: any) => e.value > 0 ? e.value.toLocaleString() : ""}>
-                    {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                <PieChart margin={{ top: 20, right: 40, bottom: 20, left: 40 }}>
+                  <Pie
+                    data={pieData.filter((d) => d.value > 0)}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={110}
+                    innerRadius={65}
+                    paddingAngle={2}
+                    label={(e: any) => `${((e.value / target) * 100).toFixed(1)}%`}
+                    labelLine={false}
+                  >
+                    {pieData.filter((d) => d.value > 0).map((entry, i) => {
+                      const originalIndex = pieData.findIndex((p) => p.name === entry.name);
+                      return <Cell key={entry.name} fill={COLORS[originalIndex % COLORS.length]} />;
+                    })}
                   </Pie>
                   <Tooltip formatter={(v: number) => v.toLocaleString()} />
-                  <Legend />
+                  <Legend verticalAlign="bottom" height={36} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
