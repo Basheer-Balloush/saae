@@ -27,6 +27,8 @@ export const Route = createFileRoute("/one-million-initiative-home")({
 
 const COLORS = ["var(--primary)", "var(--secondary)", "var(--chart-3)", "var(--muted-foreground)"];
 
+const RADIAN = Math.PI / 180;
+
 function InitiativeHome() {
   const { lang } = useLang();
   const isAr = lang === "ar";
@@ -64,6 +66,8 @@ function InitiativeHome() {
     { name: isAr ? "مقاعد مغطاة" : "Covered (free)", value: covered },
     { name: isAr ? "متبقّي" : "Remaining", value: remaining },
   ];
+  const visiblePieData = pieData.filter((d) => d.value > 0);
+  const remainingLabel = pieData[3].name;
 
   const t = isAr ? {
     badge: "مبادرة وطنية",
@@ -100,6 +104,19 @@ function InitiativeHome() {
   };
 
   const percent = Math.min((done / target) * 100, 100);
+  const renderPieLabel = ({ cx, cy, midAngle, outerRadius, percent: slicePercent, name }: any) => {
+    if (name === remainingLabel || slicePercent < 0.025) return null;
+
+    const radius = outerRadius * 0.62;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fill="var(--background)" className="text-sm font-bold">
+        {`${(slicePercent * 100).toFixed(slicePercent < 0.1 ? 1 : 0)}%`}
+      </text>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -163,21 +180,28 @@ function InitiativeHome() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart margin={{ top: 20, right: 40, bottom: 20, left: 40 }}>
                   <Pie
-                    data={pieData.filter((d) => d.value > 0)}
+                    data={visiblePieData}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
                     cy="50%"
                     outerRadius={130}
-                    paddingAngle={2}
-                    label={(e: any) => `${((e.value / target) * 100).toFixed(1)}%`}
+                    paddingAngle={visiblePieData.length > 1 ? 2 : 0}
+                    stroke="var(--background)"
+                    strokeWidth={2}
+                    label={visiblePieData.length > 1 ? renderPieLabel : false}
                     labelLine={false}
                   >
-                    {pieData.filter((d) => d.value > 0).map((entry, i) => {
+                    {visiblePieData.map((entry) => {
                       const originalIndex = pieData.findIndex((p) => p.name === entry.name);
                       return <Cell key={entry.name} fill={COLORS[originalIndex % COLORS.length]} />;
                     })}
                   </Pie>
+                  {visiblePieData.length === 1 && visiblePieData[0].name === remainingLabel && (
+                    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" fill="var(--foreground)" className="text-2xl font-bold">
+                      0%
+                    </text>
+                  )}
                   <Tooltip formatter={(v: number) => v.toLocaleString()} />
                   <Legend verticalAlign="bottom" height={36} />
                 </PieChart>
