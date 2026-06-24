@@ -82,7 +82,7 @@ function AdminEventRegistrations() {
     try {
       const res = await approveFn({ data: { id: r.id, lang } }) as { pin_code: string };
       const pin = res.pin_code;
-      toast.success(ar ? `تمت الموافقة. الرمز: ${pin}` : `Approved. PIN: ${pin}`);
+      
       // open WhatsApp pre-filled
       const msg = ar
         ? `مرحباً ${r.full_name}، تمت الموافقة على تسجيلك في الندوة الوطنية للذكاء الاصطناعي. رمز الدخول الخاص بك: ${pin}`
