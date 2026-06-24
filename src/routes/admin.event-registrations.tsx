@@ -58,6 +58,7 @@ function AdminEventRegistrations() {
   const [rows, setRows] = useState<Reg[]>([]);
   const [verifiers, setVerifiers] = useState<Verifier[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const approveFn = useServerFn(approveEventRegistration);
   const rejectFn = useServerFn(rejectEventRegistration);
 
