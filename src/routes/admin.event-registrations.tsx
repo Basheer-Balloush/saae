@@ -31,6 +31,18 @@ type Reg = {
 
 type Verifier = { id: string; username: string; created_at: string };
 
+// Normalize phone for wa.me: digits only, drop leading 00/+, drop leading 0, default to Syria (963)
+function toWaNumber(raw: string): string {
+  let n = (raw || "").replace(/[^\d]/g, "");
+  if (n.startsWith("00")) n = n.slice(2);
+  if (n.startsWith("0")) n = "963" + n.slice(1);
+  if (!/^(?:1|2[078]|3[0-469]|4[013-9]|5[1-8]|6[0-6]|7|8[1246]|9[0-58])/.test(n)) {
+    // no obvious country code → assume Syria
+    if (!n.startsWith("963")) n = "963" + n;
+  }
+  return n;
+}
+
 function AdminEventRegistrations() {
   const { lang } = useLang();
   const navigate = useNavigate();
@@ -75,8 +87,7 @@ function AdminEventRegistrations() {
       const msg = ar
         ? `مرحباً ${r.full_name}، تمت الموافقة على تسجيلك في الندوة الوطنية للذكاء الاصطناعي. رمز الدخول الخاص بك: ${pin}`
         : `Hello ${r.full_name}, your registration for the Syrian National AI Symposium is approved. Your access PIN: ${pin}`;
-      const phone = r.phone.replace(/[^0-9]/g, "");
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
+      window.open(`https://wa.me/${toWaNumber(r.phone)}?text=${encodeURIComponent(msg)}`, "_blank");
       load();
     } catch (e) {
       toast.error(toUserMessage(e));
@@ -201,7 +212,7 @@ function RegistrationsTable({ rows, ar, onApprove, onReject, onDelete }: {
                       const msg = ar
                         ? `مرحباً ${r.full_name}، رمز الدخول الخاص بك: ${r.pin_code}`
                         : `Hello ${r.full_name}, your access PIN: ${r.pin_code}`;
-                      window.open(`https://wa.me/${r.phone.replace(/[^0-9]/g,"")}?text=${encodeURIComponent(msg)}`, "_blank");
+                      window.open(`https://wa.me/${toWaNumber(r.phone)}?text=${encodeURIComponent(msg)}`, "_blank");
                     }} className="h-8"><MessageCircle className="h-3.5 w-3.5" />WhatsApp</Button>
                   )}
                   <Button size="sm" variant="ghost" onClick={() => onDelete(r.id)} className="h-8 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
