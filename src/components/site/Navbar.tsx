@@ -150,10 +150,10 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                 );
               }
               return (
-                <a key={s} href={hashHref(s)} className={linkClass}>
+                <Link key={s} to="/" hash={s} className={linkClass}>
                   {t.nav[s]}
                   {underline}
-                </a>
+                </Link>
               );
             })}
             <Link
@@ -238,14 +238,15 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                   );
                 }
                 return (
-                  <a
+                  <Link
                     key={s}
-                    href={hashHref(s)}
+                    to="/"
+                    hash={s}
                     onClick={() => setOpen(false)}
                     className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                   >
                     {t.nav[s]}
-                  </a>
+                  </Link>
                 );
               })}
             <Link
