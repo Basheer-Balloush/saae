@@ -88,7 +88,6 @@ function AdminEventRegistrations() {
     }
   };
 
-  const [bulkBusy, setBulkBusy] = useState(false);
   const approveAll = async () => {
     const pending = rows.filter((r) => r.status === "pending");
     if (!pending.length) { toast.info(ar ? "لا توجد طلبات معلقة" : "No pending requests"); return; }
