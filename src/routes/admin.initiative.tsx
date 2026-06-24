@@ -15,7 +15,7 @@ import {
   adminCreateDonation, adminDeleteDonation, adminUpdateSettings, adminListCourses,
 } from "@/lib/initiative.functions";
 
-export const Route = createFileRoute("/learning-management-system/admin/initiative")({
+export const Route = createFileRoute("/admin/initiative")({
   head: () => ({ meta: [{ title: "إدارة مبادرة المليون مستخدم" }] }),
   component: AdminInitiative,
 });
@@ -75,7 +75,7 @@ function AdminInitiative() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <Link to="/learning-management-system/admin"><Button variant="ghost"><ArrowLeft className="h-4 w-4 me-2" />العودة</Button></Link>
+      <Link to="/admin"><Button variant="ghost"><ArrowLeft className="h-4 w-4 me-2" />العودة</Button></Link>
       <h1 className="text-3xl font-bold mt-4">إدارة مبادرة مليون مستخدم</h1>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
