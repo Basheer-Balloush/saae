@@ -189,7 +189,7 @@ function InitiativeHome() {
                     paddingAngle={visiblePieData.length > 1 ? 2 : 0}
                     stroke="var(--background)"
                     strokeWidth={2}
-                    label={renderPieLabel}
+                    label={visiblePieData.length > 1 ? renderPieLabel : false}
                     labelLine={false}
                   >
                     {visiblePieData.map((entry) => {
