@@ -25,7 +25,7 @@ export const Route = createFileRoute("/one-million-initiative-home")({
   component: InitiativeHome,
 });
 
-const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "#f59e0b", "hsl(var(--muted))"];
+const COLORS = ["var(--primary)", "var(--secondary)", "var(--chart-3)", "var(--muted-foreground)"];
 
 function InitiativeHome() {
   const { lang } = useLang();
@@ -138,10 +138,10 @@ function InitiativeHome() {
           />
           <FlipCard
             front={<>
-              <HeartHandshake className="h-12 w-12 text-amber-500" />
+              <HeartHandshake className="h-12 w-12 text-secondary" />
               <h2 className="text-2xl font-bold">{t.values}</h2>
             </>}
-            back={<><h3 className="text-xl font-bold text-amber-500 mb-3">{t.values}</h3><p className="text-sm leading-relaxed text-foreground/85">{(isAr ? settings?.values_ar : settings?.values_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
+            back={<><h3 className="text-xl font-bold text-secondary mb-3">{t.values}</h3><p className="text-sm leading-relaxed text-foreground/85">{(isAr ? settings?.values_ar : settings?.values_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
           />
         </section>
 
@@ -177,7 +177,7 @@ function InitiativeHome() {
         <section className="container mx-auto px-4 sm:px-6 mt-24">
           <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
             <div>
-              <h2 className="text-3xl sm:text-4xl font-bold flex items-center gap-3"><Trophy className="h-8 w-8 text-amber-500" />{t.donorsTitle}</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold flex items-center gap-3"><Trophy className="h-8 w-8 text-secondary" />{t.donorsTitle}</h2>
               <p className="text-muted-foreground mt-2">{t.donorsSub}</p>
             </div>
             <Link to="/one-million-initiative-donors">
@@ -233,11 +233,11 @@ function InitiativeHome() {
 
         {/* CSR */}
         <section className="container mx-auto px-4 sm:px-6 mt-24">
-          <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/15 via-background to-amber-500/5 p-10 text-center">
-            <HeartHandshake className="h-16 w-16 text-amber-500 mx-auto" />
+          <div className="rounded-3xl border border-secondary/30 bg-gradient-to-br from-secondary/15 via-background to-primary/10 p-10 text-center">
+            <HeartHandshake className="h-16 w-16 text-secondary mx-auto" />
             <h2 className="text-3xl sm:text-4xl font-bold mt-4">{t.csrTitle}</h2>
             <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">{t.csrSub}</p>
-            <Button size="lg" className="mt-6 bg-amber-500 hover:bg-amber-600 text-white" onClick={() => setDonateOpen(true)}>{t.sponsor}</Button>
+            <Button size="lg" className="mt-6 bg-gradient-brand text-white border-0 hover:opacity-90" onClick={() => setDonateOpen(true)}>{t.sponsor}</Button>
           </div>
         </section>
       </main>
