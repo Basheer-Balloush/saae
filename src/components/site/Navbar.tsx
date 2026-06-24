@@ -150,10 +150,10 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                 );
               }
               return (
-                <a key={s} href={hashHref(s)} className={linkClass}>
+                <Link key={s} to="/" hash={s} className={linkClass}>
                   {t.nav[s]}
                   {underline}
-                </a>
+                </Link>
               );
             })}
             <Link
