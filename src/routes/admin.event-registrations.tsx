@@ -200,7 +200,7 @@ function RegistrationsTable({ rows, ar, onApprove, onReject, onDelete }: {
                       const msg = ar
                         ? `مرحباً ${r.full_name}، رمز الدخول الخاص بك: ${r.pin_code}`
                         : `Hello ${r.full_name}, your access PIN: ${r.pin_code}`;
-                      window.open(`https://wa.me/${r.phone.replace(/[^0-9]/g,"")}?text=${encodeURIComponent(msg)}`, "_blank");
+                      window.open(`https://wa.me/${toWaNumber(r.phone)}?text=${encodeURIComponent(msg)}`, "_blank");
                     }} className="h-8"><MessageCircle className="h-3.5 w-3.5" />WhatsApp</Button>
                   )}
                   <Button size="sm" variant="ghost" onClick={() => onDelete(r.id)} className="h-8 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
