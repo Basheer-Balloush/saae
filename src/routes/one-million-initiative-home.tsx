@@ -168,8 +168,7 @@ function InitiativeHome() {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={110}
-                    innerRadius={65}
+                    outerRadius={130}
                     paddingAngle={2}
                     label={(e: any) => `${((e.value / target) * 100).toFixed(1)}%`}
                     labelLine={false}
