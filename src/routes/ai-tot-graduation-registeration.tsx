@@ -83,8 +83,12 @@ const T = {
     cancel: "Cancel",
     successTitle: "Your request was received",
     successBody: "Awaiting admin approval. You will receive an email and WhatsApp message containing your access PIN.",
+    closedTitle: "Registration closed",
+    closedBody: "We're sorry, registration for this event is now closed. Thank you for your interest.",
+    ok: "OK",
   },
 } as const;
+
 
 const AGENDA_AR: { time: string; item: string; speaker?: string }[] = [
   { time: "10:00 - 09:30", item: "التسجيل" },
