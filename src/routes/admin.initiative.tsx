@@ -15,7 +15,7 @@ import {
   adminCreateDonation, adminDeleteDonation, adminUpdateSettings, adminListCourses,
 } from "@/lib/initiative.functions";
 
-export const Route = createFileRoute("/learning-management-system/admin/initiative")({
+export const Route = createFileRoute("/admin/initiative")({
   head: () => ({ meta: [{ title: "إدارة مبادرة المليون مستخدم" }] }),
   component: AdminInitiative,
 });

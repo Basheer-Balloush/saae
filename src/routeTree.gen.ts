@@ -43,6 +43,7 @@ import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system.login'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminInitiativeRouteImport } from './routes/admin.initiative'
 import { Route as AdminEventRegistrationsRouteImport } from './routes/admin.event-registrations'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system.student.index'
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
@@ -54,7 +55,6 @@ import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/
 import { Route as LearningManagementSystemCertificateIdRouteImport } from './routes/learning-management-system.certificate.$id'
 import { Route as LearningManagementSystemAdminUsersRouteImport } from './routes/learning-management-system.admin.users'
 import { Route as LearningManagementSystemAdminReviewsRouteImport } from './routes/learning-management-system.admin.reviews'
-import { Route as LearningManagementSystemAdminInitiativeRouteImport } from './routes/learning-management-system.admin.initiative'
 import { Route as LearningManagementSystemAdminEnrollmentRequestsRouteImport } from './routes/learning-management-system.admin.enrollment-requests'
 import { Route as LearningManagementSystemAdminCouponsRouteImport } from './routes/learning-management-system.admin.coupons'
 import { Route as LearningManagementSystemAdminAttendanceLinkRouteImport } from './routes/learning-management-system.admin.attendance-link'
@@ -254,6 +254,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInitiativeRoute = AdminInitiativeRouteImport.update({
+  id: '/admin/initiative',
+  path: '/admin/initiative',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminEventRegistrationsRoute = AdminEventRegistrationsRouteImport.update({
   id: '/admin/event-registrations',
   path: '/admin/event-registrations',
@@ -317,12 +322,6 @@ const LearningManagementSystemAdminReviewsRoute =
   LearningManagementSystemAdminReviewsRouteImport.update({
     id: '/reviews',
     path: '/reviews',
-    getParentRoute: () => LearningManagementSystemAdminRoute,
-  } as any)
-const LearningManagementSystemAdminInitiativeRoute =
-  LearningManagementSystemAdminInitiativeRouteImport.update({
-    id: '/initiative',
-    path: '/initiative',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
 const LearningManagementSystemAdminEnrollmentRequestsRoute =
@@ -406,6 +405,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/event-registrations': typeof AdminEventRegistrationsRoute
+  '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
@@ -430,7 +430,6 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
-  '/learning-management-system/admin/initiative': typeof LearningManagementSystemAdminInitiativeRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
@@ -463,6 +462,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/event-registrations': typeof AdminEventRegistrationsRoute
+  '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
@@ -484,7 +484,6 @@ export interface FileRoutesByTo {
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
-  '/learning-management-system/admin/initiative': typeof LearningManagementSystemAdminInitiativeRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
@@ -520,6 +519,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/event-registrations': typeof AdminEventRegistrationsRoute
+  '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
@@ -544,7 +544,6 @@ export interface FileRoutesById {
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
-  '/learning-management-system/admin/initiative': typeof LearningManagementSystemAdminInitiativeRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
@@ -581,6 +580,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/super-admin'
     | '/admin/event-registrations'
+    | '/admin/initiative'
     | '/admin/login'
     | '/api/chat'
     | '/attendance-management-system/login'
@@ -605,7 +605,6 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
-    | '/learning-management-system/admin/initiative'
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/certificate/$id'
@@ -638,6 +637,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/super-admin'
     | '/admin/event-registrations'
+    | '/admin/initiative'
     | '/admin/login'
     | '/api/chat'
     | '/attendance-management-system/login'
@@ -659,7 +659,6 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
-    | '/learning-management-system/admin/initiative'
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/certificate/$id'
@@ -694,6 +693,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/super-admin'
     | '/admin/event-registrations'
+    | '/admin/initiative'
     | '/admin/login'
     | '/api/chat'
     | '/attendance-management-system/login'
@@ -718,7 +718,6 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
-    | '/learning-management-system/admin/initiative'
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/certificate/$id'
@@ -754,6 +753,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
   AdminEventRegistrationsRoute: typeof AdminEventRegistrationsRoute
+  AdminInitiativeRoute: typeof AdminInitiativeRoute
   AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
@@ -1007,6 +1007,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/initiative': {
+      id: '/admin/initiative'
+      path: '/admin/initiative'
+      fullPath: '/admin/initiative'
+      preLoaderRoute: typeof AdminInitiativeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/event-registrations': {
       id: '/admin/event-registrations'
       path: '/admin/event-registrations'
@@ -1082,13 +1089,6 @@ declare module '@tanstack/react-router' {
       path: '/reviews'
       fullPath: '/learning-management-system/admin/reviews'
       preLoaderRoute: typeof LearningManagementSystemAdminReviewsRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRoute
-    }
-    '/learning-management-system/admin/initiative': {
-      id: '/learning-management-system/admin/initiative'
-      path: '/initiative'
-      fullPath: '/learning-management-system/admin/initiative'
-      preLoaderRoute: typeof LearningManagementSystemAdminInitiativeRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
     }
     '/learning-management-system/admin/enrollment-requests': {
@@ -1192,7 +1192,6 @@ interface LearningManagementSystemAdminRouteChildren {
   LearningManagementSystemAdminAttendanceLinkRoute: typeof LearningManagementSystemAdminAttendanceLinkRoute
   LearningManagementSystemAdminCouponsRoute: typeof LearningManagementSystemAdminCouponsRoute
   LearningManagementSystemAdminEnrollmentRequestsRoute: typeof LearningManagementSystemAdminEnrollmentRequestsRoute
-  LearningManagementSystemAdminInitiativeRoute: typeof LearningManagementSystemAdminInitiativeRoute
   LearningManagementSystemAdminReviewsRoute: typeof LearningManagementSystemAdminReviewsRoute
   LearningManagementSystemAdminUsersRoute: typeof LearningManagementSystemAdminUsersRoute
   LearningManagementSystemAdminIndexRoute: typeof LearningManagementSystemAdminIndexRoute
@@ -1208,8 +1207,6 @@ const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminR
       LearningManagementSystemAdminCouponsRoute,
     LearningManagementSystemAdminEnrollmentRequestsRoute:
       LearningManagementSystemAdminEnrollmentRequestsRoute,
-    LearningManagementSystemAdminInitiativeRoute:
-      LearningManagementSystemAdminInitiativeRoute,
     LearningManagementSystemAdminReviewsRoute:
       LearningManagementSystemAdminReviewsRoute,
     LearningManagementSystemAdminUsersRoute:
@@ -1333,6 +1330,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,
   AdminEventRegistrationsRoute: AdminEventRegistrationsRoute,
+  AdminInitiativeRoute: AdminInitiativeRoute,
   AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,
