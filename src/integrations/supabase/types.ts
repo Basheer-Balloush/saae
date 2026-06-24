@@ -704,6 +704,7 @@ export type Database = {
           donor_type: Database["public"]["Enums"]["initiative_donor_type"]
           email: string | null
           id: string
+          logo_small_url: string | null
           logo_url: string | null
           payment_ref: string | null
           phone: string | null
@@ -721,6 +722,7 @@ export type Database = {
           donor_type?: Database["public"]["Enums"]["initiative_donor_type"]
           email?: string | null
           id?: string
+          logo_small_url?: string | null
           logo_url?: string | null
           payment_ref?: string | null
           phone?: string | null
@@ -738,6 +740,7 @@ export type Database = {
           donor_type?: Database["public"]["Enums"]["initiative_donor_type"]
           email?: string | null
           id?: string
+          logo_small_url?: string | null
           logo_url?: string | null
           payment_ref?: string | null
           phone?: string | null

@@ -1,0 +1,1 @@
+ALTER TABLE public.initiative_donations ADD COLUMN logo_small_url text;
