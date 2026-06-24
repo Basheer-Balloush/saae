@@ -124,7 +124,7 @@ function InitiativeHome() {
       <main className="pt-32 pb-20">
         {/* HERO */}
         <section className="container mx-auto px-4 sm:px-6 text-center">
-          <h1 className="mt-6 text-4xl sm:text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent leading-[1.3] pb-2">
+          <h1 className="mt-6 text-4xl sm:text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent leading-[1.6] pb-4">
             {t.heroTitle}
           </h1>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">{t.heroSub}</p>
