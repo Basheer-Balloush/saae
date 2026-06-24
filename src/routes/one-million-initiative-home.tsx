@@ -10,7 +10,7 @@ import { WaitlistDialog } from "@/components/initiative/WaitlistDialog";
 import { DirectPaymentDialog } from "@/components/initiative/DirectPaymentDialog";
 import { CorporateDonationDialog } from "@/components/initiative/CorporateDonationDialog";
 import { getInitiativeStats, getInitiativeSettings, getTopDonors } from "@/lib/initiative.functions";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Sparkles, Target, HeartHandshake, Users, Trophy, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/one-million-initiative-home")({
@@ -25,9 +25,6 @@ export const Route = createFileRoute("/one-million-initiative-home")({
   component: InitiativeHome,
 });
 
-const COLORS = ["var(--primary)", "var(--secondary)", "var(--chart-3)", "var(--muted-foreground)"];
-
-const RADIAN = Math.PI / 180;
 
 function InitiativeHome() {
   const { lang } = useLang();
@@ -103,20 +100,27 @@ function InitiativeHome() {
     sponsor: "Donate now",
   };
 
-  const percent = Math.min((done / target) * 100, 100);
-  const renderPieLabel = ({ cx, cy, midAngle, outerRadius, percent: slicePercent, name }: any) => {
-    if (name === remainingLabel || slicePercent < 0.025) return null;
+  // Animated count-up for the center number
+  const [displayDone, setDisplayDone] = useState(0);
+  useEffect(() => {
+    const start = performance.now();
+    const from = displayDone;
+    const to = done;
+    const dur = 900;
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplayDone(Math.round(from + (to - from) * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
 
-    const radius = outerRadius * 0.62;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-      <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fill="var(--background)" className="text-sm font-bold">
-        {`${(slicePercent * 100).toFixed(slicePercent < 0.1 ? 1 : 0)}%`}
-      </text>
-    );
-  };
+  const sliceTotal = visiblePieData.reduce((s, d) => s + d.value, 0) || 1;
+  const sliceTokens = ["--primary", "--secondary", "--chart-3", "--muted-foreground"];
 
   return (
     <div className="min-h-screen bg-background">
@@ -165,44 +169,108 @@ function InitiativeHome() {
             <h2 className="text-3xl sm:text-4xl font-bold">{t.statsTitle}</h2>
             <p className="text-muted-foreground mt-2">{t.statsSub}</p>
           </div>
-          <div className="rounded-3xl border border-border bg-card p-6 sm:p-10 shadow-soft">
-            <div className="text-center mb-6">
-              <p className="text-sm text-muted-foreground">{t.progress}</p>
-              <p className="text-5xl sm:text-6xl font-bold text-primary mt-2">{done.toLocaleString()} <span className="text-2xl text-muted-foreground">/ {target.toLocaleString()}</span></p>
-              <div className="mt-4 h-3 w-full max-w-2xl mx-auto rounded-full bg-muted overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-primary to-secondary" style={{ width: `${percent}%` }} />
+          <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 sm:p-10 shadow-soft">
+            <div
+              className="pointer-events-none absolute -top-32 -right-32 h-72 w-72 rounded-full opacity-30 blur-3xl"
+              style={{ background: "radial-gradient(circle, var(--primary), transparent 70%)" }}
+            />
+            <div
+              className="pointer-events-none absolute -bottom-32 -left-32 h-72 w-72 rounded-full opacity-30 blur-3xl"
+              style={{ background: "radial-gradient(circle, var(--secondary), transparent 70%)" }}
+            />
+
+            <div className="relative grid gap-10 lg:grid-cols-[1.1fr_1fr] items-center">
+              {/* Donut */}
+              <div className="relative mx-auto h-[340px] w-full max-w-[420px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <defs>
+                      {sliceTokens.map((tok, i) => (
+                        <linearGradient key={tok} id={`slice-grad-${i}`} x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor={`var(${tok})`} stopOpacity={0.95} />
+                          <stop offset="100%" stopColor={`var(${tok})`} stopOpacity={0.7} />
+                        </linearGradient>
+                      ))}
+                    </defs>
+                    <Pie
+                      data={visiblePieData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={92}
+                      outerRadius={140}
+                      paddingAngle={visiblePieData.length > 1 ? 2 : 0}
+                      stroke="var(--card)"
+                      strokeWidth={3}
+                      startAngle={90}
+                      endAngle={-270}
+                      animationBegin={0}
+                      animationDuration={900}
+                      animationEasing="ease-out"
+                    >
+                      {visiblePieData.map((entry) => {
+                        const originalIndex = pieData.findIndex((p) => p.name === entry.name);
+                        return (
+                          <Cell
+                            key={entry.name}
+                            fill={`url(#slice-grad-${originalIndex % sliceTokens.length})`}
+                          />
+                        );
+                      })}
+                    </Pie>
+                    <Tooltip
+                      formatter={(v: number) => v.toLocaleString()}
+                      contentStyle={{
+                        background: "var(--popover)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 12,
+                        color: "var(--popover-foreground)",
+                        boxShadow: "0 10px 30px -10px rgba(0,0,0,0.2)",
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+
+                {/* Center label */}
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    {t.progress}
+                  </p>
+                  <p className="mt-1 text-4xl sm:text-5xl font-extrabold bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent leading-none">
+                    {displayDone.toLocaleString()}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {((done / target) * 100).toFixed(1)}% / {target.toLocaleString()}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="h-96">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart margin={{ top: 20, right: 40, bottom: 20, left: 40 }}>
-                  <Pie
-                    data={visiblePieData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={130}
-                    paddingAngle={visiblePieData.length > 1 ? 2 : 0}
-                    stroke="var(--background)"
-                    strokeWidth={2}
-                    label={visiblePieData.length > 1 ? renderPieLabel : false}
-                    labelLine={false}
-                  >
-                    {visiblePieData.map((entry) => {
-                      const originalIndex = pieData.findIndex((p) => p.name === entry.name);
-                      return <Cell key={entry.name} fill={COLORS[originalIndex % COLORS.length]} />;
-                    })}
-                  </Pie>
-                  {visiblePieData.length === 1 && visiblePieData[0].name === remainingLabel && (
-                    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" fill="var(--foreground)" className="text-2xl font-bold">
-                      0%
-                    </text>
-                  )}
-                  <Tooltip formatter={(v: number) => v.toLocaleString()} />
-                  <Legend verticalAlign="bottom" height={36} />
-                </PieChart>
-              </ResponsiveContainer>
+
+              {/* Custom legend */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {pieData.map((entry, i) => {
+                  const pct = ((entry.value / sliceTotal) * 100).toFixed(1);
+                  const tok = sliceTokens[i % sliceTokens.length];
+                  return (
+                    <div
+                      key={entry.name}
+                      className="group relative rounded-2xl border border-border bg-background/50 backdrop-blur p-4 transition-all hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-soft"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          className="h-3 w-3 rounded-full ring-2 ring-card"
+                          style={{ background: `var(${tok})` }}
+                        />
+                        <span className="text-sm font-medium text-foreground/90">{entry.name}</span>
+                        <span className="ms-auto text-xs text-muted-foreground tabular-nums">{pct}%</span>
+                      </div>
+                      <p className="mt-2 text-2xl font-bold tabular-nums text-foreground">
+                        {entry.value.toLocaleString()}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </section>
