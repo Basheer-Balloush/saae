@@ -156,17 +156,28 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                 </Link>
               );
             })}
-            <Link
-              to="/one-million-initiative-home"
-              className={cn(
-                "relative text-sm font-semibold transition-colors",
-                location.pathname.startsWith("/one-million-initiative")
-                  ? "text-secondary"
-                  : "text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300",
-              )}
-            >
-              {lang === "ar" ? "المبادرة" : "Initiative"}
-            </Link>
+            {(() => {
+              const isInitiative = location.pathname.startsWith("/one-million-initiative");
+              return (
+                <Link
+                  to="/one-million-initiative-home"
+                  className={cn(
+                    "relative text-sm font-semibold transition-colors",
+                    isInitiative
+                      ? "text-secondary"
+                      : "text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300",
+                  )}
+                >
+                  {lang === "ar" ? "المبادرة" : "Initiative"}
+                  <span
+                    className={cn(
+                      "pointer-events-none absolute -bottom-1.5 left-0 right-0 h-0.5 origin-center rounded-full bg-secondary transition-transform duration-300",
+                      isInitiative ? "scale-x-100" : "scale-x-0",
+                    )}
+                  />
+                </Link>
+              );
+            })()}
           </nav>
         )}
 
