@@ -79,18 +79,28 @@ function AdminEventRegistrations() {
 
   const approve = async (r: Reg) => {
     try {
-      const res = await approveFn({ data: { id: r.id, lang } }) as { pin_code: string };
-      const pin = res.pin_code;
-
-      // open WhatsApp pre-filled with full approval message
-      const msg = ar
-        ? `مرحباً ${r.full_name}،\nنشكر لك اهتمامك وتسجيلك لحضور "الندوة الوطنية السورية الأولى للذكاء الاصطناعي". يسعدنا إبلاغك بأنه قد تم قبول طلبك لحضور هذه الفعالية.\nنحن نؤمن بأن تواجدك ومشاركتك سيمثلان إضافة مهمة ومثرية جداً لمخرجات الندوة والنقاشات القيمة التي ستُطرح فيها.\n\nتفاصيل الفعالية:\nالمكان: دمشق، المكتبة الوطنية.\nالتاريخ: غداً الخميس 25/6/2026.\nموعد البدء: الساعة 10:00 صباحاً.\n\nملاحظات تنظيمية هامة:\n• يرجى التواجد في تمام الساعة 9:45 صباحاً لضمان إتمام عملية التسجيل بكل سلاسة وراحة.\n• يرجى التأكد من الاحتفاظ برمز الدخول الخاص بك، حيث ستحتاج لإبرازه للفريق التنظيمي في قسم الاستقبال لتسهيل إجراءات الدخول.\n\nرمز الدخول الخاص بك: ${pin}\n\nنتطلع للترحيب بك غداً!\nمع أطيب التحيات،`
-        : `Hello ${r.full_name},\nThank you for registering for the "First Syrian National AI Symposium". We're pleased to inform you that your request has been approved.\n\nEvent details:\nVenue: Damascus, National Library.\nDate: Tomorrow, Thursday 25/6/2026.\nStart time: 10:00 AM.\n\nImportant notes:\n• Please arrive at 9:45 AM for a smooth registration.\n• Keep your access PIN to present at the reception desk.\n\nYour access PIN: ${pin}\n\nWe look forward to welcoming you tomorrow!\nBest regards,`;
-      window.open(`https://wa.me/${toWaNumber(r.phone)}?text=${encodeURIComponent(msg)}`, "_blank");
+      await approveFn({ data: { id: r.id, lang } });
+      toast.success(ar ? "تمت الموافقة وأُرسل الإيميل" : "Approved and email sent");
       load();
     } catch (e) {
       toast.error(toUserMessage(e));
     }
+  };
+
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const approveAll = async () => {
+    const pending = rows.filter((r) => r.status === "pending");
+    if (!pending.length) { toast.info(ar ? "لا توجد طلبات معلقة" : "No pending requests"); return; }
+    if (!confirm(ar ? `إرسال إيميل القبول لـ ${pending.length} طلب؟` : `Approve and email ${pending.length} requests?`)) return;
+    setBulkBusy(true);
+    let ok = 0, fail = 0;
+    for (const r of pending) {
+      try { await approveFn({ data: { id: r.id, lang } }); ok++; }
+      catch { fail++; }
+    }
+    setBulkBusy(false);
+    toast.success(ar ? `تمت الموافقة: ${ok}${fail ? ` — فشل: ${fail}` : ""}` : `Approved: ${ok}${fail ? ` — failed: ${fail}` : ""}`);
+    load();
   };
 
 
