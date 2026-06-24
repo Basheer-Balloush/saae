@@ -31,6 +31,18 @@ type Reg = {
 
 type Verifier = { id: string; username: string; created_at: string };
 
+// Normalize phone for wa.me: digits only, drop leading 00/+, drop leading 0, default to Syria (963)
+function toWaNumber(raw: string): string {
+  let n = (raw || "").replace(/[^\d]/g, "");
+  if (n.startsWith("00")) n = n.slice(2);
+  if (n.startsWith("0")) n = "963" + n.slice(1);
+  if (!/^(?:1|2[078]|3[0-469]|4[013-9]|5[1-8]|6[0-6]|7|8[1246]|9[0-58])/.test(n)) {
+    // no obvious country code → assume Syria
+    if (!n.startsWith("963")) n = "963" + n;
+  }
+  return n;
+}
+
 function AdminEventRegistrations() {
   const { lang } = useLang();
   const navigate = useNavigate();
