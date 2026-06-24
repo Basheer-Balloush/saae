@@ -243,84 +243,30 @@ function Page() {
         </div>
       </section>
 
-      <RegistrationDialog open={open} onOpenChange={setOpen} done={done} setDone={setDone} t={t} ar={ar} />
+      <ClosedDialog open={open} onOpenChange={setOpen} t={t} ar={ar} />
     </main>
   );
 }
 
 type Strings = (typeof T)["ar"] | (typeof T)["en"];
-function RegistrationDialog({
-  open, onOpenChange, done, setDone, t, ar,
+function ClosedDialog({
+  open, onOpenChange, t, ar,
 }: {
   open: boolean; onOpenChange: (v: boolean) => void;
-  done: boolean; setDone: (v: boolean) => void;
   t: Strings; ar: boolean;
 }) {
-  const submit = useServerFn(submitEventRegistration);
-  const [busy, setBusy] = useState(false);
-  const [form, setForm] = useState({ full_name: "", phone: "", email: "", specialization: "" });
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.full_name.trim() || !form.phone.trim() || !form.email.trim() || !form.specialization.trim()) {
-      toast.error(ar ? "جميع الحقول مطلوبة" : "All fields are required");
-      return;
-    }
-    setBusy(true);
-    try {
-      await submit({ data: form });
-      setDone(true);
-      setForm({ full_name: "", phone: "", email: "", specialization: "" });
-    } catch (err) {
-      toast.error(toUserMessage(err));
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md" dir={ar ? "rtl" : "ltr"}>
-        {done ? (
-          <div className="text-center py-6">
-            <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto" />
-            <h3 className="mt-4 text-xl font-extrabold">{t.successTitle}</h3>
-            <p className="mt-2 text-sm text-muted-foreground">{t.successBody}</p>
-            <Button className="mt-6" onClick={() => onOpenChange(false)}>{t.cancel}</Button>
-          </div>
-        ) : (
-          <>
-            <DialogHeader>
-              <DialogTitle>{t.formTitle}</DialogTitle>
-              <DialogDescription>{t.formDesc}</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={onSubmit} className="space-y-3">
-              <div className="space-y-1.5">
-                <Label>{t.fullName} <span className="text-destructive">*</span></Label>
-                <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
-              </div>
-              <div className="space-y-1.5">
-                <Label>{t.phone} <span className="text-destructive">*</span></Label>
-                <Input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-              </div>
-              <div className="space-y-1.5">
-                <Label>{t.email} <span className="text-destructive">*</span></Label>
-                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              </div>
-              <div className="space-y-1.5">
-                <Label>{t.specialization} <span className="text-destructive">*</span></Label>
-                <Input value={form.specialization} onChange={(e) => setForm({ ...form, specialization: e.target.value })} />
-              </div>
-              <div className="flex gap-2 pt-2">
-                <Button type="submit" disabled={busy} className="flex-1">
-                  {busy && <Loader2 className="h-4 w-4 animate-spin mx-1" />} {t.submit}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>{t.cancel}</Button>
-              </div>
-            </form>
-          </>
-        )}
+        <div className="text-center py-6">
+          <Clock className="h-12 w-12 text-primary mx-auto" />
+          <h3 className="mt-4 text-xl font-extrabold">{t.closedTitle}</h3>
+          <p className="mt-2 text-sm text-muted-foreground">{t.closedBody}</p>
+          <Button className="mt-6" onClick={() => onOpenChange(false)}>{t.ok}</Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
+}
+
 }
