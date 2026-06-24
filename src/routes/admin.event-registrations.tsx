@@ -75,8 +75,7 @@ function AdminEventRegistrations() {
       const msg = ar
         ? `مرحباً ${r.full_name}، تمت الموافقة على تسجيلك في الندوة الوطنية للذكاء الاصطناعي. رمز الدخول الخاص بك: ${pin}`
         : `Hello ${r.full_name}, your registration for the Syrian National AI Symposium is approved. Your access PIN: ${pin}`;
-      const phone = r.phone.replace(/[^0-9]/g, "");
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
+      window.open(`https://wa.me/${toWaNumber(r.phone)}?text=${encodeURIComponent(msg)}`, "_blank");
       load();
     } catch (e) {
       toast.error(toUserMessage(e));
