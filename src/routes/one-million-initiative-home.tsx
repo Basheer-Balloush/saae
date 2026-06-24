@@ -124,9 +124,6 @@ function InitiativeHome() {
       <main className="pt-32 pb-20">
         {/* HERO */}
         <section className="container mx-auto px-4 sm:px-6 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary">
-            <Sparkles className="h-3.5 w-3.5" /> {t.badge}
-          </span>
           <h1 className="mt-6 text-4xl sm:text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
             {t.heroTitle}
           </h1>
