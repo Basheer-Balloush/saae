@@ -25,9 +25,6 @@ export const Route = createFileRoute("/one-million-initiative-home")({
   component: InitiativeHome,
 });
 
-const COLORS = ["var(--primary)", "var(--secondary)", "var(--chart-3)", "var(--muted-foreground)"];
-
-const RADIAN = Math.PI / 180;
 
 function InitiativeHome() {
   const { lang } = useLang();
