@@ -11,7 +11,7 @@ import { DirectPaymentDialog } from "@/components/initiative/DirectPaymentDialog
 import { CorporateDonationDialog } from "@/components/initiative/CorporateDonationDialog";
 import { getInitiativeStats, getInitiativeSettings, getTopDonors } from "@/lib/initiative.functions";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { Target, HeartHandshake, Users, Trophy, ArrowRight } from "lucide-react";
+import { Sparkles, Target, HeartHandshake, Users, Trophy, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/one-million-initiative-home")({
   head: () => ({
