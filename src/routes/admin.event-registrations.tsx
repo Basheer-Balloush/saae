@@ -148,7 +148,15 @@ function AdminEventRegistrations() {
         {loading ? (
           <p className="text-center py-12 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></p>
         ) : tab === "registrations" ? (
-          <RegistrationsTable rows={rows} ar={ar} onApprove={approve} onReject={reject} onDelete={remove} />
+          <>
+            <div className="mb-3 flex justify-end">
+              <Button size="sm" onClick={approveAll} disabled={bulkBusy || !rows.some(r => r.status === "pending")}>
+                {bulkBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                {ar ? "موافقة على الكل وإرسال إيميل" : "Approve all & email"}
+              </Button>
+            </div>
+            <RegistrationsTable rows={rows} ar={ar} onApprove={approve} onReject={reject} onDelete={remove} />
+          </>
         ) : (
           <VerifiersPanel verifiers={verifiers} ar={ar} reload={load} />
         )}
