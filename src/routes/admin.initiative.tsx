@@ -105,7 +105,7 @@ function AdminInitiative() {
               </Select>
               <Input placeholder="البريد" value={df.email} onChange={(e) => setDf({ ...df, email: e.target.value })} />
               <Input placeholder="الهاتف" value={df.phone} onChange={(e) => setDf({ ...df, phone: e.target.value })} />
-              <Input placeholder="رابط الشعار (URL)" value={df.logo_url} onChange={(e) => setDf({ ...df, logo_url: e.target.value })} />
+              <LogoUploader value={df.logo_url} onChange={(url) => setDf({ ...df, logo_url: url })} />
               <Input type="number" placeholder="عدد المقاعد" value={df.chairs_count} onChange={(e) => setDf({ ...df, chairs_count: Number(e.target.value) })} />
               <Select value={df.currency} onValueChange={(v) => setDf({ ...df, currency: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
