@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, Trash2, Plus } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Trash2, Plus, Upload, Loader2, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   getInitiativeStats, getInitiativeSettings,
   adminListDonations, adminListWaitlist, adminConfirmDonation,
