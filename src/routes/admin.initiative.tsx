@@ -207,3 +207,52 @@ function Card({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
+
+function LogoUploader({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("ملف صورة فقط"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("الحد الأقصى 5MB"); return; }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const path = `initiative-logos/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("news-images").upload(path, file, {
+        cacheControl: "3600", upsert: false, contentType: file.type || undefined,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from("news-images").getPublicUrl(path);
+      onChange(data.publicUrl);
+      toast.success("تم رفع الشعار");
+    } catch (err: any) {
+      toast.error(err?.message || "فشل الرفع");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2 rounded-md border border-input bg-background px-2 py-1.5">
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      {value ? (
+        <img src={value} alt="" className="h-8 w-8 rounded object-contain border border-border" />
+      ) : (
+        <div className="h-8 w-8 rounded border border-dashed border-border" />
+      )}
+      <Button type="button" size="sm" variant="outline" onClick={() => inputRef.current?.click()} disabled={uploading}>
+        {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+        <span className="ms-1 text-xs">{value ? "تغيير الشعار" : "رفع الشعار"}</span>
+      </Button>
+      {value && (
+        <Button type="button" size="sm" variant="ghost" onClick={() => onChange("")}>
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      )}
+    </div>
+  );
+}
