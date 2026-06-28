@@ -18,9 +18,6 @@ import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-i
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
-import { Route as AiTotVerifyRouteImport } from './routes/ai-tot-verify'
-import { Route as AiTotGraduationRegisterationRouteImport } from './routes/ai-tot-graduation-registeration'
-import { Route as AiTotGraduationRouteImport } from './routes/ai-tot-graduation'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
@@ -44,7 +41,6 @@ import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/at
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminInitiativeRouteImport } from './routes/admin.initiative'
-import { Route as AdminEventRegistrationsRouteImport } from './routes/admin.event-registrations'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system.student.index'
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
 import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system.admin.index'
@@ -116,22 +112,6 @@ const AttendanceManagementSystemRoute =
     path: '/attendance-management-system',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AiTotVerifyRoute = AiTotVerifyRouteImport.update({
-  id: '/ai-tot-verify',
-  path: '/ai-tot-verify',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AiTotGraduationRegisterationRoute =
-  AiTotGraduationRegisterationRouteImport.update({
-    id: '/ai-tot-graduation-registeration',
-    path: '/ai-tot-graduation-registeration',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AiTotGraduationRoute = AiTotGraduationRouteImport.update({
-  id: '/ai-tot-graduation',
-  path: '/ai-tot-graduation',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -257,11 +237,6 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
 const AdminInitiativeRoute = AdminInitiativeRouteImport.update({
   id: '/admin/initiative',
   path: '/admin/initiative',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminEventRegistrationsRoute = AdminEventRegistrationsRouteImport.update({
-  id: '/admin/event-registrations',
-  path: '/admin/event-registrations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearningManagementSystemStudentIndexRoute =
@@ -392,9 +367,6 @@ const LearningManagementSystemInstructorAssignmentsCourseIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/ai-tot-graduation': typeof AiTotGraduationRoute
-  '/ai-tot-graduation-registeration': typeof AiTotGraduationRegisterationRoute
-  '/ai-tot-verify': typeof AiTotVerifyRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
@@ -404,7 +376,6 @@ export interface FileRoutesByFullPath {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
-  '/admin/event-registrations': typeof AdminEventRegistrationsRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
@@ -451,9 +422,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/ai-tot-graduation': typeof AiTotGraduationRoute
-  '/ai-tot-graduation-registeration': typeof AiTotGraduationRegisterationRoute
-  '/ai-tot-verify': typeof AiTotVerifyRoute
   '/contact': typeof ContactRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
@@ -461,7 +429,6 @@ export interface FileRoutesByTo {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
-  '/admin/event-registrations': typeof AdminEventRegistrationsRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
@@ -506,9 +473,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/ai-tot-graduation': typeof AiTotGraduationRoute
-  '/ai-tot-graduation-registeration': typeof AiTotGraduationRegisterationRoute
-  '/ai-tot-verify': typeof AiTotVerifyRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
@@ -518,7 +482,6 @@ export interface FileRoutesById {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
-  '/admin/event-registrations': typeof AdminEventRegistrationsRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
@@ -567,9 +530,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/ai-tot-graduation'
-    | '/ai-tot-graduation-registeration'
-    | '/ai-tot-verify'
     | '/attendance-management-system'
     | '/contact'
     | '/learning-management-system'
@@ -579,7 +539,6 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
-    | '/admin/event-registrations'
     | '/admin/initiative'
     | '/admin/login'
     | '/api/chat'
@@ -626,9 +585,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/ai-tot-graduation'
-    | '/ai-tot-graduation-registeration'
-    | '/ai-tot-verify'
     | '/contact'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
@@ -636,7 +592,6 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
-    | '/admin/event-registrations'
     | '/admin/initiative'
     | '/admin/login'
     | '/api/chat'
@@ -680,9 +635,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
-    | '/ai-tot-graduation'
-    | '/ai-tot-graduation-registeration'
-    | '/ai-tot-verify'
     | '/attendance-management-system'
     | '/contact'
     | '/learning-management-system'
@@ -692,7 +644,6 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
-    | '/admin/event-registrations'
     | '/admin/initiative'
     | '/admin/login'
     | '/api/chat'
@@ -740,9 +691,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AiTotGraduationRoute: typeof AiTotGraduationRoute
-  AiTotGraduationRegisterationRoute: typeof AiTotGraduationRegisterationRoute
-  AiTotVerifyRoute: typeof AiTotVerifyRoute
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
@@ -752,7 +700,6 @@ export interface RootRouteChildren {
   RegistrationRoute: typeof RegistrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
-  AdminEventRegistrationsRoute: typeof AdminEventRegistrationsRoute
   AdminInitiativeRoute: typeof AdminInitiativeRoute
   AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -830,27 +777,6 @@ declare module '@tanstack/react-router' {
       path: '/attendance-management-system'
       fullPath: '/attendance-management-system'
       preLoaderRoute: typeof AttendanceManagementSystemRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ai-tot-verify': {
-      id: '/ai-tot-verify'
-      path: '/ai-tot-verify'
-      fullPath: '/ai-tot-verify'
-      preLoaderRoute: typeof AiTotVerifyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ai-tot-graduation-registeration': {
-      id: '/ai-tot-graduation-registeration'
-      path: '/ai-tot-graduation-registeration'
-      fullPath: '/ai-tot-graduation-registeration'
-      preLoaderRoute: typeof AiTotGraduationRegisterationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ai-tot-graduation': {
-      id: '/ai-tot-graduation'
-      path: '/ai-tot-graduation'
-      fullPath: '/ai-tot-graduation'
-      preLoaderRoute: typeof AiTotGraduationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -1012,13 +938,6 @@ declare module '@tanstack/react-router' {
       path: '/admin/initiative'
       fullPath: '/admin/initiative'
       preLoaderRoute: typeof AdminInitiativeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/event-registrations': {
-      id: '/admin/event-registrations'
-      path: '/admin/event-registrations'
-      fullPath: '/admin/event-registrations'
-      preLoaderRoute: typeof AdminEventRegistrationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learning-management-system/student/': {
@@ -1317,9 +1236,6 @@ const LearningManagementSystemRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AiTotGraduationRoute: AiTotGraduationRoute,
-  AiTotGraduationRegisterationRoute: AiTotGraduationRegisterationRoute,
-  AiTotVerifyRoute: AiTotVerifyRoute,
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
@@ -1329,7 +1245,6 @@ const rootRouteChildren: RootRouteChildren = {
   RegistrationRoute: RegistrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,
-  AdminEventRegistrationsRoute: AdminEventRegistrationsRoute,
   AdminInitiativeRoute: AdminInitiativeRoute,
   AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,
