@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, Trash2, Plus, Upload, Loader2, X, Download } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Trash2, Plus, Upload, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getInitiativeStats, getInitiativeSettings,
@@ -74,28 +74,6 @@ function AdminInitiative() {
     } catch (e: any) { toast.error(e?.message); }
   };
 
-  const exportWaitlistCSV = () => {
-    if (!waitlist.length) { toast.error("لا توجد بيانات للتصدير"); return; }
-    const headers = ["الاسم", "البريد", "الهاتف", "الحالة", "تاريخ التسجيل"];
-    const rows = waitlist.map((w) => [
-      w.full_name ?? "",
-      w.email ?? "",
-      w.phone ?? "",
-      w.status ?? "",
-      w.created_at ? new Date(w.created_at).toLocaleString() : "",
-    ]);
-    const csv = [headers, ...rows].map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `initiative-registrations-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    toast.success("تم تصدير البيانات");
-  };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -170,11 +148,6 @@ function AdminInitiative() {
         </TabsContent>
 
         <TabsContent value="waitlist">
-          <div className="flex justify-end mb-3">
-            <Button size="sm" variant="outline" onClick={exportWaitlistCSV}>
-              <Download className="h-4 w-4 me-2" />تصدير التسجيلات
-            </Button>
-          </div>
           <div className="rounded-2xl border border-border bg-card overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-muted/50"><tr>
