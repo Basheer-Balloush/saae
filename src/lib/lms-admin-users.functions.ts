@@ -3,17 +3,21 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-async function assertLmsAdmin(userId: string) {
+async function assertAdmin(userId: string) {
   const { data, error } = await supabaseAdmin
     .from("user_roles")
     .select("role")
     .eq("user_id", userId)
-    .in("role", ["lms_admin", "admin"]);
+    .eq("role", "admin");
   if (error) throw new Error(error.message);
-  if (!data || data.length === 0) throw new Error("Forbidden: admin role required");
+  if (!data || data.length === 0) throw new Error("Forbidden: super-admin role required");
 }
 
-const MANAGEABLE = ["lms_instructor", "lms_admin", "attendance_user", "attendance_admin"] as const;
+// Roles any lms_admin (or admin) can grant.
+const MANAGEABLE_BY_LMS_ADMIN = ["lms_instructor", "attendance_user", "attendance_admin"] as const;
+// Privileged roles only a super-admin can grant.
+const MANAGEABLE_BY_ADMIN_ONLY = ["lms_admin"] as const;
+const MANAGEABLE = [...MANAGEABLE_BY_LMS_ADMIN, ...MANAGEABLE_BY_ADMIN_ONLY] as const;
 
 export const grantRoleByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -26,7 +30,14 @@ export const grantRoleByEmail = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertLmsAdmin(context.userId);
+    // Privileged role grants (e.g. lms_admin) require the super-admin "admin" role.
+    // All other grants only require lms_admin or admin.
+    const isPrivileged = (MANAGEABLE_BY_ADMIN_ONLY as readonly string[]).includes(data.role);
+    if (isPrivileged) {
+      await assertAdmin(context.userId);
+    } else {
+      await assertLmsAdmin(context.userId);
+    }
 
     // Find user by email via auth admin API (paginated)
     let foundId: string | null = null;
