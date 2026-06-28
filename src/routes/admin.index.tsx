@@ -373,12 +373,6 @@ function AdminDashboard() {
             {labels.partners}
           </button>
           <Link
-            to="/admin/event-registrations"
-            className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            {lang === "ar" ? "تسجيلات الندوة" : "Symposium registrations"}
-          </Link>
-          <Link
             to="/admin/initiative"
             className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
           >
