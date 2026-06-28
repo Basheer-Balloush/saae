@@ -170,6 +170,11 @@ function AdminInitiative() {
         </TabsContent>
 
         <TabsContent value="waitlist">
+          <div className="flex justify-end mb-3">
+            <Button size="sm" variant="outline" onClick={exportWaitlistCSV}>
+              <Download className="h-4 w-4 me-2" />تصدير التسجيلات
+            </Button>
+          </div>
           <div className="rounded-2xl border border-border bg-card overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-muted/50"><tr>
