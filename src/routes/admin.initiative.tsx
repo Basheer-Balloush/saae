@@ -18,6 +18,8 @@ import {
 } from "@/lib/initiative.functions";
 
 export const Route = createFileRoute("/admin/initiative")({
+  ssr: false,
+  beforeLoad: requireAdminBeforeLoad,
   head: () => ({ meta: [{ title: "إدارة مبادرة المليون مستخدم" }] }),
   component: AdminInitiative,
 });
