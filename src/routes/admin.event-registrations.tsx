@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Check, X, Loader2, Plus, Trash2, MessageCircle, Copy, KeyRound } from "lucide-react";
+import { ArrowLeft, Check, X, Loader2, Plus, Trash2, MessageCircle, Copy, KeyRound, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -149,7 +149,11 @@ function AdminEventRegistrations() {
           <p className="text-center py-12 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></p>
         ) : tab === "registrations" ? (
           <>
-            <div className="mb-3 flex justify-end">
+            <div className="mb-3 flex justify-end gap-2">
+              <Button size="sm" variant="outline" onClick={exportRegistrationsCSV} disabled={!rows.length}>
+                <Download className="h-4 w-4" />
+                {ar ? "تصدير التسجيلات" : "Export CSV"}
+              </Button>
               <Button size="sm" onClick={approveAll} disabled={bulkBusy || !rows.some(r => r.status === "pending")}>
                 {bulkBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                 {ar ? "موافقة على الكل وإرسال إيميل" : "Approve all & email"}
