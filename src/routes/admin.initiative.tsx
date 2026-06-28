@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, Trash2, Plus, Upload, Loader2, X } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Trash2, Plus, Upload, Loader2, X, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getInitiativeStats, getInitiativeSettings,
