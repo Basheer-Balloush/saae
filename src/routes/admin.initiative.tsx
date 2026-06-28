@@ -74,6 +74,29 @@ function AdminInitiative() {
     } catch (e: any) { toast.error(e?.message); }
   };
 
+  const exportWaitlistCSV = () => {
+    if (!waitlist.length) { toast.error("لا توجد بيانات للتصدير"); return; }
+    const headers = ["الاسم", "البريد", "الهاتف", "الحالة", "تاريخ التسجيل"];
+    const rows = waitlist.map((w) => [
+      w.full_name ?? "",
+      w.email ?? "",
+      w.phone ?? "",
+      w.status ?? "",
+      w.created_at ? new Date(w.created_at).toLocaleString() : "",
+    ]);
+    const csv = [headers, ...rows].map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `initiative-registrations-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast.success("تم تصدير البيانات");
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <Link to="/admin"><Button variant="ghost"><ArrowLeft className="h-4 w-4 me-2" />العودة</Button></Link>
