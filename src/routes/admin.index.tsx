@@ -182,6 +182,8 @@ const ADMIN_TEXT = {
 type AdminLabels = (typeof ADMIN_TEXT)[keyof typeof ADMIN_TEXT];
 
 export const Route = createFileRoute("/admin/")({
+  ssr: false,
+  beforeLoad: requireAdminBeforeLoad,
   head: () => ({
     meta: [
       { title: "Admin Dashboard" },
