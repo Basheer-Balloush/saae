@@ -13,6 +13,16 @@ async function assertAdmin(userId: string) {
   if (!data || data.length === 0) throw new Error("Forbidden: super-admin role required");
 }
 
+async function assertLmsAdmin(userId: string) {
+  const { data, error } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .in("role", ["lms_admin", "admin"]);
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) throw new Error("Forbidden: admin role required");
+}
+
 // Roles any lms_admin (or admin) can grant.
 const MANAGEABLE_BY_LMS_ADMIN = ["lms_instructor", "attendance_user", "attendance_admin"] as const;
 // Privileged roles only a super-admin can grant.
