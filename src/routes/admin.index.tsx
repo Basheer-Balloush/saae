@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -182,6 +183,8 @@ const ADMIN_TEXT = {
 type AdminLabels = (typeof ADMIN_TEXT)[keyof typeof ADMIN_TEXT];
 
 export const Route = createFileRoute("/admin/")({
+  ssr: false,
+  beforeLoad: requireAdminBeforeLoad,
   head: () => ({
     meta: [
       { title: "Admin Dashboard" },

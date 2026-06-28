@@ -2,8 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
 
 export const Route = createFileRoute("/super-admin")({
+  ssr: false,
+  beforeLoad: requireAdminBeforeLoad,
   head: () => ({
     meta: [
       { title: "Super Admin — SAAE" },

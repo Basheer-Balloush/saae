@@ -319,14 +319,27 @@ export const adminDeleteDonation = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const settingsUpdateSchema = z.object({
+  seat_price_usd: z.coerce.number().positive().max(1000000).optional(),
+  usd_to_syp_rate: z.coerce.number().positive().max(100000000).optional(),
+  total_target: z.coerce.number().int().positive().max(1000000000).optional(),
+  course_id: z.string().uuid().nullable().optional(),
+  about_ar: z.string().max(5000).optional(),
+  about_en: z.string().max(5000).optional(),
+  mission_ar: z.string().max(5000).optional(),
+  mission_en: z.string().max(5000).optional(),
+  values_ar: z.string().max(5000).optional(),
+  values_en: z.string().max(5000).optional(),
+}).strict();
+
 export const adminUpdateSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: Record<string, any>) => d)
+  .inputValidator((d: unknown) => settingsUpdateSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { data: s } = await context.supabase.from("initiative_settings").select("id").maybeSingle();
     if (!s) throw new Error("settings_missing");
-    const { error } = await (context.supabase.from("initiative_settings") as any).update(data).eq("id", s.id);
+    const { error } = await context.supabase.from("initiative_settings").update(data).eq("id", s.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
