@@ -103,6 +103,30 @@ function AdminEventRegistrations() {
     load();
   };
 
+  const exportRegistrationsCSV = () => {
+    if (!rows.length) { toast.info(ar ? "لا توجد طلبات للتصدير" : "No requests to export"); return; }
+    const headers = ar ? ["الاسم", "الهاتف", "البريد", "الاختصاص", "الحالة", "الرمز", "تاريخ التسجيل"] : ["Name", "Phone", "Email", "Specialization", "Status", "PIN", "Registration Date"];
+    const rowsData = rows.map((r) => [
+      r.full_name ?? "",
+      r.phone ?? "",
+      r.email ?? "",
+      r.specialization ?? "",
+      r.status ?? "",
+      r.pin_code ?? "",
+      r.created_at ? new Date(r.created_at).toLocaleString() : "",
+    ]);
+    const csv = [headers, ...rowsData].map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `event-registrations-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast.success(ar ? "تم تصدير التسجيلات" : "Registrations exported");
+  };
 
   const reject = async (r: Reg) => {
     if (!confirm(ar ? "رفض الطلب؟" : "Reject request?")) return;
