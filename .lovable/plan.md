@@ -1,35 +1,41 @@
-## Goal
+# مشكلة `lms.aisyria.org` تحوّل للصفحة الرئيسية
 
-Replace the current flat pie chart with a refined, professional donut chart that reads as a hero stat — not a default Recharts widget.
+## التشخيص
 
-## What changes
+اختبرت `https://lms.aisyria.org/` بطلب HTTP مباشر، والرد:
 
-**Visual treatment (donut, not flat pie)**
-- Switch to a donut (inner radius ~85, outer ~130) so the center can hold the headline number.
-- Center label: large `done.toLocaleString()` on top, smaller `% of 1,000,000` underneath, both using primary/foreground tokens.
-- Slice colors driven by semantic tokens (primary, secondary, accent, muted) via CSS variables — no hardcoded hex. Subtle gradient fill per slice using SVG `<defs>` linearGradient (token → token-glow).
-- 2px background-colored stroke between slices for clean separation; soft drop-shadow on the whole donut via `filter: drop-shadow(...)` using `--shadow-elegant`.
-- Remove the redundant horizontal progress bar above the chart (the donut already encodes progress) OR keep it but demote it visually — recommend remove.
+```
+HTTP/2 302
+location: https://aisyria.org/
+server: cloudflare
+```
 
-**Labels & legend**
-- Drop in-slice percentage labels (cluttered on small slices). Keep tooltip only for hover detail.
-- Replace default Recharts `<Legend>` with a custom legend rendered as a 2×2 (desktop) / stacked (mobile) grid of cards under the chart. Each item: color dot, label, count, percentage.
+يعني الـ **edge تبع Lovable بيعمل redirect 302** على `aisyria.org` (الدومين الـ Primary) قبل ما يوصل الطلب أصلاً للسيرفر تبعنا. منطق `rewriteLmsSubdomain` بـ `src/server.ts` صحيح ١٠٠٪، بس ما عم يشتغل لأنو الطلب ما بيوصلو.
 
-**Motion**
-- One-time mount animation: donut sweeps in from 0 → full (`animationBegin: 0, animationDuration: 900, animationEasing: 'ease-out'`). Center number counts up from 0 to `done` over the same duration.
+**السبب:** بنظام Lovable، أي دومين مش Primary بيعمل تلقائياً redirect على الـ Primary. توثيق Lovable حرفياً بقول: *"others will then redirect to Primary"*. هاد السلوك مدمج بمستوى الـ edge ومانو قابل للتعديل من داخل المشروع.
 
-**Empty state (done = 0)**
-- Show the donut as a single muted ring with the center showing "0%" and subline "Be the first to fund a seat" (AR equivalent).
+## الحلول الممكنة (لازم تختار)
 
-## Technical notes
+### الخيار ١ — Cloudflare Worker قدّام Lovable (الموصى به)
+- نقل DNS تبع `aisyria.org` لـ Cloudflare (مجاني).
+- نكتب Worker صغير بيمسك `lms.aisyria.org` ويعمل `fetch` داخلي على `https://saae.lovable.app/learning-management-system{path}` ويرجّع الرد للمستخدم بدون redirect.
+- الرابط بشريط العنوان بيضل `lms.aisyria.org`.
+- **عيوب:** يحتاج إعداد Cloudflare + قواعد Worker، وأي ربط لاحق مع Supabase auth/cookies بيحتاج ضبط الـ `Host` header.
 
-- File: `src/routes/one-million-initiative-home.tsx` — replace the `PieChart` block (lines ~162–208) and remove the helper `renderPieLabel` if unused.
-- Add a small `useCountUp` hook locally (or inline `requestAnimationFrame` interpolation) for the center number.
-- Custom legend is a plain div grid — no Recharts `Legend` import needed after this.
-- All colors via `hsl(var(--primary))` / `hsl(var(--secondary))` etc. so it adapts to light/dark and matches the rest of the page.
-- Keep i18n: legend labels and center subline already come from the `pieData` names + `t.*` strings.
+### الخيار ٢ — استخدام مسار بدل ساب-دومين
+- نخلي الرابط `aisyria.org/lms` بدل `lms.aisyria.org`، ونحط redirect من ساب-دومين القديم للجديد.
+- **ميزة:** صفر إعدادات بنية تحتية، شغّال فوراً.
+- **عيب:** الرابط مش بشكل ساب-دومين.
 
-## Out of scope
+### الخيار ٣ — إلغاء Primary وجعل المنصة الرئيسية على ساب-دومين
+- مش مناسب لأنو `aisyria.org` لازم يضل الموقع الأساسي.
 
-- Donor leaderboard styling, hero section, CTA buttons.
-- Backend / stats RPC.
+## ماذا سأفعل في وضع البناء؟
+
+**أولاً:** بدي قرارك بين الخيارات. ما بقدر أنا أربط Cloudflare أو أعدل DNS من جهتك — هاد لازم تعملو إنت بحساب Hostinger/Cloudflare.
+
+إذا اخترت:
+- **الخيار ١:** بحضّرلك كود الـ Worker الكامل + خطوات نقل DNS لـ Cloudflare + ضبط الـ Worker Route.
+- **الخيار ٢:** بشيل منطق `rewriteLmsSubdomain` من `src/server.ts` (ما عاد إلو فايدة) وبضيف redirect بسيط من `lms.aisyria.org` (لما يوصل للـ apex بعد الـ 302) → `/learning-management-system`، وبوثّق إنو الرابط النهائي صار `aisyria.org/lms`.
+
+أي خيار بتفضّل؟
