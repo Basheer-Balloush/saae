@@ -15,7 +15,6 @@ import { Route as RegistrationRouteImport } from './routes/registration'
 import { Route as OneMillionInitiativeHomeRouteImport } from './routes/one-million-initiative-home'
 import { Route as OneMillionInitiativeDonorsRouteImport } from './routes/one-million-initiative-donors'
 import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-initiative'
-import { Route as LmsRouteImport } from './routes/lms'
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
@@ -94,11 +93,6 @@ const OneMillionInitiativeDonorsRoute =
 const OneMillionInitiativeRoute = OneMillionInitiativeRouteImport.update({
   id: '/one-million-initiative',
   path: '/one-million-initiative',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LmsRoute = LmsRouteImport.update({
-  id: '/lms',
-  path: '/lms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearningManagementSystemRoute =
@@ -376,7 +370,6 @@ export interface FileRoutesByFullPath {
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
-  '/lms': typeof LmsRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
@@ -430,7 +423,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/lms': typeof LmsRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
@@ -484,7 +476,6 @@ export interface FileRoutesById {
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
-  '/lms': typeof LmsRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
@@ -542,7 +533,6 @@ export interface FileRouteTypes {
     | '/attendance-management-system'
     | '/contact'
     | '/learning-management-system'
-    | '/lms'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
@@ -596,7 +586,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
-    | '/lms'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
@@ -649,7 +638,6 @@ export interface FileRouteTypes {
     | '/attendance-management-system'
     | '/contact'
     | '/learning-management-system'
-    | '/lms'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
@@ -706,7 +694,6 @@ export interface RootRouteChildren {
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
-  LmsRoute: typeof LmsRoute
   OneMillionInitiativeRoute: typeof OneMillionInitiativeRoute
   OneMillionInitiativeDonorsRoute: typeof OneMillionInitiativeDonorsRoute
   OneMillionInitiativeHomeRoute: typeof OneMillionInitiativeHomeRoute
@@ -769,13 +756,6 @@ declare module '@tanstack/react-router' {
       path: '/one-million-initiative'
       fullPath: '/one-million-initiative'
       preLoaderRoute: typeof OneMillionInitiativeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lms': {
-      id: '/lms'
-      path: '/lms'
-      fullPath: '/lms'
-      preLoaderRoute: typeof LmsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learning-management-system': {
@@ -1259,7 +1239,6 @@ const rootRouteChildren: RootRouteChildren = {
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
-  LmsRoute: LmsRoute,
   OneMillionInitiativeRoute: OneMillionInitiativeRoute,
   OneMillionInitiativeDonorsRoute: OneMillionInitiativeDonorsRoute,
   OneMillionInitiativeHomeRoute: OneMillionInitiativeHomeRoute,
