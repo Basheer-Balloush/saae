@@ -1,148 +1,112 @@
-# Plan: Cloudflare Worker for `lms.aisyria.org` redirect
+Plan: Wrap the existing Lovable web app as a native mobile app using Capacitor and publish to App Store / Google Play.
 
-## What we want
-- User visits `https://lms.aisyria.org`
-- Browser address bar stays on `lms.aisyria.org`
-- Content served is `aisyria.org/learning-management-system` (or the Lovable origin directly)
-- Works for deep links like `lms.aisyria.org/courses/123`
+## Overview
 
-## Why this works
-Cloudflare Worker sits in front of Lovable. It intercepts the `lms.aisyria.org` request before Lovable's edge redirect fires, fetches the LMS page internally from the Lovable origin, and returns it without a 302 redirect.
+The project is already a responsive web app (React + TanStack Start). The fastest path to a real native app is Capacitor: it wraps the web app in a native WebView, exposes native APIs, and produces iOS/Android projects that can be signed and submitted to the stores.
 
-## Steps to implement
+## High-level steps
 
-### Step 1: Create Cloudflare account and add domain
-1. Sign up at https://dash.cloudflare.com (free).
-2. Click **Add a Site / Add Domain**.
-3. Enter `aisyria.org`.
-4. Choose the **Free plan**.
-5. Cloudflare will scan your DNS and import existing records.
+1. Add Capacitor core + iOS + Android packages.
+2. Build the web app for production.
+3. Initialize Capacitor with the app ID, name, and webDir pointing at the build output.
+4. Add native platform projects (`npx cap add ios`, `npx cap add android`).
+5. Configure app metadata (bundle ID, display name, icons, splash screens, deep links, allowed origins).
+6. Replace any web-only features with native-safe alternatives (OAuth redirect, file downloads, push if needed).
+7. Test locally on emulator / physical device.
+8. Build signed release binaries and submit to App Store Connect / Google Play Console.
 
-### Step 2: Add DNS records in Cloudflare
-Keep your existing records, but make sure these are present:
+## Technical details
 
-| Type | Name | Value | Proxy status |
-|------|------|-------|--------------|
-| A | `lms` | `192.0.2.1` | Proxied (orange cloud) |
-| A | `@` | `185.158.133.1` | DNS only (grey cloud) OR Proxied |
-| A | `www` | `185.158.133.1` | DNS only (grey cloud) OR Proxied |
+### Capacitor project setup
 
-- For `lms` the IP value does not matter because the Worker will handle it; `192.0.2.1` is a dummy.
-- For `@` and `www`, point them to the Lovable IP `185.158.133.1`.
-- Orange cloud = proxied through Cloudflare. Grey cloud = DNS only (not proxied).
-- You can keep `@` and `www` DNS-only if you want Lovable to handle the main site directly; this avoids any Cloudflare interference with the main domain.
-
-### Step 3: Change nameservers at Hostinger
-Cloudflare will give you two nameservers like:
-- `adam.ns.cloudflare.com`
-- `iris.ns.cloudflare.com`
-
-1. Go to Hostinger hPanel → Domains → aisyria.org → DNS / Nameservers.
-2. Change from Hostinger nameservers to Cloudflare's nameservers.
-3. Wait for propagation (usually 15–60 minutes, can take up to 24 hours).
-4. Cloudflare dashboard will show **Active** status.
-
-### Step 4: Create the Cloudflare Worker
-1. In Cloudflare dashboard, go to **Workers & Pages** → **Create**.
-2. Choose **Create Worker**.
-3. Name it, e.g. `lms-redirect`.
-4. Replace the default code with:
-
-```javascript
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-
-    // Only handle lms.aisyria.org
-    if (url.hostname !== 'lms.aisyria.org') {
-      return fetch(request);
-    }
-
-    // Build target URL on Lovable origin
-    const targetOrigin = 'https://saae.lovable.app';
-    const targetPath = '/learning-management-system' + url.pathname + url.search;
-    const targetUrl = targetOrigin + targetPath;
-
-    // Clone request with new target URL and Host header
-    const modifiedRequest = new Request(targetUrl, {
-      method: request.method,
-      headers: {
-        ...Object.fromEntries(request.headers),
-        'Host': 'saae.lovable.app',
-      },
-      body: request.body,
-      redirect: 'manual',
-    });
-
-    let response = await fetch(modifiedRequest);
-
-    // If Lovable returns a 301/302 to the primary domain, follow it manually
-    if (response.status >= 300 && response.status < 400) {
-      const location = response.headers.get('Location');
-      if (location) {
-        const locUrl = new URL(location, targetUrl);
-        if (locUrl.hostname === 'saae.lovable.app' || locUrl.hostname === 'aisyria.org') {
-          const rewrittenLoc = 'https://lms.aisyria.org' + locUrl.pathname + locUrl.search;
-          return new Response(null, {
-            status: response.status,
-            headers: { 'Location': rewrittenLoc },
-          });
-        }
-      }
-    }
-
-    // Rewrite response headers that contain the Lovable origin
-    const responseHeaders = new Headers(response.headers);
-    responseHeaders.delete('content-security-policy');
-
-    // Optional: rewrite Set-Cookie domains if needed later
-    return new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-    });
-  },
-};
+```bash
+bun add @capacitor/core @capacitor/ios @capacitor/android
+bun add -D @capacitor/cli
 ```
 
-5. Click **Deploy**.
+Create `capacitor.config.ts`:
 
-### Step 5: Attach Worker to `lms.aisyria.org`
-1. Go to **Workers & Pages** → Your worker → **Triggers**.
-2. Click **Add Custom Domain** or **Add Route**.
-3. Add route: `lms.aisyria.org/*`
-4. Save.
+```typescript
+import { CapacitorConfig } from '@capacitor/cli';
 
-### Step 6: Test
-1. Open `https://lms.aisyria.org` in an incognito window.
-2. Address bar should stay on `lms.aisyria.org`.
-3. Content should be the LMS page.
-4. Try `https://lms.aisyria.org/learning-management-system` and other deep links.
+const config: CapacitorConfig = {
+  appId: 'org.aisyria.lms',
+  appName: 'SAAE LMS',
+  webDir: 'dist',
+  server: {
+    androidScheme: 'https',
+    allowNavigation: ['saae.lovable.app', 'www.aisyria.org', 'aisyria.org'],
+  },
+  bundledWebRuntime: false,
+};
 
-## Important caveats
+export default config;
+```
 
-### Authentication / Cookies
-If users log in via Supabase on `lms.aisyria.org`, the browser will set cookies for `lms.aisyria.org`. The Lovable app running at `saae.lovable.app` will also try to set cookies for `saae.lovable.app`. This can cause session conflicts.
+Run:
 
-Recommended fix:
-- After this works, configure the Lovable/Supabase project to use the same session across both domains (custom domain as primary), or
-- Restrict `lms.aisyria.org` to only public LMS content and keep login on `aisyria.org/learning-management-system`.
+```bash
+npx cap add ios
+npx cap add android
+```
 
-### SSL
-Cloudflare will issue SSL automatically for `lms.aisyria.org` once the Worker route is active. Set SSL/TLS mode to **Full (strict)** or **Full** in Cloudflare dashboard.
+### Web build
 
-### Performance
-The Worker adds ~50ms latency per request. For static assets it will be cached by Cloudflare. For the first visit it may be slightly slower.
+The existing Vite build must produce a static `dist/` folder. Capacitor loads `index.html` from that folder and the app runs as a SPA inside the native WebView. If the app uses TanStack Start SSR, we need a static export or a server-hosted fallback. The simplest route for Capacitor is to point the WebView at the published URL (`https://saae.lovable.app`) instead of a bundled build, but that requires an internet connection and careful CORS/Auth handling. Recommended first approach: bundle a static production build in the app.
 
-## What you need to do vs what I can prepare
-- You must: create Cloudflare account, add domain, change Hostinger nameservers, create Worker, add route.
-- I can prepare the Worker code and a checklist. I cannot access your Hostinger or Cloudflare accounts.
+### Icons / splash screens
 
-## Rollback plan
-If anything breaks:
-1. In Cloudflare, disable the Worker route.
-2. In Hostinger, change nameservers back to Hostinger's original values.
-3. The main site will continue working normally because DNS records are preserved.
+Generate a full icon/splash set from a single 1024x1024 source using `@capacitor/assets`:
 
-## Expected result
-`https://lms.aisyria.org` serves the LMS page directly while keeping the subdomain in the browser address bar.
+```bash
+bun add -D @capacitor/assets
+```
+
+Place source images in `resources/icon.png` and `resources/splash.png`, then run:
+
+```bash
+npx capacitor-assets generate
+```
+
+### Native-specific considerations
+
+- **Auth / OAuth**: Google/Apple OAuth inside a WebView can be blocked by providers. Use Capacitor Browser plugin (`@capacitor/browser`) for system-browser OAuth, then handle the callback via a custom URL scheme (`org.aisyria.lms://auth/callback`).
+- **Status bar / safe areas**: Use `@capacitor/status-bar` and CSS `env(safe-area-inset-*)` to handle notches.
+- **Keyboard**: `@capacitor/keyboard` to avoid input hiding.
+- **Push notifications**: If needed later, add `@capacitor/push-notifications` and configure FCM / APNs.
+- **Payments**: Keep existing web payment flow or replace with native in-app purchases if required by store policies.
+
+### Testing
+
+```bash
+npx cap open ios      # opens Xcode
+npx cap open android  # opens Android Studio
+```
+
+Run on emulators, then on real devices with provisioning / signing configured.
+
+### Publishing
+
+- iOS: Archive in Xcode, upload to App Store Connect, fill App Store listing, submit for review.
+- Android: Generate signed AAB in Android Studio, upload to Google Play Console, submit for review.
+
+## Deliverables
+
+- `capacitor.config.ts` in project root.
+- `ios/` and `android/` native project folders.
+- Updated build script to produce `dist/` then sync with Capacitor.
+- Documentation for local run and store submission.
+
+## Open questions before implementation
+
+1. Should the app load the live web URL (`https://saae.lovable.app`) or bundle a static build? Loading the live URL is faster to update but requires internet. Bundling is more "store-like" and works offline after initial load.
+2. What bundle ID should be used? Suggested: `org.aisyria.lms`.
+3. Do you need push notifications from the start?
+4. Do you have Apple Developer ($99/year) and Google Play ($25 one-time) accounts ready?
+
+## Milestones
+
+1. Capacitor setup + local iOS/Android build.
+2. Auth via system browser + custom URL scheme.
+3. Icons / splash + safe-area polish.
+4. Signed release builds + store submission.
