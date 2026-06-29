@@ -66,33 +66,11 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
-function rewriteLmsSubdomain(request: Request): Request {
-  const url = new URL(request.url);
-  const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? url.hostname).split(":")[0];
-  if (host !== "lms.aisyria.org") return request;
-  if (url.pathname === "/" || url.pathname === "") {
-    url.pathname = "/learning-management-system";
-    return new Request(url.toString(), request);
-  }
-  if (
-    url.pathname !== "/learning-management-system" &&
-    !url.pathname.startsWith("/learning-management-system/") &&
-    !url.pathname.startsWith("/_") &&
-    !url.pathname.startsWith("/api/") &&
-    !url.pathname.startsWith("/assets/") &&
-    !/\.[a-zA-Z0-9]+$/.test(url.pathname)
-  ) {
-    // Leave non-root, non-LMS app paths alone (e.g. /favicon.png, /assets/*, asset requests).
-  }
-  return request;
-}
-
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
-      const rewritten = rewriteLmsSubdomain(request);
-      const response = await handler.fetch(rewritten, env, ctx);
+      const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);
