@@ -343,3 +343,47 @@ function InitiativeHome() {
     </div>
   );
 }
+
+function DonorTable({ title, rows, isAr, sponsorLabel, emptyLabel }: {
+  title: string;
+  rows: Array<{ donor_name: string; donor_display_name: string | null; logo_url: string | null; total_chairs: number; total_amount: number }>;
+  isAr: boolean;
+  sponsorLabel: string;
+  emptyLabel: string;
+}) {
+  return (
+    <div>
+      <h3 className="text-xl font-bold mb-3">{title}</h3>
+      <div className="rounded-3xl border border-border bg-card overflow-hidden">
+        {rows.length === 0 ? (
+          <p className="p-10 text-center text-muted-foreground">{emptyLabel}</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-start">
+              <tr>
+                <th className="p-4 text-start">#</th>
+                <th className="p-4 text-start">{sponsorLabel}</th>
+                <th className="p-4 text-start">{isAr ? "المقاعد" : "Chairs"}</th>
+                <th className="p-4 text-start">{isAr ? "المساهمة" : "Amount"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((d, i) => (
+                <tr key={d.donor_name} className="border-t border-border">
+                  <td className="p-4 font-bold text-primary">{i + 1}</td>
+                  <td className="p-4 flex items-center gap-3">
+                    {d.logo_url && <img src={d.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />}
+                    <span className="font-medium">{d.donor_display_name || d.donor_name}</span>
+                  </td>
+                  <td className="p-4">{Number(d.total_chairs).toLocaleString()}</td>
+                  <td className="p-4">${Number(d.total_amount).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
