@@ -35,7 +35,8 @@ function InitiativeHome() {
 
   const [stats, setStats] = useState<{ target: number; done: number; waiting: number; coveredUnassigned: number; totalFunded: number } | null>(null);
   const [settings, setSettings] = useState<any>(null);
-  const [donors, setDonors] = useState<any[]>([]);
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [individuals, setIndividuals] = useState<any[]>([]);
   const [waitlistOpen, setWaitlistOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [donateOpen, setDonateOpen] = useState(false);
@@ -43,13 +44,15 @@ function InitiativeHome() {
   useEffect(() => {
     const load = () => {
       statsFn().then(setStats).catch(() => {});
-      donorsFn({ data: { limit: 10 } }).then(setDonors).catch(() => {});
+      donorsFn({ data: { limit: 10, donorType: "company" } }).then(setCompanies).catch(() => {});
+      donorsFn({ data: { limit: 10, donorType: "individual" } }).then(setIndividuals).catch(() => {});
     };
     load();
     settingsFn().then(setSettings).catch(() => {});
     const t = setInterval(load, 30000);
     return () => clearInterval(t);
   }, [statsFn, settingsFn, donorsFn]);
+
 
   const target = stats?.target ?? 1000000;
   const done = stats?.done ?? 0;
