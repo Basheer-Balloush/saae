@@ -36,10 +36,15 @@ export const getInitiativeSettings = createServerFn({ method: "GET" }).handler(a
 });
 
 export const getTopDonors = createServerFn({ method: "GET" })
-  .inputValidator((d: { limit?: number }) => ({ limit: Math.min(Math.max(d.limit ?? 10, 1), 100) }))
+  .inputValidator((d: { limit?: number; donorType?: "individual" | "company" }) => ({
+    limit: Math.min(Math.max(d.limit ?? 10, 1), 100),
+    donorType: d.donorType,
+  }))
   .handler(async ({ data }) => {
     const sb = publicClient();
-    const { data: rows, error } = await sb.rpc("initiative_top_donors", { _limit: data.limit });
+    const { data: rows, error } = data.donorType
+      ? await sb.rpc("initiative_top_donors_by_type", { _donor_type: data.donorType, _limit: data.limit })
+      : await sb.rpc("initiative_top_donors", { _limit: data.limit });
     if (error) throw new Error(error.message);
     return (rows ?? []) as Array<{
       donor_name: string;
@@ -50,6 +55,7 @@ export const getTopDonors = createServerFn({ method: "GET" })
       last_donation_at: string;
     }>;
   });
+
 
 export const getAllDonors = createServerFn({ method: "GET" }).handler(async () => {
   const sb = publicClient();
