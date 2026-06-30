@@ -148,21 +148,21 @@ function InitiativeHome() {
               <Sparkles className="h-12 w-12 text-primary" />
               <h2 className="text-2xl font-bold">{t.about}</h2>
             </>}
-            back={<><h3 className="text-xl font-bold text-primary mb-3">{t.about}</h3><p className="text-sm leading-relaxed text-foreground/85">{(isAr ? settings?.about_ar : settings?.about_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
+            back={<><h3 className="text-xl font-bold text-primary mb-3">{t.about}</h3><p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">{(isAr ? settings?.about_ar : settings?.about_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
           />
           <FlipCard
             front={<>
               <Target className="h-12 w-12 text-secondary" />
               <h2 className="text-2xl font-bold">{t.mission}</h2>
             </>}
-            back={<><h3 className="text-xl font-bold text-secondary mb-3">{t.mission}</h3><p className="text-sm leading-relaxed text-foreground/85">{(isAr ? settings?.mission_ar : settings?.mission_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
+            back={<><h3 className="text-xl font-bold text-secondary mb-3">{t.mission}</h3><p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">{(isAr ? settings?.mission_ar : settings?.mission_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
           />
           <FlipCard
             front={<>
               <HeartHandshake className="h-12 w-12 text-secondary" />
               <h2 className="text-2xl font-bold">{t.values}</h2>
             </>}
-            back={<><h3 className="text-xl font-bold text-secondary mb-3">{t.values}</h3><p className="text-sm leading-relaxed text-foreground/85">{(isAr ? settings?.values_ar : settings?.values_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
+            back={<><h3 className="text-xl font-bold text-secondary mb-3">{t.values}</h3><p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">{(isAr ? settings?.values_ar : settings?.values_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
           />
         </section>
 
