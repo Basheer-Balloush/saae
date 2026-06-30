@@ -35,7 +35,8 @@ function InitiativeHome() {
 
   const [stats, setStats] = useState<{ target: number; done: number; waiting: number; coveredUnassigned: number; totalFunded: number } | null>(null);
   const [settings, setSettings] = useState<any>(null);
-  const [donors, setDonors] = useState<any[]>([]);
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [individuals, setIndividuals] = useState<any[]>([]);
   const [waitlistOpen, setWaitlistOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [donateOpen, setDonateOpen] = useState(false);
@@ -43,13 +44,15 @@ function InitiativeHome() {
   useEffect(() => {
     const load = () => {
       statsFn().then(setStats).catch(() => {});
-      donorsFn({ data: { limit: 10 } }).then(setDonors).catch(() => {});
+      donorsFn({ data: { limit: 10, donorType: "company" } }).then(setCompanies).catch(() => {});
+      donorsFn({ data: { limit: 10, donorType: "individual" } }).then(setIndividuals).catch(() => {});
     };
     load();
     settingsFn().then(setSettings).catch(() => {});
     const t = setInterval(load, 30000);
     return () => clearInterval(t);
   }, [statsFn, settingsFn, donorsFn]);
+
 
   const target = stats?.target ?? 1000000;
   const done = stats?.done ?? 0;
@@ -145,21 +148,21 @@ function InitiativeHome() {
               <Sparkles className="h-12 w-12 text-primary" />
               <h2 className="text-2xl font-bold">{t.about}</h2>
             </>}
-            back={<><h3 className="text-xl font-bold text-primary mb-3">{t.about}</h3><p className="text-sm leading-relaxed text-foreground/85">{(isAr ? settings?.about_ar : settings?.about_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
+            back={<><h3 className="text-xl font-bold text-primary mb-3">{t.about}</h3><p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">{(isAr ? settings?.about_ar : settings?.about_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
           />
           <FlipCard
             front={<>
               <Target className="h-12 w-12 text-secondary" />
               <h2 className="text-2xl font-bold">{t.mission}</h2>
             </>}
-            back={<><h3 className="text-xl font-bold text-secondary mb-3">{t.mission}</h3><p className="text-sm leading-relaxed text-foreground/85">{(isAr ? settings?.mission_ar : settings?.mission_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
+            back={<><h3 className="text-xl font-bold text-secondary mb-3">{t.mission}</h3><p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">{(isAr ? settings?.mission_ar : settings?.mission_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
           />
           <FlipCard
             front={<>
               <HeartHandshake className="h-12 w-12 text-secondary" />
               <h2 className="text-2xl font-bold">{t.values}</h2>
             </>}
-            back={<><h3 className="text-xl font-bold text-secondary mb-3">{t.values}</h3><p className="text-sm leading-relaxed text-foreground/85">{(isAr ? settings?.values_ar : settings?.values_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
+            back={<><h3 className="text-xl font-bold text-secondary mb-3">{t.values}</h3><p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">{(isAr ? settings?.values_ar : settings?.values_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
           />
         </section>
 
@@ -276,8 +279,8 @@ function InitiativeHome() {
         </section>
 
         {/* TOP DONORS */}
-        <section className="container mx-auto px-4 sm:px-6 mt-24">
-          <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+        <section className="container mx-auto px-4 sm:px-6 mt-24 space-y-10">
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold flex items-center gap-3"><Trophy className="h-8 w-8 text-secondary" />{t.donorsTitle}</h2>
               <p className="text-muted-foreground mt-2">{t.donorsSub}</p>
@@ -286,36 +289,25 @@ function InitiativeHome() {
               <Button variant="outline">{t.viewAll} <ArrowRight className="h-4 w-4 ms-2" /></Button>
             </Link>
           </div>
-          <div className="rounded-3xl border border-border bg-card overflow-hidden">
-            {donors.length === 0 ? (
-              <p className="p-10 text-center text-muted-foreground">{isAr ? "لم يُسجَّل بعد أي راعٍ — كن أول الداعمين!" : "No sponsors yet — be the first!"}</p>
-            ) : (
-              <table className="w-full text-sm">
-                <thead className="bg-muted/50 text-start">
-                  <tr>
-                    <th className="p-4 text-start">#</th>
-                    <th className="p-4 text-start">{isAr ? "الراعي" : "Sponsor"}</th>
-                    <th className="p-4 text-start">{isAr ? "المقاعد" : "Chairs"}</th>
-                    <th className="p-4 text-start">{isAr ? "المساهمة" : "Amount"}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {donors.map((d, i) => (
-                    <tr key={d.donor_name} className="border-t border-border">
-                      <td className="p-4 font-bold text-primary">{i + 1}</td>
-                      <td className="p-4 flex items-center gap-3">
-                        {d.logo_url && <img src={d.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />}
-                        <span className="font-medium">{d.donor_display_name || d.donor_name}</span>
-                      </td>
-                      <td className="p-4">{Number(d.total_chairs).toLocaleString()}</td>
-                      <td className="p-4">${Number(d.total_amount).toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+
+          <DonorTable
+            title={isAr ? "أبرز الشركات الراعية" : "Top Sponsoring Companies"}
+            rows={companies}
+            isAr={isAr}
+            sponsorLabel={isAr ? "الشركة" : "Company"}
+            emptyLabel={isAr ? "لا توجد شركات راعية بعد." : "No sponsoring companies yet."}
+          />
+
+          <DonorTable
+            title={isAr ? "أبرز الأفراد الداعمين" : "Top Individual Sponsors"}
+            rows={individuals}
+            isAr={isAr}
+            sponsorLabel={isAr ? "الداعم" : "Individual"}
+            emptyLabel={isAr ? "لا يوجد أفراد داعمون بعد." : "No individual sponsors yet."}
+          />
         </section>
+
+
 
         {/* CTA Section */}
         <section className="container mx-auto px-4 sm:px-6 mt-24 grid gap-6 md:grid-cols-2">
@@ -351,3 +343,47 @@ function InitiativeHome() {
     </div>
   );
 }
+
+function DonorTable({ title, rows, isAr, sponsorLabel, emptyLabel }: {
+  title: string;
+  rows: Array<{ donor_name: string; donor_display_name: string | null; logo_url: string | null; total_chairs: number; total_amount: number }>;
+  isAr: boolean;
+  sponsorLabel: string;
+  emptyLabel: string;
+}) {
+  return (
+    <div>
+      <h3 className="text-xl font-bold mb-3">{title}</h3>
+      <div className="rounded-3xl border border-border bg-card overflow-hidden">
+        {rows.length === 0 ? (
+          <p className="p-10 text-center text-muted-foreground">{emptyLabel}</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-start">
+              <tr>
+                <th className="p-4 text-start">#</th>
+                <th className="p-4 text-start">{sponsorLabel}</th>
+                <th className="p-4 text-start">{isAr ? "المقاعد" : "Chairs"}</th>
+                <th className="p-4 text-start">{isAr ? "المساهمة" : "Amount"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((d, i) => (
+                <tr key={d.donor_name} className="border-t border-border">
+                  <td className="p-4 font-bold text-primary">{i + 1}</td>
+                  <td className="p-4 flex items-center gap-3">
+                    {d.logo_url && <img src={d.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />}
+                    <span className="font-medium">{d.donor_display_name || d.donor_name}</span>
+                  </td>
+                  <td className="p-4">{Number(d.total_chairs).toLocaleString()}</td>
+                  <td className="p-4">${Number(d.total_amount).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+

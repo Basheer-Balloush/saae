@@ -2157,6 +2157,17 @@ export type Database = {
           total_chairs: number
         }[]
       }
+      initiative_top_donors_by_type: {
+        Args: { _donor_type: string; _limit?: number }
+        Returns: {
+          donor_display_name: string
+          donor_name: string
+          last_donation_at: string
+          logo_url: string
+          total_amount: number
+          total_chairs: number
+        }[]
+      }
       is_course_instructor: {
         Args: { _course_id: string; _user_id: string }
         Returns: boolean
