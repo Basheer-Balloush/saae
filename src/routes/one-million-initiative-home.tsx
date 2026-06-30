@@ -307,7 +307,7 @@ function InitiativeHome() {
           />
         </section>
 
-        </section>
+
 
         {/* CTA Section */}
         <section className="container mx-auto px-4 sm:px-6 mt-24 grid gap-6 md:grid-cols-2">
