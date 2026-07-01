@@ -53,8 +53,16 @@ function InstructorLayout() {
           {lang === "ar" ? "حسابك كمدرّب قيد المراجعة" : "Your instructor account is pending review"}
         </h1>
         <p className="mt-3 text-muted-foreground">
-          {lang === "ar" ? "سيتم تفعيله من قبل الإدارة قريباً." : "An admin will activate it shortly."}
+          {lang === "ar"
+            ? "لتفعيل حسابك، عليك تقديم طلب اعتماد رسمي عبر نظام معادلة المدربين (4 مراحل تقييم)."
+            : "To activate your account, submit an accreditation request through the trainer equivalence system (4 evaluation phases)."}
         </p>
+        <a
+          href="/learning-management-system/trainer-apply"
+          className="mt-6 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+        >
+          {lang === "ar" ? "فتح نموذج طلب الاعتماد" : "Open accreditation form"}
+        </a>
       </div>
     );
   }
