@@ -2055,6 +2055,181 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_application_audit: {
+        Row: {
+          actor_id: string | null
+          application_id: string
+          created_at: string
+          from_status:
+            | Database["public"]["Enums"]["trainer_application_status"]
+            | null
+          id: string
+          note: string | null
+          to_status:
+            | Database["public"]["Enums"]["trainer_application_status"]
+            | null
+        }
+        Insert: {
+          actor_id?: string | null
+          application_id: string
+          created_at?: string
+          from_status?:
+            | Database["public"]["Enums"]["trainer_application_status"]
+            | null
+          id?: string
+          note?: string | null
+          to_status?:
+            | Database["public"]["Enums"]["trainer_application_status"]
+            | null
+        }
+        Update: {
+          actor_id?: string | null
+          application_id?: string
+          created_at?: string
+          from_status?:
+            | Database["public"]["Enums"]["trainer_application_status"]
+            | null
+          id?: string
+          note?: string | null
+          to_status?:
+            | Database["public"]["Enums"]["trainer_application_status"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_application_audit_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_application_files: {
+        Row: {
+          application_id: string
+          content_type: string | null
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["trainer_file_kind"]
+          original_name: string
+          size_bytes: number | null
+          storage_path: string
+          user_id: string
+        }
+        Insert: {
+          application_id: string
+          content_type?: string | null
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["trainer_file_kind"]
+          original_name: string
+          size_bytes?: number | null
+          storage_path: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string
+          content_type?: string | null
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["trainer_file_kind"]
+          original_name?: string
+          size_bytes?: number | null
+          storage_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_application_files_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_applications: {
+        Row: {
+          admin_notes: string | null
+          assigned_evaluators: string[]
+          bio: string
+          city: string
+          consent_data: boolean
+          consent_ethics: boolean
+          consent_process: boolean
+          date_of_birth: string
+          decision_at: string | null
+          email: string
+          experience_level: Database["public"]["Enums"]["trainer_experience_level"]
+          full_name_ar: string
+          full_name_en: string
+          github_url: string | null
+          has_prev_training: boolean
+          id: string
+          linkedin_url: string
+          phone: string
+          prev_training_details: string | null
+          specializations: string[]
+          status: Database["public"]["Enums"]["trainer_application_status"]
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          assigned_evaluators?: string[]
+          bio: string
+          city: string
+          consent_data?: boolean
+          consent_ethics?: boolean
+          consent_process?: boolean
+          date_of_birth: string
+          decision_at?: string | null
+          email: string
+          experience_level: Database["public"]["Enums"]["trainer_experience_level"]
+          full_name_ar: string
+          full_name_en: string
+          github_url?: string | null
+          has_prev_training?: boolean
+          id?: string
+          linkedin_url: string
+          phone: string
+          prev_training_details?: string | null
+          specializations?: string[]
+          status?: Database["public"]["Enums"]["trainer_application_status"]
+          submitted_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          assigned_evaluators?: string[]
+          bio?: string
+          city?: string
+          consent_data?: boolean
+          consent_ethics?: boolean
+          consent_process?: boolean
+          date_of_birth?: string
+          decision_at?: string | null
+          email?: string
+          experience_level?: Database["public"]["Enums"]["trainer_experience_level"]
+          full_name_ar?: string
+          full_name_en?: string
+          github_url?: string | null
+          has_prev_training?: boolean
+          id?: string
+          linkedin_url?: string
+          phone?: string
+          prev_training_details?: string | null
+          specializations?: string[]
+          status?: Database["public"]["Enums"]["trainer_application_status"]
+          submitted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2270,6 +2445,14 @@ export type Database = {
           read_ct: number
         }[]
       }
+      trainer_app_transition: {
+        Args: {
+          _application_id: string
+          _note?: string
+          _to_status: Database["public"]["Enums"]["trainer_application_status"]
+        }
+        Returns: undefined
+      }
       unlink_lms_course_from_ams: {
         Args: { _ams_course_id: string }
         Returns: undefined
@@ -2312,6 +2495,19 @@ export type Database = {
         | "payout"
         | "refund"
         | "adjustment"
+      trainer_application_status:
+        | "pending_review"
+        | "incomplete"
+        | "eligibility_check"
+        | "phase_1_theory"
+        | "phase_2_practical"
+        | "phase_3_training"
+        | "phase_4_interview"
+        | "scoring"
+        | "approved"
+        | "rejected"
+      trainer_experience_level: "lt_1" | "1_2" | "3_5" | "5_plus"
+      trainer_file_kind: "cv" | "work_sample" | "avatar"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2467,6 +2663,20 @@ export const Constants = {
         "refund",
         "adjustment",
       ],
+      trainer_application_status: [
+        "pending_review",
+        "incomplete",
+        "eligibility_check",
+        "phase_1_theory",
+        "phase_2_practical",
+        "phase_3_training",
+        "phase_4_interview",
+        "scoring",
+        "approved",
+        "rejected",
+      ],
+      trainer_experience_level: ["lt_1", "1_2", "3_5", "5_plus"],
+      trainer_file_kind: ["cv", "work_sample", "avatar"],
     },
   },
 } as const
