@@ -140,7 +140,7 @@ function AdminTrainerApplications() {
     const { error } = await supabase.rpc("trainer_app_transition", {
       _application_id: selected.id,
       _to_status: newStatus as never,
-      _note: note || null,
+      _note: note || undefined,
     });
     setSaving(false);
     if (error) { toast.error(toUserMessage(error)); return; }
