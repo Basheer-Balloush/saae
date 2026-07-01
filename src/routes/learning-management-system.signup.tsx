@@ -140,15 +140,21 @@ function LmsSignup() {
                 : "Open the link to activate your account."}
             </p>
             {asInstructor && (
-              <div className="mt-2 w-full rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
+              <div className="mt-2 w-full rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-900 dark:text-amber-200 space-y-2">
                 <p className="font-semibold">
-                  {lang === "ar" ? "⏳ طلبك كمدرّب قيد المراجعة" : "⏳ Your instructor request is under review"}
+                  {lang === "ar" ? "⏳ الخطوة التالية: املأ نموذج اعتماد المدرّب" : "⏳ Next step: complete the trainer application"}
                 </p>
-                <p className="mt-1 text-xs opacity-90">
+                <p className="text-xs opacity-90">
                   {lang === "ar"
-                    ? "بعد تأكيد البريد، سيقوم فريق الإدارة بمراجعة طلبك والموافقة عليه قبل أن تتمكن من نشر الدورات."
-                    : "After confirming your email, our admin team will review and approve your request before you can publish courses."}
+                    ? "بعد تأكيد بريدك، سجّل الدخول ثم املأ نموذج طلب الاعتماد (٤ مراحل تقييم: نظري، عملي، تدريب، مقابلة) قبل نشر أي دورة."
+                    : "After confirming your email, sign in and complete the accreditation application (4 evaluation phases) before publishing any course."}
                 </p>
+                <Link
+                  to="/learning-management-system/trainer-apply"
+                  className="inline-block text-xs font-semibold text-primary hover:underline"
+                >
+                  {lang === "ar" ? "فتح نموذج طلب الاعتماد ←" : "Open the accreditation form →"}
+                </Link>
               </div>
             )}
             <Link

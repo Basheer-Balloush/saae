@@ -206,6 +206,12 @@ function AdminHome() {
       desc: ar ? "إحصاءات وأداء" : "Stats & performance",
     },
     {
+      to: "/learning-management-system/admin/trainer-applications",
+      label: ar ? "طلبات اعتماد المدربين" : "Trainer applications",
+      icon: GraduationCap,
+      desc: ar ? "نظام معادلة المدربين" : "Trainer accreditation",
+    },
+    {
       to: "/learning-management-system/admin/users",
       label: ar ? "المستخدمون" : "Users",
       icon: Users,
