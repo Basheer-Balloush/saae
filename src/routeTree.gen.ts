@@ -27,6 +27,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ResourcesAiToolsRouteImport } from './routes/resources.ai-tools'
 import { Route as NewsIdRouteImport } from './routes/news.$id'
 import { Route as LearningManagementSystemVerifyRouteImport } from './routes/learning-management-system.verify'
+import { Route as LearningManagementSystemTrainerApplyRouteImport } from './routes/learning-management-system.trainer-apply'
 import { Route as LearningManagementSystemStudentRouteImport } from './routes/learning-management-system.student'
 import { Route as LearningManagementSystemSignupRouteImport } from './routes/learning-management-system.signup'
 import { Route as LearningManagementSystemResetPasswordRouteImport } from './routes/learning-management-system.reset-password'
@@ -50,6 +51,7 @@ import { Route as LearningManagementSystemInstructorProfileRouteImport } from '.
 import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/learning-management-system.courses.$id'
 import { Route as LearningManagementSystemCertificateIdRouteImport } from './routes/learning-management-system.certificate.$id'
 import { Route as LearningManagementSystemAdminUsersRouteImport } from './routes/learning-management-system.admin.users'
+import { Route as LearningManagementSystemAdminTrainerApplicationsRouteImport } from './routes/learning-management-system.admin.trainer-applications'
 import { Route as LearningManagementSystemAdminReviewsRouteImport } from './routes/learning-management-system.admin.reviews'
 import { Route as LearningManagementSystemAdminEnrollmentRequestsRouteImport } from './routes/learning-management-system.admin.enrollment-requests'
 import { Route as LearningManagementSystemAdminCouponsRouteImport } from './routes/learning-management-system.admin.coupons'
@@ -158,6 +160,12 @@ const LearningManagementSystemVerifyRoute =
   LearningManagementSystemVerifyRouteImport.update({
     id: '/verify',
     path: '/verify',
+    getParentRoute: () => LearningManagementSystemRoute,
+  } as any)
+const LearningManagementSystemTrainerApplyRoute =
+  LearningManagementSystemTrainerApplyRouteImport.update({
+    id: '/trainer-apply',
+    path: '/trainer-apply',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
 const LearningManagementSystemStudentRoute =
@@ -293,6 +301,12 @@ const LearningManagementSystemAdminUsersRoute =
     path: '/users',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const LearningManagementSystemAdminTrainerApplicationsRoute =
+  LearningManagementSystemAdminTrainerApplicationsRouteImport.update({
+    id: '/trainer-applications',
+    path: '/trainer-applications',
+    getParentRoute: () => LearningManagementSystemAdminRoute,
+  } as any)
 const LearningManagementSystemAdminReviewsRoute =
   LearningManagementSystemAdminReviewsRouteImport.update({
     id: '/reviews',
@@ -390,6 +404,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/reset-password': typeof LearningManagementSystemResetPasswordRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentRouteWithChildren
+  '/learning-management-system/trainer-apply': typeof LearningManagementSystemTrainerApplyRoute
   '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
   '/news/$id': typeof NewsIdRoute
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
@@ -402,6 +417,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
+  '/learning-management-system/admin/trainer-applications': typeof LearningManagementSystemAdminTrainerApplicationsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
@@ -440,6 +456,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
   '/learning-management-system/reset-password': typeof LearningManagementSystemResetPasswordRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
+  '/learning-management-system/trainer-apply': typeof LearningManagementSystemTrainerApplyRoute
   '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
   '/news/$id': typeof NewsIdRoute
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
@@ -452,6 +469,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
+  '/learning-management-system/admin/trainer-applications': typeof LearningManagementSystemAdminTrainerApplicationsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
@@ -496,6 +514,7 @@ export interface FileRoutesById {
   '/learning-management-system/reset-password': typeof LearningManagementSystemResetPasswordRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentRouteWithChildren
+  '/learning-management-system/trainer-apply': typeof LearningManagementSystemTrainerApplyRoute
   '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
   '/news/$id': typeof NewsIdRoute
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
@@ -508,6 +527,7 @@ export interface FileRoutesById {
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
+  '/learning-management-system/admin/trainer-applications': typeof LearningManagementSystemAdminTrainerApplicationsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
@@ -553,6 +573,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/reset-password'
     | '/learning-management-system/signup'
     | '/learning-management-system/student'
+    | '/learning-management-system/trainer-apply'
     | '/learning-management-system/verify'
     | '/news/$id'
     | '/resources/ai-tools'
@@ -565,6 +586,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
     | '/learning-management-system/admin/reviews'
+    | '/learning-management-system/admin/trainer-applications'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
@@ -603,6 +625,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/login'
     | '/learning-management-system/reset-password'
     | '/learning-management-system/signup'
+    | '/learning-management-system/trainer-apply'
     | '/learning-management-system/verify'
     | '/news/$id'
     | '/resources/ai-tools'
@@ -615,6 +638,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
     | '/learning-management-system/admin/reviews'
+    | '/learning-management-system/admin/trainer-applications'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
@@ -658,6 +682,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/reset-password'
     | '/learning-management-system/signup'
     | '/learning-management-system/student'
+    | '/learning-management-system/trainer-apply'
     | '/learning-management-system/verify'
     | '/news/$id'
     | '/resources/ai-tools'
@@ -670,6 +695,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
     | '/learning-management-system/admin/reviews'
+    | '/learning-management-system/admin/trainer-applications'
     | '/learning-management-system/admin/users'
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
@@ -842,6 +868,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemVerifyRouteImport
       parentRoute: typeof LearningManagementSystemRoute
     }
+    '/learning-management-system/trainer-apply': {
+      id: '/learning-management-system/trainer-apply'
+      path: '/trainer-apply'
+      fullPath: '/learning-management-system/trainer-apply'
+      preLoaderRoute: typeof LearningManagementSystemTrainerApplyRouteImport
+      parentRoute: typeof LearningManagementSystemRoute
+    }
     '/learning-management-system/student': {
       id: '/learning-management-system/student'
       path: '/student'
@@ -1003,6 +1036,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemAdminUsersRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
     }
+    '/learning-management-system/admin/trainer-applications': {
+      id: '/learning-management-system/admin/trainer-applications'
+      path: '/trainer-applications'
+      fullPath: '/learning-management-system/admin/trainer-applications'
+      preLoaderRoute: typeof LearningManagementSystemAdminTrainerApplicationsRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRoute
+    }
     '/learning-management-system/admin/reviews': {
       id: '/learning-management-system/admin/reviews'
       path: '/reviews'
@@ -1112,6 +1152,7 @@ interface LearningManagementSystemAdminRouteChildren {
   LearningManagementSystemAdminCouponsRoute: typeof LearningManagementSystemAdminCouponsRoute
   LearningManagementSystemAdminEnrollmentRequestsRoute: typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   LearningManagementSystemAdminReviewsRoute: typeof LearningManagementSystemAdminReviewsRoute
+  LearningManagementSystemAdminTrainerApplicationsRoute: typeof LearningManagementSystemAdminTrainerApplicationsRoute
   LearningManagementSystemAdminUsersRoute: typeof LearningManagementSystemAdminUsersRoute
   LearningManagementSystemAdminIndexRoute: typeof LearningManagementSystemAdminIndexRoute
 }
@@ -1128,6 +1169,8 @@ const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminR
       LearningManagementSystemAdminEnrollmentRequestsRoute,
     LearningManagementSystemAdminReviewsRoute:
       LearningManagementSystemAdminReviewsRoute,
+    LearningManagementSystemAdminTrainerApplicationsRoute:
+      LearningManagementSystemAdminTrainerApplicationsRoute,
     LearningManagementSystemAdminUsersRoute:
       LearningManagementSystemAdminUsersRoute,
     LearningManagementSystemAdminIndexRoute:
@@ -1196,6 +1239,7 @@ interface LearningManagementSystemRouteChildren {
   LearningManagementSystemResetPasswordRoute: typeof LearningManagementSystemResetPasswordRoute
   LearningManagementSystemSignupRoute: typeof LearningManagementSystemSignupRoute
   LearningManagementSystemStudentRoute: typeof LearningManagementSystemStudentRouteWithChildren
+  LearningManagementSystemTrainerApplyRoute: typeof LearningManagementSystemTrainerApplyRoute
   LearningManagementSystemVerifyRoute: typeof LearningManagementSystemVerifyRoute
   LearningManagementSystemIndexRoute: typeof LearningManagementSystemIndexRoute
   LearningManagementSystemCertificateIdRoute: typeof LearningManagementSystemCertificateIdRoute
@@ -1218,6 +1262,8 @@ const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildr
     LearningManagementSystemSignupRoute: LearningManagementSystemSignupRoute,
     LearningManagementSystemStudentRoute:
       LearningManagementSystemStudentRouteWithChildren,
+    LearningManagementSystemTrainerApplyRoute:
+      LearningManagementSystemTrainerApplyRoute,
     LearningManagementSystemVerifyRoute: LearningManagementSystemVerifyRoute,
     LearningManagementSystemIndexRoute: LearningManagementSystemIndexRoute,
     LearningManagementSystemCertificateIdRoute:
