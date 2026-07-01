@@ -1,112 +1,55 @@
-Plan: Wrap the existing Lovable web app as a native mobile app using Capacitor and publish to App Store / Google Play.
+# Trainer Accreditation System — Phased Plan
 
-## Overview
+The full spec is a large state machine (application → 4 evaluation phases → scoring → probation → 6-month re-evaluation → strikes). I'll ship it in **3 phases** so each is reviewable and usable. This plan covers **Phase 1**, which delivers what you asked for today: the detailed application form when a user clicks "Be a Trainer", and the admin button to view that submission.
 
-The project is already a responsive web app (React + TanStack Start). The fastest path to a real native app is Capacitor: it wraps the web app in a native WebView, exposes native APIs, and produces iOS/Android projects that can be signed and submitted to the stores.
+## Phase 1 — Application form + admin viewer (this turn)
 
-## High-level steps
+### Where the form appears
+When someone chooses "Sign up as instructor" on `/learning-management-system/signup`, after creating the auth account we redirect them to a new page `/learning-management-system/instructor/apply` that must be completed before their request goes to admins. If they close it, a banner on the LMS home links them back.
 
-1. Add Capacitor core + iOS + Android packages.
-2. Build the web app for production.
-3. Initialize Capacitor with the app ID, name, and webDir pointing at the build output.
-4. Add native platform projects (`npx cap add ios`, `npx cap add android`).
-5. Configure app metadata (bundle ID, display name, icons, splash screens, deep links, allowed origins).
-6. Replace any web-only features with native-safe alternatives (OAuth redirect, file downloads, push if needed).
-7. Test locally on emulator / physical device.
-8. Build signed release binaries and submit to App Store Connect / Google Play Console.
+### Application form fields (all from your spec §2)
+**Personal**: full name AR + EN, email (from auth), phone, date of birth (18+ check), city, optional profile photo.
+**Eligibility**: AI experience (dropdown <1 / 1-2 / 3-5 / 5+), specializations (multi-select: ML, NLP, Automation, CV, LLMs, Other), bio (min 100 words), CV upload (PDF required), LinkedIn (required), GitHub/portfolio (optional), previous training experience (yes/no + textarea), work samples (multiple PDF/image uploads, min 1).
+**Consents**: 3 required checkboxes (ethics policy, data processing, understanding of 4-phase equivalence + periodic re-evaluation).
 
-## Technical details
+Client-side validation with zod; server-side re-validation via `submitTrainerApplication` server function.
 
-### Capacitor project setup
+### Database (new tables)
+- `trainer_applications` — user_id, status enum (`pending_review`, `incomplete`, `eligibility_check`, `phase_1`, `phase_2`, `phase_3`, `phase_4`, `scoring`, `approved`, `rejected`), all form field columns, `submitted_at`, `decision_at`, `assigned_evaluators uuid[]`.
+- `trainer_application_files` — application_id, kind (`cv` | `work_sample` | `avatar`), storage_path, original_name.
+- `trainer_application_audit` — application_id, actor_id, from_status, to_status, note, created_at (audit trail).
 
-```bash
-bun add @capacitor/core @capacitor/ios @capacitor/android
-bun add -D @capacitor/cli
-```
+Files go to a new **private** storage bucket `trainer-applications` with RLS: applicant can read their own; admins can read all.
 
-Create `capacitor.config.ts`:
+RLS: applicant can INSERT/SELECT/UPDATE their own (only while `pending_review` or `incomplete`); admins (`is_lms_admin`) can SELECT/UPDATE all.
 
-```typescript
-import { CapacitorConfig } from '@capacitor/cli';
+Phase 2 tables (`application_phases`, `trainer_profiles`, `re_evaluations`, `warnings`, `evaluators`) will be added in Phase 2 — creating them empty now would just clutter the schema.
 
-const config: CapacitorConfig = {
-  appId: 'org.aisyria.lms',
-  appName: 'SAAE LMS',
-  webDir: 'dist',
-  server: {
-    androidScheme: 'https',
-    allowNavigation: ['saae.lovable.app', 'www.aisyria.org', 'aisyria.org'],
-  },
-  bundledWebRuntime: false,
-};
+### Admin dashboard
+New route `/learning-management-system/admin/trainer-applications`:
+- List table: name, email, submitted date, status badge, action buttons.
+- **"View submission" button** on each row → opens a dialog rendering every field the applicant submitted, with signed-URL download links for CV and work samples, plus the audit trail.
+- Status actions for now: `Mark incomplete` (with note back to applicant), `Move to eligibility check`, `Reject`. Full committee assignment + scoring UI comes in Phase 2.
 
-export default config;
-```
+Also added: link in existing `/learning-management-system/admin` index.
 
-Run:
+### Scoring formula — single source of truth
+Even though scoring UI is Phase 2, I'll create `src/lib/trainer-scoring.ts` **now** with the `computeFinalScore` / `computeLevel` functions exactly as your spec defines them (weights 0.30/0.30/0.30/0.10, pass ≥80 AND every phase ≥50, level thresholds 95/90/85/80). Phase 2 UI will import from here; nowhere else will re-implement the math.
 
-```bash
-npx cap add ios
-npx cap add android
-```
+### Signup flow change
+Remove the "instructor" radio from the signup page. New flow: everyone signs up as a student, then a "Become a trainer" CTA on the student dashboard opens the application. This matches your spec (application → review → approval → profile completion) instead of the current "auto-create pending instructor" shortcut.
 
-### Web build
+## Phase 2 — Evaluation pipeline (next request)
+Evaluator role + dashboard, per-phase criteria scoring forms, auto-score engine wired to `trainer-scoring.ts`, committee assignment (manual + round-robin), decision + email notification, `trainer_profiles` with auto-permission activation by level.
 
-The existing Vite build must produce a static `dist/` folder. Capacitor loads `index.html` from that folder and the app runs as a SPA inside the native WebView. If the app uses TanStack Start SSR, we need a static export or a server-hosted fallback. The simplest route for Capacitor is to point the WebView at the published URL (`https://saae.lovable.app`) instead of a bundled build, but that requires an internet connection and careful CORS/Auth handling. Recommended first approach: bundle a static production build in the app.
+## Phase 3 — Lifecycle automation (later)
+30-day probation flag + cron reminders, 6-month re-evaluation cron, strikes table with auto-revoke at 3, governance notifications.
 
-### Icons / splash screens
+## Technical notes
+- Server functions live in `src/lib/trainer-applications.functions.ts` (client-safe path).
+- Admin route uses `requireAdminBeforeLoad` guard (`ssr: false`) like other admin routes.
+- File uploads: client uploads directly to storage with a per-user prefix; server function then records the row.
+- Bilingual UI (AR/EN) using existing `useLang()` pattern.
+- No changes to any existing tables in this phase.
 
-Generate a full icon/splash set from a single 1024x1024 source using `@capacitor/assets`:
-
-```bash
-bun add -D @capacitor/assets
-```
-
-Place source images in `resources/icon.png` and `resources/splash.png`, then run:
-
-```bash
-npx capacitor-assets generate
-```
-
-### Native-specific considerations
-
-- **Auth / OAuth**: Google/Apple OAuth inside a WebView can be blocked by providers. Use Capacitor Browser plugin (`@capacitor/browser`) for system-browser OAuth, then handle the callback via a custom URL scheme (`org.aisyria.lms://auth/callback`).
-- **Status bar / safe areas**: Use `@capacitor/status-bar` and CSS `env(safe-area-inset-*)` to handle notches.
-- **Keyboard**: `@capacitor/keyboard` to avoid input hiding.
-- **Push notifications**: If needed later, add `@capacitor/push-notifications` and configure FCM / APNs.
-- **Payments**: Keep existing web payment flow or replace with native in-app purchases if required by store policies.
-
-### Testing
-
-```bash
-npx cap open ios      # opens Xcode
-npx cap open android  # opens Android Studio
-```
-
-Run on emulators, then on real devices with provisioning / signing configured.
-
-### Publishing
-
-- iOS: Archive in Xcode, upload to App Store Connect, fill App Store listing, submit for review.
-- Android: Generate signed AAB in Android Studio, upload to Google Play Console, submit for review.
-
-## Deliverables
-
-- `capacitor.config.ts` in project root.
-- `ios/` and `android/` native project folders.
-- Updated build script to produce `dist/` then sync with Capacitor.
-- Documentation for local run and store submission.
-
-## Open questions before implementation
-
-1. Should the app load the live web URL (`https://saae.lovable.app`) or bundle a static build? Loading the live URL is faster to update but requires internet. Bundling is more "store-like" and works offline after initial load.
-2. What bundle ID should be used? Suggested: `org.aisyria.lms`.
-3. Do you need push notifications from the start?
-4. Do you have Apple Developer ($99/year) and Google Play ($25 one-time) accounts ready?
-
-## Milestones
-
-1. Capacitor setup + local iOS/Android build.
-2. Auth via system browser + custom URL scheme.
-3. Icons / splash + safe-area polish.
-4. Signed release builds + store submission.
+Approve to proceed with Phase 1, or tell me what to adjust (e.g. keep the old instructor signup shortcut, drop the CV requirement, change required consents).
