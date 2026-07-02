@@ -116,8 +116,15 @@ function SurveyPage() {
   };
 
   const submit = async () => {
-    if (!form.full_name.trim() || !form.phone.trim()) {
-      toast.error("الرجاء تعبئة الاسم ورقم الهاتف");
+    if (!form.full_name.trim() || !form.phone.trim() || !form.email.trim()) {
+      toast.error("الرجاء تعبئة الاسم ورقم الهاتف والبريد الإلكتروني");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(form.email.trim())) {
+      toast.error("الرجاء إدخال بريد إلكتروني صحيح");
       return;
     }
     if (!form.subscription_type) {
@@ -129,7 +136,7 @@ function SurveyPage() {
       const { error } = await supabase.from("initiative_survey_responses").insert({
         ...form,
         full_name: form.full_name.trim(),
-        email: form.email.trim() || null,
+        email: form.email.trim(),
         phone: form.phone.trim(),
       });
       if (error) throw error;
