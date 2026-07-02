@@ -137,7 +137,7 @@ function LmsHome() {
       navigate({ to: "/learning-management-system/instructor" });
       return;
     }
-    navigate({ to: "/learning-ground-management-system/trainer-apply" as any });
+    navigate({ to: "/learning-management-system/trainer-apply" });
   };
 
 
