@@ -95,9 +95,10 @@ const STATUSES = [
 
 const SUBSCRIPTIONS = [
   { value: "waitlist", label: "قائمة الانتظار (ممولة من قبل المؤسسات والشركات)" },
-  { value: "self", label: "ادفع عن نفسي 1$" },
+  { value: "self", label: "ادفع عن نفسي — 1 دولار" },
   { value: "self_and_donate", label: "ادفع عن نفسي وتبرّع لآخرين غيري" },
 ];
+
 
 function SurveyPage() {
   const [submitting, setSubmitting] = useState(false);

@@ -381,6 +381,13 @@ function AdminDashboard() {
           >
             {lang === "ar" ? "مبادرة المليون" : "Million Initiative"}
           </Link>
+          <Link
+            to={"/admin/initiative-survey" as any}
+            className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            {lang === "ar" ? "استبيان المبادرة" : "Initiative Survey"}
+          </Link>
+
         </div>
 
         {tab === "news" ? (
