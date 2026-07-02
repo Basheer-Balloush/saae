@@ -13,7 +13,7 @@ import { CheckCircle2, Sparkles } from "lucide-react";
 export const Route = createFileRoute("/initiative-survey")({
   head: () => ({
     meta: [
-      { title: "استبيان مبادرة مليون مستخدم للذكاء الاصطناعي السوري" },
+      { title: "استبيان مبادرة مليون مستخدم للذاء الاصطناعي السوري" },
       {
         name: "description",
         content:
@@ -29,13 +29,7 @@ export const Route = createFileRoute("/initiative-survey")({
   component: SurveyPage,
 });
 
-const HEARD_OPTIONS = [
-  "من صديق أو زميل",
-  "وسائل التواصل الاجتماعي",
-  "موقع الجمعية",
-  "فعالية أو ندوة",
-  "أخرى",
-];
+const HEARD_OPTIONS = ["من صديق أو زميل", "وسائل التواصل الاجتماعي", "موقع الجمعية", "فعالية أو ندوة", "أخرى"];
 
 const AI_RELATION = [
   "لم أجرّبها إطلاقًا",
@@ -71,11 +65,7 @@ const METHODS = [
   "أخرى",
 ];
 
-const DEVICES = [
-  "الهاتف المحمول فقط",
-  "الحاسوب المحمول أو المكتبي فقط",
-  "كلاهما حسب المكان",
-];
+const DEVICES = ["الهاتف المحمول فقط", "الحاسوب المحمول أو المكتبي فقط", "كلاهما حسب المكان"];
 
 const MOTIVATIONS = [
   "زيادة الدخل وفرص العمل",
@@ -85,20 +75,13 @@ const MOTIVATIONS = [
   "الانضمام مع الأصدقاء وعدم التأخر عنهم",
 ];
 
-const STATUSES = [
-  "طالب جامعي",
-  "خريج ويبحث عن عمل",
-  "موظف بدوام",
-  "صاحب مشروع صغير",
-  "عاطل عن العمل حاليًا",
-];
+const STATUSES = ["طالب جامعي", "خريج ويبحث عن عمل", "موظف بدوام", "صاحب مشروع صغير", "عاطل عن العمل حاليًا"];
 
 const SUBSCRIPTIONS = [
   { value: "waitlist", label: "قائمة الانتظار (ممولة من قبل المؤسسات والشركات)" },
   { value: "self", label: "ادفع عن نفسي — 1 دولار" },
   { value: "self_and_donate", label: "ادفع عن نفسي وتبرّع لآخرين غيري" },
 ];
-
 
 function SurveyPage() {
   const [submitting, setSubmitting] = useState(false);
@@ -161,12 +144,16 @@ function SurveyPage() {
 
   if (done) {
     return (
-      <div dir="rtl" className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex items-center justify-center px-4 py-20">
+      <div
+        dir="rtl"
+        className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex items-center justify-center px-4 py-20"
+      >
         <div className="max-w-lg text-center rounded-3xl border border-border bg-card p-10 shadow-lg">
           <CheckCircle2 className="mx-auto h-16 w-16 text-primary" />
           <h1 className="mt-6 text-3xl font-bold">شكراً لمشاركتك!</h1>
           <p className="mt-4 text-muted-foreground">
-            تم استلام إجاباتك بنجاح، وسنعتمد عليها لبناء أفضل تجربة تعليمية مجانية لك ضمن مبادرة مليون مستخدم للذكاء الاصطناعي السوري.
+            تم استلام إجاباتك بنجاح، وسنعتمد عليها لبناء أفضل تجربة تعليمية مجانية لك ضمن مبادرة مليون مستخدم للذكاء
+            الاصطناعي السوري.
           </p>
           <Link to="/one-million-initiative-home">
             <Button className="mt-8">العودة لصفحة المبادرة</Button>
@@ -206,11 +193,19 @@ function SurveyPage() {
           </Section>
 
           <Section title="١. من أين سمعت عن المبادرة؟">
-            <RadioList value={form.heard_from} onChange={(v) => setForm({ ...form, heard_from: v })} options={HEARD_OPTIONS} />
+            <RadioList
+              value={form.heard_from}
+              onChange={(v) => setForm({ ...form, heard_from: v })}
+              options={HEARD_OPTIONS}
+            />
           </Section>
 
           <Section title="٢. كيف تصف علاقتك الحالية بأدوات الذكاء الاصطناعي؟">
-            <RadioList value={form.ai_relationship} onChange={(v) => setForm({ ...form, ai_relationship: v })} options={AI_RELATION} />
+            <RadioList
+              value={form.ai_relationship}
+              onChange={(v) => setForm({ ...form, ai_relationship: v })}
+              options={AI_RELATION}
+            />
           </Section>
 
           <Section title="٣. ما أكثر ما ترغب بتعلّمه؟ (اختر حتى 3 خيارات)">
@@ -218,7 +213,10 @@ function SurveyPage() {
               {INTERESTS.map((opt) => {
                 const checked = form.learning_interests.includes(opt);
                 return (
-                  <label key={opt} className="flex items-center gap-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-muted/50 transition">
+                  <label
+                    key={opt}
+                    className="flex items-center gap-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-muted/50 transition"
+                  >
                     <Checkbox checked={checked} onCheckedChange={() => toggleInterest(opt)} />
                     <span className="text-sm">{opt}</span>
                   </label>
@@ -228,11 +226,19 @@ function SurveyPage() {
           </Section>
 
           <Section title="٤. ما أكبر عائق يمنعك من التعلّم بجدية؟">
-            <RadioList value={form.biggest_obstacle} onChange={(v) => setForm({ ...form, biggest_obstacle: v })} options={OBSTACLES} />
+            <RadioList
+              value={form.biggest_obstacle}
+              onChange={(v) => setForm({ ...form, biggest_obstacle: v })}
+              options={OBSTACLES}
+            />
           </Section>
 
           <Section title="٥. ما الطريقة الأنسب لك للتعلّم؟">
-            <RadioList value={form.learning_method} onChange={(v) => setForm({ ...form, learning_method: v })} options={METHODS} />
+            <RadioList
+              value={form.learning_method}
+              onChange={(v) => setForm({ ...form, learning_method: v })}
+              options={METHODS}
+            />
           </Section>
 
           <Section title="٦. ما الجهاز الذي ستستخدمه غالبًا؟">
@@ -263,11 +269,19 @@ function SurveyPage() {
           </Section>
 
           <Section title="٨. السبب الأساسي للتسجيل؟">
-            <RadioList value={form.main_motivation} onChange={(v) => setForm({ ...form, main_motivation: v })} options={MOTIVATIONS} />
+            <RadioList
+              value={form.main_motivation}
+              onChange={(v) => setForm({ ...form, main_motivation: v })}
+              options={MOTIVATIONS}
+            />
           </Section>
 
           <Section title="٩. ما وضعك الحالي؟">
-            <RadioList value={form.current_status} onChange={(v) => setForm({ ...form, current_status: v })} options={STATUSES} />
+            <RadioList
+              value={form.current_status}
+              onChange={(v) => setForm({ ...form, current_status: v })}
+              options={STATUSES}
+            />
           </Section>
 
           <Section title="١٠. هل لديك ملاحظة أو اقتراح أو سؤال؟">
