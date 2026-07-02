@@ -42,6 +42,7 @@ import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system.login'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminInitiativeSurveyRouteImport } from './routes/admin.initiative-survey'
 import { Route as AdminInitiativeRouteImport } from './routes/admin.initiative'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system.student.index'
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
@@ -248,6 +249,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInitiativeSurveyRoute = AdminInitiativeSurveyRouteImport.update({
+  id: '/admin/initiative-survey',
+  path: '/admin/initiative-survey',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminInitiativeRoute = AdminInitiativeRouteImport.update({
   id: '/admin/initiative',
   path: '/admin/initiative',
@@ -398,6 +404,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/initiative': typeof AdminInitiativeRoute
+  '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
@@ -454,6 +461,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/initiative': typeof AdminInitiativeRoute
+  '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
@@ -510,6 +518,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/initiative': typeof AdminInitiativeRoute
+  '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
@@ -570,6 +579,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/super-admin'
     | '/admin/initiative'
+    | '/admin/initiative-survey'
     | '/admin/login'
     | '/api/chat'
     | '/attendance-management-system/login'
@@ -626,6 +636,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/super-admin'
     | '/admin/initiative'
+    | '/admin/initiative-survey'
     | '/admin/login'
     | '/api/chat'
     | '/attendance-management-system/login'
@@ -681,6 +692,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/super-admin'
     | '/admin/initiative'
+    | '/admin/initiative-survey'
     | '/admin/login'
     | '/api/chat'
     | '/attendance-management-system/login'
@@ -740,6 +752,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
   AdminInitiativeRoute: typeof AdminInitiativeRoute
+  AdminInitiativeSurveyRoute: typeof AdminInitiativeSurveyRoute
   AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
@@ -984,6 +997,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/initiative-survey': {
+      id: '/admin/initiative-survey'
+      path: '/admin/initiative-survey'
+      fullPath: '/admin/initiative-survey'
+      preLoaderRoute: typeof AdminInitiativeSurveyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/initiative': {
@@ -1313,6 +1333,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,
   AdminInitiativeRoute: AdminInitiativeRoute,
+  AdminInitiativeSurveyRoute: AdminInitiativeSurveyRoute,
   AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,
