@@ -784,6 +784,63 @@ export type Database = {
           },
         ]
       }
+      initiative_survey_responses: {
+        Row: {
+          ai_relationship: string | null
+          biggest_obstacle: string | null
+          commitment_level: number | null
+          created_at: string
+          current_status: string | null
+          device: string | null
+          email: string | null
+          extra_notes: string | null
+          full_name: string | null
+          heard_from: string | null
+          id: string
+          learning_interests: string[] | null
+          learning_method: string | null
+          main_motivation: string | null
+          phone: string | null
+          subscription_type: string | null
+        }
+        Insert: {
+          ai_relationship?: string | null
+          biggest_obstacle?: string | null
+          commitment_level?: number | null
+          created_at?: string
+          current_status?: string | null
+          device?: string | null
+          email?: string | null
+          extra_notes?: string | null
+          full_name?: string | null
+          heard_from?: string | null
+          id?: string
+          learning_interests?: string[] | null
+          learning_method?: string | null
+          main_motivation?: string | null
+          phone?: string | null
+          subscription_type?: string | null
+        }
+        Update: {
+          ai_relationship?: string | null
+          biggest_obstacle?: string | null
+          commitment_level?: number | null
+          created_at?: string
+          current_status?: string | null
+          device?: string | null
+          email?: string | null
+          extra_notes?: string | null
+          full_name?: string | null
+          heard_from?: string | null
+          id?: string
+          learning_interests?: string[] | null
+          learning_method?: string | null
+          main_motivation?: string | null
+          phone?: string | null
+          subscription_type?: string | null
+        }
+        Relationships: []
+      }
       initiative_waitlist: {
         Row: {
           claim_token: string | null

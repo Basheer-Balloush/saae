@@ -137,33 +137,9 @@ function LmsHome() {
       navigate({ to: "/learning-management-system/instructor" });
       return;
     }
-    setApplying(true);
-    try {
-      const { data: existing } = await supabase
-        .from("lms_instructors")
-        .select("approved")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (existing) {
-        toast.info(tr.alreadyRequested);
-      } else {
-        const fullName = ((user as any).user_metadata?.full_name as string) || user.email || "";
-        const { error } = await supabase
-          .from("lms_instructors")
-          .insert({ user_id: user.id, full_name: fullName, approved: false });
-        if (error) throw error;
-        toast.success(
-          lang === "ar"
-            ? "تم استلام طلبك — قيد المراجعة من قبل الإدارة"
-            : "Application received — pending admin review",
-        );
-      }
-    } catch {
-      toast.error(lang === "ar" ? "تعذّر إرسال الطلب" : "Could not submit application");
-    } finally {
-      setApplying(false);
-    }
+    navigate({ to: "/learning-management-system/trainer-apply" });
   };
+
 
 
 
