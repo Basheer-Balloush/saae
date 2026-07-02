@@ -16,6 +16,7 @@ import { Route as OneMillionInitiativeHomeRouteImport } from './routes/one-milli
 import { Route as OneMillionInitiativeDonorsRouteImport } from './routes/one-million-initiative-donors'
 import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-initiative'
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
+import { Route as InitiativeSurveyRouteImport } from './routes/initiative-survey'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
 import { Route as AboutRouteImport } from './routes/about'
@@ -103,6 +104,11 @@ const LearningManagementSystemRoute =
     path: '/learning-management-system',
     getParentRoute: () => rootRouteImport,
   } as any)
+const InitiativeSurveyRoute = InitiativeSurveyRouteImport.update({
+  id: '/initiative-survey',
+  path: '/initiative-survey',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -383,6 +389,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
+  '/initiative-survey': typeof InitiativeSurveyRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
@@ -439,6 +446,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/initiative-survey': typeof InitiativeSurveyRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
@@ -493,6 +501,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
+  '/initiative-survey': typeof InitiativeSurveyRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
@@ -552,6 +561,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/attendance-management-system'
     | '/contact'
+    | '/initiative-survey'
     | '/learning-management-system'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
@@ -608,6 +618,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/initiative-survey'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
@@ -661,6 +672,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/attendance-management-system'
     | '/contact'
+    | '/initiative-survey'
     | '/learning-management-system'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
@@ -719,6 +731,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
+  InitiativeSurveyRoute: typeof InitiativeSurveyRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
   OneMillionInitiativeRoute: typeof OneMillionInitiativeRoute
   OneMillionInitiativeDonorsRoute: typeof OneMillionInitiativeDonorsRoute
@@ -789,6 +802,13 @@ declare module '@tanstack/react-router' {
       path: '/learning-management-system'
       fullPath: '/learning-management-system'
       preLoaderRoute: typeof LearningManagementSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/initiative-survey': {
+      id: '/initiative-survey'
+      path: '/initiative-survey'
+      fullPath: '/initiative-survey'
+      preLoaderRoute: typeof InitiativeSurveyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -1284,6 +1304,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
+  InitiativeSurveyRoute: InitiativeSurveyRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
   OneMillionInitiativeRoute: OneMillionInitiativeRoute,
   OneMillionInitiativeDonorsRoute: OneMillionInitiativeDonorsRoute,
