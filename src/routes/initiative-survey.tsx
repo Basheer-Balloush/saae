@@ -186,7 +186,7 @@ function SurveyPage() {
               <Field label="رقم الهاتف / واتساب *">
                 <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               </Field>
-              <Field label="البريد الإلكتروني (اختياري)">
+              <Field label="البريد الإلكتروني *">
                 <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               </Field>
             </div>
