@@ -13,7 +13,7 @@ import { CheckCircle2, Sparkles } from "lucide-react";
 export const Route = createFileRoute("/initiative-survey")({
   head: () => ({
     meta: [
-      { title: "استبيان مبادرة مليون مستخدم للذاء الاصطناعي السوري" },
+      { title: "استبيان مبادرة مليون مستخدم للذكاء الاصطناعي السوري" },
       {
         name: "description",
         content:
