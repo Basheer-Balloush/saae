@@ -32,6 +32,7 @@ type Row = {
   current_status: string | null;
   extra_notes: string | null;
   subscription_type: string | null;
+  donation_amount: number | null;
   created_at: string;
 };
 
