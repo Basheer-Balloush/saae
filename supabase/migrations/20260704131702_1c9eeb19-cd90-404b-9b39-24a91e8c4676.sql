@@ -1,0 +1,1 @@
+ALTER TABLE public.initiative_survey_responses ALTER COLUMN email SET NOT NULL;

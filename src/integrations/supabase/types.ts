@@ -792,7 +792,7 @@ export type Database = {
           created_at: string
           current_status: string | null
           device: string | null
-          email: string | null
+          email: string
           extra_notes: string | null
           full_name: string | null
           heard_from: string | null
@@ -810,7 +810,7 @@ export type Database = {
           created_at?: string
           current_status?: string | null
           device?: string | null
-          email?: string | null
+          email: string
           extra_notes?: string | null
           full_name?: string | null
           heard_from?: string | null
@@ -828,7 +828,7 @@ export type Database = {
           created_at?: string
           current_status?: string | null
           device?: string | null
-          email?: string | null
+          email?: string
           extra_notes?: string | null
           full_name?: string | null
           heard_from?: string | null
