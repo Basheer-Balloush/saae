@@ -107,7 +107,7 @@ function AdminSurvey() {
             <tr className="text-start">
               <Th>التاريخ</Th><Th>الاسم</Th><Th>الهاتف</Th><Th>البريد</Th>
               <Th>العنوان</Th><Th>الاختصاص</Th>
-              <Th>نمط الاشتراك</Th><Th>الوضع</Th><Th>الدافع</Th>
+              <Th>نمط الاشتراك</Th><Th>مبلغ التبرّع</Th><Th>الوضع</Th><Th>الدافع</Th>
               <Th>الالتزام</Th><Th>الجهاز</Th><Th>الطريقة</Th>
               <Th>العائق</Th><Th>الاهتمامات</Th><Th>علاقته بالـAI</Th>
               <Th>أدوات استخدمها</Th>
@@ -124,6 +124,7 @@ function AdminSurvey() {
                 <Td>{r.address}</Td>
                 <Td>{r.specialization}</Td>
                 <Td>{SUB_LABEL[r.subscription_type || ""] || r.subscription_type}</Td>
+                <Td>{r.donation_amount ? `$${r.donation_amount}` : "—"}</Td>
                 <Td>{r.current_status}</Td>
                 <Td>{r.main_motivation}</Td>
                 <Td className="text-center">{r.commitment_level ?? "—"}/5</Td>
@@ -138,7 +139,7 @@ function AdminSurvey() {
               </tr>
             ))}
             {!loading && !rows.length && (
-              <tr><td colSpan={18} className="p-8 text-center text-muted-foreground">لا توجد ردود بعد</td></tr>
+              <tr><td colSpan={19} className="p-8 text-center text-muted-foreground">لا توجد ردود بعد</td></tr>
             )}
           </tbody>
         </table>
