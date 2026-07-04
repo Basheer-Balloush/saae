@@ -119,6 +119,7 @@ function SurveyPage() {
     current_status: "",
     extra_notes: "",
     subscription_type: "",
+    donation_amount: "",
   });
 
   const toggleInterest = (opt: string) => {
