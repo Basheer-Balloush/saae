@@ -18,8 +18,11 @@ type Row = {
   full_name: string | null;
   email: string | null;
   phone: string | null;
+  address: string | null;
+  specialization: string | null;
   heard_from: string | null;
   ai_relationship: string | null;
+  ai_tools_used: string | null;
   learning_interests: string[] | null;
   biggest_obstacle: string | null;
   learning_method: string | null;
@@ -57,7 +60,8 @@ function AdminSurvey() {
   const downloadCSV = () => {
     if (!rows.length) { toast.info("لا توجد بيانات"); return; }
     const headers = [
-      "created_at", "full_name", "email", "phone", "heard_from", "ai_relationship",
+      "created_at", "full_name", "email", "phone", "address", "specialization",
+      "heard_from", "ai_relationship", "ai_tools_used",
       "learning_interests", "biggest_obstacle", "learning_method", "device",
       "commitment_level", "main_motivation", "current_status", "subscription_type", "extra_notes",
     ];
@@ -101,9 +105,11 @@ function AdminSurvey() {
           <thead className="bg-muted/50">
             <tr className="text-start">
               <Th>التاريخ</Th><Th>الاسم</Th><Th>الهاتف</Th><Th>البريد</Th>
+              <Th>العنوان</Th><Th>الاختصاص</Th>
               <Th>نمط الاشتراك</Th><Th>الوضع</Th><Th>الدافع</Th>
               <Th>الالتزام</Th><Th>الجهاز</Th><Th>الطريقة</Th>
               <Th>العائق</Th><Th>الاهتمامات</Th><Th>علاقته بالـAI</Th>
+              <Th>أدوات استخدمها</Th>
               <Th>سمع من</Th><Th>ملاحظات</Th>
             </tr>
           </thead>
@@ -114,6 +120,8 @@ function AdminSurvey() {
                 <Td className="font-medium">{r.full_name}</Td>
                 <Td dir="ltr">{r.phone}</Td>
                 <Td dir="ltr">{r.email}</Td>
+                <Td>{r.address}</Td>
+                <Td>{r.specialization}</Td>
                 <Td>{SUB_LABEL[r.subscription_type || ""] || r.subscription_type}</Td>
                 <Td>{r.current_status}</Td>
                 <Td>{r.main_motivation}</Td>
@@ -123,12 +131,13 @@ function AdminSurvey() {
                 <Td>{r.biggest_obstacle}</Td>
                 <Td>{(r.learning_interests || []).join("، ")}</Td>
                 <Td>{r.ai_relationship}</Td>
+                <Td>{r.ai_tools_used}</Td>
                 <Td>{r.heard_from}</Td>
                 <Td className="max-w-[240px] whitespace-pre-wrap">{r.extra_notes}</Td>
               </tr>
             ))}
             {!loading && !rows.length && (
-              <tr><td colSpan={15} className="p-8 text-center text-muted-foreground">لا توجد ردود بعد</td></tr>
+              <tr><td colSpan={18} className="p-8 text-center text-muted-foreground">لا توجد ردود بعد</td></tr>
             )}
           </tbody>
         </table>

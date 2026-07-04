@@ -13,13 +13,13 @@ import { CheckCircle2, Sparkles } from "lucide-react";
 export const Route = createFileRoute("/initiative-survey")({
   head: () => ({
     meta: [
-      { title: "استبيان مبادرة مليون مستخدم للذكاء الاصطناعي السوري" },
+      { title: "استبيان مبادرة مليون مستخدم ذكاء اصطناعي سوري" },
       {
         name: "description",
         content:
-          "شاركنا رأيك لنُصمّم لك مسار تدريبي على أدوات الذكاء الاصطناعي ضمن مبادرة مليون مستخدم للذكاء الاصطناعي السوري.",
+          "شاركنا رأيك لنُصمّم لك مسار تدريبي على أدوات الذكاء الاصطناعي ضمن مبادرة مليون مستخدم ذكاء اصطناعي سوري.",
       },
-      { property: "og:title", content: "استبيان مبادرة مليون مستخدم للذكاء الاصطناعي السوري" },
+      { property: "og:title", content: "استبيان مبادرة مليون مستخدم ذكاء اصطناعي سوري" },
       {
         property: "og:description",
         content: "ساعدنا نبني المسار التدريبي الأنسب لك — دقيقتان فقط.",
@@ -29,7 +29,9 @@ export const Route = createFileRoute("/initiative-survey")({
   component: SurveyPage,
 });
 
-const HEARD_OPTIONS = ["من صديق أو زميل", "وسائل التواصل الاجتماعي", "موقع الجمعية", "فعالية أو ندوة", "أخرى"];
+const OTHER = "أخرى";
+
+const HEARD_OPTIONS = ["من صديق أو زميل", "وسائل التواصل الاجتماعي", "موقع الجمعية", "فعالية أو ندوة", OTHER];
 
 const AI_RELATION = [
   "لم أجرّبها إطلاقًا",
@@ -45,7 +47,7 @@ const INTERESTS = [
   "أتمتة المهام المتكررة في العمل",
   "ريادة الأعمال وتحقيق دخل إضافي",
   "تحليل البيانات وإعداد التقارير",
-  "أخرى",
+  OTHER,
 ];
 
 const OBSTACLES = [
@@ -55,14 +57,14 @@ const OBSTACLES = [
   "الخوف من صعوبة المجال",
   "عدم رؤية فائدة مباشرة شخصية",
   "ارتفاع تكلفة الدورات التدريبية",
-  "أخرى",
+  OTHER,
 ];
 
 const METHODS = [
   "فيديوهات قصيرة أتعلمها في الوقت المناسب لي",
   "جلسات حضورية مباشرة في قاعة أو مدرج",
   "مزيج بين فيديوهات ولقاءات حضورية من وقت لآخر",
-  "أخرى",
+  OTHER,
 ];
 
 const DEVICES = ["الهاتف المحمول فقط", "الحاسوب المحمول أو المكتبي فقط", "كلاهما حسب المكان"];
@@ -73,6 +75,7 @@ const MOTIVATIONS = [
   "الفضول وتعلّم مهارة جديدة",
   "الحصول على شهادة تُضاف إلى السيرة الذاتية",
   "الانضمام مع الأصدقاء وعدم التأخر عنهم",
+  OTHER,
 ];
 
 const STATUSES = ["طالب جامعي", "خريج ويبحث عن عمل", "موظف بدوام", "صاحب مشروع صغير", "عاطل عن العمل حاليًا"];
@@ -83,6 +86,13 @@ const SUBSCRIPTIONS = [
   { value: "self_and_donate", label: "ادفع عن نفسي وتبرّع لآخرين غيري" },
 ];
 
+// AI relationship values that indicate prior usage
+const USED_AI_BEFORE = new Set([
+  "جرّبتها مرات قليلة بشكل غير منتظم",
+  "أستخدمها بشكل دوري لكن دون احتراف",
+  "أستخدمها بشكل احترافي في عملي أو مشروعي",
+]);
+
 function SurveyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -90,14 +100,22 @@ function SurveyPage() {
     full_name: "",
     email: "",
     phone: "",
+    address: "",
+    specialization: "",
     heard_from: "",
+    heard_from_other: "",
     ai_relationship: "",
+    ai_tools_used: "",
     learning_interests: [] as string[],
+    learning_interests_other: "",
     biggest_obstacle: "",
+    biggest_obstacle_other: "",
     learning_method: "",
+    learning_method_other: "",
     device: "",
     commitment_level: 3,
     main_motivation: "",
+    main_motivation_other: "",
     current_status: "",
     extra_notes: "",
     subscription_type: "",
@@ -115,14 +133,14 @@ function SurveyPage() {
     });
   };
 
+  const resolve = (value: string, other: string) => (value === OTHER ? other.trim() || OTHER : value);
+
   const submit = async () => {
     if (!form.full_name.trim() || !form.phone.trim() || !form.email.trim()) {
       toast.error("الرجاء تعبئة الاسم ورقم الهاتف والبريد الإلكتروني");
       return;
     }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     if (!emailRegex.test(form.email.trim())) {
       toast.error("الرجاء إدخال بريد إلكتروني صحيح");
       return;
@@ -131,13 +149,34 @@ function SurveyPage() {
       toast.error("الرجاء اختيار نمط الاشتراك");
       return;
     }
+
+    const interests = form.learning_interests.map((x) =>
+      x === OTHER ? form.learning_interests_other.trim() || OTHER : x,
+    );
+
     setSubmitting(true);
     try {
       const { error } = await supabase.from("initiative_survey_responses").insert({
-        ...form,
         full_name: form.full_name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
+        address: form.address.trim() || null,
+        specialization: form.specialization.trim() || null,
+        heard_from: resolve(form.heard_from, form.heard_from_other),
+        ai_relationship: form.ai_relationship,
+        ai_tools_used:
+          USED_AI_BEFORE.has(form.ai_relationship) && form.ai_tools_used.trim()
+            ? form.ai_tools_used.trim()
+            : null,
+        learning_interests: interests,
+        biggest_obstacle: resolve(form.biggest_obstacle, form.biggest_obstacle_other),
+        learning_method: resolve(form.learning_method, form.learning_method_other),
+        device: form.device,
+        commitment_level: form.commitment_level,
+        main_motivation: resolve(form.main_motivation, form.main_motivation_other),
+        current_status: form.current_status,
+        extra_notes: form.extra_notes,
+        subscription_type: form.subscription_type,
       });
       if (error) throw error;
       setDone(true);
@@ -159,8 +198,8 @@ function SurveyPage() {
           <CheckCircle2 className="mx-auto h-16 w-16 text-primary" />
           <h1 className="mt-6 text-3xl font-bold">شكراً لمشاركتك!</h1>
           <p className="mt-4 text-muted-foreground">
-            تم استلام إجاباتك بنجاح، وسنعتمد عليها لبناء أفضل تجربة تعليمية مجانية لك ضمن مبادرة مليون مستخدم للذكاء
-            الاصطناعي السوري.
+            تم استلام إجاباتك بنجاح، وسنعتمد عليها لبناء أفضل تجربة تعليمية لك ضمن مبادرة مليون مستخدم ذكاء اصطناعي
+            سوري.
           </p>
           <Link to="/one-million-initiative-home">
             <Button className="mt-8">العودة لصفحة المبادرة</Button>
@@ -175,7 +214,7 @@ function SurveyPage() {
       <div className="mx-auto max-w-3xl">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm text-primary font-semibold">
-            <Sparkles className="h-4 w-4" /> مبادرة مليون مستخدم للذكاء الاصطناعي السوري
+            <Sparkles className="h-4 w-4" /> استبيان مبادرة مليون مستخدم ذكاء اصطناعي سوري
           </div>
           <h1 className="mt-4 text-3xl sm:text-4xl font-bold">شاركنا رأيك — دقيقتان فقط</h1>
           <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
@@ -194,7 +233,26 @@ function SurveyPage() {
                 <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               </Field>
               <Field label="البريد الإلكتروني *">
-                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                <Input
+                  type="email"
+                  required
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+              </Field>
+              <Field label="عنوان السكن">
+                <Input
+                  placeholder="المحافظة / المدينة"
+                  value={form.address}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
+                />
+              </Field>
+              <Field label="الاختصاص">
+                <Input
+                  placeholder="مثال: هندسة، طب، تسويق..."
+                  value={form.specialization}
+                  onChange={(e) => setForm({ ...form, specialization: e.target.value })}
+                />
               </Field>
             </div>
           </Section>
@@ -205,6 +263,13 @@ function SurveyPage() {
               onChange={(v) => setForm({ ...form, heard_from: v })}
               options={HEARD_OPTIONS}
             />
+            {form.heard_from === OTHER && (
+              <OtherInput
+                value={form.heard_from_other}
+                onChange={(v) => setForm({ ...form, heard_from_other: v })}
+                placeholder="اذكر المصدر..."
+              />
+            )}
           </Section>
 
           <Section title="٢. كيف تصف علاقتك الحالية بأدوات الذكاء الاصطناعي؟">
@@ -213,6 +278,17 @@ function SurveyPage() {
               onChange={(v) => setForm({ ...form, ai_relationship: v })}
               options={AI_RELATION}
             />
+            {USED_AI_BEFORE.has(form.ai_relationship) && (
+              <div className="mt-3">
+                <Label className="mb-1.5 block text-sm">ما الأدوات التي استخدمتها من قبل؟</Label>
+                <Textarea
+                  rows={2}
+                  placeholder="مثال: ChatGPT، Gemini، Midjourney، Copilot..."
+                  value={form.ai_tools_used}
+                  onChange={(e) => setForm({ ...form, ai_tools_used: e.target.value })}
+                />
+              </div>
+            )}
           </Section>
 
           <Section title="٣. ما أكثر ما ترغب بتعلّمه؟ (اختر حتى 3 خيارات)">
@@ -230,6 +306,13 @@ function SurveyPage() {
                 );
               })}
             </div>
+            {form.learning_interests.includes(OTHER) && (
+              <OtherInput
+                value={form.learning_interests_other}
+                onChange={(v) => setForm({ ...form, learning_interests_other: v })}
+                placeholder="اذكر ما ترغب بتعلّمه..."
+              />
+            )}
           </Section>
 
           <Section title="٤. ما أكبر عائق يمنعك من التعلّم بجدية؟">
@@ -238,6 +321,13 @@ function SurveyPage() {
               onChange={(v) => setForm({ ...form, biggest_obstacle: v })}
               options={OBSTACLES}
             />
+            {form.biggest_obstacle === OTHER && (
+              <OtherInput
+                value={form.biggest_obstacle_other}
+                onChange={(v) => setForm({ ...form, biggest_obstacle_other: v })}
+                placeholder="اذكر العائق..."
+              />
+            )}
           </Section>
 
           <Section title="٥. ما الطريقة الأنسب لك للتعلّم؟">
@@ -246,13 +336,20 @@ function SurveyPage() {
               onChange={(v) => setForm({ ...form, learning_method: v })}
               options={METHODS}
             />
+            {form.learning_method === OTHER && (
+              <OtherInput
+                value={form.learning_method_other}
+                onChange={(v) => setForm({ ...form, learning_method_other: v })}
+                placeholder="اذكر الطريقة..."
+              />
+            )}
           </Section>
 
           <Section title="٦. ما الجهاز الذي ستستخدمه غالبًا؟">
             <RadioList value={form.device} onChange={(v) => setForm({ ...form, device: v })} options={DEVICES} />
           </Section>
 
-          <Section title="٧. مدى التزامك بإكمال مسار مجاني كامل؟">
+          <Section title="٧. مدى التزامك بإكمال مسار كامل؟">
             <div className="flex items-center justify-between gap-3">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
@@ -275,12 +372,19 @@ function SurveyPage() {
             </div>
           </Section>
 
-          <Section title="٨. السبب الأساسي للتسجيل؟">
+          <Section title="٨. السبب الأساسي للتسجيل في مبادرة مليون مستخدم ذكاء اصطناعي سوري؟">
             <RadioList
               value={form.main_motivation}
               onChange={(v) => setForm({ ...form, main_motivation: v })}
               options={MOTIVATIONS}
             />
+            {form.main_motivation === OTHER && (
+              <OtherInput
+                value={form.main_motivation_other}
+                onChange={(v) => setForm({ ...form, main_motivation_other: v })}
+                placeholder="اذكر السبب..."
+              />
+            )}
           </Section>
 
           <Section title="٩. ما وضعك الحالي؟">
@@ -288,15 +392,6 @@ function SurveyPage() {
               value={form.current_status}
               onChange={(v) => setForm({ ...form, current_status: v })}
               options={STATUSES}
-            />
-          </Section>
-
-          <Section title="١٠. هل لديك ملاحظة أو اقتراح أو سؤال؟">
-            <Textarea
-              rows={4}
-              value={form.extra_notes}
-              onChange={(e) => setForm({ ...form, extra_notes: e.target.value })}
-              placeholder="اكتب هنا (اختياري)..."
             />
           </Section>
 
@@ -320,6 +415,15 @@ function SurveyPage() {
                 </label>
               ))}
             </RadioGroup>
+          </Section>
+
+          <Section title="١٠. هل لديك ملاحظة أو اقتراح أو سؤال؟">
+            <Textarea
+              rows={4}
+              value={form.extra_notes}
+              onChange={(e) => setForm({ ...form, extra_notes: e.target.value })}
+              placeholder="اكتب هنا (اختياري)..."
+            />
           </Section>
 
           <Button size="lg" className="w-full h-14 text-base font-bold" onClick={submit} disabled={submitting}>
@@ -348,6 +452,22 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div>
       <Label className="mb-1.5 block text-sm">{label}</Label>
       {children}
+    </div>
+  );
+}
+
+function OtherInput({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <div className="mt-3">
+      <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
     </div>
   );
 }

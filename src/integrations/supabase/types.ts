@@ -786,7 +786,9 @@ export type Database = {
       }
       initiative_survey_responses: {
         Row: {
+          address: string | null
           ai_relationship: string | null
+          ai_tools_used: string | null
           biggest_obstacle: string | null
           commitment_level: number | null
           created_at: string
@@ -801,10 +803,13 @@ export type Database = {
           learning_method: string | null
           main_motivation: string | null
           phone: string | null
+          specialization: string | null
           subscription_type: string | null
         }
         Insert: {
+          address?: string | null
           ai_relationship?: string | null
+          ai_tools_used?: string | null
           biggest_obstacle?: string | null
           commitment_level?: number | null
           created_at?: string
@@ -819,10 +824,13 @@ export type Database = {
           learning_method?: string | null
           main_motivation?: string | null
           phone?: string | null
+          specialization?: string | null
           subscription_type?: string | null
         }
         Update: {
+          address?: string | null
           ai_relationship?: string | null
+          ai_tools_used?: string | null
           biggest_obstacle?: string | null
           commitment_level?: number | null
           created_at?: string
@@ -837,6 +845,7 @@ export type Database = {
           learning_method?: string | null
           main_motivation?: string | null
           phone?: string | null
+          specialization?: string | null
           subscription_type?: string | null
         }
         Relationships: []
