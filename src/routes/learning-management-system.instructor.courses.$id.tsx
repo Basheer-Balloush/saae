@@ -43,7 +43,7 @@ type Course = {
   duration_hours: number | null;
 };
 type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
-type LessonAttachment = { name: string; url: string };
+type LessonAttachment = { name: string; url: string; path?: string };
 type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; is_preview: boolean; duration_seconds: number; display_order: number; attachments: LessonAttachment[] | null };
 type Category = { id: string; name_ar: string; name_en: string | null };
 
@@ -370,11 +370,12 @@ function CourseBuilder() {
         continue;
       }
       const safe = file.name.replace(/[^\w.\-]+/g, "_");
+      // Store in the PRIVATE bucket so materials require enrollment/instructor/admin
+      // access; the player generates short-lived signed URLs at render time.
       const path = `${user.id}/${course.id}/attachments/${lesson.id}/${Date.now()}-${safe}`;
-      const { error } = await supabase.storage.from("lms-media").upload(path, file, { upsert: true, contentType: file.type || undefined });
+      const { error } = await supabase.storage.from("lms-private").upload(path, file, { upsert: true, contentType: file.type || undefined });
       if (error) { toast.error(`${file.name}: ${toUserMessage(error)}`); continue; }
-      const { data: pub } = supabase.storage.from("lms-media").getPublicUrl(path);
-      next.push({ name: file.name, url: pub.publicUrl });
+      next.push({ name: file.name, path, url: "" });
     }
     await updateLesson(lesson.id, { attachments: next });
     toast.success(lang === "ar" ? "تم رفع المرفقات" : "Attachments uploaded");
