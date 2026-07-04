@@ -149,7 +149,17 @@ function Player() {
   if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
 
   const safeHref = (url: string) => (/^https?:\/\//i.test(url) ? url : "#");
-  const attachments = Array.isArray(current?.attachments) ? (current!.attachments as { name: string; url: string }[]) : [];
+  const attachments = Array.isArray(current?.attachments) ? (current!.attachments as { name: string; url?: string; path?: string }[]) : [];
+
+  const openAttachment = async (a: { name: string; url?: string; path?: string }) => {
+    if (a.path) {
+      const { data, error } = await supabase.storage.from("lms-private").createSignedUrl(a.path, 300, { download: a.name });
+      if (error || !data?.signedUrl) return;
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+    if (a.url) window.open(safeHref(a.url), "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 grid lg:grid-cols-[1fr_320px] gap-6">
