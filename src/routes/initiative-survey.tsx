@@ -150,6 +150,10 @@ function SurveyPage() {
       toast.error("الرجاء اختيار نمط الاشتراك");
       return;
     }
+    if (form.subscription_type === "self_and_donate" && (!form.donation_amount || Number(form.donation_amount) < 1)) {
+      toast.error("الرجاء إدخال مبلغ التبرّع (دولار واحد على الأقل)");
+      return;
+    }
 
     const interests = form.learning_interests.map((x) =>
       x === OTHER ? form.learning_interests_other.trim() || OTHER : x,
