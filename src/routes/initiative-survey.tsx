@@ -182,6 +182,10 @@ function SurveyPage() {
         current_status: form.current_status,
         extra_notes: form.extra_notes,
         subscription_type: form.subscription_type,
+        donation_amount:
+          form.subscription_type === "self_and_donate"
+            ? Math.max(1, Math.floor(Number(form.donation_amount)))
+            : null,
       });
       if (error) throw error;
       setDone(true);
