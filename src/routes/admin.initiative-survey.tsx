@@ -18,8 +18,11 @@ type Row = {
   full_name: string | null;
   email: string | null;
   phone: string | null;
+  address: string | null;
+  specialization: string | null;
   heard_from: string | null;
   ai_relationship: string | null;
+  ai_tools_used: string | null;
   learning_interests: string[] | null;
   biggest_obstacle: string | null;
   learning_method: string | null;
