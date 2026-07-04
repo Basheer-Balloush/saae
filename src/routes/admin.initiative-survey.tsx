@@ -64,7 +64,7 @@ function AdminSurvey() {
       "created_at", "full_name", "email", "phone", "address", "specialization",
       "heard_from", "ai_relationship", "ai_tools_used",
       "learning_interests", "biggest_obstacle", "learning_method", "device",
-      "commitment_level", "main_motivation", "current_status", "subscription_type", "extra_notes",
+      "commitment_level", "main_motivation", "current_status", "subscription_type", "donation_amount", "extra_notes",
     ];
     const esc = (v: any) => {
       if (v === null || v === undefined) return "";
