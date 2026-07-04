@@ -60,7 +60,8 @@ function AdminSurvey() {
   const downloadCSV = () => {
     if (!rows.length) { toast.info("لا توجد بيانات"); return; }
     const headers = [
-      "created_at", "full_name", "email", "phone", "heard_from", "ai_relationship",
+      "created_at", "full_name", "email", "phone", "address", "specialization",
+      "heard_from", "ai_relationship", "ai_tools_used",
       "learning_interests", "biggest_obstacle", "learning_method", "device",
       "commitment_level", "main_motivation", "current_status", "subscription_type", "extra_notes",
     ];
