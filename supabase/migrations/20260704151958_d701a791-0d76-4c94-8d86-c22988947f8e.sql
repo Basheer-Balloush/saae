@@ -1,0 +1,1 @@
+ALTER TABLE public.initiative_survey_responses ADD COLUMN donation_amount integer;
