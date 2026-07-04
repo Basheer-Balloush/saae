@@ -218,9 +218,9 @@ function Player() {
                 <ul className="mt-2 space-y-1.5">
                   {attachments.map((a, i) => (
                     <li key={i}>
-                      <a href={safeHref(a.url)} download={a.name} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+                      <button type="button" onClick={() => openAttachment(a)} className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
                         <Paperclip className="h-3.5 w-3.5" />{a.name}
-                      </a>
+                      </button>
                     </li>
                   ))}
                 </ul>
