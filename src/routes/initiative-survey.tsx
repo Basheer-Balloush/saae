@@ -119,6 +119,7 @@ function SurveyPage() {
     current_status: "",
     extra_notes: "",
     subscription_type: "",
+    donation_amount: "",
   });
 
   const toggleInterest = (opt: string) => {
@@ -149,6 +150,10 @@ function SurveyPage() {
       toast.error("الرجاء اختيار نمط الاشتراك");
       return;
     }
+    if (form.subscription_type === "self_and_donate" && (!form.donation_amount || Number(form.donation_amount) < 1)) {
+      toast.error("الرجاء إدخال مبلغ التبرّع (دولار واحد على الأقل)");
+      return;
+    }
 
     const interests = form.learning_interests.map((x) =>
       x === OTHER ? form.learning_interests_other.trim() || OTHER : x,
@@ -177,6 +182,10 @@ function SurveyPage() {
         current_status: form.current_status,
         extra_notes: form.extra_notes,
         subscription_type: form.subscription_type,
+        donation_amount:
+          form.subscription_type === "self_and_donate"
+            ? Math.max(1, Math.floor(Number(form.donation_amount)))
+            : null,
       });
       if (error) throw error;
       setDone(true);
@@ -415,6 +424,21 @@ function SurveyPage() {
                 </label>
               ))}
             </RadioGroup>
+            {form.subscription_type === "self_and_donate" && (
+              <div className="mt-4 rounded-xl border border-border bg-background p-4">
+                <Label className="mb-1.5 block text-sm font-medium">مبلغ التبرّع (بالدولار) *</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  step={1}
+                  placeholder="مثال: 5"
+                  value={form.donation_amount}
+                  onChange={(e) => setForm({ ...form, donation_amount: e.target.value })}
+                  dir="ltr"
+                />
+                <p className="mt-1.5 text-xs text-muted-foreground">كل 1$ يمول مقعد تدريبي واحد.</p>
+              </div>
+            )}
           </Section>
 
           <Section title="١٠. هل لديك ملاحظة أو اقتراح أو سؤال؟">

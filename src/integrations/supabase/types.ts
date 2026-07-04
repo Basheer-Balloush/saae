@@ -794,6 +794,7 @@ export type Database = {
           created_at: string
           current_status: string | null
           device: string | null
+          donation_amount: number | null
           email: string
           extra_notes: string | null
           full_name: string | null
@@ -815,6 +816,7 @@ export type Database = {
           created_at?: string
           current_status?: string | null
           device?: string | null
+          donation_amount?: number | null
           email: string
           extra_notes?: string | null
           full_name?: string | null
@@ -836,6 +838,7 @@ export type Database = {
           created_at?: string
           current_status?: string | null
           device?: string | null
+          donation_amount?: number | null
           email?: string
           extra_notes?: string | null
           full_name?: string | null
