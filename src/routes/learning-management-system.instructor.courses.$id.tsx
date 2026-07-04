@@ -370,11 +370,12 @@ function CourseBuilder() {
         continue;
       }
       const safe = file.name.replace(/[^\w.\-]+/g, "_");
+      // Store in the PRIVATE bucket so materials require enrollment/instructor/admin
+      // access; the player generates short-lived signed URLs at render time.
       const path = `${user.id}/${course.id}/attachments/${lesson.id}/${Date.now()}-${safe}`;
-      const { error } = await supabase.storage.from("lms-media").upload(path, file, { upsert: true, contentType: file.type || undefined });
+      const { error } = await supabase.storage.from("lms-private").upload(path, file, { upsert: true, contentType: file.type || undefined });
       if (error) { toast.error(`${file.name}: ${toUserMessage(error)}`); continue; }
-      const { data: pub } = supabase.storage.from("lms-media").getPublicUrl(path);
-      next.push({ name: file.name, url: pub.publicUrl });
+      next.push({ name: file.name, path, url: "" });
     }
     await updateLesson(lesson.id, { attachments: next });
     toast.success(lang === "ar" ? "تم رفع المرفقات" : "Attachments uploaded");
