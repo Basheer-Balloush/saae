@@ -96,11 +96,12 @@ function Index() {
     <div id="home" className="min-h-screen bg-background text-foreground">
       <Navbar />
       <main>
+        <LmsCta />
+        <InitiativeCta />
         <FeaturedNews initialNews={news} />
         <Partners />
         <Achievements />
         <Communities />
-        <LmsCta />
       </main>
       <Footer />
     </div>
