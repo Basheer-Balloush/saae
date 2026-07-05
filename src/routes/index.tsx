@@ -4,6 +4,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { FeaturedNews, type HomeNewsRow } from "@/components/site/FeaturedNews";
 import { Communities } from "@/components/site/Communities";
 import { LmsCta } from "@/components/site/LmsCta";
+import { InitiativeCta } from "@/components/site/InitiativeCta";
 import { Achievements } from "@/components/site/Achievements";
 import { Partners } from "@/components/site/Partners";
 import { Footer } from "@/components/site/Footer";
