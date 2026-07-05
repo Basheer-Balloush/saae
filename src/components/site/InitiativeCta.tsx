@@ -20,7 +20,7 @@ export function InitiativeCta() {
         cta: "Explore the initiative",
       };
 
-  const Arrow = isRtl ? ArrowRight : ArrowRight;
+  const Arrow = ArrowRight;
 
   return (
     <section id="initiative" className="relative bg-muted/30 py-10 lg:py-14">
@@ -40,43 +40,23 @@ export function InitiativeCta() {
               {copy.eyebrow}
             </div>
 
-            <h2
-              className="text-display-2 text-foreground"
-              style={{
-                fontFamily: '"Cairo", system-ui, sans-serif',
-                fontWeight: 900,
-                lineHeight: isRtl ? 1.4 : 1.05,
-                letterSpacing: "-0.02em",
-              }}
-            >
+            <h2 className="mt-4 text-display-2 text-foreground">
               {copy.title}
             </h2>
 
-            <p
-              className="mt-5 text-body text-muted-foreground"
-              style={{ fontFamily: '"Cairo", system-ui, sans-serif' }}
-            >
+            <p className="mt-5 text-body text-muted-foreground">
               {copy.body}
             </p>
 
-            <div
-              className="mt-6 h-[2px] w-16"
-              style={{ backgroundColor: "#F77F00" }}
-            />
+            <div className="mt-6 h-[2px] w-16 bg-secondary" />
           </div>
 
           <div className="shrink-0">
             <a
               href="/one-million-initiative"
-              className={`group inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-base transition-all hover:-translate-y-0.5 ${
+              className={`group inline-flex items-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-base font-semibold text-secondary-foreground transition-all hover:-translate-y-0.5 ${
                 isRtl ? "flex-row-reverse" : ""
               }`}
-              style={{
-                backgroundColor: "#F77F00",
-                color: "#ffffff",
-                fontFamily: '"Cairo", system-ui, sans-serif',
-                fontWeight: 700,
-              }}
             >
               {copy.cta}
               <Arrow
@@ -91,3 +71,4 @@ export function InitiativeCta() {
     </section>
   );
 }
+
