@@ -34,6 +34,22 @@ export function InitiativeCta() {
             isRtl ? "lg:flex-row-reverse text-right" : "text-left"
           }`}
         >
+          <div className="shrink-0">
+            <a
+              href="/one-million-initiative"
+              className={`group inline-flex items-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-base font-semibold text-secondary-foreground transition-all hover:-translate-y-0.5 ${
+                isRtl ? "flex-row-reverse" : ""
+              }`}
+            >
+              {copy.cta}
+              <Arrow
+                className={`h-4 w-4 transition-transform ${
+                  isRtl ? "group-hover:-translate-x-1" : "group-hover:translate-x-1"
+                }`}
+              />
+            </a>
+          </div>
+
           <div className="max-w-2xl">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-secondary/30 bg-secondary/10 px-4 py-1.5 text-xs font-semibold text-secondary">
               <Sparkles className="h-3.5 w-3.5" />
@@ -49,22 +65,6 @@ export function InitiativeCta() {
             </p>
 
             <div className="mt-6 h-[2px] w-16 bg-secondary" />
-          </div>
-
-          <div className="shrink-0">
-            <a
-              href="/one-million-initiative"
-              className={`group inline-flex items-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-base font-semibold text-secondary-foreground transition-all hover:-translate-y-0.5 ${
-                isRtl ? "flex-row-reverse" : ""
-              }`}
-            >
-              {copy.cta}
-              <Arrow
-                className={`h-4 w-4 transition-transform ${
-                  isRtl ? "group-hover:-translate-x-1" : "group-hover:translate-x-1"
-                }`}
-              />
-            </a>
           </div>
         </motion.div>
       </div>
