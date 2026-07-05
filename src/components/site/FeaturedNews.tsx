@@ -120,8 +120,6 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   // Hide section entirely until we have published news to show
   if (!slides || slides.length === 0) return null;
 
-  const row = [...slides, ...slides];
-
   return (
     <section id="news" aria-labelledby="news-heading" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32">
       <h1 className="sr-only">
@@ -150,8 +148,16 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
       </div>
 
       <div dir="ltr" className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
-        <div ref={rowRef} className={`flex w-max gap-6 hover:[animation-play-state:paused] ${dir === "rtl" ? "animate-[news-marquee-rtl_60s_linear_infinite]" : "animate-[news-marquee_60s_linear_infinite]"}`}>
-          {row.map((c, i) => {
+        <div
+          ref={rowRef}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+          className="flex w-max cursor-grab gap-6 overflow-x-auto scroll-smooth px-[calc((100vw-1280px)/2+24px)] pb-4 pt-2 [-ms-overflow-style:none] [scrollbar-width:none] active:cursor-grabbing"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          {slides.map((c, i) => {
             const cardClass = "group flex w-[78vw] max-w-[320px] flex-none flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift sm:w-[340px] sm:max-w-none lg:w-[360px]";
             const inner = (
               <>
@@ -185,9 +191,8 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
               </>
             );
             return (
-              <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id! }} onClick={saveOffset} aria-label={`${t.news.readMore}: ${c.title}`} className={cardClass}>
+              <Link key={c.key} to="/news/$id" params={{ id: c.id! }} onClick={saveOffset} aria-label={`${t.news.readMore}: ${c.title}`} className={cardClass}>
                 {inner}
-
               </Link>
             );
           })}
@@ -203,17 +208,6 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
           <ArrowRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
         </Link>
       </div>
-
-      <style>{`
-        @keyframes news-marquee {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-        @keyframes news-marquee-rtl {
-          from { transform: translateX(-50%); }
-          to { transform: translateX(0); }
-        }
-      `}</style>
     </section>
   );
 }
