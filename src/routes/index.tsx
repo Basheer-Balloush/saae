@@ -96,9 +96,9 @@ function Index() {
     <div id="home" className="min-h-screen bg-background text-foreground">
       <Navbar />
       <main>
+        <FeaturedNews initialNews={news} />
         <LmsCta />
         <InitiativeCta />
-        <FeaturedNews initialNews={news} />
         <Partners />
         <Achievements />
         <Communities />
