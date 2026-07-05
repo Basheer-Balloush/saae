@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { communityLabel } from "@/lib/communityCategories";
 import { LogoParticles } from "./LogoParticles";
 
-const SCROLL_KEY = "saae-news-scroll-offset";
+const SCROLL_KEY = "saae-news-marquee-offset";
 
 const IMG = {
   featured: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80",
@@ -44,12 +44,11 @@ function mapNewsRows(rows: HomeNewsRow[], lang: "ar" | "en"): Slide[] {
 
 export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const { t, dir, lang } = useLang();
-  const cats = t.news.categories;
-  const items = t.news.items;
 
   const [slides, setSlides] = useState<Slide[] | null>(() => initialNews ? mapNewsRows(initialNews, lang) : null);
   const rowRef = useRef<HTMLDivElement | null>(null);
-  const dragRef = useRef({ isDragging: false, startX: 0, scrollLeft: 0 });
+  const dragRef = useRef({ isDragging: false, startX: 0, initialOffset: 0 });
+  const didDragRef = useRef(false);
 
   useEffect(() => {
     if (initialNews) {
@@ -68,7 +67,7 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
       });
   }, [initialNews, lang]);
 
-  // Restore scroll position when returning from a news detail page.
+  // Restore marquee position when returning from a news detail page.
   useEffect(() => {
     if (!slides || slides.length === 0) return;
     if (typeof window === "undefined") return;
@@ -79,7 +78,15 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     const row = rowRef.current;
     if (!row) return;
     const apply = () => {
-      row.scrollLeft = savedPx;
+      const half = row.scrollWidth / 2;
+      if (!half) return;
+      const isRtl = dir === "rtl";
+      const actualOffset = isRtl ? savedPx - half : -savedPx;
+      const wrapped = wrapOffset(actualOffset, half);
+      const from = isRtl ? -half : 0;
+      const to = isRtl ? 0 : -half;
+      const pct = (wrapped - from) / (to - from);
+      row.style.animationDelay = `-${(pct * 60).toFixed(3)}s`;
       sessionStorage.removeItem(SCROLL_KEY);
     };
     const id = window.setTimeout(apply, 50);
@@ -89,13 +96,27 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const saveOffset = () => {
     const row = rowRef.current;
     if (!row) return;
-    try { sessionStorage.setItem(SCROLL_KEY, String(row.scrollLeft)); } catch {}
+    const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
+    const offset = Math.abs(m.m41);
+    try { sessionStorage.setItem(SCROLL_KEY, String(offset)); } catch {}
   };
+
+  const wrapOffset = (offset: number, half: number) => {
+    while (offset < -half) offset += half;
+    while (offset > 0) offset -= half;
+    return offset;
+  };
+
+  const animationClass = dir === "rtl" ? "animate-[news-marquee-rtl_60s_linear_infinite]" : "animate-[news-marquee_60s_linear_infinite]";
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const row = rowRef.current;
     if (!row) return;
-    dragRef.current = { isDragging: true, startX: e.clientX - row.scrollLeft, scrollLeft: row.scrollLeft };
+    const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
+    dragRef.current = { isDragging: true, startX: e.clientX, initialOffset: m.m41 };
+    didDragRef.current = false;
+    row.style.transform = `translateX(${m.m41}px)`;
+    row.classList.remove(animationClass);
     row.setPointerCapture(e.pointerId);
     row.style.cursor = "grabbing";
   };
@@ -104,17 +125,39 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     if (!dragRef.current.isDragging) return;
     const row = rowRef.current;
     if (!row) return;
+    const delta = e.clientX - dragRef.current.startX;
+    if (Math.abs(delta) > 4) didDragRef.current = true;
     e.preventDefault();
-    const x = e.clientX - dragRef.current.startX;
-    row.scrollLeft = dragRef.current.scrollLeft - x;
+    const factor = dir === "rtl" ? 1 : -1;
+    const offset = dragRef.current.initialOffset + factor * delta;
+    row.style.transform = `translateX(${offset}px)`;
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     const row = rowRef.current;
     if (!row) return;
     dragRef.current.isDragging = false;
+    const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
+    const half = row.scrollWidth / 2;
+    const offset = wrapOffset(m.m41, half);
+    const isRtl = dir === "rtl";
+    const from = isRtl ? -half : 0;
+    const to = isRtl ? 0 : -half;
+    const pct = (offset - from) / (to - from);
+    row.style.transform = "";
+    row.style.animationDelay = `-${(pct * 60).toFixed(3)}s`;
+    row.classList.add(animationClass);
     try { row.releasePointerCapture(e.pointerId); } catch {}
     row.style.cursor = "grab";
+  };
+
+  const handleLinkClick = (e: React.MouseEvent) => {
+    if (didDragRef.current) {
+      e.preventDefault();
+      didDragRef.current = false;
+    } else {
+      saveOffset();
+    }
   };
 
   // Hide section entirely until we have published news to show
