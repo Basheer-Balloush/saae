@@ -4,6 +4,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { FeaturedNews, type HomeNewsRow } from "@/components/site/FeaturedNews";
 import { Communities } from "@/components/site/Communities";
 import { LmsCta } from "@/components/site/LmsCta";
+import { InitiativeCta } from "@/components/site/InitiativeCta";
 import { Achievements } from "@/components/site/Achievements";
 import { Partners } from "@/components/site/Partners";
 import { Footer } from "@/components/site/Footer";
@@ -95,11 +96,12 @@ function Index() {
     <div id="home" className="min-h-screen bg-background text-foreground">
       <Navbar />
       <main>
+        <LmsCta />
+        <InitiativeCta />
         <FeaturedNews initialNews={news} />
         <Partners />
         <Achievements />
         <Communities />
-        <LmsCta />
       </main>
       <Footer />
     </div>
