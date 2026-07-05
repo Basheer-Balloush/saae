@@ -51,11 +51,6 @@ export function InitiativeCta() {
           </div>
 
           <div className="max-w-2xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-secondary/30 bg-secondary/10 px-4 py-1.5 text-xs font-semibold text-secondary">
-              <Sparkles className="h-3.5 w-3.5" />
-              {copy.eyebrow}
-            </div>
-
             <h2 className="mt-4 text-display-2 text-foreground">
               {copy.title}
             </h2>
