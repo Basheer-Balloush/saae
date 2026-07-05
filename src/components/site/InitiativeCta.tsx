@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 
 export function InitiativeCta() {
@@ -8,13 +8,11 @@ export function InitiativeCta() {
 
   const copy = isRtl
     ? {
-        eyebrow: "مبادرة وطنية",
         title: "مليون مستخدم ذكاء اصطناعي سوري",
         body: "مبادرة وطنية لمحو الأمية في الذكاء الاصطناعي وتمكين مليون سوري من أدوات المستقبل عبر تدريب معتمد وشفاف على كامل الجغرافيا السورية.",
         cta: "اكتشف المبادرة",
       }
     : {
-        eyebrow: "National Initiative",
         title: "One Million Syrian AI Users",
         body: "A national initiative to eradicate AI illiteracy and empower one million Syrians with future-ready tools through accredited, transparent training across Syria.",
         cta: "Explore the initiative",
@@ -51,7 +49,7 @@ export function InitiativeCta() {
           </div>
 
           <div className="max-w-2xl">
-            <h2 className="mt-4 text-display-2 text-foreground">
+            <h2 className="text-display-2 text-foreground">
               {copy.title}
             </h2>
 
