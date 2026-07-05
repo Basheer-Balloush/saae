@@ -46,9 +46,13 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const { t, dir, lang } = useLang();
 
   const [slides, setSlides] = useState<Slide[] | null>(() => initialNews ? mapNewsRows(initialNews, lang) : null);
+  const [isPaused, setIsPaused] = useState(false);
   const rowRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef({ isDragging: false, startX: 0, initialOffset: 0 });
   const didDragRef = useRef(false);
+
+  const animationDuration = 30; // seconds per loop (faster than before)
+  const animationClass = dir === "rtl" ? "animate-[news-marquee-rtl_30s_linear_infinite]" : "animate-[news-marquee_30s_linear_infinite]";
 
   useEffect(() => {
     if (initialNews) {
@@ -86,12 +90,12 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
       const from = isRtl ? -half : 0;
       const to = isRtl ? 0 : -half;
       const pct = (wrapped - from) / (to - from);
-      row.style.animationDelay = `-${(pct * 60).toFixed(3)}s`;
+      row.style.animationDelay = `-${(pct * animationDuration).toFixed(3)}s`;
       sessionStorage.removeItem(SCROLL_KEY);
     };
     const id = window.setTimeout(apply, 50);
     return () => window.clearTimeout(id);
-  }, [slides, dir]);
+  }, [slides, dir, animationDuration]);
 
   const saveOffset = () => {
     const row = rowRef.current;
@@ -107,7 +111,8 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     return offset;
   };
 
-  const animationClass = dir === "rtl" ? "animate-[news-marquee-rtl_60s_linear_infinite]" : "animate-[news-marquee_60s_linear_infinite]";
+  const handleMouseEnter = () => setIsPaused(true);
+  const handleMouseLeave = () => setIsPaused(false);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const row = rowRef.current;
@@ -144,9 +149,11 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     const from = isRtl ? -half : 0;
     const to = isRtl ? 0 : -half;
     const pct = (offset - from) / (to - from);
-    row.style.transform = "";
-    row.style.animationDelay = `-${(pct * 60).toFixed(3)}s`;
+    row.style.animationDelay = `-${(pct * animationDuration).toFixed(3)}s`;
     row.classList.add(animationClass);
+    requestAnimationFrame(() => {
+      row.style.transform = "";
+    });
     try { row.releasePointerCapture(e.pointerId); } catch {}
     row.style.cursor = "grab";
   };
@@ -195,11 +202,14 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
       <div dir="ltr" className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
         <div
           ref={rowRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-          className={`flex w-max cursor-grab gap-6 hover:[animation-play-state:paused] ${animationClass}`}
+          onPointerCancel={handlePointerUp}
+          className={`flex w-max cursor-grab gap-6 touch-pan-y will-change-transform ${animationClass}`}
+          style={{ animationPlayState: isPaused ? "paused" : "running" }}
         >
           {row.map((c, i) => {
             const cardClass = "group flex w-[78vw] max-w-[320px] flex-none flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift sm:w-[340px] sm:max-w-none lg:w-[360px]";
