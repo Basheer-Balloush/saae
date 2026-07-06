@@ -1189,17 +1189,21 @@ type PartnerRow = {
 
 const SIZE_OPTIONS = ["h-16", "h-20", "h-24", "h-28", "h-32", "h-36", "h-40"] as const;
 
-async function uploadPartnerLogo(file: File): Promise<string> {
-  const ext = file.name.split(".").pop() || "png";
+async function uploadPartnerLogo(
+  file: File,
+  onProgress?: (pct: number, loaded: number, total: number) => void,
+): Promise<string> {
+  const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
   const path = `partners/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("news-images").upload(path, file, {
-    cacheControl: "3600",
+  const { publicUrl } = await uploadToSupabaseStorage({
+    bucket: "news-images",
+    path,
+    file,
     upsert: false,
     contentType: file.type || undefined,
+    onProgress,
   });
-  if (error) throw error;
-  const { data } = supabase.storage.from("news-images").getPublicUrl(path);
-  return data.publicUrl;
+  return publicUrl;
 }
 
 function PartnersAdmin({ lang }: { lang: "en" | "ar" }) {
