@@ -193,6 +193,11 @@ export function AdminInstructorEditDialog({
                   {ar ? "رفع صورة" : "Upload image"}
                 </Button>
               </div>
+              {uploadPct && (
+                <div className="mt-2">
+                  <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} />
+                </div>
+              )}
               <Label className="mt-3 block text-xs text-muted-foreground">{ar ? "أو رابط مباشر" : "Or direct URL"}</Label>
               <Input dir="ltr" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} />
             </div>
