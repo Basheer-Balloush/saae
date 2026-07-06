@@ -1423,6 +1423,9 @@ function PartnerForm({
                   </button>
                 )}
               </div>
+              {uploadPct?.which === "dark" && (
+                <div className="mt-2"><UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} compact /></div>
+              )}
             </div>
 
             <div>
