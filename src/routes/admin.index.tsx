@@ -1165,6 +1165,11 @@ function MemberForm({
                 </button>
               )}
             </div>
+            {uploadPct && (
+              <div className="mt-2 max-w-sm">
+                <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} />
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
