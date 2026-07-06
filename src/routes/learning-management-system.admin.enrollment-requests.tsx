@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Check, X, Clock, FileText, ArrowLeft, ArrowRight, ChevronRight, Download, Mail } from "lucide-react";
+import { Loader2, Check, X, Clock, FileText, ArrowLeft, ArrowRight, ChevronRight, Download, Mail, MessageCircle } from "lucide-react";
 import ExcelJS from "exceljs";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
@@ -332,24 +332,26 @@ function AdminEnrollmentRequests() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const decide = async (req: Req, action: "approve" | "reject") => {
+  const decide = async (req: Req, action: "approve" | "reject", notify?: "email" | "whatsapp") => {
     setBusy(req.id);
     try {
       const fn = action === "approve" ? "lms_approve_enrollment_request" : "lms_reject_enrollment_request";
       const { error } = await supabase.rpc(fn, { _request_id: req.id, _admin_notes: noteDraft[req.id] || undefined });
       if (error) throw error;
       if (action === "approve") {
-        try {
-          await sendApprovedEmail({ data: { requestId: req.id, lang: ar ? "ar" : "en" } });
-        } catch (mailErr) {
-          console.error("Failed to send approval email", mailErr);
-          toast.warning(ar ? "تمت الموافقة لكن تعذّر إرسال البريد الإلكتروني" : "Approved but failed to send notification email");
-        }
-        // Open WhatsApp with prefilled message
-        try {
-          await openWhatsAppForRequest(req);
-        } catch (waErr) {
-          console.error("Failed to open WhatsApp", waErr);
+        if (notify === "email") {
+          try {
+            await sendApprovedEmail({ data: { requestId: req.id, lang: ar ? "ar" : "en" } });
+          } catch (mailErr) {
+            console.error("Failed to send approval email", mailErr);
+            toast.warning(ar ? "تمت الموافقة لكن تعذّر إرسال البريد الإلكتروني" : "Approved but failed to send notification email");
+          }
+        } else if (notify === "whatsapp") {
+          try {
+            await openWhatsAppForRequest(req);
+          } catch (waErr) {
+            console.error("Failed to open WhatsApp", waErr);
+          }
         }
       }
       toast.success(ar ? (action === "approve" ? "تمت الموافقة" : "تم الرفض") : (action === "approve" ? "Approved" : "Rejected"));
@@ -507,9 +509,13 @@ function AdminEnrollmentRequests() {
                         <FileText className="h-4 w-4 mx-1" />
                         {ar ? "عرض بيانات التسجيل" : "View form answers"}
                       </Button>
-                      <Button size="sm" onClick={() => decide(r, "approve")} disabled={busy === r.id} className="flex-1 min-w-[100px]">
-                        {busy === r.id ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Check className="h-4 w-4 mx-1" />}
-                        {ar ? "موافقة" : "Approve"}
+                      <Button size="sm" onClick={() => decide(r, "approve", "email")} disabled={busy === r.id} className="flex-1 min-w-[140px]">
+                        {busy === r.id ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Mail className="h-4 w-4 mx-1" />}
+                        {ar ? "موافقة + إيميل" : "Approve + Email"}
+                      </Button>
+                      <Button size="sm" onClick={() => decide(r, "approve", "whatsapp")} disabled={busy === r.id} className="flex-1 min-w-[140px] bg-emerald-600 hover:bg-emerald-700 text-white">
+                        {busy === r.id ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <MessageCircle className="h-4 w-4 mx-1" />}
+                        {ar ? "موافقة + واتساب" : "Approve + WhatsApp"}
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => decide(r, "reject")} disabled={busy === r.id} className="flex-1 min-w-[100px]">
                         <X className="h-4 w-4 mx-1" />
