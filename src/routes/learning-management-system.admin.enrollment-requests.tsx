@@ -509,9 +509,13 @@ function AdminEnrollmentRequests() {
                         <FileText className="h-4 w-4 mx-1" />
                         {ar ? "عرض بيانات التسجيل" : "View form answers"}
                       </Button>
-                      <Button size="sm" onClick={() => decide(r, "approve")} disabled={busy === r.id} className="flex-1 min-w-[100px]">
-                        {busy === r.id ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Check className="h-4 w-4 mx-1" />}
-                        {ar ? "موافقة" : "Approve"}
+                      <Button size="sm" onClick={() => decide(r, "approve", "email")} disabled={busy === r.id} className="flex-1 min-w-[140px]">
+                        {busy === r.id ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Mail className="h-4 w-4 mx-1" />}
+                        {ar ? "موافقة + إيميل" : "Approve + Email"}
+                      </Button>
+                      <Button size="sm" onClick={() => decide(r, "approve", "whatsapp")} disabled={busy === r.id} className="flex-1 min-w-[140px] bg-emerald-600 hover:bg-emerald-700 text-white">
+                        {busy === r.id ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <MessageCircle className="h-4 w-4 mx-1" />}
+                        {ar ? "موافقة + واتساب" : "Approve + WhatsApp"}
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => decide(r, "reject")} disabled={busy === r.id} className="flex-1 min-w-[100px]">
                         <X className="h-4 w-4 mx-1" />
