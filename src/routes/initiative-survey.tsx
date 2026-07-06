@@ -119,6 +119,7 @@ function SurveyPage() {
 
   const [form, setForm] = useState({
     full_name: "",
+    age: "",
     email: "",
     phone: "",
     address: "",
