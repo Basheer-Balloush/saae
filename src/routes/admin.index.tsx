@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X, Globe, Sun, Moon } from "lucide-react";
+import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { UploadProgress } from "@/components/ui/upload-progress";
 import { useLang } from "@/lib/i18n";
 import { AdminChatbotSection } from "@/components/admin/AdminChatbotSection";
 import { useTheme } from "@/lib/theme";
