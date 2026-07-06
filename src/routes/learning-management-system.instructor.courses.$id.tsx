@@ -203,16 +203,20 @@ function CourseBuilder() {
       return;
     }
     setUploading(true);
+    setCoverPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
       const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
       const safeName = `cover-${Date.now()}.${ext}`;
       const path = `${user.id}/${course.id}/${safeName}`;
-      const { error: upErr } = await supabase.storage
-        .from("lms-media")
-        .upload(path, file, { upsert: true, contentType: file.type || undefined });
-      if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from("lms-media").getPublicUrl(path);
-      const bustedUrl = `${pub.publicUrl}?v=${Date.now()}`;
+      const { publicUrl } = await uploadToSupabaseStorage({
+        bucket: "lms-media",
+        path,
+        file,
+        upsert: true,
+        contentType: file.type || undefined,
+        onProgress: (pct, loaded, total) => setCoverPct({ pct, loaded, total, name: file.name }),
+      });
+      const bustedUrl = `${publicUrl}?v=${Date.now()}`;
       const { error: dbErr } = await supabase
         .from("lms_courses")
         .update({ cover_url: bustedUrl })
@@ -224,6 +228,7 @@ function CourseBuilder() {
       toast.error(toUserMessage(e));
     } finally {
       setUploading(false);
+      setCoverPct(null);
     }
   };
 
