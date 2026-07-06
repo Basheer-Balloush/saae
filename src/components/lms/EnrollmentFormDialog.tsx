@@ -50,6 +50,7 @@ export function EnrollmentFormDialog({
   const [fields, setFields] = useState<Field[]>([]);
   const [values, setValues] = useState<Record<string, AnswerValue>>({});
   const [busy, setBusy] = useState(false);
+  const [fileProgress, setFileProgress] = useState<Record<string, { pct: number; loaded: number; total: number; name: string }>>({});
 
   // Base fields
   const [fullName, setFullName] = useState("");
