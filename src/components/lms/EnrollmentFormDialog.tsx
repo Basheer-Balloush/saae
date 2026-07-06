@@ -257,13 +257,23 @@ export function EnrollmentFormDialog({
           </div>
         )}
         {f.field_type === "file" && (
-          <div className="flex items-center gap-2">
-            <label className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-input bg-background text-sm cursor-pointer hover:bg-muted">
-              <Upload className="h-4 w-4" />
-              <span>{ar ? "اختر ملف" : "Choose file"}</span>
-              <input type="file" className="hidden" onChange={(e) => { const fi = e.target.files?.[0]; if (fi) handleFile(f, fi); }} />
-            </label>
-            {v && <span className="text-xs text-emerald-600">✓ {ar ? "تم الرفع" : "Uploaded"}</span>}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <label className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-input bg-background text-sm cursor-pointer hover:bg-muted">
+                <Upload className="h-4 w-4" />
+                <span>{ar ? "اختر ملف" : "Choose file"}</span>
+                <input type="file" className="hidden" disabled={!!fileProgress[f.id]} onChange={(e) => { const fi = e.target.files?.[0]; if (fi) handleFile(f, fi); }} />
+              </label>
+              {v && !fileProgress[f.id] && <span className="text-xs text-emerald-600">✓ {ar ? "تم الرفع" : "Uploaded"}</span>}
+            </div>
+            {fileProgress[f.id] && (
+              <UploadProgress
+                percent={fileProgress[f.id].pct}
+                loaded={fileProgress[f.id].loaded}
+                total={fileProgress[f.id].total}
+                label={fileProgress[f.id].name}
+              />
+            )}
           </div>
         )}
       </div>
