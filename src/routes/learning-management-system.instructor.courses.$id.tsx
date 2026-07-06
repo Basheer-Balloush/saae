@@ -922,35 +922,40 @@ function CourseBuilder() {
                       </label>
                       <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: "lesson", id: l.id })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
-                    <div className="flex items-center gap-2 text-xs flex-wrap">
-                      <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
-                        <span>{lang === "ar" ? "اختر فيديو" : "Choose video"}</span>
-                        <input type="file" accept="video/*" className="hidden"
-                          disabled={videoProgress[l.id] !== undefined}
-                          onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
-                      </label>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
+                          <span>{lang === "ar" ? "اختر فيديو" : "Choose video"}</span>
+                          <input type="file" accept="video/*" className="hidden"
+                            disabled={videoProgress[l.id] !== undefined}
+                            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
+                        </label>
+                        {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && l.video_ready && (
+                          <span className="text-emerald-600">
+                            ✓ {lang === "ar" ? "تم رفع الفيديو بنجاح" : "Video uploaded successfully"}
+                          </span>
+                        )}
+                        {videoProgress[l.id] === undefined && l.video_provider !== "bunny" && l.video_url && (
+                          <span className="text-amber-600">
+                            ⚠ {lang === "ar" ? "فيديو قديم — أعد رفعه للحصول على بث سريع" : "Legacy video — re-upload for fast streaming"}
+                          </span>
+                        )}
+                      </div>
                       {videoProgress[l.id] !== undefined && (
-                        <span className="text-primary inline-flex items-center gap-2">
-                          <span>{lang === "ar" ? "جاري الرفع" : "Uploading"} {videoProgress[l.id].pct}%</span>
-                          {videoProgress[l.id].speedMbps > 0 && (
-                            <span className="text-muted-foreground">
-                              · {videoProgress[l.id].speedMbps.toFixed(1)} Mbps
-                              {videoProgress[l.id].etaSec > 0 && (
-                                <> · {lang === "ar" ? "متبقي" : "ETA"} {videoProgress[l.id].etaSec >= 60 ? `${Math.ceil(videoProgress[l.id].etaSec / 60)} ${lang === "ar" ? "د" : "min"}` : `${videoProgress[l.id].etaSec} ${lang === "ar" ? "ث" : "s"}`}</>
-                              )}
-                            </span>
-                          )}
-                        </span>
-                      )}
-                      {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && l.video_ready && (
-                        <span className="text-emerald-600">
-                          ✓ {lang === "ar" ? "تم رفع الفيديو بنجاح" : "Video uploaded successfully"}
-                        </span>
-                      )}
-                      {videoProgress[l.id] === undefined && l.video_provider !== "bunny" && l.video_url && (
-                        <span className="text-amber-600">
-                          ⚠ {lang === "ar" ? "فيديو قديم — أعد رفعه للحصول على بث سريع" : "Legacy video — re-upload for fast streaming"}
-                        </span>
+                        <div className="max-w-md">
+                          <UploadProgress
+                            percent={videoProgress[l.id].pct}
+                            label={
+                              (lang === "ar" ? "رفع الفيديو" : "Video upload") +
+                              (videoProgress[l.id].speedMbps > 0
+                                ? ` · ${videoProgress[l.id].speedMbps.toFixed(1)} Mbps`
+                                : "") +
+                              (videoProgress[l.id].etaSec > 0
+                                ? ` · ${lang === "ar" ? "متبقي" : "ETA"} ${videoProgress[l.id].etaSec >= 60 ? `${Math.ceil(videoProgress[l.id].etaSec / 60)} ${lang === "ar" ? "د" : "min"}` : `${videoProgress[l.id].etaSec} ${lang === "ar" ? "ث" : "s"}`}`
+                                : "")
+                            }
+                          />
+                        </div>
                       )}
                     </div>
                     <Textarea dir="rtl" rows={2} placeholder="محتوى الدرس بالعربية (Markdown)"
