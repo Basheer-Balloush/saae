@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ArrowLeft, CheckCircle2, Trash2, Plus, Upload, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { UploadProgress } from "@/components/ui/upload-progress";
 import {
   getInitiativeStats, getInitiativeSettings,
   adminListDonations, adminListWaitlist, adminConfirmDonation,
