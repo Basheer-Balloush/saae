@@ -557,18 +557,22 @@ function NewsForm({
   const [videos, setVideos] = useState<string[]>(initial?.videos ?? []);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  
+  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
 
   const handleCoverUpload = async (file: File) => {
     setUploading(true);
+    setUploadPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
-      const url = await uploadToBucket(file, "image");
+      const url = await uploadToBucket(file, "image", (pct, loaded, total) =>
+        setUploadPct({ pct, loaded, total, name: file.name }),
+      );
       setImageUrl(url);
       toast.success(labels.coverUploaded);
     } catch (err: any) {
       toast.error(toUserMessage(err));
     } finally {
       setUploading(false);
+      setUploadPct(null);
     }
   };
 
@@ -577,7 +581,12 @@ function NewsForm({
     try {
       const urls: string[] = [];
       for (const f of Array.from(files)) {
-        urls.push(await uploadToBucket(f, "image"));
+        setUploadPct({ pct: 0, loaded: 0, total: f.size, name: f.name });
+        urls.push(
+          await uploadToBucket(f, "image", (pct, loaded, total) =>
+            setUploadPct({ pct, loaded, total, name: f.name }),
+          ),
+        );
       }
       setImages((prev) => [...prev, ...urls]);
       toast.success(labels.imagesUploaded(urls.length));
@@ -585,6 +594,7 @@ function NewsForm({
       toast.error(toUserMessage(err));
     } finally {
       setUploading(false);
+      setUploadPct(null);
     }
   };
 
@@ -593,7 +603,12 @@ function NewsForm({
     try {
       const urls: string[] = [];
       for (const f of Array.from(files)) {
-        urls.push(await uploadToBucket(f, "video"));
+        setUploadPct({ pct: 0, loaded: 0, total: f.size, name: f.name });
+        urls.push(
+          await uploadToBucket(f, "video", (pct, loaded, total) =>
+            setUploadPct({ pct, loaded, total, name: f.name }),
+          ),
+        );
       }
       setVideos((prev) => [...prev, ...urls]);
       toast.success(labels.videosUploaded(urls.length));
@@ -601,6 +616,7 @@ function NewsForm({
       toast.error(toUserMessage(err));
     } finally {
       setUploading(false);
+      setUploadPct(null);
     }
   };
 
