@@ -1334,11 +1334,15 @@ function PartnerForm({
   const [showOnHome, setShowOnHome] = useState(initial?.show_on_home ?? true);
   const [uploading, setUploading] = useState<"dark" | "light" | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploadPct, setUploadPct] = useState<{ which: "dark" | "light"; pct: number; loaded: number; total: number; name: string } | null>(null);
 
   const handleUpload = async (file: File, which: "dark" | "light") => {
     setUploading(which);
+    setUploadPct({ which, pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
-      const url = await uploadPartnerLogo(file);
+      const url = await uploadPartnerLogo(file, (pct, loaded, total) =>
+        setUploadPct({ which, pct, loaded, total, name: file.name }),
+      );
       if (which === "dark") setLogoUrl(url);
       else setLogoLightUrl(url);
       toast.success(ar ? "تم رفع الصورة" : "Logo uploaded");
@@ -1346,6 +1350,7 @@ function PartnerForm({
       toast.error(toUserMessage(e));
     } finally {
       setUploading(null);
+      setUploadPct(null);
     }
   };
 
