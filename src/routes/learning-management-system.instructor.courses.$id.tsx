@@ -611,6 +611,11 @@ function CourseBuilder() {
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadCover(f); }} />
             </label>
           </div>
+          {coverPct && (
+            <div className="mt-2 max-w-sm">
+              <UploadProgress percent={coverPct.pct} loaded={coverPct.loaded} total={coverPct.total} label={coverPct.name} />
+            </div>
+          )}
         </div>
 
         {(isAdmin || (user && user.id === course.instructor_id)) && (
