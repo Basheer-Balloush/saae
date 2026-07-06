@@ -975,6 +975,11 @@ function CourseBuilder() {
                         </label>
                         <span className="text-muted-foreground">{lang === "ar" ? "PDF / صور / مستندات — حتى 50 ميجابايت لكل ملف" : "PDF / images / docs — up to 50MB each"}</span>
                       </div>
+                      {Object.entries(attachPct)
+                        .filter(([k]) => k.startsWith(`${l.id}::`))
+                        .map(([k, p]) => (
+                          <UploadProgress key={k} percent={p.pct} loaded={p.loaded} total={p.total} label={p.name} compact />
+                        ))}
                       {Array.isArray(l.attachments) && l.attachments.length > 0 && (
                         <ul className="flex flex-wrap gap-1.5">
                           {l.attachments.map((a, i) => (
