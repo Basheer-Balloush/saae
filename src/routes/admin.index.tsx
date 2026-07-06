@@ -1020,17 +1020,22 @@ function MemberForm({
   const [order, setOrder] = useState(initial?.display_order ?? 0);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
 
   const handlePhoto = async (file: File) => {
     setUploading(true);
+    setUploadPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
-      const url = await uploadToBucket(file, "image");
+      const url = await uploadToBucket(file, "image", (pct, loaded, total) =>
+        setUploadPct({ pct, loaded, total, name: file.name }),
+      );
       setPhotoUrl(url);
       toast.success(labels.photoUploaded);
     } catch (err: any) {
       toast.error(toUserMessage(err));
     } finally {
       setUploading(false);
+      setUploadPct(null);
     }
   };
 
