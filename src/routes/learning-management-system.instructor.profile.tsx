@@ -148,6 +148,11 @@ function InstructorProfileEdit() {
               {ar ? "تغيير الصورة" : "Change photo"}
             </Button>
             <p className="mt-1 text-xs text-muted-foreground">{ar ? "حتى 5 ميجابايت" : "Up to 5MB"}</p>
+            {uploadPct && (
+              <div className="mt-2 max-w-xs">
+                <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} />
+              </div>
+            )}
           </div>
         </div>
 
