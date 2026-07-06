@@ -501,17 +501,24 @@ function AdminDashboard() {
   );
 }
 
-async function uploadToBucket(file: File, kind: "image" | "video"): Promise<string> {
-  const ext = file.name.split(".").pop() || (kind === "video" ? "mp4" : "jpg");
-  const path = `${kind}s/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("news-images").upload(path, file, {
-    cacheControl: "3600",
+async function uploadToBucket(
+  file: File,
+  kind: "image" | "video",
+  onProgress?: (pct: number, loaded: number, total: number) => void,
+): Promise<string> {
+  const ext = (file.name.split(".").pop() || (kind === "video" ? "mp4" : "jpg"))
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  const path = `${kind}s/${crypto.randomUUID()}.${ext || (kind === "video" ? "mp4" : "jpg")}`;
+  const { publicUrl } = await uploadToSupabaseStorage({
+    bucket: "news-images",
+    path,
+    file,
     upsert: false,
     contentType: file.type || undefined,
+    onProgress,
   });
-  if (error) throw error;
-  const { data } = supabase.storage.from("news-images").getPublicUrl(path);
-  return data.publicUrl;
+  return publicUrl;
 }
 
 function NewsForm({
