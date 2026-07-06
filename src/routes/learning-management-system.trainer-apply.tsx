@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { UploadProgress } from "@/components/ui/upload-progress";
 import {
   Select,
   SelectContent,
@@ -86,6 +88,7 @@ function TrainerApplyPage() {
   const [existing, setExisting] = useState<ExistingApp | null>(null);
   const [loadingExisting, setLoadingExisting] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string; index: number; count: number } | null>(null);
 
   const [fullNameAr, setFullNameAr] = useState("");
   const [fullNameEn, setFullNameEn] = useState("");
@@ -215,13 +218,21 @@ function TrainerApplyPage() {
         size_bytes: number;
       }[] = [];
 
-      for (const u of uploads) {
+      const total = uploads.length;
+      for (let i = 0; i < uploads.length; i++) {
+        const u = uploads[i];
         const safeName = u.file.name.replace(/[^A-Za-z0-9._-]/g, "_");
         const path = `${user.id}/${app.id}/${u.kind}-${Date.now()}-${safeName}`;
-        const { error: upErr } = await supabase.storage
-          .from("trainer-applications")
-          .upload(path, u.file, { upsert: false, contentType: u.file.type });
-        if (upErr) throw upErr;
+        setUploadPct({ pct: 0, loaded: 0, total: u.file.size, name: u.file.name, index: i + 1, count: total });
+        await uploadToSupabaseStorage({
+          bucket: "trainer-applications",
+          path,
+          file: u.file,
+          upsert: false,
+          contentType: u.file.type,
+          onProgress: (pct, loaded, tot) =>
+            setUploadPct({ pct, loaded, total: tot, name: u.file.name, index: i + 1, count: total }),
+        });
         fileRows.push({
           application_id: app.id,
           user_id: user.id,
@@ -241,6 +252,7 @@ function TrainerApplyPage() {
       toast.error(toUserMessage(err));
     } finally {
       setSubmitting(false);
+      setUploadPct(null);
     }
   };
 
@@ -444,6 +456,17 @@ function TrainerApplyPage() {
             </span>
           </label>
         </section>
+
+        {uploadPct && (
+          <div className="rounded-xl border border-border bg-card p-4">
+            <UploadProgress
+              percent={uploadPct.pct}
+              loaded={uploadPct.loaded}
+              total={uploadPct.total}
+              label={`${ar ? "الملف" : "File"} ${uploadPct.index}/${uploadPct.count} — ${uploadPct.name}`}
+            />
+          </div>
+        )}
 
         <div className="flex justify-end gap-2">
           <Button type="submit" disabled={submitting}>

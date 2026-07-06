@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { UploadProgress } from "@/components/ui/upload-progress";
 
 export const Route = createFileRoute("/learning-management-system/instructor/profile")({
   head: () => ({ meta: [{ title: "LMS · Instructor profile" }] }),
@@ -28,6 +30,7 @@ function InstructorProfileEdit() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
   const [fullName, setFullName] = useState("");
   const [fullNameAr, setFullNameAr] = useState("");
   const [fullNameEn, setFullNameEn] = useState("");
@@ -62,20 +65,33 @@ function InstructorProfileEdit() {
 
   const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file || !user) return;
     if (file.size > 5 * 1024 * 1024) {
       toast.error(ar ? "حجم الصورة أكبر من 5 ميجابايت" : "Image larger than 5MB");
       return;
     }
     setUploading(true);
-    const ext = file.name.split(".").pop() || "jpg";
-    const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("lms-media").upload(path, file, { upsert: true, contentType: file.type });
-    if (error) { setUploading(false); toast.error(toUserMessage(error)); return; }
-    const { data: pub } = supabase.storage.from("lms-media").getPublicUrl(path);
-    setAvatarUrl(pub.publicUrl);
-    setUploading(false);
-    toast.success(ar ? "تم رفع الصورة" : "Image uploaded");
+    setUploadPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const { publicUrl } = await uploadToSupabaseStorage({
+        bucket: "lms-media",
+        path,
+        file,
+        upsert: true,
+        contentType: file.type,
+        onProgress: (pct, loaded, total) => setUploadPct({ pct, loaded, total, name: file.name }),
+      });
+      setAvatarUrl(`${publicUrl}?v=${Date.now()}`);
+      toast.success(ar ? "تم رفع الصورة" : "Image uploaded");
+    } catch (err) {
+      toast.error(toUserMessage(err));
+    } finally {
+      setUploading(false);
+      setUploadPct(null);
+    }
   };
 
   const onSave = async (e: React.FormEvent) => {
@@ -132,6 +148,11 @@ function InstructorProfileEdit() {
               {ar ? "تغيير الصورة" : "Change photo"}
             </Button>
             <p className="mt-1 text-xs text-muted-foreground">{ar ? "حتى 5 ميجابايت" : "Up to 5MB"}</p>
+            {uploadPct && (
+              <div className="mt-2 max-w-xs">
+                <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} />
+              </div>
+            )}
           </div>
         </div>
 

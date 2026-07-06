@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ArrowLeft, CheckCircle2, Trash2, Plus, Upload, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { UploadProgress } from "@/components/ui/upload-progress";
 import {
   getInitiativeStats, getInitiativeSettings,
   adminListDonations, adminListWaitlist, adminConfirmDonation,
@@ -215,6 +217,7 @@ function Card({ label, value }: { label: string; value: number }) {
 function LogoUploader({ value, onChange }: { value: string; onChange: (url: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -223,39 +226,49 @@ function LogoUploader({ value, onChange }: { value: string; onChange: (url: stri
     if (!file.type.startsWith("image/")) { toast.error("ملف صورة فقط"); return; }
     if (file.size > 5 * 1024 * 1024) { toast.error("الحد الأقصى 5MB"); return; }
     setUploading(true);
+    setUploadPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
-      const ext = file.name.split(".").pop() || "png";
+      const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
       const path = `initiative-logos/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("news-images").upload(path, file, {
-        cacheControl: "3600", upsert: false, contentType: file.type || undefined,
+      const { publicUrl } = await uploadToSupabaseStorage({
+        bucket: "news-images",
+        path,
+        file,
+        upsert: false,
+        contentType: file.type || undefined,
+        onProgress: (pct, loaded, total) => setUploadPct({ pct, loaded, total, name: file.name }),
       });
-      if (error) throw error;
-      const { data } = supabase.storage.from("news-images").getPublicUrl(path);
-      onChange(data.publicUrl);
+      onChange(publicUrl);
       toast.success("تم رفع الشعار");
     } catch (err: any) {
       toast.error(err?.message || "فشل الرفع");
     } finally {
       setUploading(false);
+      setUploadPct(null);
     }
   };
 
   return (
-    <div className="flex items-center gap-2 rounded-md border border-input bg-background px-2 py-1.5">
-      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-      {value ? (
-        <img src={value} alt="" className="h-8 w-8 rounded object-contain border border-border" />
-      ) : (
-        <div className="h-8 w-8 rounded border border-dashed border-border" />
-      )}
-      <Button type="button" size="sm" variant="outline" onClick={() => inputRef.current?.click()} disabled={uploading}>
-        {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-        <span className="ms-1 text-xs">{value ? "تغيير الشعار" : "رفع الشعار"}</span>
-      </Button>
-      {value && (
-        <Button type="button" size="sm" variant="ghost" onClick={() => onChange("")}>
-          <X className="h-3.5 w-3.5" />
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-2 rounded-md border border-input bg-background px-2 py-1.5">
+        <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+        {value ? (
+          <img src={value} alt="" className="h-8 w-8 rounded object-contain border border-border" />
+        ) : (
+          <div className="h-8 w-8 rounded border border-dashed border-border" />
+        )}
+        <Button type="button" size="sm" variant="outline" onClick={() => inputRef.current?.click()} disabled={uploading}>
+          {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+          <span className="ms-1 text-xs">{value ? "تغيير الشعار" : "رفع الشعار"}</span>
         </Button>
+        {value && (
+          <Button type="button" size="sm" variant="ghost" onClick={() => onChange("")}>
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        )}
+      </div>
+      {uploadPct && (
+        <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} compact />
       )}
     </div>
   );

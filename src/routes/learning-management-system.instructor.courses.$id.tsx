@@ -17,6 +17,8 @@ import { createBunnyUpload, setLessonBunnyVideo } from "@/lib/bunny-stream.funct
 import * as tus from "tus-js-client";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import { CourseCoInstructors } from "@/components/lms/CourseCoInstructors";
+import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { UploadProgress } from "@/components/ui/upload-progress";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -61,6 +63,8 @@ function CourseBuilder() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [coverPct, setCoverPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
+  const [attachPct, setAttachPct] = useState<Record<string, { pct: number; loaded: number; total: number; name: string }>>({});
   const [videoProgress, setVideoProgress] = useState<Record<string, { pct: number; speedMbps: number; etaSec: number }>>({});
   // In-app dialog state replacing native prompt()/confirm()
   const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
@@ -199,16 +203,20 @@ function CourseBuilder() {
       return;
     }
     setUploading(true);
+    setCoverPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
       const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
       const safeName = `cover-${Date.now()}.${ext}`;
       const path = `${user.id}/${course.id}/${safeName}`;
-      const { error: upErr } = await supabase.storage
-        .from("lms-media")
-        .upload(path, file, { upsert: true, contentType: file.type || undefined });
-      if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from("lms-media").getPublicUrl(path);
-      const bustedUrl = `${pub.publicUrl}?v=${Date.now()}`;
+      const { publicUrl } = await uploadToSupabaseStorage({
+        bucket: "lms-media",
+        path,
+        file,
+        upsert: true,
+        contentType: file.type || undefined,
+        onProgress: (pct, loaded, total) => setCoverPct({ pct, loaded, total, name: file.name }),
+      });
+      const bustedUrl = `${publicUrl}?v=${Date.now()}`;
       const { error: dbErr } = await supabase
         .from("lms_courses")
         .update({ cover_url: bustedUrl })
@@ -220,6 +228,7 @@ function CourseBuilder() {
       toast.error(toUserMessage(e));
     } finally {
       setUploading(false);
+      setCoverPct(null);
     }
   };
 
@@ -385,19 +394,35 @@ function CourseBuilder() {
     if (!user || !files || files.length === 0) return;
     const current = Array.isArray(lesson.attachments) ? lesson.attachments : [];
     const next = [...current];
-    toast.info(lang === "ar" ? "جاري رفع المرفقات..." : "Uploading attachments...");
     for (const file of Array.from(files)) {
       if (file.size > MAX_ATTACHMENT_BYTES) {
         toast.error(`${file.name}: ${lang === "ar" ? "الحجم أكبر من 50 ميجابايت" : "larger than 50MB"}`);
         continue;
       }
       const safe = file.name.replace(/[^\w.\-]+/g, "_");
-      // Store in the PRIVATE bucket so materials require enrollment/instructor/admin
-      // access; the player generates short-lived signed URLs at render time.
       const path = `${user.id}/${course.id}/attachments/${lesson.id}/${Date.now()}-${safe}`;
-      const { error } = await supabase.storage.from("lms-private").upload(path, file, { upsert: true, contentType: file.type || undefined });
-      if (error) { toast.error(`${file.name}: ${toUserMessage(error)}`); continue; }
-      next.push({ name: file.name, path, url: "" });
+      const key = `${lesson.id}::${path}`;
+      setAttachPct((p) => ({ ...p, [key]: { pct: 0, loaded: 0, total: file.size, name: file.name } }));
+      try {
+        await uploadToSupabaseStorage({
+          bucket: "lms-private",
+          path,
+          file,
+          upsert: true,
+          contentType: file.type || undefined,
+          onProgress: (pct, loaded, total) =>
+            setAttachPct((p) => ({ ...p, [key]: { pct, loaded, total, name: file.name } })),
+        });
+        next.push({ name: file.name, path, url: "" });
+      } catch (err) {
+        toast.error(`${file.name}: ${toUserMessage(err)}`);
+      } finally {
+        setAttachPct((p) => {
+          const nxt = { ...p };
+          delete nxt[key];
+          return nxt;
+        });
+      }
     }
     await updateLesson(lesson.id, { attachments: next });
     toast.success(lang === "ar" ? "تم رفع المرفقات" : "Attachments uploaded");
@@ -586,6 +611,11 @@ function CourseBuilder() {
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadCover(f); }} />
             </label>
           </div>
+          {coverPct && (
+            <div className="mt-2 max-w-sm">
+              <UploadProgress percent={coverPct.pct} loaded={coverPct.loaded} total={coverPct.total} label={coverPct.name} />
+            </div>
+          )}
         </div>
 
         {(isAdmin || (user && user.id === course.instructor_id)) && (
@@ -892,35 +922,40 @@ function CourseBuilder() {
                       </label>
                       <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: "lesson", id: l.id })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
-                    <div className="flex items-center gap-2 text-xs flex-wrap">
-                      <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
-                        <span>{lang === "ar" ? "اختر فيديو" : "Choose video"}</span>
-                        <input type="file" accept="video/*" className="hidden"
-                          disabled={videoProgress[l.id] !== undefined}
-                          onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
-                      </label>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
+                          <span>{lang === "ar" ? "اختر فيديو" : "Choose video"}</span>
+                          <input type="file" accept="video/*" className="hidden"
+                            disabled={videoProgress[l.id] !== undefined}
+                            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
+                        </label>
+                        {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && l.video_ready && (
+                          <span className="text-emerald-600">
+                            ✓ {lang === "ar" ? "تم رفع الفيديو بنجاح" : "Video uploaded successfully"}
+                          </span>
+                        )}
+                        {videoProgress[l.id] === undefined && l.video_provider !== "bunny" && l.video_url && (
+                          <span className="text-amber-600">
+                            ⚠ {lang === "ar" ? "فيديو قديم — أعد رفعه للحصول على بث سريع" : "Legacy video — re-upload for fast streaming"}
+                          </span>
+                        )}
+                      </div>
                       {videoProgress[l.id] !== undefined && (
-                        <span className="text-primary inline-flex items-center gap-2">
-                          <span>{lang === "ar" ? "جاري الرفع" : "Uploading"} {videoProgress[l.id].pct}%</span>
-                          {videoProgress[l.id].speedMbps > 0 && (
-                            <span className="text-muted-foreground">
-                              · {videoProgress[l.id].speedMbps.toFixed(1)} Mbps
-                              {videoProgress[l.id].etaSec > 0 && (
-                                <> · {lang === "ar" ? "متبقي" : "ETA"} {videoProgress[l.id].etaSec >= 60 ? `${Math.ceil(videoProgress[l.id].etaSec / 60)} ${lang === "ar" ? "د" : "min"}` : `${videoProgress[l.id].etaSec} ${lang === "ar" ? "ث" : "s"}`}</>
-                              )}
-                            </span>
-                          )}
-                        </span>
-                      )}
-                      {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && l.video_ready && (
-                        <span className="text-emerald-600">
-                          ✓ {lang === "ar" ? "تم رفع الفيديو بنجاح" : "Video uploaded successfully"}
-                        </span>
-                      )}
-                      {videoProgress[l.id] === undefined && l.video_provider !== "bunny" && l.video_url && (
-                        <span className="text-amber-600">
-                          ⚠ {lang === "ar" ? "فيديو قديم — أعد رفعه للحصول على بث سريع" : "Legacy video — re-upload for fast streaming"}
-                        </span>
+                        <div className="max-w-md">
+                          <UploadProgress
+                            percent={videoProgress[l.id].pct}
+                            label={
+                              (lang === "ar" ? "رفع الفيديو" : "Video upload") +
+                              (videoProgress[l.id].speedMbps > 0
+                                ? ` · ${videoProgress[l.id].speedMbps.toFixed(1)} Mbps`
+                                : "") +
+                              (videoProgress[l.id].etaSec > 0
+                                ? ` · ${lang === "ar" ? "متبقي" : "ETA"} ${videoProgress[l.id].etaSec >= 60 ? `${Math.ceil(videoProgress[l.id].etaSec / 60)} ${lang === "ar" ? "د" : "min"}` : `${videoProgress[l.id].etaSec} ${lang === "ar" ? "ث" : "s"}`}`
+                                : "")
+                            }
+                          />
+                        </div>
                       )}
                     </div>
                     <Textarea dir="rtl" rows={2} placeholder="محتوى الدرس بالعربية (Markdown)"
@@ -940,6 +975,11 @@ function CourseBuilder() {
                         </label>
                         <span className="text-muted-foreground">{lang === "ar" ? "PDF / صور / مستندات — حتى 50 ميجابايت لكل ملف" : "PDF / images / docs — up to 50MB each"}</span>
                       </div>
+                      {Object.entries(attachPct)
+                        .filter(([k]) => k.startsWith(`${l.id}::`))
+                        .map(([k, p]) => (
+                          <UploadProgress key={k} percent={p.pct} loaded={p.loaded} total={p.total} label={p.name} compact />
+                        ))}
                       {Array.isArray(l.attachments) && l.attachments.length > 0 && (
                         <ul className="flex flex-wrap gap-1.5">
                           {l.attachments.map((a, i) => (

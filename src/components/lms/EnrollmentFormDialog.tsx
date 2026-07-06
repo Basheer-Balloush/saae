@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/safe-error";
+import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { UploadProgress } from "@/components/ui/upload-progress";
 
 type FieldType =
   | "short_text" | "long_text" | "number" | "single_choice"
@@ -48,6 +50,7 @@ export function EnrollmentFormDialog({
   const [fields, setFields] = useState<Field[]>([]);
   const [values, setValues] = useState<Record<string, AnswerValue>>({});
   const [busy, setBusy] = useState(false);
+  const [fileProgress, setFileProgress] = useState<Record<string, { pct: number; loaded: number; total: number; name: string }>>({});
 
   // Base fields
   const [fullName, setFullName] = useState("");
@@ -99,10 +102,29 @@ export function EnrollmentFormDialog({
       toast.error(ar ? `الحد الأقصى ${MAX_FILE_MB} ميجا` : `Max ${MAX_FILE_MB} MB`);
       return;
     }
-    const path = `form-uploads/${courseId}/${user.id}/${field.id}-${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from("lms-private").upload(path, file, { upsert: true });
-    if (error) { toast.error(toUserMessage(error)); return; }
-    setVal(field.id, path);
+    const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+    const path = `form-uploads/${courseId}/${user.id}/${field.id}-${Date.now()}-${safeName}`;
+    setFileProgress((p) => ({ ...p, [field.id]: { pct: 0, loaded: 0, total: file.size, name: file.name } }));
+    try {
+      await uploadToSupabaseStorage({
+        bucket: "lms-private",
+        path,
+        file,
+        upsert: true,
+        contentType: file.type || undefined,
+        onProgress: (pct, loaded, total) =>
+          setFileProgress((p) => ({ ...p, [field.id]: { pct, loaded, total, name: file.name } })),
+      });
+      setVal(field.id, path);
+    } catch (err) {
+      toast.error(toUserMessage(err));
+    } finally {
+      setFileProgress((p) => {
+        const next = { ...p };
+        delete next[field.id];
+        return next;
+      });
+    }
   };
 
   const submit = async () => {
@@ -235,13 +257,23 @@ export function EnrollmentFormDialog({
           </div>
         )}
         {f.field_type === "file" && (
-          <div className="flex items-center gap-2">
-            <label className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-input bg-background text-sm cursor-pointer hover:bg-muted">
-              <Upload className="h-4 w-4" />
-              <span>{ar ? "اختر ملف" : "Choose file"}</span>
-              <input type="file" className="hidden" onChange={(e) => { const fi = e.target.files?.[0]; if (fi) handleFile(f, fi); }} />
-            </label>
-            {v && <span className="text-xs text-emerald-600">✓ {ar ? "تم الرفع" : "Uploaded"}</span>}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <label className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-input bg-background text-sm cursor-pointer hover:bg-muted">
+                <Upload className="h-4 w-4" />
+                <span>{ar ? "اختر ملف" : "Choose file"}</span>
+                <input type="file" className="hidden" disabled={!!fileProgress[f.id]} onChange={(e) => { const fi = e.target.files?.[0]; if (fi) handleFile(f, fi); }} />
+              </label>
+              {v && !fileProgress[f.id] && <span className="text-xs text-emerald-600">✓ {ar ? "تم الرفع" : "Uploaded"}</span>}
+            </div>
+            {fileProgress[f.id] && (
+              <UploadProgress
+                percent={fileProgress[f.id].pct}
+                loaded={fileProgress[f.id].loaded}
+                total={fileProgress[f.id].total}
+                label={fileProgress[f.id].name}
+              />
+            )}
           </div>
         )}
       </div>

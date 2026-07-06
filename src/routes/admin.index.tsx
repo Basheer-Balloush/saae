@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X, Globe, Sun, Moon } from "lucide-react";
+import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { UploadProgress } from "@/components/ui/upload-progress";
 import { useLang } from "@/lib/i18n";
 import { AdminChatbotSection } from "@/components/admin/AdminChatbotSection";
 import { useTheme } from "@/lib/theme";
@@ -499,17 +501,24 @@ function AdminDashboard() {
   );
 }
 
-async function uploadToBucket(file: File, kind: "image" | "video"): Promise<string> {
-  const ext = file.name.split(".").pop() || (kind === "video" ? "mp4" : "jpg");
-  const path = `${kind}s/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("news-images").upload(path, file, {
-    cacheControl: "3600",
+async function uploadToBucket(
+  file: File,
+  kind: "image" | "video",
+  onProgress?: (pct: number, loaded: number, total: number) => void,
+): Promise<string> {
+  const ext = (file.name.split(".").pop() || (kind === "video" ? "mp4" : "jpg"))
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  const path = `${kind}s/${crypto.randomUUID()}.${ext || (kind === "video" ? "mp4" : "jpg")}`;
+  const { publicUrl } = await uploadToSupabaseStorage({
+    bucket: "news-images",
+    path,
+    file,
     upsert: false,
     contentType: file.type || undefined,
+    onProgress,
   });
-  if (error) throw error;
-  const { data } = supabase.storage.from("news-images").getPublicUrl(path);
-  return data.publicUrl;
+  return publicUrl;
 }
 
 function NewsForm({
@@ -548,18 +557,22 @@ function NewsForm({
   const [videos, setVideos] = useState<string[]>(initial?.videos ?? []);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  
+  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
 
   const handleCoverUpload = async (file: File) => {
     setUploading(true);
+    setUploadPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
-      const url = await uploadToBucket(file, "image");
+      const url = await uploadToBucket(file, "image", (pct, loaded, total) =>
+        setUploadPct({ pct, loaded, total, name: file.name }),
+      );
       setImageUrl(url);
       toast.success(labels.coverUploaded);
     } catch (err: any) {
       toast.error(toUserMessage(err));
     } finally {
       setUploading(false);
+      setUploadPct(null);
     }
   };
 
@@ -568,7 +581,12 @@ function NewsForm({
     try {
       const urls: string[] = [];
       for (const f of Array.from(files)) {
-        urls.push(await uploadToBucket(f, "image"));
+        setUploadPct({ pct: 0, loaded: 0, total: f.size, name: f.name });
+        urls.push(
+          await uploadToBucket(f, "image", (pct, loaded, total) =>
+            setUploadPct({ pct, loaded, total, name: f.name }),
+          ),
+        );
       }
       setImages((prev) => [...prev, ...urls]);
       toast.success(labels.imagesUploaded(urls.length));
@@ -576,6 +594,7 @@ function NewsForm({
       toast.error(toUserMessage(err));
     } finally {
       setUploading(false);
+      setUploadPct(null);
     }
   };
 
@@ -584,7 +603,12 @@ function NewsForm({
     try {
       const urls: string[] = [];
       for (const f of Array.from(files)) {
-        urls.push(await uploadToBucket(f, "video"));
+        setUploadPct({ pct: 0, loaded: 0, total: f.size, name: f.name });
+        urls.push(
+          await uploadToBucket(f, "video", (pct, loaded, total) =>
+            setUploadPct({ pct, loaded, total, name: f.name }),
+          ),
+        );
       }
       setVideos((prev) => [...prev, ...urls]);
       toast.success(labels.videosUploaded(urls.length));
@@ -592,6 +616,7 @@ function NewsForm({
       toast.error(toUserMessage(err));
     } finally {
       setUploading(false);
+      setUploadPct(null);
     }
   };
 
@@ -766,6 +791,11 @@ function NewsForm({
                 </button>
               )}
             </div>
+            {uploadPct && (
+              <div className="mt-2 max-w-sm">
+                <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} />
+              </div>
+            )}
           </div>
 
           <div>
@@ -990,17 +1020,22 @@ function MemberForm({
   const [order, setOrder] = useState(initial?.display_order ?? 0);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
 
   const handlePhoto = async (file: File) => {
     setUploading(true);
+    setUploadPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
-      const url = await uploadToBucket(file, "image");
+      const url = await uploadToBucket(file, "image", (pct, loaded, total) =>
+        setUploadPct({ pct, loaded, total, name: file.name }),
+      );
       setPhotoUrl(url);
       toast.success(labels.photoUploaded);
     } catch (err: any) {
       toast.error(toUserMessage(err));
     } finally {
       setUploading(false);
+      setUploadPct(null);
     }
   };
 
@@ -1130,6 +1165,11 @@ function MemberForm({
                 </button>
               )}
             </div>
+            {uploadPct && (
+              <div className="mt-2 max-w-sm">
+                <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} />
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
@@ -1159,17 +1199,21 @@ type PartnerRow = {
 
 const SIZE_OPTIONS = ["h-16", "h-20", "h-24", "h-28", "h-32", "h-36", "h-40"] as const;
 
-async function uploadPartnerLogo(file: File): Promise<string> {
-  const ext = file.name.split(".").pop() || "png";
+async function uploadPartnerLogo(
+  file: File,
+  onProgress?: (pct: number, loaded: number, total: number) => void,
+): Promise<string> {
+  const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
   const path = `partners/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("news-images").upload(path, file, {
-    cacheControl: "3600",
+  const { publicUrl } = await uploadToSupabaseStorage({
+    bucket: "news-images",
+    path,
+    file,
     upsert: false,
     contentType: file.type || undefined,
+    onProgress,
   });
-  if (error) throw error;
-  const { data } = supabase.storage.from("news-images").getPublicUrl(path);
-  return data.publicUrl;
+  return publicUrl;
 }
 
 function PartnersAdmin({ lang }: { lang: "en" | "ar" }) {
@@ -1300,11 +1344,15 @@ function PartnerForm({
   const [showOnHome, setShowOnHome] = useState(initial?.show_on_home ?? true);
   const [uploading, setUploading] = useState<"dark" | "light" | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploadPct, setUploadPct] = useState<{ which: "dark" | "light"; pct: number; loaded: number; total: number; name: string } | null>(null);
 
   const handleUpload = async (file: File, which: "dark" | "light") => {
     setUploading(which);
+    setUploadPct({ which, pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
-      const url = await uploadPartnerLogo(file);
+      const url = await uploadPartnerLogo(file, (pct, loaded, total) =>
+        setUploadPct({ which, pct, loaded, total, name: file.name }),
+      );
       if (which === "dark") setLogoUrl(url);
       else setLogoLightUrl(url);
       toast.success(ar ? "تم رفع الصورة" : "Logo uploaded");
@@ -1312,6 +1360,7 @@ function PartnerForm({
       toast.error(toUserMessage(e));
     } finally {
       setUploading(null);
+      setUploadPct(null);
     }
   };
 
@@ -1384,6 +1433,9 @@ function PartnerForm({
                   </button>
                 )}
               </div>
+              {uploadPct?.which === "dark" && (
+                <div className="mt-2"><UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} compact /></div>
+              )}
             </div>
 
             <div>
@@ -1412,6 +1464,9 @@ function PartnerForm({
                   </button>
                 )}
               </div>
+              {uploadPct?.which === "light" && (
+                <div className="mt-2"><UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} compact /></div>
+              )}
               <p className="mt-1 text-xs text-muted-foreground">
                 {ar ? "اتركه فارغاً لاستخدام نفس اللوغو في الوضعين." : "Leave empty to use the same logo in both modes."}
               </p>
