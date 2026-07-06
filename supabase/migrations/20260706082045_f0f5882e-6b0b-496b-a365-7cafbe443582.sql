@@ -1,0 +1,1 @@
+ALTER TABLE public.initiative_survey_responses ADD COLUMN age smallint CHECK (age >= 5 AND age <= 120);
