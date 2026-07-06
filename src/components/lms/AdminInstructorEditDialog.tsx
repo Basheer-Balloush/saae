@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { UploadProgress } from "@/components/ui/upload-progress";
 
 export function AdminInstructorEditDialog({
   userId,
