@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { UploadProgress } from "@/components/ui/upload-progress";
 
 const ALLOWED_EXTS = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "zip", "rar", "7z", "txt", "md", "png", "jpg", "jpeg", "webp"];
 const MAX_BYTES = 25 * 1024 * 1024; // 25MB
