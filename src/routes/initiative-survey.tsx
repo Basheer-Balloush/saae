@@ -91,7 +91,7 @@ const STATUSES = [
 const SUBSCRIPTIONS = [
   { value: "waitlist", label: "قائمة الانتظار (ممولة من قبل المؤسسات والشركات)" },
   { value: "self", label: "ادفع عن نفسي — 1 دولار" },
-  { value: "self_and_donate", label: "ادفع عن نفسي وتبرّع لآخرين غيري" },
+  { value: "self_and_donate", label: "ادفع عن نفسي وأتبرّع لآخرين غيري" },
 ];
 
 // AI relationship values that indicate prior usage
