@@ -279,7 +279,22 @@ function SurveyPage() {
           <Section title="معلوماتك الأساسية">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="الاسم الكامل *">
-                <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+                <Input
+                  placeholder="الاسم الأول واسم العائلة على الأقل"
+                  value={form.full_name}
+                  onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                />
+              </Field>
+              <Field label="العمر *">
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  min={5}
+                  max={120}
+                  placeholder="مثال: 25"
+                  value={form.age}
+                  onChange={(e) => setForm({ ...form, age: e.target.value.replace(/[^0-9]/g, "") })}
+                />
               </Field>
               <Field label="رقم الهاتف / واتساب *">
                 <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
