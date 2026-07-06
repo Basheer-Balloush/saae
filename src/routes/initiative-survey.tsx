@@ -251,7 +251,16 @@ function SurveyPage() {
           <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
             إجاباتك ستساعدنا في تصميم مسار تدريبي يناسب احتياجاتك، ويأخذ بعين الاعتبار ظروفك وأدواتك.
           </p>
+          {responseCount !== null && (
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-5 py-2 shadow-sm">
+              <Users className="h-4 w-4 text-primary" />
+              <span className="text-sm text-muted-foreground">شارك حتى الآن</span>
+              <span className="text-base font-bold text-primary">{responseCount.toLocaleString("ar-EG")}</span>
+              <span className="text-sm text-muted-foreground">شخص</span>
+            </div>
+          )}
         </div>
+
 
         <div className="space-y-6">
           {/* Contact */}
