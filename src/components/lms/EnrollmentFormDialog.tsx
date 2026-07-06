@@ -102,10 +102,29 @@ export function EnrollmentFormDialog({
       toast.error(ar ? `الحد الأقصى ${MAX_FILE_MB} ميجا` : `Max ${MAX_FILE_MB} MB`);
       return;
     }
-    const path = `form-uploads/${courseId}/${user.id}/${field.id}-${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from("lms-private").upload(path, file, { upsert: true });
-    if (error) { toast.error(toUserMessage(error)); return; }
-    setVal(field.id, path);
+    const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+    const path = `form-uploads/${courseId}/${user.id}/${field.id}-${Date.now()}-${safeName}`;
+    setFileProgress((p) => ({ ...p, [field.id]: { pct: 0, loaded: 0, total: file.size, name: file.name } }));
+    try {
+      await uploadToSupabaseStorage({
+        bucket: "lms-private",
+        path,
+        file,
+        upsert: true,
+        contentType: file.type || undefined,
+        onProgress: (pct, loaded, total) =>
+          setFileProgress((p) => ({ ...p, [field.id]: { pct, loaded, total, name: file.name } })),
+      });
+      setVal(field.id, path);
+    } catch (err) {
+      toast.error(toUserMessage(err));
+    } finally {
+      setFileProgress((p) => {
+        const next = { ...p };
+        delete next[field.id];
+        return next;
+      });
+    }
   };
 
   const submit = async () => {
