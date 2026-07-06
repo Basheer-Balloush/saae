@@ -125,6 +125,7 @@ function SurveyPage() {
     main_motivation: "",
     main_motivation_other: "",
     current_status: "",
+    current_status_other: "",
     extra_notes: "",
     subscription_type: "",
     donation_amount: "",
