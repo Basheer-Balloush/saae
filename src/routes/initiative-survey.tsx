@@ -188,7 +188,7 @@ function SurveyPage() {
         device: form.device,
         commitment_level: form.commitment_level,
         main_motivation: resolve(form.main_motivation, form.main_motivation_other),
-        current_status: form.current_status,
+        current_status: resolve(form.current_status, form.current_status_other),
         extra_notes: form.extra_notes,
         subscription_type: form.subscription_type,
         donation_amount:
