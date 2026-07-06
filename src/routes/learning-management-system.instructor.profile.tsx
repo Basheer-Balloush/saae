@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { UploadProgress } from "@/components/ui/upload-progress";
 
 export const Route = createFileRoute("/learning-management-system/instructor/profile")({
   head: () => ({ meta: [{ title: "LMS · Instructor profile" }] }),
