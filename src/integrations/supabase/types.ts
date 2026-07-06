@@ -2342,6 +2342,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_initiative_survey_count: { Args: never; Returns: number }
       has_ams_access: { Args: { _user_id: string }; Returns: boolean }
       has_lms_role: {
         Args: {

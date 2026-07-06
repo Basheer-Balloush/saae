@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { CheckCircle2, Sparkles } from "lucide-react";
+import { CheckCircle2, Sparkles, Users } from "lucide-react";
 
 export const Route = createFileRoute("/initiative-survey")({
   head: () => ({
@@ -78,7 +78,15 @@ const MOTIVATIONS = [
   OTHER,
 ];
 
-const STATUSES = ["طالب جامعي", "خريج ويبحث عن عمل", "موظف بدوام", "صاحب مشروع صغير", "عاطل عن العمل حاليًا"];
+const STATUSES = [
+  "طالب مدرسة",
+  "طالب جامعي",
+  "خريج ويبحث عن عمل",
+  "موظف بدوام",
+  "صاحب مشروع صغير",
+  "عاطل عن العمل حاليًا",
+  OTHER,
+];
 
 const SUBSCRIPTIONS = [
   { value: "waitlist", label: "قائمة الانتظار (ممولة من قبل المؤسسات والشركات)" },
@@ -96,6 +104,19 @@ const USED_AI_BEFORE = new Set([
 function SurveyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [responseCount, setResponseCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.rpc("get_initiative_survey_count");
+      if (!cancelled && !error && typeof data === "number") setResponseCount(data);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const [form, setForm] = useState({
     full_name: "",
     email: "",
@@ -117,6 +138,7 @@ function SurveyPage() {
     main_motivation: "",
     main_motivation_other: "",
     current_status: "",
+    current_status_other: "",
     extra_notes: "",
     subscription_type: "",
     donation_amount: "",
@@ -179,7 +201,7 @@ function SurveyPage() {
         device: form.device,
         commitment_level: form.commitment_level,
         main_motivation: resolve(form.main_motivation, form.main_motivation_other),
-        current_status: form.current_status,
+        current_status: resolve(form.current_status, form.current_status_other),
         extra_notes: form.extra_notes,
         subscription_type: form.subscription_type,
         donation_amount:
@@ -229,7 +251,16 @@ function SurveyPage() {
           <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
             إجاباتك ستساعدنا في تصميم مسار تدريبي يناسب احتياجاتك، ويأخذ بعين الاعتبار ظروفك وأدواتك.
           </p>
+          {responseCount !== null && (
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-5 py-2 shadow-sm">
+              <Users className="h-4 w-4 text-primary" />
+              <span className="text-sm text-muted-foreground">شارك حتى الآن</span>
+              <span className="text-base font-bold text-primary">{responseCount.toLocaleString("ar-EG")}</span>
+              <span className="text-sm text-muted-foreground">شخص</span>
+            </div>
+          )}
         </div>
+
 
         <div className="space-y-6">
           {/* Contact */}
@@ -402,6 +433,13 @@ function SurveyPage() {
               onChange={(v) => setForm({ ...form, current_status: v })}
               options={STATUSES}
             />
+            {form.current_status === OTHER && (
+              <OtherInput
+                value={form.current_status_other}
+                onChange={(v) => setForm({ ...form, current_status_other: v })}
+                placeholder="اذكر وضعك الحالي..."
+              />
+            )}
           </Section>
 
           <Section title="نمط الاشتراك الأنسب لك *">
