@@ -791,6 +791,11 @@ function NewsForm({
                 </button>
               )}
             </div>
+            {uploadPct && (
+              <div className="mt-2 max-w-sm">
+                <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} />
+              </div>
+            )}
           </div>
 
           <div>
