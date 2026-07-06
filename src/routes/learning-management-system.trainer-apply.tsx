@@ -88,6 +88,7 @@ function TrainerApplyPage() {
   const [existing, setExisting] = useState<ExistingApp | null>(null);
   const [loadingExisting, setLoadingExisting] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string; index: number; count: number } | null>(null);
 
   const [fullNameAr, setFullNameAr] = useState("");
   const [fullNameEn, setFullNameEn] = useState("");
