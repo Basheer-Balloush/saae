@@ -332,24 +332,26 @@ function AdminEnrollmentRequests() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const decide = async (req: Req, action: "approve" | "reject") => {
+  const decide = async (req: Req, action: "approve" | "reject", notify?: "email" | "whatsapp") => {
     setBusy(req.id);
     try {
       const fn = action === "approve" ? "lms_approve_enrollment_request" : "lms_reject_enrollment_request";
       const { error } = await supabase.rpc(fn, { _request_id: req.id, _admin_notes: noteDraft[req.id] || undefined });
       if (error) throw error;
       if (action === "approve") {
-        try {
-          await sendApprovedEmail({ data: { requestId: req.id, lang: ar ? "ar" : "en" } });
-        } catch (mailErr) {
-          console.error("Failed to send approval email", mailErr);
-          toast.warning(ar ? "تمت الموافقة لكن تعذّر إرسال البريد الإلكتروني" : "Approved but failed to send notification email");
-        }
-        // Open WhatsApp with prefilled message
-        try {
-          await openWhatsAppForRequest(req);
-        } catch (waErr) {
-          console.error("Failed to open WhatsApp", waErr);
+        if (notify === "email") {
+          try {
+            await sendApprovedEmail({ data: { requestId: req.id, lang: ar ? "ar" : "en" } });
+          } catch (mailErr) {
+            console.error("Failed to send approval email", mailErr);
+            toast.warning(ar ? "تمت الموافقة لكن تعذّر إرسال البريد الإلكتروني" : "Approved but failed to send notification email");
+          }
+        } else if (notify === "whatsapp") {
+          try {
+            await openWhatsAppForRequest(req);
+          } catch (waErr) {
+            console.error("Failed to open WhatsApp", waErr);
+          }
         }
       }
       toast.success(ar ? (action === "approve" ? "تمت الموافقة" : "تم الرفض") : (action === "approve" ? "Approved" : "Rejected"));
