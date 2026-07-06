@@ -457,6 +457,17 @@ function TrainerApplyPage() {
           </label>
         </section>
 
+        {uploadPct && (
+          <div className="rounded-xl border border-border bg-card p-4">
+            <UploadProgress
+              percent={uploadPct.pct}
+              loaded={uploadPct.loaded}
+              total={uploadPct.total}
+              label={`${ar ? "الملف" : "File"} ${uploadPct.index}/${uploadPct.count} — ${uploadPct.name}`}
+            />
+          </div>
+        )}
+
         <div className="flex justify-end gap-2">
           <Button type="submit" disabled={submitting}>
             {submitting && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
