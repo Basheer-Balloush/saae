@@ -17,6 +17,8 @@ import { createBunnyUpload, setLessonBunnyVideo } from "@/lib/bunny-stream.funct
 import * as tus from "tus-js-client";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import { CourseCoInstructors } from "@/components/lms/CourseCoInstructors";
+import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { UploadProgress } from "@/components/ui/upload-progress";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
