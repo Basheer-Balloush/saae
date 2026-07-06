@@ -104,6 +104,19 @@ const USED_AI_BEFORE = new Set([
 function SurveyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [responseCount, setResponseCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.rpc("get_initiative_survey_count");
+      if (!cancelled && !error && typeof data === "number") setResponseCount(data);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const [form, setForm] = useState({
     full_name: "",
     email: "",
