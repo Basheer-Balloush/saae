@@ -164,6 +164,16 @@ function SurveyPage() {
       toast.error("الرجاء تعبئة الاسم ورقم الهاتف والبريد الإلكتروني");
       return;
     }
+    const nameWords = form.full_name.trim().split(/\s+/).filter((w) => w.length >= 2);
+    if (nameWords.length < 2) {
+      toast.error("الرجاء إدخال الاسم الكامل (كلمتين على الأقل)");
+      return;
+    }
+    const ageNum = Number(form.age);
+    if (!form.age || !Number.isFinite(ageNum) || ageNum < 5 || ageNum > 120) {
+      toast.error("الرجاء إدخال عمر صحيح (بين 5 و 120)");
+      return;
+    }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(form.email.trim())) {
       toast.error("الرجاء إدخال بريد إلكتروني صحيح");
