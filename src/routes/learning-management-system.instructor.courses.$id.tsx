@@ -190,15 +190,37 @@ function CourseBuilder() {
 
   const uploadCover = async (file: File) => {
     if (!user) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error(lang === "ar" ? "يجب اختيار صورة" : "Please choose an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(lang === "ar" ? "الحد الأقصى 5 ميجابايت" : "Max file size is 5MB");
+      return;
+    }
     setUploading(true);
-    const path = `${user.id}/${course.id}/cover-${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from("lms-media").upload(path, file, { upsert: true });
-    if (error) { setUploading(false); toast.error(toUserMessage(error)); return; }
-    const { data: pub } = supabase.storage.from("lms-media").getPublicUrl(path);
-    update({ cover_url: pub.publicUrl });
-    await supabase.from("lms_courses").update({ cover_url: pub.publicUrl }).eq("id", course.id);
-    setUploading(false);
-    toast.success(lang === "ar" ? "تم رفع الغلاف" : "Cover uploaded");
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const safeName = `cover-${Date.now()}.${ext}`;
+      const path = `${user.id}/${course.id}/${safeName}`;
+      const { error: upErr } = await supabase.storage
+        .from("lms-media")
+        .upload(path, file, { upsert: true, contentType: file.type || undefined });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("lms-media").getPublicUrl(path);
+      const bustedUrl = `${pub.publicUrl}?v=${Date.now()}`;
+      const { error: dbErr } = await supabase
+        .from("lms_courses")
+        .update({ cover_url: bustedUrl })
+        .eq("id", course.id);
+      if (dbErr) throw dbErr;
+      update({ cover_url: bustedUrl });
+      toast.success(lang === "ar" ? "تم رفع الغلاف" : "Cover uploaded");
+    } catch (e) {
+      toast.error(toUserMessage(e));
+    } finally {
+      setUploading(false);
+    }
   };
 
   const openAddSection = () => {
