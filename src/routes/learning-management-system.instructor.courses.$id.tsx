@@ -394,19 +394,35 @@ function CourseBuilder() {
     if (!user || !files || files.length === 0) return;
     const current = Array.isArray(lesson.attachments) ? lesson.attachments : [];
     const next = [...current];
-    toast.info(lang === "ar" ? "جاري رفع المرفقات..." : "Uploading attachments...");
     for (const file of Array.from(files)) {
       if (file.size > MAX_ATTACHMENT_BYTES) {
         toast.error(`${file.name}: ${lang === "ar" ? "الحجم أكبر من 50 ميجابايت" : "larger than 50MB"}`);
         continue;
       }
       const safe = file.name.replace(/[^\w.\-]+/g, "_");
-      // Store in the PRIVATE bucket so materials require enrollment/instructor/admin
-      // access; the player generates short-lived signed URLs at render time.
       const path = `${user.id}/${course.id}/attachments/${lesson.id}/${Date.now()}-${safe}`;
-      const { error } = await supabase.storage.from("lms-private").upload(path, file, { upsert: true, contentType: file.type || undefined });
-      if (error) { toast.error(`${file.name}: ${toUserMessage(error)}`); continue; }
-      next.push({ name: file.name, path, url: "" });
+      const key = `${lesson.id}::${path}`;
+      setAttachPct((p) => ({ ...p, [key]: { pct: 0, loaded: 0, total: file.size, name: file.name } }));
+      try {
+        await uploadToSupabaseStorage({
+          bucket: "lms-private",
+          path,
+          file,
+          upsert: true,
+          contentType: file.type || undefined,
+          onProgress: (pct, loaded, total) =>
+            setAttachPct((p) => ({ ...p, [key]: { pct, loaded, total, name: file.name } })),
+        });
+        next.push({ name: file.name, path, url: "" });
+      } catch (err) {
+        toast.error(`${file.name}: ${toUserMessage(err)}`);
+      } finally {
+        setAttachPct((p) => {
+          const nxt = { ...p };
+          delete nxt[key];
+          return nxt;
+        });
+      }
     }
     await updateLesson(lesson.id, { attachments: next });
     toast.success(lang === "ar" ? "تم رفع المرفقات" : "Attachments uploaded");
