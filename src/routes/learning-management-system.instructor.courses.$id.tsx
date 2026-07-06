@@ -63,6 +63,8 @@ function CourseBuilder() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [coverPct, setCoverPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
+  const [attachPct, setAttachPct] = useState<Record<string, { pct: number; loaded: number; total: number; name: string }>>({});
   const [videoProgress, setVideoProgress] = useState<Record<string, { pct: number; speedMbps: number; etaSec: number }>>({});
   // In-app dialog state replacing native prompt()/confirm()
   const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
