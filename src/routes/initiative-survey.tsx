@@ -433,6 +433,13 @@ function SurveyPage() {
               onChange={(v) => setForm({ ...form, current_status: v })}
               options={STATUSES}
             />
+            {form.current_status === OTHER && (
+              <OtherInput
+                value={form.current_status_other}
+                onChange={(v) => setForm({ ...form, current_status_other: v })}
+                placeholder="اذكر وضعك الحالي..."
+              />
+            )}
           </Section>
 
           <Section title="نمط الاشتراك الأنسب لك *">
