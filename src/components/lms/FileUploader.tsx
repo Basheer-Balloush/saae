@@ -38,6 +38,7 @@ export function FileUploader({
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [progress, setProgress] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
 
   const currentName = currentPath ? currentPath.split("/").pop() : null;
 
@@ -57,14 +58,19 @@ export function FileUploader({
       return;
     }
     setUploading(true);
+    setProgress({ pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
       const safeName = `${Date.now()}-${file.name.replace(/[^\w.\-]+/g, "_")}`;
       const fullPath = `${pathPrefix.replace(/\/+$/, "")}/${safeName}`;
-      const { error } = await supabase.storage.from(bucket).upload(fullPath, file, {
+      await uploadToSupabaseStorage({
+        bucket,
+        path: fullPath,
+        file,
         upsert: true,
         contentType: file.type || undefined,
+        onProgress: (pct, loaded, total) =>
+          setProgress({ pct, loaded, total, name: file.name }),
       });
-      if (error) throw error;
       // Best-effort: remove previous file if it had the same prefix and a different name
       if (currentPath && currentPath !== fullPath) {
         await supabase.storage.from(bucket).remove([currentPath]).catch(() => {});
@@ -76,6 +82,7 @@ export function FileUploader({
       toast.error(msg);
     } finally {
       setUploading(false);
+      setProgress(null);
     }
   };
 
