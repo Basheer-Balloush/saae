@@ -1454,6 +1454,9 @@ function PartnerForm({
                   </button>
                 )}
               </div>
+              {uploadPct?.which === "light" && (
+                <div className="mt-2"><UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} compact /></div>
+              )}
               <p className="mt-1 text-xs text-muted-foreground">
                 {ar ? "اتركه فارغاً لاستخدام نفس اللوغو في الوضعين." : "Leave empty to use the same logo in both modes."}
               </p>
