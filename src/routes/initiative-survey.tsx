@@ -196,6 +196,7 @@ function SurveyPage() {
     try {
       const { error } = await supabase.from("initiative_survey_responses").insert({
         full_name: form.full_name.trim(),
+        age: Math.floor(Number(form.age)),
         email: form.email.trim(),
         phone: form.phone.trim(),
         address: form.address.trim() || null,
