@@ -787,6 +787,7 @@ export type Database = {
       initiative_survey_responses: {
         Row: {
           address: string | null
+          age: number | null
           ai_relationship: string | null
           ai_tools_used: string | null
           biggest_obstacle: string | null
@@ -809,6 +810,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          age?: number | null
           ai_relationship?: string | null
           ai_tools_used?: string | null
           biggest_obstacle?: string | null
@@ -831,6 +833,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          age?: number | null
           ai_relationship?: string | null
           ai_tools_used?: string | null
           biggest_obstacle?: string | null
