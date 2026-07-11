@@ -68,6 +68,10 @@ export const amsT: Record<Lang, {
   confirmDeleteCourse: string;
   previousRegistrants: string;
   useDetails: string;
+  linkedFromLms: string;
+  sessionsFromSectionsHint: string;
+  accountCreated: string;
+  emailRequired: string;
 }> = {
   en: {
     title: "Attendance Management",
@@ -137,6 +141,10 @@ export const amsT: Record<Lang, {
     confirmDeleteCourse: "Delete this course and all its data?",
     previousRegistrants: "Previously registered",
     useDetails: "Use details",
+    linkedFromLms: "Linked to LMS",
+    sessionsFromSectionsHint: "Sessions mirror the LMS course sections and are managed from the LMS.",
+    accountCreated: "Account created — login details emailed to the student.",
+    emailRequired: "Email is required for LMS-linked courses.",
   },
   ar: {
     title: "نظام إدارة الحضور",
@@ -206,5 +214,9 @@ export const amsT: Record<Lang, {
     confirmDeleteCourse: "هل تريد حذف هذه الدورة وكل بياناتها؟",
     previousRegistrants: "مسجَّل سابقًا",
     useDetails: "استخدام المعلومات",
+    linkedFromLms: "مرتبطة بالمنصة التعليمية",
+    sessionsFromSectionsHint: "الجلسات مطابقة لأقسام الدورة على المنصة، وتُدار من هناك.",
+    accountCreated: "تم إنشاء الحساب — تم إرسال بيانات الدخول عبر البريد.",
+    emailRequired: "البريد الإلكتروني مطلوب للدورات المرتبطة بالمنصة.",
   },
 };
