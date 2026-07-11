@@ -525,11 +525,17 @@ function AdminEnrollmentRequests() {
                   </div>
                 )}
                 {r.status !== "pending" && (
-                  <div className="pt-2 border-t border-border">
+                  <div className="pt-2 border-t border-border flex gap-2 flex-wrap">
                     <Button size="sm" variant="secondary" onClick={() => setViewing({ requestId: r.id, courseId: r.course_id })}>
                       <FileText className="h-4 w-4 mx-1" />
                       {ar ? "عرض بيانات التسجيل" : "View form answers"}
                     </Button>
+                    {r.status === "approved" && (
+                      <Button size="sm" onClick={() => openWhatsAppForRequest(r)} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                        <MessageCircle className="h-4 w-4 mx-1" />
+                        {ar ? "إرسال عبر واتساب" : "Send via WhatsApp"}
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
