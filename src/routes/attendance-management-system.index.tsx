@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { toUserMessage } from "@/lib/safe-error";
 import { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
-import { ArrowLeft, ArrowRight, Plus, Trash2, Users, CalendarDays, Loader2, Eye, FileSpreadsheet } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus, Trash2, Users, CalendarDays, Loader2, Eye, FileSpreadsheet, Link2 } from "lucide-react";
 import ExcelJS from "exceljs";
 import { supabase } from "@/integrations/supabase/client";
+import { addAmsRegistrantWithLms } from "@/lib/ams-registrant.functions";
 import { useLang } from "@/lib/i18n";
 import { amsT } from "@/lib/ams-i18n";
 import { Button } from "@/components/ui/button";
@@ -71,6 +73,7 @@ type Course = {
   name_ar: string;
   name_en: string | null;
   created_at: string;
+  lms_course_id: string | null;
 };
 
 type Registrant = {
@@ -88,6 +91,7 @@ type Session = {
   course_id: string;
   title: string;
   session_date: string;
+  lms_section_id: string | null;
 };
 
 function AmsDashboard() {
@@ -474,7 +478,15 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
         {tr.back}
       </button>
 
-      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{courseName}</h1>
+      <div className="flex items-center gap-2 flex-wrap">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{courseName}</h1>
+        {course.lms_course_id && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+            <Link2 className="h-3 w-3" />
+            {tr.linkedFromLms}
+          </span>
+        )}
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
@@ -497,7 +509,7 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
                     {tr.exportExcel}
                   </Button>
                 )}
-                <AddRegistrantDialog courseId={course.id} onCreated={load} />
+                <AddRegistrantDialog courseId={course.id} isLinked={!!course.lms_course_id} onCreated={load} />
               </div>
             </div>
             {registrants.length === 0 ? (
@@ -555,9 +567,14 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
                     {tr.exportExcel}
                   </Button>
                 )}
-                <AddSessionDialog courseId={course.id} onCreated={load} />
+                {!course.lms_course_id && <AddSessionDialog courseId={course.id} onCreated={load} />}
               </div>
             </div>
+            {course.lms_course_id && (
+              <p className="text-xs text-muted-foreground mb-3 rounded-md bg-primary/5 border border-primary/20 px-3 py-2">
+                {tr.sessionsFromSectionsHint}
+              </p>
+            )}
             {sessions.length === 0 ? (
               <p className="text-sm text-muted-foreground py-8 text-center">{tr.noSessions}</p>
             ) : (
@@ -574,14 +591,16 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
                       <div className="font-medium text-sm">{s.title}</div>
                       <div className="text-xs text-muted-foreground" dir="ltr">{s.session_date}</div>
                     </button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteSession(s.id)}
-                      aria-label={tr.delete}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    {!s.lms_section_id && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteSession(s.id)}
+                        aria-label={tr.delete}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -761,9 +780,10 @@ const registrantSchema = z.object({
   payment_status: z.enum(["paid", "unpaid", "partial", "waived"]),
 });
 
-function AddRegistrantDialog({ courseId, onCreated }: { courseId: string; onCreated: () => void }) {
+function AddRegistrantDialog({ courseId, isLinked, onCreated }: { courseId: string; isLinked: boolean; onCreated: () => void }) {
   const { lang } = useLang();
   const tr = amsT[lang];
+  const addWithLms = useServerFn(addAmsRegistrantWithLms);
   const [open, setOpen] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -824,25 +844,49 @@ function AddRegistrantDialog({ courseId, onCreated }: { courseId: string; onCrea
       toast.error(parsed.error.issues[0]?.message ?? tr.required);
       return;
     }
+    if (isLinked && !parsed.data.email) {
+      toast.error(tr.emailRequired);
+      return;
+    }
     setSaving(true);
-    const { error } = await supabase.from("ams_registrants").insert({
-      course_id: courseId,
-      full_name: parsed.data.full_name,
-      email: parsed.data.email || null,
-      phone: parsed.data.phone || null,
-      payment_status: parsed.data.payment_status,
-    });
-    setSaving(false);
-    if (error) return toast.error(toUserMessage(error));
-    toast.success(tr.saved);
-    setFullName("");
-    setEmail("");
-    setPhone("");
-    setStatus("unpaid");
-    setSuggestions([]);
-    setOpen(false);
-    onCreated();
+    try {
+      if (isLinked) {
+        const res = await addWithLms({
+          data: {
+            amsCourseId: courseId,
+            fullName: parsed.data.full_name,
+            email: parsed.data.email!,
+            phone: parsed.data.phone || null,
+            paymentStatus: parsed.data.payment_status,
+            lang,
+          },
+        });
+        toast.success(res.isNewUser ? tr.accountCreated : tr.saved);
+      } else {
+        const { error } = await supabase.from("ams_registrants").insert({
+          course_id: courseId,
+          full_name: parsed.data.full_name,
+          email: parsed.data.email || null,
+          phone: parsed.data.phone || null,
+          payment_status: parsed.data.payment_status,
+        });
+        if (error) throw error;
+        toast.success(tr.saved);
+      }
+      setFullName("");
+      setEmail("");
+      setPhone("");
+      setStatus("unpaid");
+      setSuggestions([]);
+      setOpen(false);
+      onCreated();
+    } catch (err) {
+      toast.error(toUserMessage(err));
+    } finally {
+      setSaving(false);
+    }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -1042,12 +1086,11 @@ function SessionAttendanceDialog({
   const toggle = async (registrantId: string, next: boolean) => {
     setPresentMap((p) => ({ ...p, [registrantId]: next }));
     setSavingId(registrantId);
-    const { error } = await supabase
-      .from("ams_attendance")
-      .upsert(
-        { session_id: session.id, registrant_id: registrantId, present: next },
-        { onConflict: "session_id,registrant_id" },
-      );
+    const { error } = await supabase.rpc("ams_mark_attendance_and_complete", {
+      _session_id: session.id,
+      _registrant_id: registrantId,
+      _present: next,
+    });
     setSavingId(null);
     if (error) toast.error(toUserMessage(error));
   };

@@ -150,6 +150,8 @@ export type Database = {
           course_id: string
           created_at: string
           id: string
+          is_manual: boolean
+          lms_section_id: string | null
           session_date: string
           title: string
           updated_at: string
@@ -158,6 +160,8 @@ export type Database = {
           course_id: string
           created_at?: string
           id?: string
+          is_manual?: boolean
+          lms_section_id?: string | null
           session_date?: string
           title: string
           updated_at?: string
@@ -166,6 +170,8 @@ export type Database = {
           course_id?: string
           created_at?: string
           id?: string
+          is_manual?: boolean
+          lms_section_id?: string | null
           session_date?: string
           title?: string
           updated_at?: string
@@ -176,6 +182,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "ams_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ams_sessions_lms_section_id_fkey"
+            columns: ["lms_section_id"]
+            isOneToOne: false
+            referencedRelation: "lms_sections"
             referencedColumns: ["id"]
           },
         ]
@@ -2328,6 +2341,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ams_attach_user_to_linked_course: {
+        Args: {
+          _ams_course_id: string
+          _email: string
+          _full_name: string
+          _payment_status: Database["public"]["Enums"]["ams_payment_status"]
+          _phone: string
+          _user_id: string
+        }
+        Returns: string
+      }
+      ams_mark_attendance_and_complete: {
+        Args: { _present: boolean; _registrant_id: string; _session_id: string }
+        Returns: undefined
+      }
       can_access_ams_course: { Args: { _course_id: string }; Returns: boolean }
       can_access_ams_registrant: {
         Args: { _registrant_id: string }
