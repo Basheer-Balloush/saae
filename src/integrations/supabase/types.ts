@@ -532,6 +532,66 @@ export type Database = {
         }
         Relationships: []
       }
+      event_survey_responses: {
+        Row: {
+          city: string
+          contact_name: string
+          created_at: string
+          description: string
+          email: string
+          facebook_url: string | null
+          field: string
+          id: string
+          instagram_url: string | null
+          linkedin_url: string | null
+          notes: string | null
+          phone: string
+          problem_solved: string
+          project_name: string
+          stage: string
+          team_size: string
+          website: string | null
+        }
+        Insert: {
+          city: string
+          contact_name: string
+          created_at?: string
+          description: string
+          email: string
+          facebook_url?: string | null
+          field: string
+          id?: string
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          notes?: string | null
+          phone: string
+          problem_solved: string
+          project_name: string
+          stage: string
+          team_size: string
+          website?: string | null
+        }
+        Update: {
+          city?: string
+          contact_name?: string
+          created_at?: string
+          description?: string
+          email?: string
+          facebook_url?: string | null
+          field?: string
+          id?: string
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          notes?: string | null
+          phone?: string
+          problem_solved?: string
+          project_name?: string
+          stage?: string
+          team_size?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       individual_leads: {
         Row: {
           address: string | null

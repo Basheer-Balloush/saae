@@ -17,6 +17,7 @@ import { Route as OneMillionInitiativeDonorsRouteImport } from './routes/one-mil
 import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-initiative'
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
 import { Route as InitiativeSurveyRouteImport } from './routes/initiative-survey'
+import { Route as EventSurveyRouteImport } from './routes/event-survey'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
 import { Route as AboutRouteImport } from './routes/about'
@@ -108,6 +109,11 @@ const LearningManagementSystemRoute =
 const InitiativeSurveyRoute = InitiativeSurveyRouteImport.update({
   id: '/initiative-survey',
   path: '/initiative-survey',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventSurveyRoute = EventSurveyRouteImport.update({
+  id: '/event-survey',
+  path: '/event-survey',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -395,6 +401,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
+  '/event-survey': typeof EventSurveyRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
   '/one-million-initiative': typeof OneMillionInitiativeRoute
@@ -453,6 +460,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/event-survey': typeof EventSurveyRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
@@ -509,6 +517,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
+  '/event-survey': typeof EventSurveyRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
   '/one-million-initiative': typeof OneMillionInitiativeRoute
@@ -570,6 +579,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/attendance-management-system'
     | '/contact'
+    | '/event-survey'
     | '/initiative-survey'
     | '/learning-management-system'
     | '/one-million-initiative'
@@ -628,6 +638,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/event-survey'
     | '/initiative-survey'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
@@ -683,6 +694,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/attendance-management-system'
     | '/contact'
+    | '/event-survey'
     | '/initiative-survey'
     | '/learning-management-system'
     | '/one-million-initiative'
@@ -743,6 +755,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
+  EventSurveyRoute: typeof EventSurveyRoute
   InitiativeSurveyRoute: typeof InitiativeSurveyRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
   OneMillionInitiativeRoute: typeof OneMillionInitiativeRoute
@@ -822,6 +835,13 @@ declare module '@tanstack/react-router' {
       path: '/initiative-survey'
       fullPath: '/initiative-survey'
       preLoaderRoute: typeof InitiativeSurveyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event-survey': {
+      id: '/event-survey'
+      path: '/event-survey'
+      fullPath: '/event-survey'
+      preLoaderRoute: typeof EventSurveyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -1324,6 +1344,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
+  EventSurveyRoute: EventSurveyRoute,
   InitiativeSurveyRoute: InitiativeSurveyRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
   OneMillionInitiativeRoute: OneMillionInitiativeRoute,
@@ -1349,13 +1370,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
