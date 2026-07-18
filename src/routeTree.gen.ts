@@ -45,6 +45,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminInitiativeSurveyRouteImport } from './routes/admin.initiative-survey'
 import { Route as AdminInitiativeRouteImport } from './routes/admin.initiative'
+import { Route as AdminEventSurveyRouteImport } from './routes/admin.event-survey'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system.student.index'
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
 import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system.admin.index'
@@ -265,6 +266,11 @@ const AdminInitiativeRoute = AdminInitiativeRouteImport.update({
   path: '/admin/initiative',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEventSurveyRoute = AdminEventSurveyRouteImport.update({
+  id: '/admin/event-survey',
+  path: '/admin/event-survey',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearningManagementSystemStudentIndexRoute =
   LearningManagementSystemStudentIndexRouteImport.update({
     id: '/',
@@ -410,6 +416,7 @@ export interface FileRoutesByFullPath {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/event-survey': typeof AdminEventSurveyRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
@@ -468,6 +475,7 @@ export interface FileRoutesByTo {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/event-survey': typeof AdminEventSurveyRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
@@ -526,6 +534,7 @@ export interface FileRoutesById {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/event-survey': typeof AdminEventSurveyRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
@@ -588,6 +597,7 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
+    | '/admin/event-survey'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
@@ -646,6 +656,7 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
+    | '/admin/event-survey'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
@@ -703,6 +714,7 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
+    | '/admin/event-survey'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
@@ -764,6 +776,7 @@ export interface RootRouteChildren {
   RegistrationRoute: typeof RegistrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
+  AdminEventSurveyRoute: typeof AdminEventSurveyRoute
   AdminInitiativeRoute: typeof AdminInitiativeRoute
   AdminInitiativeSurveyRoute: typeof AdminInitiativeSurveyRoute
   AdminLoginRoute: typeof AdminLoginRoute
@@ -1031,6 +1044,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/initiative'
       fullPath: '/admin/initiative'
       preLoaderRoute: typeof AdminInitiativeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/event-survey': {
+      id: '/admin/event-survey'
+      path: '/admin/event-survey'
+      fullPath: '/admin/event-survey'
+      preLoaderRoute: typeof AdminEventSurveyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learning-management-system/student/': {
@@ -1353,6 +1373,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegistrationRoute: RegistrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,
+  AdminEventSurveyRoute: AdminEventSurveyRoute,
   AdminInitiativeRoute: AdminInitiativeRoute,
   AdminInitiativeSurveyRoute: AdminInitiativeSurveyRoute,
   AdminLoginRoute: AdminLoginRoute,

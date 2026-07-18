@@ -106,7 +106,7 @@ function AdminEventSurvey() {
               <Th>المجال</Th>
               <Th>المرحلة</Th>
               <Th>الفريق</Th>
-              <Th></Th>
+              <Th> </Th>
             </tr>
           </thead>
           <tbody>
