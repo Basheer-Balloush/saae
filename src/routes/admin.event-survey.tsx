@@ -1,0 +1,208 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft, Download, RefreshCw, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/admin/event-survey")({
+  ssr: false,
+  beforeLoad: requireAdminBeforeLoad,
+  head: () => ({ meta: [{ title: "إدارة استبيان المشاريع" }] }),
+  component: AdminEventSurvey,
+});
+
+type Row = {
+  id: string;
+  project_name: string | null;
+  contact_name: string | null;
+  phone: string | null;
+  email: string | null;
+  city: string | null;
+  website: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  linkedin_url: string | null;
+  field: string | null;
+  description: string | null;
+  problem_solved: string | null;
+  stage: string | null;
+  team_size: string | null;
+  notes: string | null;
+  created_at: string;
+};
+
+function AdminEventSurvey() {
+  const [rows, setRows] = useState<Row[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<Row | null>(null);
+
+  const load = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("event_survey_responses")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) toast.error(error.message);
+    setRows((data as Row[]) || []);
+    setLoading(false);
+  };
+  useEffect(() => { load(); }, []);
+
+  const downloadCSV = () => {
+    if (!rows.length) { toast.info("لا توجد بيانات"); return; }
+    const headers = [
+      "created_at","project_name","contact_name","phone","email","city",
+      "website","facebook_url","instagram_url","linkedin_url",
+      "field","description","problem_solved","stage","team_size","notes",
+    ];
+    const esc = (v: any) => {
+      if (v === null || v === undefined) return "";
+      return `"${String(v).replace(/"/g, '""')}"`;
+    };
+    const csv = [
+      headers.join(","),
+      ...rows.map((r) => headers.map((h) => esc((r as any)[h])).join(",")),
+    ].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `event-survey-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div dir="rtl" className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <Link to="/admin"><Button variant="ghost"><ArrowLeft className="h-4 w-4 ms-2 rotate-180" />العودة</Button></Link>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={load} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 ms-2 ${loading ? "animate-spin" : ""}`} /> تحديث
+          </Button>
+          <Button onClick={downloadCSV}>
+            <Download className="h-4 w-4 ms-2" /> تنزيل CSV
+          </Button>
+        </div>
+      </div>
+
+      <h1 className="text-3xl font-bold mt-4">استبيان المشاريع</h1>
+      <p className="text-muted-foreground mt-1">
+        إجمالي الردود: <span className="font-bold text-foreground">{rows.length}</span>
+      </p>
+
+      <div className="mt-6 rounded-2xl border border-border bg-card overflow-x-auto">
+        <table className="w-full text-sm min-w-[1100px]">
+          <thead className="bg-muted/50">
+            <tr>
+              <Th>التاريخ</Th>
+              <Th>المشروع</Th>
+              <Th>المسؤول</Th>
+              <Th>الهاتف</Th>
+              <Th>البريد</Th>
+              <Th>المدينة</Th>
+              <Th>المجال</Th>
+              <Th>المرحلة</Th>
+              <Th>الفريق</Th>
+              <Th> </Th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.id} className="border-t border-border align-top hover:bg-muted/30">
+                <Td>{new Date(r.created_at).toLocaleDateString("ar")}</Td>
+                <Td className="font-medium">{r.project_name}</Td>
+                <Td>{r.contact_name}</Td>
+                <Td dir="ltr">{r.phone}</Td>
+                <Td dir="ltr">{r.email}</Td>
+                <Td>{r.city}</Td>
+                <Td>{r.field}</Td>
+                <Td>{r.stage}</Td>
+                <Td>{r.team_size}</Td>
+                <Td>
+                  <Button size="sm" variant="outline" onClick={() => setSelected(r)}>
+                    التفاصيل
+                  </Button>
+                </Td>
+              </tr>
+            ))}
+            {!loading && !rows.length && (
+              <tr><td colSpan={10} className="p-8 text-center text-muted-foreground">لا توجد ردود بعد</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {selected && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            className="bg-card border border-border rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">{selected.project_name}</h2>
+              <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>✕</Button>
+            </div>
+            <div className="space-y-3 text-sm">
+              <Field label="تاريخ الإرسال" value={new Date(selected.created_at).toLocaleString("ar")} />
+              <Field label="اسم المسؤول" value={selected.contact_name} />
+              <Field label="رقم الهاتف" value={selected.phone} ltr />
+              <Field label="البريد الإلكتروني" value={selected.email} ltr />
+              <Field label="المدينة" value={selected.city} />
+              <LinkField label="الموقع الإلكتروني" value={selected.website} />
+              <LinkField label="Facebook" value={selected.facebook_url} />
+              <LinkField label="Instagram" value={selected.instagram_url} />
+              <LinkField label="LinkedIn" value={selected.linkedin_url} />
+              <Field label="مجال العمل" value={selected.field} />
+              <Field label="وصف المشروع" value={selected.description} multiline />
+              <Field label="المشكلة التي يحلها" value={selected.problem_solved} multiline />
+              <Field label="المرحلة الحالية" value={selected.stage} />
+              <Field label="عدد أفراد الفريق" value={selected.team_size} />
+              <Field label="ملاحظات" value={selected.notes} multiline />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Th({ children }: { children: React.ReactNode }) {
+  return <th className="p-3 text-start whitespace-nowrap font-semibold text-xs uppercase tracking-wide text-muted-foreground">{children}</th>;
+}
+function Td({ children, className = "", ...rest }: React.HTMLAttributes<HTMLTableCellElement>) {
+  return <td className={`p-3 ${className}`} {...rest}>{children}</td>;
+}
+
+function Field({ label, value, ltr, multiline }: { label: string; value: string | null; ltr?: boolean; multiline?: boolean }) {
+  return (
+    <div className="border-b border-border pb-2">
+      <div className="text-xs font-semibold text-muted-foreground mb-1">{label}</div>
+      <div
+        dir={ltr ? "ltr" : undefined}
+        className={`text-foreground ${multiline ? "whitespace-pre-wrap" : ""}`}
+      >
+        {value || <span className="text-muted-foreground italic">—</span>}
+      </div>
+    </div>
+  );
+}
+
+function LinkField({ label, value }: { label: string; value: string | null }) {
+  return (
+    <div className="border-b border-border pb-2">
+      <div className="text-xs font-semibold text-muted-foreground mb-1">{label}</div>
+      {value ? (
+        <a href={value} target="_blank" rel="noreferrer" dir="ltr"
+           className="text-primary hover:underline inline-flex items-center gap-1 break-all">
+          {value} <ExternalLink className="h-3 w-3" />
+        </a>
+      ) : <span className="text-muted-foreground italic">—</span>}
+    </div>
+  );
+}
