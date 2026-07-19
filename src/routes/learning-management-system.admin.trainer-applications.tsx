@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Eye, FileText, Loader2, ArrowLeft, ExternalLink } from "lucide-react";
+import { Eye, FileText, Loader2, ArrowLeft, ExternalLink, Mail, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
@@ -8,9 +8,10 @@ import { useLang } from "@/lib/i18n";
 import { toUserMessage } from "@/lib/safe-error";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { cleanupUnapprovedInstructors, countUnapprovedInstructors } from "@/lib/instructor-cleanup.functions";
 
 export const Route = createFileRoute("/learning-management-system/admin/trainer-applications")({
   ssr: false,
