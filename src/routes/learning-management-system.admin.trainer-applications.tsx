@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Eye, FileText, Loader2, ArrowLeft, ExternalLink } from "lucide-react";
+import { Eye, FileText, Loader2, ArrowLeft, ExternalLink, Mail, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
@@ -8,9 +8,10 @@ import { useLang } from "@/lib/i18n";
 import { toUserMessage } from "@/lib/safe-error";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { cleanupUnapprovedInstructors, countUnapprovedInstructors } from "@/lib/instructor-cleanup.functions";
 
 export const Route = createFileRoute("/learning-management-system/admin/trainer-applications")({
   ssr: false,
@@ -114,6 +115,37 @@ function AdminTrainerApplications() {
 
   useEffect(() => { load(); }, []);
 
+  // ---- Cleanup unapproved instructors ----
+  const [unapprovedCount, setUnapprovedCount] = useState<number | null>(null);
+  const [cleanupOpen, setCleanupOpen] = useState(false);
+  const [cleanupRunning, setCleanupRunning] = useState(false);
+  const [cleanupResult, setCleanupResult] = useState<{ total: number; emailed: number; deleted: number; failed: string[] } | null>(null);
+
+  const loadUnapprovedCount = async () => {
+    try {
+      const res = await countUnapprovedInstructors();
+      setUnapprovedCount(res.count);
+    } catch (e) {
+      setUnapprovedCount(null);
+    }
+  };
+  useEffect(() => { loadUnapprovedCount(); }, []);
+
+  const runCleanup = async () => {
+    setCleanupRunning(true);
+    setCleanupResult(null);
+    try {
+      const res = await cleanupUnapprovedInstructors();
+      setCleanupResult(res);
+      toast.success(ar ? `تم — أُرسل ${res.emailed} بريد، حُذف ${res.deleted}` : `Done — ${res.emailed} emailed, ${res.deleted} deleted`);
+      loadUnapprovedCount();
+    } catch (e) {
+      toast.error(toUserMessage(e));
+    } finally {
+      setCleanupRunning(false);
+    }
+  };
+
   const openView = async (app: App) => {
     setSelected(app);
     setNewStatus(app.status);
@@ -162,6 +194,66 @@ function AdminTrainerApplications() {
         </div>
         <Button variant="outline" onClick={load}>{ar ? "تحديث" : "Refresh"}</Button>
       </div>
+
+      {/* Cleanup unapproved instructors */}
+      <div className="mb-6 rounded-2xl border border-amber-500/40 bg-amber-500/5 p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h3 className="font-bold text-foreground">
+              {ar ? "تنظيف المدرّبين غير المعتمدين" : "Clean up unapproved instructors"}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1 max-w-2xl">
+              {ar
+                ? `يحذف كل الملفات غير المعتمدة من قاعدة البيانات ويرسل بريداً لكل واحد منهم لإعادة تعبئة نموذج اعتماد المدرّبين، لتظهر طلباتهم الجديدة هنا.${unapprovedCount !== null ? ` عدد الملفات غير المعتمدة الحالية: ${unapprovedCount}.` : ""}`
+                : `Deletes all unapproved instructor profiles and emails each of them a link to re-fill the trainer application form. Their new submissions will appear here.${unapprovedCount !== null ? ` Current unapproved: ${unapprovedCount}.` : ""}`}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            className="border-amber-500/60 text-amber-700 hover:bg-amber-500/10 shrink-0"
+            onClick={() => setCleanupOpen(true)}
+            disabled={unapprovedCount === 0}
+          >
+            <Mail className="h-4 w-4 mx-1" />
+            {ar ? "بدء التنظيف وإرسال البريد" : "Cleanup & email"}
+          </Button>
+        </div>
+      </div>
+
+      <Dialog open={cleanupOpen} onOpenChange={(v) => { if (!cleanupRunning) { setCleanupOpen(v); if (!v) setCleanupResult(null); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{ar ? "تأكيد التنظيف" : "Confirm cleanup"}</DialogTitle>
+            <DialogDescription>
+              {ar
+                ? `سيتم حذف ${unapprovedCount ?? "?"} من ملفات المدرّبين غير المعتمدين وإرسال بريد لكل واحد منهم لإعادة تعبئة النموذج. هل تريد المتابعة؟`
+                : `This will delete ${unapprovedCount ?? "?"} unapproved instructor profiles and email each of them to re-fill the form. Continue?`}
+            </DialogDescription>
+          </DialogHeader>
+          {cleanupResult && (
+            <div className="rounded-xl border border-border p-3 text-sm space-y-1">
+              <p>{ar ? "الإجمالي" : "Total"}: <b>{cleanupResult.total}</b></p>
+              <p>{ar ? "أُرسل البريد" : "Emailed"}: <b>{cleanupResult.emailed}</b></p>
+              <p>{ar ? "حُذف" : "Deleted"}: <b>{cleanupResult.deleted}</b></p>
+              {cleanupResult.failed.length > 0 && (
+                <p className="text-destructive">{ar ? "فشل" : "Failed"}: {cleanupResult.failed.length}</p>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" disabled={cleanupRunning} onClick={() => { setCleanupOpen(false); setCleanupResult(null); }}>
+              {cleanupResult ? (ar ? "إغلاق" : "Close") : (ar ? "إلغاء" : "Cancel")}
+            </Button>
+            {!cleanupResult && (
+              <Button variant="destructive" disabled={cleanupRunning} onClick={runCleanup}>
+                {cleanupRunning ? <Loader2 className="h-4 w-4 animate-spin mx-2" /> : <Trash2 className="h-4 w-4 mx-2" />}
+                {ar ? "تأكيد" : "Confirm"}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       {loading ? (
         <p className="text-center py-10 text-muted-foreground">…</p>
