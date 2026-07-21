@@ -42,10 +42,15 @@ function mapNewsRows(rows: HomeNewsRow[], lang: "ar" | "en"): Slide[] {
   }));
 }
 
-export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
-  const { t, dir, lang } = useLang();
+type Translations = ReturnType<typeof useLang>["t"];
 
-  const [slides, setSlides] = useState<Slide[] | null>(() => initialNews ? mapNewsRows(initialNews, lang) : null);
+type NewsMarqueeProps = {
+  slides: Slide[];
+  dir: "ltr" | "rtl";
+  t: Translations;
+};
+
+function NewsMarquee({ slides, dir, t }: NewsMarqueeProps) {
   const [isPaused, setIsPaused] = useState(false);
   const rowRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef({
@@ -57,30 +62,8 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   });
   const didDragRef = useRef(false);
   const DRAG_THRESHOLD = 5;
-
-  const animationDuration = 30; // seconds per loop (faster than before)
-  // Direction is derived from the active locale:
-  // - English (ltr): keyframe translates -50% → 0, so items visually flow left → right.
-  // - Arabic  (rtl): keyframe translates 0 → -50%, so items visually flow right → left.
+  const animationDuration = 30;
   const animationClass = dir === "rtl" ? "animate-[news-marquee_30s_linear_infinite]" : "animate-[news-marquee-rtl_30s_linear_infinite]";
-
-
-  useEffect(() => {
-    if (initialNews) {
-      setSlides(mapNewsRows(initialNews, lang));
-      return;
-    }
-    supabase
-      .from("news")
-      .select("id,title,title_ar,title_en,image_url,category,published_at")
-      .eq("show_on_home", true)
-      .order("published_at", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(8)
-      .then(({ data }) => {
-        setSlides(mapNewsRows((data ?? []) as HomeNewsRow[], lang));
-      });
-  }, [initialNews, lang]);
 
   // Restore marquee position when returning from a news detail page.
   useEffect(() => {
@@ -96,10 +79,8 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
       const half = row.scrollWidth / 2;
       if (!half) return;
       const isRtl = dir === "rtl";
-      // Both keyframes translate between -half and 0, so m41 is always ≤ 0.
       const actualOffset = -savedPx;
       const wrapped = wrapOffset(actualOffset, half);
-      // ltr (news-marquee-rtl): -half → 0.  rtl (news-marquee): 0 → -half.
       const from = isRtl ? 0 : -half;
       const to = isRtl ? -half : 0;
       const pct = (wrapped - from) / (to - from);
@@ -108,11 +89,9 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     };
     const id = window.setTimeout(apply, 50);
     return () => window.clearTimeout(id);
-  }, [slides, dir, animationDuration]);
+  }, [slides, dir]);
 
-  // When the language changes at runtime, reset any inline animationDelay /
-  // transform left over from a previous drag or restore so the marquee starts
-  // cleanly in the new direction without a jump or double animation.
+  // Reset inline state when language changes at runtime.
   useEffect(() => {
     const row = rowRef.current;
     if (!row) return;
@@ -120,7 +99,6 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     row.style.transform = "";
     try { sessionStorage.removeItem(SCROLL_KEY); } catch {}
   }, [dir]);
-
 
   const saveOffset = () => {
     const row = rowRef.current;
@@ -151,8 +129,6 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
       pointerId: e.pointerId,
     };
     didDragRef.current = false;
-    // Do not capture pointer, freeze animation, or change cursor yet — a
-    // stationary press should still allow the underlying <Link> click.
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -164,7 +140,6 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
 
     if (!state.isDragging) {
       if (Math.abs(delta) < DRAG_THRESHOLD) return;
-      // Promote to drag: freeze animation at current position and take capture.
       const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
       state.initialOffset = m.m41;
       state.startX = e.clientX;
@@ -194,11 +169,7 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
       initialOffset: 0,
       pointerId: null,
     };
-
-    if (!wasDragging) {
-      // Simple click — let the <Link> handle navigation.
-      return;
-    }
+    if (!wasDragging) return;
 
     const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
     const half = row.scrollWidth / 2;
@@ -227,10 +198,92 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     saveOffset();
   };
 
-  // Hide section entirely until we have published news to show
-  if (!slides || slides.length === 0) return null;
-
   const row = [...slides, ...slides];
+
+  return (
+    <div dir="ltr" className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
+      <div
+        ref={rowRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className={`flex w-max cursor-grab gap-6 touch-pan-y will-change-transform ${animationClass}`}
+        style={{ animationPlayState: isPaused ? "paused" : "running" }}
+      >
+        {row.map((c, i) => {
+          const cardClass = "group flex w-[78vw] max-w-[320px] flex-none flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift sm:w-[340px] sm:max-w-none lg:w-[360px]";
+          return (
+            <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id! }} onClick={handleLinkClick} aria-label={`${t.news.readMore}: ${c.title}`} className={cardClass}>
+              <div className="aspect-[16/10] overflow-hidden">
+                <img
+                  src={c.img}
+                  alt={c.title}
+                  width={800}
+                  height={600}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  fetchPriority={i === 0 ? "high" : "auto"}
+                  decoding="async"
+                  className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
+                />
+              </div>
+              <div className="flex flex-1 flex-col p-6">
+                <div className="flex items-center gap-3 text-xs">
+                  <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
+                    {c.cat}
+                  </span>
+                  <span className="whitespace-nowrap text-muted-foreground">{c.date}</span>
+                </div>
+                <h3 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
+                  {c.title}
+                </h3>
+                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                  {t.news.readMore}
+                  <ArrowUpRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
+                </span>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+      <style>{`
+        @keyframes news-marquee {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        @keyframes news-marquee-rtl {
+          from { transform: translateX(-50%); }
+          to { transform: translateX(0); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
+  const { t, dir, lang } = useLang();
+  const [slides, setSlides] = useState<Slide[] | null>(() => initialNews ? mapNewsRows(initialNews, lang) : null);
+
+  useEffect(() => {
+    if (initialNews) {
+      setSlides(mapNewsRows(initialNews, lang));
+      return;
+    }
+    supabase
+      .from("news")
+      .select("id,title,title_ar,title_en,image_url,category,published_at")
+      .eq("show_on_home", true)
+      .order("published_at", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(8)
+      .then(({ data }) => {
+        setSlides(mapNewsRows((data ?? []) as HomeNewsRow[], lang));
+      });
+  }, [initialNews, lang]);
+
+  if (!slides || slides.length === 0) return null;
 
   return (
     <section id="news" aria-labelledby="news-heading" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32">
@@ -259,59 +312,7 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
         </motion.div>
       </div>
 
-      <div dir="ltr" className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
-        <div
-          ref={rowRef}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          className={`flex w-max cursor-grab gap-6 touch-pan-y will-change-transform ${animationClass}`}
-          style={{ animationPlayState: isPaused ? "paused" : "running" }}
-        >
-          {row.map((c, i) => {
-            const cardClass = "group flex w-[78vw] max-w-[320px] flex-none flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift sm:w-[340px] sm:max-w-none lg:w-[360px]";
-            const inner = (
-              <>
-                <div className="aspect-[16/10] overflow-hidden">
-                  <img
-                    src={c.img}
-                    alt={c.title}
-                    width={800}
-                    height={600}
-                    loading={i === 0 ? "eager" : "lazy"}
-                    fetchPriority={i === 0 ? "high" : "auto"}
-                    decoding="async"
-                    className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
-                  />
-                </div>
-                <div className="flex flex-1 flex-col p-6">
-                  <div className="flex items-center gap-3 text-xs">
-                    <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
-                      {c.cat}
-                    </span>
-                    <span className="whitespace-nowrap text-muted-foreground">{c.date}</span>
-                  </div>
-                  <h3 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
-                    {c.title}
-                  </h3>
-                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                    {t.news.readMore}
-                    <ArrowUpRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
-                  </span>
-                </div>
-              </>
-            );
-            return (
-              <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id! }} onClick={handleLinkClick} aria-label={`${t.news.readMore}: ${c.title}`} className={cardClass}>
-                {inner}
-              </Link>
-            );
-          })}
-        </div>
-      </div>
+      <NewsMarquee slides={slides} dir={dir} t={t} />
 
       <div className="mx-auto mt-14 flex max-w-7xl justify-center px-6 lg:px-10">
         <Link
@@ -322,17 +323,6 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
           <ArrowRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
         </Link>
       </div>
-
-      <style>{`
-        @keyframes news-marquee {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-        @keyframes news-marquee-rtl {
-          from { transform: translateX(-50%); }
-          to { transform: translateX(0); }
-        }
-      `}</style>
     </section>
   );
 }

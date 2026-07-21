@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import logoTree from "@/assets/logo-tree.png";
 import logoEagle from "@/assets/logo-eagle.png";
 
@@ -103,9 +103,13 @@ function samplePoints(img: HTMLImageElement, size: number, step: number, fit: Fi
   return pts;
 }
 
-export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], className }: Props) {
+const DEFAULT_COLORS: [string, string] = ["#048090", "#b8a06a"];
+
+function LogoParticlesImpl({ size = 200, colors = DEFAULT_COLORS, className }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const colorsRef = useRef(colors);
+  colorsRef.current = colors;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -131,7 +135,7 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
     let cancelled = false;
     const cx = size / 2;
     const cy = size / 2;
-    const [rgbA, rgbB] = [hexToRgb(colors[0]), hexToRgb(colors[1])];
+    // Colors are read via ref inside the draw loop so palette changes don't tear down the animation.
 
     Promise.all([loadImage(logoTree), loadImage(logoEagle)]).then(([imgA, imgB]) => {
       if (cancelled) return;
@@ -203,6 +207,8 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
             cp = 1; break;
           case "scatterB": cp = 1 - st; break;
         }
+        const rgbA = hexToRgb(colorsRef.current[0]);
+        const rgbB = hexToRgb(colorsRef.current[1]);
         const r = Math.round(rgbA[0] + (rgbB[0] - rgbA[0]) * cp);
         const g = Math.round(rgbA[1] + (rgbB[1] - rgbA[1]) * cp);
         const b = Math.round(rgbA[2] + (rgbB[2] - rgbA[2]) * cp);
@@ -285,7 +291,7 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
       cancelled = true;
       cancelAnimationFrame(rafId);
     };
-  }, [size, colors, reducedMotion]);
+  }, [size, reducedMotion]);
 
   if (reducedMotion) {
     return (
@@ -308,3 +314,5 @@ export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], cla
     />
   );
 }
+
+export const LogoParticles = memo(LogoParticlesImpl);
