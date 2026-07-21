@@ -103,7 +103,9 @@ function samplePoints(img: HTMLImageElement, size: number, step: number, fit: Fi
   return pts;
 }
 
-export function LogoParticles({ size = 200, colors = ["#048090", "#b8a06a"], className }: Props) {
+const DEFAULT_COLORS: [string, string] = ["#048090", "#b8a06a"];
+
+function LogoParticlesImpl({ size = 200, colors = DEFAULT_COLORS, className }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
 
