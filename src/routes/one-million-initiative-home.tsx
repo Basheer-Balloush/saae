@@ -124,6 +124,7 @@ function InitiativeHome() {
 
   const sliceTotal = visiblePieData.reduce((s, d) => s + d.value, 0) || 1;
   const sliceTokens = ["--primary", "--secondary", "--chart-3", "--muted-foreground"];
+  const INNER_R = 92;
 
   return (
     <div className="min-h-screen bg-background">
@@ -184,7 +185,10 @@ function InitiativeHome() {
 
             <div className="relative grid gap-10 lg:grid-cols-[1.1fr_1fr] items-center">
               {/* Donut */}
-              <div className="relative mx-auto h-[340px] w-full max-w-[420px]">
+              <div
+                className="relative mx-auto h-[340px] w-full max-w-[420px]"
+                style={{ containerType: "inline-size" }}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <defs>
@@ -201,7 +205,7 @@ function InitiativeHome() {
                       nameKey="name"
                       cx="50%"
                       cy="50%"
-                      innerRadius={92}
+                      innerRadius={INNER_R}
                       outerRadius={140}
                       paddingAngle={visiblePieData.length > 1 ? 2 : 0}
                       stroke="var(--card)"
@@ -237,15 +241,28 @@ function InitiativeHome() {
 
                 {/* Center label */}
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                    {t.progress}
-                  </p>
-                  <p className="mt-1 text-4xl sm:text-5xl font-extrabold bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent leading-none">
-                    {displayDone.toLocaleString()}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {((done / target) * 100).toFixed(1)}% / {target.toLocaleString()}
-                  </p>
+                  <div
+                    className="flex flex-col items-center justify-center mx-auto"
+                    style={{ maxWidth: INNER_R * 2 - 24, paddingInline: 8 }}
+                  >
+                    <p
+                      className={`uppercase text-muted-foreground text-center whitespace-normal break-words leading-[1.15] ${
+                        isAr ? "tracking-[0.18em]" : "tracking-[0.12em]"
+                      }`}
+                      style={{ fontSize: "clamp(10px, 3.2cqi, 12px)" }}
+                    >
+                      {t.progress}
+                    </p>
+                    <p
+                      className="mt-1 font-extrabold bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent leading-none tabular-nums"
+                      style={{ fontSize: "clamp(22px, 9cqi, 44px)", maxWidth: "100%" }}
+                    >
+                      {displayDone.toLocaleString()}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground whitespace-nowrap">
+                      {((done / target) * 100).toFixed(1)}% / {target.toLocaleString()}
+                    </p>
+                  </div>
                 </div>
               </div>
 
