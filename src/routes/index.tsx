@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { createFileRoute, useLocation } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { FeaturedNews, type HomeNewsRow } from "@/components/site/FeaturedNews";
 import { Communities } from "@/components/site/Communities";
