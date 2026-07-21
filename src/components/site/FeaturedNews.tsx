@@ -48,8 +48,15 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const [slides, setSlides] = useState<Slide[] | null>(() => initialNews ? mapNewsRows(initialNews, lang) : null);
   const [isPaused, setIsPaused] = useState(false);
   const rowRef = useRef<HTMLDivElement | null>(null);
-  const dragRef = useRef({ isDragging: false, startX: 0, initialOffset: 0 });
+  const dragRef = useRef({
+    isPointerDown: false,
+    isDragging: false,
+    startX: 0,
+    initialOffset: 0,
+    pointerId: null as number | null,
+  });
   const didDragRef = useRef(false);
+  const DRAG_THRESHOLD = 5;
 
   const animationDuration = 30; // seconds per loop (faster than before)
   // Direction is derived from the active locale:
