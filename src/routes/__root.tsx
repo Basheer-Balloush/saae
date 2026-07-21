@@ -293,6 +293,7 @@ function RootComponent() {
         <LanguageProvider>
           <FormValidationHandler />
           <ScrollRestoration />
+          <ScrollToHash />
           <RouteProgress />
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
