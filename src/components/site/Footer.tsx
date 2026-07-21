@@ -12,6 +12,20 @@ const MUTED = "rgba(255,255,255,0.78)";
 export function Footer() {
   const { t, dir } = useLang();
   const isRtl = dir === "rtl";
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    if (pathname === "/") {
+      e.preventDefault();
+      if (typeof window !== "undefined") {
+        if (window.location.hash) {
+          window.history.replaceState(null, "", "/");
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  };
 
   return (
     <footer
