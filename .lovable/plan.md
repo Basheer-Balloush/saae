@@ -1,48 +1,55 @@
-## Problem
+## Why the page stayed Arabic
 
-On `src/routes/contact.tsx` line 420, "Chat with Abu Al-Joud" is a `<Link to="/" hash="assistant">`. That navigates away from `/contact` to the home page and, at best, scrolls to the `#assistant` section — it never opens the Abu Al-Joud chatbot.
+`src/routes/about.tsx` reads `useLang()` only for direction and the members list. Every other string — hero paragraph, Vision/Mission cards, Goals list + heading, Fields items + heading, Values items + heading, and the "العودة إلى الرئيسية" button — is hardcoded Arabic. Switching to English never affected them because there is no English branch.
 
-The chatbot is actually an in-page modal opened by `AssistantFab` (mounted globally), which listens for a `window` event:
-
-```
-// src/components/site/AssistantFab.tsx
-window.addEventListener("assistant:open", handler);
-```
-
-`src/routes/communities.$key.tsx` already uses this pattern:
-
-```
-window.dispatchEvent(new CustomEvent("assistant:open", { detail: { prefill } }));
-```
+The project's established i18n pattern is `const { lang } = useLang(); const t = lang === "ar" ? ar : en;` with a local content object (used across other route files). We'll follow that — not sprinkle `lang === "ar" ? ... : ...` ternaries at every string.
 
 ## Fix
 
-In `src/routes/contact.tsx`, replace the `<Link>` with a `<button type="button">` that dispatches the `assistant:open` event. The AssistantFab modal handles Arabic/English automatically via the existing `useLang` translations, so no language prefix or per-locale routing is needed.
+Refactor `src/routes/about.tsx` so all copy lives in a single bilingual content module and each section reads from it.
 
-- Keep the exact text, arrow icon, spacing, and hover classes.
-- Use a `<button>` so mouse/keyboard/touch all activate it (Enter + Space work natively); no nested clickables.
-- No changes to other Contact page content, links, routes, or translations.
+1. Create `src/lib/about-content.ts` exporting `aboutContent: { ar: {...}, en: {...} }` with matching keys:
+   - `hero`: `title`, `p1`, `p2`, `backHome`
+   - `vision`: `eyebrow`, `body`
+   - `mission`: `eyebrow`, `body`
+   - `goals`: `heading`, `intro`, `items[]` (5 items)
+   - `fields`: `heading`, `intro`, `items[]` (5 titles, aligned by index with icons)
+   - `values`: `heading`, `intro`, `items[]` (5 titles, aligned by index with icons)
+   - `members`: `boardTitle`, `boardSubtitle`, `executiveTitle`, `executiveSubtitle`
 
-### Change (single file, single element)
+   Arabic values = the existing strings verbatim (no changes to Arabic). English values = natural, professional translations preserving meaning, names, and organizational terminology (SAAE, Syrian Association for AI & Entrepreneurship).
 
-`src/routes/contact.tsx` (~line 420):
+2. In `src/routes/about.tsx`:
+   - Add `const { lang, dir } = useLang(); const t = aboutContent[lang];` in `AboutPage`, pass `t` (and `Arrow`) to each subsection via props, OR call `useLang()` inside each subsection and read `aboutContent[lang]` locally. Use the second (matches other files, avoids prop drilling).
+   - Replace every hardcoded Arabic string with the corresponding `t.*` value.
+   - Icons stay statically declared in the component; only `title` (and, for goals, the full string) come from `t`.
+   - Keep `MembersSection` DB-driven; only its section title/subtitle switch to `t.members.*`.
+   - The hero "back to home" `<Link to="/">` label becomes `t.hero.backHome`.
 
-```tsx
-<button
-  type="button"
-  onClick={() => window.dispatchEvent(new CustomEvent("assistant:open"))}
-  className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
->
-  {isAr ? "تحدث مع أبو الجود" : "Chat with Abu Al-Joud"}
-  <Arrow className="h-3.5 w-3.5" />
-</button>
-```
+3. Route `head()` metadata: TanStack `head()` runs without React context, so we can't read `useLang()` there. Extend it to emit both Arabic and English `og:title`/`og:description`/`title` alternates by keeping the current Arabic `title` + `description` and adding English `og:title`/`og:description` as-is (they're already partially English/mixed). Add `<link rel="alternate" hreflang="ar" .../>` and `hreflang="en"` entries pointing to the same URL. Keep this change scoped — no other routes touched.
 
-Remove the now-unused `Link` import only if it isn't used elsewhere in the file.
+4. Direction/layout: no CSS changes needed — the existing layout already uses logical properties (`start-…`, `end-…`, `ms-…`) and `dir` is set on `<html>` by the app's language provider. The hero arrow already flips via `dir === "rtl" ? ArrowLeft : ArrowRight`.
+
+5. Runtime switching: because every string is now derived from `useLang()` reactively, toggling the language re-renders each section immediately, same as other pages on the site.
+
+## Content decisions (flagged)
+
+- "الجمعية السورية للذكاء الصنعي وريادة الأعمال" → "Syrian Association for Artificial Intelligence & Entrepreneurship (SAAE)". Note: the Arabic uses "الذكاء الصنعي" (a Syrian variant of "الذكاء الاصطناعي"); English equivalent is simply "Artificial Intelligence".
+- Section headings use idiomatic English: رؤيتنا → "Our Vision"; رسالتنا → "Our Mission"; أهدافنا → "Our Goals"; مجالات عملنا → "Our Focus Areas"; قيمنا → "Our Values".
+- Hero back-link "العودة إلى الرئيسية" → "Back to Home".
+- No new facts, names, or dates are introduced; English text is a faithful, professional rendering of the Arabic source.
+
+## Files changed
+
+- `src/lib/about-content.ts` (new) — the bilingual content module.
+- `src/routes/about.tsx` — replace hardcoded Arabic strings with lookups into `aboutContent[lang]`; add English `head()` alternates.
+
+No other files, translations, or pages are modified. Arabic content is preserved byte-for-byte inside the `ar` object.
 
 ## Verification
 
-- On `/contact` (English) and `/contact` (Arabic): click the link → Abu Al-Joud modal opens in the current language, URL stays on `/contact`.
-- Keyboard: Tab to the control, press Enter → modal opens.
-- Back button behavior unchanged (no navigation occurred).
-- No other Contact page links affected.
+- Toggle language on `/about`: every heading, paragraph, list item, and button label switches between Arabic and English; `dir` flips; arrow icon flips.
+- Section-by-section diff between the AR and EN objects confirms parity (same keys, same array lengths for goals/fields/values, aligned with the same icon order).
+- No console warnings (no untranslated keys, no missing props).
+- Members section still loads DB rows; `pick(ar, en)` fallback logic unchanged.
+- Responsive check at mobile and desktop widths for both languages.
