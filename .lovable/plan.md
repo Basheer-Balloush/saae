@@ -1,91 +1,51 @@
-## Goal
+## Root cause
 
-Make the homepage news slider in `src/components/site/FeaturedNews.tsx` support both a normal click (opens the article) and a press-hold-drag (slides the row), based on actual pointer movement — not on hold time.
+`LogoParticles` re-initializes its entire animation on every parent re-render because its main `useEffect` has `[size, colors, reducedMotion]` as dependencies and the `colors` default (`["#048090", "#b8a06a"]`) is a **new array literal each time the component renders** (default-parameter values are re-created per call). So the reference-equality check on `colors` always fails.
 
-## Root cause of current behavior
+Meanwhile, `FeaturedNews` calls `setIsPaused(true/false)` on every `onMouseEnter` / `onMouseLeave` on the marquee row. Because `LogoParticles` sits inside the same `FeaturedNews` component, every hover on any news card re-renders the parent → re-renders `LogoParticles` → `colors` gets a new reference → the animation effect re-runs → previous RAF is cancelled, images reload, points get re-sampled, particles are reallocated, and the animation visibly restarts / stutters. Dragging the slider also flips hover state as the pointer crosses cards, compounding the effect.
 
-`handlePointerDown` currently:
-- Reads the transform and freezes the row at that offset immediately.
-- Removes the marquee animation class right away.
-- Calls `setPointerCapture` on pointer-down.
-- Sets cursor to `grabbing`.
+Secondary contributors (also fixed):
+- `LogoParticles` is not memoized, so it always re-renders with the parent.
+- Slider hover state lives on the same component as the logo, so any local state change forces the logo subtree through React's render pass.
 
-This means every mouse-down enters "drag mode" before the user has moved, and pointer capture routes the eventual `pointerup` to the row instead of the anchor, so the `<Link>` click doesn't fire reliably. A click without meaningful motion should just open the article.
+## Fix
 
-## Fix (single file: `src/components/site/FeaturedNews.tsx`)
+Only two files, no design changes.
 
-### 1. Add a drag threshold + "armed vs active" model
+### 1. `src/components/site/LogoParticles.tsx`
 
-- Add a constant `DRAG_THRESHOLD = 5` (px).
-- Extend `dragRef` to track state:
-  - `isPointerDown: boolean` — mouse is held, not necessarily dragging yet.
-  - `isDragging: boolean` — threshold crossed; row is being moved.
-  - `startX: number`
-  - `initialOffset: number` (row's current `translateX` at pointer-down)
-  - `pointerId: number | null`
-- Keep `didDragRef` as the flag the click handler reads to cancel navigation.
+- Hoist the default color pair to a module-level constant (`DEFAULT_COLORS = ["#048090", "#b8a06a"] as const`) and use it as the default value so the reference is stable across renders.
+- Keep animation state driven by refs; put the current `colors` into a ref and read it inside `draw`, so passing a different palette later would not tear down the animation either.
+- Drop `colors` from the main effect's dependency array; keep `[size, reducedMotion]`. Size legitimately requires reinit (canvas dimensions + resampling); reduced-motion legitimately swaps to the static `<img>` branch.
+- Wrap the default export in `React.memo` so shallow-equal props (`size`, `className`, and now-stable `colors`) skip re-render entirely when the parent re-renders due to slider hover / drag state.
+- Preserve everything visible: canvas size, colors, particle sampling step, phase durations, alpha curves, reduced-motion fallback image, DPR handling, cleanup on real unmount.
 
-### 2. `handlePointerDown` (light-touch)
+### 2. `src/components/site/FeaturedNews.tsx` (isolation only)
 
-- Only record `startX`, `initialOffset` (from `DOMMatrixReadOnly` of current transform), `pointerId`, and set `isPointerDown = true`, `isDragging = false`, `didDragRef.current = false`.
-- Do NOT: call `preventDefault`, `setPointerCapture`, remove the animation class, write inline `transform`, or change cursor.
-- This preserves the normal click path.
+- Extract the news marquee (the `dir="ltr"` overflow wrapper plus its inner draggable row and the `<style>` keyframes) into a local `NewsMarquee` sub-component that owns `isPaused`, `rowRef`, `dragRef`, `didDragRef`, and all pointer handlers.
+- `FeaturedNews` keeps the section shell, heading block, `LogoParticles`, "View all" button, and passes `slides`, `t`, `dir`, `lang` down as stable props (arrays/strings from state, no new object literals per render).
+- Net effect: `setIsPaused` on hover only re-renders `NewsMarquee`, not `FeaturedNews` or `LogoParticles`. Combined with `React.memo`, the logo subtree is fully insulated from slider interaction.
+- No visual/behavioral change to the slider: same drag threshold, same autoplay/pause, same link-click guard, same restore-offset effect, same dir-keyed reset.
 
-### 3. `handlePointerMove`
+## Why this satisfies each requirement
 
-- Return early if `!isPointerDown`.
-- Compute `delta = e.clientX - startX`.
-- If `!isDragging` and `Math.abs(delta) >= DRAG_THRESHOLD`:
-  - Promote to drag: `isDragging = true`, `didDragRef.current = true`.
-  - Now do the deferred setup:
-    - Re-read current computed transform (animation has kept moving during the hold) and update `initialOffset` to that value so the row doesn't jump.
-    - `row.classList.remove(animationClass)` and set inline `transform: translateX(<currentOffset>px)` to freeze it.
-    - `row.setPointerCapture(e.pointerId)`.
-    - `row.style.cursor = "grabbing"`.
-- Once `isDragging` is true:
-  - `e.preventDefault()` to block text selection / native drag.
-  - Apply `translateX(initialOffset + delta)px` (finger-following, same as today).
+- Isolates the logo from slider state → hover/drag/click on any news card cannot reach `LogoParticles`' render path.
+- Animation initialized once after mount (effect deps no longer churn).
+- No changing `key`, no recreated particle arrays, no rebuilt canvas context, no duplicated RAF loops.
+- RAF id + `cancelled` flag stay in the effect closure; cleanup only fires on real unmount or size/reduced-motion change.
+- `prefers-reduced-motion` behavior unchanged.
+- No dependency on visibility / IntersectionObserver added (out of scope of this bug and the section is already above-the-fold on the homepage).
 
-### 4. `handlePointerUp` / `handlePointerCancel`
+## Manual verification
 
-- If `!isDragging`:
-  - Just clear `isPointerDown` and `pointerId`. Leave `didDragRef.current === false` so the `<Link>` click that fires next opens the article.
-  - Do not touch animation, transform, cursor, or pointer capture (none was taken).
-- If `isDragging`:
-  - Run the existing release math: wrap the offset, compute `pct` against the correct per-direction `from`/`to` (already keyed off `dir` after the previous fix), set `animationDelay`, re-add `animationClass`, then in `requestAnimationFrame` clear the inline `transform` so autoplay resumes from the released position.
-  - `releasePointerCapture` (guarded in try/catch).
-  - Reset cursor to `grab`.
-  - Keep `didDragRef.current = true` so the click handler on the `<Link>` cancels navigation for this release.
-- Always reset `isPointerDown`, `isDragging`, `pointerId`.
-
-### 5. `handleLinkClick` on the card `<Link>`
-
-```ts
-if (didDragRef.current) {
-  e.preventDefault();
-  e.stopPropagation();
-  didDragRef.current = false;
-  return;
-}
-saveOffset();
-```
-
-- Click without drag → falls through and TanStack `<Link>` navigates; also persists the current marquee offset via `saveOffset()` (unchanged).
-- Click after a drag → navigation is blocked once; flag is cleared for the next interaction.
-
-### 6. Keep everything else identical
-
-- Language-based keyframe selection (`animationClass` from `dir`), the `dir`-keyed reset effect, hover pause via `isPaused`, restore-on-return effect, `saveOffset`, `wrapOffset`, mask gradient, card markup, 30s duration, responsive widths, outer wrapper's `dir="ltr"`.
-
-## Acceptance checks (manual, in preview)
-
-- Click a card without moving → article opens.
-- Press, move horizontally more than ~5px, release → row slides, no article opens, autoplay resumes from released position.
-- Press and hold stationary, then release → article opens (tiny sub-threshold jitter is tolerated).
-- Works in both English (L→R autoplay) and Arabic (R→L autoplay), including switching languages at runtime with no flicker.
-- Hover still pauses; leaving hover resumes cleanly.
-- Back-navigation from a news detail restores the slider position within the same language.
+- Load `/`, hover repeatedly and quickly across many news cards for 30+ seconds → logo phases (assembleA → revealA → hideA → scatterA → …B) progress without restart or stutter.
+- Drag/swipe the slider left/right multiple times → logo continues uninterrupted.
+- Switch language via navbar → slider flips direction (existing behavior), logo continues without reinitializing (size unchanged; only `dir` changed, which the logo doesn't consume).
+- Resize the window to change viewport-based `size` prop (200 ↔ 150 via responsive `<LogoParticles>` instances) → each instance still runs its own animation; the visible one keeps going.
+- Click a news card and navigate back → logo mounts fresh (expected) and runs smoothly.
+- No new console errors; React DevTools shows `LogoParticles` render count staying flat during slider interaction.
 
 ## Files changed
 
-- `src/components/site/FeaturedNews.tsx` (only)
+- `src/components/site/LogoParticles.tsx`
+- `src/components/site/FeaturedNews.tsx`
