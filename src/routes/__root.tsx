@@ -20,6 +20,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "@/components/ui/sonner";
 import { AssistantFab } from "@/components/site/AssistantFab";
 import { RouteProgress } from "@/components/site/RouteProgress";
+import { ScrollToHash } from "@/components/site/ScrollToHash";
 
 
 function NotFoundComponent() {
@@ -264,6 +265,7 @@ function ScrollRestoration() {
   }, []);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash) return;
     const key = "saae-scroll-positions";
     let saved = 0;
     try {
@@ -291,6 +293,7 @@ function RootComponent() {
         <LanguageProvider>
           <FormValidationHandler />
           <ScrollRestoration />
+          <ScrollToHash />
           <RouteProgress />
           <AnimatePresence mode="wait" initial={false}>
             <motion.div

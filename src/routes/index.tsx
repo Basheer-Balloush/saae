@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { createFileRoute, useLocation } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { FeaturedNews, type HomeNewsRow } from "@/components/site/FeaturedNews";
 import { Communities } from "@/components/site/Communities";
@@ -45,7 +45,6 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const location = useLocation();
   const { news } = Route.useLoaderData();
 
   // Prevent the browser's scroll restoration from flashing a previous
@@ -62,38 +61,8 @@ function Index() {
     };
   }, []);
 
-  useEffect(() => {
-    const hash = location.hash?.replace(/^#/, "");
-    if (!hash) return;
-    let cancelled = false;
-    let attempts = 0;
-    const doScroll = (el: HTMLElement) => {
-      if (cancelled) return;
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    };
-    const tryScroll = () => {
-      if (cancelled) return;
-      const el = document.getElementById(hash);
-      if (el) {
-        // Override TanStack Router's scrollRestoration (runs after mount) by
-        // scheduling a few delayed scrolls.
-        doScroll(el);
-        window.setTimeout(() => doScroll(el), 60);
-        window.setTimeout(() => doScroll(el), 200);
-        return;
-      }
-      if (attempts++ < 40) {
-        window.setTimeout(tryScroll, 50);
-      }
-    };
-    tryScroll();
-    return () => {
-      cancelled = true;
-    };
-  }, [location.hash]);
-
   return (
-    <div id="home" className="min-h-screen bg-background text-foreground">
+    <div id="home" className="min-h-screen scroll-mt-24 bg-background text-foreground">
       <Navbar />
       <main>
         <FeaturedNews initialNews={news} />

@@ -85,7 +85,7 @@ export function Partners() {
   if (partners.length === 0) return null;
 
   return (
-    <section id="partners" className="relative bg-surface py-24 lg:py-28">
+    <section id="partners" className="relative scroll-mt-24 bg-surface py-24 lg:py-28">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
