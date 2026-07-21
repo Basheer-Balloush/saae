@@ -4,11 +4,10 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import { aboutContent } from "@/lib/about-content";
 import {
-  Sparkles,
   Target,
   Compass,
-  Rocket,
   Brain,
   Code2,
   Briefcase,
@@ -43,18 +42,21 @@ export const Route = createFileRoute("/about")({
       {
         name: "description",
         content:
-          "الجمعية السورية للذكاء الصنعي وريادة الأعمال — منظمة شبابية تنشر ثقافة الذكاء الصنعي وريادة الأعمال وتمكّن الشباب السوري من صناعة المستقبل.",
+          "الجمعية السورية للذكاء الصنعي وريادة الأعمال — منظمة شبابية تنشر ثقافة الذكاء الصنعي وريادة الأعمال وتمكّن الشباب السوري من صناعة المستقبل. Syrian Association for AI & Entrepreneurship (SAAE) — a youth-led organization empowering Syrian youth through AI and entrepreneurship.",
       },
-      { property: "og:title", content: "عن الجمعية — SAAE" },
+      { property: "og:title", content: "About SAAE — Syrian Association for AI & Entrepreneurship" },
       {
         property: "og:description",
         content:
-          "نبني بيئة معرفية تجمع بين التكنولوجيا الحديثة وروح المبادرة عبر التدريب والمشاريع التطبيقية.",
+          "We build a knowledge ecosystem that pairs modern technology with the spirit of initiative — training, workshops, and applied projects for Syrian youth.",
       },
       { property: "og:url", content: "https://aisyria.org/about" },
     ],
     links: [
       { rel: "canonical", href: "https://aisyria.org/about" },
+      { rel: "alternate", hreflang: "ar", href: "https://aisyria.org/about" },
+      { rel: "alternate", hreflang: "en", href: "https://aisyria.org/about" },
+      { rel: "alternate", hreflang: "x-default", href: "https://aisyria.org/about" },
     ],
   }),
   component: AboutPage,
@@ -84,6 +86,7 @@ function AboutPage() {
 /* ---------- MEMBERS ---------- */
 function MembersSection({ category }: { category: "board" | "executive" }) {
   const { lang } = useLang();
+  const t = aboutContent[lang];
   const [members, setMembers] = useState<Member[]>([]);
 
   useEffect(() => {
@@ -95,22 +98,13 @@ function MembersSection({ category }: { category: "board" | "executive" }) {
       .then(({ data }) => setMembers((data ?? []) as Member[]));
   }, [category]);
 
-  const title = category === "board"
-    ? (lang === "ar" ? "مجلس الإدارة" : "Board of Directors")
-    : (lang === "ar" ? "الفريق التنفيذي" : "Executive Members");
-
-  const subtitle = category === "board"
-    ? (lang === "ar"
-        ? "القيادة الاستراتيجية التي ترسم رؤية الجمعية واتجاهها."
-        : "The strategic leadership shaping the association's vision and direction.")
-    : (lang === "ar"
-        ? "الفريق الذي يقود العمل اليومي ويُترجم الرؤية إلى أثر ملموس."
-        : "The team driving daily operations and turning vision into measurable impact.");
+  const title = category === "board" ? t.members.boardTitle : t.members.executiveTitle;
+  const subtitle = category === "board" ? t.members.boardSubtitle : t.members.executiveSubtitle;
 
   if (members.length === 0) return null;
 
-  const pick = (ar: string | null, en: string | null) =>
-    lang === "ar" ? (ar ?? en ?? "") : (en ?? ar ?? "");
+  const pick = (arVal: string | null, enVal: string | null) =>
+    lang === "ar" ? (arVal ?? enVal ?? "") : (enVal ?? arVal ?? "");
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
@@ -153,8 +147,9 @@ function MembersSection({ category }: { category: "board" | "executive" }) {
 }
 
 /* ---------- HERO ---------- */
-function Hero({ Arrow }: { Arrow: typeof ArrowRight }) {
+function Hero({ Arrow: _Arrow }: { Arrow: typeof ArrowRight }) {
   const { lang } = useLang();
+  const t = aboutContent[lang];
   return (
     <section className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0">
@@ -165,18 +160,13 @@ function Hero({ Arrow }: { Arrow: typeof ArrowRight }) {
 
       <div className="relative mx-auto max-w-5xl px-6 pb-16 pt-12 text-center lg:px-10 lg:pb-24 lg:pt-20">
         <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-          {lang === "ar" ? "من نحن" : "About SAAE"}
+          {t.hero.title}
         </h1>
         <p className="mx-auto mt-6 max-w-3xl text-base leading-loose text-muted-foreground sm:text-lg">
-          الجمعية السورية للذكاء الصنعي وريادة الأعمال هي منظمة شبابية ومجتمعية
-          تُعنى بنشر ثقافة الذكاء الصنعي وريادة الأعمال في المجتمع السوري،
-          وتمكين الشباب والطلاب ورواد الأعمال من اكتساب المهارات التقنية
-          والريادية التي تساعدهم على الابتكار وصناعة المستقبل.
+          {t.hero.p1}
         </p>
         <p className="mx-auto mt-5 max-w-3xl text-base leading-loose text-muted-foreground sm:text-lg">
-          نسعى إلى بناء بيئة معرفية تجمع بين التكنولوجيا الحديثة وروح المبادرة،
-          من خلال التدريب، وورشات العمل، والفعاليات العلمية، والمشاريع التطبيقية
-          التي تساهم في تطوير القدرات الفردية ودعم الأفكار الريادية.
+          {t.hero.p2}
         </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
@@ -184,7 +174,7 @@ function Hero({ Arrow }: { Arrow: typeof ArrowRight }) {
             to="/"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-6 py-3 text-sm font-semibold text-foreground/80 backdrop-blur transition-colors hover:border-primary hover:text-primary"
           >
-            العودة إلى الرئيسية
+            {t.hero.backHome}
           </Link>
         </div>
       </div>
@@ -194,17 +184,11 @@ function Hero({ Arrow }: { Arrow: typeof ArrowRight }) {
 
 /* ---------- VISION & MISSION ---------- */
 function VisionMission() {
+  const { lang } = useLang();
+  const t = aboutContent[lang];
   const cards = [
-    {
-      Icon: Compass,
-      eyebrow: "رؤيتنا",
-      body: "أن نكون منصة رائدة في تمكين الشباب السوري في مجالات الذكاء الصنعي والتقنيات الحديثة وريادة الأعمال، والمساهمة في بناء مجتمع معرفي قادر على المنافسة والابتكار.",
-    },
-    {
-      Icon: Target,
-      eyebrow: "رسالتنا",
-      body: "توفير فرص تعليمية وتدريبية نوعية تساعد الأفراد على تطوير مهاراتهم التقنية والريادية، وربط المعرفة الأكاديمية بالتطبيق العملي، بما يخلق أثراً إيجابياً ومستداماً في المجتمع.",
-    },
+    { Icon: Compass, eyebrow: t.vision.eyebrow, body: t.vision.body },
+    { Icon: Target, eyebrow: t.mission.eyebrow, body: t.mission.body },
   ];
 
   return (
@@ -236,13 +220,8 @@ function VisionMission() {
 
 /* ---------- GOALS ---------- */
 function Goals() {
-  const goals = [
-    "نشر الوعي بأهمية الذكاء الصنعي والتحول الرقمي.",
-    "دعم وتمكين رواد الأعمال وأصحاب المشاريع الناشئة.",
-    "تنظيم الدورات التدريبية والورشات التقنية والريادية.",
-    "بناء مجتمع تعاوني يجمع المهتمين بالتكنولوجيا والابتكار.",
-    "تشجيع البحث والتطوير والمبادرات الشبابية.",
-  ];
+  const { lang } = useLang();
+  const t = aboutContent[lang];
 
   return (
     <section className="relative border-y border-border bg-muted/40">
@@ -250,16 +229,15 @@ function Goals() {
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-              أهدافنا
+              {t.goals.heading}
             </h2>
             <p className="mt-5 text-base leading-loose text-muted-foreground">
-              نعمل على ترجمة رؤيتنا إلى خطوات ملموسة تُحدث فرقاً حقيقياً في حياة
-              الشباب السوري ومستقبل التكنولوجيا في بلدنا.
+              {t.goals.intro}
             </p>
           </div>
 
           <ol className="lg:col-span-8 space-y-4">
-            {goals.map((g, i) => (
+            {t.goals.items.map((g, i) => (
               <li
                 key={i}
                 className="group flex items-start gap-5 rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/50 hover:shadow-soft sm:p-6"
@@ -281,39 +259,38 @@ function Goals() {
 
 /* ---------- FIELDS ---------- */
 function Fields() {
-  const fields = [
-    { Icon: Brain, title: "الذكاء الصنعي وتعلم الآلة" },
-    { Icon: Code2, title: "البرمجة والتقنيات الحديثة" },
-    { Icon: Briefcase, title: "ريادة الأعمال وإدارة المشاريع" },
-    { Icon: Lightbulb, title: "التحول الرقمي والابتكار" },
-    { Icon: GraduationCap, title: "التدريب والتطوير المهني" },
-  ];
+  const { lang } = useLang();
+  const t = aboutContent[lang];
+  const icons = [Brain, Code2, Briefcase, Lightbulb, GraduationCap];
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
       <div className="mx-auto max-w-3xl text-center">
         <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-          مجالات عملنا
+          {t.fields.heading}
         </h2>
         <p className="mt-5 text-base leading-loose text-muted-foreground">
-          خمسة محاور أساسية نتحرك فيها لبناء جيل قادر على المنافسة والابتكار.
+          {t.fields.intro}
         </p>
       </div>
 
       <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {fields.map(({ Icon, title }) => (
-          <div
-            key={title}
-            className="group flex flex-col items-start gap-5 rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-soft"
-          >
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-secondary/15 text-primary transition-colors group-hover:from-primary group-hover:to-secondary group-hover:text-primary-foreground">
-              <Icon className="h-6 w-6" />
+        {t.fields.items.map((title, i) => {
+          const Icon = icons[i] ?? Brain;
+          return (
+            <div
+              key={title}
+              className="group flex flex-col items-start gap-5 rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-soft"
+            >
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-secondary/15 text-primary transition-colors group-hover:from-primary group-hover:to-secondary group-hover:text-primary-foreground">
+                <Icon className="h-6 w-6" />
+              </div>
+              <h3 className="text-base font-bold leading-snug text-foreground sm:text-lg">
+                {title}
+              </h3>
             </div>
-            <h3 className="text-base font-bold leading-snug text-foreground sm:text-lg">
-              {title}
-            </h3>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
@@ -321,40 +298,37 @@ function Fields() {
 
 /* ---------- VALUES ---------- */
 function Values() {
-  const values = [
-    { Icon: Lightbulb, title: "الابتكار والإبداع" },
-    { Icon: Users, title: "العمل الجماعي" },
-    { Icon: Share2, title: "مشاركة المعرفة" },
-    { Icon: TrendingUp, title: "التطوير المستمر" },
-    { Icon: HeartHandshake, title: "المسؤولية المجتمعية" },
-  ];
+  const { lang } = useLang();
+  const t = aboutContent[lang];
+  const icons = [Lightbulb, Users, Share2, TrendingUp, HeartHandshake];
 
   return (
     <section className="relative overflow-hidden border-y border-border bg-gradient-to-br from-primary/5 via-background to-secondary/5">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-            قيمنا
+            {t.values.heading}
           </h2>
           <p className="mt-5 text-base leading-loose text-muted-foreground">
-            خمس قيم جوهرية تقود كل ما نفعله، من الفصل التدريبي إلى مشاريع
-            الشراكة الكبرى.
+            {t.values.intro}
           </p>
         </div>
 
         <div className="mt-14 flex flex-wrap items-center justify-center gap-3">
-          {values.map(({ Icon, title }) => (
-            <div
-              key={title}
-              className="inline-flex items-center gap-3 rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground/90 shadow-sm transition-all hover:border-primary hover:text-primary"
-            >
-              <Icon className="h-4 w-4 text-primary" />
-              {title}
-            </div>
-          ))}
+          {t.values.items.map((title, i) => {
+            const Icon = icons[i] ?? Lightbulb;
+            return (
+              <div
+                key={title}
+                className="inline-flex items-center gap-3 rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground/90 shadow-sm transition-all hover:border-primary hover:text-primary"
+              >
+                <Icon className="h-4 w-4 text-primary" />
+                {title}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
-
