@@ -207,6 +207,8 @@ function LogoParticlesImpl({ size = 200, colors = DEFAULT_COLORS, className }: P
             cp = 1; break;
           case "scatterB": cp = 1 - st; break;
         }
+        const rgbA = hexToRgb(colorsRef.current[0]);
+        const rgbB = hexToRgb(colorsRef.current[1]);
         const r = Math.round(rgbA[0] + (rgbB[0] - rgbA[0]) * cp);
         const g = Math.round(rgbA[1] + (rgbB[1] - rgbA[1]) * cp);
         const b = Math.round(rgbA[2] + (rgbB[2] - rgbA[2]) * cp);
