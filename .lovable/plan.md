@@ -1,50 +1,44 @@
-## Root cause
+## Diagnosis
 
-`src/components/site/Footer.tsx` renders the three quick links (Communities / Achievements / Partners) as bare `<a href="#communities">` etc. Those hashes resolve against the current URL, so on any non-home route they either do nothing or jump to a random on-page id. There is also no global hash-scroll handler — only `src/routes/index.tsx` has a homepage-local effect, which never runs when the user navigates in from `/about`, `/news`, an LMS route, or a fresh tab opened at `https://aisyria.org/#partners`.
+In `src/routes/one-million-initiative-home.tsx` (~lines 187–250), the donut is a Recharts `<PieChart>` inside `ResponsiveContainer`, and the center label is an **HTML overlay** — an absolutely-positioned `<div className="absolute inset-0 flex flex-col items-center justify-center">` sitting on top of the chart. So the fix is HTML wrapping + responsive font sizing, not SVG `<tspan>`.
 
-`src/routes/__root.tsx` already has a `ScrollRestoration` component that force-scrolls to a saved-per-pathname position on every path change. That will fight a hash scroll unless we skip restoration when the incoming URL carries a hash.
+The chart uses fixed pixel radii: `innerRadius={92}`, `outerRadius={140}`. That means the inner circle diameter is a fixed 184px regardless of the container width, so the label's max width must be derived from that inner-radius value, not from the viewport. English "Progress toward 1,000,000" currently renders as a single non-wrapping line in a container that spans the full overlay, so it overflows past the ring.
 
-The homepage section ids `home` (on the wrapper `div` in `index.tsx`), `communities`, `achievements`, `partners` already exist and match the required link targets — no id renaming needed.
+## Fix (only the center-label block, ~lines 238–249)
 
-## Changes
+Derive constants from the existing chart props so future resizes stay in sync:
 
-### 1. `src/components/site/Footer.tsx` — router-aware quick links
-Replace the three `<a href="#…">` for `communities`, `achievements`, `partners` inside the Quick Links list with `<Link to="/" hash="…">` (from `@tanstack/react-router`, already imported). The existing `contact`/`news`/`about` `Link`s stay unchanged. Visual classes and hover state are preserved.
+- Reuse the `innerRadius = 92` value (lift to a `const INNER_R = 92` used in both the `<Pie innerRadius={INNER_R}>` prop and the label wrapper) so the label width tracks the ring.
+- Label wrapper inline style: `maxWidth: INNER_R * 2 - 24` (≈160px, leaves ~12px padding each side so text never touches the ring), plus `paddingInline: 8`. Keep `absolute inset-0 flex flex-col items-center justify-center text-center` and add `mx-auto` on an inner block sized to that maxWidth so it stays centered on the chart's cx/cy at any container width.
 
-### 2. New `src/components/site/ScrollToHash.tsx` — global handler
-Small client-only component with no UI:
-- Reads the current location via `useLocation()` and `prefers-reduced-motion` via `matchMedia`.
-- In an effect keyed on `[location.pathname, location.hash]`:
-  - If `location.hash` is empty → do nothing (ScrollRestoration in `__root` already handles top / saved position).
-  - If `location.hash` is present → poll for `document.getElementById(hash)` via `requestAnimationFrame` for up to ~2 s (60 rAF ticks or a wall-clock cutoff), then call `el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" })`. Stop silently if the element never appears.
-- Also runs once on mount to cover deep-link first loads (e.g. `/#partners` in a fresh tab), since the initial effect run already captures the initial hash.
+Then, for the three lines inside:
 
-Mount it inside `RootComponent` in `src/routes/__root.tsx`, right after `<ScrollRestoration />`.
+1. **Eyebrow ("Progress toward 1,000,000" / "التقدّم نحو المليون")**
+   - Allow wrapping: `whitespace-normal break-words leading-[1.15]`, keep `uppercase text-muted-foreground text-center`.
+   - Responsive font via inline `fontSize: 'clamp(10px, 3.2cqi, 12px)'` on a container using `containerType: 'inline-size'` on the donut wrapper — or, if we prefer to avoid container queries, use Tailwind `text-[10px] sm:text-xs` with `leading-[1.15]`. Chart size is fixed in px, so viewport units are wrong here; container-query units (`cqi`) or plain breakpoint classes are correct.
+   - Apply the tighter English tracking conditionally: `tracking-[0.12em]` when `!isAr`, keep `tracking-[0.18em]` when `isAr`, so Arabic letter-spacing is untouched.
 
-### 3. `src/routes/__root.tsx` — don't fight hash scrolls
-In the `ScrollRestoration` effect that scrolls on `[location.pathname]`, early-return when `window.location.hash` is non-empty so hash navigations aren't clobbered by the saved-position jump.
+2. **Central number (`displayDone.toLocaleString()`)**
+   - Bound its width the same way: it lives inside the same `maxWidth: INNER_R*2 - 24` wrapper, plus `leading-none tabular-nums`.
+   - Replace `text-4xl sm:text-5xl` with a responsive clamp so 7-char values like `1,000,000` still fit: inline `fontSize: 'clamp(22px, 6cqi, 40px)'` (or, without container queries, `text-2xl sm:text-4xl` with a hard `maxWidth` on the number itself). Keep the existing gradient/`bg-clip-text` styling and animation untouched — this only changes size.
 
-### 4. `src/routes/index.tsx` — remove duplicate handler
-Delete the inline `useEffect` that polls for `#hash` on the homepage (lines ~65–93). The new global handler covers it. Keep the other effect that manages `history.scrollRestoration` on this route.
+3. **Percentage / target line**
+   - Keep on one line: add `whitespace-nowrap`, keep `text-xs text-muted-foreground mt-1`. Content unchanged: `((done / target) * 100).toFixed(1)% / target.toLocaleString()`.
 
-### 5. Section scroll offset for the sticky navbar
-Add `scroll-mt-24` (6 rem ≈ 96 px, comfortably clears the fixed navbar's `py-3 + ~44 px` logo row and its blur band) to:
-- The `#home` wrapper `div` in `src/routes/index.tsx`.
-- The `#communities` section in `src/components/site/Communities.tsx`.
-- The `#achievements` section in `src/components/site/Achievements.tsx`.
-- The `#partners` section in `src/components/site/Partners.tsx`.
+Nothing else changes: chart data, colors, gradients, `innerRadius`/`outerRadius`, `paddingAngle`, animation props, tooltip, legend, and Arabic copy stay exactly as-is. `isAr` is already available in the component, so the tracking swap is a one-line ternary.
 
-Tailwind's `scroll-mt-*` is direction-independent, so this works identically in RTL and LTR and in both themes.
+## Why this satisfies each requirement
 
-### 6. Audit other hash links
-Grep showed no other bare `href="#communities|#achievements|#partners|#home"` in the codebase; `Navbar.tsx` and `communities.$key.tsx` already use `<Link to="/" hash="…">`. Nothing else needs changing.
+- **Max width from `innerRadius`**: `INNER_R * 2 - 24`, reused from the same const passed to `<Pie innerRadius>`.
+- **English wraps, Arabic unaffected**: `whitespace-normal` + tighter English tracking only.
+- **Responsive font with floor/ceiling**: `clamp(10px, 3.2cqi, 12px)` for eyebrow, `clamp(22px, 6cqi, 40px)` for the number (or breakpoint equivalents).
+- **Long digit lengths never touch the ring**: number lives in the same bounded wrapper and scales down via clamp.
+- **Percentage never mid-wraps**: `whitespace-nowrap`.
+- **Positioned relative to chart center**: still `absolute inset-0` + flex-centered; no fixed pixel offsets, unaffected by redraws/resizes.
+- **Scoped**: only the center-label overlay `<div>` and the `INNER_R` constant are edited; stats cards, sponsors, CSR, hero, flip cards remain untouched.
 
 ## Verification
 
-- From `/about`, `/contact`, `/news`, `/news/:id`, `/one-million-initiative-home`, `/learning-management-system`: click each footer quick link → client-side nav to `/`, viewport lands on the matching section with the heading fully below the navbar.
-- On `/`: same clicks smooth-scroll to the section, no reload.
-- Fresh tab to `https://aisyria.org/#achievements` → after mount, viewport scrolls to Achievements.
-- Normal cross-route navigation with no hash still lands at top (or saved position from ScrollRestoration).
-- macOS "Reduce motion" enabled → scroll is instant.
-- Keyboard: Tab to a footer quick link → Enter → same behavior as click.
-- AR (RTL) and EN (LTR), light and dark themes: identical behavior; no direction-specific branches.
+- Visually check EN + AR at 1440 / 1024 / 768 / 390 / 320px.
+- Temporarily set `done` to a large value (e.g. 1,000,000) in dev to confirm the digit-length case.
+- Confirm donut animation still plays and no console errors.
