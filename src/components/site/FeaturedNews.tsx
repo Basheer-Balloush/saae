@@ -52,7 +52,11 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const didDragRef = useRef(false);
 
   const animationDuration = 30; // seconds per loop (faster than before)
-  const animationClass = dir === "rtl" ? "animate-[news-marquee-rtl_30s_linear_infinite]" : "animate-[news-marquee_30s_linear_infinite]";
+  // Direction is derived from the active locale:
+  // - English (ltr): keyframe translates -50% → 0, so items visually flow left → right.
+  // - Arabic  (rtl): keyframe translates 0 → -50%, so items visually flow right → left.
+  const animationClass = dir === "rtl" ? "animate-[news-marquee_30s_linear_infinite]" : "animate-[news-marquee-rtl_30s_linear_infinite]";
+
 
   useEffect(() => {
     if (initialNews) {
@@ -85,10 +89,12 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
       const half = row.scrollWidth / 2;
       if (!half) return;
       const isRtl = dir === "rtl";
-      const actualOffset = isRtl ? savedPx - half : -savedPx;
+      // Both keyframes translate between -half and 0, so m41 is always ≤ 0.
+      const actualOffset = -savedPx;
       const wrapped = wrapOffset(actualOffset, half);
-      const from = isRtl ? -half : 0;
-      const to = isRtl ? 0 : -half;
+      // ltr (news-marquee-rtl): -half → 0.  rtl (news-marquee): 0 → -half.
+      const from = isRtl ? 0 : -half;
+      const to = isRtl ? -half : 0;
       const pct = (wrapped - from) / (to - from);
       row.style.animationDelay = `-${(pct * animationDuration).toFixed(3)}s`;
       sessionStorage.removeItem(SCROLL_KEY);
@@ -96,6 +102,18 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     const id = window.setTimeout(apply, 50);
     return () => window.clearTimeout(id);
   }, [slides, dir, animationDuration]);
+
+  // When the language changes at runtime, reset any inline animationDelay /
+  // transform left over from a previous drag or restore so the marquee starts
+  // cleanly in the new direction without a jump or double animation.
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    row.style.animationDelay = "";
+    row.style.transform = "";
+    try { sessionStorage.removeItem(SCROLL_KEY); } catch {}
+  }, [dir]);
+
 
   const saveOffset = () => {
     const row = rowRef.current;
@@ -133,8 +151,8 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     const delta = e.clientX - dragRef.current.startX;
     if (Math.abs(delta) > 4) didDragRef.current = true;
     e.preventDefault();
-    const factor = dir === "rtl" ? 1 : -1;
-    const offset = dragRef.current.initialOffset + factor * delta;
+    // Drag follows finger in both directions.
+    const offset = dragRef.current.initialOffset + delta;
     row.style.transform = `translateX(${offset}px)`;
   };
 
@@ -146,9 +164,11 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     const half = row.scrollWidth / 2;
     const offset = wrapOffset(m.m41, half);
     const isRtl = dir === "rtl";
-    const from = isRtl ? -half : 0;
-    const to = isRtl ? 0 : -half;
+    // ltr (news-marquee-rtl): -half → 0.  rtl (news-marquee): 0 → -half.
+    const from = isRtl ? 0 : -half;
+    const to = isRtl ? -half : 0;
     const pct = (offset - from) / (to - from);
+
     row.style.animationDelay = `-${(pct * animationDuration).toFixed(3)}s`;
     row.classList.add(animationClass);
     requestAnimationFrame(() => {
