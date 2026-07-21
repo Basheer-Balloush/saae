@@ -109,13 +109,14 @@ export function Footer() {
                         {t.nav[k]}
                       </Link>
                     ) : (
-                      <a
-                        href={`#${k}`}
+                      <Link
+                        to="/"
+                        hash={k}
                         className="transition-colors hover:text-white/80"
                         style={{ color: INK }}
                       >
                         {t.nav[k]}
-                      </a>
+                      </Link>
                     )}
                   </li>
                 );
