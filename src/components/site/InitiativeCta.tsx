@@ -35,16 +35,23 @@ export function InitiativeCta() {
           <div className="shrink-0">
             <a
               href="/one-million-initiative-home"
-              className={`group inline-flex items-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-base font-semibold text-secondary-foreground transition-all hover:-translate-y-0.5 ${
-                isRtl ? "flex-row-reverse" : ""
-              }`}
+              className="group inline-flex items-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-base font-semibold text-secondary-foreground transition-all hover:-translate-y-0.5"
             >
-              {copy.cta}
-              <Arrow
-                className={`h-4 w-4 transition-transform ${
-                  isRtl ? "group-hover:-translate-x-1" : "group-hover:translate-x-1"
-                }`}
-              />
+              {isRtl ? (
+                <>
+                  <Arrow
+                    className="h-4 w-4 scale-x-[-1] transition-transform group-hover:-translate-x-1"
+                  />
+                  {copy.cta}
+                </>
+              ) : (
+                <>
+                  {copy.cta}
+                  <Arrow
+                    className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                  />
+                </>
+              )}
             </a>
           </div>
 
