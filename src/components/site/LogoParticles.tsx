@@ -314,3 +314,5 @@ function LogoParticlesImpl({ size = 200, colors = DEFAULT_COLORS, className }: P
     />
   );
 }
+
+export const LogoParticles = memo(LogoParticlesImpl);
