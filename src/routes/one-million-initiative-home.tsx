@@ -123,7 +123,7 @@ function InitiativeHome() {
   }, [done]);
 
   const sliceTotal = visiblePieData.reduce((s, d) => s + d.value, 0) || 1;
-  const sliceTokens = ["--primary", "--secondary", "--chart-3", "--muted-foreground"];
+  const sliceTokens = ["--chart-1", "--chart-2", "--chart-4", "--chart-5"];
   const INNER_R = 92;
 
   return (
