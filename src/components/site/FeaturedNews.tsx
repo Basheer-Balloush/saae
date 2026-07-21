@@ -52,7 +52,11 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const didDragRef = useRef(false);
 
   const animationDuration = 30; // seconds per loop (faster than before)
-  const animationClass = dir === "rtl" ? "animate-[news-marquee-rtl_30s_linear_infinite]" : "animate-[news-marquee_30s_linear_infinite]";
+  // Direction is derived from the active locale:
+  // - English (ltr): keyframe translates -50% → 0, so items visually flow left → right.
+  // - Arabic  (rtl): keyframe translates 0 → -50%, so items visually flow right → left.
+  const animationClass = dir === "rtl" ? "animate-[news-marquee_30s_linear_infinite]" : "animate-[news-marquee-rtl_30s_linear_infinite]";
+
 
   useEffect(() => {
     if (initialNews) {
