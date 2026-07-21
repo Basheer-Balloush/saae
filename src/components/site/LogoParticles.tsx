@@ -108,6 +108,8 @@ const DEFAULT_COLORS: [string, string] = ["#048090", "#b8a06a"];
 function LogoParticlesImpl({ size = 200, colors = DEFAULT_COLORS, className }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const colorsRef = useRef(colors);
+  colorsRef.current = colors;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
