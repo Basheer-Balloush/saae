@@ -124,6 +124,7 @@ function InitiativeHome() {
 
   const sliceTotal = visiblePieData.reduce((s, d) => s + d.value, 0) || 1;
   const sliceTokens = ["--primary", "--secondary", "--chart-3", "--muted-foreground"];
+  const INNER_R = 92;
 
   return (
     <div className="min-h-screen bg-background">
