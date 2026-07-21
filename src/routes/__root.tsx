@@ -265,6 +265,7 @@ function ScrollRestoration() {
   }, []);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash) return;
     const key = "saae-scroll-positions";
     let saved = 0;
     try {
