@@ -42,6 +42,226 @@ function mapNewsRows(rows: HomeNewsRow[], lang: "ar" | "en"): Slide[] {
   }));
 }
 
+type Translations = ReturnType<typeof useLang>["t"];
+
+type NewsMarqueeProps = {
+  slides: Slide[];
+  dir: "ltr" | "rtl";
+  t: Translations;
+};
+
+function NewsMarquee({ slides, dir, t }: NewsMarqueeProps) {
+  const [isPaused, setIsPaused] = useState(false);
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef({
+    isPointerDown: false,
+    isDragging: false,
+    startX: 0,
+    initialOffset: 0,
+    pointerId: null as number | null,
+  });
+  const didDragRef = useRef(false);
+  const DRAG_THRESHOLD = 5;
+  const animationDuration = 30;
+  const animationClass = dir === "rtl" ? "animate-[news-marquee_30s_linear_infinite]" : "animate-[news-marquee-rtl_30s_linear_infinite]";
+
+  // Restore marquee position when returning from a news detail page.
+  useEffect(() => {
+    if (!slides || slides.length === 0) return;
+    if (typeof window === "undefined") return;
+    const raw = sessionStorage.getItem(SCROLL_KEY);
+    if (!raw) return;
+    const savedPx = parseFloat(raw);
+    if (!Number.isFinite(savedPx)) return;
+    const row = rowRef.current;
+    if (!row) return;
+    const apply = () => {
+      const half = row.scrollWidth / 2;
+      if (!half) return;
+      const isRtl = dir === "rtl";
+      const actualOffset = -savedPx;
+      const wrapped = wrapOffset(actualOffset, half);
+      const from = isRtl ? 0 : -half;
+      const to = isRtl ? -half : 0;
+      const pct = (wrapped - from) / (to - from);
+      row.style.animationDelay = `-${(pct * animationDuration).toFixed(3)}s`;
+      sessionStorage.removeItem(SCROLL_KEY);
+    };
+    const id = window.setTimeout(apply, 50);
+    return () => window.clearTimeout(id);
+  }, [slides, dir]);
+
+  // Reset inline state when language changes at runtime.
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    row.style.animationDelay = "";
+    row.style.transform = "";
+    try { sessionStorage.removeItem(SCROLL_KEY); } catch {}
+  }, [dir]);
+
+  const saveOffset = () => {
+    const row = rowRef.current;
+    if (!row) return;
+    const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
+    const offset = Math.abs(m.m41);
+    try { sessionStorage.setItem(SCROLL_KEY, String(offset)); } catch {}
+  };
+
+  const wrapOffset = (offset: number, half: number) => {
+    while (offset < -half) offset += half;
+    while (offset > 0) offset -= half;
+    return offset;
+  };
+
+  const handleMouseEnter = () => setIsPaused(true);
+  const handleMouseLeave = () => setIsPaused(false);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const row = rowRef.current;
+    if (!row) return;
+    const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
+    dragRef.current = {
+      isPointerDown: true,
+      isDragging: false,
+      startX: e.clientX,
+      initialOffset: m.m41,
+      pointerId: e.pointerId,
+    };
+    didDragRef.current = false;
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const state = dragRef.current;
+    if (!state.isPointerDown) return;
+    const row = rowRef.current;
+    if (!row) return;
+    const delta = e.clientX - state.startX;
+
+    if (!state.isDragging) {
+      if (Math.abs(delta) < DRAG_THRESHOLD) return;
+      const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
+      state.initialOffset = m.m41;
+      state.startX = e.clientX;
+      state.isDragging = true;
+      didDragRef.current = true;
+      row.classList.remove(animationClass);
+      row.style.transform = `translateX(${m.m41}px)`;
+      try { row.setPointerCapture(e.pointerId); } catch {}
+      row.style.cursor = "grabbing";
+      return;
+    }
+
+    e.preventDefault();
+    const offset = state.initialOffset + delta;
+    row.style.transform = `translateX(${offset}px)`;
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const row = rowRef.current;
+    if (!row) return;
+    const state = dragRef.current;
+    const wasDragging = state.isDragging;
+    dragRef.current = {
+      isPointerDown: false,
+      isDragging: false,
+      startX: 0,
+      initialOffset: 0,
+      pointerId: null,
+    };
+    if (!wasDragging) return;
+
+    const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
+    const half = row.scrollWidth / 2;
+    const offset = wrapOffset(m.m41, half);
+    const isRtl = dir === "rtl";
+    const from = isRtl ? 0 : -half;
+    const to = isRtl ? -half : 0;
+    const pct = (offset - from) / (to - from);
+
+    row.style.animationDelay = `-${(pct * animationDuration).toFixed(3)}s`;
+    row.classList.add(animationClass);
+    requestAnimationFrame(() => {
+      row.style.transform = "";
+    });
+    try { row.releasePointerCapture(e.pointerId); } catch {}
+    row.style.cursor = "grab";
+  };
+
+  const handleLinkClick = (e: React.MouseEvent) => {
+    if (didDragRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      didDragRef.current = false;
+      return;
+    }
+    saveOffset();
+  };
+
+  const row = [...slides, ...slides];
+
+  return (
+    <div dir="ltr" className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
+      <div
+        ref={rowRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className={`flex w-max cursor-grab gap-6 touch-pan-y will-change-transform ${animationClass}`}
+        style={{ animationPlayState: isPaused ? "paused" : "running" }}
+      >
+        {row.map((c, i) => {
+          const cardClass = "group flex w-[78vw] max-w-[320px] flex-none flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift sm:w-[340px] sm:max-w-none lg:w-[360px]";
+          return (
+            <Link key={`${c.key}-${i}`} to="/news/$id" params={{ id: c.id! }} onClick={handleLinkClick} aria-label={`${t.news.readMore}: ${c.title}`} className={cardClass}>
+              <div className="aspect-[16/10] overflow-hidden">
+                <img
+                  src={c.img}
+                  alt={c.title}
+                  width={800}
+                  height={600}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  fetchPriority={i === 0 ? "high" : "auto"}
+                  decoding="async"
+                  className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
+                />
+              </div>
+              <div className="flex flex-1 flex-col p-6">
+                <div className="flex items-center gap-3 text-xs">
+                  <span className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
+                    {c.cat}
+                  </span>
+                  <span className="whitespace-nowrap text-muted-foreground">{c.date}</span>
+                </div>
+                <h3 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
+                  {c.title}
+                </h3>
+                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                  {t.news.readMore}
+                  <ArrowUpRight className={dir === "rtl" ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
+                </span>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+      <style>{`
+        @keyframes news-marquee {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        @keyframes news-marquee-rtl {
+          from { transform: translateX(-50%); }
+          to { transform: translateX(0); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const { t, dir, lang } = useLang();
 
