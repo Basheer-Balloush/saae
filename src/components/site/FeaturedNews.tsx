@@ -151,8 +151,8 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     const delta = e.clientX - dragRef.current.startX;
     if (Math.abs(delta) > 4) didDragRef.current = true;
     e.preventDefault();
-    const factor = dir === "rtl" ? 1 : -1;
-    const offset = dragRef.current.initialOffset + factor * delta;
+    // Drag follows finger in both directions.
+    const offset = dragRef.current.initialOffset + delta;
     row.style.transform = `translateX(${offset}px)`;
   };
 
@@ -164,9 +164,11 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     const half = row.scrollWidth / 2;
     const offset = wrapOffset(m.m41, half);
     const isRtl = dir === "rtl";
-    const from = isRtl ? -half : 0;
-    const to = isRtl ? 0 : -half;
+    // ltr (news-marquee-rtl): -half → 0.  rtl (news-marquee): 0 → -half.
+    const from = isRtl ? 0 : -half;
+    const to = isRtl ? -half : 0;
     const pct = (offset - from) / (to - from);
+
     row.style.animationDelay = `-${(pct * animationDuration).toFixed(3)}s`;
     row.classList.add(animationClass);
     requestAnimationFrame(() => {
