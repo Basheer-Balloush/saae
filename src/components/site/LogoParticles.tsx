@@ -291,7 +291,7 @@ function LogoParticlesImpl({ size = 200, colors = DEFAULT_COLORS, className }: P
       cancelled = true;
       cancelAnimationFrame(rafId);
     };
-  }, [size, colors, reducedMotion]);
+  }, [size, reducedMotion]);
 
   if (reducedMotion) {
     return (
