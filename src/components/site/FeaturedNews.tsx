@@ -89,10 +89,12 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
       const half = row.scrollWidth / 2;
       if (!half) return;
       const isRtl = dir === "rtl";
-      const actualOffset = isRtl ? savedPx - half : -savedPx;
+      // Both keyframes translate between -half and 0, so m41 is always ≤ 0.
+      const actualOffset = -savedPx;
       const wrapped = wrapOffset(actualOffset, half);
-      const from = isRtl ? -half : 0;
-      const to = isRtl ? 0 : -half;
+      // ltr (news-marquee-rtl): -half → 0.  rtl (news-marquee): 0 → -half.
+      const from = isRtl ? 0 : -half;
+      const to = isRtl ? -half : 0;
       const pct = (wrapped - from) / (to - from);
       row.style.animationDelay = `-${(pct * animationDuration).toFixed(3)}s`;
       sessionStorage.removeItem(SCROLL_KEY);
@@ -100,6 +102,18 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     const id = window.setTimeout(apply, 50);
     return () => window.clearTimeout(id);
   }, [slides, dir, animationDuration]);
+
+  // When the language changes at runtime, reset any inline animationDelay /
+  // transform left over from a previous drag or restore so the marquee starts
+  // cleanly in the new direction without a jump or double animation.
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    row.style.animationDelay = "";
+    row.style.transform = "";
+    try { sessionStorage.removeItem(SCROLL_KEY); } catch {}
+  }, [dir]);
+
 
   const saveOffset = () => {
     const row = rowRef.current;
