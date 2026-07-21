@@ -20,6 +20,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "@/components/ui/sonner";
 import { AssistantFab } from "@/components/site/AssistantFab";
 import { RouteProgress } from "@/components/site/RouteProgress";
+import { ScrollToHash } from "@/components/site/ScrollToHash";
 
 
 function NotFoundComponent() {
