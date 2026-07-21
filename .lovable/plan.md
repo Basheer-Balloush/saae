@@ -1,45 +1,29 @@
 ## Root cause
 
-`FeaturedNews` (the homepage news slider) chooses its marquee animation from `dir` in `useLang`, but the two keyframes are assigned the wrong way around for what the user perceives as "direction":
+In `src/components/site/FeaturedNews.tsx`, each card is already wrapped in a TanStack `<Link to="/news/$id" params={{ id }}>`, but the row calls `row.setPointerCapture(e.pointerId)` inside `handlePointerDown`. When a pointer is captured by an ancestor, the browser retargets the subsequent `click` event to the capturing element (the row `div`) instead of the `<Link>` child. TanStack Router's `<Link>` relies on its own `onClick` handler to intercept navigation and call `router.navigate`; that handler never runs, so clicking a card does nothing. The `href` also isn't followed because pointer capture + our `pointerup` handling absorbs the gesture.
 
-- `news-marquee` animates `translateX(0) → translateX(-50%)`. Content slides **leftward**, so items visually flow **right → left**. This is currently applied when `dir === "ltr"` (English).
-- `news-marquee-rtl` animates `-50% → 0`. Content slides **rightward**, items flow **left → right**. This is currently applied when `dir === "rtl"` (Arabic).
+Secondary contributor: `handlePointerDown` unconditionally strips the animation class and switches the row to an inline `translateX(...)`, even for a plain tap that never moves. That does not itself block navigation, but it does mean every "click" is treated as a zero-length "drag", which pairs badly with pointer capture.
 
-So today English scrolls right‑to‑left and Arabic scrolls left‑to‑right — the opposite of what's requested. The outer wrapper is also hardcoded `dir="ltr"`, which further hides the language from the slider.
+Nothing is wrong with the data — `slides[i].id` is the real `news.id` and the target route `/news/$id` exists (`src/routes/news.$id.tsx`) and is used elsewhere.
 
-Runtime language switching mostly works (React re-renders and swaps `animationClass`), but two things can cause a flicker/desync when toggling AR↔EN:
+## Fix (single file: `src/components/site/FeaturedNews.tsx`)
 
-1. `animationDelay` set during drag/restore is preserved on the row element, so after a language change the new animation starts at the old offset.
-2. The pointer‑drag math (`factor = dir === "rtl" ? 1 : -1`) is tied to the old direction assumption and will need to flip in step with the keyframe swap.
-
-## Fix
-
-Only touch `src/components/site/FeaturedNews.tsx`. No other slider/component changes.
-
-1. Swap the direction → keyframe mapping so:
-   - English (`dir === "ltr"`) uses the keyframe that translates `-50% → 0` (items flow L→R).
-   - Arabic (`dir === "rtl"`) uses `0 → -50%` (items flow R→L).
-   Keep both keyframes; just switch which class each branch picks.
-2. Flip the drag direction factor to match the new mapping so swiping still feels natural in both languages.
-3. Update the "restore offset" / "release drag" math (`from`, `to`, `pct`) to use the new per‑direction start/end so autoplay resumes seamlessly after a drag in either language.
-4. Reset `animationDelay` and any inline `transform` on `rowRef` in a `useEffect` keyed on `dir`, so switching AR↔EN at runtime restarts the marquee cleanly with no flicker or leftover offset. Also clear the persisted `SCROLL_KEY` on direction change so a saved Arabic offset can't be applied to an English run.
-5. Keep the outer wrapper's `dir="ltr"` (it exists so `translateX` math is consistent); direction is expressed via the chosen keyframe, not via the wrapper's `dir` attribute.
-6. Preserve everything else: card markup, spacing, 30s duration, hover pause, pointer drag, link click behavior, mask gradient, responsive widths.
+1. Defer drag setup until real movement is detected:
+   - In `handlePointerDown`, only record `{ startX, initialOffset, pointerId }` and set `didDragRef.current = false`. Do NOT call `setPointerCapture`, do NOT freeze `transform`, do NOT remove `animationClass`, do NOT change cursor. A tap therefore behaves like a normal click on the `<Link>` and TanStack Router navigates.
+   - In `handlePointerMove`, when the horizontal delta first crosses ~5px, promote the gesture to a drag: freeze the current transform, remove `animationClass`, call `setPointerCapture` on the row, set `cursor: grabbing`, and set `didDragRef.current = true`. From then on, follow the finger and `preventDefault()` as today.
+   - `handlePointerUp` keeps the existing "resume animation from released offset" logic but only runs the drag-release branch when `didDragRef.current` is true; for a pure tap it does nothing (no capture to release, no transform to clear).
+2. Keep `handleLinkClick`: if `didDragRef.current` is true, `e.preventDefault()` so a drag doesn't accidentally navigate; otherwise call `saveOffset()` as today so the marquee position is restored on back-nav.
+3. Add `role="link"` isn't needed — `<Link>` already renders an `<a href>`, which gives keyboard focus and Enter-to-activate for free. Add `cursor-pointer` on the card (currently the row has `cursor-grab`, which is fine on the row but the `<Link>` should read as clickable; keep row `cursor-grab`, ensure the `<Link>` doesn't override to something non-clickable — current `cardClass` already inherits, so no change needed).
+4. Preserve everything else: 30s duration, keyframes and their locale mapping, hover pause, mask gradient, spacing, responsive widths, card markup, "View all" button, saved-offset restore across nav, direction-reset effect.
 
 ## Verification
 
-Project has no test runner wired up for this slider, so verify manually in the preview:
-
-- Load `/` in English → news row auto‑scrolls left → right; new cards enter from the left edge; drag left/right feels natural; release resumes autoplay from the released position.
-- Load `/` in Arabic → news row auto‑scrolls right → left; drag feels natural.
-- Toggle language via the navbar switcher without reloading → direction flips immediately, no double animation, no jump, no console/hydration errors.
-- Hover pauses; leaving hover resumes without the earlier glitch.
-- Clicking a card still navigates and restores position on back‑nav within the same language.
+- Click three different cards on `/` (English and Arabic) → each opens `/news/<its own id>` and the article page renders that specific article.
+- Keyboard: Tab focuses each card (it's an `<a>`), Enter opens the article.
+- Touch: tap navigates; horizontal swipe (>5px) drags the row and does NOT navigate; release resumes autoplay from the released position.
+- Hover pause and language switch (AR↔EN) still work with no jump, no console errors, no double animation.
+- Back-nav from a news article restores the previous marquee offset within the same language.
 
 ## Files changed
 
 - `src/components/site/FeaturedNews.tsx` (only)
-
-## Report after implementation
-
-Root cause, the single file changed, how locale drives direction (via `useLang().dir` selecting the keyframe class + a `dir`-keyed reset effect), and the manual checks above.
