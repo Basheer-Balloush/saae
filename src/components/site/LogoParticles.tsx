@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import logoTree from "@/assets/logo-tree.png";
 import logoEagle from "@/assets/logo-eagle.png";
 
