@@ -1,5 +1,5 @@
 import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, ArrowRight } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import logo from "@/assets/footer-logo.png";
 import locationMap from "@/assets/location-map.png";
