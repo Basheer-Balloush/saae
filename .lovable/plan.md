@@ -1,45 +1,91 @@
-## Root cause
+## Goal
 
-`FeaturedNews` (the homepage news slider) chooses its marquee animation from `dir` in `useLang`, but the two keyframes are assigned the wrong way around for what the user perceives as "direction":
+Make the homepage news slider in `src/components/site/FeaturedNews.tsx` support both a normal click (opens the article) and a press-hold-drag (slides the row), based on actual pointer movement — not on hold time.
 
-- `news-marquee` animates `translateX(0) → translateX(-50%)`. Content slides **leftward**, so items visually flow **right → left**. This is currently applied when `dir === "ltr"` (English).
-- `news-marquee-rtl` animates `-50% → 0`. Content slides **rightward**, items flow **left → right**. This is currently applied when `dir === "rtl"` (Arabic).
+## Root cause of current behavior
 
-So today English scrolls right‑to‑left and Arabic scrolls left‑to‑right — the opposite of what's requested. The outer wrapper is also hardcoded `dir="ltr"`, which further hides the language from the slider.
+`handlePointerDown` currently:
+- Reads the transform and freezes the row at that offset immediately.
+- Removes the marquee animation class right away.
+- Calls `setPointerCapture` on pointer-down.
+- Sets cursor to `grabbing`.
 
-Runtime language switching mostly works (React re-renders and swaps `animationClass`), but two things can cause a flicker/desync when toggling AR↔EN:
+This means every mouse-down enters "drag mode" before the user has moved, and pointer capture routes the eventual `pointerup` to the row instead of the anchor, so the `<Link>` click doesn't fire reliably. A click without meaningful motion should just open the article.
 
-1. `animationDelay` set during drag/restore is preserved on the row element, so after a language change the new animation starts at the old offset.
-2. The pointer‑drag math (`factor = dir === "rtl" ? 1 : -1`) is tied to the old direction assumption and will need to flip in step with the keyframe swap.
+## Fix (single file: `src/components/site/FeaturedNews.tsx`)
 
-## Fix
+### 1. Add a drag threshold + "armed vs active" model
 
-Only touch `src/components/site/FeaturedNews.tsx`. No other slider/component changes.
+- Add a constant `DRAG_THRESHOLD = 5` (px).
+- Extend `dragRef` to track state:
+  - `isPointerDown: boolean` — mouse is held, not necessarily dragging yet.
+  - `isDragging: boolean` — threshold crossed; row is being moved.
+  - `startX: number`
+  - `initialOffset: number` (row's current `translateX` at pointer-down)
+  - `pointerId: number | null`
+- Keep `didDragRef` as the flag the click handler reads to cancel navigation.
 
-1. Swap the direction → keyframe mapping so:
-   - English (`dir === "ltr"`) uses the keyframe that translates `-50% → 0` (items flow L→R).
-   - Arabic (`dir === "rtl"`) uses `0 → -50%` (items flow R→L).
-   Keep both keyframes; just switch which class each branch picks.
-2. Flip the drag direction factor to match the new mapping so swiping still feels natural in both languages.
-3. Update the "restore offset" / "release drag" math (`from`, `to`, `pct`) to use the new per‑direction start/end so autoplay resumes seamlessly after a drag in either language.
-4. Reset `animationDelay` and any inline `transform` on `rowRef` in a `useEffect` keyed on `dir`, so switching AR↔EN at runtime restarts the marquee cleanly with no flicker or leftover offset. Also clear the persisted `SCROLL_KEY` on direction change so a saved Arabic offset can't be applied to an English run.
-5. Keep the outer wrapper's `dir="ltr"` (it exists so `translateX` math is consistent); direction is expressed via the chosen keyframe, not via the wrapper's `dir` attribute.
-6. Preserve everything else: card markup, spacing, 30s duration, hover pause, pointer drag, link click behavior, mask gradient, responsive widths.
+### 2. `handlePointerDown` (light-touch)
 
-## Verification
+- Only record `startX`, `initialOffset` (from `DOMMatrixReadOnly` of current transform), `pointerId`, and set `isPointerDown = true`, `isDragging = false`, `didDragRef.current = false`.
+- Do NOT: call `preventDefault`, `setPointerCapture`, remove the animation class, write inline `transform`, or change cursor.
+- This preserves the normal click path.
 
-Project has no test runner wired up for this slider, so verify manually in the preview:
+### 3. `handlePointerMove`
 
-- Load `/` in English → news row auto‑scrolls left → right; new cards enter from the left edge; drag left/right feels natural; release resumes autoplay from the released position.
-- Load `/` in Arabic → news row auto‑scrolls right → left; drag feels natural.
-- Toggle language via the navbar switcher without reloading → direction flips immediately, no double animation, no jump, no console/hydration errors.
-- Hover pauses; leaving hover resumes without the earlier glitch.
-- Clicking a card still navigates and restores position on back‑nav within the same language.
+- Return early if `!isPointerDown`.
+- Compute `delta = e.clientX - startX`.
+- If `!isDragging` and `Math.abs(delta) >= DRAG_THRESHOLD`:
+  - Promote to drag: `isDragging = true`, `didDragRef.current = true`.
+  - Now do the deferred setup:
+    - Re-read current computed transform (animation has kept moving during the hold) and update `initialOffset` to that value so the row doesn't jump.
+    - `row.classList.remove(animationClass)` and set inline `transform: translateX(<currentOffset>px)` to freeze it.
+    - `row.setPointerCapture(e.pointerId)`.
+    - `row.style.cursor = "grabbing"`.
+- Once `isDragging` is true:
+  - `e.preventDefault()` to block text selection / native drag.
+  - Apply `translateX(initialOffset + delta)px` (finger-following, same as today).
+
+### 4. `handlePointerUp` / `handlePointerCancel`
+
+- If `!isDragging`:
+  - Just clear `isPointerDown` and `pointerId`. Leave `didDragRef.current === false` so the `<Link>` click that fires next opens the article.
+  - Do not touch animation, transform, cursor, or pointer capture (none was taken).
+- If `isDragging`:
+  - Run the existing release math: wrap the offset, compute `pct` against the correct per-direction `from`/`to` (already keyed off `dir` after the previous fix), set `animationDelay`, re-add `animationClass`, then in `requestAnimationFrame` clear the inline `transform` so autoplay resumes from the released position.
+  - `releasePointerCapture` (guarded in try/catch).
+  - Reset cursor to `grab`.
+  - Keep `didDragRef.current = true` so the click handler on the `<Link>` cancels navigation for this release.
+- Always reset `isPointerDown`, `isDragging`, `pointerId`.
+
+### 5. `handleLinkClick` on the card `<Link>`
+
+```ts
+if (didDragRef.current) {
+  e.preventDefault();
+  e.stopPropagation();
+  didDragRef.current = false;
+  return;
+}
+saveOffset();
+```
+
+- Click without drag → falls through and TanStack `<Link>` navigates; also persists the current marquee offset via `saveOffset()` (unchanged).
+- Click after a drag → navigation is blocked once; flag is cleared for the next interaction.
+
+### 6. Keep everything else identical
+
+- Language-based keyframe selection (`animationClass` from `dir`), the `dir`-keyed reset effect, hover pause via `isPaused`, restore-on-return effect, `saveOffset`, `wrapOffset`, mask gradient, card markup, 30s duration, responsive widths, outer wrapper's `dir="ltr"`.
+
+## Acceptance checks (manual, in preview)
+
+- Click a card without moving → article opens.
+- Press, move horizontally more than ~5px, release → row slides, no article opens, autoplay resumes from released position.
+- Press and hold stationary, then release → article opens (tiny sub-threshold jitter is tolerated).
+- Works in both English (L→R autoplay) and Arabic (R→L autoplay), including switching languages at runtime with no flicker.
+- Hover still pauses; leaving hover resumes cleanly.
+- Back-navigation from a news detail restores the slider position within the same language.
 
 ## Files changed
 
 - `src/components/site/FeaturedNews.tsx` (only)
-
-## Report after implementation
-
-Root cause, the single file changed, how locale drives direction (via `useLang().dir` selecting the keyframe class + a `dir`-keyed reset effect), and the manual checks above.

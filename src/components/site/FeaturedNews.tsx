@@ -48,8 +48,15 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const [slides, setSlides] = useState<Slide[] | null>(() => initialNews ? mapNewsRows(initialNews, lang) : null);
   const [isPaused, setIsPaused] = useState(false);
   const rowRef = useRef<HTMLDivElement | null>(null);
-  const dragRef = useRef({ isDragging: false, startX: 0, initialOffset: 0 });
+  const dragRef = useRef({
+    isPointerDown: false,
+    isDragging: false,
+    startX: 0,
+    initialOffset: 0,
+    pointerId: null as number | null,
+  });
   const didDragRef = useRef(false);
+  const DRAG_THRESHOLD = 5;
 
   const animationDuration = 30; // seconds per loop (faster than before)
   // Direction is derived from the active locale:
@@ -136,35 +143,67 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
     const row = rowRef.current;
     if (!row) return;
     const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
-    dragRef.current = { isDragging: true, startX: e.clientX, initialOffset: m.m41 };
+    dragRef.current = {
+      isPointerDown: true,
+      isDragging: false,
+      startX: e.clientX,
+      initialOffset: m.m41,
+      pointerId: e.pointerId,
+    };
     didDragRef.current = false;
-    row.style.transform = `translateX(${m.m41}px)`;
-    row.classList.remove(animationClass);
-    row.setPointerCapture(e.pointerId);
-    row.style.cursor = "grabbing";
+    // Do not capture pointer, freeze animation, or change cursor yet — a
+    // stationary press should still allow the underlying <Link> click.
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragRef.current.isDragging) return;
+    const state = dragRef.current;
+    if (!state.isPointerDown) return;
     const row = rowRef.current;
     if (!row) return;
-    const delta = e.clientX - dragRef.current.startX;
-    if (Math.abs(delta) > 4) didDragRef.current = true;
+    const delta = e.clientX - state.startX;
+
+    if (!state.isDragging) {
+      if (Math.abs(delta) < DRAG_THRESHOLD) return;
+      // Promote to drag: freeze animation at current position and take capture.
+      const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
+      state.initialOffset = m.m41;
+      state.startX = e.clientX;
+      state.isDragging = true;
+      didDragRef.current = true;
+      row.classList.remove(animationClass);
+      row.style.transform = `translateX(${m.m41}px)`;
+      try { row.setPointerCapture(e.pointerId); } catch {}
+      row.style.cursor = "grabbing";
+      return;
+    }
+
     e.preventDefault();
-    // Drag follows finger in both directions.
-    const offset = dragRef.current.initialOffset + delta;
+    const offset = state.initialOffset + delta;
     row.style.transform = `translateX(${offset}px)`;
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     const row = rowRef.current;
     if (!row) return;
-    dragRef.current.isDragging = false;
+    const state = dragRef.current;
+    const wasDragging = state.isDragging;
+    dragRef.current = {
+      isPointerDown: false,
+      isDragging: false,
+      startX: 0,
+      initialOffset: 0,
+      pointerId: null,
+    };
+
+    if (!wasDragging) {
+      // Simple click — let the <Link> handle navigation.
+      return;
+    }
+
     const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
     const half = row.scrollWidth / 2;
     const offset = wrapOffset(m.m41, half);
     const isRtl = dir === "rtl";
-    // ltr (news-marquee-rtl): -half → 0.  rtl (news-marquee): 0 → -half.
     const from = isRtl ? 0 : -half;
     const to = isRtl ? -half : 0;
     const pct = (offset - from) / (to - from);
@@ -181,10 +220,11 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const handleLinkClick = (e: React.MouseEvent) => {
     if (didDragRef.current) {
       e.preventDefault();
+      e.stopPropagation();
       didDragRef.current = false;
-    } else {
-      saveOffset();
+      return;
     }
+    saveOffset();
   };
 
   // Hide section entirely until we have published news to show
