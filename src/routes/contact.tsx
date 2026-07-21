@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { motion } from "framer-motion";
@@ -417,10 +417,14 @@ function ContactPage() {
                   <p className="mt-2 text-sm text-muted-foreground">
                     {isAr ? "تحدث مع «أبو الجود» — مساعدنا الذكي على مدار الساعة." : "Chat with Abu Al-Joud — our AI assistant, 24/7."}
                   </p>
-                  <Link to="/" hash="assistant" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+                  <button
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent("assistant:open"))}
+                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+                  >
                     {isAr ? "تحدث مع أبو الجود" : "Chat with Abu Al-Joud"}
                     <Arrow className="h-3.5 w-3.5" />
-                  </Link>
+                  </button>
                 </div>
               </motion.div>
             </div>
