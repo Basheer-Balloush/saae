@@ -135,7 +135,7 @@ function LogoParticlesImpl({ size = 200, colors = DEFAULT_COLORS, className }: P
     let cancelled = false;
     const cx = size / 2;
     const cy = size / 2;
-    const [rgbA, rgbB] = [hexToRgb(colors[0]), hexToRgb(colors[1])];
+    // Colors are read via ref inside the draw loop so palette changes don't tear down the animation.
 
     Promise.all([loadImage(logoTree), loadImage(logoEagle)]).then(([imgA, imgB]) => {
       if (cancelled) return;
