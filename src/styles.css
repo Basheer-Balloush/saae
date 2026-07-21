@@ -96,6 +96,9 @@ html {
   --footer-foreground: oklch(0.985 0.005 95);
   --footer-muted: oklch(0.88 0.03 215);
   --footer-border: oklch(1 0 0 / 0.14);
+  --footer-accent: #a8e6e6;
+  --footer-medium: #3ba4a4;
+  --footer-light: #7fcfcf;
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.235 0 0);
@@ -190,6 +193,9 @@ html {
   --footer-foreground: oklch(0.985 0.005 95);
   --footer-muted: oklch(0.85 0.03 215);
   --footer-border: oklch(1 0 0 / 0.14);
+  --footer-accent: #a8e6e6;
+  --footer-medium: #3ba4a4;
+  --footer-light: #7fcfcf;
 
   --card: oklch(0.235 0 0);
   --card-foreground: oklch(0.97 0.002 95);
