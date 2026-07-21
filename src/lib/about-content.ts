@@ -59,13 +59,7 @@ const ar: AboutContent = {
   values: {
     heading: "قيمنا",
     intro: "خمس قيم جوهرية تقود كل ما نفعله، من الفصل التدريبي إلى مشاريع الشراكة الكبرى.",
-    items: [
-      "الابتكار والإبداع",
-      "العمل الجماعي",
-      "مشاركة المعرفة",
-      "التطوير المستمر",
-      "المسؤولية المجتمعية",
-    ],
+    items: ["الابتكار والإبداع", "العمل الجماعي", "مشاركة المعرفة", "التطوير المستمر", "المسؤولية المجتمعية"],
   },
   members: {
     boardTitle: "مجلس الإدارة",
@@ -78,7 +72,7 @@ const ar: AboutContent = {
 const en: AboutContent = {
   hero: {
     title: "About SAAE",
-    p1: "The Syrian Association for Artificial Intelligence and Entrepreneurship is a youth-led, community-driven organization dedicated to spreading the culture of AI and entrepreneurship across Syria, and to equipping students, young professionals, and founders with the technical and entrepreneurial skills they need to innovate and shape the future.",
+    p1: "The Syrian Association for Artificial Intelligence and Entrepreneurship is a youth-led, community-driven organization dedicated to spread the culture of AI and entrepreneurship across Syria, and to equip students, young professionals, and founders with the technical and entrepreneurial skills they need to innovate and shape the future.",
     p2: "We are building a knowledge ecosystem that pairs modern technology with the spirit of initiative — through training, workshops, scientific events, and applied projects that grow individual capabilities and support entrepreneurial ideas.",
     backHome: "Back to Home",
   },
@@ -98,7 +92,7 @@ const en: AboutContent = {
       "Raise awareness of the importance of artificial intelligence and digital transformation.",
       "Support and empower entrepreneurs and early-stage founders.",
       "Organize training courses and technical and entrepreneurial workshops.",
-      "Build a collaborative community for people passionate about technology and innovation.",
+      "Build a collaborative community that brings together people passionate about technology and innovation.",
       "Encourage research, development, and youth-led initiatives.",
     ],
   },
