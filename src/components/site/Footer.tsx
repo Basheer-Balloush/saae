@@ -1,5 +1,5 @@
 import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, ArrowRight } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import logo from "@/assets/footer-logo.png";
 import locationMap from "@/assets/location-map.png";
@@ -12,6 +12,20 @@ const MUTED = "rgba(255,255,255,0.78)";
 export function Footer() {
   const { t, dir } = useLang();
   const isRtl = dir === "rtl";
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    if (pathname === "/") {
+      e.preventDefault();
+      if (typeof window !== "undefined") {
+        if (window.location.hash) {
+          window.history.replaceState(null, "", "/");
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  };
 
   return (
     <footer
@@ -29,15 +43,22 @@ export function Footer() {
         <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Col 1 — Identity */}
           <div className="lg:col-span-5">
-            <img
-              src={logo}
-              alt="Syrian Association for AI & Entrepreneurship logo"
-              width={180}
-              height={48}
-              loading="lazy"
-              decoding="async"
-              className="h-12 w-auto brightness-0 invert"
-            />
+            <Link
+              to="/"
+              onClick={handleLogoClick}
+              aria-label={`${t.footer.mission ? "SAAE" : "SAAE"} — ${t.nav.home}`}
+              className="inline-block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            >
+              <img
+                src={logo}
+                alt="Syrian Association for AI & Entrepreneurship logo"
+                width={180}
+                height={48}
+                loading="lazy"
+                decoding="async"
+                className="h-12 w-auto brightness-0 invert"
+              />
+            </Link>
             <p
               className="mt-6 max-w-xs text-sm leading-relaxed"
               style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 400, color: INK }}
