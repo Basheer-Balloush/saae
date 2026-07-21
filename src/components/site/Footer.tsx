@@ -43,15 +43,22 @@ export function Footer() {
         <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Col 1 — Identity */}
           <div className="lg:col-span-5">
-            <img
-              src={logo}
-              alt="Syrian Association for AI & Entrepreneurship logo"
-              width={180}
-              height={48}
-              loading="lazy"
-              decoding="async"
-              className="h-12 w-auto brightness-0 invert"
-            />
+            <Link
+              to="/"
+              onClick={handleLogoClick}
+              aria-label={`${t.footer.mission ? "SAAE" : "SAAE"} — ${t.nav.home}`}
+              className="inline-block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            >
+              <img
+                src={logo}
+                alt="Syrian Association for AI & Entrepreneurship logo"
+                width={180}
+                height={48}
+                loading="lazy"
+                decoding="async"
+                className="h-12 w-auto brightness-0 invert"
+              />
+            </Link>
             <p
               className="mt-6 max-w-xs text-sm leading-relaxed"
               style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 400, color: INK }}
