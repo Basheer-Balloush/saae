@@ -135,35 +135,23 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const row = rowRef.current;
     if (!row) return;
-    // Record the gesture but DO NOT capture the pointer or freeze the
-    // animation yet — pointer capture retargets the eventual `click` to this
-    // row and prevents the child <Link>'s onClick from firing (blocking
-    // navigation). Only promote to a real drag once movement exceeds a small
-    // threshold in handlePointerMove.
     const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
-    dragRef.current = { isDragging: false, startX: e.clientX, initialOffset: m.m41 };
+    dragRef.current = { isDragging: true, startX: e.clientX, initialOffset: m.m41 };
     didDragRef.current = false;
+    row.style.transform = `translateX(${m.m41}px)`;
+    row.classList.remove(animationClass);
+    row.setPointerCapture(e.pointerId);
+    row.style.cursor = "grabbing";
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current.isDragging) return;
     const row = rowRef.current;
     if (!row) return;
     const delta = e.clientX - dragRef.current.startX;
-
-    if (!dragRef.current.isDragging) {
-      if (Math.abs(delta) <= 5) return;
-      // Promote tap → drag.
-      dragRef.current.isDragging = true;
-      didDragRef.current = true;
-      const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
-      dragRef.current.initialOffset = m.m41;
-      row.style.transform = `translateX(${m.m41}px)`;
-      row.classList.remove(animationClass);
-      try { row.setPointerCapture(e.pointerId); } catch {}
-      row.style.cursor = "grabbing";
-    }
-
+    if (Math.abs(delta) > 4) didDragRef.current = true;
     e.preventDefault();
+    // Drag follows finger in both directions.
     const offset = dragRef.current.initialOffset + delta;
     row.style.transform = `translateX(${offset}px)`;
   };
@@ -171,10 +159,6 @@ export function FeaturedNews({ initialNews }: { initialNews?: HomeNewsRow[] }) {
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     const row = rowRef.current;
     if (!row) return;
-    if (!dragRef.current.isDragging) {
-      // Pure tap — let the <Link>'s click handler fire and navigate.
-      return;
-    }
     dragRef.current.isDragging = false;
     const m = new DOMMatrixReadOnly(getComputedStyle(row).transform);
     const half = row.scrollWidth / 2;
