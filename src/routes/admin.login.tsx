@@ -73,6 +73,12 @@ function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const logoSrc =
+    lang === "ar"
+      ? theme === "dark" ? logoArDark : logoArLight
+      : theme === "dark" ? logoEnDark : logoEnLight;
 
   const schema = z.object({
     email: z.string().trim().email(t.invalidEmail).max(255),
