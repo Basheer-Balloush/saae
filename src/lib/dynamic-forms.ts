@@ -100,7 +100,7 @@ export const fieldSchema = z
     }
   });
 
-export const formInputSchema = z.object({
+export const formInputBaseSchema = z.object({
   slug: z.string().refine(isValidSlug, "invalid_slug"),
   name_ar: z.string().trim().min(1).max(200),
   name_en: z.string().trim().min(1).max(200),
@@ -110,7 +110,9 @@ export const formInputSchema = z.object({
   submit_label_en: z.string().trim().min(1).max(80),
   status: z.enum(["draft", "published"]),
   fields: z.array(fieldSchema).max(80),
-}).superRefine((form, ctx) => {
+});
+
+function checkUniqueFieldIds(form: { fields: { id: string }[] }, ctx: z.RefinementCtx) {
   const ids = new Set<string>();
   for (const f of form.fields) {
     if (ids.has(f.id)) {
@@ -119,7 +121,12 @@ export const formInputSchema = z.object({
     }
     ids.add(f.id);
   }
-});
+}
+
+export const formInputSchema = formInputBaseSchema.superRefine(checkUniqueFieldIds);
+export const formInputWithIdSchema = formInputBaseSchema
+  .extend({ id: z.string().uuid() })
+  .superRefine(checkUniqueFieldIds);
 
 export type FormInput = z.infer<typeof formInputSchema>;
 
