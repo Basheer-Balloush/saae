@@ -97,9 +97,7 @@ export const createDynamicForm = createServerFn({ method: "POST" })
 // ---------- Admin: update ----------
 export const updateDynamicForm = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    formInputSchema.extend({ id: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d) => formInputWithIdSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { id, ...rest } = data;
