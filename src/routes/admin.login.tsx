@@ -42,6 +42,9 @@ const T = {
     signedIn: "Signed in",
     authFailed: "Authentication failed",
     langBtn: "العربية",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
+    logoAlt: "Syrian Association for AI & Entrepreneurship",
   },
   ar: {
     back: "→ العودة إلى الموقع",
@@ -55,6 +58,9 @@ const T = {
     signedIn: "تم تسجيل الدخول",
     authFailed: "فشل المصادقة",
     langBtn: "English",
+    showPassword: "إظهار كلمة المرور",
+    hidePassword: "إخفاء كلمة المرور",
+    logoAlt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",
   },
 };
 
