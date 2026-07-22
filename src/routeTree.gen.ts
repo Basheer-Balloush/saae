@@ -20,6 +20,7 @@ import { Route as InitiativeSurveyRouteImport } from './routes/initiative-survey
 import { Route as EventSurveyRouteImport } from './routes/event-survey'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
@@ -42,10 +43,14 @@ import { Route as InitiativeClaimRouteImport } from './routes/initiative.claim'
 import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system.login'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
+import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminInitiativeSurveyRouteImport } from './routes/admin.initiative-survey'
 import { Route as AdminInitiativeRouteImport } from './routes/admin.initiative'
 import { Route as AdminEventSurveyRouteImport } from './routes/admin.event-survey'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system.student.index'
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
 import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system.admin.index'
@@ -128,6 +133,11 @@ const AttendanceManagementSystemRoute =
     path: '/attendance-management-system',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -156,9 +166,9 @@ const AttendanceManagementSystemIndexRoute =
     getParentRoute: () => AttendanceManagementSystemRoute,
   } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/admin/',
-  path: '/admin/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ResourcesAiToolsRoute = ResourcesAiToolsRouteImport.update({
   id: '/resources/ai-tools',
@@ -251,25 +261,45 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPartnersRoute = AdminPartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMembersRoute = AdminMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin/login',
-  path: '/admin/login',
-  getParentRoute: () => rootRouteImport,
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminInitiativeSurveyRoute = AdminInitiativeSurveyRouteImport.update({
-  id: '/admin/initiative-survey',
-  path: '/admin/initiative-survey',
-  getParentRoute: () => rootRouteImport,
+  id: '/initiative-survey',
+  path: '/initiative-survey',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminInitiativeRoute = AdminInitiativeRouteImport.update({
-  id: '/admin/initiative',
-  path: '/admin/initiative',
-  getParentRoute: () => rootRouteImport,
+  id: '/initiative',
+  path: '/initiative',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminEventSurveyRoute = AdminEventSurveyRouteImport.update({
-  id: '/admin/event-survey',
-  path: '/admin/event-survey',
-  getParentRoute: () => rootRouteImport,
+  id: '/event-survey',
+  path: '/event-survey',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminChatbotRoute = AdminChatbotRouteImport.update({
+  id: '/chatbot',
+  path: '/chatbot',
+  getParentRoute: () => AdminRoute,
 } as any)
 const LearningManagementSystemStudentIndexRoute =
   LearningManagementSystemStudentIndexRouteImport.update({
@@ -405,6 +435,7 @@ const LearningManagementSystemInstructorAssignmentsCourseIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
@@ -416,10 +447,14 @@ export interface FileRoutesByFullPath {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/chatbot': typeof AdminChatbotRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/members': typeof AdminMembersRoute
+  '/admin/partners': typeof AdminPartnersRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -475,10 +510,14 @@ export interface FileRoutesByTo {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/chatbot': typeof AdminChatbotRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/members': typeof AdminMembersRoute
+  '/admin/partners': typeof AdminPartnersRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -523,6 +562,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
@@ -534,10 +574,14 @@ export interface FileRoutesById {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/chatbot': typeof AdminChatbotRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/members': typeof AdminMembersRoute
+  '/admin/partners': typeof AdminPartnersRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -586,6 +630,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/attendance-management-system'
     | '/contact'
     | '/event-survey'
@@ -597,10 +642,14 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
+    | '/admin/chatbot'
+    | '/admin/dashboard'
     | '/admin/event-survey'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
+    | '/admin/members'
+    | '/admin/partners'
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
@@ -656,10 +705,14 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
+    | '/admin/chatbot'
+    | '/admin/dashboard'
     | '/admin/event-survey'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
+    | '/admin/members'
+    | '/admin/partners'
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
@@ -703,6 +756,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/attendance-management-system'
     | '/contact'
     | '/event-survey'
@@ -714,10 +768,14 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
+    | '/admin/chatbot'
+    | '/admin/dashboard'
     | '/admin/event-survey'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
+    | '/admin/members'
+    | '/admin/partners'
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
@@ -765,6 +823,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
   EventSurveyRoute: typeof EventSurveyRoute
@@ -776,16 +835,11 @@ export interface RootRouteChildren {
   RegistrationRoute: typeof RegistrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
-  AdminEventSurveyRoute: typeof AdminEventSurveyRoute
-  AdminInitiativeRoute: typeof AdminInitiativeRoute
-  AdminInitiativeSurveyRoute: typeof AdminInitiativeSurveyRoute
-  AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
   InitiativeClaimRoute: typeof InitiativeClaimRoute
   NewsIdRoute: typeof NewsIdRoute
   ResourcesAiToolsRoute: typeof ResourcesAiToolsRoute
-  AdminIndexRoute: typeof AdminIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -871,6 +925,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AttendanceManagementSystemRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -908,10 +969,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/': {
       id: '/admin/'
-      path: '/admin'
+      path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/resources/ai-tools': {
       id: '/resources/ai-tools'
@@ -1025,33 +1086,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/partners': {
+      id: '/admin/partners'
+      path: '/partners'
+      fullPath: '/admin/partners'
+      preLoaderRoute: typeof AdminPartnersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/members': {
+      id: '/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AdminMembersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/login': {
       id: '/admin/login'
-      path: '/admin/login'
+      path: '/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/initiative-survey': {
       id: '/admin/initiative-survey'
-      path: '/admin/initiative-survey'
+      path: '/initiative-survey'
       fullPath: '/admin/initiative-survey'
       preLoaderRoute: typeof AdminInitiativeSurveyRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/initiative': {
       id: '/admin/initiative'
-      path: '/admin/initiative'
+      path: '/initiative'
       fullPath: '/admin/initiative'
       preLoaderRoute: typeof AdminInitiativeRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/event-survey': {
       id: '/admin/event-survey'
-      path: '/admin/event-survey'
+      path: '/event-survey'
       fullPath: '/admin/event-survey'
       preLoaderRoute: typeof AdminEventSurveyRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/chatbot': {
+      id: '/admin/chatbot'
+      path: '/chatbot'
+      fullPath: '/admin/chatbot'
+      preLoaderRoute: typeof AdminChatbotRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/learning-management-system/student/': {
       id: '/learning-management-system/student/'
@@ -1210,6 +1299,32 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminChatbotRoute: typeof AdminChatbotRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminEventSurveyRoute: typeof AdminEventSurveyRoute
+  AdminInitiativeRoute: typeof AdminInitiativeRoute
+  AdminInitiativeSurveyRoute: typeof AdminInitiativeSurveyRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminMembersRoute: typeof AdminMembersRoute
+  AdminPartnersRoute: typeof AdminPartnersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminChatbotRoute: AdminChatbotRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
+  AdminEventSurveyRoute: AdminEventSurveyRoute,
+  AdminInitiativeRoute: AdminInitiativeRoute,
+  AdminInitiativeSurveyRoute: AdminInitiativeSurveyRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminMembersRoute: AdminMembersRoute,
+  AdminPartnersRoute: AdminPartnersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface AttendanceManagementSystemRouteChildren {
   AttendanceManagementSystemLoginRoute: typeof AttendanceManagementSystemLoginRoute
   AttendanceManagementSystemIndexRoute: typeof AttendanceManagementSystemIndexRoute
@@ -1362,6 +1477,7 @@ const LearningManagementSystemRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
   EventSurveyRoute: EventSurveyRoute,
@@ -1373,16 +1489,11 @@ const rootRouteChildren: RootRouteChildren = {
   RegistrationRoute: RegistrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,
-  AdminEventSurveyRoute: AdminEventSurveyRoute,
-  AdminInitiativeRoute: AdminInitiativeRoute,
-  AdminInitiativeSurveyRoute: AdminInitiativeSurveyRoute,
-  AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,
   InitiativeClaimRoute: InitiativeClaimRoute,
   NewsIdRoute: NewsIdRoute,
   ResourcesAiToolsRoute: ResourcesAiToolsRoute,
-  AdminIndexRoute: AdminIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
