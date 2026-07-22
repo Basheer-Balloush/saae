@@ -95,7 +95,7 @@ export function EventSurveyDashboard() {
           </Button>
           <Button onClick={exportXlsx} disabled={exporting} aria-label="تنزيل ملف Excel">
             <Download className="h-4 w-4 ms-2" /> {exporting ? "جارٍ التصدير..." : "تنزيل Excel"}
-            <Download className="h-4 w-4 ms-2" /> تنزيل CSV
+            
           </Button>
         </div>
       </div>
