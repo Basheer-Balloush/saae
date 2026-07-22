@@ -1,91 +1,97 @@
+## Scope
 
-## Current state (verified)
+Convert the two remaining CSV exports in the admin dashboard to real `.xlsx` workbooks, using the same `exceljs` library the enrollment-requests export already uses. Introduce one shared helper so all admin exports use consistent formatting, filenames, MIME type, and formula-injection protection.
 
-- **Leads** live inside `AdminChatbotSection.tsx` as the `"leads"` subtab (`LeadsPanel`), backed by `listLeads` in `src/lib/admin-chat.functions.ts` reading `public.individual_leads` and `public.company_leads`. Filters/pagination are minimal (single fetch, client-side render).
-- **Form submissions** live in two hardcoded admin routes:
-  - `/admin/initiative-survey` → `src/routes/admin.initiative-survey.tsx` → `public.initiative_survey_responses`
-  - `/admin/event-survey` → `src/routes/admin.event-survey.tsx` → `public.event_survey_responses`
-  Each has its own table, search, filters, detail modal, CSV/Excel export.
-- Sidebar (`src/components/admin/AdminSidebar.tsx`) already has a "Forms" group with the two surveys hardcoded as children, and a "Chatbot" leaf.
-- Admin routes are file-based under `src/routes/admin.*.tsx`. Auth gate is `requireAdminBeforeLoad` (`admin` or `lms_admin`) — reuse as-is.
-- No `forms` registry table exists. No shared submissions table. Every form today = one dedicated table + one bespoke admin page.
+## Discovery result
 
-## Assumption about "dynamic form tabs"
+Every admin export entry point:
 
-The spec asks new future forms to appear automatically. Since each existing form is a bespoke table + page (no admin form-builder that persists a schema), truly generic auto-discovery is not achievable without building a form-builder — out of scope. I will make the tab list **data-driven from a single in-code registry** (`src/lib/admin-forms-registry.ts`) so adding a future form = one entry + its page component, no sidebar/route edits. Please flag if you instead want me to design a `public.admin_forms` metadata table now.
+1. `src/components/admin/crm/InitiativeSurveyDashboard.tsx` — `downloadCSV` button "تنزيل CSV" → **CSV, needs conversion**.
+2. `src/components/admin/crm/EventSurveyDashboard.tsx` — `downloadCSV` button "تنزيل CSV" → **CSV, needs conversion**.
+3. `src/routes/learning-management-system.admin.enrollment-requests.tsx` — `exportXlsx` → **already `.xlsx` via `exceljs`**. Will be refactored to use the shared helper for consistency (same output, same filters, no behavior change).
+
+No other admin export buttons, shared CSV utilities, server-side CSV routes, `text/csv` MIME usage, or CSV translation keys exist. `exceljs` is already a project dependency (pinned in `package.json` overrides). No new dependency needed.
+
+Data scope today: both survey dashboards fetch all rows via `supabase` under existing admin RLS. Scope stays identical — no filters, sort, or pagination exist on those pages, so the export continues to cover the full authorized result set in the current `created_at DESC` order.
 
 ## Changes
 
-### 1. Sidebar: introduce CRM group, remove Leads from Chatbot
-`src/components/admin/AdminSidebar.tsx`:
-```
-CRM (Users icon)
-  ├── Leads (submenu handled inside the CRM pages, or as sub-children)
-  │     ├── Individuals  → /admin/crm/leads/individuals
-  │     └── Companies    → /admin/crm/leads/companies
-  └── Forms
-        ├── Initiative Survey → /admin/crm/forms/initiative-survey
-        └── Project Survey    → /admin/crm/forms/event-survey
-```
-Remove the old top-level "Forms" group. Keep Chatbot leaf. Nav children generated from the forms registry (`.map`) so future forms appear automatically.
+### 1. New shared helper — `src/lib/admin-xlsx-export.ts`
 
-### 2. New routes (file-based)
-- `src/routes/admin.crm.tsx` — layout `<Outlet />` (guarded, noindex).
-- `src/routes/admin.crm.index.tsx` — redirects to `/admin/crm/leads/individuals`.
-- `src/routes/admin.crm.leads.tsx` — layout with Individuals / Companies tabs.
-- `src/routes/admin.crm.leads.individuals.tsx` — extracts the individual-leads table from `LeadsPanel`.
-- `src/routes/admin.crm.leads.companies.tsx` — extracts the company-leads table from `LeadsPanel`.
-- `src/routes/admin.crm.forms.tsx` — layout listing form tabs from registry.
-- `src/routes/admin.crm.forms.index.tsx` — redirects to first registry entry.
-- `src/routes/admin.crm.forms.$formSlug.tsx` — resolves slug → registry entry → renders that form's dashboard component; `notFound()` for unknown slug.
+Single typed utility used by every admin export.
 
-### 3. Extract reusable pieces
-- Move the individual/company lead tables out of `AdminChatbotSection.tsx` into `src/components/admin/crm/IndividualLeadsTable.tsx` and `CompanyLeadsTable.tsx` (same query via `listLeads`, same columns/actions — pure lift). Remove the `"leads"` subtab from `AdminChatbotSection` and its translation strings.
-- Extract the survey dashboard bodies from `admin.initiative-survey.tsx` / `admin.event-survey.tsx` into `src/components/admin/crm/InitiativeSurveyDashboard.tsx` and `EventSurveyDashboard.tsx` (same queries, filters, exports, modals). Old route files become thin redirects to the new CRM URL.
+- `exportRowsToXlsx<T>({ filenameBase, sheetName, rtl, columns, rows })`:
+  - `columns: { header: string; key: string; width?: number; type?: "text" | "number" | "date" | "boolean"; get: (row: T) => unknown }[]`
+  - Builds workbook with `exceljs`, adds one worksheet, bold header row, `views: [{ rightToLeft: rtl }]`, per-column width (default 22, cap 60), and number format `yyyy-mm-dd hh:mm` for date columns.
+  - Writes cell values by declared type: numbers as numbers, booleans as `Yes/No` (or `نعم/لا` when `rtl`), dates as `Date` objects, arrays joined with `", "`, `null`/`undefined` as `""`, objects via `JSON.stringify` (last-resort — not used by current callers).
+  - **Formula-injection guard** on every text cell: if the string starts with `=`, `+`, `-`, `@`, `\t`, or `\r`, prefix a single `'` and force `cell.value = { text: safe }` so Excel treats it as plain text. Numeric/date/boolean columns skip the guard so legitimate negatives stay numeric.
+  - Header row emitted even when `rows.length === 0`.
+  - Blob type `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`.
+- `buildXlsxFilename(base: string)`: sanitizes `base` to `[A-Za-z0-9._-]`, appends `_YYYY-MM-DD_HH-mm.xlsx` in local time, returns `<base>_<ts>.xlsx`. Used for all admin exports.
+- `triggerBlobDownload(blob, filename)`: shared anchor-click + `URL.revokeObjectURL` helper.
 
-### 4. Forms registry
-`src/lib/admin-forms-registry.ts`:
-```ts
-export type AdminFormEntry = {
-  slug: string;                       // URL segment
-  labelAr: string; labelEn: string;
-  Component: React.ComponentType;     // dashboard renderer
-};
-export const ADMIN_FORMS: AdminFormEntry[] = [
-  { slug: "initiative-survey", labelAr: "استبيان المبادرة", labelEn: "Initiative Survey", Component: InitiativeSurveyDashboard },
-  { slug: "event-survey",      labelAr: "استبيان المشاريع", labelEn: "Project Survey",    Component: EventSurveyDashboard },
-];
-```
-Sidebar Forms children and `$formSlug` route both iterate this list.
+Kept small and typed; no server round-trip (matches existing client-side pattern under admin RLS).
 
-### 5. Redirects (no broken bookmarks)
-Old routes → new CRM URLs via `beforeLoad: () => { throw redirect({ to: "..." }) }`:
-- `/admin/initiative-survey` → `/admin/crm/forms/initiative-survey`
-- `/admin/event-survey` → `/admin/crm/forms/event-survey`
-- Dashboard cards in `admin.dashboard.tsx` updated to new URLs.
-- `AdminHeader` TITLES map gets the new paths.
+### 2. `src/components/admin/crm/InitiativeSurveyDashboard.tsx`
 
-### 6. Permissions & data
-- Every new route uses `requireAdminBeforeLoad` — identical gate.
-- No DB migration. No table rename. No data movement. `listLeads`, `individual_leads`, `company_leads`, `initiative_survey_responses`, `event_survey_responses` untouched.
+- Replace `downloadCSV` with `exportXlsx` calling the shared helper.
+- Add `exporting` state; disable button while running; toasts for success/empty/error in Arabic.
+- Column config (order preserved from current CSV, headers switched to the Arabic labels already used in the visible table):
+  1. التاريخ (`created_at`, date)
+  2. الاسم (text)
+  3. الهاتف (text — leading-zero safe)
+  4. البريد (text)
+  5. العنوان, الاختصاص, نمط الاشتراك (mapped through `SUB_LABEL`)
+  6. مبلغ التبرّع (number)
+  7. الوضع, الدافع
+  8. الالتزام (number)
+  9. الجهاز, الطريقة, العائق, الاهتمامات (array join), علاقته بالـAI, أدوات استخدمها, سمع من, ملاحظات
+- Button label: "تنزيل Excel"; sheet name: "استبيان المبادرة"; filename base: `initiative-survey`.
+- Empty-result: still generates a workbook with headers (spec requirement) and shows an info toast.
 
-## Files touched
+### 3. `src/components/admin/crm/EventSurveyDashboard.tsx`
 
-Created:
-- `src/routes/admin.crm.tsx`, `admin.crm.index.tsx`, `admin.crm.leads.tsx`, `admin.crm.leads.individuals.tsx`, `admin.crm.leads.companies.tsx`, `admin.crm.forms.tsx`, `admin.crm.forms.index.tsx`, `admin.crm.forms.$formSlug.tsx`
-- `src/components/admin/crm/IndividualLeadsTable.tsx`, `CompanyLeadsTable.tsx`, `InitiativeSurveyDashboard.tsx`, `EventSurveyDashboard.tsx`
-- `src/lib/admin-forms-registry.ts`
+- Same treatment: `exportXlsx` via shared helper, `exporting` state, disabled-while-running, toasts.
+- Preserve current CSV column order and headers, but in Arabic to match the visible dashboard.
+- Sheet name: "استبيان المشاريع"; filename base: `event-survey`.
 
-Modified:
-- `src/components/admin/AdminSidebar.tsx` — add CRM group from registry, drop old Forms group
-- `src/components/admin/AdminChatbotSection.tsx` — remove Leads subtab + strings
-- `src/routes/admin.initiative-survey.tsx`, `admin.event-survey.tsx` — replaced with redirect stubs
-- `src/routes/admin.dashboard.tsx` — updated card URLs
-- `src/components/admin/AdminHeader.tsx` — TITLES entries for new paths
+### 4. `src/routes/learning-management-system.admin.enrollment-requests.tsx`
+
+- Refactor `exportXlsx` to call the shared helper (columns include the current 7 base columns + dynamic form-field columns). Same query, same filter (`selectedCourseId`), same values.
+- Filename: `enrollment-requests-<sanitized-course-slug>_<ts>.xlsx` via `buildXlsxFilename`; sheet name unchanged.
+- Button label stays "تصدير Excel" / "Export Excel".
+- Behavior otherwise identical (still disabled via `exporting`, still shows the same toasts).
+
+## Explicit non-changes
+
+- No changes to RLS, server functions, database, or public-site pages.
+- No changes to LMS student/instructor exports (none exist).
+- No changes to `AdminChatbotSection`, `LeadsView`, news/members/partners pages — none of them expose an export button.
+- No new dependency (uses installed `exceljs`).
+
+## Technical notes
+
+- `exceljs` runs client-side; matches current architecture and stays under Cloudflare Workers' constraints (we never bundle it into SSR-only paths).
+- Formula-injection guard uses `cell.value = { text: safe }` (ExcelJS string form) so the leading apostrophe stays literal in the cell, not visible.
+- Dates use JS `Date` objects with `numFmt = "yyyy-mm-dd hh:mm"` so Excel treats them as real dates.
+- Phones/IDs marked `type: "text"` prevent leading-zero loss.
+- Column widths clamped between 12 and 60.
+
+## Files changed
+
+- `src/lib/admin-xlsx-export.ts` (new)
+- `src/components/admin/crm/InitiativeSurveyDashboard.tsx`
+- `src/components/admin/crm/EventSurveyDashboard.tsx`
+- `src/routes/learning-management-system.admin.enrollment-requests.tsx` (refactor to shared helper)
 
 ## Verification
-- `bunx tsgo --noEmit`
-- Manual: visit `/admin/crm/leads/individuals`, `/admin/crm/leads/companies`, `/admin/crm/forms/initiative-survey`, `/admin/crm/forms/event-survey`, unknown slug (404), old URLs (redirect), Chatbot no longer shows Leads, exports/filters still work, RTL/EN sidebar labels correct.
 
-## Open question
-Confirm the in-code forms registry is acceptable (fast, type-safe, no DB). If you need admins to create forms from the UI and have new tabs appear without a code change, that's a separate form-builder feature — say the word and I'll plan it.
+- `bunx tsgo --noEmit`.
+- Manual smoke test on `/admin/crm/forms/initiative-survey` and `/admin/crm/forms/event-survey`: click export, confirm downloaded `.xlsx` opens without repair prompt, headers correct, Arabic renders, dates are real Excel dates, phone leading zeros preserved, `=SUM(1,1)` inserted into a free-text field appears as literal text.
+- Re-test enrollment-requests export to confirm the refactor changed nothing user-visible.
+
+## Assumptions
+
+- The two survey dashboards intentionally have no filters/search/pagination today, so "export the full authorized result set" equals the current fetch — no new query surface needed.
+- No test suite exists for these routes; no new tests added (matches project convention).
+- Arabic-first labels for the survey exports match the dashboards' Arabic-only UI; enrollment-requests keeps its bilingual `ar` branch.
