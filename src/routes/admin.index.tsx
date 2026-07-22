@@ -820,10 +820,11 @@ function NewsForm({
         toast.success(labels.created);
       }
       onSaved();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(toUserMessage(err));
     } finally {
       setSaving(false);
+      submitInFlightRef.current = false;
     }
   };
 
