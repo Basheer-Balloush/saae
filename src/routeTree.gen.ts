@@ -49,6 +49,7 @@ import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminInitiativeSurveyRouteImport } from './routes/admin.initiative-survey'
 import { Route as AdminInitiativeRouteImport } from './routes/admin.initiative'
+import { Route as AdminFormsRouteImport } from './routes/admin.forms'
 import { Route as AdminEventSurveyRouteImport } from './routes/admin.event-survey'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCrmRouteImport } from './routes/admin.crm'
@@ -56,6 +57,7 @@ import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system.student.index'
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
 import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system.admin.index'
+import { Route as AdminFormsIndexRouteImport } from './routes/admin.forms.index'
 import { Route as AdminCrmIndexRouteImport } from './routes/admin.crm.index'
 import { Route as LearningManagementSystemStudentRequestsRouteImport } from './routes/learning-management-system.student.requests'
 import { Route as LearningManagementSystemInstructorsIdRouteImport } from './routes/learning-management-system.instructors.$id'
@@ -69,6 +71,7 @@ import { Route as LearningManagementSystemAdminEnrollmentRequestsRouteImport } f
 import { Route as LearningManagementSystemAdminCouponsRouteImport } from './routes/learning-management-system.admin.coupons'
 import { Route as LearningManagementSystemAdminAttendanceLinkRouteImport } from './routes/learning-management-system.admin.attendance-link'
 import { Route as LearningManagementSystemAdminAnalyticsRouteImport } from './routes/learning-management-system.admin.analytics'
+import { Route as AdminFormsNewRouteImport } from './routes/admin.forms.new'
 import { Route as AdminCrmLeadsRouteImport } from './routes/admin.crm.leads'
 import { Route as AdminCrmFormsRouteImport } from './routes/admin.crm.forms'
 import { Route as AdminCrmFormsIndexRouteImport } from './routes/admin.crm.forms.index'
@@ -79,6 +82,7 @@ import { Route as LearningManagementSystemStudentQuizCourseIdRouteImport } from 
 import { Route as LearningManagementSystemStudentPlayerCourseIdRouteImport } from './routes/learning-management-system.student.player.$courseId'
 import { Route as LearningManagementSystemInstructorCoursesIdRouteImport } from './routes/learning-management-system.instructor.courses.$id'
 import { Route as LearningManagementSystemInstructorAssignmentsCourseIdRouteImport } from './routes/learning-management-system.instructor.assignments.$courseId'
+import { Route as AdminFormsFormIdEditRouteImport } from './routes/admin.forms.$formId.edit'
 import { Route as AdminCrmLeadsIndividualsRouteImport } from './routes/admin.crm.leads.individuals'
 import { Route as AdminCrmLeadsCompaniesRouteImport } from './routes/admin.crm.leads.companies'
 import { Route as AdminCrmFormsFormSlugRouteImport } from './routes/admin.crm.forms.$formSlug'
@@ -300,6 +304,11 @@ const AdminInitiativeRoute = AdminInitiativeRouteImport.update({
   path: '/initiative',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminFormsRoute = AdminFormsRouteImport.update({
+  id: '/forms',
+  path: '/forms',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminEventSurveyRoute = AdminEventSurveyRouteImport.update({
   id: '/event-survey',
   path: '/event-survey',
@@ -338,6 +347,11 @@ const LearningManagementSystemAdminIndexRoute =
     path: '/',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const AdminFormsIndexRoute = AdminFormsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminFormsRoute,
+} as any)
 const AdminCrmIndexRoute = AdminCrmIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -415,6 +429,11 @@ const LearningManagementSystemAdminAnalyticsRoute =
     path: '/analytics',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const AdminFormsNewRoute = AdminFormsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminFormsRoute,
+} as any)
 const AdminCrmLeadsRoute = AdminCrmLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -470,6 +489,11 @@ const LearningManagementSystemInstructorAssignmentsCourseIdRoute =
     path: '/assignments/$courseId',
     getParentRoute: () => LearningManagementSystemInstructorRoute,
   } as any)
+const AdminFormsFormIdEditRoute = AdminFormsFormIdEditRouteImport.update({
+  id: '/$formId/edit',
+  path: '/$formId/edit',
+  getParentRoute: () => AdminFormsRoute,
+} as any)
 const AdminCrmLeadsIndividualsRoute =
   AdminCrmLeadsIndividualsRouteImport.update({
     id: '/individuals',
@@ -506,6 +530,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm': typeof AdminCrmRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
+  '/admin/forms': typeof AdminFormsRouteWithChildren
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
@@ -534,6 +559,7 @@ export interface FileRoutesByFullPath {
   '/news/': typeof NewsIndexRoute
   '/admin/crm/forms': typeof AdminCrmFormsRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteWithChildren
+  '/admin/forms/new': typeof AdminFormsNewRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
@@ -547,12 +573,14 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/instructors/$id': typeof LearningManagementSystemInstructorsIdRoute
   '/learning-management-system/student/requests': typeof LearningManagementSystemStudentRequestsRoute
   '/admin/crm/': typeof AdminCrmIndexRoute
+  '/admin/forms/': typeof AdminFormsIndexRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRoute
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRoute
+  '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
@@ -601,6 +629,7 @@ export interface FileRoutesByTo {
   '/learning-management-system': typeof LearningManagementSystemIndexRoute
   '/news': typeof NewsIndexRoute
   '/admin/crm/leads': typeof AdminCrmLeadsRouteWithChildren
+  '/admin/forms/new': typeof AdminFormsNewRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
@@ -614,12 +643,14 @@ export interface FileRoutesByTo {
   '/learning-management-system/instructors/$id': typeof LearningManagementSystemInstructorsIdRoute
   '/learning-management-system/student/requests': typeof LearningManagementSystemStudentRequestsRoute
   '/admin/crm': typeof AdminCrmIndexRoute
+  '/admin/forms': typeof AdminFormsIndexRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentIndexRoute
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRoute
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRoute
+  '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
@@ -649,6 +680,7 @@ export interface FileRoutesById {
   '/admin/crm': typeof AdminCrmRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
+  '/admin/forms': typeof AdminFormsRouteWithChildren
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
@@ -677,6 +709,7 @@ export interface FileRoutesById {
   '/news/': typeof NewsIndexRoute
   '/admin/crm/forms': typeof AdminCrmFormsRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteWithChildren
+  '/admin/forms/new': typeof AdminFormsNewRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
@@ -690,12 +723,14 @@ export interface FileRoutesById {
   '/learning-management-system/instructors/$id': typeof LearningManagementSystemInstructorsIdRoute
   '/learning-management-system/student/requests': typeof LearningManagementSystemStudentRequestsRoute
   '/admin/crm/': typeof AdminCrmIndexRoute
+  '/admin/forms/': typeof AdminFormsIndexRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRoute
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRoute
+  '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
@@ -726,6 +761,7 @@ export interface FileRouteTypes {
     | '/admin/crm'
     | '/admin/dashboard'
     | '/admin/event-survey'
+    | '/admin/forms'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
@@ -754,6 +790,7 @@ export interface FileRouteTypes {
     | '/news/'
     | '/admin/crm/forms'
     | '/admin/crm/leads'
+    | '/admin/forms/new'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
@@ -767,12 +804,14 @@ export interface FileRouteTypes {
     | '/learning-management-system/instructors/$id'
     | '/learning-management-system/student/requests'
     | '/admin/crm/'
+    | '/admin/forms/'
     | '/learning-management-system/admin/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/student/'
     | '/admin/crm/forms/$formSlug'
     | '/admin/crm/leads/companies'
     | '/admin/crm/leads/individuals'
+    | '/admin/forms/$formId/edit'
     | '/learning-management-system/instructor/assignments/$courseId'
     | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/student/player/$courseId'
@@ -821,6 +860,7 @@ export interface FileRouteTypes {
     | '/learning-management-system'
     | '/news'
     | '/admin/crm/leads'
+    | '/admin/forms/new'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
@@ -834,12 +874,14 @@ export interface FileRouteTypes {
     | '/learning-management-system/instructors/$id'
     | '/learning-management-system/student/requests'
     | '/admin/crm'
+    | '/admin/forms'
     | '/learning-management-system/admin'
     | '/learning-management-system/instructor'
     | '/learning-management-system/student'
     | '/admin/crm/forms/$formSlug'
     | '/admin/crm/leads/companies'
     | '/admin/crm/leads/individuals'
+    | '/admin/forms/$formId/edit'
     | '/learning-management-system/instructor/assignments/$courseId'
     | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/student/player/$courseId'
@@ -868,6 +910,7 @@ export interface FileRouteTypes {
     | '/admin/crm'
     | '/admin/dashboard'
     | '/admin/event-survey'
+    | '/admin/forms'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
@@ -896,6 +939,7 @@ export interface FileRouteTypes {
     | '/news/'
     | '/admin/crm/forms'
     | '/admin/crm/leads'
+    | '/admin/forms/new'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
@@ -909,12 +953,14 @@ export interface FileRouteTypes {
     | '/learning-management-system/instructors/$id'
     | '/learning-management-system/student/requests'
     | '/admin/crm/'
+    | '/admin/forms/'
     | '/learning-management-system/admin/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/student/'
     | '/admin/crm/forms/$formSlug'
     | '/admin/crm/leads/companies'
     | '/admin/crm/leads/individuals'
+    | '/admin/forms/$formId/edit'
     | '/learning-management-system/instructor/assignments/$courseId'
     | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/student/player/$courseId'
@@ -1234,6 +1280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInitiativeRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/forms': {
+      id: '/admin/forms'
+      path: '/forms'
+      fullPath: '/admin/forms'
+      preLoaderRoute: typeof AdminFormsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/event-survey': {
       id: '/admin/event-survey'
       path: '/event-survey'
@@ -1282,6 +1335,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/learning-management-system/admin/'
       preLoaderRoute: typeof LearningManagementSystemAdminIndexRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
+    }
+    '/admin/forms/': {
+      id: '/admin/forms/'
+      path: '/'
+      fullPath: '/admin/forms/'
+      preLoaderRoute: typeof AdminFormsIndexRouteImport
+      parentRoute: typeof AdminFormsRoute
     }
     '/admin/crm/': {
       id: '/admin/crm/'
@@ -1374,6 +1434,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemAdminAnalyticsRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
     }
+    '/admin/forms/new': {
+      id: '/admin/forms/new'
+      path: '/new'
+      fullPath: '/admin/forms/new'
+      preLoaderRoute: typeof AdminFormsNewRouteImport
+      parentRoute: typeof AdminFormsRoute
+    }
     '/admin/crm/leads': {
       id: '/admin/crm/leads'
       path: '/leads'
@@ -1444,6 +1511,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemInstructorAssignmentsCourseIdRouteImport
       parentRoute: typeof LearningManagementSystemInstructorRoute
     }
+    '/admin/forms/$formId/edit': {
+      id: '/admin/forms/$formId/edit'
+      path: '/$formId/edit'
+      fullPath: '/admin/forms/$formId/edit'
+      preLoaderRoute: typeof AdminFormsFormIdEditRouteImport
+      parentRoute: typeof AdminFormsRoute
+    }
     '/admin/crm/leads/individuals': {
       id: '/admin/crm/leads/individuals'
       path: '/individuals'
@@ -1512,11 +1586,28 @@ const AdminCrmRouteWithChildren = AdminCrmRoute._addFileChildren(
   AdminCrmRouteChildren,
 )
 
+interface AdminFormsRouteChildren {
+  AdminFormsNewRoute: typeof AdminFormsNewRoute
+  AdminFormsIndexRoute: typeof AdminFormsIndexRoute
+  AdminFormsFormIdEditRoute: typeof AdminFormsFormIdEditRoute
+}
+
+const AdminFormsRouteChildren: AdminFormsRouteChildren = {
+  AdminFormsNewRoute: AdminFormsNewRoute,
+  AdminFormsIndexRoute: AdminFormsIndexRoute,
+  AdminFormsFormIdEditRoute: AdminFormsFormIdEditRoute,
+}
+
+const AdminFormsRouteWithChildren = AdminFormsRoute._addFileChildren(
+  AdminFormsRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminChatbotRoute: typeof AdminChatbotRoute
   AdminCrmRoute: typeof AdminCrmRouteWithChildren
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEventSurveyRoute: typeof AdminEventSurveyRoute
+  AdminFormsRoute: typeof AdminFormsRouteWithChildren
   AdminInitiativeRoute: typeof AdminInitiativeRoute
   AdminInitiativeSurveyRoute: typeof AdminInitiativeSurveyRoute
   AdminLoginRoute: typeof AdminLoginRoute
@@ -1530,6 +1621,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCrmRoute: AdminCrmRouteWithChildren,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEventSurveyRoute: AdminEventSurveyRoute,
+  AdminFormsRoute: AdminFormsRouteWithChildren,
   AdminInitiativeRoute: AdminInitiativeRoute,
   AdminInitiativeSurveyRoute: AdminInitiativeSurveyRoute,
   AdminLoginRoute: AdminLoginRoute,
