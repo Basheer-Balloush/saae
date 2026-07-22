@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   formInputSchema,
+  formInputWithIdSchema,
   isValidSlug,
   validateSubmission,
   type DynamicForm,
