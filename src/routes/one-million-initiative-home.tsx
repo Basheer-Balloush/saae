@@ -123,7 +123,7 @@ function InitiativeHome() {
   }, [done]);
 
   const sliceTotal = visiblePieData.reduce((s, d) => s + d.value, 0) || 1;
-  const sliceTokens = ["--footer", "--footer-medium", "--footer-light", "--footer-accent"];
+  const sliceTokens = ["--footer-accent", "--footer-medium", "--footer-light", "--footer"];
   const INNER_R = 92;
 
   return (
