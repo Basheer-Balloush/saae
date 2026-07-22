@@ -93,7 +93,8 @@ export function EventSurveyDashboard() {
           <Button variant="outline" onClick={load} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ms-2 ${loading ? "animate-spin" : ""}`} /> تحديث
           </Button>
-          <Button onClick={downloadCSV}>
+          <Button onClick={exportXlsx} disabled={exporting} aria-label="تنزيل ملف Excel">
+            <Download className="h-4 w-4 ms-2" /> {exporting ? "جارٍ التصدير..." : "تنزيل Excel"}
             <Download className="h-4 w-4 ms-2" /> تنزيل CSV
           </Button>
         </div>
