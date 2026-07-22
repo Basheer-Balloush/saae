@@ -58,7 +58,7 @@ const T = {
     descAr: "Description (Arabic, optional)", descEn: "Description (English, optional)",
     submitAr: "Submit label (Arabic)", submitEn: "Submit label (English)",
     slug: "Slug", slugHint: "Lowercase letters, digits, and hyphens only",
-    status: "Status", draft: "Draft", published: "Published",
+    status: "Status", draft: "Draft", published: "Published", hidden: "Hidden", archived: "Archived",
     fields: "Fields", addField: "Add field", noFields: "No fields yet",
     labelAr: "Label (Arabic)", labelEn: "Label (English)",
     required: "Required", type: "Type",
