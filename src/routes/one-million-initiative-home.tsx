@@ -124,7 +124,6 @@ function InitiativeHome() {
 
   const sliceTotal = visiblePieData.reduce((s, d) => s + d.value, 0) || 1;
   const sliceTokens = ["--footer-accent", "--footer-medium", "--footer-light", "--footer"];
-  const sliceColors = ["#a8e6e6", "#3ba4a4", "#7fcfcf", "#2b7f7f"];
   const INNER_R = 92;
 
   return (
@@ -214,9 +213,8 @@ function InitiativeHome() {
                         return (
                         <Cell
                             key={entry.name}
-                            fill={sliceColors[originalIndex % sliceColors.length]}
+                            fill={`var(${sliceTokens[originalIndex % sliceTokens.length]})`}
                           />
-
                         );
                       })}
                     </Pie>
@@ -264,7 +262,7 @@ function InitiativeHome() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {pieData.map((entry, i) => {
                   const pct = ((entry.value / sliceTotal) * 100).toFixed(1);
-                  const tok = sliceColors[i % sliceColors.length];
+                  const tok = sliceTokens[i % sliceTokens.length];
                   return (
                     <div
                       key={entry.name}
@@ -273,7 +271,7 @@ function InitiativeHome() {
                       <div className="flex items-center gap-3">
                         <span
                           className="h-3 w-3 rounded-full ring-2 ring-card"
-                          style={{ background: tok }}
+                          style={{ background: `var(${tok})` }}
                         />
                         <span className="text-sm font-medium text-foreground/90">{entry.name}</span>
                         <span className="ms-auto text-xs text-muted-foreground tabular-nums">{pct}%</span>
