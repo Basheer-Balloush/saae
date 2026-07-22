@@ -47,10 +47,10 @@ export const NEWS_CATEGORY_KEYS = [
 export type NewsCategoryKey = (typeof NEWS_CATEGORY_KEYS)[number];
 
 const EXTRA_LABELS_AR: Record<(typeof EXTRA_NEWS_CATEGORY_KEYS)[number], string> = {
-  society: "المجتمع",
+  society: "عام",
 };
 const EXTRA_LABELS_EN: Record<(typeof EXTRA_NEWS_CATEGORY_KEYS)[number], string> = {
-  society: "Society",
+  society: "General",
 };
 
 export function communityLabel(key: string, lang: "ar" | "en"): string {
