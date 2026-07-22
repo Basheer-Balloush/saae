@@ -67,10 +67,10 @@ export function DynamicFormSubmissions({ formId }: { formId: string }) {
         },
       })),
     ];
-    exportRowsToXlsx({
+    void exportRowsToXlsx<SubRow>({
       rows,
       columns: cols,
-      filename: buildXlsxFilename(form.slug),
+      filenameBase: buildXlsxFilename(form.slug),
       sheetName: form.slug.slice(0, 30),
       rtl: ar,
     });
