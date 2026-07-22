@@ -914,7 +914,7 @@ function NewsForm({
           </div>
 
           <div>
-            <Label>{labels.coverImage}</Label>
+            <Label htmlFor="news-cover">{labels.coverImage}</Label>
             <div className="mt-2 flex items-center gap-4">
               {imageUrl ? (
                 <img src={imageUrl} alt="" className="h-20 w-28 rounded object-cover" />
@@ -923,10 +923,13 @@ function NewsForm({
               )}
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {uploading ? labels.uploading : labels.uploadCover}
+                {coverUploading ? labels.uploading : labels.uploadCover}
                 <input
+                  id="news-cover"
+                  name="cover"
+                  ref={coverInputRef}
                   type="file"
-                  accept="image/*"
+                  accept={IMAGE_MIME.join(",")}
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
@@ -938,21 +941,28 @@ function NewsForm({
                 <button
                   type="button"
                   className="text-xs text-destructive hover:underline"
-                  onClick={() => setImageUrl("")}
+                  onClick={() => {
+                    setImageUrl("");
+                    setCoverError(null);
+                    resetInput(coverInputRef);
+                  }}
                 >
                   {labels.remove}
                 </button>
               )}
             </div>
-            {uploadPct && (
+            {coverPct && (
               <div className="mt-2 max-w-sm">
-                <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} />
+                <UploadProgress percent={coverPct.pct} loaded={coverPct.loaded} total={coverPct.total} label={coverPct.name} />
               </div>
+            )}
+            {coverError && (
+              <p className="mt-2 text-xs text-destructive">{coverError}</p>
             )}
           </div>
 
           <div>
-            <Label>{labels.galleryImages}</Label>
+            <Label htmlFor="news-gallery">{labels.galleryImages}</Label>
             <div className="mt-2 flex flex-wrap gap-3">
               {images.map((url, i) => (
                 <div key={url} className="relative h-20 w-28">
@@ -969,23 +979,33 @@ function NewsForm({
               ))}
               <label className="inline-flex h-20 w-28 cursor-pointer items-center justify-center gap-1 rounded border border-dashed border-input text-xs font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {labels.add}
+                {galleryUploading ? labels.uploading : labels.add}
                 <input
+                  id="news-gallery"
+                  name="gallery[]"
+                  ref={galleryInputRef}
                   type="file"
-                  accept="image/*"
+                  accept={IMAGE_MIME.join(",")}
                   multiple
                   className="hidden"
                   onChange={(e) => {
                     if (e.target.files && e.target.files.length > 0) handleGalleryUpload(e.target.files);
-                    e.target.value = "";
                   }}
                 />
               </label>
             </div>
+            {galleryPct && (
+              <div className="mt-2 max-w-sm">
+                <UploadProgress percent={galleryPct.pct} loaded={galleryPct.loaded} total={galleryPct.total} label={galleryPct.name} />
+              </div>
+            )}
+            {galleryError && (
+              <p className="mt-2 text-xs text-destructive">{galleryError}</p>
+            )}
           </div>
 
           <div>
-            <Label>{labels.videos}</Label>
+            <Label htmlFor="news-video">{labels.videos}</Label>
             <div className="mt-2 space-y-2">
               {videos.map((url, i) => (
                 <div key={url} className="flex items-center gap-3 rounded border border-border p-2">
@@ -1002,20 +1022,31 @@ function NewsForm({
               ))}
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {uploading ? labels.uploading : labels.uploadVideos}
+                {videoUploading ? labels.uploading : labels.uploadVideos}
                 <input
+                  id="news-video"
+                  name="video[]"
+                  ref={videoInputRef}
                   type="file"
-                  accept="video/*"
+                  accept={VIDEO_MIME.join(",")}
                   multiple
                   className="hidden"
                   onChange={(e) => {
                     if (e.target.files && e.target.files.length > 0) handleVideoUpload(e.target.files);
-                    e.target.value = "";
                   }}
                 />
               </label>
             </div>
+            {videoPct && (
+              <div className="mt-2 max-w-sm">
+                <UploadProgress percent={videoPct.pct} loaded={videoPct.loaded} total={videoPct.total} label={videoPct.name} />
+              </div>
+            )}
+            {videoError && (
+              <p className="mt-2 text-xs text-destructive">{videoError}</p>
+            )}
           </div>
+
 
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div>
