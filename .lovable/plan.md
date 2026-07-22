@@ -1,71 +1,46 @@
-# Admin Dashboard — Sidebar Navigation Refactor
+## Scope
+Update only `src/routes/admin.login.tsx`. No changes to auth logic, other login pages, or shared components.
 
-Pure UI/navigation refactor. No changes to backend, routes, RLS, auth, permissions, or business logic. All existing pages remain reachable at their current URLs.
+## Changes
 
-## Current state (verified)
+### 1. Association logo above the form
+- Reuse existing lang/theme-aware logo assets from `src/components/site/Navbar.tsx`: `saae-logo-en-light.png`, `saae-logo-en-dark.png`, `saae-logo-ar-light.png`, `saae-logo-ar-dark.png` (fallback: `saae-logo-horizontal.png`).
+- Pick the matching one based on current `lang` (from `useLang`) and `theme` (from `useTheme`), which are already imported.
+- Render centered above the `<h1>Admin Sign in</h1>` title inside the card, using a responsive height (`h-12 sm:h-14`), `w-auto`, `object-contain`, `mx-auto`, with margin below for spacing.
+- Alt text: `"Syrian Association for AI & Entrepreneurship"` (EN) / `"الجمعية السورية للذكاء الاصطناعي وريادة الأعمال"` (AR).
 
-- Top nav lives inline in `src/routes/admin.index.tsx` as pill buttons switching a local `tab` state between: News, Members, Chatbot, Partners.
-- Sibling admin routes exist as separate pages: `/admin/initiative`, `/admin/initiative-survey`, `/admin/event-survey`.
-- There is **no existing** CRM, Leads, Contacts, Organizations, Activities, Notes, Communication History, Follow-ups, Form Builder, Analytics, Roles, Permissions, or Settings module in the codebase.
+### 2. Show/hide password toggle
+- Add local `const [showPassword, setShowPassword] = useState(false);`.
+- Wrap the password `<Input>` in a `relative` container. Keep the `Input`'s `value`, `onChange`, `required`, `autoComplete="current-password"`, `id="password"` untouched — only flip `type` between `"password"` and `"text"`.
+- Add right-side padding on the input (`pr-10` in LTR, `pl-10` in RTL) so text never overlaps the icon. RTL handled via `dir` from `useLang`: use `pe-10` (logical padding-inline-end) so it works in both directions.
+- Add `Eye` and `EyeOff` icons from `lucide-react` (already used in the file for other icons).
+- Toggle button:
+  - `type="button"` (never submits).
+  - Absolutely positioned to the inline-end (`end-2 top-1/2 -translate-y-1/2`) so it mirrors correctly in RTL.
+  - `aria-pressed={showPassword}`.
+  - `aria-label` bound to translated strings `showPassword` / `hidePassword` added to the `T` dict (EN: "Show password" / "Hide password"; AR: "إظهار كلمة المرور" / "إخفاء كلمة المرور").
+  - Uses shadcn `Button` `variant="ghost" size="icon"` for consistent focus ring + keyboard support.
+  - `tabIndex` left default; visible focus comes from the shared Button component.
 
-## Scope decision (important)
+### Translation additions
+Add `showPassword` and `hidePassword` keys to both `T.en` and `T.ar`.
 
-The spec lists modules that don't exist yet (CRM sub-pages, Form Builder, Roles/Permissions, etc.). This plan is a **navigation architecture refactor only** — it will not invent new feature pages. The sidebar will expose the modules that map to existing functionality; groups the spec mentions that have no backing page will be **omitted** from the sidebar for now (not shown as dead links). When those features get built later, they slot into the already-defined groups.
+### Behavior preserved
+- No changes to `schema`, `onSubmit`, `signInWithPassword` call, redirect `useEffect`, toast messages, submitting state, or Enter-to-submit.
+- Autocomplete stays `current-password`.
+- Password stays hidden on load.
 
-If you want empty placeholder pages for the missing items ("coming soon"), say so and I'll add them — otherwise they stay out.
+## Files changed
+- `src/routes/admin.login.tsx` (only)
 
-## Sidebar module mapping (existing pages only)
+## Verification
+- `bunx tsgo --noEmit` (typecheck).
+- Manual: load `/admin/login`, confirm logo swaps with lang/theme, toggle shows/hides password without clearing it, Enter still submits, invalid creds still toast error, RTL mirrors icon to the left side.
 
-- **Dashboard** → `/admin` (overview: keep News table here as the landing view, or make it a small stats page — see Question below)
-- **News** → `/admin` News tab (extracted into `/admin/news` sub-route OR kept as tab, see Question)
-- **Partners** → Partners tab
-- **Members** → Members tab
-- **Forms** (group)
-  - Initiative Survey → `/admin/initiative-survey`
-  - Event Survey → `/admin/event-survey`
-- **Initiative** → `/admin/initiative` (Million Initiative admin)
-- **Chatbot** → Chatbot tab
-- **Settings** → omitted (no page exists)
-- **CRM** → omitted (no page exists)
+## Assumptions
+- Existing SAAE logos in `src/assets/` are the official association assets (already used site-wide in `Navbar`/`Footer`).
+- No test suite exists for this route; no new tests added.
 
-Order in sidebar: Dashboard, News, Partners, Members, Forms, Initiative, Chatbot.
-
-## Implementation
-
-1. **New `AdminLayout`** at `src/routes/admin.tsx` (parent layout route) rendering `<Outlet />` with:
-   - shadcn `SidebarProvider` + custom `AdminSidebar` component
-   - Minimal top header: sidebar toggle, page title, language switcher, user menu (search/notifications omitted — no backing data)
-   - Content area with automatic offset via SidebarProvider CSS vars
-2. **`AdminSidebar` component** (`src/components/admin/AdminSidebar.tsx`) using shadcn `Sidebar` primitives:
-   - `collapsible="icon"` (72px collapsed / 260px expanded via `--sidebar-width` CSS vars)
-   - Uses `w-[var(--sidebar-width)]` explicit syntax (Tailwind v4 fix)
-   - `localStorage` persistence of collapsed state via controlled `open` prop
-   - Lucide icons per item; tooltip on collapsed hover (built into shadcn `SidebarMenuButton`)
-   - Active state via `useRouterState` pathname match: highlighted bg + start-side accent bar + bold + colored icon
-   - Nested groups (Forms) use `SidebarMenuSub` with smooth expand
-   - Mobile: shadcn Sidebar already renders as Sheet drawer with overlay + auto-close on nav
-3. **Refactor `admin.index.tsx`**:
-   - Remove the inline pill nav
-   - Split the four tab bodies (News, Members, Chatbot, Partners) into their own route files: `admin.news.tsx`, `admin.members.tsx`, `admin.chatbot.tsx`, `admin.partners.tsx` — each imports the existing section components unchanged
-   - `admin.index.tsx` becomes the Dashboard landing (keeps News list as the default view OR simple welcome — see Question)
-   - Auth gate (`useEffect` redirect to `/admin/login`) moves into `admin.tsx` layout so it protects all children
-4. **RTL**: shadcn Sidebar already flips via `dir="rtl"` on `<html>`; verify active-border side uses logical `border-s-*` utilities.
-5. **Styling**: reuse existing design tokens (`--primary`, `--sidebar-*`); no new palette.
-
-## Files touched
-
-- New: `src/routes/admin.tsx`, `src/routes/admin.news.tsx`, `src/routes/admin.members.tsx`, `src/routes/admin.chatbot.tsx`, `src/routes/admin.partners.tsx`, `src/components/admin/AdminSidebar.tsx`, `src/components/admin/AdminHeader.tsx`
-- Modified: `src/routes/admin.index.tsx` (strip nav + tabs, become dashboard landing), `src/routes/admin.initiative.tsx`, `src/routes/admin.initiative-survey.tsx`, `src/routes/admin.event-survey.tsx` (remove their own top headers so they render inside the shared layout)
-- Untouched: all business logic, form dialogs, server functions, Supabase calls, `admin.login.tsx`, LMS admin routes (separate area)
-
-## Out of scope (explicit)
-
-- No CRM / Leads / Contacts / Organizations / Activities / Notes / Communication / Follow-ups module
-- No Form Builder, Analytics, Published Forms, Responses pages
-- No Roles / Permissions / System Settings UI
-- LMS admin (`/learning-management-system/admin/*`) is a separate area — untouched
-
-## Question before I build
-
-1. **Dashboard landing** — should `/admin` become (a) a small stats overview page (news count, members count, etc.), or (b) keep it as the News list (rename sidebar "News" to point to `/admin` and drop "Dashboard")? I'll default to **(b)** — cleanest with zero new feature work — unless you say otherwise.
-2. **Placeholder pages** for CRM / Forms Builder / Settings — add empty "coming soon" pages so the sidebar groups from your spec are visible, or omit them entirely? Default: **omit**.
+## Explicit non-changes
+- `src/routes/attendance-management-system.login.tsx`, `src/routes/learning-management-system.login.tsx`, `learning-management-system.signup.tsx`, `learning-management-system.forgot-password.tsx`, `learning-management-system.reset-password.tsx` — untouched.
+- No backend, Supabase config, RLS, or auth middleware changes.

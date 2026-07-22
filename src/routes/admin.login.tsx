@@ -9,7 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Globe, Sun, Moon } from "lucide-react";
+import { Loader2, Globe, Sun, Moon, Eye, EyeOff } from "lucide-react";
+import logoEnLight from "@/assets/saae-logo-en-light.png";
+import logoEnDark from "@/assets/saae-logo-en-dark.png";
+import logoArLight from "@/assets/saae-logo-ar-light.png";
+import logoArDark from "@/assets/saae-logo-ar-dark.png";
+import logoFallback from "@/assets/saae-logo-horizontal.png";
 
 export const Route = createFileRoute("/admin/login")({
   head: () => ({
