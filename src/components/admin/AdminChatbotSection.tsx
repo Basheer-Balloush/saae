@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toUserMessage } from "@/lib/safe-error";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Loader2, Trash2, Upload, Eye, RefreshCw, MessageSquare, Users, Building2, BookOpen, BarChart3 } from "lucide-react";
+import { Loader2, Trash2, Upload, Eye, MessageSquare, BookOpen, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
