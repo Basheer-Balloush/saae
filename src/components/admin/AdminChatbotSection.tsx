@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toUserMessage } from "@/lib/safe-error";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Loader2, Trash2, Upload, Eye, RefreshCw, MessageSquare, Users, Building2, BookOpen, BarChart3 } from "lucide-react";
+import { Loader2, Trash2, Upload, Eye, MessageSquare, BookOpen, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,13 +18,13 @@ import {
   getConversationMessages,
   deleteConversation,
   getChatStats,
-  listLeads,
+  
   listKnowledgeDocuments,
   addKnowledgeText,
   deleteKnowledgeDocument,
 } from "@/lib/admin-chat.functions";
 
-type SubTab = "stats" | "conversations" | "leads" | "knowledge";
+type SubTab = "stats" | "conversations" | "knowledge";
 
 const T = {
   ar: {
@@ -142,7 +142,6 @@ export function AdminChatbotSection({ lang }: { lang: "ar" | "en" }) {
   const tabs: Array<{ key: SubTab; label: string; icon: typeof BarChart3 }> = [
     { key: "stats", label: tr.stats, icon: BarChart3 },
     { key: "conversations", label: tr.conversations, icon: MessageSquare },
-    { key: "leads", label: tr.leads, icon: Users },
     { key: "knowledge", label: tr.knowledge, icon: BookOpen },
   ];
 
@@ -171,7 +170,7 @@ export function AdminChatbotSection({ lang }: { lang: "ar" | "en" }) {
 
       {sub === "stats" && <StatsPanel tr={tr} />}
       {sub === "conversations" && <ConversationsPanel tr={tr} lang={lang} />}
-      {sub === "leads" && <LeadsPanel tr={tr} lang={lang} />}
+      
       {sub === "knowledge" && <KnowledgePanel tr={tr} lang={lang} />}
     </div>
   );
@@ -330,159 +329,6 @@ function ConversationsPanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "
   );
 }
 
-function LeadsPanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "en" }) {
-  const fetchLeads = useServerFn(listLeads);
-  const fetchMsgs = useServerFn(getConversationMessages);
-  const [data, setData] = useState<Awaited<ReturnType<typeof listLeads>> | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"ind" | "comp">("ind");
-  const [openConvId, setOpenConvId] = useState<string | null>(null);
-  const [msgs, setMsgs] = useState<Message[]>([]);
-  const [msgsLoading, setMsgsLoading] = useState(false);
-
-  useEffect(() => {
-    fetchLeads().then(setData).catch((e) => toast.error(toUserMessage(e))).finally(() => setLoading(false));
-  }, [fetchLeads]);
-
-  const openChat = (conversationId: string | null | undefined) => {
-    if (!conversationId) {
-      toast.error(tr.noChatLinked);
-      return;
-    }
-    setOpenConvId(conversationId);
-    setMsgsLoading(true);
-    fetchMsgs({ data: { conversationId } })
-      .then((r) => setMsgs(r.messages as Message[]))
-      .catch((e) => toast.error(toUserMessage(e)))
-      .finally(() => setMsgsLoading(false));
-  };
-
-  if (loading) return <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />;
-  if (!data) return null;
-
-  return (
-    <div>
-      <div className="mb-4 inline-flex items-center gap-1 rounded-full border border-border bg-card p-1">
-        <button onClick={() => setTab("ind")} className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm ${tab === "ind" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
-          <Users className="h-4 w-4" /> {tr.individuals} ({data.individuals.length})
-        </button>
-        <button onClick={() => setTab("comp")} className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm ${tab === "comp" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
-          <Building2 className="h-4 w-4" /> {tr.companies} ({data.companies.length})
-        </button>
-      </div>
-
-      {tab === "ind" ? (
-        <div className="overflow-x-auto rounded-xl border border-border bg-card">
-          <table className="w-full min-w-[820px] text-sm">
-            <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 text-start">{tr.name}</th>
-                <th className="px-3 py-2 text-start">{tr.email}</th>
-                <th className="px-3 py-2 text-start">{tr.phone}</th>
-                <th className="px-3 py-2 text-start">{tr.specialty}</th>
-                <th className="px-3 py-2 text-start">{tr.description}</th>
-                <th className="px-3 py-2 text-start">{tr.date}</th>
-                <th className="px-3 py-2 text-end">{tr.actions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.individuals.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
-              )}
-              {data.individuals.map((r) => {
-                const convId = (r as { conversation_id?: string | null }).conversation_id ?? null;
-                return (
-                  <tr key={r.id} className="border-t border-border">
-                    <td className="px-3 py-2 font-medium">{r.full_name}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{r.email ?? "—"}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{r.phone ?? "—"}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{r.specialty ?? "—"}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{r.short_description ?? "—"}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}</td>
-                    <td className="px-3 py-2">
-                      <div className="flex justify-end">
-                        <Button size="sm" variant="outline" disabled={!convId} onClick={() => openChat(convId)}>
-                          <MessageSquare className="h-4 w-4" /> {tr.viewChat}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="overflow-x-auto rounded-xl border border-border bg-card">
-          <table className="w-full min-w-[820px] text-sm">
-            <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 text-start">{tr.company}</th>
-                <th className="px-3 py-2 text-start">{tr.field}</th>
-                <th className="px-3 py-2 text-start">{tr.contact}</th>
-                <th className="px-3 py-2 text-start">{tr.email}</th>
-                <th className="px-3 py-2 text-start">{tr.phone}</th>
-                <th className="px-3 py-2 text-start">{tr.date}</th>
-                <th className="px-3 py-2 text-end">{tr.actions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.companies.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
-              )}
-              {data.companies.map((r) => {
-                const convId = (r as { conversation_id?: string | null }).conversation_id ?? null;
-                return (
-                  <tr key={r.id} className="border-t border-border">
-                    <td className="px-3 py-2 font-medium">{r.company_name}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{r.work_field ?? "—"}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{r.contact_name ?? "—"}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{r.contact_email ?? "—"}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{r.contact_phone ?? "—"}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}</td>
-                    <td className="px-3 py-2">
-                      <div className="flex justify-end">
-                        <Button size="sm" variant="outline" disabled={!convId} onClick={() => openChat(convId)}>
-                          <MessageSquare className="h-4 w-4" /> {tr.viewChat}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <Dialog open={!!openConvId} onOpenChange={(o) => !o && setOpenConvId(null)}>
-        <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{tr.conversations}</DialogTitle>
-          </DialogHeader>
-          {msgsLoading ? (
-            <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
-          ) : (
-            <div className="space-y-3">
-              {msgs.map((m) => {
-                const isUser = m.role === "user";
-                return (
-                  <div key={m.id} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm ${
-                      isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-                    }`}>
-                      {m.content || <em className="opacity-60">[{m.role}]</em>}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
 
 type Doc = {
   id: string;
