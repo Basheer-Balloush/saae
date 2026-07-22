@@ -214,8 +214,9 @@ function InitiativeHome() {
                         return (
                         <Cell
                             key={entry.name}
-                            fill={`var(${sliceTokens[originalIndex % sliceTokens.length]})`}
+                            fill={sliceColors[originalIndex % sliceColors.length]}
                           />
+
                         );
                       })}
                     </Pie>
