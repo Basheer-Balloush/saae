@@ -111,7 +111,7 @@ export const formInputBaseSchema = z.object({
   description_en: z.string().max(2000).optional().nullable(),
   submit_label_ar: z.string().trim().min(1).max(80),
   submit_label_en: z.string().trim().min(1).max(80),
-  status: z.enum(["draft", "published"]),
+  status: z.enum(FORM_STATUSES),
   fields: z.array(fieldSchema).max(80),
 });
 
