@@ -1087,7 +1087,7 @@ type MemberRow = {
   display_order: number;
 };
 
-function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar" }) {
+export function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar" }) {
   const [list, setList] = useState<MemberRow[]>([]);
   const [editing, setEditing] = useState<MemberRow | null>(null);
   const [showForm, setShowForm] = useState(false);
