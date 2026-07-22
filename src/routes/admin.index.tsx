@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
 import { toUserMessage } from "@/lib/safe-error";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -562,73 +562,217 @@ function NewsForm({
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
   const [images, setImages] = useState<string[]>(initial?.images ?? []);
   const [videos, setVideos] = useState<string[]>(initial?.videos ?? []);
-  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
+
+  // Per-field upload lanes — each has independent uploading flag, progress, and error.
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
+  type PctState = { pct: number; loaded: number; total: number; name: string } | null;
+  const [coverPct, setCoverPct] = useState<PctState>(null);
+  const [galleryPct, setGalleryPct] = useState<PctState>(null);
+  const [videoPct, setVideoPct] = useState<PctState>(null);
+  const [coverError, setCoverError] = useState<string | null>(null);
+  const [galleryError, setGalleryError] = useState<string | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
+
+  // Per-field input refs — reset value after every terminal state so re-selecting
+  // the same filename retriggers onChange.
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  // Per-field request-ID refs — stale responses cannot commit state.
+  const coverReqIdRef = useRef(0);
+  const galleryReqIdRef = useRef(0);
+  const videoReqIdRef = useRef(0);
+
+  // Synchronous submit guard — blocks double-click before React re-renders.
+  const submitInFlightRef = useRef(false);
+
+  const anyUploading = coverUploading || galleryUploading || videoUploading;
+
+  // Bucket has no server-side MIME/size rules — client validation is authoritative.
+  const IMAGE_MIME = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
+  const IMAGE_EXT = /\.(jpe?g|png|webp|gif)$/i;
+  const VIDEO_MIME = ["video/mp4", "video/webm", "video/quicktime"] as const;
+  const VIDEO_EXT = /\.(mp4|webm|mov)$/i;
+  const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
+  const MAX_VIDEO_BYTES = 200 * 1024 * 1024; // 200 MB
+
+  const resetInput = (ref: React.RefObject<HTMLInputElement | null>) => {
+    if (ref.current) ref.current.value = "";
+  };
+
+  const validateImage = (file: File): string | null => {
+    if (!IMAGE_MIME.includes(file.type as (typeof IMAGE_MIME)[number]) || !IMAGE_EXT.test(file.name)) {
+      return lang === "ar"
+        ? `${file.name}: نوع الصورة غير مسموح (JPG / PNG / WEBP / GIF فقط)`
+        : `${file.name}: unsupported image type (JPG / PNG / WEBP / GIF only)`;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      return lang === "ar"
+        ? `${file.name}: الحجم أكبر من 10 ميجابايت`
+        : `${file.name}: larger than 10 MB`;
+    }
+    return null;
+  };
+
+  const validateVideo = (file: File): string | null => {
+    if (!VIDEO_MIME.includes(file.type as (typeof VIDEO_MIME)[number]) || !VIDEO_EXT.test(file.name)) {
+      return lang === "ar"
+        ? `${file.name}: نوع الفيديو غير مسموح (MP4 / WEBM / MOV فقط)`
+        : `${file.name}: unsupported video type (MP4 / WEBM / MOV only)`;
+    }
+    if (file.size > MAX_VIDEO_BYTES) {
+      return lang === "ar"
+        ? `${file.name}: الحجم أكبر من 200 ميجابايت`
+        : `${file.name}: larger than 200 MB`;
+    }
+    return null;
+  };
 
   const handleCoverUpload = async (file: File) => {
-    setUploading(true);
-    setUploadPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
+    const err = validateImage(file);
+    if (err) {
+      setCoverError(err);
+      toast.error(err);
+      resetInput(coverInputRef);
+      return;
+    }
+    setCoverError(null);
+    const myReq = ++coverReqIdRef.current;
+    setCoverUploading(true);
+    setCoverPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
-      const url = await uploadToBucket(file, "image", (pct, loaded, total) =>
-        setUploadPct({ pct, loaded, total, name: file.name }),
-      );
+      const url = await uploadToBucket(file, "image", (pct, loaded, total) => {
+        if (myReq === coverReqIdRef.current) setCoverPct({ pct, loaded, total, name: file.name });
+      });
+      if (myReq !== coverReqIdRef.current) return; // stale — drop
       setImageUrl(url);
       toast.success(labels.coverUploaded);
-    } catch (err: any) {
-      toast.error(toUserMessage(err));
+    } catch (e: unknown) {
+      if (myReq !== coverReqIdRef.current) return;
+      const msg = toUserMessage(e);
+      setCoverError(msg);
+      toast.error(msg);
     } finally {
-      setUploading(false);
-      setUploadPct(null);
+      if (myReq === coverReqIdRef.current) {
+        setCoverUploading(false);
+        setCoverPct(null);
+      }
+      resetInput(coverInputRef);
     }
   };
 
   const handleGalleryUpload = async (files: FileList) => {
-    setUploading(true);
+    const list = Array.from(files);
+    const rejected = list.map((f) => ({ f, err: validateImage(f) })).filter((x) => x.err);
+    const accepted = list.filter((f) => !validateImage(f));
+    if (rejected.length > 0) {
+      const msg = rejected.map((r) => r.err).join(" · ");
+      setGalleryError(msg);
+      toast.error(msg);
+    } else {
+      setGalleryError(null);
+    }
+    if (accepted.length === 0) {
+      resetInput(galleryInputRef);
+      return;
+    }
+    const myReq = ++galleryReqIdRef.current;
+    setGalleryUploading(true);
+    const uploaded: string[] = [];
+    let failure: string | null = null;
     try {
-      const urls: string[] = [];
-      for (const f of Array.from(files)) {
-        setUploadPct({ pct: 0, loaded: 0, total: f.size, name: f.name });
-        urls.push(
-          await uploadToBucket(f, "image", (pct, loaded, total) =>
-            setUploadPct({ pct, loaded, total, name: f.name }),
-          ),
-        );
+      for (const f of accepted) {
+        if (myReq !== galleryReqIdRef.current) return; // superseded
+        setGalleryPct({ pct: 0, loaded: 0, total: f.size, name: f.name });
+        try {
+          const url = await uploadToBucket(f, "image", (pct, loaded, total) => {
+            if (myReq === galleryReqIdRef.current) setGalleryPct({ pct, loaded, total, name: f.name });
+          });
+          if (myReq !== galleryReqIdRef.current) return;
+          uploaded.push(url);
+        } catch (e: unknown) {
+          failure = `${f.name}: ${toUserMessage(e)}`;
+          break; // retain what succeeded; report the failure
+        }
       }
-      setImages((prev) => [...prev, ...urls]);
-      toast.success(labels.imagesUploaded(urls.length));
-    } catch (err: any) {
-      toast.error(toUserMessage(err));
+      if (myReq !== galleryReqIdRef.current) return;
+      if (uploaded.length > 0) {
+        setImages((prev) => [...prev, ...uploaded]);
+        toast.success(labels.imagesUploaded(uploaded.length));
+      }
+      if (failure) {
+        setGalleryError(failure);
+        toast.error(failure);
+      }
     } finally {
-      setUploading(false);
-      setUploadPct(null);
+      if (myReq === galleryReqIdRef.current) {
+        setGalleryUploading(false);
+        setGalleryPct(null);
+      }
+      resetInput(galleryInputRef);
     }
   };
 
   const handleVideoUpload = async (files: FileList) => {
-    setUploading(true);
+    const list = Array.from(files);
+    const rejected = list.map((f) => ({ f, err: validateVideo(f) })).filter((x) => x.err);
+    const accepted = list.filter((f) => !validateVideo(f));
+    if (rejected.length > 0) {
+      const msg = rejected.map((r) => r.err).join(" · ");
+      setVideoError(msg);
+      toast.error(msg);
+    } else {
+      setVideoError(null);
+    }
+    if (accepted.length === 0) {
+      resetInput(videoInputRef);
+      return;
+    }
+    const myReq = ++videoReqIdRef.current;
+    setVideoUploading(true);
+    const uploaded: string[] = [];
+    let failure: string | null = null;
     try {
-      const urls: string[] = [];
-      for (const f of Array.from(files)) {
-        setUploadPct({ pct: 0, loaded: 0, total: f.size, name: f.name });
-        urls.push(
-          await uploadToBucket(f, "video", (pct, loaded, total) =>
-            setUploadPct({ pct, loaded, total, name: f.name }),
-          ),
-        );
+      for (const f of accepted) {
+        if (myReq !== videoReqIdRef.current) return;
+        setVideoPct({ pct: 0, loaded: 0, total: f.size, name: f.name });
+        try {
+          const url = await uploadToBucket(f, "video", (pct, loaded, total) => {
+            if (myReq === videoReqIdRef.current) setVideoPct({ pct, loaded, total, name: f.name });
+          });
+          if (myReq !== videoReqIdRef.current) return;
+          uploaded.push(url);
+        } catch (e: unknown) {
+          failure = `${f.name}: ${toUserMessage(e)}`;
+          break;
+        }
       }
-      setVideos((prev) => [...prev, ...urls]);
-      toast.success(labels.videosUploaded(urls.length));
-    } catch (err: any) {
-      toast.error(toUserMessage(err));
+      if (myReq !== videoReqIdRef.current) return;
+      if (uploaded.length > 0) {
+        setVideos((prev) => [...prev, ...uploaded]);
+        toast.success(labels.videosUploaded(uploaded.length));
+      }
+      if (failure) {
+        setVideoError(failure);
+        toast.error(failure);
+      }
     } finally {
-      setUploading(false);
-      setUploadPct(null);
+      if (myReq === videoReqIdRef.current) {
+        setVideoUploading(false);
+        setVideoPct(null);
+      }
+      resetInput(videoInputRef);
     }
   };
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitInFlightRef.current || anyUploading) return;
     const parsed = newsSchema.safeParse({
       title_ar: titleAr,
       title_en: titleEn,
@@ -644,6 +788,7 @@ function NewsForm({
       toast.error(parsed.error.issues[0].message);
       return;
     }
+    submitInFlightRef.current = true;
     setSaving(true);
     try {
       const payload = {
@@ -675,10 +820,11 @@ function NewsForm({
         toast.success(labels.created);
       }
       onSaved();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(toUserMessage(err));
     } finally {
       setSaving(false);
+      submitInFlightRef.current = false;
     }
   };
 
@@ -768,7 +914,7 @@ function NewsForm({
           </div>
 
           <div>
-            <Label>{labels.coverImage}</Label>
+            <Label htmlFor="news-cover">{labels.coverImage}</Label>
             <div className="mt-2 flex items-center gap-4">
               {imageUrl ? (
                 <img src={imageUrl} alt="" className="h-20 w-28 rounded object-cover" />
@@ -777,10 +923,13 @@ function NewsForm({
               )}
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {uploading ? labels.uploading : labels.uploadCover}
+                {coverUploading ? labels.uploading : labels.uploadCover}
                 <input
+                  id="news-cover"
+                  name="cover"
+                  ref={coverInputRef}
                   type="file"
-                  accept="image/*"
+                  accept={IMAGE_MIME.join(",")}
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
@@ -792,21 +941,28 @@ function NewsForm({
                 <button
                   type="button"
                   className="text-xs text-destructive hover:underline"
-                  onClick={() => setImageUrl("")}
+                  onClick={() => {
+                    setImageUrl("");
+                    setCoverError(null);
+                    resetInput(coverInputRef);
+                  }}
                 >
                   {labels.remove}
                 </button>
               )}
             </div>
-            {uploadPct && (
+            {coverPct && (
               <div className="mt-2 max-w-sm">
-                <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} />
+                <UploadProgress percent={coverPct.pct} loaded={coverPct.loaded} total={coverPct.total} label={coverPct.name} />
               </div>
+            )}
+            {coverError && (
+              <p className="mt-2 text-xs text-destructive">{coverError}</p>
             )}
           </div>
 
           <div>
-            <Label>{labels.galleryImages}</Label>
+            <Label htmlFor="news-gallery">{labels.galleryImages}</Label>
             <div className="mt-2 flex flex-wrap gap-3">
               {images.map((url, i) => (
                 <div key={url} className="relative h-20 w-28">
@@ -823,23 +979,33 @@ function NewsForm({
               ))}
               <label className="inline-flex h-20 w-28 cursor-pointer items-center justify-center gap-1 rounded border border-dashed border-input text-xs font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {labels.add}
+                {galleryUploading ? labels.uploading : labels.add}
                 <input
+                  id="news-gallery"
+                  name="gallery[]"
+                  ref={galleryInputRef}
                   type="file"
-                  accept="image/*"
+                  accept={IMAGE_MIME.join(",")}
                   multiple
                   className="hidden"
                   onChange={(e) => {
                     if (e.target.files && e.target.files.length > 0) handleGalleryUpload(e.target.files);
-                    e.target.value = "";
                   }}
                 />
               </label>
             </div>
+            {galleryPct && (
+              <div className="mt-2 max-w-sm">
+                <UploadProgress percent={galleryPct.pct} loaded={galleryPct.loaded} total={galleryPct.total} label={galleryPct.name} />
+              </div>
+            )}
+            {galleryError && (
+              <p className="mt-2 text-xs text-destructive">{galleryError}</p>
+            )}
           </div>
 
           <div>
-            <Label>{labels.videos}</Label>
+            <Label htmlFor="news-video">{labels.videos}</Label>
             <div className="mt-2 space-y-2">
               {videos.map((url, i) => (
                 <div key={url} className="flex items-center gap-3 rounded border border-border p-2">
@@ -856,20 +1022,31 @@ function NewsForm({
               ))}
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
                 <Upload className="h-4 w-4" />
-                {uploading ? labels.uploading : labels.uploadVideos}
+                {videoUploading ? labels.uploading : labels.uploadVideos}
                 <input
+                  id="news-video"
+                  name="video[]"
+                  ref={videoInputRef}
                   type="file"
-                  accept="video/*"
+                  accept={VIDEO_MIME.join(",")}
                   multiple
                   className="hidden"
                   onChange={(e) => {
                     if (e.target.files && e.target.files.length > 0) handleVideoUpload(e.target.files);
-                    e.target.value = "";
                   }}
                 />
               </label>
             </div>
+            {videoPct && (
+              <div className="mt-2 max-w-sm">
+                <UploadProgress percent={videoPct.pct} loaded={videoPct.loaded} total={videoPct.total} label={videoPct.name} />
+              </div>
+            )}
+            {videoError && (
+              <p className="mt-2 text-xs text-destructive">{videoError}</p>
+            )}
           </div>
+
 
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div>
@@ -883,7 +1060,8 @@ function NewsForm({
             <Button type="button" variant="outline" onClick={onClose}>
               {labels.cancel}
             </Button>
-            <Button type="submit" disabled={saving || uploading}>
+            <Button type="submit" disabled={saving || anyUploading}>
+
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {initial ? labels.saveChanges : labels.create}
             </Button>
