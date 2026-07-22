@@ -1401,7 +1401,7 @@ async function uploadPartnerLogo(
   return publicUrl;
 }
 
-function PartnersAdmin({ lang }: { lang: "en" | "ar" }) {
+export function PartnersAdmin({ lang }: { lang: "en" | "ar" }) {
   const ar = lang === "ar";
   const [rows, setRows] = useState<PartnerRow[]>([]);
   const [editing, setEditing] = useState<PartnerRow | null>(null);
