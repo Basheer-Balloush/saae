@@ -82,7 +82,6 @@ import { Route as LearningManagementSystemInstructorAssignmentsCourseIdRouteImpo
 import { Route as AdminCrmLeadsIndividualsRouteImport } from './routes/admin.crm.leads.individuals'
 import { Route as AdminCrmLeadsCompaniesRouteImport } from './routes/admin.crm.leads.companies'
 import { Route as AdminCrmFormsFormSlugRouteImport } from './routes/admin.crm.forms.$formSlug'
-import { Route as AdminCrmFormsFormSlugEditRouteImport } from './routes/admin.crm.forms.$formSlug.edit'
 
 const SuperAdminRoute = SuperAdminRouteImport.update({
   id: '/super-admin',
@@ -487,12 +486,6 @@ const AdminCrmFormsFormSlugRoute = AdminCrmFormsFormSlugRouteImport.update({
   path: '/$formSlug',
   getParentRoute: () => AdminCrmFormsRoute,
 } as any)
-const AdminCrmFormsFormSlugEditRoute =
-  AdminCrmFormsFormSlugEditRouteImport.update({
-    id: '/edit',
-    path: '/edit',
-    getParentRoute: () => AdminCrmFormsFormSlugRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -557,7 +550,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
-  '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRouteWithChildren
+  '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRoute
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
@@ -568,7 +561,6 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/crm/forms/': typeof AdminCrmFormsIndexRoute
-  '/admin/crm/forms/$formSlug/edit': typeof AdminCrmFormsFormSlugEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -625,7 +617,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/admin': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentIndexRoute
-  '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRouteWithChildren
+  '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRoute
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
@@ -636,7 +628,6 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/crm/forms': typeof AdminCrmFormsIndexRoute
-  '/admin/crm/forms/$formSlug/edit': typeof AdminCrmFormsFormSlugEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -702,7 +693,7 @@ export interface FileRoutesById {
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
-  '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRouteWithChildren
+  '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRoute
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
@@ -713,7 +704,6 @@ export interface FileRoutesById {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/crm/forms/': typeof AdminCrmFormsIndexRoute
-  '/admin/crm/forms/$formSlug/edit': typeof AdminCrmFormsFormSlugEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -791,7 +781,6 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/crm/forms/'
-    | '/admin/crm/forms/$formSlug/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -859,7 +848,6 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/crm/forms'
-    | '/admin/crm/forms/$formSlug/edit'
   id:
     | '__root__'
     | '/'
@@ -935,7 +923,6 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/crm/forms/'
-    | '/admin/crm/forms/$formSlug/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1478,36 +1465,16 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCrmFormsFormSlugRouteImport
       parentRoute: typeof AdminCrmFormsRoute
     }
-    '/admin/crm/forms/$formSlug/edit': {
-      id: '/admin/crm/forms/$formSlug/edit'
-      path: '/edit'
-      fullPath: '/admin/crm/forms/$formSlug/edit'
-      preLoaderRoute: typeof AdminCrmFormsFormSlugEditRouteImport
-      parentRoute: typeof AdminCrmFormsFormSlugRoute
-    }
   }
 }
 
-interface AdminCrmFormsFormSlugRouteChildren {
-  AdminCrmFormsFormSlugEditRoute: typeof AdminCrmFormsFormSlugEditRoute
-}
-
-const AdminCrmFormsFormSlugRouteChildren: AdminCrmFormsFormSlugRouteChildren = {
-  AdminCrmFormsFormSlugEditRoute: AdminCrmFormsFormSlugEditRoute,
-}
-
-const AdminCrmFormsFormSlugRouteWithChildren =
-  AdminCrmFormsFormSlugRoute._addFileChildren(
-    AdminCrmFormsFormSlugRouteChildren,
-  )
-
 interface AdminCrmFormsRouteChildren {
-  AdminCrmFormsFormSlugRoute: typeof AdminCrmFormsFormSlugRouteWithChildren
+  AdminCrmFormsFormSlugRoute: typeof AdminCrmFormsFormSlugRoute
   AdminCrmFormsIndexRoute: typeof AdminCrmFormsIndexRoute
 }
 
 const AdminCrmFormsRouteChildren: AdminCrmFormsRouteChildren = {
-  AdminCrmFormsFormSlugRoute: AdminCrmFormsFormSlugRouteWithChildren,
+  AdminCrmFormsFormSlugRoute: AdminCrmFormsFormSlugRoute,
   AdminCrmFormsIndexRoute: AdminCrmFormsIndexRoute,
 }
 
