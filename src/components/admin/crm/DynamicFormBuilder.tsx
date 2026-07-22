@@ -101,7 +101,7 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
   const [submitEn, setSubmitEn] = useState(initial?.submit_label_en ?? "Submit");
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(!!initial);
-  const [status, setStatus] = useState<"draft" | "published">(initial?.status ?? "draft");
+  const [status, setStatus] = useState<FormStatus>(initial?.status ?? "draft");
   const [fields, setFields] = useState<FormField[]>(initial?.fields ?? []);
   const [saving, setSaving] = useState(false);
   const [slugConfirm, setSlugConfirm] = useState(false);
