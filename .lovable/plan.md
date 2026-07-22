@@ -1,18 +1,19 @@
-Plan: Update the pie chart segment colors so the Remaining slice uses the main footer color token (`--footer`).
+Plan: Make the pie chart segment colors exactly match the solid legend colors shown in the legend spans.
+
+Context: The custom legend uses solid CSS-variable backgrounds (`var(--footer-accent)`, `var(--footer-medium)`, `var(--footer-light)`, `var(--footer)`), while the pie chart currently fills each segment with a gradient that uses the same variable but at reduced opacity. That makes the chart segments look different from the legend dots.
 
 Steps:
-1. In `src/routes/one-million-initiative-home.tsx`, reorder the `sliceTokens` array so that the 4th index (Remaining in `pieData`) resolves to `var(--footer)`. The most coherent reordering is:
-   ```ts
-   const sliceTokens = ["--footer-accent", "--footer-medium", "--footer-light", "--footer"];
+1. In `src/routes/one-million-initiative-home.tsx`, change the `<Cell>` fill from the gradient URL to the same CSS variable used by the matching legend span:
+   ```tsx
+   <Cell
+     key={entry.name}
+     fill={`var(${sliceTokens[originalIndex % sliceTokens.length]})`}
+   />
    ```
-   This maps:
-   - Trained → `--footer-accent`
-   - Waitlist → `--footer-medium`
-   - Covered (free) → `--footer-light`
-   - Remaining → `--footer` (main footer color)
+   This will make Covered, Trained, Waitlist, and Remaining segments use the exact same solid colors as their legend labels.
 
-2. The existing gradient logic and `originalIndex % sliceTokens.length` mapping in the Recharts `<Cell>` elements stays unchanged, so the change is limited to the color order.
+2. Remove the now-unused `<defs>` gradient block and the related `sliceTokens` mapping loop in the `<PieChart>` element, since the gradient definitions are no longer referenced.
 
-3. Verify the project still builds with `bun run build`.
+3. Verify the project builds with `bun run build`.
 
-No other files need changes; no other pie-chart logic, labels, or layout will be affected.
+No other pie-chart logic, labels, or layout will change.

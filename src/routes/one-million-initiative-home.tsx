@@ -190,16 +190,8 @@ function InitiativeHome() {
                 style={{ containerType: "inline-size" }}
               >
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <defs>
-                      {sliceTokens.map((tok, i) => (
-                        <linearGradient key={tok} id={`slice-grad-${i}`} x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stopColor={`var(${tok})`} stopOpacity={0.95} />
-                          <stop offset="100%" stopColor={`var(${tok})`} stopOpacity={0.7} />
-                        </linearGradient>
-                      ))}
-                    </defs>
-                    <Pie
+                <PieChart>
+                  <Pie
                       data={visiblePieData}
                       dataKey="value"
                       nameKey="name"
@@ -219,9 +211,9 @@ function InitiativeHome() {
                       {visiblePieData.map((entry) => {
                         const originalIndex = pieData.findIndex((p) => p.name === entry.name);
                         return (
-                          <Cell
+                        <Cell
                             key={entry.name}
-                            fill={`url(#slice-grad-${originalIndex % sliceTokens.length})`}
+                            fill={`var(${sliceTokens[originalIndex % sliceTokens.length]})`}
                           />
                         );
                       })}
