@@ -211,9 +211,9 @@ function InitiativeHome() {
                       {visiblePieData.map((entry) => {
                         const originalIndex = pieData.findIndex((p) => p.name === entry.name);
                         return (
-                          <Cell
+                        <Cell
                             key={entry.name}
-                            fill={`url(#slice-grad-${originalIndex % sliceTokens.length})`}
+                            fill={`var(${sliceTokens[originalIndex % sliceTokens.length]})`}
                           />
                         );
                       })}
