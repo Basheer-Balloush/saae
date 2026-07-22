@@ -1060,7 +1060,8 @@ function NewsForm({
             <Button type="button" variant="outline" onClick={onClose}>
               {labels.cancel}
             </Button>
-            <Button type="submit" disabled={saving || uploading}>
+            <Button type="submit" disabled={saving || anyUploading}>
+
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {initial ? labels.saveChanges : labels.create}
             </Button>
