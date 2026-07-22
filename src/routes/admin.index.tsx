@@ -33,7 +33,7 @@ import {
 } from "@/lib/communityCategories";
 
 
-const ADMIN_TEXT = {
+export const ADMIN_TEXT = {
   en: {
     backToSite: "← Site",
     adminTitle: "Admin Dashboard",
