@@ -111,7 +111,13 @@ function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-6 py-16" dir={dir}>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-16" dir={dir}>
+      <img
+        src={logoSrc}
+        alt={t.logoAlt}
+        onError={(e) => { (e.currentTarget as HTMLImageElement).src = logoFallback; }}
+        className="mb-6 h-14 w-auto object-contain sm:h-16"
+      />
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-soft">
         <div className="flex items-center justify-between gap-3">
           <Link to="/" className="text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-primary">
@@ -126,12 +132,6 @@ function AdminLogin() {
             </Button>
           </div>
         </div>
-        <img
-          src={logoSrc}
-          alt={t.logoAlt}
-          onError={(e) => { (e.currentTarget as HTMLImageElement).src = logoFallback; }}
-          className="mx-auto mt-6 h-12 w-auto object-contain sm:h-14"
-        />
         <h1 className="mt-4 text-2xl font-bold text-foreground text-center">{t.title}</h1>
         <p className="mt-2 text-sm text-muted-foreground text-center">{t.subtitle}</p>
 
