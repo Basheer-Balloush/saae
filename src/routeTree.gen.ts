@@ -43,6 +43,7 @@ import { Route as InitiativeClaimRouteImport } from './routes/initiative.claim'
 import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system.login'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminInitiativeSurveyRouteImport } from './routes/admin.initiative-survey'
 import { Route as AdminInitiativeRouteImport } from './routes/admin.initiative'
@@ -257,6 +258,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminMembersRoute = AdminMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -427,6 +433,7 @@ export interface FileRoutesByFullPath {
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/members': typeof AdminMembersRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -486,6 +493,7 @@ export interface FileRoutesByTo {
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/members': typeof AdminMembersRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -546,6 +554,7 @@ export interface FileRoutesById {
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/members': typeof AdminMembersRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -610,6 +619,7 @@ export interface FileRouteTypes {
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
+    | '/admin/members'
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
@@ -669,6 +679,7 @@ export interface FileRouteTypes {
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
+    | '/admin/members'
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
@@ -728,6 +739,7 @@ export interface FileRouteTypes {
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
+    | '/admin/members'
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
@@ -1038,6 +1050,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/members': {
+      id: '/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AdminMembersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/login'
@@ -1228,6 +1247,7 @@ interface AdminRouteChildren {
   AdminInitiativeRoute: typeof AdminInitiativeRoute
   AdminInitiativeSurveyRoute: typeof AdminInitiativeSurveyRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminMembersRoute: typeof AdminMembersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -1236,6 +1256,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInitiativeRoute: AdminInitiativeRoute,
   AdminInitiativeSurveyRoute: AdminInitiativeSurveyRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminMembersRoute: AdminMembersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
