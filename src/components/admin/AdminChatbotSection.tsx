@@ -18,13 +18,13 @@ import {
   getConversationMessages,
   deleteConversation,
   getChatStats,
-  listLeads,
+  
   listKnowledgeDocuments,
   addKnowledgeText,
   deleteKnowledgeDocument,
 } from "@/lib/admin-chat.functions";
 
-type SubTab = "stats" | "conversations" | "leads" | "knowledge";
+type SubTab = "stats" | "conversations" | "knowledge";
 
 const T = {
   ar: {
@@ -142,7 +142,6 @@ export function AdminChatbotSection({ lang }: { lang: "ar" | "en" }) {
   const tabs: Array<{ key: SubTab; label: string; icon: typeof BarChart3 }> = [
     { key: "stats", label: tr.stats, icon: BarChart3 },
     { key: "conversations", label: tr.conversations, icon: MessageSquare },
-    { key: "leads", label: tr.leads, icon: Users },
     { key: "knowledge", label: tr.knowledge, icon: BookOpen },
   ];
 
