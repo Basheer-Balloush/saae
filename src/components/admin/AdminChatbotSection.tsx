@@ -170,7 +170,7 @@ export function AdminChatbotSection({ lang }: { lang: "ar" | "en" }) {
 
       {sub === "stats" && <StatsPanel tr={tr} />}
       {sub === "conversations" && <ConversationsPanel tr={tr} lang={lang} />}
-      {sub === "leads" && <LeadsPanel tr={tr} lang={lang} />}
+      
       {sub === "knowledge" && <KnowledgePanel tr={tr} lang={lang} />}
     </div>
   );
