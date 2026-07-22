@@ -3,6 +3,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
+  FORM_STATUSES,
   formInputSchema,
   formInputWithIdSchema,
   isValidSlug,
@@ -36,14 +37,38 @@ function mapForm(row: any): DynamicForm {
   };
 }
 
-// ---------- Admin: list all forms ----------
+// ---------- Admin: list all forms with submission counts ----------
 export const listDynamicForms = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { data, error } = await context.supabase
       .from("dynamic_forms")
-      .select("id, slug, name_ar, name_en, status, updated_at, created_at")
+      .select(
+        "id, slug, name_ar, name_en, status, created_at, updated_at, dynamic_form_submissions(count)",
+      )
+      .order("updated_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r: any) => ({
+      id: r.id,
+      slug: r.slug,
+      name_ar: r.name_ar,
+      name_en: r.name_en,
+      status: r.status as DynamicForm["status"],
+      created_at: r.created_at,
+      updated_at: r.updated_at,
+      submissions_count: Number(r.dynamic_form_submissions?.[0]?.count ?? 0),
+    }));
+  });
+
+// ---------- Admin: list forms visible in CRM > Forms tab strip (all statuses) ----------
+export const listDynamicFormsForCrm = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data, error } = await context.supabase
+      .from("dynamic_forms")
+      .select("id, slug, name_ar, name_en, status, updated_at")
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data ?? [];
@@ -124,15 +149,69 @@ export const updateDynamicForm = createServerFn({ method: "POST" })
     return mapForm(row);
   });
 
-// ---------- Admin: delete ----------
+// ---------- Admin: change status only (publish / hide / archive) ----------
+export const setDynamicFormStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; status: DynamicForm["status"] }) =>
+    z.object({ id: z.string().uuid(), status: z.enum(FORM_STATUSES) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { data: row, error } = await context.supabase
+      .from("dynamic_forms")
+      .update({ status: data.status })
+      .eq("id", data.id)
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return mapForm(row);
+  });
+
+// ---------- Admin: safe delete ----------
 export const deleteDynamicForm = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; deleteSubmissions?: boolean }) =>
+    z
+      .object({ id: z.string().uuid(), deleteSubmissions: z.boolean().optional() })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { count, error: cErr } = await context.supabase
+      .from("dynamic_form_submissions")
+      .select("id", { count: "exact", head: true })
+      .eq("form_id", data.id);
+    if (cErr) throw new Error(cErr.message);
+    const total = count ?? 0;
+    if (total > 0 && !data.deleteSubmissions) {
+      const err = new Error("has_submissions");
+      (err as any).submissions_count = total;
+      throw err;
+    }
+    if (total > 0 && data.deleteSubmissions) {
+      const { error: dErr } = await context.supabase
+        .from("dynamic_form_submissions")
+        .delete()
+        .eq("form_id", data.id);
+      if (dErr) throw new Error(dErr.message);
+    }
+    const { error } = await context.supabase.from("dynamic_forms").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, deleted_submissions: total };
+  });
+
+// ---------- Admin: count only ----------
+export const countDynamicFormSubmissions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase.from("dynamic_forms").delete().eq("id", data.id);
+    const { count, error } = await context.supabase
+      .from("dynamic_form_submissions")
+      .select("id", { count: "exact", head: true })
+      .eq("form_id", data.id);
     if (error) throw new Error(error.message);
-    return { ok: true as const };
+    return { count: count ?? 0 };
   });
 
 // ---------- Admin: list submissions for a form ----------
@@ -146,7 +225,7 @@ export const listDynamicFormSubmissions = createServerFn({ method: "POST" })
       .select("id, values, field_snapshot, submitted_at")
       .eq("form_id", data.formId)
       .order("submitted_at", { ascending: false })
-      .limit(1000);
+      .limit(2000);
     if (error) throw new Error(error.message);
     return rows ?? [];
   });

@@ -1,23 +1,47 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Loader2, Download, RefreshCw, Pencil, Trash2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { useLang } from "@/lib/i18n";
 import { toUserMessage } from "@/lib/safe-error";
-import type { DynamicForm, FormField } from "@/lib/dynamic-forms";
+import type { DynamicForm, FormField, FormStatus } from "@/lib/dynamic-forms";
 import {
   deleteDynamicForm,
   getDynamicFormById,
   listDynamicFormSubmissions,
 } from "@/lib/dynamic-forms.functions";
 import { buildXlsxFilename, exportRowsToXlsx, type XlsxColumn } from "@/lib/admin-xlsx-export";
+import { cn } from "@/lib/utils";
 
 type SubRow = { id: string; values: Record<string, unknown>; field_snapshot: FormField[]; submitted_at: string };
+
+const STATUS_LABELS_AR: Record<FormStatus, string> = {
+  draft: "مسودة",
+  published: "منشور",
+  hidden: "مخفي",
+  archived: "مؤرشف",
+};
+const STATUS_LABELS_EN: Record<FormStatus, string> = {
+  draft: "Draft",
+  published: "Published",
+  hidden: "Hidden",
+  archived: "Archived",
+};
+function statusColor(s: FormStatus) {
+  switch (s) {
+    case "published": return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
+    case "draft": return "bg-amber-500/10 text-amber-700 border-amber-500/20";
+    case "hidden": return "bg-slate-500/10 text-slate-600 border-slate-500/20";
+    case "archived": return "bg-muted text-muted-foreground border-border";
+  }
+}
 
 export function DynamicFormSubmissions({ formId }: { formId: string }) {
   const { lang } = useLang();
@@ -30,6 +54,10 @@ export function DynamicFormSubmissions({ formId }: { formId: string }) {
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<SubRow | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [alsoDeleteSubs, setAlsoDeleteSubs] = useState(false);
+  const [q, setQ] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -51,8 +79,22 @@ export function DynamicFormSubmissions({ formId }: { formId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formId]);
 
+  const filteredRows = useMemo(() => {
+    if (!rows) return [];
+    const s = q.trim().toLowerCase();
+    const from = fromDate ? new Date(fromDate).getTime() : null;
+    const to = toDate ? new Date(toDate).getTime() + 24 * 3600 * 1000 : null;
+    return rows.filter((r) => {
+      const t = new Date(r.submitted_at).getTime();
+      if (from !== null && t < from) return false;
+      if (to !== null && t >= to) return false;
+      if (!s) return true;
+      return JSON.stringify(r.values ?? {}).toLowerCase().includes(s);
+    });
+  }, [rows, q, fromDate, toDate]);
+
   const exportXlsx = () => {
-    if (!form || !rows) return;
+    if (!form) return;
     const cols: XlsxColumn<SubRow>[] = [
       { header: ar ? "التاريخ" : "Date", type: "date", width: 20, get: (r) => r.submitted_at },
       ...form.fields.map<XlsxColumn<SubRow>>((f) => ({
@@ -68,7 +110,7 @@ export function DynamicFormSubmissions({ formId }: { formId: string }) {
       })),
     ];
     void exportRowsToXlsx<SubRow>({
-      rows,
+      rows: filteredRows,
       columns: cols,
       filenameBase: buildXlsxFilename(form.slug),
       sheetName: form.slug.slice(0, 30),
@@ -78,7 +120,12 @@ export function DynamicFormSubmissions({ formId }: { formId: string }) {
 
   const handleDelete = async () => {
     try {
-      await doDelete({ data: { id: formId } });
+      await doDelete({
+        data: {
+          id: formId,
+          deleteSubmissions: (rows?.length ?? 0) > 0 ? alsoDeleteSubs : false,
+        },
+      });
       toast.success(ar ? "تم الحذف" : "Deleted");
       window.location.href = "/admin/crm/forms";
     } catch (e) {
@@ -97,8 +144,14 @@ export function DynamicFormSubmissions({ formId }: { formId: string }) {
           <h3 className="text-lg font-semibold text-foreground">
             {ar ? form.name_ar : form.name_en}
           </h3>
-          <p className="text-xs text-muted-foreground">
-            /forms/{form.slug} · {form.status === "published" ? (ar ? "منشور" : "Published") : (ar ? "مسودة" : "Draft")} · {rows.length} {ar ? "استجابة" : "responses"}
+          <p className="text-xs text-muted-foreground flex items-center gap-2">
+            <span>/forms/{form.slug}</span>
+            <span>·</span>
+            <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px]", statusColor(form.status))}>
+              {ar ? STATUS_LABELS_AR[form.status] : STATUS_LABELS_EN[form.status]}
+            </span>
+            <span>·</span>
+            <span>{rows.length} {ar ? "استجابة" : "responses"}</span>
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -110,25 +163,50 @@ export function DynamicFormSubmissions({ formId }: { formId: string }) {
             </Button>
           )}
           <Button variant="outline" size="sm" asChild>
-            <Link to="/admin/crm/forms/$formSlug/edit" params={{ formSlug: form.slug }}>
+            <Link to="/admin/forms/$formId/edit" params={{ formId: form.id }}>
               <Pencil className="h-4 w-4" /> {ar ? "تعديل" : "Edit"}
             </Link>
           </Button>
           <Button variant="outline" size="sm" onClick={load}>
             <RefreshCw className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={exportXlsx} disabled={rows.length === 0}>
+          <Button variant="outline" size="sm" onClick={exportXlsx} disabled={filteredRows.length === 0}>
             <Download className="h-4 w-4" /> Excel
           </Button>
-          <Button variant="outline" size="sm" className="text-destructive" onClick={() => setConfirmDelete(true)}>
+          <Button variant="outline" size="sm" className="text-destructive" onClick={() => { setAlsoDeleteSubs(false); setConfirmDelete(true); }}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      {rows.length === 0 ? (
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          placeholder={ar ? "بحث في الاستجابات" : "Search submissions"}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="max-w-xs"
+        />
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <span>{ar ? "من" : "From"}</span>
+          <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="w-40" />
+          <span>{ar ? "إلى" : "To"}</span>
+          <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="w-40" />
+        </div>
+        {(q || fromDate || toDate) && (
+          <Button variant="ghost" size="sm" onClick={() => { setQ(""); setFromDate(""); setToDate(""); }}>
+            {ar ? "مسح" : "Clear"}
+          </Button>
+        )}
+        <span className="text-xs text-muted-foreground">
+          {filteredRows.length} / {rows.length}
+        </span>
+      </div>
+
+      {filteredRows.length === 0 ? (
         <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
-          {ar ? "لا توجد استجابات بعد" : "No submissions yet"}
+          {rows.length === 0
+            ? (ar ? "لا توجد استجابات بعد" : "No submissions yet")
+            : (ar ? "لا نتائج مطابقة" : "No matching results")}
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card">
@@ -143,7 +221,7 @@ export function DynamicFormSubmissions({ formId }: { formId: string }) {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {filteredRows.map((r) => (
                 <tr key={r.id} className="border-t border-border">
                   <td className="p-2 whitespace-nowrap">{new Date(r.submitted_at).toLocaleString()}</td>
                   {form.fields.slice(0, 4).map((f) => {
@@ -191,12 +269,34 @@ export function DynamicFormSubmissions({ formId }: { formId: string }) {
           <DialogHeader>
             <DialogTitle>{ar ? "حذف النموذج؟" : "Delete form?"}</DialogTitle>
             <DialogDescription>
-              {ar ? "سيتم حذف النموذج وكل الاستجابات نهائياً." : "The form and all its submissions will be permanently deleted."}
+              {rows.length > 0
+                ? ar
+                  ? `يحتوي هذا النموذج على ${rows.length} استجابة. لا يمكن حذفه ما لم تختر حذف الاستجابات معه.`
+                  : `This form has ${rows.length} submission(s). It cannot be deleted unless you also delete its submissions.`
+                : ar
+                  ? "لا يمكن التراجع عن هذا الإجراء."
+                  : "This action cannot be undone."}
             </DialogDescription>
           </DialogHeader>
+          {rows.length > 0 && (
+            <label className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm">
+              <Checkbox checked={alsoDeleteSubs} onCheckedChange={(v) => setAlsoDeleteSubs(!!v)} className="mt-0.5" />
+              <span className="text-destructive">
+                {ar
+                  ? `نعم، احذف النموذج و ${rows.length} استجابة نهائياً.`
+                  : `Yes, permanently delete the form and its ${rows.length} submission(s).`}
+              </span>
+            </label>
+          )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmDelete(false)}>{ar ? "إلغاء" : "Cancel"}</Button>
-            <Button variant="destructive" onClick={handleDelete}>{ar ? "حذف" : "Delete"}</Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={rows.length > 0 && !alsoDeleteSubs}
+            >
+              {ar ? "حذف" : "Delete"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

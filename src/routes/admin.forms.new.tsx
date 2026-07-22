@@ -3,12 +3,12 @@ import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
 import { DynamicFormBuilder } from "@/components/admin/crm/DynamicFormBuilder";
 import { useLang } from "@/lib/i18n";
 
-export const Route = createFileRoute("/admin/crm/forms/new")({
+export const Route = createFileRoute("/admin/forms/new")({
   ssr: false,
   beforeLoad: requireAdminBeforeLoad,
   head: () => ({
     meta: [
-      { title: "New form — CRM" },
+      { title: "New form — Admin" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

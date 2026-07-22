@@ -1,72 +1,69 @@
-# Dynamic Form Builder
 
-Enables admins to create bilingual (AR/EN) forms without code changes. Each published form is reachable at a stable `/forms/<slug>` public URL. Reuses the existing admin auth (`requireAdminBeforeLoad` + `has_role('admin')`), the CRM > Forms module, shadcn/ui components, i18n via `useLang`, and RTL/LTR conventions already in the project.
+## Inspection report
 
-## Data model (new tables)
+### Current architecture
+- Admin shell: `src/routes/admin.tsx` + `AdminSidebar.tsx` (top-level: Dashboard, News, Partners, Members, CRM group [Leads sub, Companies sub], Forms group [Initiative/Project + dynamic list], Initiative, Chatbot).
+- Chatbot page (`admin.chatbot.tsx`) only renders `AdminChatbotSection` — it does NOT contain lead management. Leads already live under `/admin/crm/leads/{individuals,companies}` via `LeadsView`. No move required.
+- Legacy hardcoded surveys: `InitiativeSurveyDashboard` and `EventSurveyDashboard` — data in `initiative_survey_responses` (145 rows) and `event_survey_responses` (40 rows). Registered in `src/lib/admin-forms-registry.tsx`.
+- Dynamic forms already scaffolded: table `public.dynamic_forms` (0 rows), `public.dynamic_form_submissions`, server fns in `src/lib/dynamic-forms.functions.ts`, builder `DynamicFormBuilder.tsx`, submissions viewer `DynamicFormSubmissions.tsx`. Public route `/forms/$slug`.
+- Current dynamic-forms create/edit lives at `/admin/crm/forms/new` and `.../edit` — mixed into CRM per the old spec.
 
-**`dynamic_forms`**
-- `id uuid PK`
-- `slug text UNIQUE NOT NULL` (lowercase alphanumeric + hyphens; server-enforced)
-- `name_ar text NOT NULL`, `name_en text NOT NULL`
-- `description_ar text`, `description_en text`
-- `submit_label_ar text NOT NULL`, `submit_label_en text NOT NULL`
-- `status text NOT NULL DEFAULT 'draft' CHECK IN ('draft','published')`
-- `fields jsonb NOT NULL DEFAULT '[]'` — ordered array of field configs (stable `id` per field)
-- `created_by uuid REFERENCES auth.users`, `created_at`, `updated_at`
+### Database
+- `dynamic_forms(id uuid PK, slug unique, name_ar/en, description_ar/en, submit_label_ar/en, status dynamic_form_status[draft|published], fields jsonb, created_by, timestamps)`.
+- `dynamic_form_submissions(id, form_id → dynamic_forms.id ON DELETE CASCADE, values jsonb, field_snapshot jsonb, user_agent, submitted_at)`, indexed on `(form_id, submitted_at DESC)`.
+- RLS: admin-only for management/read submissions; public insert requires `status='published'`; public read only for published forms.
 
-**`dynamic_form_submissions`**
-- `id uuid PK`
-- `form_id uuid REFERENCES dynamic_forms(id) ON DELETE CASCADE`
-- `values jsonb NOT NULL` — `{ <fieldId>: value }` keyed by stable field id
-- `field_snapshot jsonb NOT NULL` — copy of the form's `fields` at submit time, so historical submissions stay readable if the form is later edited
-- `submitted_at timestamptz DEFAULT now()`
-- `user_agent text`, `ip inet` (best-effort metadata)
+### Gaps vs. request
+1. No top-level "Forms" management page — mixed into CRM.
+2. Status enum lacks `hidden` and `archived`.
+3. `ON DELETE CASCADE` on submissions FK silently destroys history — violates Part 4.
+4. No submissions count surfaced in list, no lifecycle actions (hide/archive), no safeguarded delete.
+5. Legacy surveys are hardcoded; safe to keep as legacy read-only entries in CRM > Forms tab strip (their tables cannot be reshaped into `dynamic_form_submissions` without data risk and are out of scope for "Forms Management").
+6. Sidebar CRM group currently exposes a "Forms" child that duplicates the intended split.
 
-## Field types (minimal coherent set)
+### Migration (single migration)
+- `ALTER TYPE dynamic_form_status ADD VALUE 'hidden'; ADD VALUE 'archived';`
+- Drop existing FK on `dynamic_form_submissions.form_id`; recreate `ON DELETE RESTRICT` so deletion cannot silently wipe history.
+- Keep RLS as-is (public insert already gated to `published`, so hidden/archived reject new submissions automatically).
 
-`short_text`, `long_text`, `email`, `number`, `select` (options[]), `radio` (options[]), `checkbox_group` (options[]), `single_checkbox` (consent), `date`. Each field: `{ id, type, label_ar, label_en, required, placeholder_ar?, placeholder_en?, options?: [{value,label_ar,label_en}] }`. Validated both client-side (zod) and via a Postgres trigger before insert.
+### Implementation plan (staged)
 
-## Slug rules
+**Stage 1 — DB + shared types**
+- Migration above.
+- Extend `DynamicForm.status` union in `src/lib/dynamic-forms.ts` to `'draft'|'published'|'hidden'|'archived'` and update Zod schema.
 
-- Normalize to `[a-z0-9-]+`, no leading/trailing/duplicate hyphens.
-- Reserved list: `admin`, `api`, `auth`, `learning-management-system`, `attendance-management-system`, `contact`, `about`, `news`, `communities`, `initiative-survey`, `event-survey`, `one-million-initiative`, `one-million-initiative-home`, `one-million-initiative-donors`, `registration`, `resources`, `super-admin`, `sitemap.xml`, `forms`.
-- Uniqueness enforced by DB unique index + server-side check with clear AR/EN error.
-- Auto-suggested from English name; editable.
-- On published-form slug change: modal warns "existing links will break" and requires confirmation.
+**Stage 2 — Server functions** (`src/lib/dynamic-forms.functions.ts`)
+- `listDynamicForms` → also return `submissions_count` (single grouped query).
+- `setDynamicFormStatus({ id, status })` — admin-only status transitions.
+- `deleteDynamicForm({ id, deleteSubmissions?: boolean })` — count submissions; refuse when >0 unless `deleteSubmissions:true` (explicit flag); when true, delete children first then the form.
 
-## Access control
+**Stage 3 — Forms Management (top-level)**
+- New routes: `src/routes/admin.forms.tsx` (layout+list), `admin.forms.new.tsx` (create), `admin.forms.$formId.edit.tsx` (edit by immutable UUID, not slug).
+- List view mirrors News table (`admin.index.tsx`): columns Name (AR/EN), Slug, Status badge, Submissions count, Updated, Created, Actions (Edit / Publish↔Hide toggle / Archive / Delete-with-confirm / View Data).
+- "View Data" links to `/admin/crm/forms/$formSlug`.
+- Delete dialog shows submission count; blocks default delete when >0; separate "Delete form and N submissions" destructive path.
+- Sidebar: add top-level "Forms" entry (icon `FileText`) between Members and CRM. Remove Forms group from CRM in sidebar.
 
-- **Admin write/read all**: server functions using `requireSupabaseAuth` + `has_role(auth.uid(),'admin')` check. RLS: admins can SELECT/INSERT/UPDATE/DELETE via `has_role`.
-- **Public read published only**: RLS policy `TO anon, authenticated USING (status = 'published')` on `dynamic_forms`.
-- **Public insert submissions**: RLS policy on `dynamic_form_submissions` allowing INSERT only when the referenced form is published; server function validates payload against field spec.
-- **Submissions read**: admin only.
+**Stage 4 — CRM > Forms (submissions only)**
+- Keep `admin.crm.forms.tsx` layout but strip create/edit buttons and route links; tab strip = legacy registry entries (initiative-survey, event-survey) + dynamic_forms rows filtered to statuses admin should see (draft/published/hidden/archived — all visible in CRM tab list for review; label archived/hidden with badges).
+- Delete `admin.crm.forms.new.tsx` and `admin.crm.forms.$formSlug.edit.tsx`; add redirects to new `/admin/forms/...` equivalents.
+- `admin.crm.forms.$formSlug.tsx` continues to resolve legacy registry first, then dynamic_forms — unchanged for isolation guarantee (query filters strictly by form UUID).
+- Enhance `DynamicFormSubmissions.tsx`: add text search (across values), date-range filter, sort, refresh, "View full response" dialog already present, keep `.xlsx` export (already uses `exportRowsToXlsx` with formula-injection guard).
 
-## Files
+**Stage 5 — Redirects & polish**
+- `/admin/crm/forms/new` → redirect `/admin/forms/new`.
+- `/admin/crm/forms/:slug/edit` → redirect `/admin/forms/{id}/edit` (resolve slug → id first; fall back to list).
+- Public `/forms/$slug` unchanged; already blocks non-`published` forms via server fn.
 
-**New (migration + server fns + admin UI + public page):**
-- `supabase/migrations/*` — the two tables, RLS, GRANTs, slug-normalization + validation triggers.
-- `src/lib/dynamic-forms.ts` — shared types, zod schemas, slug normalizer, reserved-slug list, field validator.
-- `src/lib/dynamic-forms.functions.ts` — `listForms`, `getFormById`, `getFormBySlug` (public), `createForm`, `updateForm`, `deleteForm`, `submitForm` (public), `listSubmissions` (admin).
-- `src/components/admin/crm/DynamicFormsList.tsx` — list in Forms tab bar with "Create form" button.
-- `src/components/admin/crm/DynamicFormBuilder.tsx` — create/edit form (bilingual meta, slug editor with published-change warning dialog, drag-to-reorder fields, per-field editor for each type).
-- `src/components/admin/crm/DynamicFormSubmissions.tsx` — table + detail view + xlsx export via existing `admin-xlsx-export.ts`.
-- `src/routes/admin.crm.forms.new.tsx` — create page.
-- `src/routes/admin.crm.forms.$formSlug.edit.tsx` — edit page.
-- `src/routes/forms.$slug.tsx` — public bilingual form renderer + submit + success/error states + notFound for draft/missing.
+### Files touched
+- MIG: `supabase/migrations/*_forms_lifecycle.sql`
+- ADD: `src/routes/admin.forms.tsx`, `admin.forms.new.tsx`, `admin.forms.$formId.edit.tsx`
+- EDIT: `src/lib/dynamic-forms.ts`, `dynamic-forms.functions.ts`, `src/components/admin/AdminSidebar.tsx`, `src/routes/admin.crm.forms.tsx`, `src/components/admin/crm/DynamicFormSubmissions.tsx`, `src/components/admin/crm/DynamicFormBuilder.tsx` (route back to /admin/forms after save).
+- REMOVE/redirect: `admin.crm.forms.new.tsx`, `admin.crm.forms.$formSlug.edit.tsx`.
 
-**Modified:**
-- `src/lib/admin-forms-registry.tsx` — extend registry so DB-backed dynamic forms auto-populate the CRM > Forms tabs (query on mount; static entries remain for `initiative-survey` and `event-survey`).
-- `src/routes/admin.crm.forms.tsx` — render dynamic-forms list + "Create form" CTA alongside static tabs; keep existing tab logic.
-- `src/routes/admin.crm.forms.$formSlug.tsx` — when slug is not a static entry, resolve from DB and render `DynamicFormSubmissions` + "Edit form" affordance.
-- `src/components/admin/AdminSidebar.tsx` — no changes needed (Forms group already lists static entries; dynamic ones appear as tabs inside `/admin/crm/forms`).
+### Out of scope / assumptions
+- Not backfilling legacy `initiative_survey_responses`/`event_survey_responses` into `dynamic_form_submissions` (destructive, unwarranted). Legacy surveys stay as hardcoded dashboards inside CRM > Forms tabs but are NOT manageable from Forms Management — this matches "do not remove existing form submissions" and "reuse existing dashboards".
+- No File-upload field type added (would need storage bucket + RLS). Current supported types stay: short/long text, email, number, date, select, radio, checkbox_group, single_checkbox. Adding File requires a follow-up.
+- Slug-history/redirect table not added; slug changes update the record and existing submissions remain linked by UUID (Part 3 acceptance).
 
-## Verification
-
-- `tsgo` typecheck.
-- Manual: create draft → confirm `/forms/<slug>` returns notFound; publish → confirm loads; submit → confirm row appears in admin submissions; edit field labels → confirm old submissions still render via `field_snapshot`; attempt duplicate/reserved/unsafe slug → clear error; attempt non-admin access to admin routes → redirect.
-
-## Out of scope / assumptions
-
-- No slug-history redirect table (project has none for courses/articles either); the confirmation dialog documents the break.
-- Drag-reorder uses simple up/down buttons (no new dependency) unless a DnD lib is already present.
-- The two existing hard-coded surveys (`initiative-survey`, `event-survey`) remain code-based; new forms use the dynamic system.
+Proceeding to implement all stages in one pass once approved.

@@ -10,7 +10,7 @@ import {
   ChevronDown,
   Contact2,
 } from "lucide-react";
-import { ADMIN_FORMS } from "@/lib/admin-forms-registry";
+
 import { useState } from "react";
 import {
   Sidebar,
@@ -43,21 +43,15 @@ function buildNav(lang: "ar" | "en"): NavItem[] {
     { title: ar ? "الأخبار" : "News", url: "/admin", icon: Newspaper },
     { title: ar ? "الشركاء" : "Partners", url: "/admin/partners", icon: Handshake },
     { title: ar ? "الأعضاء" : "Members", url: "/admin/members", icon: Users },
+    { title: ar ? "النماذج" : "Forms", url: "/admin/forms", icon: FileText },
     {
       title: "CRM",
       icon: Contact2,
       children: [
         { title: ar ? "أفراد" : "Individual leads", url: "/admin/crm/leads/individuals" },
         { title: ar ? "شركات" : "Company leads", url: "/admin/crm/leads/companies" },
+        { title: ar ? "استجابات النماذج" : "Form submissions", url: "/admin/crm/forms" },
       ],
-    },
-    {
-      title: ar ? "الاستبيانات" : "Forms",
-      icon: FileText,
-      children: ADMIN_FORMS.map((f) => ({
-        title: ar ? f.labelAr : f.labelEn,
-        url: `/admin/crm/forms/${f.slug}`,
-      })),
     },
     { title: ar ? "مبادرة المليون" : "Million Initiative", url: "/admin/initiative", icon: Sparkles },
     { title: ar ? "الشات بوت" : "Chatbot", url: "/admin/chatbot", icon: Bot },

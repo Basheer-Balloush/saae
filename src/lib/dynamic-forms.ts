@@ -13,6 +13,9 @@ export const FIELD_TYPES = [
 ] as const;
 export type FieldType = (typeof FIELD_TYPES)[number];
 
+export const FORM_STATUSES = ["draft", "published", "hidden", "archived"] as const;
+export type FormStatus = (typeof FORM_STATUSES)[number];
+
 export const RESERVED_SLUGS = new Set([
   "admin", "api", "auth", "learning-management-system", "attendance-management-system",
   "contact", "about", "news", "communities", "initiative-survey", "event-survey",
@@ -43,7 +46,7 @@ export type DynamicForm = {
   description_en: string | null;
   submit_label_ar: string;
   submit_label_en: string;
-  status: "draft" | "published";
+  status: FormStatus;
   fields: FormField[];
   created_at: string;
   updated_at: string;
@@ -108,7 +111,7 @@ export const formInputBaseSchema = z.object({
   description_en: z.string().max(2000).optional().nullable(),
   submit_label_ar: z.string().trim().min(1).max(80),
   submit_label_en: z.string().trim().min(1).max(80),
-  status: z.enum(["draft", "published"]),
+  status: z.enum(FORM_STATUSES),
   fields: z.array(fieldSchema).max(80),
 });
 

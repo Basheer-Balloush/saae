@@ -27,6 +27,7 @@ import {
   type DynamicForm,
   type FieldType,
   type FormField,
+  type FormStatus,
 } from "@/lib/dynamic-forms";
 import { createDynamicForm, updateDynamicForm } from "@/lib/dynamic-forms.functions";
 
@@ -36,7 +37,7 @@ const T = {
     descAr: "الوصف بالعربية (اختياري)", descEn: "الوصف بالإنكليزية (اختياري)",
     submitAr: "زر الإرسال بالعربية", submitEn: "زر الإرسال بالإنكليزية",
     slug: "الرابط (Slug)", slugHint: "أحرف صغيرة وأرقام وشرطات فقط",
-    status: "الحالة", draft: "مسودة", published: "منشور",
+    status: "الحالة", draft: "مسودة", published: "منشور", hidden: "مخفي", archived: "مؤرشف",
     fields: "الحقول", addField: "إضافة حقل", noFields: "لا توجد حقول بعد",
     labelAr: "التسمية بالعربية", labelEn: "التسمية بالإنكليزية",
     required: "إلزامي", type: "النوع",
@@ -57,7 +58,7 @@ const T = {
     descAr: "Description (Arabic, optional)", descEn: "Description (English, optional)",
     submitAr: "Submit label (Arabic)", submitEn: "Submit label (English)",
     slug: "Slug", slugHint: "Lowercase letters, digits, and hyphens only",
-    status: "Status", draft: "Draft", published: "Published",
+    status: "Status", draft: "Draft", published: "Published", hidden: "Hidden", archived: "Archived",
     fields: "Fields", addField: "Add field", noFields: "No fields yet",
     labelAr: "Label (Arabic)", labelEn: "Label (English)",
     required: "Required", type: "Type",
@@ -101,7 +102,7 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
   const [submitEn, setSubmitEn] = useState(initial?.submit_label_en ?? "Submit");
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(!!initial);
-  const [status, setStatus] = useState<"draft" | "published">(initial?.status ?? "draft");
+  const [status, setStatus] = useState<FormStatus>(initial?.status ?? "draft");
   const [fields, setFields] = useState<FormField[]>(initial?.fields ?? []);
   const [saving, setSaving] = useState(false);
   const [slugConfirm, setSlugConfirm] = useState(false);
@@ -201,7 +202,7 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
         ? await update({ data: { ...parsed.data, id: initial.id } })
         : await create({ data: parsed.data });
       toast.success(tr.saved);
-      navigate({ to: "/admin/crm/forms/$formSlug", params: { formSlug: saved.slug } });
+      navigate({ to: "/admin/forms/$formId/edit", params: { formId: saved.id } });
     } catch (e) {
       const msg = toUserMessage(e);
       if (msg.includes("slug_taken")) toast.error(tr.slugTaken);
@@ -257,11 +258,13 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
         </div>
         <div className="space-y-1">
           <Label>{tr.status}</Label>
-          <Select value={status} onValueChange={(v) => setStatus(v as "draft" | "published")}>
+          <Select value={status} onValueChange={(v) => setStatus(v as FormStatus)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="draft">{tr.draft}</SelectItem>
               <SelectItem value="published">{tr.published}</SelectItem>
+              <SelectItem value="hidden">{tr.hidden}</SelectItem>
+              <SelectItem value="archived">{tr.archived}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -374,7 +377,7 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/crm/forms" })}>
+        <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/forms" })}>
           {tr.cancel}
         </Button>
         <Button type="button" onClick={submit} disabled={saving}>
@@ -415,7 +418,7 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
                         ? await update({ data: { ...parsed.data, id: initial.id } })
                         : await create({ data: parsed.data });
                       toast.success(tr.saved);
-                      navigate({ to: "/admin/crm/forms/$formSlug", params: { formSlug: saved.slug } });
+                      navigate({ to: "/admin/forms/$formId/edit", params: { formId: saved.id } });
                     } catch (e) {
                       toast.error(toUserMessage(e));
                     } finally {
