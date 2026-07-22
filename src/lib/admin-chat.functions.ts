@@ -1,11 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { chunkText, embedTexts } from "@/lib/embeddings.server";
 
-async function assertAdmin(userId: string) {
-  const { data, error } = await supabaseAdmin
+async function assertAdmin(sb: SupabaseClient, userId: string) {
+  const { data, error } = await sb
     .from("user_roles")
     .select("role")
     .eq("user_id", userId)
@@ -18,8 +18,8 @@ async function assertAdmin(userId: string) {
 export const listConversations = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context.userId);
-    const { data, error } = await supabaseAdmin
+    await assertAdmin(context.supabase, context.userId);
+    const { data, error } = await context.supabase
       .from("chat_conversations")
       .select("id, session_id, lang, message_count, started_at, last_message_at")
       .order("last_message_at", { ascending: false })
@@ -34,8 +34,8 @@ export const getConversationMessages = createServerFn({ method: "POST" })
     z.object({ conversationId: z.string().uuid() }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
-    const { data: rows, error } = await supabaseAdmin
+    await assertAdmin(context.supabase, context.userId);
+    const { data: rows, error } = await context.supabase
       .from("chat_messages")
       .select("id, role, content, created_at")
       .eq("conversation_id", data.conversationId)
@@ -50,8 +50,8 @@ export const deleteConversation = createServerFn({ method: "POST" })
     z.object({ conversationId: z.string().uuid() }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
-    const { error } = await supabaseAdmin
+    await assertAdmin(context.supabase, context.userId);
+    const { error } = await context.supabase
       .from("chat_conversations")
       .delete()
       .eq("id", data.conversationId);
@@ -62,23 +62,24 @@ export const deleteConversation = createServerFn({ method: "POST" })
 export const getChatStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context.userId);
+    await assertAdmin(context.supabase, context.userId);
+    const sb = context.supabase;
     const since = (days: number) =>
       new Date(Date.now() - days * 86400000).toISOString();
 
     const [convAll, conv7, conv30, msgAll, indLeads, compLeads] = await Promise.all([
-      supabaseAdmin.from("chat_conversations").select("id", { count: "exact", head: true }),
-      supabaseAdmin
+      sb.from("chat_conversations").select("id", { count: "exact", head: true }),
+      sb
         .from("chat_conversations")
         .select("id", { count: "exact", head: true })
         .gte("last_message_at", since(7)),
-      supabaseAdmin
+      sb
         .from("chat_conversations")
         .select("id", { count: "exact", head: true })
         .gte("last_message_at", since(30)),
-      supabaseAdmin.from("chat_messages").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("individual_leads").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("company_leads").select("id", { count: "exact", head: true }),
+      sb.from("chat_messages").select("id", { count: "exact", head: true }),
+      sb.from("individual_leads").select("id", { count: "exact", head: true }),
+      sb.from("company_leads").select("id", { count: "exact", head: true }),
     ]);
 
     return {
@@ -94,14 +95,15 @@ export const getChatStats = createServerFn({ method: "GET" })
 export const listLeads = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context.userId);
+    await assertAdmin(context.supabase, context.userId);
+    const sb = context.supabase;
     const [ind, comp] = await Promise.all([
-      supabaseAdmin
+      sb
         .from("individual_leads")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(500),
-      supabaseAdmin
+      sb
         .from("company_leads")
         .select("*")
         .order("created_at", { ascending: false })
@@ -115,8 +117,8 @@ export const listLeads = createServerFn({ method: "GET" })
 export const listKnowledgeDocuments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context.userId);
-    const { data, error } = await supabaseAdmin
+    await assertAdmin(context.supabase, context.userId);
+    const { data, error } = await context.supabase
       .from("chat_knowledge_documents")
       .select("id, title, source_type, status, error_message, chunk_count, created_at, updated_at")
       .order("created_at", { ascending: false });
@@ -135,9 +137,10 @@ export const addKnowledgeText = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
+    await assertAdmin(context.supabase, context.userId);
+    const sb = context.supabase;
 
-    const { data: doc, error: insErr } = await supabaseAdmin
+    const { data: doc, error: insErr } = await sb
       .from("chat_knowledge_documents")
       .insert({
         title: data.title,
@@ -152,7 +155,6 @@ export const addKnowledgeText = createServerFn({ method: "POST" })
 
     try {
       const chunks = chunkText(data.text);
-      // Embed in batches of 64 to stay well under provider limits
       const batchSize = 64;
       const rows: Array<{
         document_id: string;
@@ -168,25 +170,24 @@ export const addKnowledgeText = createServerFn({ method: "POST" })
             document_id: doc.id,
             chunk_index: i + j,
             content: batch[j],
-            // pgvector text representation
             embedding: `[${vectors[j].join(",")}]`,
           });
         }
       }
       if (rows.length > 0) {
-        const { error: chunkErr } = await supabaseAdmin
+        const { error: chunkErr } = await sb
           .from("chat_knowledge_chunks")
           .insert(rows);
         if (chunkErr) throw new Error(chunkErr.message);
       }
-      await supabaseAdmin
+      await sb
         .from("chat_knowledge_documents")
         .update({ status: "ready", chunk_count: rows.length, error_message: null })
         .eq("id", doc.id);
       return { ok: true, documentId: doc.id, chunkCount: rows.length };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      await supabaseAdmin
+      await sb
         .from("chat_knowledge_documents")
         .update({ status: "failed", error_message: msg })
         .eq("id", doc.id);
@@ -200,17 +201,17 @@ export const deleteKnowledgeDocument = createServerFn({ method: "POST" })
     z.object({ documentId: z.string().uuid() }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
-    // Get file path if any to clean storage
-    const { data: doc } = await supabaseAdmin
+    await assertAdmin(context.supabase, context.userId);
+    const sb = context.supabase;
+    const { data: doc } = await sb
       .from("chat_knowledge_documents")
       .select("file_path")
       .eq("id", data.documentId)
       .maybeSingle();
     if (doc?.file_path) {
-      await supabaseAdmin.storage.from("chat-knowledge").remove([doc.file_path]);
+      await sb.storage.from("chat-knowledge").remove([doc.file_path]);
     }
-    const { error } = await supabaseAdmin
+    const { error } = await sb
       .from("chat_knowledge_documents")
       .delete()
       .eq("id", data.documentId);
