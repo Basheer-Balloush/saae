@@ -43,7 +43,7 @@ export type DynamicForm = {
   description_en: string | null;
   submit_label_ar: string;
   submit_label_en: string;
-  status: "draft" | "published";
+  status: FormStatus;
   fields: FormField[];
   created_at: string;
   updated_at: string;
