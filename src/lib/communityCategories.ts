@@ -37,7 +37,7 @@ export const COMMUNITY_LABELS_EN: Record<CommunityKey, string> = {
 };
 
 // News-only extra categories (not full communities with their own pages)
-export const EXTRA_NEWS_CATEGORY_KEYS = ["society", "general"] as const;
+export const EXTRA_NEWS_CATEGORY_KEYS = ["society"] as const;
 
 export const NEWS_CATEGORY_KEYS = [
   ...COMMUNITY_KEYS,
@@ -48,11 +48,9 @@ export type NewsCategoryKey = (typeof NEWS_CATEGORY_KEYS)[number];
 
 const EXTRA_LABELS_AR: Record<(typeof EXTRA_NEWS_CATEGORY_KEYS)[number], string> = {
   society: "المجتمع",
-  general: "عام",
 };
 const EXTRA_LABELS_EN: Record<(typeof EXTRA_NEWS_CATEGORY_KEYS)[number], string> = {
   society: "Society",
-  general: "General",
 };
 
 export function communityLabel(key: string, lang: "ar" | "en"): string {
