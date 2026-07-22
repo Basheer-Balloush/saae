@@ -772,6 +772,7 @@ function NewsForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitInFlightRef.current || anyUploading) return;
     const parsed = newsSchema.safeParse({
       title_ar: titleAr,
       title_en: titleEn,
@@ -787,6 +788,7 @@ function NewsForm({
       toast.error(parsed.error.issues[0].message);
       return;
     }
+    submitInFlightRef.current = true;
     setSaving(true);
     try {
       const payload = {
