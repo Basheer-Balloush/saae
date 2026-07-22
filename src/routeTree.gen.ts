@@ -43,11 +43,14 @@ import { Route as InitiativeClaimRouteImport } from './routes/initiative.claim'
 import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system.login'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminInitiativeSurveyRouteImport } from './routes/admin.initiative-survey'
 import { Route as AdminInitiativeRouteImport } from './routes/admin.initiative'
 import { Route as AdminEventSurveyRouteImport } from './routes/admin.event-survey'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system.student.index'
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
 import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system.admin.index'
@@ -258,6 +261,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPartnersRoute = AdminPartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMembersRoute = AdminMembersRouteImport.update({
   id: '/members',
   path: '/members',
@@ -281,6 +289,16 @@ const AdminInitiativeRoute = AdminInitiativeRouteImport.update({
 const AdminEventSurveyRoute = AdminEventSurveyRouteImport.update({
   id: '/event-survey',
   path: '/event-survey',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminChatbotRoute = AdminChatbotRouteImport.update({
+  id: '/chatbot',
+  path: '/chatbot',
   getParentRoute: () => AdminRoute,
 } as any)
 const LearningManagementSystemStudentIndexRoute =
@@ -429,11 +447,14 @@ export interface FileRoutesByFullPath {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/chatbot': typeof AdminChatbotRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/partners': typeof AdminPartnersRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -489,11 +510,14 @@ export interface FileRoutesByTo {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/chatbot': typeof AdminChatbotRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/partners': typeof AdminPartnersRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -550,11 +574,14 @@ export interface FileRoutesById {
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/chatbot': typeof AdminChatbotRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/partners': typeof AdminPartnersRoute
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
@@ -615,11 +642,14 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
+    | '/admin/chatbot'
+    | '/admin/dashboard'
     | '/admin/event-survey'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
     | '/admin/members'
+    | '/admin/partners'
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
@@ -675,11 +705,14 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
+    | '/admin/chatbot'
+    | '/admin/dashboard'
     | '/admin/event-survey'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
     | '/admin/members'
+    | '/admin/partners'
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
@@ -735,11 +768,14 @@ export interface FileRouteTypes {
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
+    | '/admin/chatbot'
+    | '/admin/dashboard'
     | '/admin/event-survey'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/login'
     | '/admin/members'
+    | '/admin/partners'
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
@@ -1050,6 +1086,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/partners': {
+      id: '/admin/partners'
+      path: '/partners'
+      fullPath: '/admin/partners'
+      preLoaderRoute: typeof AdminPartnersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/members': {
       id: '/admin/members'
       path: '/members'
@@ -1083,6 +1126,20 @@ declare module '@tanstack/react-router' {
       path: '/event-survey'
       fullPath: '/admin/event-survey'
       preLoaderRoute: typeof AdminEventSurveyRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/chatbot': {
+      id: '/admin/chatbot'
+      path: '/chatbot'
+      fullPath: '/admin/chatbot'
+      preLoaderRoute: typeof AdminChatbotRouteImport
       parentRoute: typeof AdminRoute
     }
     '/learning-management-system/student/': {
@@ -1243,20 +1300,26 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminChatbotRoute: typeof AdminChatbotRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEventSurveyRoute: typeof AdminEventSurveyRoute
   AdminInitiativeRoute: typeof AdminInitiativeRoute
   AdminInitiativeSurveyRoute: typeof AdminInitiativeSurveyRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMembersRoute: typeof AdminMembersRoute
+  AdminPartnersRoute: typeof AdminPartnersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminChatbotRoute: AdminChatbotRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
   AdminEventSurveyRoute: AdminEventSurveyRoute,
   AdminInitiativeRoute: AdminInitiativeRoute,
   AdminInitiativeSurveyRoute: AdminInitiativeSurveyRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminMembersRoute: AdminMembersRoute,
+  AdminPartnersRoute: AdminPartnersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

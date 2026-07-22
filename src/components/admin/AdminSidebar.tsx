@@ -37,8 +37,8 @@ const isGroup = (i: NavItem): i is NavGroup => "children" in i;
 function buildNav(lang: "ar" | "en"): NavItem[] {
   const ar = lang === "ar";
   return [
-    { title: ar ? "لوحة التحكم" : "Dashboard", url: "/admin", icon: LayoutDashboard },
-    { title: ar ? "الأخبار" : "News", url: "/admin/news", icon: Newspaper },
+    { title: ar ? "لوحة التحكم" : "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
+    { title: ar ? "الأخبار" : "News", url: "/admin", icon: Newspaper },
     { title: ar ? "الشركاء" : "Partners", url: "/admin/partners", icon: Handshake },
     { title: ar ? "الأعضاء" : "Members", url: "/admin/members", icon: Users },
     {
