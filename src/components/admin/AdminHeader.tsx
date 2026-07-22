@@ -9,8 +9,8 @@ import { useTheme } from "@/lib/theme";
 import { supabase } from "@/integrations/supabase/client";
 
 const TITLES: Record<string, { ar: string; en: string }> = {
-  "/admin": { ar: "لوحة التحكم", en: "Dashboard" },
-  "/admin/news": { ar: "الأخبار", en: "News" },
+  "/admin": { ar: "الأخبار", en: "News" },
+  "/admin/dashboard": { ar: "لوحة التحكم", en: "Dashboard" },
   "/admin/members": { ar: "الأعضاء", en: "Members" },
   "/admin/partners": { ar: "الشركاء", en: "Partners" },
   "/admin/chatbot": { ar: "الشات بوت", en: "Chatbot" },
