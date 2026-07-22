@@ -44,12 +44,20 @@ function buildNav(lang: "ar" | "en"): NavItem[] {
     { title: ar ? "الشركاء" : "Partners", url: "/admin/partners", icon: Handshake },
     { title: ar ? "الأعضاء" : "Members", url: "/admin/members", icon: Users },
     {
+      title: "CRM",
+      icon: Contact2,
+      children: [
+        { title: ar ? "أفراد" : "Individual leads", url: "/admin/crm/leads/individuals" },
+        { title: ar ? "شركات" : "Company leads", url: "/admin/crm/leads/companies" },
+      ],
+    },
+    {
       title: ar ? "الاستبيانات" : "Forms",
       icon: FileText,
-      children: [
-        { title: ar ? "استبيان المبادرة" : "Initiative Survey", url: "/admin/initiative-survey" },
-        { title: ar ? "استبيان المشاريع" : "Event Survey", url: "/admin/event-survey" },
-      ],
+      children: ADMIN_FORMS.map((f) => ({
+        title: ar ? f.labelAr : f.labelEn,
+        url: `/admin/crm/forms/${f.slug}`,
+      })),
     },
     { title: ar ? "مبادرة المليون" : "Million Initiative", url: "/admin/initiative", icon: Sparkles },
     { title: ar ? "الشات بوت" : "Chatbot", url: "/admin/chatbot", icon: Bot },
