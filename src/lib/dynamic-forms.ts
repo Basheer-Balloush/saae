@@ -13,6 +13,9 @@ export const FIELD_TYPES = [
 ] as const;
 export type FieldType = (typeof FIELD_TYPES)[number];
 
+export const FORM_STATUSES = ["draft", "published", "hidden", "archived"] as const;
+export type FormStatus = (typeof FORM_STATUSES)[number];
+
 export const RESERVED_SLUGS = new Set([
   "admin", "api", "auth", "learning-management-system", "attendance-management-system",
   "contact", "about", "news", "communities", "initiative-survey", "event-survey",
