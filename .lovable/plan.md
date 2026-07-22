@@ -1,19 +1,46 @@
-Plan: Make the pie chart segment colors exactly match the solid legend colors shown in the legend spans.
+## Source of truth
 
-Context: The custom legend uses solid CSS-variable backgrounds (`var(--footer-accent)`, `var(--footer-medium)`, `var(--footer-light)`, `var(--footer)`), while the pie chart currently fills each segment with a gradient that uses the same variable but at reduced opacity. That makes the chart segments look different from the legend dots.
+The news-category labels live in `src/lib/communityCategories.ts`. The extra (news-only) category we need to rename is keyed by `"society"` in `EXTRA_NEWS_CATEGORY_KEYS`, with display labels in `EXTRA_LABELS_AR` / `EXTRA_LABELS_EN`. Everything in the admin dashboard (Create News / Edit News category selector) and public news pages renders these labels through `communityLabel(key, lang)`. No enum, DB column, or slug uses `"society"` as a stored value beyond the free-text `news.category` / `news.categories` rows already saved.
 
-Steps:
-1. In `src/routes/one-million-initiative-home.tsx`, change the `<Cell>` fill from the gradient URL to the same CSS variable used by the matching legend span:
-   ```tsx
-   <Cell
-     key={entry.name}
-     fill={`var(${sliceTokens[originalIndex % sliceTokens.length]})`}
-   />
-   ```
-   This will make Covered, Trained, Waitlist, and Remaining segments use the exact same solid colors as their legend labels.
+The only other `Society` / `المجتمع` matches in the repo are unrelated prose (about-content, initiative copy, communities page, and the admin form field label "المجتمع (التصنيف)" which means "Community (Category)" — the form field for the category selector, not the "society" value). Those stay untouched.
 
-2. Remove the now-unused `<defs>` gradient block and the related `sliceTokens` mapping loop in the `<PieChart>` element, since the gradient definitions are no longer referenced.
+## Change
 
-3. Verify the project builds with `bun run build`.
+Rename the display labels only. Keep the internal key `"society"` so existing news rows with `category = 'society'` (or `'society'` inside `categories[]`) automatically render as the new label.
 
-No other pie-chart logic, labels, or layout will change.
+In `src/lib/communityCategories.ts`:
+
+```ts
+const EXTRA_LABELS_AR: Record<...> = {
+  society: "عام",
+};
+const EXTRA_LABELS_EN: Record<...> = {
+  society: "General",
+};
+```
+
+That's the whole code change. Because `communityLabel()` is the single label resolver used by:
+- Admin create/edit category selector (`src/routes/admin.index.tsx`)
+- News list (`src/routes/news.index.tsx`)
+- News detail (`src/routes/news.$id.tsx`)
+- Community pages
+
+…the rename automatically flows to every surface in both Arabic and English, and existing articles keep their `society` association.
+
+## Not changing
+
+- Internal key / slug `society` (no data migration needed; historical articles keep their association).
+- Order of categories in `NEWS_CATEGORY_KEYS`.
+- Any other category label.
+- Unrelated "Society"/"المجتمع" prose in about-content, initiative, or communities pages.
+- The admin form field label "المجتمع (التصنيف)" (means "Community (Category)" — a field label, not the category value).
+- Public routing (no URL uses the label; community pages use the `COMMUNITY_KEYS`, not `society`).
+
+## Verification
+
+- `bun run build` passes.
+- Manually confirm in the admin news dialog that the selector shows "General" (EN) / "عام" (AR) and that saving/loading an article previously tagged `society` still shows it under the new label.
+
+## Risks
+
+None expected — pure label rename behind a single resolver function.
