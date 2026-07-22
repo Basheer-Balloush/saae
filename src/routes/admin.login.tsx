@@ -126,8 +126,14 @@ function AdminLogin() {
             </Button>
           </div>
         </div>
-        <h1 className="mt-4 text-2xl font-bold text-foreground">{t.title}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{t.subtitle}</p>
+        <img
+          src={logoSrc}
+          alt={t.logoAlt}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = logoFallback; }}
+          className="mx-auto mt-6 h-12 w-auto object-contain sm:h-14"
+        />
+        <h1 className="mt-4 text-2xl font-bold text-foreground text-center">{t.title}</h1>
+        <p className="mt-2 text-sm text-muted-foreground text-center">{t.subtitle}</p>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div>
