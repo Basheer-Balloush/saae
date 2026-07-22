@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Download, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { exportRowsToXlsx, type XlsxColumn } from "@/lib/admin-xlsx-export";
 
 type Row = {
   id: string;
@@ -33,9 +34,37 @@ const SUB_LABEL: Record<string, string> = {
   self_and_donate: "دفع + تبرّع",
 };
 
+const COLUMNS: XlsxColumn<Row>[] = [
+  { header: "التاريخ", type: "date", width: 20, get: (r) => r.created_at },
+  { header: "الاسم", type: "text", width: 26, get: (r) => r.full_name },
+  { header: "الهاتف", type: "text", width: 18, get: (r) => r.phone },
+  { header: "البريد", type: "text", width: 28, get: (r) => r.email },
+  { header: "العنوان", type: "text", width: 24, get: (r) => r.address },
+  { header: "الاختصاص", type: "text", width: 20, get: (r) => r.specialization },
+  {
+    header: "نمط الاشتراك",
+    type: "text",
+    width: 18,
+    get: (r) => (r.subscription_type ? SUB_LABEL[r.subscription_type] ?? r.subscription_type : ""),
+  },
+  { header: "مبلغ التبرّع", type: "number", width: 14, get: (r) => r.donation_amount },
+  { header: "الوضع", type: "text", width: 18, get: (r) => r.current_status },
+  { header: "الدافع", type: "text", width: 24, get: (r) => r.main_motivation },
+  { header: "الالتزام", type: "number", width: 12, get: (r) => r.commitment_level },
+  { header: "الجهاز", type: "text", width: 14, get: (r) => r.device },
+  { header: "الطريقة", type: "text", width: 16, get: (r) => r.learning_method },
+  { header: "العائق", type: "text", width: 24, get: (r) => r.biggest_obstacle },
+  { header: "الاهتمامات", type: "text", width: 30, get: (r) => r.learning_interests },
+  { header: "علاقته بالـAI", type: "text", width: 20, get: (r) => r.ai_relationship },
+  { header: "أدوات استخدمها", type: "text", width: 24, get: (r) => r.ai_tools_used },
+  { header: "سمع من", type: "text", width: 18, get: (r) => r.heard_from },
+  { header: "ملاحظات", type: "text", width: 40, get: (r) => r.extra_notes },
+];
+
 export function InitiativeSurveyDashboard() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -49,30 +78,25 @@ export function InitiativeSurveyDashboard() {
   };
   useEffect(() => { load(); }, []);
 
-  const downloadCSV = () => {
-    if (!rows.length) { toast.info("لا توجد بيانات"); return; }
-    const headers = [
-      "created_at", "full_name", "email", "phone", "address", "specialization",
-      "heard_from", "ai_relationship", "ai_tools_used",
-      "learning_interests", "biggest_obstacle", "learning_method", "device",
-      "commitment_level", "main_motivation", "current_status", "subscription_type", "donation_amount", "extra_notes",
-    ];
-    const esc = (v: unknown) => {
-      if (v === null || v === undefined) return "";
-      const s = Array.isArray(v) ? v.join(" | ") : String(v);
-      return `"${s.replace(/"/g, '""')}"`;
-    };
-    const csv = [
-      headers.join(","),
-      ...rows.map((r) => headers.map((h) => esc((r as unknown as Record<string, unknown>)[h])).join(",")),
-    ].join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `initiative-survey-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const exportXlsx = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      await exportRowsToXlsx<Row>({
+        filenameBase: "initiative-survey",
+        sheetName: "استبيان المبادرة",
+        rtl: true,
+        columns: COLUMNS,
+        rows,
+      });
+      if (!rows.length) toast.info("لا توجد بيانات — تم تنزيل ملف بالعناوين فقط");
+      else toast.success("تم التصدير");
+    } catch (e) {
+      toast.error("تعذّر إنشاء الملف");
+      console.error("initiative-survey export failed", e);
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -85,8 +109,8 @@ export function InitiativeSurveyDashboard() {
           <Button variant="outline" onClick={load} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ms-2 ${loading ? "animate-spin" : ""}`} /> تحديث
           </Button>
-          <Button onClick={downloadCSV}>
-            <Download className="h-4 w-4 ms-2" /> تنزيل CSV
+          <Button onClick={exportXlsx} disabled={exporting} aria-label="تنزيل ملف Excel">
+            <Download className="h-4 w-4 ms-2" /> {exporting ? "جارٍ التصدير..." : "تنزيل Excel"}
           </Button>
         </div>
       </div>

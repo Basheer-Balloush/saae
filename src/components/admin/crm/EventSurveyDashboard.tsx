@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Download, RefreshCw, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { exportRowsToXlsx, type XlsxColumn } from "@/lib/admin-xlsx-export";
 
 type Row = {
   id: string;
@@ -24,9 +25,29 @@ type Row = {
   created_at: string;
 };
 
+const COLUMNS: XlsxColumn<Row>[] = [
+  { header: "التاريخ", type: "date", width: 20, get: (r) => r.created_at },
+  { header: "اسم المشروع", type: "text", width: 26, get: (r) => r.project_name },
+  { header: "المسؤول", type: "text", width: 22, get: (r) => r.contact_name },
+  { header: "الهاتف", type: "text", width: 18, get: (r) => r.phone },
+  { header: "البريد", type: "text", width: 28, get: (r) => r.email },
+  { header: "المدينة", type: "text", width: 16, get: (r) => r.city },
+  { header: "الموقع", type: "text", width: 30, get: (r) => r.website },
+  { header: "Facebook", type: "text", width: 30, get: (r) => r.facebook_url },
+  { header: "Instagram", type: "text", width: 30, get: (r) => r.instagram_url },
+  { header: "LinkedIn", type: "text", width: 30, get: (r) => r.linkedin_url },
+  { header: "المجال", type: "text", width: 20, get: (r) => r.field },
+  { header: "الوصف", type: "text", width: 40, get: (r) => r.description },
+  { header: "المشكلة التي يحلها", type: "text", width: 40, get: (r) => r.problem_solved },
+  { header: "المرحلة", type: "text", width: 16, get: (r) => r.stage },
+  { header: "حجم الفريق", type: "text", width: 14, get: (r) => r.team_size },
+  { header: "ملاحظات", type: "text", width: 40, get: (r) => r.notes },
+];
+
 export function EventSurveyDashboard() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [selected, setSelected] = useState<Row | null>(null);
 
   const load = async () => {
@@ -41,28 +62,25 @@ export function EventSurveyDashboard() {
   };
   useEffect(() => { load(); }, []);
 
-  const downloadCSV = () => {
-    if (!rows.length) { toast.info("لا توجد بيانات"); return; }
-    const headers = [
-      "created_at","project_name","contact_name","phone","email","city",
-      "website","facebook_url","instagram_url","linkedin_url",
-      "field","description","problem_solved","stage","team_size","notes",
-    ];
-    const esc = (v: unknown) => {
-      if (v === null || v === undefined) return "";
-      return `"${String(v).replace(/"/g, '""')}"`;
-    };
-    const csv = [
-      headers.join(","),
-      ...rows.map((r) => headers.map((h) => esc((r as unknown as Record<string, unknown>)[h])).join(",")),
-    ].join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `event-survey-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const exportXlsx = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      await exportRowsToXlsx<Row>({
+        filenameBase: "event-survey",
+        sheetName: "استبيان المشاريع",
+        rtl: true,
+        columns: COLUMNS,
+        rows,
+      });
+      if (!rows.length) toast.info("لا توجد بيانات — تم تنزيل ملف بالعناوين فقط");
+      else toast.success("تم التصدير");
+    } catch (e) {
+      toast.error("تعذّر إنشاء الملف");
+      console.error("event-survey export failed", e);
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -75,8 +93,9 @@ export function EventSurveyDashboard() {
           <Button variant="outline" onClick={load} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ms-2 ${loading ? "animate-spin" : ""}`} /> تحديث
           </Button>
-          <Button onClick={downloadCSV}>
-            <Download className="h-4 w-4 ms-2" /> تنزيل CSV
+          <Button onClick={exportXlsx} disabled={exporting} aria-label="تنزيل ملف Excel">
+            <Download className="h-4 w-4 ms-2" /> {exporting ? "جارٍ التصدير..." : "تنزيل Excel"}
+            
           </Button>
         </div>
       </div>

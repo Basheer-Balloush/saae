@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Check, X, Clock, FileText, ArrowLeft, ArrowRight, ChevronRight, Download, Mail, MessageCircle } from "lucide-react";
-import ExcelJS from "exceljs";
+import { exportRowsToXlsx, type XlsxColumn } from "@/lib/admin-xlsx-export";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -157,56 +157,45 @@ function AdminEnrollmentRequests() {
       }
       const respByReq = new Map(responses.map((r) => [r.request_id, r.answers ?? []]));
 
-      const wb = new ExcelJS.Workbook();
-      const ws = wb.addWorksheet(ar ? "طلبات التسجيل" : "Enrollment requests");
-      const headers = [
-        ar ? "تاريخ الطلب" : "Created at",
-        ar ? "الحالة" : "Status",
-        ar ? "معرّف المستخدم" : "User ID",
-        ar ? "طريقة الدفع" : "Payment method",
-        ar ? "ملاحظات الطالب" : "Student notes",
-        ar ? "ملاحظات الإدارة" : "Admin notes",
-        ar ? "تاريخ القرار" : "Decided at",
-        ...fields.map((f) => (ar ? f.label_ar : (f.label_en || f.label_ar))),
-      ];
-      ws.addRow(headers);
-      ws.getRow(1).font = { bold: true };
+      type ExportRow = { req: Req; ansMap: Map<string, unknown> };
+      const exportRows: ExportRow[] = list.map((r) => ({
+        req: r,
+        ansMap: new Map((respByReq.get(r.id) ?? []).map((a) => [a.field_id, a.value])),
+      }));
 
-      for (const r of list) {
-        const ans = respByReq.get(r.id) ?? [];
-        const ansMap = new Map(ans.map((a) => [a.field_id, a.value]));
-        const fieldCells = fields.map((f) => {
+      const baseColumns: XlsxColumn<ExportRow>[] = [
+        { header: ar ? "تاريخ الطلب" : "Created at", type: "date", width: 20, get: ({ req }) => req.created_at },
+        { header: ar ? "الحالة" : "Status", type: "text", width: 14, get: ({ req }) => req.status },
+        { header: ar ? "معرّف المستخدم" : "User ID", type: "text", width: 38, get: ({ req }) => req.user_id },
+        { header: ar ? "طريقة الدفع" : "Payment method", type: "text", width: 18, get: ({ req }) => req.payment_method },
+        { header: ar ? "ملاحظات الطالب" : "Student notes", type: "text", width: 32, get: ({ req }) => req.notes ?? "" },
+        { header: ar ? "ملاحظات الإدارة" : "Admin notes", type: "text", width: 32, get: ({ req }) => req.admin_notes ?? "" },
+        { header: ar ? "تاريخ القرار" : "Decided at", type: "date", width: 20, get: ({ req }) => req.decided_at },
+      ];
+      const fieldColumns: XlsxColumn<ExportRow>[] = fields.map((f) => ({
+        header: ar ? f.label_ar : (f.label_en || f.label_ar),
+        type: "text",
+        width: 24,
+        get: ({ ansMap }) => {
           const v = ansMap.get(f.id);
           if (v === null || v === undefined || v === "") return "";
           if (Array.isArray(v)) return v.join(", ");
           if (typeof v === "boolean") return v ? (ar ? "نعم" : "Yes") : (ar ? "لا" : "No");
-          if (typeof v === "object") return JSON.stringify(v);
+          if (typeof v === "object") { try { return JSON.stringify(v); } catch { return ""; } }
           return String(v);
-        });
-        ws.addRow([
-          new Date(r.created_at).toLocaleString(ar ? "ar" : "en"),
-          r.status,
-          r.user_id,
-          r.payment_method,
-          r.notes ?? "",
-          r.admin_notes ?? "",
-          r.decided_at ? new Date(r.decided_at).toLocaleString(ar ? "ar" : "en") : "",
-          ...fieldCells,
-        ]);
-      }
-      ws.columns.forEach((col) => { col.width = 22; });
+        },
+      }));
 
-      const buf = await wb.xlsx.writeBuffer();
-      const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      const courseTitle = selectedCourse ? (ar ? selectedCourse.title_ar : (selectedCourse.title_en || selectedCourse.title_ar)) : "course";
-      a.href = url;
-      a.download = `enrollment-requests-${courseTitle}-${new Date().toISOString().slice(0, 10)}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const courseTitle = selectedCourse
+        ? (ar ? selectedCourse.title_ar : (selectedCourse.title_en || selectedCourse.title_ar))
+        : "course";
+      await exportRowsToXlsx<ExportRow>({
+        filenameBase: `enrollment-requests-${courseTitle}`,
+        sheetName: ar ? "طلبات التسجيل" : "Enrollment requests",
+        rtl: ar,
+        columns: [...baseColumns, ...fieldColumns],
+        rows: exportRows,
+      });
       toast.success(ar ? "تم التصدير" : "Exported");
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Export failed");
