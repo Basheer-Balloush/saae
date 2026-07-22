@@ -8,7 +8,9 @@ import {
   Bot,
   Sparkles,
   ChevronDown,
+  Contact2,
 } from "lucide-react";
+import { ADMIN_FORMS } from "@/lib/admin-forms-registry";
 import { useState } from "react";
 import {
   Sidebar,
