@@ -9,7 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Globe, Sun, Moon } from "lucide-react";
+import { Loader2, Globe, Sun, Moon, Eye, EyeOff } from "lucide-react";
+import logoEnLight from "@/assets/saae-logo-en-light.png";
+import logoEnDark from "@/assets/saae-logo-en-dark.png";
+import logoArLight from "@/assets/saae-logo-ar-light.png";
+import logoArDark from "@/assets/saae-logo-ar-dark.png";
+import logoFallback from "@/assets/saae-logo-horizontal.png";
 
 export const Route = createFileRoute("/admin/login")({
   head: () => ({
@@ -37,6 +42,9 @@ const T = {
     signedIn: "Signed in",
     authFailed: "Authentication failed",
     langBtn: "العربية",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
+    logoAlt: "Syrian Association for AI & Entrepreneurship",
   },
   ar: {
     back: "→ العودة إلى الموقع",
@@ -50,6 +58,9 @@ const T = {
     signedIn: "تم تسجيل الدخول",
     authFailed: "فشل المصادقة",
     langBtn: "English",
+    showPassword: "إظهار كلمة المرور",
+    hidePassword: "إخفاء كلمة المرور",
+    logoAlt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",
   },
 };
 
@@ -62,6 +73,12 @@ function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const logoSrc =
+    lang === "ar"
+      ? theme === "dark" ? logoArDark : logoArLight
+      : theme === "dark" ? logoEnDark : logoEnLight;
 
   const schema = z.object({
     email: z.string().trim().email(t.invalidEmail).max(255),
@@ -109,8 +126,14 @@ function AdminLogin() {
             </Button>
           </div>
         </div>
-        <h1 className="mt-4 text-2xl font-bold text-foreground">{t.title}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{t.subtitle}</p>
+        <img
+          src={logoSrc}
+          alt={t.logoAlt}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = logoFallback; }}
+          className="mx-auto mt-6 h-12 w-auto object-contain sm:h-14"
+        />
+        <h1 className="mt-4 text-2xl font-bold text-foreground text-center">{t.title}</h1>
+        <p className="mt-2 text-sm text-muted-foreground text-center">{t.subtitle}</p>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div>
@@ -119,7 +142,26 @@ function AdminLogin() {
           </div>
           <div>
             <Label htmlFor="password">{t.password}</Label>
-            <Input id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pe-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? t.hidePassword : t.showPassword}
+                aria-pressed={showPassword}
+                className="absolute end-1 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
           <Button type="submit" className="w-full" disabled={submitting}>
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
