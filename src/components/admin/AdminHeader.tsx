@@ -15,8 +15,10 @@ const TITLES: Record<string, { ar: string; en: string }> = {
   "/admin/partners": { ar: "الشركاء", en: "Partners" },
   "/admin/chatbot": { ar: "الشات بوت", en: "Chatbot" },
   "/admin/initiative": { ar: "مبادرة المليون", en: "Million Initiative" },
-  "/admin/initiative-survey": { ar: "استبيان المبادرة", en: "Initiative Survey" },
-  "/admin/event-survey": { ar: "استبيان المشاريع", en: "Event Survey" },
+  "/admin/crm/leads/individuals": { ar: "CRM — أفراد", en: "CRM — Individual Leads" },
+  "/admin/crm/leads/companies": { ar: "CRM — شركات", en: "CRM — Company Leads" },
+  "/admin/crm/forms/initiative-survey": { ar: "استبيان المبادرة", en: "Initiative Survey" },
+  "/admin/crm/forms/event-survey": { ar: "استبيان المشاريع", en: "Project Survey" },
 };
 
 export function AdminHeader() {

@@ -22,8 +22,9 @@ function DashboardPage() {
     { title: ar ? "الأخبار" : "News", href: "/admin", icon: Newspaper, desc: ar ? "إدارة الأخبار والمقالات" : "Manage news articles" },
     { title: ar ? "الأعضاء" : "Members", href: "/admin/members", icon: Users, desc: ar ? "مجلس الإدارة والفريق" : "Board & team members" },
     { title: ar ? "الشركاء" : "Partners", href: "/admin/partners", icon: Handshake, desc: ar ? "شعارات الشركاء" : "Partner logos" },
-    { title: ar ? "استبيان المبادرة" : "Initiative Survey", href: "/admin/initiative-survey", icon: FileText, desc: ar ? "استجابات المستخدمين" : "User responses" },
-    { title: ar ? "استبيان المشاريع" : "Event Survey", href: "/admin/event-survey", icon: FileText, desc: ar ? "استجابات المشاريع" : "Project responses" },
+    { title: "CRM — Leads", href: "/admin/crm/leads/individuals", icon: Users, desc: ar ? "الأفراد والشركات" : "Individuals & companies" },
+    { title: ar ? "استبيان المبادرة" : "Initiative Survey", href: "/admin/crm/forms/initiative-survey", icon: FileText, desc: ar ? "استجابات المستخدمين" : "User responses" },
+    { title: ar ? "استبيان المشاريع" : "Event Survey", href: "/admin/crm/forms/event-survey", icon: FileText, desc: ar ? "استجابات المشاريع" : "Project responses" },
     { title: ar ? "مبادرة المليون" : "Million Initiative", href: "/admin/initiative", icon: Sparkles, desc: ar ? "التبرعات والإعدادات" : "Donations & settings" },
     { title: ar ? "الشات بوت" : "Chatbot", href: "/admin/chatbot", icon: Bot, desc: ar ? "قاعدة المعرفة والمحادثات" : "Knowledge & conversations" },
   ] as const;
