@@ -17,14 +17,16 @@ export const Route = createFileRoute("/one-million-initiative-home")({
   head: () => ({
     meta: [
       { title: "مبادرة مليون مستخدم ذكاء اصطناعي سوري — الصفحة التفاعلية" },
-      { name: "description", content: "ادعم أو سجّل في مبادرة مليون مستخدم ذكاء اصطناعي سوري. تابع الإحصائيات الحية وقائمة الرعاة." },
+      {
+        name: "description",
+        content: "ادعم أو سجّل في مبادرة مليون مستخدم ذكاء اصطناعي سوري. تابع الإحصائيات الحية وقائمة الرعاة.",
+      },
       { property: "og:title", content: "مبادرة مليون مستخدم — تفاعلي" },
       { property: "og:description", content: "تبرع، ادفع وابدأ، أو انضم لقائمة الانتظار." },
     ],
   }),
   component: InitiativeHome,
 });
-
 
 function InitiativeHome() {
   const { lang } = useLang();
@@ -33,7 +35,13 @@ function InitiativeHome() {
   const settingsFn = useServerFn(getInitiativeSettings);
   const donorsFn = useServerFn(getTopDonors);
 
-  const [stats, setStats] = useState<{ target: number; done: number; waiting: number; coveredUnassigned: number; totalFunded: number } | null>(null);
+  const [stats, setStats] = useState<{
+    target: number;
+    done: number;
+    waiting: number;
+    coveredUnassigned: number;
+    totalFunded: number;
+  } | null>(null);
   const [settings, setSettings] = useState<any>(null);
   const [companies, setCompanies] = useState<any[]>([]);
   const [individuals, setIndividuals] = useState<any[]>([]);
@@ -43,16 +51,23 @@ function InitiativeHome() {
 
   useEffect(() => {
     const load = () => {
-      statsFn().then(setStats).catch(() => {});
-      donorsFn({ data: { limit: 10, donorType: "company" } }).then(setCompanies).catch(() => {});
-      donorsFn({ data: { limit: 10, donorType: "individual" } }).then(setIndividuals).catch(() => {});
+      statsFn()
+        .then(setStats)
+        .catch(() => {});
+      donorsFn({ data: { limit: 10, donorType: "company" } })
+        .then(setCompanies)
+        .catch(() => {});
+      donorsFn({ data: { limit: 10, donorType: "individual" } })
+        .then(setIndividuals)
+        .catch(() => {});
     };
     load();
-    settingsFn().then(setSettings).catch(() => {});
+    settingsFn()
+      .then(setSettings)
+      .catch(() => {});
     const t = setInterval(load, 30000);
     return () => clearInterval(t);
   }, [statsFn, settingsFn, donorsFn]);
-
 
   const target = stats?.target ?? 1000000;
   const done = stats?.done ?? 0;
@@ -69,39 +84,47 @@ function InitiativeHome() {
   const visiblePieData = pieData.filter((d) => d.value > 0);
   const remainingLabel = pieData[3].name;
 
-  const t = isAr ? {
-    badge: "مبادرة وطنية",
-    heroTitle: "مبادرة مليون مستخدم ذكاء اصطناعي سوري",
-    heroSub: "محو الأمية في الذكاء الاصطناعي وتمكين السوريين من أدوات المستقبل.",
-    payStart: "ادفع وابدأ",
-    joinWait: "سجّل على قائمة الانتظار",
-    about: "حولنا", mission: "رسالتنا", values: "قيمنا",
-    statsTitle: "الإحصائيات الحية", statsSub: "تابع تقدم المبادرة لحظة بلحظة.",
-    progress: "التقدّم نحو المليون",
-    donorsTitle: "أبرز الرعاة",
-    donorsSub: "قائمة الشركات والأفراد الأكثر دعماً للمبادرة.",
-    viewAll: "عرض الكل",
-    chair: "مقعد",
-    csrTitle: "مسؤولية مجتمعية",
-    csrSub: "ساهم في تدريب السوريين عبر شراء مقاعد لقائمة الانتظار. كل مقعد بدولار أمريكي واحد فقط.",
-    sponsor: "تبرّع الآن",
-  } : {
-    badge: "National Initiative",
-    heroTitle: "One Million Syrian AI Users Initiative",
-    heroSub: "AI literacy for Syria — empowering people with the tools of the future.",
-    payStart: "Pay & Start",
-    joinWait: "Join the Waitlist",
-    about: "About", mission: "Mission", values: "Values",
-    statsTitle: "Live Statistics", statsSub: "Track the initiative's progress in real time.",
-    progress: "Progress toward 1,000,000",
-    donorsTitle: "Top Sponsors",
-    donorsSub: "Companies and individuals leading the initiative.",
-    viewAll: "View all",
-    chair: "seats",
-    csrTitle: "Corporate Social Responsibility",
-    csrSub: "Sponsor seats for waitlisted learners. Just $1 per seat.",
-    sponsor: "Donate now",
-  };
+  const t = isAr
+    ? {
+        badge: "مبادرة وطنية",
+        heroTitle: "مبادرة مليون مستخدم ذكاء اصطناعي سوري",
+        heroSub: "محو الأمية في الذكاء الاصطناعي وتمكين السوريين من أدوات المستقبل.",
+        payStart: "ادفع وابدأ",
+        joinWait: "سجّل على قائمة الانتظار",
+        about: "حولنا",
+        mission: "رسالتنا",
+        values: "قيمنا",
+        statsTitle: "الإحصائيات الحية",
+        statsSub: "تابع تقدم المبادرة لحظة بلحظة.",
+        progress: "التقدّم نحو المليون",
+        donorsTitle: "أبرز الرعاة",
+        donorsSub: "قائمة الشركات والأفراد الأكثر دعماً للمبادرة.",
+        viewAll: "عرض الكل",
+        chair: "مقعد",
+        csrTitle: "مسؤولية مجتمعية",
+        csrSub: "ساهم في تدريب السوريين عبر شراء مقاعد لقائمة الانتظار. كل مقعد بدولار أمريكي واحد فقط.",
+        sponsor: "تبرّع الآن",
+      }
+    : {
+        badge: "National Initiative",
+        heroTitle: "One Million Syrian AI Users Initiative",
+        heroSub: "AI literacy for Syria — empowering people with the tools of the future.",
+        payStart: "Pay & Start",
+        joinWait: "Join the Waitlist",
+        about: "About",
+        mission: "Mission",
+        values: "Values",
+        statsTitle: "Live Statistics",
+        statsSub: "Track the initiative's progress in real time.",
+        progress: "Progress toward 1,000,000",
+        donorsTitle: "Top Sponsors",
+        donorsSub: "Companies and individuals leading the initiative.",
+        viewAll: "View all",
+        chair: "seats",
+        csrTitle: "Corporate Social Responsibility",
+        csrSub: "Sponsor seats for waitlisted learners. Just $1 per seat.",
+        sponsor: "Donate now",
+      };
 
   // Animated count-up for the center number
   const [displayDone, setDisplayDone] = useState(0);
@@ -137,33 +160,64 @@ function InitiativeHome() {
           </h1>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">{t.heroSub}</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button size="lg" onClick={() => setPayOpen(true)}>{t.payStart}</Button>
-            <Button size="lg" variant="outline" onClick={() => setWaitlistOpen(true)}>{t.joinWait}</Button>
+            <Button size="lg" onClick={() => setPayOpen(true)}>
+              {t.payStart}
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => setWaitlistOpen(true)}>
+              {t.joinWait}
+            </Button>
           </div>
         </section>
 
         {/* FLIP CARDS */}
         <section className="container mx-auto px-4 sm:px-6 mt-20 grid gap-6 md:grid-cols-3">
           <FlipCard
-            front={<>
-              <Sparkles className="h-12 w-12 text-primary" />
-              <h2 className="text-2xl font-bold">{t.about}</h2>
-            </>}
-            back={<><h3 className="text-xl font-bold text-primary mb-3">{t.about}</h3><p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">{(isAr ? settings?.about_ar : settings?.about_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
+            front={
+              <>
+                <Sparkles className="h-12 w-12 text-primary" />
+                <h2 className="text-2xl font-bold">{t.about}</h2>
+              </>
+            }
+            back={
+              <>
+                <h3 className="text-xl font-bold text-primary mb-3">{t.about}</h3>
+                <p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">
+                  {(isAr ? settings?.about_ar : settings?.about_en) || (isAr ? "تحميل..." : "Loading...")}
+                </p>
+              </>
+            }
           />
           <FlipCard
-            front={<>
-              <Target className="h-12 w-12 text-secondary" />
-              <h2 className="text-2xl font-bold">{t.mission}</h2>
-            </>}
-            back={<><h3 className="text-xl font-bold text-secondary mb-3">{t.mission}</h3><p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">{(isAr ? settings?.mission_ar : settings?.mission_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
+            front={
+              <>
+                <Target className="h-12 w-12 text-secondary" />
+                <h2 className="text-2xl font-bold">{t.mission}</h2>
+              </>
+            }
+            back={
+              <>
+                <h3 className="text-xl font-bold text-secondary mb-3">{t.mission}</h3>
+                <p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">
+                  {(isAr ? settings?.mission_ar : settings?.mission_en) || (isAr ? "تحميل..." : "Loading...")}
+                </p>
+              </>
+            }
           />
           <FlipCard
-            front={<>
-              <HeartHandshake className="h-12 w-12 text-secondary" />
-              <h2 className="text-2xl font-bold">{t.values}</h2>
-            </>}
-            back={<><h3 className="text-xl font-bold text-secondary mb-3">{t.values}</h3><p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">{(isAr ? settings?.values_ar : settings?.values_en) || (isAr ? "تحميل..." : "Loading...")}</p></>}
+            front={
+              <>
+                <HeartHandshake className="h-12 w-12 text-secondary" />
+                <h2 className="text-2xl font-bold">{t.values}</h2>
+              </>
+            }
+            back={
+              <>
+                <h3 className="text-xl font-bold text-secondary mb-3">{t.values}</h3>
+                <p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">
+                  {(isAr ? settings?.values_ar : settings?.values_en) || (isAr ? "تحميل..." : "Loading...")}
+                </p>
+              </>
+            }
           />
         </section>
 
@@ -185,13 +239,10 @@ function InitiativeHome() {
 
             <div className="relative grid gap-10 lg:grid-cols-[1.1fr_1fr] items-center">
               {/* Donut */}
-              <div
-                className="relative mx-auto h-[340px] w-full max-w-[420px]"
-                style={{ containerType: "inline-size" }}
-              >
+              <div className="relative mx-auto h-[340px] w-full max-w-[420px]" style={{ containerType: "inline-size" }}>
                 <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
+                  <PieChart>
+                    <Pie
                       data={visiblePieData}
                       dataKey="value"
                       nameKey="name"
@@ -201,7 +252,7 @@ function InitiativeHome() {
                       outerRadius={140}
                       paddingAngle={visiblePieData.length > 1 ? 2 : 0}
                       stroke="var(--card)"
-                      strokeWidth={3}
+                      strokeWidth={1}
                       startAngle={90}
                       endAngle={-270}
                       animationBegin={0}
@@ -211,10 +262,7 @@ function InitiativeHome() {
                       {visiblePieData.map((entry) => {
                         const originalIndex = pieData.findIndex((p) => p.name === entry.name);
                         return (
-                        <Cell
-                            key={entry.name}
-                            fill={`var(${sliceTokens[originalIndex % sliceTokens.length]})`}
-                          />
+                          <Cell key={entry.name} fill={`var(${sliceTokens[originalIndex % sliceTokens.length]})`} />
                         );
                       })}
                     </Pie>
@@ -269,10 +317,7 @@ function InitiativeHome() {
                       className="group relative rounded-2xl border border-border bg-background/50 backdrop-blur p-4 transition-all hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-soft"
                     >
                       <div className="flex items-center gap-3">
-                        <span
-                          className="h-3 w-3 rounded-full ring-2 ring-card"
-                          style={{ background: `var(${tok})` }}
-                        />
+                        <span className="h-3 w-3 rounded-full ring-2 ring-card" style={{ background: `var(${tok})` }} />
                         <span className="text-sm font-medium text-foreground/90">{entry.name}</span>
                         <span className="ms-auto text-xs text-muted-foreground tabular-nums">{pct}%</span>
                       </div>
@@ -291,11 +336,16 @@ function InitiativeHome() {
         <section className="container mx-auto px-4 sm:px-6 mt-24 space-y-10">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h2 className="text-3xl sm:text-4xl font-bold flex items-center gap-3"><Trophy className="h-8 w-8 text-secondary" />{t.donorsTitle}</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold flex items-center gap-3">
+                <Trophy className="h-8 w-8 text-secondary" />
+                {t.donorsTitle}
+              </h2>
               <p className="text-muted-foreground mt-2">{t.donorsSub}</p>
             </div>
             <Link to="/one-million-initiative-donors">
-              <Button variant="outline">{t.viewAll} <ArrowRight className="h-4 w-4 ms-2" /></Button>
+              <Button variant="outline">
+                {t.viewAll} <ArrowRight className="h-4 w-4 ms-2" />
+              </Button>
             </Link>
           </div>
 
@@ -316,21 +366,27 @@ function InitiativeHome() {
           />
         </section>
 
-
-
         {/* CTA Section */}
         <section className="container mx-auto px-4 sm:px-6 mt-24 grid gap-6 md:grid-cols-2">
           <div className="rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/15 to-primary/5 p-8 text-center">
             <Users className="h-12 w-12 text-primary mx-auto" />
             <h3 className="text-2xl font-bold mt-4">{t.payStart}</h3>
-            <p className="text-muted-foreground mt-2">{isAr ? "ادفع $1 وابدأ الكورس فوراً." : "Pay $1 and start instantly."}</p>
-            <Button size="lg" className="mt-6" onClick={() => setPayOpen(true)}>{t.payStart}</Button>
+            <p className="text-muted-foreground mt-2">
+              {isAr ? "ادفع $1 وابدأ الكورس فوراً." : "Pay $1 and start instantly."}
+            </p>
+            <Button size="lg" className="mt-6" onClick={() => setPayOpen(true)}>
+              {t.payStart}
+            </Button>
           </div>
           <div className="rounded-3xl border border-secondary/30 bg-gradient-to-br from-secondary/15 to-secondary/5 p-8 text-center">
             <HeartHandshake className="h-12 w-12 text-secondary mx-auto" />
             <h3 className="text-2xl font-bold mt-4">{t.joinWait}</h3>
-            <p className="text-muted-foreground mt-2">{isAr ? "انتظر تغطية مقعدك من أحد الرعاة." : "Wait for a sponsor to cover your seat."}</p>
-            <Button size="lg" variant="outline" className="mt-6" onClick={() => setWaitlistOpen(true)}>{t.joinWait}</Button>
+            <p className="text-muted-foreground mt-2">
+              {isAr ? "انتظر تغطية مقعدك من أحد الرعاة." : "Wait for a sponsor to cover your seat."}
+            </p>
+            <Button size="lg" variant="outline" className="mt-6" onClick={() => setWaitlistOpen(true)}>
+              {t.joinWait}
+            </Button>
           </div>
         </section>
 
@@ -340,7 +396,13 @@ function InitiativeHome() {
             <HeartHandshake className="h-16 w-16 text-secondary mx-auto" />
             <h2 className="text-3xl sm:text-4xl font-bold mt-4">{t.csrTitle}</h2>
             <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">{t.csrSub}</p>
-            <Button size="lg" className="mt-6 bg-gradient-brand text-white border-0 hover:opacity-90" onClick={() => setDonateOpen(true)}>{t.sponsor}</Button>
+            <Button
+              size="lg"
+              className="mt-6 bg-gradient-brand text-white border-0 hover:opacity-90"
+              onClick={() => setDonateOpen(true)}
+            >
+              {t.sponsor}
+            </Button>
           </div>
         </section>
       </main>
@@ -353,9 +415,21 @@ function InitiativeHome() {
   );
 }
 
-function DonorTable({ title, rows, isAr, sponsorLabel, emptyLabel }: {
+function DonorTable({
+  title,
+  rows,
+  isAr,
+  sponsorLabel,
+  emptyLabel,
+}: {
   title: string;
-  rows: Array<{ donor_name: string; donor_display_name: string | null; logo_url: string | null; total_chairs: number; total_amount: number }>;
+  rows: Array<{
+    donor_name: string;
+    donor_display_name: string | null;
+    logo_url: string | null;
+    total_chairs: number;
+    total_amount: number;
+  }>;
   isAr: boolean;
   sponsorLabel: string;
   emptyLabel: string;
@@ -395,4 +469,3 @@ function DonorTable({ title, rows, isAr, sponsorLabel, emptyLabel }: {
     </div>
   );
 }
-
