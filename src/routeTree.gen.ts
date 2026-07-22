@@ -20,6 +20,7 @@ import { Route as InitiativeSurveyRouteImport } from './routes/initiative-survey
 import { Route as EventSurveyRouteImport } from './routes/event-survey'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
@@ -128,6 +129,11 @@ const AttendanceManagementSystemRoute =
     path: '/attendance-management-system',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -156,9 +162,9 @@ const AttendanceManagementSystemIndexRoute =
     getParentRoute: () => AttendanceManagementSystemRoute,
   } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/admin/',
-  path: '/admin/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ResourcesAiToolsRoute = ResourcesAiToolsRouteImport.update({
   id: '/resources/ai-tools',
@@ -252,24 +258,24 @@ const ApiChatRoute = ApiChatRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin/login',
-  path: '/admin/login',
-  getParentRoute: () => rootRouteImport,
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminInitiativeSurveyRoute = AdminInitiativeSurveyRouteImport.update({
-  id: '/admin/initiative-survey',
-  path: '/admin/initiative-survey',
-  getParentRoute: () => rootRouteImport,
+  id: '/initiative-survey',
+  path: '/initiative-survey',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminInitiativeRoute = AdminInitiativeRouteImport.update({
-  id: '/admin/initiative',
-  path: '/admin/initiative',
-  getParentRoute: () => rootRouteImport,
+  id: '/initiative',
+  path: '/initiative',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminEventSurveyRoute = AdminEventSurveyRouteImport.update({
-  id: '/admin/event-survey',
-  path: '/admin/event-survey',
-  getParentRoute: () => rootRouteImport,
+  id: '/event-survey',
+  path: '/event-survey',
+  getParentRoute: () => AdminRoute,
 } as any)
 const LearningManagementSystemStudentIndexRoute =
   LearningManagementSystemStudentIndexRouteImport.update({
@@ -405,6 +411,7 @@ const LearningManagementSystemInstructorAssignmentsCourseIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
@@ -523,6 +530,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
@@ -586,6 +594,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/attendance-management-system'
     | '/contact'
     | '/event-survey'
@@ -703,6 +712,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/attendance-management-system'
     | '/contact'
     | '/event-survey'
@@ -765,6 +775,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
   EventSurveyRoute: typeof EventSurveyRoute
@@ -776,16 +787,11 @@ export interface RootRouteChildren {
   RegistrationRoute: typeof RegistrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
-  AdminEventSurveyRoute: typeof AdminEventSurveyRoute
-  AdminInitiativeRoute: typeof AdminInitiativeRoute
-  AdminInitiativeSurveyRoute: typeof AdminInitiativeSurveyRoute
-  AdminLoginRoute: typeof AdminLoginRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
   InitiativeClaimRoute: typeof InitiativeClaimRoute
   NewsIdRoute: typeof NewsIdRoute
   ResourcesAiToolsRoute: typeof ResourcesAiToolsRoute
-  AdminIndexRoute: typeof AdminIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -871,6 +877,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AttendanceManagementSystemRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -908,10 +921,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/': {
       id: '/admin/'
-      path: '/admin'
+      path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/resources/ai-tools': {
       id: '/resources/ai-tools'
@@ -1027,31 +1040,31 @@ declare module '@tanstack/react-router' {
     }
     '/admin/login': {
       id: '/admin/login'
-      path: '/admin/login'
+      path: '/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/initiative-survey': {
       id: '/admin/initiative-survey'
-      path: '/admin/initiative-survey'
+      path: '/initiative-survey'
       fullPath: '/admin/initiative-survey'
       preLoaderRoute: typeof AdminInitiativeSurveyRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/initiative': {
       id: '/admin/initiative'
-      path: '/admin/initiative'
+      path: '/initiative'
       fullPath: '/admin/initiative'
       preLoaderRoute: typeof AdminInitiativeRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/event-survey': {
       id: '/admin/event-survey'
-      path: '/admin/event-survey'
+      path: '/event-survey'
       fullPath: '/admin/event-survey'
       preLoaderRoute: typeof AdminEventSurveyRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/learning-management-system/student/': {
       id: '/learning-management-system/student/'
@@ -1210,6 +1223,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminEventSurveyRoute: typeof AdminEventSurveyRoute
+  AdminInitiativeRoute: typeof AdminInitiativeRoute
+  AdminInitiativeSurveyRoute: typeof AdminInitiativeSurveyRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminEventSurveyRoute: AdminEventSurveyRoute,
+  AdminInitiativeRoute: AdminInitiativeRoute,
+  AdminInitiativeSurveyRoute: AdminInitiativeSurveyRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface AttendanceManagementSystemRouteChildren {
   AttendanceManagementSystemLoginRoute: typeof AttendanceManagementSystemLoginRoute
   AttendanceManagementSystemIndexRoute: typeof AttendanceManagementSystemIndexRoute
@@ -1362,6 +1393,7 @@ const LearningManagementSystemRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
   EventSurveyRoute: EventSurveyRoute,
@@ -1373,16 +1405,11 @@ const rootRouteChildren: RootRouteChildren = {
   RegistrationRoute: RegistrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,
-  AdminEventSurveyRoute: AdminEventSurveyRoute,
-  AdminInitiativeRoute: AdminInitiativeRoute,
-  AdminInitiativeSurveyRoute: AdminInitiativeSurveyRoute,
-  AdminLoginRoute: AdminLoginRoute,
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,
   InitiativeClaimRoute: InitiativeClaimRoute,
   NewsIdRoute: NewsIdRoute,
   ResourcesAiToolsRoute: ResourcesAiToolsRoute,
-  AdminIndexRoute: AdminIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
