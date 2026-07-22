@@ -232,27 +232,14 @@ const newsSchema = z.object({
 });
 
 function AdminDashboard() {
-  const navigate = useNavigate();
-  const { user, isAdmin, loading } = useAuth();
-  const { lang, dir, toggle: toggleLang } = useLang();
-  const { theme, toggle: toggleTheme } = useTheme();
+  const { isAdmin } = useAuth();
+  const { lang } = useLang();
   const labels = ADMIN_TEXT[lang];
   void COMMUNITY_LABELS_AR; void COMMUNITY_LABELS_EN;
   const [items, setItems] = useState<NewsRow[]>([]);
   const [editing, setEditing] = useState<NewsRow | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [tab, setTab] = useState<"news" | "members" | "chatbot" | "partners">("news");
-
-  useEffect(() => {
-    if (!loading) {
-      if (!user) navigate({ to: "/admin/login" });
-      else if (!isAdmin) {
-        toast.error(labels.noAccess);
-        navigate({ to: "/" });
-      }
-    }
-  }, [loading, user, isAdmin, navigate]);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -287,210 +274,89 @@ function AdminDashboard() {
     }
   };
 
-  if (loading || !isAdmin) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background" dir={dir}>
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <div>
-            <Link to="/" className="text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-primary">
-              {labels.backToSite}
-            </Link>
-            <h1 className="mt-1 text-xl font-bold text-foreground">{labels.adminTitle}</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            {user?.email && (
-              <span className="hidden text-xs text-muted-foreground sm:inline">{user.email}</span>
+    <>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-foreground">{labels.allNews} ({items.length})</h2>
+        <Button
+          onClick={() => {
+            setEditing(null);
+            setShowForm(true);
+          }}
+        >
+          <Plus className="h-4 w-4" /> {labels.newArticle}
+        </Button>
+      </div>
+
+      <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-card">
+        <table className="w-full min-w-[720px] text-sm">
+          <thead className="bg-muted/40 text-start text-xs uppercase tracking-wide text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3 text-start">{labels.cover}</th>
+              <th className="px-4 py-3 text-start">{labels.title}</th>
+              <th className="px-4 py-3 text-start">{labels.category}</th>
+              <th className="px-4 py-3 text-start">{labels.date}</th>
+              <th className="px-4 py-3 text-start">{labels.onHome}</th>
+              <th className="px-4 py-3 text-end">{labels.actions}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
+                  {labels.noNews}
+                </td>
+              </tr>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleLang}
-              aria-label="Toggle language"
-            >
-              <Globe className="h-4 w-4" /> {labels.languageButton}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-            >
-              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                await supabase.auth.signOut();
-                navigate({ to: "/admin/login" });
-              }}
-            >
-              <LogOut className="h-4 w-4" /> {labels.signOut}
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-border bg-card p-1">
-          <button
-            type="button"
-            onClick={() => setTab("news")}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              tab === "news" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {labels.news}
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("members")}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              tab === "members" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {labels.members}
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("chatbot")}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              tab === "chatbot" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {labels.chatbot}
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("partners")}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              tab === "partners" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {labels.partners}
-          </button>
-          <Link
-            to="/admin/initiative"
-            className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            {lang === "ar" ? "مبادرة المليون" : "Million Initiative"}
-          </Link>
-          <Link
-            to={"/admin/initiative-survey" as any}
-            className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            {lang === "ar" ? "استبيان المبادرة" : "Initiative Survey"}
-          </Link>
-          <Link
-            to={"/admin/event-survey" as any}
-            className="rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            {lang === "ar" ? "استبيان المشاريع" : "Event Survey"}
-          </Link>
-
-
-        </div>
-
-        {tab === "news" ? (
-          <>
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">{labels.allNews} ({items.length})</h2>
-              <Button
-                onClick={() => {
-                  setEditing(null);
-                  setShowForm(true);
-                }}
-              >
-                <Plus className="h-4 w-4" /> {labels.newArticle}
-              </Button>
-            </div>
-
-            <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-card">
-              <table className="w-full min-w-[720px] text-sm">
-                <thead className="bg-muted/40 text-start text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3 text-start">{labels.cover}</th>
-                    <th className="px-4 py-3 text-start">{labels.title}</th>
-                    <th className="px-4 py-3 text-start">{labels.category}</th>
-                    <th className="px-4 py-3 text-start">{labels.date}</th>
-                    <th className="px-4 py-3 text-start">{labels.onHome}</th>
-                    <th className="px-4 py-3 text-end">{labels.actions}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                        {labels.noNews}
-                      </td>
-                    </tr>
+            {items.map((row) => (
+              <tr key={row.id} className="border-t border-border">
+                <td className="px-4 py-3">
+                  {row.image_url ? (
+                    <img
+                      src={row.image_url}
+                      alt=""
+                      className="h-12 w-16 rounded object-cover bg-muted"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        img.style.visibility = "hidden";
+                      }}
+                    />
+                  ) : (
+                    <div className="h-12 w-16 rounded bg-muted" />
                   )}
-                  {items.map((row) => (
-                    <tr key={row.id} className="border-t border-border">
-                      <td className="px-4 py-3">
-                        {row.image_url ? (
-                          <img
-                            src={row.image_url}
-                            alt=""
-                            className="h-12 w-16 rounded object-cover bg-muted"
-                            onError={(e) => {
-                              const img = e.currentTarget;
-                              img.style.visibility = "hidden";
-                            }}
-                          />
-                        ) : (
-                          <div className="h-12 w-16 rounded bg-muted" />
-                        )}
-                      </td>
-                      <td className="px-4 py-3 font-medium text-foreground">{lang === "ar" ? row.title_ar || row.title_en || row.title : row.title_en || row.title_ar || row.title}</td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {(row.categories && row.categories.length > 0 ? row.categories : [row.category])
-                          .filter(Boolean)
-                          .map((c) => communityLabel(c, lang))
-                          .join(lang === "ar" ? "، " : ", ")}
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">{row.published_at}</td>
-                      <td className="px-4 py-3">
-                        <Switch checked={row.show_on_home} onCheckedChange={(v) => toggleHome(row, v)} />
-                      </td>
-                      <td className="px-4 py-3 text-end">
+                </td>
+                <td className="px-4 py-3 font-medium text-foreground">{lang === "ar" ? row.title_ar || row.title_en || row.title : row.title_en || row.title_ar || row.title}</td>
+                <td className="px-4 py-3 text-muted-foreground">
+                  {(row.categories && row.categories.length > 0 ? row.categories : [row.category])
+                    .filter(Boolean)
+                    .map((c) => communityLabel(c, lang))
+                    .join(lang === "ar" ? "، " : ", ")}
+                </td>
+                <td className="px-4 py-3 text-muted-foreground">{row.published_at}</td>
+                <td className="px-4 py-3">
+                  <Switch checked={row.show_on_home} onCheckedChange={(v) => toggleHome(row, v)} />
+                </td>
+                <td className="px-4 py-3 text-end">
 
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setEditing(row);
-                            setShowForm(true);
-                          }}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(row.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        ) : tab === "members" ? (
-          <MembersAdmin labels={labels} lang={lang} />
-        ) : tab === "partners" ? (
-          <PartnersAdmin lang={lang} />
-        ) : (
-          <AdminChatbotSection lang={lang} />
-        )}
-      </main>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditing(row);
+                      setShowForm(true);
+                    }}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDelete(row.id)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {showForm && (
         <NewsForm
@@ -504,9 +370,10 @@ function AdminDashboard() {
           }}
         />
       )}
-    </div>
+    </>
   );
 }
+
 
 async function uploadToBucket(
   file: File,
