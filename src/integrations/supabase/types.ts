@@ -445,6 +445,89 @@ export type Database = {
         }
         Relationships: []
       }
+      dynamic_form_submissions: {
+        Row: {
+          field_snapshot: Json
+          form_id: string
+          id: string
+          submitted_at: string
+          user_agent: string | null
+          values: Json
+        }
+        Insert: {
+          field_snapshot: Json
+          form_id: string
+          id?: string
+          submitted_at?: string
+          user_agent?: string | null
+          values: Json
+        }
+        Update: {
+          field_snapshot?: Json
+          form_id?: string
+          id?: string
+          submitted_at?: string
+          user_agent?: string | null
+          values?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dynamic_form_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "dynamic_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dynamic_forms: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description_ar: string | null
+          description_en: string | null
+          fields: Json
+          id: string
+          name_ar: string
+          name_en: string
+          slug: string
+          status: Database["public"]["Enums"]["dynamic_form_status"]
+          submit_label_ar: string
+          submit_label_en: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          fields?: Json
+          id?: string
+          name_ar: string
+          name_en: string
+          slug: string
+          status?: Database["public"]["Enums"]["dynamic_form_status"]
+          submit_label_ar?: string
+          submit_label_en?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          fields?: Json
+          id?: string
+          name_ar?: string
+          name_en?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["dynamic_form_status"]
+          submit_label_ar?: string
+          submit_label_en?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -2639,6 +2722,7 @@ export type Database = {
         | "lms_student"
         | "lms_instructor"
         | "lms_admin"
+      dynamic_form_status: "draft" | "published"
       event_registration_status: "pending" | "approved" | "rejected"
       initiative_donation_status: "pending" | "confirmed" | "cancelled"
       initiative_donor_type: "individual" | "company"
@@ -2806,6 +2890,7 @@ export const Constants = {
         "lms_instructor",
         "lms_admin",
       ],
+      dynamic_form_status: ["draft", "published"],
       event_registration_status: ["pending", "approved", "rejected"],
       initiative_donation_status: ["pending", "confirmed", "cancelled"],
       initiative_donor_type: ["individual", "company"],
