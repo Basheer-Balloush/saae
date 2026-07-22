@@ -258,11 +258,13 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
         </div>
         <div className="space-y-1">
           <Label>{tr.status}</Label>
-          <Select value={status} onValueChange={(v) => setStatus(v as "draft" | "published")}>
+          <Select value={status} onValueChange={(v) => setStatus(v as FormStatus)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="draft">{tr.draft}</SelectItem>
               <SelectItem value="published">{tr.published}</SelectItem>
+              <SelectItem value="hidden">{tr.hidden}</SelectItem>
+              <SelectItem value="archived">{tr.archived}</SelectItem>
             </SelectContent>
           </Select>
         </div>
