@@ -2722,7 +2722,7 @@ export type Database = {
         | "lms_student"
         | "lms_instructor"
         | "lms_admin"
-      dynamic_form_status: "draft" | "published"
+      dynamic_form_status: "draft" | "published" | "hidden" | "archived"
       event_registration_status: "pending" | "approved" | "rejected"
       initiative_donation_status: "pending" | "confirmed" | "cancelled"
       initiative_donor_type: "individual" | "company"
@@ -2890,7 +2890,7 @@ export const Constants = {
         "lms_instructor",
         "lms_admin",
       ],
-      dynamic_form_status: ["draft", "published"],
+      dynamic_form_status: ["draft", "published", "hidden", "archived"],
       event_registration_status: ["pending", "approved", "rejected"],
       initiative_donation_status: ["pending", "confirmed", "cancelled"],
       initiative_donor_type: ["individual", "company"],
