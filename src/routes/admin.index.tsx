@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useRef, useState } from "react";
@@ -17,12 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Pencil, Plus, Trash2, LogOut, Upload, X, Globe, Sun, Moon } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/ui/upload-progress";
 import { useLang } from "@/lib/i18n";
-import { AdminChatbotSection } from "@/components/admin/AdminChatbotSection";
-import { useTheme } from "@/lib/theme";
 import { z } from "zod";
 import {
   NEWS_CATEGORY_KEYS,
