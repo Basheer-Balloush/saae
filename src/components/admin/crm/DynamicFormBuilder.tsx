@@ -202,7 +202,7 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
         ? await update({ data: { ...parsed.data, id: initial.id } })
         : await create({ data: parsed.data });
       toast.success(tr.saved);
-      navigate({ to: "/admin/crm/forms/$formSlug", params: { formSlug: saved.slug } });
+      navigate({ to: "/admin/forms/$formId/edit", params: { formId: saved.id } });
     } catch (e) {
       const msg = toUserMessage(e);
       if (msg.includes("slug_taken")) toast.error(tr.slugTaken);
@@ -377,7 +377,7 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/crm/forms" })}>
+        <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/forms" })}>
           {tr.cancel}
         </Button>
         <Button type="button" onClick={submit} disabled={saving}>
@@ -418,7 +418,7 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
                         ? await update({ data: { ...parsed.data, id: initial.id } })
                         : await create({ data: parsed.data });
                       toast.success(tr.saved);
-                      navigate({ to: "/admin/crm/forms/$formSlug", params: { formSlug: saved.slug } });
+                      navigate({ to: "/admin/forms/$formId/edit", params: { formId: saved.id } });
                     } catch (e) {
                       toast.error(toUserMessage(e));
                     } finally {
