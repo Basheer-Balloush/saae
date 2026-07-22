@@ -37,7 +37,7 @@ const T = {
     descAr: "الوصف بالعربية (اختياري)", descEn: "الوصف بالإنكليزية (اختياري)",
     submitAr: "زر الإرسال بالعربية", submitEn: "زر الإرسال بالإنكليزية",
     slug: "الرابط (Slug)", slugHint: "أحرف صغيرة وأرقام وشرطات فقط",
-    status: "الحالة", draft: "مسودة", published: "منشور",
+    status: "الحالة", draft: "مسودة", published: "منشور", hidden: "مخفي", archived: "مؤرشف",
     fields: "الحقول", addField: "إضافة حقل", noFields: "لا توجد حقول بعد",
     labelAr: "التسمية بالعربية", labelEn: "التسمية بالإنكليزية",
     required: "إلزامي", type: "النوع",
