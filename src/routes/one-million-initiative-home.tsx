@@ -250,9 +250,10 @@ function InitiativeHome() {
                       cy="50%"
                       innerRadius={INNER_R}
                       outerRadius={140}
-                      paddingAngle={visiblePieData.length > 1 ? 2 : 0}
+                      paddingAngle={0}
                       stroke="var(--card)"
                       strokeWidth={1}
+                      minAngle={2}
                       startAngle={90}
                       endAngle={-270}
                       animationBegin={0}
