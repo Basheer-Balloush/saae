@@ -2,12 +2,29 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { Mic, Landmark, Presentation, Link2, MessageSquare, Users, Boxes, Clock, Calendar, MapPin } from "lucide-react";
 import ministryEconomy from "@/assets/ministry-economy.png.asset.json";
-import ministryComms from "@/assets/ministry-communications.png.asset.json";
-import agenda from "@/assets/ibb-agenda.jpg.asset.json";
+import ministryComms from "@/assets/ministry-communications-v2.png.asset.json";
 
 // 30 July 2026, 11:00 AM Damascus time (UTC+3, no DST)
 const TARGET_MS = Date.UTC(2026, 6, 30, 8, 0, 0);
+
+const AGENDA_ITEMS: { icon: React.ComponentType<{ className?: string }>; text: string }[] = [
+  { icon: Mic, text: "كلمة رئيس مجلس إدارة الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
+  { icon: Landmark, text: "كلمة وزارة الاقتصاد والصناعة" },
+  { icon: Presentation, text: "عرض تجربة تدريب المهارات السورية في شركة Mozaic AI الألمانية" },
+  { icon: Presentation, text: "عرض تجربة تدريب المهارات السورية في شركة Devista الرومانية" },
+  { icon: Link2, text: "إطلاق منصة ربط المهارات السورية بالأعمال الدولية" },
+  { icon: MessageSquare, text: "جلسة حوارية: أثر التدريب العملي على الاقتصاد السوري" },
+  { icon: Users, text: "جلسة حوارية: حوار مع خبراء في علوم البيانات والذكاء الاصطناعي" },
+  { icon: Boxes, text: "معرض تقني مرافق للمؤتمر" },
+];
+
+const EVENT_META = [
+  { icon: Clock, label: "التوقيت", value: "11:00 صباحاً" },
+  { icon: Calendar, label: "التاريخ", value: "30 تموز 2026" },
+  { icon: MapPin, label: "المكان", value: "المكتبة الوطنية — دمشق" },
+];
 
 function useCountdown(target: number) {
   const [now, setNow] = useState<number | null>(null);
