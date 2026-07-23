@@ -89,6 +89,8 @@ import { Route as AdminCrmLeadsIndividualsRouteImport } from './routes/admin.crm
 import { Route as AdminCrmLeadsCompaniesRouteImport } from './routes/admin.crm.leads.companies'
 import { Route as AdminCrmFormsFormSlugRouteImport } from './routes/admin.crm.forms.$formSlug'
 import { Route as AdminCrmContactsContactIdRouteImport } from './routes/admin.crm.contacts.$contactId'
+import { Route as AdminCrmLeadsIndividualsLeadIdRouteImport } from './routes/admin.crm.leads.individuals.$leadId'
+import { Route as AdminCrmLeadsCompaniesLeadIdRouteImport } from './routes/admin.crm.leads.companies.$leadId'
 
 const SuperAdminRoute = SuperAdminRouteImport.update({
   id: '/super-admin',
@@ -529,6 +531,18 @@ const AdminCrmContactsContactIdRoute =
     path: '/$contactId',
     getParentRoute: () => AdminCrmContactsRoute,
   } as any)
+const AdminCrmLeadsIndividualsLeadIdRoute =
+  AdminCrmLeadsIndividualsLeadIdRouteImport.update({
+    id: '/$leadId',
+    path: '/$leadId',
+    getParentRoute: () => AdminCrmLeadsIndividualsRoute,
+  } as any)
+const AdminCrmLeadsCompaniesLeadIdRoute =
+  AdminCrmLeadsCompaniesLeadIdRouteImport.update({
+    id: '/$leadId',
+    path: '/$leadId',
+    getParentRoute: () => AdminCrmLeadsCompaniesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -600,8 +614,8 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
   '/admin/crm/contacts/$contactId': typeof AdminCrmContactsContactIdRoute
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
-  '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRoute
-  '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRoute
+  '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRouteWithChildren
+  '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRouteWithChildren
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
@@ -611,6 +625,8 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/crm/forms/': typeof AdminCrmFormsIndexRoute
+  '/admin/crm/leads/companies/$leadId': typeof AdminCrmLeadsCompaniesLeadIdRoute
+  '/admin/crm/leads/individuals/$leadId': typeof AdminCrmLeadsIndividualsLeadIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -673,8 +689,8 @@ export interface FileRoutesByTo {
   '/learning-management-system/student': typeof LearningManagementSystemStudentIndexRoute
   '/admin/crm/contacts/$contactId': typeof AdminCrmContactsContactIdRoute
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
-  '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRoute
-  '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRoute
+  '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRouteWithChildren
+  '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRouteWithChildren
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
@@ -684,6 +700,8 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/crm/forms': typeof AdminCrmFormsIndexRoute
+  '/admin/crm/leads/companies/$leadId': typeof AdminCrmLeadsCompaniesLeadIdRoute
+  '/admin/crm/leads/individuals/$leadId': typeof AdminCrmLeadsIndividualsLeadIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -756,8 +774,8 @@ export interface FileRoutesById {
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
   '/admin/crm/contacts/$contactId': typeof AdminCrmContactsContactIdRoute
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
-  '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRoute
-  '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRoute
+  '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRouteWithChildren
+  '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRouteWithChildren
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
@@ -767,6 +785,8 @@ export interface FileRoutesById {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/crm/forms/': typeof AdminCrmFormsIndexRoute
+  '/admin/crm/leads/companies/$leadId': typeof AdminCrmLeadsCompaniesLeadIdRoute
+  '/admin/crm/leads/individuals/$leadId': typeof AdminCrmLeadsIndividualsLeadIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -851,6 +871,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/crm/forms/'
+    | '/admin/crm/leads/companies/$leadId'
+    | '/admin/crm/leads/individuals/$leadId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -924,6 +946,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/crm/forms'
+    | '/admin/crm/leads/companies/$leadId'
+    | '/admin/crm/leads/individuals/$leadId'
   id:
     | '__root__'
     | '/'
@@ -1006,6 +1030,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/crm/forms/'
+    | '/admin/crm/leads/companies/$leadId'
+    | '/admin/crm/leads/individuals/$leadId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1597,6 +1623,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCrmContactsContactIdRouteImport
       parentRoute: typeof AdminCrmContactsRoute
     }
+    '/admin/crm/leads/individuals/$leadId': {
+      id: '/admin/crm/leads/individuals/$leadId'
+      path: '/$leadId'
+      fullPath: '/admin/crm/leads/individuals/$leadId'
+      preLoaderRoute: typeof AdminCrmLeadsIndividualsLeadIdRouteImport
+      parentRoute: typeof AdminCrmLeadsIndividualsRoute
+    }
+    '/admin/crm/leads/companies/$leadId': {
+      id: '/admin/crm/leads/companies/$leadId'
+      path: '/$leadId'
+      fullPath: '/admin/crm/leads/companies/$leadId'
+      preLoaderRoute: typeof AdminCrmLeadsCompaniesLeadIdRouteImport
+      parentRoute: typeof AdminCrmLeadsCompaniesRoute
+    }
   }
 }
 
@@ -1625,14 +1665,42 @@ const AdminCrmFormsRouteWithChildren = AdminCrmFormsRoute._addFileChildren(
   AdminCrmFormsRouteChildren,
 )
 
+interface AdminCrmLeadsCompaniesRouteChildren {
+  AdminCrmLeadsCompaniesLeadIdRoute: typeof AdminCrmLeadsCompaniesLeadIdRoute
+}
+
+const AdminCrmLeadsCompaniesRouteChildren: AdminCrmLeadsCompaniesRouteChildren =
+  {
+    AdminCrmLeadsCompaniesLeadIdRoute: AdminCrmLeadsCompaniesLeadIdRoute,
+  }
+
+const AdminCrmLeadsCompaniesRouteWithChildren =
+  AdminCrmLeadsCompaniesRoute._addFileChildren(
+    AdminCrmLeadsCompaniesRouteChildren,
+  )
+
+interface AdminCrmLeadsIndividualsRouteChildren {
+  AdminCrmLeadsIndividualsLeadIdRoute: typeof AdminCrmLeadsIndividualsLeadIdRoute
+}
+
+const AdminCrmLeadsIndividualsRouteChildren: AdminCrmLeadsIndividualsRouteChildren =
+  {
+    AdminCrmLeadsIndividualsLeadIdRoute: AdminCrmLeadsIndividualsLeadIdRoute,
+  }
+
+const AdminCrmLeadsIndividualsRouteWithChildren =
+  AdminCrmLeadsIndividualsRoute._addFileChildren(
+    AdminCrmLeadsIndividualsRouteChildren,
+  )
+
 interface AdminCrmLeadsRouteChildren {
-  AdminCrmLeadsCompaniesRoute: typeof AdminCrmLeadsCompaniesRoute
-  AdminCrmLeadsIndividualsRoute: typeof AdminCrmLeadsIndividualsRoute
+  AdminCrmLeadsCompaniesRoute: typeof AdminCrmLeadsCompaniesRouteWithChildren
+  AdminCrmLeadsIndividualsRoute: typeof AdminCrmLeadsIndividualsRouteWithChildren
 }
 
 const AdminCrmLeadsRouteChildren: AdminCrmLeadsRouteChildren = {
-  AdminCrmLeadsCompaniesRoute: AdminCrmLeadsCompaniesRoute,
-  AdminCrmLeadsIndividualsRoute: AdminCrmLeadsIndividualsRoute,
+  AdminCrmLeadsCompaniesRoute: AdminCrmLeadsCompaniesRouteWithChildren,
+  AdminCrmLeadsIndividualsRoute: AdminCrmLeadsIndividualsRouteWithChildren,
 }
 
 const AdminCrmLeadsRouteWithChildren = AdminCrmLeadsRoute._addFileChildren(
