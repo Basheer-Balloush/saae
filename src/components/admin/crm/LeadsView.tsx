@@ -551,25 +551,29 @@ function NotesCell({
   contactId, latestNotes, onView, tr,
 }: {
   contactId: string | null;
-  latestNotes: Record<string, { body: string; created_at: string }>;
+  latestNotes: Record<string, { id: string; contact_id: string; body: string; created_at: string; updated_at: string }>;
   onView: (body: string) => void;
   tr: typeof T.ar;
 }) {
   const note = contactId ? latestNotes[contactId] : undefined;
   if (!note) return <span className="text-muted-foreground">—</span>;
-  const isLong = note.body.length > 80 || note.body.includes("\n");
   return (
-    <div className="max-w-[240px] space-y-1">
-      <p className="line-clamp-2 whitespace-pre-wrap text-xs text-muted-foreground">{note.body}</p>
-      {isLong && (
-        <button
-          type="button"
-          onClick={() => onView(note.body)}
-          className="text-xs text-primary hover:underline focus:underline focus:outline-none"
+    <div className="min-w-[160px] max-w-[280px] space-y-1">
+      <div className="rounded-md bg-muted/40 px-2 py-1.5">
+        <p
+          dir="auto"
+          className="line-clamp-2 whitespace-pre-wrap break-words text-xs text-muted-foreground [overflow-wrap:anywhere]"
         >
-          {tr.more}
-        </button>
-      )}
+          {note.body}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={() => onView(note.body)}
+        className="text-xs text-primary hover:underline focus:underline focus:outline-none"
+      >
+        {tr.more}
+      </button>
     </div>
   );
 }
@@ -580,11 +584,12 @@ type TableProps = {
   tr: typeof T.ar;
   savingId: string | null;
   onStatus: (id: string, s: LeadStatusT) => void;
-  onNote: (id: string) => void;
+  onNote: (leadId: string, contactId: string | null) => void;
   onChat: (convId: string | null | undefined) => void;
-  latestNotes: Record<string, { body: string; created_at: string }>;
+  latestNotes: Record<string, { id: string; contact_id: string; body: string; created_at: string; updated_at: string }>;
   onViewNote: (body: string) => void;
 };
+
 
 function IndividualsTable({
   rows, lang, tr, savingId, onStatus, onNote, onChat, latestNotes, onViewNote,
