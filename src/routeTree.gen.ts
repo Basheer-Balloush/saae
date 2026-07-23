@@ -16,6 +16,7 @@ import { Route as OneMillionInitiativeHomeRouteImport } from './routes/one-milli
 import { Route as OneMillionInitiativeDonorsRouteImport } from './routes/one-million-initiative-donors'
 import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-initiative'
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
+import { Route as InternationalBusinessBridgeRouteImport } from './routes/international-business-bridge'
 import { Route as InitiativeSurveyRouteImport } from './routes/initiative-survey'
 import { Route as EventSurveyRouteImport } from './routes/event-survey'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -128,6 +129,12 @@ const LearningManagementSystemRoute =
   LearningManagementSystemRouteImport.update({
     id: '/learning-management-system',
     path: '/learning-management-system',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const InternationalBusinessBridgeRoute =
+  InternationalBusinessBridgeRouteImport.update({
+    id: '/international-business-bridge',
+    path: '/international-business-bridge',
     getParentRoute: () => rootRouteImport,
   } as any)
 const InitiativeSurveyRoute = InitiativeSurveyRouteImport.update({
@@ -552,6 +559,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
+  '/international-business-bridge': typeof InternationalBusinessBridgeRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
@@ -634,6 +642,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
+  '/international-business-bridge': typeof InternationalBusinessBridgeRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
@@ -712,6 +721,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
+  '/international-business-bridge': typeof InternationalBusinessBridgeRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
@@ -798,6 +808,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/event-survey'
     | '/initiative-survey'
+    | '/international-business-bridge'
     | '/learning-management-system'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
@@ -880,6 +891,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/event-survey'
     | '/initiative-survey'
+    | '/international-business-bridge'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
@@ -957,6 +969,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/event-survey'
     | '/initiative-survey'
+    | '/international-business-bridge'
     | '/learning-management-system'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
@@ -1042,6 +1055,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   EventSurveyRoute: typeof EventSurveyRoute
   InitiativeSurveyRoute: typeof InitiativeSurveyRoute
+  InternationalBusinessBridgeRoute: typeof InternationalBusinessBridgeRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
   OneMillionInitiativeRoute: typeof OneMillionInitiativeRoute
   OneMillionInitiativeDonorsRoute: typeof OneMillionInitiativeDonorsRoute
@@ -1110,6 +1124,13 @@ declare module '@tanstack/react-router' {
       path: '/learning-management-system'
       fullPath: '/learning-management-system'
       preLoaderRoute: typeof LearningManagementSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/international-business-bridge': {
+      id: '/international-business-bridge'
+      path: '/international-business-bridge'
+      fullPath: '/international-business-bridge'
+      preLoaderRoute: typeof InternationalBusinessBridgeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/initiative-survey': {
@@ -1930,6 +1951,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   EventSurveyRoute: EventSurveyRoute,
   InitiativeSurveyRoute: InitiativeSurveyRoute,
+  InternationalBusinessBridgeRoute: InternationalBusinessBridgeRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
   OneMillionInitiativeRoute: OneMillionInitiativeRoute,
   OneMillionInitiativeDonorsRoute: OneMillionInitiativeDonorsRoute,
