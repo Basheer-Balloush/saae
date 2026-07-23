@@ -82,7 +82,7 @@ export function AdminSidebar() {
           {!collapsed && (
             <div className="flex min-w-0 flex-col leading-tight">
               <span className="truncate text-sm font-bold text-sidebar-foreground">
-                {lang === "ar" ? "الإدارة" : "Admin"}
+                {lang === "ar" ? "لوحة الإدارة" : "Admin"}
               </span>
               <span className="truncate text-[10px] uppercase tracking-wider text-sidebar-foreground/60">SAAE</span>
             </div>
