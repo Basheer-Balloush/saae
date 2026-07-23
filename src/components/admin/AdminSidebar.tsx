@@ -52,10 +52,8 @@ function buildNav(lang: "ar" | "en"): NavItem[] {
       title: "CRM",
       icon: Contact2,
       children: [
-        { title: ar ? "Leads" : "Leads", url: "/admin/crm/contacts" },
+        { title: ar ? "Leads" : "Leads", url: "/admin/crm/leads" },
         { title: ar ? "طلاب المنصة" : "LMS Students", url: "/admin/crm/students" },
-        { title: ar ? "أفراد" : "Individual leads", url: "/admin/crm/leads/individuals" },
-        { title: ar ? "شركات" : "Company leads", url: "/admin/crm/leads/companies" },
         { title: ar ? "استجابات النماذج" : "Form submissions", url: "/admin/crm/forms" },
       ],
     },
