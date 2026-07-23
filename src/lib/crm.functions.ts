@@ -301,7 +301,7 @@ export const updateContact = createServerFn({ method: "POST" })
     for (const k of ["display_name", "status", "assigned_admin_id", "tags", "organization", "country", "city"] as const) {
       if (data[k] !== undefined) patch[k] = data[k];
     }
-    const { error } = await context.supabase.from("crm_contacts").update(patch).eq("id", data.contactId);
+    const { error } = await context.supabase.from("crm_contacts").update(patch as never).eq("id", data.contactId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
