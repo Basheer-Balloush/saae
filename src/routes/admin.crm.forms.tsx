@@ -81,8 +81,13 @@ function FormsLayout() {
               >
                 {ar ? f.name_ar : f.name_en}
                 {f.status !== "published" && (
-                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
-                    {f.status}
+                  <span className={cn(
+                    "rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground",
+                    ar ? "" : "uppercase",
+                  )}>
+                    {ar
+                      ? (f.status === "draft" ? "مسودة" : f.status === "hidden" ? "مخفي" : f.status === "archived" ? "مؤرشف" : f.status)
+                      : f.status}
                   </span>
                 )}
               </Link>
