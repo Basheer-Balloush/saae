@@ -96,8 +96,12 @@ export const getContact = createServerFn({ method: "POST" })
       id: string;
       timestamp: string;
       title: string;
-      subtitle?: string | null;
-      meta?: Record<string, unknown>;
+      subtitle: string | null;
+      source: string | null;
+      conversation_id: string | null;
+      form_slug: string | null;
+      values_json: string | null;
+      author_id: string | null;
     };
     const activities: Activity[] = [];
     for (const l of indLeadsQ.data ?? []) {
@@ -106,8 +110,12 @@ export const getContact = createServerFn({ method: "POST" })
         id: l.id,
         timestamp: l.created_at,
         title: "Individual lead submitted",
-        subtitle: l.short_description ?? l.source,
-        meta: { source: l.source, conversation_id: l.conversation_id },
+        subtitle: l.short_description ?? l.source ?? null,
+        source: l.source ?? null,
+        conversation_id: l.conversation_id ?? null,
+        form_slug: null,
+        values_json: null,
+        author_id: null,
       });
     }
     for (const l of compLeadsQ.data ?? []) {
@@ -116,8 +124,12 @@ export const getContact = createServerFn({ method: "POST" })
         id: l.id,
         timestamp: l.created_at,
         title: `Company lead — ${l.company_name}`,
-        subtitle: l.work_field ?? l.source,
-        meta: { source: l.source, conversation_id: l.conversation_id },
+        subtitle: l.work_field ?? l.source ?? null,
+        source: l.source ?? null,
+        conversation_id: l.conversation_id ?? null,
+        form_slug: null,
+        values_json: null,
+        author_id: null,
       });
     }
     for (const s of formSubsQ.data ?? []) {
@@ -128,7 +140,11 @@ export const getContact = createServerFn({ method: "POST" })
         timestamp: s.submitted_at,
         title: `Form: ${form?.name_en ?? form?.slug ?? "Unknown"}`,
         subtitle: form?.name_ar ?? null,
-        meta: { form_slug: form?.slug, values: s.values },
+        source: null,
+        conversation_id: null,
+        form_slug: form?.slug ?? null,
+        values_json: JSON.stringify(s.values ?? {}),
+        author_id: null,
       });
     }
     for (const n of notesQ.data ?? []) {
@@ -138,7 +154,11 @@ export const getContact = createServerFn({ method: "POST" })
         timestamp: n.created_at,
         title: "Note",
         subtitle: n.body,
-        meta: { author_id: n.author_id },
+        source: null,
+        conversation_id: null,
+        form_slug: null,
+        values_json: null,
+        author_id: n.author_id ?? null,
       });
     }
     activities.sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
