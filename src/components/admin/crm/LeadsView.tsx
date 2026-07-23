@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Loader2, MessageSquare, Plus, Download, Search, StickyNote, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Loader2, MessageSquare, Plus, Download, Search, StickyNote, ChevronLeft, ChevronRight, X, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ import {
   exportIndividualLeads, exportCompanyLeads,
   setLeadStatus, addLeadNote,
   createIndividualLead, createCompanyLead,
+  listLatestNotesForContacts,
 } from "@/lib/crm.functions";
 import { getConversationMessages } from "@/lib/admin-chat.functions";
 import { toUserMessage } from "@/lib/safe-error";
