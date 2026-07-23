@@ -72,8 +72,10 @@ import { Route as LearningManagementSystemAdminCouponsRouteImport } from './rout
 import { Route as LearningManagementSystemAdminAttendanceLinkRouteImport } from './routes/learning-management-system.admin.attendance-link'
 import { Route as LearningManagementSystemAdminAnalyticsRouteImport } from './routes/learning-management-system.admin.analytics'
 import { Route as AdminFormsNewRouteImport } from './routes/admin.forms.new'
+import { Route as AdminCrmStudentsRouteImport } from './routes/admin.crm.students'
 import { Route as AdminCrmLeadsRouteImport } from './routes/admin.crm.leads'
 import { Route as AdminCrmFormsRouteImport } from './routes/admin.crm.forms'
+import { Route as AdminCrmContactsRouteImport } from './routes/admin.crm.contacts'
 import { Route as AdminCrmFormsIndexRouteImport } from './routes/admin.crm.forms.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -86,6 +88,7 @@ import { Route as AdminFormsFormIdEditRouteImport } from './routes/admin.forms.$
 import { Route as AdminCrmLeadsIndividualsRouteImport } from './routes/admin.crm.leads.individuals'
 import { Route as AdminCrmLeadsCompaniesRouteImport } from './routes/admin.crm.leads.companies'
 import { Route as AdminCrmFormsFormSlugRouteImport } from './routes/admin.crm.forms.$formSlug'
+import { Route as AdminCrmContactsContactIdRouteImport } from './routes/admin.crm.contacts.$contactId'
 
 const SuperAdminRoute = SuperAdminRouteImport.update({
   id: '/super-admin',
@@ -434,6 +437,11 @@ const AdminFormsNewRoute = AdminFormsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AdminFormsRoute,
 } as any)
+const AdminCrmStudentsRoute = AdminCrmStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AdminCrmRoute,
+} as any)
 const AdminCrmLeadsRoute = AdminCrmLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -442,6 +450,11 @@ const AdminCrmLeadsRoute = AdminCrmLeadsRouteImport.update({
 const AdminCrmFormsRoute = AdminCrmFormsRouteImport.update({
   id: '/forms',
   path: '/forms',
+  getParentRoute: () => AdminCrmRoute,
+} as any)
+const AdminCrmContactsRoute = AdminCrmContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
   getParentRoute: () => AdminCrmRoute,
 } as any)
 const AdminCrmFormsIndexRoute = AdminCrmFormsIndexRouteImport.update({
@@ -510,6 +523,12 @@ const AdminCrmFormsFormSlugRoute = AdminCrmFormsFormSlugRouteImport.update({
   path: '/$formSlug',
   getParentRoute: () => AdminCrmFormsRoute,
 } as any)
+const AdminCrmContactsContactIdRoute =
+  AdminCrmContactsContactIdRouteImport.update({
+    id: '/$contactId',
+    path: '/$contactId',
+    getParentRoute: () => AdminCrmContactsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -557,8 +576,10 @@ export interface FileRoutesByFullPath {
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/admin/crm/contacts': typeof AdminCrmContactsRouteWithChildren
   '/admin/crm/forms': typeof AdminCrmFormsRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteWithChildren
+  '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
@@ -577,6 +598,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
+  '/admin/crm/contacts/$contactId': typeof AdminCrmContactsContactIdRoute
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRoute
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRoute
@@ -628,7 +650,9 @@ export interface FileRoutesByTo {
   '/attendance-management-system': typeof AttendanceManagementSystemIndexRoute
   '/learning-management-system': typeof LearningManagementSystemIndexRoute
   '/news': typeof NewsIndexRoute
+  '/admin/crm/contacts': typeof AdminCrmContactsRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteWithChildren
+  '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
@@ -647,6 +671,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/admin': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentIndexRoute
+  '/admin/crm/contacts/$contactId': typeof AdminCrmContactsContactIdRoute
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRoute
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRoute
@@ -707,8 +732,10 @@ export interface FileRoutesById {
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/admin/crm/contacts': typeof AdminCrmContactsRouteWithChildren
   '/admin/crm/forms': typeof AdminCrmFormsRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteWithChildren
+  '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
@@ -727,6 +754,7 @@ export interface FileRoutesById {
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
+  '/admin/crm/contacts/$contactId': typeof AdminCrmContactsContactIdRoute
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRoute
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRoute
@@ -788,8 +816,10 @@ export interface FileRouteTypes {
     | '/attendance-management-system/'
     | '/learning-management-system/'
     | '/news/'
+    | '/admin/crm/contacts'
     | '/admin/crm/forms'
     | '/admin/crm/leads'
+    | '/admin/crm/students'
     | '/admin/forms/new'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
@@ -808,6 +838,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/student/'
+    | '/admin/crm/contacts/$contactId'
     | '/admin/crm/forms/$formSlug'
     | '/admin/crm/leads/companies'
     | '/admin/crm/leads/individuals'
@@ -859,7 +890,9 @@ export interface FileRouteTypes {
     | '/attendance-management-system'
     | '/learning-management-system'
     | '/news'
+    | '/admin/crm/contacts'
     | '/admin/crm/leads'
+    | '/admin/crm/students'
     | '/admin/forms/new'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
@@ -878,6 +911,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin'
     | '/learning-management-system/instructor'
     | '/learning-management-system/student'
+    | '/admin/crm/contacts/$contactId'
     | '/admin/crm/forms/$formSlug'
     | '/admin/crm/leads/companies'
     | '/admin/crm/leads/individuals'
@@ -937,8 +971,10 @@ export interface FileRouteTypes {
     | '/attendance-management-system/'
     | '/learning-management-system/'
     | '/news/'
+    | '/admin/crm/contacts'
     | '/admin/crm/forms'
     | '/admin/crm/leads'
+    | '/admin/crm/students'
     | '/admin/forms/new'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
@@ -957,6 +993,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/student/'
+    | '/admin/crm/contacts/$contactId'
     | '/admin/crm/forms/$formSlug'
     | '/admin/crm/leads/companies'
     | '/admin/crm/leads/individuals'
@@ -1441,6 +1478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFormsNewRouteImport
       parentRoute: typeof AdminFormsRoute
     }
+    '/admin/crm/students': {
+      id: '/admin/crm/students'
+      path: '/students'
+      fullPath: '/admin/crm/students'
+      preLoaderRoute: typeof AdminCrmStudentsRouteImport
+      parentRoute: typeof AdminCrmRoute
+    }
     '/admin/crm/leads': {
       id: '/admin/crm/leads'
       path: '/leads'
@@ -1453,6 +1497,13 @@ declare module '@tanstack/react-router' {
       path: '/forms'
       fullPath: '/admin/crm/forms'
       preLoaderRoute: typeof AdminCrmFormsRouteImport
+      parentRoute: typeof AdminCrmRoute
+    }
+    '/admin/crm/contacts': {
+      id: '/admin/crm/contacts'
+      path: '/contacts'
+      fullPath: '/admin/crm/contacts'
+      preLoaderRoute: typeof AdminCrmContactsRouteImport
       parentRoute: typeof AdminCrmRoute
     }
     '/admin/crm/forms/': {
@@ -1539,8 +1590,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCrmFormsFormSlugRouteImport
       parentRoute: typeof AdminCrmFormsRoute
     }
+    '/admin/crm/contacts/$contactId': {
+      id: '/admin/crm/contacts/$contactId'
+      path: '/$contactId'
+      fullPath: '/admin/crm/contacts/$contactId'
+      preLoaderRoute: typeof AdminCrmContactsContactIdRouteImport
+      parentRoute: typeof AdminCrmContactsRoute
+    }
   }
 }
+
+interface AdminCrmContactsRouteChildren {
+  AdminCrmContactsContactIdRoute: typeof AdminCrmContactsContactIdRoute
+}
+
+const AdminCrmContactsRouteChildren: AdminCrmContactsRouteChildren = {
+  AdminCrmContactsContactIdRoute: AdminCrmContactsContactIdRoute,
+}
+
+const AdminCrmContactsRouteWithChildren =
+  AdminCrmContactsRoute._addFileChildren(AdminCrmContactsRouteChildren)
 
 interface AdminCrmFormsRouteChildren {
   AdminCrmFormsFormSlugRoute: typeof AdminCrmFormsFormSlugRoute
@@ -1571,14 +1640,18 @@ const AdminCrmLeadsRouteWithChildren = AdminCrmLeadsRoute._addFileChildren(
 )
 
 interface AdminCrmRouteChildren {
+  AdminCrmContactsRoute: typeof AdminCrmContactsRouteWithChildren
   AdminCrmFormsRoute: typeof AdminCrmFormsRouteWithChildren
   AdminCrmLeadsRoute: typeof AdminCrmLeadsRouteWithChildren
+  AdminCrmStudentsRoute: typeof AdminCrmStudentsRoute
   AdminCrmIndexRoute: typeof AdminCrmIndexRoute
 }
 
 const AdminCrmRouteChildren: AdminCrmRouteChildren = {
+  AdminCrmContactsRoute: AdminCrmContactsRouteWithChildren,
   AdminCrmFormsRoute: AdminCrmFormsRouteWithChildren,
   AdminCrmLeadsRoute: AdminCrmLeadsRouteWithChildren,
+  AdminCrmStudentsRoute: AdminCrmStudentsRoute,
   AdminCrmIndexRoute: AdminCrmIndexRoute,
 }
 
@@ -1810,13 +1883,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

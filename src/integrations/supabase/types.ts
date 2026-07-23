@@ -338,13 +338,16 @@ export type Database = {
       company_leads: {
         Row: {
           accepts_training_new_staff: boolean | null
+          assigned_admin_id: string | null
           company_name: string
           contact_email: string | null
+          contact_id: string | null
           contact_name: string | null
           contact_phone: string | null
           conversation_id: string | null
           country: string | null
           created_at: string
+          created_by: string | null
           employee_count: string | null
           has_office: boolean | null
           id: string
@@ -353,18 +356,24 @@ export type Database = {
           office_address: string | null
           raw: Json | null
           source: string
+          status: Database["public"]["Enums"]["crm_lead_status"]
+          tags: string[]
+          updated_at: string
           uses_ai: boolean | null
           work_field: string | null
         }
         Insert: {
           accepts_training_new_staff?: boolean | null
+          assigned_admin_id?: string | null
           company_name: string
           contact_email?: string | null
+          contact_id?: string | null
           contact_name?: string | null
           contact_phone?: string | null
           conversation_id?: string | null
           country?: string | null
           created_at?: string
+          created_by?: string | null
           employee_count?: string | null
           has_office?: boolean | null
           id?: string
@@ -373,18 +382,24 @@ export type Database = {
           office_address?: string | null
           raw?: Json | null
           source?: string
+          status?: Database["public"]["Enums"]["crm_lead_status"]
+          tags?: string[]
+          updated_at?: string
           uses_ai?: boolean | null
           work_field?: string | null
         }
         Update: {
           accepts_training_new_staff?: boolean | null
+          assigned_admin_id?: string | null
           company_name?: string
           contact_email?: string | null
+          contact_id?: string | null
           contact_name?: string | null
           contact_phone?: string | null
           conversation_id?: string | null
           country?: string | null
           created_at?: string
+          created_by?: string | null
           employee_count?: string | null
           has_office?: boolean | null
           id?: string
@@ -393,10 +408,20 @@ export type Database = {
           office_address?: string | null
           raw?: Json | null
           source?: string
+          status?: Database["public"]["Enums"]["crm_lead_status"]
+          tags?: string[]
+          updated_at?: string
           uses_ai?: boolean | null
           work_field?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "company_leads_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "company_leads_conversation_id_fkey"
             columns: ["conversation_id"]
@@ -445,8 +470,133 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_contact_identities: {
+        Row: {
+          contact_id: string
+          created_at: string
+          id: string
+          identity_type: string
+          identity_value: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          id?: string
+          identity_type: string
+          identity_value: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          id?: string
+          identity_type?: string
+          identity_value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_contact_identities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_contacts: {
+        Row: {
+          assigned_admin_id: string | null
+          city: string | null
+          contact_type: Database["public"]["Enums"]["crm_contact_type"]
+          country: string | null
+          created_at: string
+          created_by: string | null
+          display_name: string
+          id: string
+          metadata: Json
+          organization: string | null
+          primary_email: string | null
+          primary_phone: string | null
+          status: Database["public"]["Enums"]["crm_lead_status"]
+          tags: string[]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          assigned_admin_id?: string | null
+          city?: string | null
+          contact_type?: Database["public"]["Enums"]["crm_contact_type"]
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_name: string
+          id?: string
+          metadata?: Json
+          organization?: string | null
+          primary_email?: string | null
+          primary_phone?: string | null
+          status?: Database["public"]["Enums"]["crm_lead_status"]
+          tags?: string[]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          assigned_admin_id?: string | null
+          city?: string | null
+          contact_type?: Database["public"]["Enums"]["crm_contact_type"]
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_name?: string
+          id?: string
+          metadata?: Json
+          organization?: string | null
+          primary_email?: string | null
+          primary_phone?: string | null
+          status?: Database["public"]["Enums"]["crm_lead_status"]
+          tags?: string[]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      crm_notes: {
+        Row: {
+          author_id: string | null
+          body: string
+          contact_id: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          body: string
+          contact_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string
+          contact_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_notes_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dynamic_form_submissions: {
         Row: {
+          contact_id: string | null
           field_snapshot: Json
           form_id: string
           id: string
@@ -455,6 +605,7 @@ export type Database = {
           values: Json
         }
         Insert: {
+          contact_id?: string | null
           field_snapshot: Json
           form_id: string
           id?: string
@@ -463,6 +614,7 @@ export type Database = {
           values: Json
         }
         Update: {
+          contact_id?: string | null
           field_snapshot?: Json
           form_id?: string
           id?: string
@@ -471,6 +623,13 @@ export type Database = {
           values?: Json
         }
         Relationships: [
+          {
+            foreignKeyName: "dynamic_form_submissions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dynamic_form_submissions_form_id_fkey"
             columns: ["form_id"]
@@ -678,8 +837,11 @@ export type Database = {
       individual_leads: {
         Row: {
           address: string | null
+          assigned_admin_id: string | null
+          contact_id: string | null
           conversation_id: string | null
           created_at: string
+          created_by: string | null
           email: string | null
           full_name: string
           id: string
@@ -688,12 +850,18 @@ export type Database = {
           short_description: string | null
           source: string
           specialty: string | null
+          status: Database["public"]["Enums"]["crm_lead_status"]
+          tags: string[]
+          updated_at: string
           work_field: string | null
         }
         Insert: {
           address?: string | null
+          assigned_admin_id?: string | null
+          contact_id?: string | null
           conversation_id?: string | null
           created_at?: string
+          created_by?: string | null
           email?: string | null
           full_name: string
           id?: string
@@ -702,12 +870,18 @@ export type Database = {
           short_description?: string | null
           source?: string
           specialty?: string | null
+          status?: Database["public"]["Enums"]["crm_lead_status"]
+          tags?: string[]
+          updated_at?: string
           work_field?: string | null
         }
         Update: {
           address?: string | null
+          assigned_admin_id?: string | null
+          contact_id?: string | null
           conversation_id?: string | null
           created_at?: string
+          created_by?: string | null
           email?: string | null
           full_name?: string
           id?: string
@@ -716,9 +890,19 @@ export type Database = {
           short_description?: string | null
           source?: string
           specialty?: string | null
+          status?: Database["public"]["Enums"]["crm_lead_status"]
+          tags?: string[]
+          updated_at?: string
           work_field?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "individual_leads_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "individual_leads_conversation_id_fkey"
             columns: ["conversation_id"]
@@ -2508,6 +2692,19 @@ export type Database = {
         Args: { _session_id: string }
         Returns: boolean
       }
+      crm_normalize_email: { Args: { v: string }; Returns: string }
+      crm_normalize_phone: { Args: { v: string }; Returns: string }
+      crm_upsert_contact: {
+        Args: {
+          _contact_type?: Database["public"]["Enums"]["crm_contact_type"]
+          _display_name: string
+          _email: string
+          _metadata?: Json
+          _organization?: string
+          _phone: string
+        }
+        Returns: string
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -2722,6 +2919,13 @@ export type Database = {
         | "lms_student"
         | "lms_instructor"
         | "lms_admin"
+      crm_contact_type: "individual" | "company"
+      crm_lead_status:
+        | "new"
+        | "contacted"
+        | "qualified"
+        | "converted"
+        | "archived"
       dynamic_form_status: "draft" | "published" | "hidden" | "archived"
       event_registration_status: "pending" | "approved" | "rejected"
       initiative_donation_status: "pending" | "confirmed" | "cancelled"
@@ -2889,6 +3093,14 @@ export const Constants = {
         "lms_student",
         "lms_instructor",
         "lms_admin",
+      ],
+      crm_contact_type: ["individual", "company"],
+      crm_lead_status: [
+        "new",
+        "contacted",
+        "qualified",
+        "converted",
+        "archived",
       ],
       dynamic_form_status: ["draft", "published", "hidden", "archived"],
       event_registration_status: ["pending", "approved", "rejected"],
