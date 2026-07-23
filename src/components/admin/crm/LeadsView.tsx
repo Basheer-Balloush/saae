@@ -85,6 +85,8 @@ const T = {
     duplicateFound: "A lead with the same email/phone already exists. Create anyway?",
     createAnyway: "Create anyway",
     notes: "Notes", more: "More", noteTitle: "Note",
+    editNote: "Edit note", saveChanges: "Save changes",
+    noteAdded: "Note added successfully", noteUpdated: "Note updated successfully",
   },
 };
 
