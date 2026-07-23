@@ -472,23 +472,48 @@ export function LeadsView({ variant }: { variant: Variant }) {
 }
 
 function StatusSelect({
-  value, onChange, disabled, tr,
-}: { value: LeadStatusT; onChange: (v: LeadStatusT) => void; disabled?: boolean; tr: typeof T.ar }) {
+  value, onChange, disabled, tr, lang,
+}: { value: LeadStatusT; onChange: (v: LeadStatusT) => void; disabled?: boolean; tr: typeof T.ar; lang: "ar" | "en" }) {
   return (
     <Select value={value} onValueChange={(v) => onChange(v as LeadStatusT)} disabled={disabled}>
       <SelectTrigger className="h-8 w-32 text-xs" aria-label={tr.status}>
-        <SelectValue />
+        <SelectValue>{statusLabel(value, lang)}</SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+        {STATUSES.map((s) => <SelectItem key={s} value={s}>{statusLabel(s, lang)}</SelectItem>)}
       </SelectContent>
     </Select>
   );
 }
 
-function IndividualsTable({
-  rows, lang, tr, savingId, onStatus, onNote, onChat,
+function NotesCell({
+  contactId, latestNotes, onView, tr,
 }: {
+  contactId: string | null;
+  latestNotes: Record<string, { body: string; created_at: string }>;
+  onView: (body: string) => void;
+  tr: typeof T.ar;
+}) {
+  const note = contactId ? latestNotes[contactId] : undefined;
+  if (!note) return <span className="text-muted-foreground">—</span>;
+  const isLong = note.body.length > 80 || note.body.includes("\n");
+  return (
+    <div className="max-w-[240px] space-y-1">
+      <p className="line-clamp-2 whitespace-pre-wrap text-xs text-muted-foreground">{note.body}</p>
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => onView(note.body)}
+          className="text-xs text-primary hover:underline focus:underline focus:outline-none"
+        >
+          {tr.more}
+        </button>
+      )}
+    </div>
+  );
+}
+
+type TableProps = {
   rows: Record<string, unknown>[];
   lang: "ar" | "en";
   tr: typeof T.ar;
@@ -496,10 +521,16 @@ function IndividualsTable({
   onStatus: (id: string, s: LeadStatusT) => void;
   onNote: (id: string) => void;
   onChat: (convId: string | null | undefined) => void;
-}) {
+  latestNotes: Record<string, { body: string; created_at: string }>;
+  onViewNote: (body: string) => void;
+};
+
+function IndividualsTable({
+  rows, lang, tr, savingId, onStatus, onNote, onChat, latestNotes, onViewNote,
+}: TableProps) {
   return (
     <div className="overflow-x-auto rounded-xl border border-border bg-card">
-      <table className="w-full min-w-[960px] text-sm">
+      <table className="w-full min-w-[1100px] text-sm">
         <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
           <tr>
             <th className="px-3 py-2 text-start">{tr.name}</th>
@@ -508,16 +539,18 @@ function IndividualsTable({
             <th className="px-3 py-2 text-start">{tr.specialty}</th>
             <th className="px-3 py-2 text-start">{tr.status}</th>
             <th className="px-3 py-2 text-start">{tr.date}</th>
+            <th className="px-3 py-2 text-start">{tr.notes}</th>
             <th className="px-3 py-2 text-end">{tr.actions}</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 && (
-            <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
+            <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
           )}
           {rows.map((r) => {
             const id = String(r.id);
             const convId = (r.conversation_id as string | null) ?? null;
+            const contactId = (r.contact_id as string | null) ?? null;
             return (
               <tr key={id} className="border-t border-border">
                 <td className="px-3 py-2 font-medium">
@@ -534,10 +567,14 @@ function IndividualsTable({
                     disabled={savingId === id}
                     onChange={(s) => onStatus(id, s)}
                     tr={tr}
+                    lang={lang}
                   />
                 </td>
                 <td className="px-3 py-2 text-muted-foreground">
                   {new Date(String(r.created_at)).toLocaleDateString(lang === "ar" ? "ar" : "en")}
+                </td>
+                <td className="px-3 py-2">
+                  <NotesCell contactId={contactId} latestNotes={latestNotes} onView={onViewNote} tr={tr} />
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex justify-end gap-1">
@@ -559,19 +596,11 @@ function IndividualsTable({
 }
 
 function CompaniesTable({
-  rows, lang, tr, savingId, onStatus, onNote, onChat,
-}: {
-  rows: Record<string, unknown>[];
-  lang: "ar" | "en";
-  tr: typeof T.ar;
-  savingId: string | null;
-  onStatus: (id: string, s: LeadStatusT) => void;
-  onNote: (id: string) => void;
-  onChat: (convId: string | null | undefined) => void;
-}) {
+  rows, lang, tr, savingId, onStatus, onNote, onChat, latestNotes, onViewNote,
+}: TableProps) {
   return (
     <div className="overflow-x-auto rounded-xl border border-border bg-card">
-      <table className="w-full min-w-[960px] text-sm">
+      <table className="w-full min-w-[1100px] text-sm">
         <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
           <tr>
             <th className="px-3 py-2 text-start">{tr.company}</th>
@@ -580,16 +609,18 @@ function CompaniesTable({
             <th className="px-3 py-2 text-start">{tr.email}</th>
             <th className="px-3 py-2 text-start">{tr.status}</th>
             <th className="px-3 py-2 text-start">{tr.date}</th>
+            <th className="px-3 py-2 text-start">{tr.notes}</th>
             <th className="px-3 py-2 text-end">{tr.actions}</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 && (
-            <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
+            <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
           )}
           {rows.map((r) => {
             const id = String(r.id);
             const convId = (r.conversation_id as string | null) ?? null;
+            const contactId = (r.contact_id as string | null) ?? null;
             return (
               <tr key={id} className="border-t border-border">
                 <td className="px-3 py-2 font-medium">
@@ -606,10 +637,14 @@ function CompaniesTable({
                     disabled={savingId === id}
                     onChange={(s) => onStatus(id, s)}
                     tr={tr}
+                    lang={lang}
                   />
                 </td>
                 <td className="px-3 py-2 text-muted-foreground">
                   {new Date(String(r.created_at)).toLocaleDateString(lang === "ar" ? "ar" : "en")}
+                </td>
+                <td className="px-3 py-2">
+                  <NotesCell contactId={contactId} latestNotes={latestNotes} onView={onViewNote} tr={tr} />
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex justify-end gap-1">
@@ -629,6 +664,7 @@ function CompaniesTable({
     </div>
   );
 }
+
 
 function NewLeadDialog({
   open, onOpenChange, variant, onCreated, createInd, createComp, tr,
