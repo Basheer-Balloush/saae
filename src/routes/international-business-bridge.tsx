@@ -59,9 +59,7 @@ export const Route = createFileRoute("/international-business-bridge")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://aisyria.org/international-business-bridge" },
-      { property: "og:image", content: `https://aisyria.org${agenda.url}` },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: `https://aisyria.org${agenda.url}` },
     ],
     links: [
       { rel: "canonical", href: "https://aisyria.org/international-business-bridge" },
