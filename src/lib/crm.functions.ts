@@ -693,7 +693,7 @@ export const createIndividualLead = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { data: result, error } = await context.supabase.rpc(
       "crm_create_individual_lead_tx",
-      { payload: stripEmpty(data) },
+      { payload: stripEmpty(data) as never },
     );
     if (error) throw new Error(error.message);
     return result as { lead_id: string; contact_id: string };
@@ -706,7 +706,7 @@ export const createCompanyLead = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { data: result, error } = await context.supabase.rpc(
       "crm_create_company_lead_tx",
-      { payload: stripEmpty(data) },
+      { payload: stripEmpty(data) as never },
     );
     if (error) throw new Error(error.message);
     return result as { lead_id: string; contact_id: string };
@@ -723,7 +723,7 @@ export const updateIndividualLead = createServerFn({ method: "POST" })
     const { leadId, ...rest } = data;
     const { data: result, error } = await context.supabase.rpc(
       "crm_update_individual_lead_tx",
-      { _lead_id: leadId, payload: rest as Record<string, unknown> },
+      { _lead_id: leadId, payload: rest as never },
     );
     if (error) throw new Error(error.message);
     return result;
@@ -737,7 +737,7 @@ export const updateCompanyLead = createServerFn({ method: "POST" })
     const { leadId, ...rest } = data;
     const { data: result, error } = await context.supabase.rpc(
       "crm_update_company_lead_tx",
-      { _lead_id: leadId, payload: rest as Record<string, unknown> },
+      { _lead_id: leadId, payload: rest as never },
     );
     if (error) throw new Error(error.message);
     return result;
