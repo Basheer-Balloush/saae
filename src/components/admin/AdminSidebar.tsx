@@ -11,7 +11,6 @@ import {
   Contact2,
 } from "lucide-react";
 import logoTree from "@/assets/logo-tree.png";
-
 import { useState } from "react";
 import {
   Sidebar,
