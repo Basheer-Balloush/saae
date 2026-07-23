@@ -230,28 +230,55 @@ export function LeadsView({ variant }: { variant: Variant }) {
       .finally(() => setMsgsLoading(false));
   };
 
-  // --- note modal ---
-  const [noteFor, setNoteFor] = useState<string | null>(null);
+  // --- note modal (add + edit) ---
+  type NoteState = {
+    leadId: string;
+    contactId: string | null;
+    mode: "add" | "edit";
+    noteId: string | null;
+    initialBody: string;
+  };
+  const [noteState, setNoteState] = useState<NoteState | null>(null);
   const [noteBody, setNoteBody] = useState("");
   const [savingNote, setSavingNote] = useState(false);
+
+  const openNote = (leadId: string, contactId: string | null) => {
+    const existing = contactId ? latestNotes[contactId] : undefined;
+    if (existing) {
+      setNoteState({ leadId, contactId, mode: "edit", noteId: existing.id, initialBody: existing.body });
+      setNoteBody(existing.body);
+    } else {
+      setNoteState({ leadId, contactId, mode: "add", noteId: null, initialBody: "" });
+      setNoteBody("");
+    }
+  };
+
+  const closeNote = () => { setNoteState(null); setNoteBody(""); };
+
   const saveNote = async () => {
-    if (!noteFor || !noteBody.trim()) return;
+    if (!noteState) return;
+    const trimmed = noteBody.trim();
+    if (!trimmed) return;
+    if (noteState.mode === "edit" && trimmed === noteState.initialBody.trim()) return;
     setSavingNote(true);
     try {
-      await addNoteFn({
-        data: { leadType: variant === "individuals" ? "individual" : "company", leadId: noteFor, body: noteBody.trim() },
-      });
-      // Refresh notes preview for the current page without full reload.
+      const leadType = variant === "individuals" ? "individual" : "company";
+      if (noteState.mode === "add") {
+        await addNoteFn({ data: { leadType, leadId: noteState.leadId, body: trimmed } });
+        toast.success(tr.noteAdded);
+      } else if (noteState.noteId) {
+        await editNoteFn({ data: { leadType, leadId: noteState.leadId, noteId: noteState.noteId, body: trimmed } });
+        toast.success(tr.noteUpdated);
+      }
       loadNotesFor(rows.map((row) => String(row.contact_id ?? "")).filter(Boolean));
-      toast.success(tr.saved);
-      setNoteFor(null);
-      setNoteBody("");
+      closeNote();
     } catch (e) {
       toast.error(toUserMessage(e));
     } finally {
       setSavingNote(false);
     }
   };
+
 
   // --- view note modal ---
   const [viewNoteBody, setViewNoteBody] = useState<string | null>(null);
