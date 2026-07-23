@@ -334,17 +334,9 @@ export function LeadsView({ variant }: { variant: Variant }) {
             <SelectTrigger><SelectValue placeholder={tr.allStatuses} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="__all__">{tr.allStatuses}</SelectItem>
-              {STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              {STATUSES.map((s) => <SelectItem key={s} value={s}>{statusLabel(s, lang)}</SelectItem>)}
             </SelectContent>
           </Select>
-        </div>
-        <div className="w-40">
-          <Label className="text-xs">{tr.source}</Label>
-          <Input
-            value={source}
-            onChange={(e) => updateSearch({ source: e.target.value || undefined, page: 1 })}
-            placeholder={tr.allSources}
-          />
         </div>
         <div>
           <Label className="text-xs">{tr.from}</Label>
@@ -355,6 +347,9 @@ export function LeadsView({ variant }: { variant: Variant }) {
           <Input type="date" value={to} onChange={(e) => updateSearch({ to: e.target.value || undefined, page: 1 })} />
         </div>
         <div className="ms-auto flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={resetFilters} disabled={!hasActiveFilters}>
+            <RotateCcw className="h-4 w-4" /> {tr.reset}
+          </Button>
           <Button variant="outline" size="sm" onClick={doExport}>
             <Download className="h-4 w-4" /> {tr.export}
           </Button>
@@ -363,6 +358,7 @@ export function LeadsView({ variant }: { variant: Variant }) {
           </Button>
         </div>
       </div>
+
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
