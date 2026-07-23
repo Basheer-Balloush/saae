@@ -63,7 +63,7 @@ export function CrmContactsList() {
   const onExport = () => {
     void exportRowsToXlsx<Contact>({
       filenameBase: `crm-contacts-${new Date().toISOString().slice(0, 10)}`,
-      sheetName: "Contacts",
+      sheetName: "Leads",
       rtl: ar,
       columns: [
         { header: "Name", get: (r) => r.display_name },
@@ -85,9 +85,9 @@ export function CrmContactsList() {
         <div>
           <h1 className="text-2xl font-bold">{ar ? "جهات الاتصال" : "Contacts"}</h1>
           <p className="text-sm text-muted-foreground">
-            {ar ? "الإجمالي" : "Total"}: <span className="font-semibold">{stats.total}</span> · {ar ? "أفراد" : "Individuals"}:{" "}
-            <span className="font-semibold">{stats.individuals}</span> · {ar ? "شركات" : "Companies"}:{" "}
-            <span className="font-semibold">{stats.companies}</span>
+            {ar ? "الإجمالي" : "Total"}: <span className="font-semibold">{stats.total}</span> ·{" "}
+            {ar ? "أفراد" : "Individuals"}: <span className="font-semibold">{stats.individuals}</span> ·{" "}
+            {ar ? "شركات" : "Companies"}: <span className="font-semibold">{stats.companies}</span>
           </p>
         </div>
         <div className="flex gap-2">
@@ -112,7 +112,9 @@ export function CrmContactsList() {
           />
         </div>
         <Select value={type} onValueChange={setType}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-40">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{ar ? "كل الأنواع" : "All types"}</SelectItem>
             <SelectItem value="individual">{ar ? "فرد" : "Individual"}</SelectItem>
@@ -120,15 +122,21 @@ export function CrmContactsList() {
           </SelectContent>
         </Select>
         <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-44">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{ar ? "كل الحالات" : "All statuses"}</SelectItem>
             {Object.entries(STATUS_LABELS).map(([k, v]) => (
-              <SelectItem key={k} value={k}>{ar ? v.ar : v.en}</SelectItem>
+              <SelectItem key={k} value={k}>
+                {ar ? v.ar : v.en}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Button variant="secondary" size="sm" onClick={load}>{ar ? "بحث" : "Search"}</Button>
+        <Button variant="secondary" size="sm" onClick={load}>
+          {ar ? "بحث" : "Search"}
+        </Button>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
@@ -146,37 +154,50 @@ export function CrmContactsList() {
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={7} className="px-4 py-10 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" /></td></tr>
+              <tr>
+                <td colSpan={7} className="px-4 py-10 text-center">
+                  <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+                </td>
+              </tr>
             )}
             {!loading && rows.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">{ar ? "لا توجد نتائج" : "No contacts"}</td></tr>
+              <tr>
+                <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
+                  {ar ? "لا توجد نتائج" : "No contacts"}
+                </td>
+              </tr>
             )}
-            {!loading && rows.map((r) => {
-              const s = STATUS_LABELS[r.status] ?? STATUS_LABELS.new;
-              return (
-                <tr key={r.id} className="border-t border-border hover:bg-muted/20">
-                  <td className="px-3 py-2">
-                    <Link
-                      to="/admin/crm/contacts/$contactId"
-                      params={{ contactId: r.id }}
-                      className="font-medium text-primary hover:underline"
-                    >
-                      {r.display_name}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-2 text-muted-foreground">
-                    {r.contact_type === "company" ? (ar ? "شركة" : "Company") : (ar ? "فرد" : "Individual")}
-                  </td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.primary_email ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.primary_phone ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.organization ?? "—"}</td>
-                  <td className="px-3 py-2"><Badge className={s.className} variant="secondary">{ar ? s.ar : s.en}</Badge></td>
-                  <td className="px-3 py-2 text-muted-foreground">
-                    {new Date(r.updated_at).toLocaleDateString(ar ? "ar" : "en")}
-                  </td>
-                </tr>
-              );
-            })}
+            {!loading &&
+              rows.map((r) => {
+                const s = STATUS_LABELS[r.status] ?? STATUS_LABELS.new;
+                return (
+                  <tr key={r.id} className="border-t border-border hover:bg-muted/20">
+                    <td className="px-3 py-2">
+                      <Link
+                        to="/admin/crm/contacts/$contactId"
+                        params={{ contactId: r.id }}
+                        className="font-medium text-primary hover:underline"
+                      >
+                        {r.display_name}
+                      </Link>
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {r.contact_type === "company" ? (ar ? "شركة" : "Company") : ar ? "فرد" : "Individual"}
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.primary_email ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.primary_phone ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.organization ?? "—"}</td>
+                    <td className="px-3 py-2">
+                      <Badge className={s.className} variant="secondary">
+                        {ar ? s.ar : s.en}
+                      </Badge>
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {new Date(r.updated_at).toLocaleDateString(ar ? "ar" : "en")}
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
