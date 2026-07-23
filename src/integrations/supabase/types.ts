@@ -2692,8 +2692,43 @@ export type Database = {
         Args: { _session_id: string }
         Returns: boolean
       }
+      crm_add_lead_note_tx: {
+        Args: { _body: string; _lead_id: string; _lead_type: string }
+        Returns: Json
+      }
+      crm_attach_identity: {
+        Args: { _contact: string; _type: string; _value: string }
+        Returns: undefined
+      }
+      crm_create_company_lead_tx: { Args: { payload: Json }; Returns: Json }
+      crm_create_individual_lead_tx: { Args: { payload: Json }; Returns: Json }
       crm_normalize_email: { Args: { v: string }; Returns: string }
       crm_normalize_phone: { Args: { v: string }; Returns: string }
+      crm_resolve_or_conflict: {
+        Args: { _email: string; _phone: string }
+        Returns: {
+          conflict: string
+          contact_id: string
+          email_contact: string
+          phone_contact: string
+        }[]
+      }
+      crm_set_lead_status_tx: {
+        Args: {
+          _lead_id: string
+          _lead_type: string
+          _status: Database["public"]["Enums"]["crm_lead_status"]
+        }
+        Returns: Json
+      }
+      crm_update_company_lead_tx: {
+        Args: { _lead_id: string; payload: Json }
+        Returns: Json
+      }
+      crm_update_individual_lead_tx: {
+        Args: { _lead_id: string; payload: Json }
+        Returns: Json
+      }
       crm_upsert_contact: {
         Args: {
           _contact_type?: Database["public"]["Enums"]["crm_contact_type"]
