@@ -31,11 +31,17 @@ type LeadStatusT = "new" | "contacted" | "qualified" | "converted" | "archived";
 const STATUSES: LeadStatusT[] = ["new", "contacted", "qualified", "converted", "archived"];
 const PAGE_SIZE = 25;
 
+const STATUS_LABELS = {
+  ar: { new: "جديد", contacted: "تم التواصل", qualified: "مؤهل", converted: "تم التحويل", archived: "مؤرشف" },
+  en: { new: "New", contacted: "Contacted", qualified: "Qualified", converted: "Converted", archived: "Archived" },
+} as const;
+const statusLabel = (s: LeadStatusT, lang: "ar" | "en") => STATUS_LABELS[lang][s];
+
 const T = {
   ar: {
-    heading: "الـ Leads", newLead: "Lead جديد", export: "تصدير Excel",
+    heading: "الـ Leads", newLead: "Lead جديد", export: "تصدير Excel", reset: "إعادة تعيين",
     searchPh: "بحث بالاسم، إيميل، هاتف...",
-    status: "الحالة", allStatuses: "كل الحالات", source: "المصدر", allSources: "كل المصادر",
+    status: "الحالة", allStatuses: "كل الحالات", source: "المصدر",
     from: "من", to: "إلى",
     total: "الإجمالي", noLeads: "لا توجد نتائج", actions: "إجراءات",
     viewChat: "عرض المحادثة", noChatLinked: "لا توجد محادثة مرتبطة",
@@ -53,11 +59,12 @@ const T = {
     country: "البلد", officeAddress: "عنوان المكتب",
     duplicateFound: "يوجد Lead مرتبط بنفس البريد أو الهاتف. أنشئ على أي حال؟",
     createAnyway: "أنشئ على أي حال",
+    notes: "الملاحظات", more: "عرض المزيد", noteTitle: "الملاحظة",
   },
   en: {
-    heading: "Leads", newLead: "New Lead", export: "Export Excel",
+    heading: "Leads", newLead: "New Lead", export: "Export Excel", reset: "Reset",
     searchPh: "Search by name, email, phone...",
-    status: "Status", allStatuses: "All statuses", source: "Source", allSources: "All sources",
+    status: "Status", allStatuses: "All statuses", source: "Source",
     from: "From", to: "To",
     total: "Total", noLeads: "No results", actions: "Actions",
     viewChat: "View chat", noChatLinked: "No linked chat",
@@ -75,6 +82,7 @@ const T = {
     country: "Country", officeAddress: "Office address",
     duplicateFound: "A lead with the same email/phone already exists. Create anyway?",
     createAnyway: "Create anyway",
+    notes: "Notes", more: "More", noteTitle: "Note",
   },
 };
 
