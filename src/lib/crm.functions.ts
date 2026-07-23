@@ -14,8 +14,15 @@ async function assertAdmin(sb: SupabaseClient, userId: string) {
   if (!data) throw new Error("Forbidden: admin role required");
 }
 
-const ContactType = z.enum(["individual", "company"]);
 const LeadStatus = z.enum(["new", "contacted", "qualified", "converted", "archived"]);
+type LeadStatusT = z.infer<typeof LeadStatus>;
+const LeadType = z.enum(["individual", "company"]);
+
+// ============================================================
+// Legacy contact-level functions (kept for /admin/crm/contacts/*)
+// ============================================================
+
+const ContactType = z.enum(["individual", "company"]);
 
 function normalizeEmail(v?: string | null) {
   const s = (v ?? "").trim().toLowerCase();
@@ -90,7 +97,6 @@ export const getContact = createServerFn({ method: "POST" })
       if (r.error) throw new Error(r.error.message);
     }
 
-    // Build unified activity timeline
     type Activity = {
       kind: "individual_lead" | "company_lead" | "form_submission" | "note";
       id: string;
@@ -185,7 +191,7 @@ export const createContact = createServerFn({ method: "POST" })
     country?: string;
     city?: string;
     tags?: string[];
-    status?: "new" | "contacted" | "qualified" | "converted" | "archived";
+    status?: LeadStatusT;
     notes?: string;
     force?: boolean;
   }) =>
@@ -211,10 +217,7 @@ export const createContact = createServerFn({ method: "POST" })
     const email = normalizeEmail(data.primary_email);
     const phone = normalizePhone(data.primary_phone);
 
-    // Duplicate check
     if (!data.force && (email || phone)) {
-      const orParts: string[] = [];
-      if (email) orParts.push(`identity_type.eq.email,identity_value.eq.${email}`);
       let dup: { contact_id: string } | null = null;
       if (email) {
         const { data: r } = await sb
@@ -234,10 +237,7 @@ export const createContact = createServerFn({ method: "POST" })
           .maybeSingle();
         if (r) dup = r;
       }
-      if (dup) {
-        return { ok: false as const, duplicateContactId: dup.contact_id, matchedOn: email ? "email" : "phone" };
-      }
-      void orParts;
+      if (dup) return { ok: false as const, duplicateContactId: dup.contact_id, matchedOn: email ? "email" : "phone" };
     }
 
     const { data: inserted, error } = await sb
@@ -275,7 +275,7 @@ export const updateContact = createServerFn({ method: "POST" })
   .inputValidator((d: {
     contactId: string;
     display_name?: string;
-    status?: "new" | "contacted" | "qualified" | "converted" | "archived";
+    status?: LeadStatusT;
     assigned_admin_id?: string | null;
     tags?: string[];
     organization?: string | null;
@@ -297,22 +297,10 @@ export const updateContact = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const patch: {
-      display_name?: string;
-      status?: "new" | "contacted" | "qualified" | "converted" | "archived";
-      assigned_admin_id?: string | null;
-      tags?: string[];
-      organization?: string | null;
-      country?: string | null;
-      city?: string | null;
-    } = {};
-    if (data.display_name !== undefined) patch.display_name = data.display_name;
-    if (data.status !== undefined) patch.status = data.status;
-    if (data.assigned_admin_id !== undefined) patch.assigned_admin_id = data.assigned_admin_id;
-    if (data.tags !== undefined) patch.tags = data.tags;
-    if (data.organization !== undefined) patch.organization = data.organization;
-    if (data.country !== undefined) patch.country = data.country;
-    if (data.city !== undefined) patch.city = data.city;
+    const patch: Record<string, unknown> = {};
+    for (const k of ["display_name", "status", "assigned_admin_id", "tags", "organization", "country", "city"] as const) {
+      if (data[k] !== undefined) patch[k] = data[k];
+    }
     const { error } = await context.supabase.from("crm_contacts").update(patch).eq("id", data.contactId);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -366,7 +354,6 @@ export const listLmsStudents = createServerFn({ method: "GET" })
       .limit(2000);
     if (error) throw new Error(error.message);
 
-    // Aggregate by student
     const byStudent = new Map<
       string,
       {
@@ -409,7 +396,6 @@ export const listLmsStudents = createServerFn({ method: "GET" })
     }));
     students.sort((a, b) => (a.last_enrolled_at < b.last_enrolled_at ? 1 : -1));
 
-    // Fetch emails via admin
     let emailsById: Record<string, string> = {};
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -426,4 +412,363 @@ export const listLmsStudents = createServerFn({ method: "GET" })
     return {
       students: students.map((s) => ({ ...s, email: emailsById[s.student_id] ?? null })),
     };
+  });
+
+// ============================================================
+// NEW: Lead-level server functions (thin wrappers over SECURITY DEFINER RPCs)
+// ============================================================
+
+const LeadFilters = z.object({
+  search: z.string().trim().max(200).optional(),
+  status: LeadStatus.optional(),
+  source: z.string().trim().max(50).optional(),
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  limit: z.number().int().min(1).max(200).optional(),
+  offset: z.number().int().min(0).max(100000).optional(),
+});
+type LeadFiltersT = z.infer<typeof LeadFilters>;
+
+const INDIVIDUAL_COLS =
+  "id, full_name, email, phone, specialty, work_field, address, short_description, source, status, contact_id, conversation_id, created_at, updated_at";
+const COMPANY_COLS =
+  "id, company_name, contact_name, contact_email, contact_phone, work_field, country, office_address, source, status, contact_id, conversation_id, created_at, updated_at";
+
+function escLike(s: string) {
+  return s.replace(/[%_,()]/g, (m) => `\\${m}`);
+}
+
+function applyIndividualFilters<T extends { or: (v: string) => T; eq: (a: string, b: string) => T; gte: (a: string, b: string) => T; lte: (a: string, b: string) => T }>(
+  q: T, f: LeadFiltersT,
+): T {
+  if (f.search) {
+    const s = escLike(f.search);
+    q = q.or(`full_name.ilike.%${s}%,email.ilike.%${s}%,phone.ilike.%${s}%,specialty.ilike.%${s}%,work_field.ilike.%${s}%`);
+  }
+  if (f.status) q = q.eq("status", f.status);
+  if (f.source) q = q.eq("source", f.source);
+  if (f.from) q = q.gte("created_at", f.from);
+  if (f.to) q = q.lte("created_at", f.to);
+  return q;
+}
+
+function applyCompanyFilters<T extends { or: (v: string) => T; eq: (a: string, b: string) => T; gte: (a: string, b: string) => T; lte: (a: string, b: string) => T }>(
+  q: T, f: LeadFiltersT,
+): T {
+  if (f.search) {
+    const s = escLike(f.search);
+    q = q.or(`company_name.ilike.%${s}%,contact_name.ilike.%${s}%,contact_email.ilike.%${s}%,contact_phone.ilike.%${s}%,work_field.ilike.%${s}%`);
+  }
+  if (f.status) q = q.eq("status", f.status);
+  if (f.source) q = q.eq("source", f.source);
+  if (f.from) q = q.gte("created_at", f.from);
+  if (f.to) q = q.lte("created_at", f.to);
+  return q;
+}
+
+export const listIndividualLeads = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: LeadFiltersT = {}) => LeadFilters.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const limit = data.limit ?? 50;
+    const offset = data.offset ?? 0;
+    let q = context.supabase
+      .from("individual_leads")
+      .select(INDIVIDUAL_COLS, { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+    q = applyIndividualFilters(q, data);
+    const { data: rows, count, error } = await q;
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [], total: count ?? 0 };
+  });
+
+export const listCompanyLeads = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: LeadFiltersT = {}) => LeadFilters.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const limit = data.limit ?? 50;
+    const offset = data.offset ?? 0;
+    let q = context.supabase
+      .from("company_leads")
+      .select(COMPANY_COLS, { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+    q = applyCompanyFilters(q, data);
+    const { data: rows, count, error } = await q;
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [], total: count ?? 0 };
+  });
+
+const EXPORT_CAP = 10000;
+
+export const exportIndividualLeads = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: LeadFiltersT = {}) => LeadFilters.omit({ limit: true, offset: true }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    let q = context.supabase
+      .from("individual_leads")
+      .select(INDIVIDUAL_COLS, { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(0, EXPORT_CAP);
+    q = applyIndividualFilters(q, data);
+    const { data: rows, count, error } = await q;
+    if (error) throw new Error(error.message);
+    if ((count ?? 0) > EXPORT_CAP) {
+      throw new Error(`export_too_large:${count}:${EXPORT_CAP}`);
+    }
+    return { rows: rows ?? [] };
+  });
+
+export const exportCompanyLeads = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: LeadFiltersT = {}) => LeadFilters.omit({ limit: true, offset: true }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    let q = context.supabase
+      .from("company_leads")
+      .select(COMPANY_COLS, { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(0, EXPORT_CAP);
+    q = applyCompanyFilters(q, data);
+    const { data: rows, count, error } = await q;
+    if (error) throw new Error(error.message);
+    if ((count ?? 0) > EXPORT_CAP) {
+      throw new Error(`export_too_large:${count}:${EXPORT_CAP}`);
+    }
+    return { rows: rows ?? [] };
+  });
+
+// ---------- Detail ----------
+
+async function loadLeadDetail(
+  sb: SupabaseClient,
+  variant: "individual" | "company",
+  leadId: string,
+) {
+  const table = variant === "individual" ? "individual_leads" : "company_leads";
+  const cols = variant === "individual" ? INDIVIDUAL_COLS : COMPANY_COLS;
+  const { data: lead, error } = await sb.from(table).select(cols).eq("id", leadId).maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!lead) throw new Error("lead_not_found");
+  const leadRow = lead as unknown as { id: string; contact_id: string | null; conversation_id: string | null; created_at: string };
+
+  let contact = null;
+  let notes: Array<{ id: string; body: string; created_at: string; author_id: string | null }> = [];
+  let formSubs: Array<{
+    id: string;
+    submitted_at: string;
+    values: unknown;
+    dynamic_forms: { slug: string; name_en: string; name_ar: string } | null;
+  }> = [];
+
+  if (leadRow.contact_id) {
+    const [cQ, nQ, fQ] = await Promise.all([
+      sb.from("crm_contacts").select("*").eq("id", leadRow.contact_id).maybeSingle(),
+      sb.from("crm_notes").select("id, body, created_at, author_id").eq("contact_id", leadRow.contact_id).order("created_at", { ascending: false }),
+      sb
+        .from("dynamic_form_submissions")
+        .select("id, submitted_at, values, dynamic_forms(slug, name_en, name_ar)")
+        .eq("contact_id", leadRow.contact_id)
+        .order("submitted_at", { ascending: false }),
+    ]);
+    if (cQ.error) throw new Error(cQ.error.message);
+    if (nQ.error) throw new Error(nQ.error.message);
+    if (fQ.error) throw new Error(fQ.error.message);
+    contact = cQ.data;
+    notes = nQ.data ?? [];
+    formSubs = (fQ.data ?? []) as typeof formSubs;
+  }
+
+  // Activity timeline: notes + form submissions (contact_id only) + lead creation
+  type Activity = {
+    kind: "lead_created" | "note" | "form_submission";
+    id: string;
+    timestamp: string;
+    title: string;
+    subtitle: string | null;
+    form_slug: string | null;
+    author_id: string | null;
+  };
+  const activities: Activity[] = [];
+  activities.push({
+    kind: "lead_created",
+    id: leadRow.id,
+    timestamp: leadRow.created_at,
+    title: variant === "individual" ? "Individual lead created" : "Company lead created",
+    subtitle: null,
+    form_slug: null,
+    author_id: null,
+  });
+  for (const n of notes) {
+    activities.push({
+      kind: "note",
+      id: n.id,
+      timestamp: n.created_at,
+      title: "Note",
+      subtitle: n.body,
+      form_slug: null,
+      author_id: n.author_id,
+    });
+  }
+  for (const s of formSubs) {
+    activities.push({
+      kind: "form_submission",
+      id: s.id,
+      timestamp: s.submitted_at,
+      title: `Form: ${s.dynamic_forms?.name_en ?? s.dynamic_forms?.slug ?? "Form"}`,
+      subtitle: s.dynamic_forms?.name_ar ?? null,
+      form_slug: s.dynamic_forms?.slug ?? null,
+      author_id: null,
+    });
+  }
+  activities.sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
+
+  return { lead, contact, notes, activities };
+}
+
+export const getIndividualLead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { leadId: string }) => z.object({ leadId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    return loadLeadDetail(context.supabase, "individual", data.leadId);
+  });
+
+export const getCompanyLead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { leadId: string }) => z.object({ leadId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    return loadLeadDetail(context.supabase, "company", data.leadId);
+  });
+
+// ---------- Mutations (RPC-backed) ----------
+
+const IndividualCreate = z.object({
+  full_name: z.string().trim().min(1).max(200),
+  email: z.string().trim().email().max(255).optional().or(z.literal("")),
+  phone: z.string().trim().max(50).optional().or(z.literal("")),
+  specialty: z.string().trim().max(200).optional().or(z.literal("")),
+  work_field: z.string().trim().max(200).optional().or(z.literal("")),
+  address: z.string().trim().max(500).optional().or(z.literal("")),
+  short_description: z.string().trim().max(2000).optional().or(z.literal("")),
+  source: z.string().trim().max(50).optional(),
+  status: LeadStatus.optional(),
+  override_conflict: z.boolean().optional(),
+});
+type IndividualCreateT = z.infer<typeof IndividualCreate>;
+
+const CompanyCreate = z.object({
+  company_name: z.string().trim().min(2).max(200),
+  contact_name: z.string().trim().max(200).optional().or(z.literal("")),
+  contact_email: z.string().trim().email().max(255).optional().or(z.literal("")),
+  contact_phone: z.string().trim().max(50).optional().or(z.literal("")),
+  work_field: z.string().trim().max(200).optional().or(z.literal("")),
+  country: z.string().trim().max(120).optional().or(z.literal("")),
+  office_address: z.string().trim().max(500).optional().or(z.literal("")),
+  source: z.string().trim().max(50).optional(),
+  status: LeadStatus.optional(),
+  override_conflict: z.boolean().optional(),
+});
+type CompanyCreateT = z.infer<typeof CompanyCreate>;
+
+function stripEmpty<T extends Record<string, unknown>>(o: T): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(o)) if (v !== "" && v !== undefined) out[k] = v;
+  return out;
+}
+
+export const createIndividualLead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: IndividualCreateT) => IndividualCreate.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data: result, error } = await context.supabase.rpc(
+      "crm_create_individual_lead_tx",
+      { payload: stripEmpty(data) },
+    );
+    if (error) throw new Error(error.message);
+    return result as { lead_id: string; contact_id: string };
+  });
+
+export const createCompanyLead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: CompanyCreateT) => CompanyCreate.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data: result, error } = await context.supabase.rpc(
+      "crm_create_company_lead_tx",
+      { payload: stripEmpty(data) },
+    );
+    if (error) throw new Error(error.message);
+    return result as { lead_id: string; contact_id: string };
+  });
+
+const IndividualPatch = IndividualCreate.partial().extend({ leadId: z.string().uuid() });
+const CompanyPatch = CompanyCreate.partial().extend({ leadId: z.string().uuid() });
+
+export const updateIndividualLead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof IndividualPatch>) => IndividualPatch.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { leadId, ...rest } = data;
+    const { data: result, error } = await context.supabase.rpc(
+      "crm_update_individual_lead_tx",
+      { _lead_id: leadId, payload: rest as Record<string, unknown> },
+    );
+    if (error) throw new Error(error.message);
+    return result;
+  });
+
+export const updateCompanyLead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof CompanyPatch>) => CompanyPatch.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { leadId, ...rest } = data;
+    const { data: result, error } = await context.supabase.rpc(
+      "crm_update_company_lead_tx",
+      { _lead_id: leadId, payload: rest as Record<string, unknown> },
+    );
+    if (error) throw new Error(error.message);
+    return result;
+  });
+
+export const setLeadStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { leadType: "individual" | "company"; leadId: string; status: LeadStatusT }) =>
+    z.object({ leadType: LeadType, leadId: z.string().uuid(), status: LeadStatus }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data: result, error } = await context.supabase.rpc("crm_set_lead_status_tx", {
+      _lead_type: data.leadType,
+      _lead_id: data.leadId,
+      _status: data.status,
+    });
+    if (error) throw new Error(error.message);
+    return result;
+  });
+
+export const addLeadNote = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { leadType: "individual" | "company"; leadId: string; body: string }) =>
+    z
+      .object({ leadType: LeadType, leadId: z.string().uuid(), body: z.string().trim().min(1).max(4000) })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data: result, error } = await context.supabase.rpc("crm_add_lead_note_tx", {
+      _lead_type: data.leadType,
+      _lead_id: data.leadId,
+      _body: data.body,
+    });
+    if (error) throw new Error(error.message);
+    return result as { note_id: string; contact_id: string };
   });
