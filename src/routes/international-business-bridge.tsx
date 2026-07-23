@@ -2,12 +2,29 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { Mic, Landmark, Presentation, Link2, MessageSquare, Users, Boxes, Clock, Calendar, MapPin } from "lucide-react";
 import ministryEconomy from "@/assets/ministry-economy.png.asset.json";
-import ministryComms from "@/assets/ministry-communications.png.asset.json";
-import agenda from "@/assets/ibb-agenda.jpg.asset.json";
+import ministryComms from "@/assets/ministry-communications-v2.png.asset.json";
 
 // 30 July 2026, 11:00 AM Damascus time (UTC+3, no DST)
 const TARGET_MS = Date.UTC(2026, 6, 30, 8, 0, 0);
+
+const AGENDA_ITEMS: { icon: React.ComponentType<{ className?: string }>; text: string }[] = [
+  { icon: Mic, text: "كلمة رئيس مجلس إدارة الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
+  { icon: Landmark, text: "كلمة وزارة الاقتصاد والصناعة" },
+  { icon: Presentation, text: "عرض تجربة تدريب المهارات السورية في شركة Mozaic AI الألمانية" },
+  { icon: Presentation, text: "عرض تجربة تدريب المهارات السورية في شركة Devista الرومانية" },
+  { icon: Link2, text: "إطلاق منصة ربط المهارات السورية بالأعمال الدولية" },
+  { icon: MessageSquare, text: "جلسة حوارية: أثر التدريب العملي على الاقتصاد السوري" },
+  { icon: Users, text: "جلسة حوارية: حوار مع خبراء في علوم البيانات والذكاء الاصطناعي" },
+  { icon: Boxes, text: "معرض تقني مرافق للمؤتمر" },
+];
+
+const EVENT_META = [
+  { icon: Clock, label: "التوقيت", value: "11:00 صباحاً" },
+  { icon: Calendar, label: "التاريخ", value: "30 تموز 2026" },
+  { icon: MapPin, label: "المكان", value: "المكتبة الوطنية — دمشق" },
+];
 
 function useCountdown(target: number) {
   const [now, setNow] = useState<number | null>(null);
@@ -42,9 +59,7 @@ export const Route = createFileRoute("/international-business-bridge")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://aisyria.org/international-business-bridge" },
-      { property: "og:image", content: `https://aisyria.org${agenda.url}` },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: `https://aisyria.org${agenda.url}` },
     ],
     links: [
       { rel: "canonical", href: "https://aisyria.org/international-business-bridge" },
@@ -124,14 +139,43 @@ function IbbPage() {
           <h2 className="text-center text-2xl sm:text-3xl font-semibold">
             محاور المؤتمر
           </h2>
-          <div className="mt-8 flex justify-center">
-            <img
-              src={agenda.url}
-              alt="أجندة مؤتمر جسر الأعمال الدولي نحو المهارات السورية"
-              className="w-full max-w-3xl rounded-2xl border border-border shadow-soft"
-            />
+          <ol className="mx-auto mt-8 max-w-3xl space-y-3">
+            {AGENDA_ITEMS.map(({ icon: Icon, text }, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-4 rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-soft"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="flex-1 pt-1.5 text-base sm:text-lg leading-relaxed">
+                  <span className="ml-2 text-sm font-semibold text-primary tabular-nums">
+                    {String(i + 1).padStart(2, "0")}.
+                  </span>
+                  {text}
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
+            {EVENT_META.map(({ icon: Icon, label, value }) => (
+              <div
+                key={label}
+                className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-soft"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-muted-foreground">{label}</span>
+                  <span className="font-semibold">{value}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
+
       </main>
       <Footer />
     </div>
