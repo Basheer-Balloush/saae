@@ -52,7 +52,7 @@ function buildNav(lang: "ar" | "en"): NavItem[] {
       title: "CRM",
       icon: Contact2,
       children: [
-        { title: ar ? "Leads" : "Leads", url: "/admin/crm/leads" },
+        { title: ar ? "تشات بوت" : "Chatbot", url: "/admin/crm/leads" },
         { title: ar ? "طلاب المنصة" : "LMS Students", url: "/admin/crm/students" },
         { title: ar ? "استجابات النماذج" : "Form submissions", url: "/admin/crm/forms" },
       ],
