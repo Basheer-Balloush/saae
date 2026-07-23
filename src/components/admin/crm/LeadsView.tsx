@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Loader2, MessageSquare, Plus, Download, Search, StickyNote, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Loader2, MessageSquare, Plus, Download, Search, StickyNote, ChevronLeft, ChevronRight, X, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ import {
   exportIndividualLeads, exportCompanyLeads,
   setLeadStatus, addLeadNote,
   createIndividualLead, createCompanyLead,
+  listLatestNotesForContacts,
 } from "@/lib/crm.functions";
 import { getConversationMessages } from "@/lib/admin-chat.functions";
 import { toUserMessage } from "@/lib/safe-error";
@@ -30,11 +31,17 @@ type LeadStatusT = "new" | "contacted" | "qualified" | "converted" | "archived";
 const STATUSES: LeadStatusT[] = ["new", "contacted", "qualified", "converted", "archived"];
 const PAGE_SIZE = 25;
 
+const STATUS_LABELS = {
+  ar: { new: "جديد", contacted: "تم التواصل", qualified: "مؤهل", converted: "تم التحويل", archived: "مؤرشف" },
+  en: { new: "New", contacted: "Contacted", qualified: "Qualified", converted: "Converted", archived: "Archived" },
+} as const;
+const statusLabel = (s: LeadStatusT, lang: "ar" | "en") => STATUS_LABELS[lang][s];
+
 const T = {
   ar: {
-    heading: "الـ Leads", newLead: "Lead جديد", export: "تصدير Excel",
+    heading: "الـ Leads", newLead: "Lead جديد", export: "تصدير Excel", reset: "إعادة تعيين",
     searchPh: "بحث بالاسم، إيميل، هاتف...",
-    status: "الحالة", allStatuses: "كل الحالات", source: "المصدر", allSources: "كل المصادر",
+    status: "الحالة", allStatuses: "كل الحالات", source: "المصدر",
     from: "من", to: "إلى",
     total: "الإجمالي", noLeads: "لا توجد نتائج", actions: "إجراءات",
     viewChat: "عرض المحادثة", noChatLinked: "لا توجد محادثة مرتبطة",
@@ -52,11 +59,12 @@ const T = {
     country: "البلد", officeAddress: "عنوان المكتب",
     duplicateFound: "يوجد Lead مرتبط بنفس البريد أو الهاتف. أنشئ على أي حال؟",
     createAnyway: "أنشئ على أي حال",
+    notes: "الملاحظات", more: "عرض المزيد", noteTitle: "الملاحظة",
   },
   en: {
-    heading: "Leads", newLead: "New Lead", export: "Export Excel",
+    heading: "Leads", newLead: "New Lead", export: "Export Excel", reset: "Reset",
     searchPh: "Search by name, email, phone...",
-    status: "Status", allStatuses: "All statuses", source: "Source", allSources: "All sources",
+    status: "Status", allStatuses: "All statuses", source: "Source",
     from: "From", to: "To",
     total: "Total", noLeads: "No results", actions: "Actions",
     viewChat: "View chat", noChatLinked: "No linked chat",
@@ -74,6 +82,7 @@ const T = {
     country: "Country", officeAddress: "Office address",
     duplicateFound: "A lead with the same email/phone already exists. Create anyway?",
     createAnyway: "Create anyway",
+    notes: "Notes", more: "More", noteTitle: "Note",
   },
 };
 
@@ -81,7 +90,7 @@ type Variant = "individuals" | "companies";
 type SearchParams = {
   q?: string;
   status?: LeadStatusT | "";
-  source?: string;
+  source?: string; // legacy — accepted for URL cleanup only
   from?: string;
   to?: string;
   page?: number;
@@ -95,17 +104,20 @@ export function LeadsView({ variant }: { variant: Variant }) {
 
   const q = search.q ?? "";
   const status = (search.status ?? "") as LeadStatusT | "";
-  const source = search.source ?? "";
   const from = search.from ?? "";
   const to = search.to ?? "";
   const page = Math.max(1, Number(search.page ?? 1));
 
+  const routeTo = variant === "individuals" ? "/admin/crm/leads/individuals" : "/admin/crm/leads/companies";
+
   const updateSearch = useCallback(
     (patch: Partial<SearchParams>) => {
       nav({
-        to: variant === "individuals" ? "/admin/crm/leads/individuals" : "/admin/crm/leads/companies",
+        to: routeTo,
         search: (prev: SearchParams) => {
           const merged = { ...prev, ...patch };
+          // Strip legacy source key entirely.
+          delete (merged as SearchParams).source;
           for (const k of Object.keys(merged) as (keyof SearchParams)[]) {
             if (merged[k] === "" || merged[k] === undefined || merged[k] === null) delete merged[k];
           }
@@ -114,7 +126,7 @@ export function LeadsView({ variant }: { variant: Variant }) {
         replace: true,
       });
     },
-    [nav, variant],
+    [nav, routeTo],
   );
 
   const [qInput, setQInput] = useState(q);
@@ -135,20 +147,32 @@ export function LeadsView({ variant }: { variant: Variant }) {
   const createIndFn = useServerFn(createIndividualLead);
   const createCompFn = useServerFn(createCompanyLead);
   const fetchMsgs = useServerFn(getConversationMessages);
+  const fetchNotes = useServerFn(listLatestNotesForContacts);
 
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
+  const [latestNotes, setLatestNotes] = useState<Record<string, { body: string; created_at: string }>>({});
 
   const filters = useMemo(
     () => ({
       search: q || undefined,
       status: status || undefined,
-      source: source || undefined,
       from: from ? new Date(from).toISOString() : undefined,
       to: to ? new Date(to + "T23:59:59").toISOString() : undefined,
     }),
-    [q, status, source, from, to],
+    [q, status, from, to],
+  );
+
+  const loadNotesFor = useCallback(
+    (contactIds: string[]) => {
+      const ids = Array.from(new Set(contactIds.filter(Boolean)));
+      if (ids.length === 0) { setLatestNotes({}); return; }
+      fetchNotes({ data: { contactIds: ids } })
+        .then((r) => setLatestNotes(r.notes))
+        .catch(() => { /* non-fatal */ });
+    },
+    [fetchNotes],
   );
 
   const reload = useCallback(() => {
@@ -156,12 +180,14 @@ export function LeadsView({ variant }: { variant: Variant }) {
     const args = { data: { ...filters, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE } };
     const p = variant === "individuals" ? listInd(args) : listComp(args);
     p.then((r) => {
-      setRows(r.rows as Record<string, unknown>[]);
+      const nextRows = r.rows as Record<string, unknown>[];
+      setRows(nextRows);
       setTotal(r.total);
+      loadNotesFor(nextRows.map((row) => String(row.contact_id ?? "")).filter(Boolean));
     })
       .catch((e) => toast.error(toUserMessage(e)))
       .finally(() => setLoading(false));
-  }, [filters, page, variant, listInd, listComp]);
+  }, [filters, page, variant, listInd, listComp, loadNotesFor]);
 
   useEffect(() => reload(), [reload]);
 
@@ -209,6 +235,8 @@ export function LeadsView({ variant }: { variant: Variant }) {
       await addNoteFn({
         data: { leadType: variant === "individuals" ? "individual" : "company", leadId: noteFor, body: noteBody.trim() },
       });
+      // Refresh notes preview for the current page without full reload.
+      loadNotesFor(rows.map((row) => String(row.contact_id ?? "")).filter(Boolean));
       toast.success(tr.saved);
       setNoteFor(null);
       setNoteBody("");
@@ -217,6 +245,16 @@ export function LeadsView({ variant }: { variant: Variant }) {
     } finally {
       setSavingNote(false);
     }
+  };
+
+  // --- view note modal ---
+  const [viewNoteBody, setViewNoteBody] = useState<string | null>(null);
+
+  // --- reset ---
+  const hasActiveFilters = !!(qInput || q || status || from || to) || page !== 1;
+  const resetFilters = () => {
+    setQInput("");
+    nav({ to: routeTo, search: {}, replace: true });
   };
 
   // --- new lead modal ---
@@ -296,17 +334,9 @@ export function LeadsView({ variant }: { variant: Variant }) {
             <SelectTrigger><SelectValue placeholder={tr.allStatuses} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="__all__">{tr.allStatuses}</SelectItem>
-              {STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              {STATUSES.map((s) => <SelectItem key={s} value={s}>{statusLabel(s, lang)}</SelectItem>)}
             </SelectContent>
           </Select>
-        </div>
-        <div className="w-40">
-          <Label className="text-xs">{tr.source}</Label>
-          <Input
-            value={source}
-            onChange={(e) => updateSearch({ source: e.target.value || undefined, page: 1 })}
-            placeholder={tr.allSources}
-          />
         </div>
         <div>
           <Label className="text-xs">{tr.from}</Label>
@@ -317,6 +347,9 @@ export function LeadsView({ variant }: { variant: Variant }) {
           <Input type="date" value={to} onChange={(e) => updateSearch({ to: e.target.value || undefined, page: 1 })} />
         </div>
         <div className="ms-auto flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={resetFilters} disabled={!hasActiveFilters}>
+            <RotateCcw className="h-4 w-4" /> {tr.reset}
+          </Button>
           <Button variant="outline" size="sm" onClick={doExport}>
             <Download className="h-4 w-4" /> {tr.export}
           </Button>
@@ -325,6 +358,7 @@ export function LeadsView({ variant }: { variant: Variant }) {
           </Button>
         </div>
       </div>
+
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
@@ -343,6 +377,8 @@ export function LeadsView({ variant }: { variant: Variant }) {
           onStatus={handleStatusChange}
           onNote={(id) => { setNoteFor(id); setNoteBody(""); }}
           onChat={openChat}
+          latestNotes={latestNotes}
+          onViewNote={setViewNoteBody}
         />
       ) : (
         <CompaniesTable
@@ -353,6 +389,8 @@ export function LeadsView({ variant }: { variant: Variant }) {
           onStatus={handleStatusChange}
           onNote={(id) => { setNoteFor(id); setNoteBody(""); }}
           onChat={openChat}
+          latestNotes={latestNotes}
+          onViewNote={setViewNoteBody}
         />
       )}
 
@@ -406,6 +444,19 @@ export function LeadsView({ variant }: { variant: Variant }) {
         </DialogContent>
       </Dialog>
 
+      {/* View note modal */}
+      <Dialog open={viewNoteBody !== null} onOpenChange={(o) => !o && setViewNoteBody(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{tr.noteTitle}</DialogTitle>
+            <DialogDescription className="sr-only">{tr.noteTitle}</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap text-sm text-foreground">
+            {viewNoteBody}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* New lead modal */}
       <NewLeadDialog
         open={newOpen}
@@ -421,23 +472,48 @@ export function LeadsView({ variant }: { variant: Variant }) {
 }
 
 function StatusSelect({
-  value, onChange, disabled, tr,
-}: { value: LeadStatusT; onChange: (v: LeadStatusT) => void; disabled?: boolean; tr: typeof T.ar }) {
+  value, onChange, disabled, tr, lang,
+}: { value: LeadStatusT; onChange: (v: LeadStatusT) => void; disabled?: boolean; tr: typeof T.ar; lang: "ar" | "en" }) {
   return (
     <Select value={value} onValueChange={(v) => onChange(v as LeadStatusT)} disabled={disabled}>
       <SelectTrigger className="h-8 w-32 text-xs" aria-label={tr.status}>
-        <SelectValue />
+        <SelectValue>{statusLabel(value, lang)}</SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+        {STATUSES.map((s) => <SelectItem key={s} value={s}>{statusLabel(s, lang)}</SelectItem>)}
       </SelectContent>
     </Select>
   );
 }
 
-function IndividualsTable({
-  rows, lang, tr, savingId, onStatus, onNote, onChat,
+function NotesCell({
+  contactId, latestNotes, onView, tr,
 }: {
+  contactId: string | null;
+  latestNotes: Record<string, { body: string; created_at: string }>;
+  onView: (body: string) => void;
+  tr: typeof T.ar;
+}) {
+  const note = contactId ? latestNotes[contactId] : undefined;
+  if (!note) return <span className="text-muted-foreground">—</span>;
+  const isLong = note.body.length > 80 || note.body.includes("\n");
+  return (
+    <div className="max-w-[240px] space-y-1">
+      <p className="line-clamp-2 whitespace-pre-wrap text-xs text-muted-foreground">{note.body}</p>
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => onView(note.body)}
+          className="text-xs text-primary hover:underline focus:underline focus:outline-none"
+        >
+          {tr.more}
+        </button>
+      )}
+    </div>
+  );
+}
+
+type TableProps = {
   rows: Record<string, unknown>[];
   lang: "ar" | "en";
   tr: typeof T.ar;
@@ -445,10 +521,16 @@ function IndividualsTable({
   onStatus: (id: string, s: LeadStatusT) => void;
   onNote: (id: string) => void;
   onChat: (convId: string | null | undefined) => void;
-}) {
+  latestNotes: Record<string, { body: string; created_at: string }>;
+  onViewNote: (body: string) => void;
+};
+
+function IndividualsTable({
+  rows, lang, tr, savingId, onStatus, onNote, onChat, latestNotes, onViewNote,
+}: TableProps) {
   return (
     <div className="overflow-x-auto rounded-xl border border-border bg-card">
-      <table className="w-full min-w-[960px] text-sm">
+      <table className="w-full min-w-[1100px] text-sm">
         <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
           <tr>
             <th className="px-3 py-2 text-start">{tr.name}</th>
@@ -457,16 +539,18 @@ function IndividualsTable({
             <th className="px-3 py-2 text-start">{tr.specialty}</th>
             <th className="px-3 py-2 text-start">{tr.status}</th>
             <th className="px-3 py-2 text-start">{tr.date}</th>
+            <th className="px-3 py-2 text-start">{tr.notes}</th>
             <th className="px-3 py-2 text-end">{tr.actions}</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 && (
-            <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
+            <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
           )}
           {rows.map((r) => {
             const id = String(r.id);
             const convId = (r.conversation_id as string | null) ?? null;
+            const contactId = (r.contact_id as string | null) ?? null;
             return (
               <tr key={id} className="border-t border-border">
                 <td className="px-3 py-2 font-medium">
@@ -483,10 +567,14 @@ function IndividualsTable({
                     disabled={savingId === id}
                     onChange={(s) => onStatus(id, s)}
                     tr={tr}
+                    lang={lang}
                   />
                 </td>
                 <td className="px-3 py-2 text-muted-foreground">
                   {new Date(String(r.created_at)).toLocaleDateString(lang === "ar" ? "ar" : "en")}
+                </td>
+                <td className="px-3 py-2">
+                  <NotesCell contactId={contactId} latestNotes={latestNotes} onView={onViewNote} tr={tr} />
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex justify-end gap-1">
@@ -508,19 +596,11 @@ function IndividualsTable({
 }
 
 function CompaniesTable({
-  rows, lang, tr, savingId, onStatus, onNote, onChat,
-}: {
-  rows: Record<string, unknown>[];
-  lang: "ar" | "en";
-  tr: typeof T.ar;
-  savingId: string | null;
-  onStatus: (id: string, s: LeadStatusT) => void;
-  onNote: (id: string) => void;
-  onChat: (convId: string | null | undefined) => void;
-}) {
+  rows, lang, tr, savingId, onStatus, onNote, onChat, latestNotes, onViewNote,
+}: TableProps) {
   return (
     <div className="overflow-x-auto rounded-xl border border-border bg-card">
-      <table className="w-full min-w-[960px] text-sm">
+      <table className="w-full min-w-[1100px] text-sm">
         <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
           <tr>
             <th className="px-3 py-2 text-start">{tr.company}</th>
@@ -529,16 +609,18 @@ function CompaniesTable({
             <th className="px-3 py-2 text-start">{tr.email}</th>
             <th className="px-3 py-2 text-start">{tr.status}</th>
             <th className="px-3 py-2 text-start">{tr.date}</th>
+            <th className="px-3 py-2 text-start">{tr.notes}</th>
             <th className="px-3 py-2 text-end">{tr.actions}</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 && (
-            <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
+            <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">{tr.noLeads}</td></tr>
           )}
           {rows.map((r) => {
             const id = String(r.id);
             const convId = (r.conversation_id as string | null) ?? null;
+            const contactId = (r.contact_id as string | null) ?? null;
             return (
               <tr key={id} className="border-t border-border">
                 <td className="px-3 py-2 font-medium">
@@ -555,10 +637,14 @@ function CompaniesTable({
                     disabled={savingId === id}
                     onChange={(s) => onStatus(id, s)}
                     tr={tr}
+                    lang={lang}
                   />
                 </td>
                 <td className="px-3 py-2 text-muted-foreground">
                   {new Date(String(r.created_at)).toLocaleDateString(lang === "ar" ? "ar" : "en")}
+                </td>
+                <td className="px-3 py-2">
+                  <NotesCell contactId={contactId} latestNotes={latestNotes} onView={onViewNote} tr={tr} />
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex justify-end gap-1">
@@ -578,6 +664,7 @@ function CompaniesTable({
     </div>
   );
 }
+
 
 function NewLeadDialog({
   open, onOpenChange, variant, onCreated, createInd, createComp, tr,

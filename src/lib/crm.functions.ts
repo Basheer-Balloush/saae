@@ -776,3 +776,25 @@ export const addLeadNote = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return result as { note_id: string; contact_id: string };
   });
+
+export const listLatestNotesForContacts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { contactIds: string[] }) =>
+    z.object({ contactIds: z.array(z.string().uuid()).max(200) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    if (data.contactIds.length === 0) return { notes: {} as Record<string, { body: string; created_at: string }> };
+    const { data: rows, error } = await context.supabase
+      .from("crm_notes")
+      .select("contact_id, body, created_at")
+      .in("contact_id", data.contactIds)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    const map: Record<string, { body: string; created_at: string }> = {};
+    for (const r of rows ?? []) {
+      const cid = r.contact_id as string;
+      if (!map[cid]) map[cid] = { body: r.body as string, created_at: r.created_at as string };
+    }
+    return { notes: map };
+  });
