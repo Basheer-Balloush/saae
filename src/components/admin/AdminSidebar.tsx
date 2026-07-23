@@ -84,7 +84,7 @@ export function AdminSidebar() {
               <span className="truncate text-sm font-bold text-sidebar-foreground">
                 {lang === "ar" ? "لوحة الإدارة" : "Admin"}
               </span>
-              <span className="truncate text-[10px] uppercase tracking-wider text-sidebar-foreground/60">SAAE</span>
+              <span className="truncate text-[10px] uppercase tracking-wider text-sidebar-foreground/60"></span>
             </div>
           )}
         </Link>
