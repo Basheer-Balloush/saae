@@ -76,8 +76,12 @@ export function AdminSidebar() {
     <Sidebar collapsible="icon" side={lang === "ar" ? "right" : "left"}>
       <SidebarHeader className="border-b border-sidebar-border">
         <Link to="/admin" className="flex items-center gap-2 px-2 py-2">
-          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
-            <LayoutDashboard className="h-4 w-4" />
+          <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-white">
+            <img
+              src={logoTree}
+              alt={lang === "ar" ? "شعار الجمعية" : "Association logo"}
+              className="h-full w-full object-contain p-1"
+            />
           </div>
           {!collapsed && (
             <div className="flex min-w-0 flex-col leading-tight">
