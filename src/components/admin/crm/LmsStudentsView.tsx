@@ -35,23 +35,19 @@ export function LmsStudentsView() {
   }, [rows, search]);
 
   const onExport = () => {
-    exportRowsToXlsx({
-      filename: `lms-students-${new Date().toISOString().slice(0, 10)}`,
+    void exportRowsToXlsx<Student>({
+      filenameBase: `lms-students-${new Date().toISOString().slice(0, 10)}`,
       sheetName: "Students",
+      rtl: ar,
       columns: [
-        { header: "Email", key: "email" },
-        { header: "Enrollments", key: "enrollments_count" },
-        { header: "Completed", key: "completed_count" },
-        { header: "Avg Progress %", key: "avg_progress" },
-        { header: "Last enrolled", key: "last_enrolled_at" },
-        { header: "Courses", key: "course_titles" },
+        { header: "Email", get: (r) => r.email ?? "" },
+        { header: "Enrollments", type: "number", get: (r) => r.enrollments_count },
+        { header: "Completed", type: "number", get: (r) => r.completed_count },
+        { header: "Avg Progress %", type: "number", get: (r) => r.avg_progress },
+        { header: "Last enrolled", type: "date", get: (r) => new Date(r.last_enrolled_at) },
+        { header: "Courses", get: (r) => r.courses.map((c) => (ar ? c.title_ar : c.title_en)).join(" | ") },
       ],
-      rows: filtered.map((r) => ({
-        ...r,
-        course_titles: r.courses.map((c) => (ar ? c.title_ar : c.title_en)).join(" | "),
-        last_enrolled_at: new Date(r.last_enrolled_at).toISOString(),
-      })),
-      dir: ar ? "rtl" : "ltr",
+      rows: filtered,
     });
   };
 

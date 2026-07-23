@@ -61,25 +61,21 @@ export function CrmContactsList() {
   }, [rows]);
 
   const onExport = () => {
-    exportRowsToXlsx({
-      filename: `crm-contacts-${new Date().toISOString().slice(0, 10)}`,
+    void exportRowsToXlsx<Contact>({
+      filenameBase: `crm-contacts-${new Date().toISOString().slice(0, 10)}`,
       sheetName: "Contacts",
+      rtl: ar,
       columns: [
-        { header: "Name", key: "display_name" },
-        { header: "Type", key: "contact_type" },
-        { header: "Email", key: "primary_email" },
-        { header: "Phone", key: "primary_phone" },
-        { header: "Organization", key: "organization" },
-        { header: "Status", key: "status" },
-        { header: "Tags", key: "tags" },
-        { header: "Created", key: "created_at" },
+        { header: "Name", get: (r) => r.display_name },
+        { header: "Type", get: (r) => r.contact_type },
+        { header: "Email", get: (r) => r.primary_email ?? "" },
+        { header: "Phone", get: (r) => r.primary_phone ?? "" },
+        { header: "Organization", get: (r) => r.organization ?? "" },
+        { header: "Status", get: (r) => r.status },
+        { header: "Tags", get: (r) => (r.tags ?? []).join(", ") },
+        { header: "Created", type: "date", get: (r) => new Date(r.created_at) },
       ],
-      rows: rows.map((r) => ({
-        ...r,
-        tags: (r.tags ?? []).join(", "),
-        created_at: new Date(r.created_at).toISOString(),
-      })),
-      dir: ar ? "rtl" : "ltr",
+      rows,
     });
   };
 
