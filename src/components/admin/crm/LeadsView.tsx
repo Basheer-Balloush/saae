@@ -463,11 +463,15 @@ export function LeadsView({ variant }: { variant: Variant }) {
         </DialogContent>
       </Dialog>
 
-      {/* Note modal */}
-      <Dialog open={!!noteFor} onOpenChange={(o) => { if (!o && !savingNote) { setNoteFor(null); setNoteBody(""); } }}>
-        <DialogContent className="max-w-xl flex max-h-[90vh] flex-col">
-          <DialogHeader><DialogTitle>{tr.addNote}</DialogTitle></DialogHeader>
+      {/* Note modal (add + edit) */}
+      <Dialog open={!!noteState} onOpenChange={(o) => { if (!o && !savingNote) closeNote(); }}>
+        <DialogContent className="flex max-h-[90vh] w-[min(100vw-2rem,42rem)] max-w-2xl flex-col">
+          <DialogHeader>
+            <DialogTitle>{noteState?.mode === "edit" ? tr.editNote : tr.addNote}</DialogTitle>
+            <DialogDescription className="sr-only">{tr.noteTitle}</DialogDescription>
+          </DialogHeader>
           <Textarea
+            dir="auto"
             value={noteBody}
             onChange={(e) => {
               setNoteBody(e.target.value);
@@ -476,16 +480,25 @@ export function LeadsView({ variant }: { variant: Variant }) {
               el.style.height = Math.min(el.scrollHeight, Math.round(window.innerHeight * 0.6)) + "px";
             }}
             placeholder={tr.noteBody}
-            className="min-h-[220px] max-h-[60vh] resize-y overflow-y-auto whitespace-pre-wrap"
+            className="min-h-[220px] max-h-[60vh] resize-y overflow-y-auto whitespace-pre-wrap break-words [overflow-wrap:anywhere]"
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setNoteFor(null)} disabled={savingNote}>{tr.cancel}</Button>
-            <Button onClick={saveNote} disabled={savingNote || !noteBody.trim()}>
-              {savingNote && <Loader2 className="h-4 w-4 animate-spin" />} {tr.save}
+            <Button variant="outline" onClick={closeNote} disabled={savingNote}>{tr.cancel}</Button>
+            <Button
+              onClick={saveNote}
+              disabled={
+                savingNote ||
+                !noteBody.trim() ||
+                (noteState?.mode === "edit" && noteBody.trim() === (noteState?.initialBody ?? "").trim())
+              }
+            >
+              {savingNote && <Loader2 className="h-4 w-4 animate-spin" />}
+              {noteState?.mode === "edit" ? tr.saveChanges : tr.save}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
 
 
       {/* View note modal */}
