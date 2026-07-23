@@ -5,27 +5,90 @@ import { Footer } from "@/components/site/Footer";
 import { Mic, Landmark, Presentation, Link2, MessageSquare, Users, Boxes, Clock, Calendar, MapPin } from "lucide-react";
 import ministryEconomy from "@/assets/ministry-economy.png.asset.json";
 import ministryComms from "@/assets/ministry-communications-v2.png.asset.json";
+import { useLang } from "@/lib/i18n";
 
 // 30 July 2026, 11:00 AM Damascus time (UTC+3, no DST)
 const TARGET_MS = Date.UTC(2026, 6, 30, 8, 0, 0);
 
-const AGENDA_ITEMS: { icon: React.ComponentType<{ className?: string }>; text: string }[] = [
-  { icon: Mic, text: "كلمة رئيس مجلس إدارة الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
-  { icon: Landmark, text: "كلمة وزارة الاقتصاد والصناعة" },
-  { icon: Landmark, text: "كلمة وزارة الاتصالات وتقانة المعلومات" },
-  { icon: Presentation, text: "عرض تجربة تدريب المهارات السورية في شركة Mozaic AI الألمانية" },
-  { icon: Presentation, text: "عرض تجربة تدريب المهارات السورية في شركة Devista الرومانية" },
-  { icon: Link2, text: "إطلاق منصة ربط المهارات السورية بالأعمال الدولية" },
-  { icon: MessageSquare, text: "جلسة حوارية: أثر التدريب العملي على الاقتصاد السوري" },
-  { icon: Users, text: "جلسة حوارية: حوار مع خبراء في علوم البيانات والذكاء الاصطناعي" },
-  { icon: Boxes, text: "معرض تقني مرافق للمؤتمر" },
-];
+type Lang = "ar" | "en";
 
-const EVENT_META = [
-  { icon: Clock, label: "التوقيت", value: "11:00 صباحاً" },
-  { icon: Calendar, label: "التاريخ", value: "30 تموز 2026" },
-  { icon: MapPin, label: "المكان", value: "المكتبة الوطنية — دمشق" },
-];
+const CONTENT = {
+  ar: {
+    title1: "جسر الأعمال الدولي",
+    title2: "نحو المهارات السورية",
+    subtitle: "معاً نربط المهارات السورية بالفرص الدولية ونبني مستقبل الأعمال والتكنولوجيا",
+    sponsors: "برعاية كريمة من:",
+    economyAlt: "وزارة الاقتصاد والصناعة",
+    commsAlt: "وزارة الاتصالات وتقانة المعلومات",
+    countdownTitle: "العد التنازلي حتى انطلاق المؤتمر",
+    countdownSub: "30 تموز 2026 — 11:00 صباحاً بتوقيت دمشق",
+    started: "انطلق المؤتمر!",
+    days: "أيام",
+    hours: "ساعات",
+    minutes: "دقائق",
+    seconds: "ثواني",
+    agendaTitle: "محاور المؤتمر",
+    metaTime: { label: "التوقيت", value: "11:00 صباحاً" },
+    metaDate: { label: "التاريخ", value: "30 تموز 2026" },
+    metaPlace: { label: "المكان", value: "المكتبة الوطنية — دمشق" },
+    agenda: [
+      "كلمة رئيس مجلس إدارة الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",
+      "كلمة وزارة الاقتصاد والصناعة",
+      "كلمة وزارة الاتصالات وتقانة المعلومات",
+      "عرض تجربة تدريب المهارات السورية في شركة Mozaic AI الألمانية",
+      "عرض تجربة تدريب المهارات السورية في شركة Devista الرومانية",
+      "إطلاق منصة ربط المهارات السورية بالأعمال الدولية",
+      "جلسة حوارية: أثر التدريب العملي على الاقتصاد السوري",
+      "جلسة حوارية: حوار مع خبراء في علوم البيانات والذكاء الاصطناعي",
+      "معرض تقني مرافق للمؤتمر",
+    ],
+    meta: {
+      title: "جسر الأعمال الدولي نحو المهارات السورية — SAAE",
+      description:
+        "مؤتمر جسر الأعمال الدولي نحو المهارات السورية — 30 تموز 2026، المكتبة الوطنية، دمشق.",
+      ogDescription: "معاً نربط المهارات بالفرص ونبني مستقبل الأعمال والتكنولوجيا.",
+    },
+  },
+  en: {
+    title1: "International Business Bridge",
+    title2: "to Syrian Talent",
+    subtitle:
+      "Together we connect Syrian talent with international opportunities and build the future of business and technology",
+    sponsors: "Under the generous patronage of:",
+    economyAlt: "Ministry of Economy and Industry",
+    commsAlt: "Ministry of Communications and Information Technology",
+    countdownTitle: "Countdown to the Conference",
+    countdownSub: "July 30, 2026 — 11:00 AM Damascus time",
+    started: "The conference has started!",
+    days: "Days",
+    hours: "Hours",
+    minutes: "Minutes",
+    seconds: "Seconds",
+    agendaTitle: "Conference Agenda",
+    metaTime: { label: "Time", value: "11:00 AM" },
+    metaDate: { label: "Date", value: "July 30, 2026" },
+    metaPlace: { label: "Venue", value: "National Library — Damascus" },
+    agenda: [
+      "Opening speech by the Chairman of the Syrian Association for AI and Entrepreneurship",
+      "Speech by the Ministry of Economy and Industry",
+      "Speech by the Ministry of Communications and Information Technology",
+      "Case study: training Syrian talent at Mozaic AI (Germany)",
+      "Case study: training Syrian talent at Devista (Romania)",
+      "Launch of the platform connecting Syrian talent with international business",
+      "Panel: the impact of practical training on the Syrian economy",
+      "Panel: dialogue with experts in data science and AI",
+      "Tech exhibition alongside the conference",
+    ],
+    meta: {
+      title: "International Business Bridge to Syrian Talent — SAAE",
+      description:
+        "International Business Bridge to Syrian Talent conference — July 30, 2026, National Library, Damascus.",
+      ogDescription: "Connecting talent with opportunities, building the future of business and technology.",
+    },
+  },
+} as const;
+
+const AGENDA_ICONS = [Mic, Landmark, Landmark, Presentation, Presentation, Link2, MessageSquare, Users, Boxes];
 
 function useCountdown(target: number) {
   const [now, setNow] = useState<number | null>(null);
@@ -81,42 +144,44 @@ function Cell({ value, label }: { value: number; label: string }) {
 }
 
 function IbbPage() {
+  const { lang } = useLang();
+  const l = (lang as Lang) === "en" ? "en" : "ar";
+  const t = CONTENT[l];
+  const dir = l === "ar" ? "rtl" : "ltr";
   const { days, hours, minutes, seconds, done } = useCountdown(TARGET_MS);
 
   return (
-    <div dir="rtl" className="min-h-screen bg-background text-foreground">
+    <div dir={dir} className="min-h-screen bg-background text-foreground">
       <Navbar />
       <main className="container mx-auto px-4 pb-16 sm:pb-24">
         <section className="relative flex min-h-[60vh] flex-col items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-b from-primary/5 via-background to-background py-24 sm:py-32 md:py-40">
           <div className="pointer-events-none absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
           <h1 className="relative z-10 text-center text-4xl font-extrabold leading-tight tracking-tight text-primary sm:text-6xl md:text-7xl">
-            جسر الأعمال الدولي
+            {t.title1}
             <br className="hidden sm:block" />
-            <span className="text-foreground">نحو المهارات السورية</span>
+            <span className="text-foreground">{t.title2}</span>
           </h1>
           <p className="relative z-10 mx-auto mt-6 max-w-2xl text-center text-base text-muted-foreground sm:text-xl">
-            معاً نربط المهارات السورية بالفرص الدولية ونبني مستقبل الأعمال والتكنولوجيا
+            {t.subtitle}
           </p>
         </section>
 
         <section className="mt-12">
           <p className="text-center text-lg sm:text-xl text-muted-foreground">
-            برعاية كريمة من:
+            {t.sponsors}
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-10 sm:gap-20">
-            {/* Right (RTL first) — Ministry of Economy & Industry */}
             <div className="flex flex-col items-center gap-3">
               <img
                 src={ministryEconomy.url}
-                alt="وزارة الاقتصاد والصناعة"
+                alt={t.economyAlt}
                 className="h-32 sm:h-40 w-auto object-contain"
               />
             </div>
-            {/* Left — Ministry of Communications */}
             <div className="flex flex-col items-center gap-3">
               <img
                 src={ministryComms.url}
-                alt="وزارة الاتصالات وتقانة المعلومات"
+                alt={t.commsAlt}
                 className="h-32 sm:h-40 w-auto object-contain"
               />
             </div>
@@ -125,50 +190,57 @@ function IbbPage() {
 
         <section className="mt-16">
           <h2 className="text-center text-2xl sm:text-3xl font-semibold">
-            العد التنازلي حتى انطلاق المؤتمر
+            {t.countdownTitle}
           </h2>
           <p className="mt-2 text-center text-sm text-muted-foreground">
-            30 تموز 2026 — 11:00 صباحاً بتوقيت دمشق
+            {t.countdownSub}
           </p>
           {done ? (
             <p className="mt-6 text-center text-xl font-semibold text-primary">
-              انطلق المؤتمر!
+              {t.started}
             </p>
           ) : (
             <div className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4" dir="ltr">
-              <Cell value={days} label="أيام" />
-              <Cell value={hours} label="ساعات" />
-              <Cell value={minutes} label="دقائق" />
-              <Cell value={seconds} label="ثواني" />
+              <Cell value={days} label={t.days} />
+              <Cell value={hours} label={t.hours} />
+              <Cell value={minutes} label={t.minutes} />
+              <Cell value={seconds} label={t.seconds} />
             </div>
           )}
         </section>
 
         <section className="mt-16">
           <h2 className="text-center text-2xl sm:text-3xl font-semibold">
-            محاور المؤتمر
+            {t.agendaTitle}
           </h2>
           <ol className="mx-auto mt-8 max-w-3xl space-y-3">
-            {AGENDA_ITEMS.map(({ icon: Icon, text }, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-4 rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-soft"
-              >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div className="flex-1 pt-1.5 text-base sm:text-lg leading-relaxed">
-                  <span className="ml-2 text-sm font-semibold text-primary tabular-nums">
-                    {String(i + 1).padStart(2, "0")}.
-                  </span>
-                  {text}
-                </div>
-              </li>
-            ))}
+            {t.agenda.map((text, i) => {
+              const Icon = AGENDA_ICONS[i] ?? Mic;
+              return (
+                <li
+                  key={i}
+                  className="flex items-start gap-4 rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-soft"
+                >
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 pt-1.5 text-base sm:text-lg leading-relaxed">
+                    <span className={`${l === "ar" ? "ml-2" : "mr-2"} text-sm font-semibold text-primary tabular-nums`}>
+                      {String(i + 1).padStart(2, "0")}.
+                    </span>
+                    {text}
+                  </div>
+                </li>
+              );
+            })}
           </ol>
 
           <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
-            {EVENT_META.map(({ icon: Icon, label, value }) => (
+            {[
+              { icon: Clock, ...t.metaTime },
+              { icon: Calendar, ...t.metaDate },
+              { icon: MapPin, ...t.metaPlace },
+            ].map(({ icon: Icon, label, value }) => (
               <div
                 key={label}
                 className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-soft"
