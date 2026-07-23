@@ -12,6 +12,7 @@ const TARGET_MS = Date.UTC(2026, 6, 30, 8, 0, 0);
 const AGENDA_ITEMS: { icon: React.ComponentType<{ className?: string }>; text: string }[] = [
   { icon: Mic, text: "كلمة رئيس مجلس إدارة الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
   { icon: Landmark, text: "كلمة وزارة الاقتصاد والصناعة" },
+  { icon: Landmark, text: "كلمة وزارة الاتصالات وتقانة المعلومات" },
   { icon: Presentation, text: "عرض تجربة تدريب المهارات السورية في شركة Mozaic AI الألمانية" },
   { icon: Presentation, text: "عرض تجربة تدريب المهارات السورية في شركة Devista الرومانية" },
   { icon: Link2, text: "إطلاق منصة ربط المهارات السورية بالأعمال الدولية" },
