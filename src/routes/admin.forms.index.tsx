@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Send,
   RotateCcw,
+  ClipboardList,
 } from "lucide-react";
 import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
 import { useLang } from "@/lib/i18n";
