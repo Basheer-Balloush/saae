@@ -60,6 +60,8 @@ const T = {
     duplicateFound: "يوجد Lead مرتبط بنفس البريد أو الهاتف. أنشئ على أي حال؟",
     createAnyway: "أنشئ على أي حال",
     notes: "الملاحظات", more: "عرض المزيد", noteTitle: "الملاحظة",
+    editNote: "تعديل الملاحظة", saveChanges: "حفظ التعديلات",
+    noteAdded: "تمت إضافة الملاحظة", noteUpdated: "تم تحديث الملاحظة",
   },
   en: {
     heading: "Leads", newLead: "New Lead", export: "Export Excel", reset: "Reset",
