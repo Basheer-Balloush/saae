@@ -156,7 +156,8 @@ export function LeadsView({ variant }: { variant: Variant }) {
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
-  const [latestNotes, setLatestNotes] = useState<Record<string, { body: string; created_at: string }>>({});
+  type LatestNote = { id: string; contact_id: string; body: string; created_at: string; updated_at: string };
+  const [latestNotes, setLatestNotes] = useState<Record<string, LatestNote>>({});
 
   const filters = useMemo(
     () => ({
