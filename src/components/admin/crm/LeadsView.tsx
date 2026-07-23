@@ -444,6 +444,19 @@ export function LeadsView({ variant }: { variant: Variant }) {
         </DialogContent>
       </Dialog>
 
+      {/* View note modal */}
+      <Dialog open={viewNoteBody !== null} onOpenChange={(o) => !o && setViewNoteBody(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{tr.noteTitle}</DialogTitle>
+            <DialogDescription className="sr-only">{tr.noteTitle}</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap text-sm text-foreground">
+            {viewNoteBody}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* New lead modal */}
       <NewLeadDialog
         open={newOpen}
