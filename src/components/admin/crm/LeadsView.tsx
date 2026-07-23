@@ -104,7 +104,7 @@ export function LeadsView({ variant }: { variant: Variant }) {
     (patch: Partial<SearchParams>) => {
       nav({
         to: variant === "individuals" ? "/admin/crm/leads/individuals" : "/admin/crm/leads/companies",
-        search: (prev) => {
+        search: (prev: SearchParams) => {
           const merged = { ...prev, ...patch };
           for (const k of Object.keys(merged) as (keyof SearchParams)[]) {
             if (merged[k] === "" || merged[k] === undefined || merged[k] === null) delete merged[k];
