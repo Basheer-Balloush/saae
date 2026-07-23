@@ -90,7 +90,7 @@ type Variant = "individuals" | "companies";
 type SearchParams = {
   q?: string;
   status?: LeadStatusT | "";
-  source?: string;
+  source?: string; // legacy — accepted for URL cleanup only
   from?: string;
   to?: string;
   page?: number;
@@ -104,17 +104,20 @@ export function LeadsView({ variant }: { variant: Variant }) {
 
   const q = search.q ?? "";
   const status = (search.status ?? "") as LeadStatusT | "";
-  const source = search.source ?? "";
   const from = search.from ?? "";
   const to = search.to ?? "";
   const page = Math.max(1, Number(search.page ?? 1));
 
+  const routeTo = variant === "individuals" ? "/admin/crm/leads/individuals" : "/admin/crm/leads/companies";
+
   const updateSearch = useCallback(
     (patch: Partial<SearchParams>) => {
       nav({
-        to: variant === "individuals" ? "/admin/crm/leads/individuals" : "/admin/crm/leads/companies",
+        to: routeTo,
         search: (prev: SearchParams) => {
           const merged = { ...prev, ...patch };
+          // Strip legacy source key entirely.
+          delete (merged as SearchParams).source;
           for (const k of Object.keys(merged) as (keyof SearchParams)[]) {
             if (merged[k] === "" || merged[k] === undefined || merged[k] === null) delete merged[k];
           }
@@ -123,7 +126,7 @@ export function LeadsView({ variant }: { variant: Variant }) {
         replace: true,
       });
     },
-    [nav, variant],
+    [nav, routeTo],
   );
 
   const [qInput, setQInput] = useState(q);
@@ -144,20 +147,32 @@ export function LeadsView({ variant }: { variant: Variant }) {
   const createIndFn = useServerFn(createIndividualLead);
   const createCompFn = useServerFn(createCompanyLead);
   const fetchMsgs = useServerFn(getConversationMessages);
+  const fetchNotes = useServerFn(listLatestNotesForContacts);
 
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
+  const [latestNotes, setLatestNotes] = useState<Record<string, { body: string; created_at: string }>>({});
 
   const filters = useMemo(
     () => ({
       search: q || undefined,
       status: status || undefined,
-      source: source || undefined,
       from: from ? new Date(from).toISOString() : undefined,
       to: to ? new Date(to + "T23:59:59").toISOString() : undefined,
     }),
-    [q, status, source, from, to],
+    [q, status, from, to],
+  );
+
+  const loadNotesFor = useCallback(
+    (contactIds: string[]) => {
+      const ids = Array.from(new Set(contactIds.filter(Boolean)));
+      if (ids.length === 0) { setLatestNotes({}); return; }
+      fetchNotes({ data: { contactIds: ids } })
+        .then((r) => setLatestNotes(r.notes))
+        .catch(() => { /* non-fatal */ });
+    },
+    [fetchNotes],
   );
 
   const reload = useCallback(() => {
