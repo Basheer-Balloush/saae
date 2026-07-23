@@ -16,7 +16,7 @@ import {
 import {
   listIndividualLeads, listCompanyLeads,
   exportIndividualLeads, exportCompanyLeads,
-  setLeadStatus, addLeadNote,
+  setLeadStatus, addLeadNote, editLeadNote,
   createIndividualLead, createCompanyLead,
   listLatestNotesForContacts,
 } from "@/lib/crm.functions";
