@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Send,
   RotateCcw,
+  ClipboardList,
 } from "lucide-react";
 import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
 import { useLang } from "@/lib/i18n";
@@ -267,6 +268,20 @@ function FormsList() {
                           </a>
                         </Button>
                       )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        asChild
+                        title={ar ? "عرض الاستجابات" : "View responses"}
+                      >
+                        <Link
+                          to="/admin/crm/forms/$formSlug"
+                          params={{ formSlug: r.slug }}
+                          aria-label={ar ? "عرض استجابات النموذج" : "View form responses"}
+                        >
+                          <ClipboardList className="h-4 w-4" />
+                        </Link>
+                      </Button>
                       <Button variant="ghost" size="icon" asChild title={ar ? "تعديل" : "Edit"}>
                         <Link to="/admin/forms/$formId/edit" params={{ formId: r.id }}>
                           <Pencil className="h-4 w-4" />
