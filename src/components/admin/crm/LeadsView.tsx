@@ -431,18 +431,29 @@ export function LeadsView({ variant }: { variant: Variant }) {
       </Dialog>
 
       {/* Note modal */}
-      <Dialog open={!!noteFor} onOpenChange={(o) => { if (!o) { setNoteFor(null); setNoteBody(""); } }}>
-        <DialogContent className="max-w-md">
+      <Dialog open={!!noteFor} onOpenChange={(o) => { if (!o && !savingNote) { setNoteFor(null); setNoteBody(""); } }}>
+        <DialogContent className="max-w-xl flex max-h-[90vh] flex-col">
           <DialogHeader><DialogTitle>{tr.addNote}</DialogTitle></DialogHeader>
-          <Textarea rows={5} value={noteBody} onChange={(e) => setNoteBody(e.target.value)} placeholder={tr.noteBody} />
+          <Textarea
+            value={noteBody}
+            onChange={(e) => {
+              setNoteBody(e.target.value);
+              const el = e.currentTarget;
+              el.style.height = "auto";
+              el.style.height = Math.min(el.scrollHeight, Math.round(window.innerHeight * 0.6)) + "px";
+            }}
+            placeholder={tr.noteBody}
+            className="min-h-[220px] max-h-[60vh] resize-y overflow-y-auto whitespace-pre-wrap"
+          />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setNoteFor(null)}>{tr.cancel}</Button>
+            <Button variant="outline" onClick={() => setNoteFor(null)} disabled={savingNote}>{tr.cancel}</Button>
             <Button onClick={saveNote} disabled={savingNote || !noteBody.trim()}>
               {savingNote && <Loader2 className="h-4 w-4 animate-spin" />} {tr.save}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
 
       {/* View note modal */}
       <Dialog open={viewNoteBody !== null} onOpenChange={(o) => !o && setViewNoteBody(null)}>
