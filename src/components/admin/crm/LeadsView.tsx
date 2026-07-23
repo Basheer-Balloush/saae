@@ -377,6 +377,8 @@ export function LeadsView({ variant }: { variant: Variant }) {
           onStatus={handleStatusChange}
           onNote={(id) => { setNoteFor(id); setNoteBody(""); }}
           onChat={openChat}
+          latestNotes={latestNotes}
+          onViewNote={setViewNoteBody}
         />
       ) : (
         <CompaniesTable
@@ -387,6 +389,8 @@ export function LeadsView({ variant }: { variant: Variant }) {
           onStatus={handleStatusChange}
           onNote={(id) => { setNoteFor(id); setNoteBody(""); }}
           onChat={openChat}
+          latestNotes={latestNotes}
+          onViewNote={setViewNoteBody}
         />
       )}
 
