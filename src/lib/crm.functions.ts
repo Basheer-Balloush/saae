@@ -763,7 +763,7 @@ export const addLeadNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { leadType: "individual" | "company"; leadId: string; body: string }) =>
     z
-      .object({ leadType: LeadType, leadId: z.string().uuid(), body: z.string().trim().min(1).max(4000) })
+      .object({ leadType: LeadType, leadId: z.string().uuid(), body: z.string().trim().min(1).max(20000) })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
