@@ -180,12 +180,14 @@ export function LeadsView({ variant }: { variant: Variant }) {
     const args = { data: { ...filters, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE } };
     const p = variant === "individuals" ? listInd(args) : listComp(args);
     p.then((r) => {
-      setRows(r.rows as Record<string, unknown>[]);
+      const nextRows = r.rows as Record<string, unknown>[];
+      setRows(nextRows);
       setTotal(r.total);
+      loadNotesFor(nextRows.map((row) => String(row.contact_id ?? "")).filter(Boolean));
     })
       .catch((e) => toast.error(toUserMessage(e)))
       .finally(() => setLoading(false));
-  }, [filters, page, variant, listInd, listComp]);
+  }, [filters, page, variant, listInd, listComp, loadNotesFor]);
 
   useEffect(() => reload(), [reload]);
 
