@@ -420,7 +420,7 @@ export function LeadsView({ variant }: { variant: Variant }) {
           tr={tr}
           savingId={savingId}
           onStatus={handleStatusChange}
-          onNote={(id) => { setNoteFor(id); setNoteBody(""); }}
+          onNote={openNote}
           onChat={openChat}
           latestNotes={latestNotes}
           onViewNote={setViewNoteBody}
