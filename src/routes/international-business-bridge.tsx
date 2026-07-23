@@ -86,8 +86,8 @@ function IbbPage() {
   return (
     <div dir="rtl" className="min-h-screen bg-background text-foreground">
       <Navbar />
-      <main className="container mx-auto px-4">
-        <section className="relative flex flex-col items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-b from-primary/5 via-background to-background py-20 sm:py-28 md:py-36">
+      <main className="container mx-auto px-4 pb-16 sm:pb-24">
+        <section className="relative flex min-h-[60vh] flex-col items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-b from-primary/5 via-background to-background py-24 sm:py-32 md:py-40">
           <div className="pointer-events-none absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
           <h1 className="relative z-10 text-center text-4xl font-extrabold leading-tight tracking-tight text-primary sm:text-6xl md:text-7xl">
             جسر الأعمال الدولي
