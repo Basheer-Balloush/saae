@@ -83,7 +83,7 @@ export function CrmContactsList() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">{ar ? "جهات الاتصال" : "Leads"}</h1>
+          <h1 className="text-2xl font-bold">{ar ? "Leads ال" : "Leads"}</h1>
           <p className="text-sm text-muted-foreground">
             {ar ? "الإجمالي" : "Total"}: <span className="font-semibold">{stats.total}</span> ·{" "}
             {ar ? "أفراد" : "Individuals"}: <span className="font-semibold">{stats.individuals}</span> ·{" "}
