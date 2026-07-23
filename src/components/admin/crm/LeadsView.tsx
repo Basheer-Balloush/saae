@@ -235,6 +235,8 @@ export function LeadsView({ variant }: { variant: Variant }) {
       await addNoteFn({
         data: { leadType: variant === "individuals" ? "individual" : "company", leadId: noteFor, body: noteBody.trim() },
       });
+      // Refresh notes preview for the current page without full reload.
+      loadNotesFor(rows.map((row) => String(row.contact_id ?? "")).filter(Boolean));
       toast.success(tr.saved);
       setNoteFor(null);
       setNoteBody("");
@@ -243,6 +245,16 @@ export function LeadsView({ variant }: { variant: Variant }) {
     } finally {
       setSavingNote(false);
     }
+  };
+
+  // --- view note modal ---
+  const [viewNoteBody, setViewNoteBody] = useState<string | null>(null);
+
+  // --- reset ---
+  const hasActiveFilters = !!(qInput || q || status || from || to) || page !== 1;
+  const resetFilters = () => {
+    setQInput("");
+    nav({ to: routeTo, search: {}, replace: true });
   };
 
   // --- new lead modal ---
