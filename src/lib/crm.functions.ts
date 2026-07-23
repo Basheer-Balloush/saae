@@ -580,7 +580,11 @@ async function loadLeadDetail(
     if (fQ.error) throw new Error(fQ.error.message);
     contact = cQ.data;
     notes = nQ.data ?? [];
-    formSubs = (fQ.data ?? []) as typeof formSubs;
+    formSubs = ((fQ.data ?? []) as unknown[]).map((r) => {
+      const row = r as { id: string; submitted_at: string; values: unknown; dynamic_forms: { slug: string; name_en: string; name_ar: string } | { slug: string; name_en: string; name_ar: string }[] | null };
+      const df = Array.isArray(row.dynamic_forms) ? row.dynamic_forms[0] ?? null : row.dynamic_forms;
+      return { id: row.id, submitted_at: row.submitted_at, values: row.values, dynamic_forms: df };
+    });
   }
 
   // Activity timeline: notes + form submissions (contact_id only) + lead creation
