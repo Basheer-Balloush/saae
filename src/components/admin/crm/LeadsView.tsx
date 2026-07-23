@@ -148,6 +148,7 @@ export function LeadsView({ variant }: { variant: Variant }) {
   const expComp = useServerFn(exportCompanyLeads);
   const setStatusFn = useServerFn(setLeadStatus);
   const addNoteFn = useServerFn(addLeadNote);
+  const editNoteFn = useServerFn(editLeadNote);
   const createIndFn = useServerFn(createIndividualLead);
   const createCompFn = useServerFn(createCompanyLead);
   const fetchMsgs = useServerFn(getConversationMessages);
