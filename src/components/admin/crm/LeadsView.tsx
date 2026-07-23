@@ -720,9 +720,15 @@ function CompaniesTable({
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex justify-end gap-1">
-                    <Button size="sm" variant="outline" onClick={() => onNote(id)} title={tr.addNote}>
-                      <StickyNote className="h-4 w-4" />
-                    </Button>
+                    {(() => {
+                      const hasNote = !!(contactId && latestNotes[contactId]);
+                      const label = hasNote ? tr.editNote : tr.addNote;
+                      return (
+                        <Button size="sm" variant="outline" onClick={() => onNote(id, contactId)} title={label} aria-label={label}>
+                          {hasNote ? <Pencil className="h-4 w-4" /> : <StickyNote className="h-4 w-4" />}
+                        </Button>
+                      );
+                    })()}
                     <Button size="sm" variant="outline" disabled={!convId} onClick={() => onChat(convId)} title={tr.viewChat}>
                       <MessageSquare className="h-4 w-4" />
                     </Button>
