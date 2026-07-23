@@ -139,14 +139,43 @@ function IbbPage() {
           <h2 className="text-center text-2xl sm:text-3xl font-semibold">
             محاور المؤتمر
           </h2>
-          <div className="mt-8 flex justify-center">
-            <img
-              src={agenda.url}
-              alt="أجندة مؤتمر جسر الأعمال الدولي نحو المهارات السورية"
-              className="w-full max-w-3xl rounded-2xl border border-border shadow-soft"
-            />
+          <ol className="mx-auto mt-8 max-w-3xl space-y-3">
+            {AGENDA_ITEMS.map(({ icon: Icon, text }, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-4 rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-soft"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="flex-1 pt-1.5 text-base sm:text-lg leading-relaxed">
+                  <span className="ml-2 text-sm font-semibold text-primary tabular-nums">
+                    {String(i + 1).padStart(2, "0")}.
+                  </span>
+                  {text}
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
+            {EVENT_META.map(({ icon: Icon, label, value }) => (
+              <div
+                key={label}
+                className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-soft"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-muted-foreground">{label}</span>
+                  <span className="font-semibold">{value}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
+
       </main>
       <Footer />
     </div>
