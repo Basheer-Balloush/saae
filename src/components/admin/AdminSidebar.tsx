@@ -31,7 +31,11 @@ import { useLang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type NavLeaf = { title: string; url: string; icon: React.ComponentType<{ className?: string }> };
-type NavGroup = { title: string; icon: React.ComponentType<{ className?: string }>; children: { title: string; url: string }[] };
+type NavGroup = {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  children: { title: string; url: string }[];
+};
 type NavItem = NavLeaf | NavGroup;
 
 const isGroup = (i: NavItem): i is NavGroup => "children" in i;
@@ -48,7 +52,7 @@ function buildNav(lang: "ar" | "en"): NavItem[] {
       title: "CRM",
       icon: Contact2,
       children: [
-        { title: ar ? "جهات الاتصال" : "Contacts", url: "/admin/crm/contacts" },
+        { title: ar ? "Leads" : "Leads", url: "/admin/crm/contacts" },
         { title: ar ? "طلاب المنصة" : "LMS Students", url: "/admin/crm/students" },
         { title: ar ? "أفراد" : "Individual leads", url: "/admin/crm/leads/individuals" },
         { title: ar ? "شركات" : "Company leads", url: "/admin/crm/leads/companies" },
@@ -82,9 +86,7 @@ export function AdminSidebar() {
               <span className="truncate text-sm font-bold text-sidebar-foreground">
                 {lang === "ar" ? "الإدارة" : "Admin"}
               </span>
-              <span className="truncate text-[10px] uppercase tracking-wider text-sidebar-foreground/60">
-                SAAE
-              </span>
+              <span className="truncate text-[10px] uppercase tracking-wider text-sidebar-foreground/60">SAAE</span>
             </div>
           )}
         </Link>
@@ -92,9 +94,7 @@ export function AdminSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          {!collapsed && (
-            <SidebarGroupLabel>{lang === "ar" ? "التنقل" : "Navigation"}</SidebarGroupLabel>
-          )}
+          {!collapsed && <SidebarGroupLabel>{lang === "ar" ? "التنقل" : "Navigation"}</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) =>
@@ -110,9 +110,7 @@ export function AdminSidebar() {
                         "group/nav relative transition-colors",
                         "data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold",
                         "data-[active=true]:before:absolute data-[active=true]:before:inset-y-1 data-[active=true]:before:w-1 data-[active=true]:before:rounded-full data-[active=true]:before:bg-primary",
-                        lang === "ar"
-                          ? "data-[active=true]:before:right-0"
-                          : "data-[active=true]:before:left-0",
+                        lang === "ar" ? "data-[active=true]:before:right-0" : "data-[active=true]:before:left-0",
                       )}
                     >
                       <Link to={item.url}>
@@ -158,10 +156,7 @@ function NestedItem({
           tooltip={item.title}
           onClick={() => setOpen((v) => !v)}
           isActive={anyActive}
-          className={cn(
-            "group/nav relative transition-colors",
-            "data-[active=true]:font-semibold",
-          )}
+          className={cn("group/nav relative transition-colors", "data-[active=true]:font-semibold")}
         >
           <item.icon
             className={cn(
@@ -172,10 +167,7 @@ function NestedItem({
           <span className="truncate">{item.title}</span>
           {!collapsed && (
             <ChevronDown
-              className={cn(
-                "ms-auto h-4 w-4 shrink-0 transition-transform duration-200",
-                open && "rotate-180",
-              )}
+              className={cn("ms-auto h-4 w-4 shrink-0 transition-transform duration-200", open && "rotate-180")}
             />
           )}
         </SidebarMenuButton>
@@ -191,9 +183,7 @@ function NestedItem({
                   "relative transition-colors",
                   "data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold",
                   "data-[active=true]:before:absolute data-[active=true]:before:inset-y-1 data-[active=true]:before:w-0.5 data-[active=true]:before:rounded-full data-[active=true]:before:bg-primary",
-                  lang === "ar"
-                    ? "data-[active=true]:before:right-0"
-                    : "data-[active=true]:before:left-0",
+                  lang === "ar" ? "data-[active=true]:before:right-0" : "data-[active=true]:before:left-0",
                 )}
               >
                 <Link to={child.url}>
