@@ -297,7 +297,15 @@ export const updateContact = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const patch: Record<string, unknown> = {};
+    const patch: {
+      display_name?: string;
+      status?: "new" | "contacted" | "qualified" | "converted" | "archived";
+      assigned_admin_id?: string | null;
+      tags?: string[];
+      organization?: string | null;
+      country?: string | null;
+      city?: string | null;
+    } = {};
     if (data.display_name !== undefined) patch.display_name = data.display_name;
     if (data.status !== undefined) patch.status = data.status;
     if (data.assigned_admin_id !== undefined) patch.assigned_admin_id = data.assigned_admin_id;
