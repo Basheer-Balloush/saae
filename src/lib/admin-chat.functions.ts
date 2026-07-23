@@ -92,27 +92,8 @@ export const getChatStats = createServerFn({ method: "GET" })
     };
   });
 
-export const listLeads = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    await assertAdmin(context.supabase, context.userId);
-    const sb = context.supabase;
-    const [ind, comp] = await Promise.all([
-      sb
-        .from("individual_leads")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(500),
-      sb
-        .from("company_leads")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(500),
-    ]);
-    if (ind.error) throw new Error(ind.error.message);
-    if (comp.error) throw new Error(comp.error.message);
-    return { individuals: ind.data ?? [], companies: comp.data ?? [] };
-  });
+// listLeads moved to src/lib/crm.functions.ts as listIndividualLeads / listCompanyLeads
+
 
 export const listKnowledgeDocuments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
