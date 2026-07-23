@@ -777,6 +777,41 @@ export const addLeadNote = createServerFn({ method: "POST" })
     return result as { note_id: string; contact_id: string };
   });
 
+export const editLeadNote = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { leadType: "individual" | "company"; leadId: string; noteId: string; body: string }) =>
+    z
+      .object({
+        leadType: LeadType,
+        leadId: z.string().uuid(),
+        noteId: z.string().uuid(),
+        body: z.string().trim().min(1).max(20000),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const table = data.leadType === "individual" ? "individual_leads" : "company_leads";
+    const { data: lead, error: leadErr } = await context.supabase
+      .from(table)
+      .select("contact_id")
+      .eq("id", data.leadId)
+      .maybeSingle();
+    if (leadErr) throw new Error(leadErr.message);
+    const contactId = (lead as { contact_id: string | null } | null)?.contact_id;
+    if (!contactId) throw new Error("lead_not_linked_to_contact");
+    const { data: updated, error } = await context.supabase
+      .from("crm_notes")
+      .update({ body: data.body, updated_at: new Date().toISOString() })
+      .eq("id", data.noteId)
+      .eq("contact_id", contactId)
+      .select("id, contact_id, body, created_at, updated_at")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!updated) throw new Error("note_not_found");
+    return { note: updated };
+  });
+
 export const listLatestNotesForContacts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { contactIds: string[] }) =>
@@ -784,17 +819,27 @@ export const listLatestNotesForContacts = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    if (data.contactIds.length === 0) return { notes: {} as Record<string, { body: string; created_at: string }> };
+    type NoteEntry = { id: string; contact_id: string; body: string; created_at: string; updated_at: string };
+    if (data.contactIds.length === 0) return { notes: {} as Record<string, NoteEntry> };
     const { data: rows, error } = await context.supabase
       .from("crm_notes")
-      .select("contact_id, body, created_at")
+      .select("id, contact_id, body, created_at, updated_at")
       .in("contact_id", data.contactIds)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    const map: Record<string, { body: string; created_at: string }> = {};
+    const map: Record<string, NoteEntry> = {};
     for (const r of rows ?? []) {
       const cid = r.contact_id as string;
-      if (!map[cid]) map[cid] = { body: r.body as string, created_at: r.created_at as string };
+      if (!map[cid]) {
+        map[cid] = {
+          id: r.id as string,
+          contact_id: cid,
+          body: r.body as string,
+          created_at: r.created_at as string,
+          updated_at: r.updated_at as string,
+        };
+      }
     }
     return { notes: map };
   });
+

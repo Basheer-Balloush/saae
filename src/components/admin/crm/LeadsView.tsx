@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Loader2, MessageSquare, Plus, Download, Search, StickyNote, ChevronLeft, ChevronRight, X, RotateCcw } from "lucide-react";
+import { Loader2, MessageSquare, Plus, Download, Search, StickyNote, Pencil, ChevronLeft, ChevronRight, X, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ import {
 import {
   listIndividualLeads, listCompanyLeads,
   exportIndividualLeads, exportCompanyLeads,
-  setLeadStatus, addLeadNote,
+  setLeadStatus, addLeadNote, editLeadNote,
   createIndividualLead, createCompanyLead,
   listLatestNotesForContacts,
 } from "@/lib/crm.functions";
@@ -60,6 +60,8 @@ const T = {
     duplicateFound: "يوجد Lead مرتبط بنفس البريد أو الهاتف. أنشئ على أي حال؟",
     createAnyway: "أنشئ على أي حال",
     notes: "الملاحظات", more: "عرض المزيد", noteTitle: "الملاحظة",
+    editNote: "تعديل الملاحظة", saveChanges: "حفظ التعديلات",
+    noteAdded: "تمت إضافة الملاحظة", noteUpdated: "تم تحديث الملاحظة",
   },
   en: {
     heading: "Leads", newLead: "New Lead", export: "Export Excel", reset: "Reset",
@@ -83,6 +85,8 @@ const T = {
     duplicateFound: "A lead with the same email/phone already exists. Create anyway?",
     createAnyway: "Create anyway",
     notes: "Notes", more: "More", noteTitle: "Note",
+    editNote: "Edit note", saveChanges: "Save changes",
+    noteAdded: "Note added successfully", noteUpdated: "Note updated successfully",
   },
 };
 
@@ -144,6 +148,7 @@ export function LeadsView({ variant }: { variant: Variant }) {
   const expComp = useServerFn(exportCompanyLeads);
   const setStatusFn = useServerFn(setLeadStatus);
   const addNoteFn = useServerFn(addLeadNote);
+  const editNoteFn = useServerFn(editLeadNote);
   const createIndFn = useServerFn(createIndividualLead);
   const createCompFn = useServerFn(createCompanyLead);
   const fetchMsgs = useServerFn(getConversationMessages);
@@ -152,7 +157,8 @@ export function LeadsView({ variant }: { variant: Variant }) {
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
-  const [latestNotes, setLatestNotes] = useState<Record<string, { body: string; created_at: string }>>({});
+  type LatestNote = { id: string; contact_id: string; body: string; created_at: string; updated_at: string };
+  const [latestNotes, setLatestNotes] = useState<Record<string, LatestNote>>({});
 
   const filters = useMemo(
     () => ({
@@ -224,28 +230,55 @@ export function LeadsView({ variant }: { variant: Variant }) {
       .finally(() => setMsgsLoading(false));
   };
 
-  // --- note modal ---
-  const [noteFor, setNoteFor] = useState<string | null>(null);
+  // --- note modal (add + edit) ---
+  type NoteState = {
+    leadId: string;
+    contactId: string | null;
+    mode: "add" | "edit";
+    noteId: string | null;
+    initialBody: string;
+  };
+  const [noteState, setNoteState] = useState<NoteState | null>(null);
   const [noteBody, setNoteBody] = useState("");
   const [savingNote, setSavingNote] = useState(false);
+
+  const openNote = (leadId: string, contactId: string | null) => {
+    const existing = contactId ? latestNotes[contactId] : undefined;
+    if (existing) {
+      setNoteState({ leadId, contactId, mode: "edit", noteId: existing.id, initialBody: existing.body });
+      setNoteBody(existing.body);
+    } else {
+      setNoteState({ leadId, contactId, mode: "add", noteId: null, initialBody: "" });
+      setNoteBody("");
+    }
+  };
+
+  const closeNote = () => { setNoteState(null); setNoteBody(""); };
+
   const saveNote = async () => {
-    if (!noteFor || !noteBody.trim()) return;
+    if (!noteState) return;
+    const trimmed = noteBody.trim();
+    if (!trimmed) return;
+    if (noteState.mode === "edit" && trimmed === noteState.initialBody.trim()) return;
     setSavingNote(true);
     try {
-      await addNoteFn({
-        data: { leadType: variant === "individuals" ? "individual" : "company", leadId: noteFor, body: noteBody.trim() },
-      });
-      // Refresh notes preview for the current page without full reload.
+      const leadType = variant === "individuals" ? "individual" : "company";
+      if (noteState.mode === "add") {
+        await addNoteFn({ data: { leadType, leadId: noteState.leadId, body: trimmed } });
+        toast.success(tr.noteAdded);
+      } else if (noteState.noteId) {
+        await editNoteFn({ data: { leadType, leadId: noteState.leadId, noteId: noteState.noteId, body: trimmed } });
+        toast.success(tr.noteUpdated);
+      }
       loadNotesFor(rows.map((row) => String(row.contact_id ?? "")).filter(Boolean));
-      toast.success(tr.saved);
-      setNoteFor(null);
-      setNoteBody("");
+      closeNote();
     } catch (e) {
       toast.error(toUserMessage(e));
     } finally {
       setSavingNote(false);
     }
   };
+
 
   // --- view note modal ---
   const [viewNoteBody, setViewNoteBody] = useState<string | null>(null);
@@ -375,7 +408,7 @@ export function LeadsView({ variant }: { variant: Variant }) {
           tr={tr}
           savingId={savingId}
           onStatus={handleStatusChange}
-          onNote={(id) => { setNoteFor(id); setNoteBody(""); }}
+          onNote={openNote}
           onChat={openChat}
           latestNotes={latestNotes}
           onViewNote={setViewNoteBody}
@@ -387,7 +420,7 @@ export function LeadsView({ variant }: { variant: Variant }) {
           tr={tr}
           savingId={savingId}
           onStatus={handleStatusChange}
-          onNote={(id) => { setNoteFor(id); setNoteBody(""); }}
+          onNote={openNote}
           onChat={openChat}
           latestNotes={latestNotes}
           onViewNote={setViewNoteBody}
@@ -430,11 +463,15 @@ export function LeadsView({ variant }: { variant: Variant }) {
         </DialogContent>
       </Dialog>
 
-      {/* Note modal */}
-      <Dialog open={!!noteFor} onOpenChange={(o) => { if (!o && !savingNote) { setNoteFor(null); setNoteBody(""); } }}>
-        <DialogContent className="max-w-xl flex max-h-[90vh] flex-col">
-          <DialogHeader><DialogTitle>{tr.addNote}</DialogTitle></DialogHeader>
+      {/* Note modal (add + edit) */}
+      <Dialog open={!!noteState} onOpenChange={(o) => { if (!o && !savingNote) closeNote(); }}>
+        <DialogContent className="flex max-h-[90vh] w-[min(100vw-2rem,42rem)] max-w-2xl flex-col">
+          <DialogHeader>
+            <DialogTitle>{noteState?.mode === "edit" ? tr.editNote : tr.addNote}</DialogTitle>
+            <DialogDescription className="sr-only">{tr.noteTitle}</DialogDescription>
+          </DialogHeader>
           <Textarea
+            dir="auto"
             value={noteBody}
             onChange={(e) => {
               setNoteBody(e.target.value);
@@ -443,30 +480,43 @@ export function LeadsView({ variant }: { variant: Variant }) {
               el.style.height = Math.min(el.scrollHeight, Math.round(window.innerHeight * 0.6)) + "px";
             }}
             placeholder={tr.noteBody}
-            className="min-h-[220px] max-h-[60vh] resize-y overflow-y-auto whitespace-pre-wrap"
+            className="min-h-[220px] max-h-[60vh] resize-y overflow-y-auto whitespace-pre-wrap break-words [overflow-wrap:anywhere]"
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setNoteFor(null)} disabled={savingNote}>{tr.cancel}</Button>
-            <Button onClick={saveNote} disabled={savingNote || !noteBody.trim()}>
-              {savingNote && <Loader2 className="h-4 w-4 animate-spin" />} {tr.save}
+            <Button variant="outline" onClick={closeNote} disabled={savingNote}>{tr.cancel}</Button>
+            <Button
+              onClick={saveNote}
+              disabled={
+                savingNote ||
+                !noteBody.trim() ||
+                (noteState?.mode === "edit" && noteBody.trim() === (noteState?.initialBody ?? "").trim())
+              }
+            >
+              {savingNote && <Loader2 className="h-4 w-4 animate-spin" />}
+              {noteState?.mode === "edit" ? tr.saveChanges : tr.save}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
 
+
       {/* View note modal */}
       <Dialog open={viewNoteBody !== null} onOpenChange={(o) => !o && setViewNoteBody(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="w-[min(100vw-2rem,42rem)] max-w-2xl">
           <DialogHeader>
             <DialogTitle>{tr.noteTitle}</DialogTitle>
             <DialogDescription className="sr-only">{tr.noteTitle}</DialogDescription>
           </DialogHeader>
-          <div className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap text-sm text-foreground">
+          <div
+            dir="auto"
+            className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap break-words text-sm text-foreground [overflow-wrap:anywhere]"
+          >
             {viewNoteBody}
           </div>
         </DialogContent>
       </Dialog>
+
 
       {/* New lead modal */}
       <NewLeadDialog
@@ -501,25 +551,29 @@ function NotesCell({
   contactId, latestNotes, onView, tr,
 }: {
   contactId: string | null;
-  latestNotes: Record<string, { body: string; created_at: string }>;
+  latestNotes: Record<string, { id: string; contact_id: string; body: string; created_at: string; updated_at: string }>;
   onView: (body: string) => void;
   tr: typeof T.ar;
 }) {
   const note = contactId ? latestNotes[contactId] : undefined;
   if (!note) return <span className="text-muted-foreground">—</span>;
-  const isLong = note.body.length > 80 || note.body.includes("\n");
   return (
-    <div className="max-w-[240px] space-y-1">
-      <p className="line-clamp-2 whitespace-pre-wrap text-xs text-muted-foreground">{note.body}</p>
-      {isLong && (
-        <button
-          type="button"
-          onClick={() => onView(note.body)}
-          className="text-xs text-primary hover:underline focus:underline focus:outline-none"
+    <div className="min-w-[160px] max-w-[280px] space-y-1">
+      <div className="rounded-md bg-muted/40 px-2 py-1.5">
+        <p
+          dir="auto"
+          className="line-clamp-2 whitespace-pre-wrap break-words text-xs text-muted-foreground [overflow-wrap:anywhere]"
         >
-          {tr.more}
-        </button>
-      )}
+          {note.body}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={() => onView(note.body)}
+        className="text-xs text-primary hover:underline focus:underline focus:outline-none"
+      >
+        {tr.more}
+      </button>
     </div>
   );
 }
@@ -530,11 +584,12 @@ type TableProps = {
   tr: typeof T.ar;
   savingId: string | null;
   onStatus: (id: string, s: LeadStatusT) => void;
-  onNote: (id: string) => void;
+  onNote: (leadId: string, contactId: string | null) => void;
   onChat: (convId: string | null | undefined) => void;
-  latestNotes: Record<string, { body: string; created_at: string }>;
+  latestNotes: Record<string, { id: string; contact_id: string; body: string; created_at: string; updated_at: string }>;
   onViewNote: (body: string) => void;
 };
+
 
 function IndividualsTable({
   rows, lang, tr, savingId, onStatus, onNote, onChat, latestNotes, onViewNote,
@@ -589,9 +644,15 @@ function IndividualsTable({
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex justify-end gap-1">
-                    <Button size="sm" variant="outline" onClick={() => onNote(id)} title={tr.addNote}>
-                      <StickyNote className="h-4 w-4" />
-                    </Button>
+                    {(() => {
+                      const hasNote = !!(contactId && latestNotes[contactId]);
+                      const label = hasNote ? tr.editNote : tr.addNote;
+                      return (
+                        <Button size="sm" variant="outline" onClick={() => onNote(id, contactId)} title={label} aria-label={label}>
+                          {hasNote ? <Pencil className="h-4 w-4" /> : <StickyNote className="h-4 w-4" />}
+                        </Button>
+                      );
+                    })()}
                     <Button size="sm" variant="outline" disabled={!convId} onClick={() => onChat(convId)} title={tr.viewChat}>
                       <MessageSquare className="h-4 w-4" />
                     </Button>
@@ -659,9 +720,15 @@ function CompaniesTable({
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex justify-end gap-1">
-                    <Button size="sm" variant="outline" onClick={() => onNote(id)} title={tr.addNote}>
-                      <StickyNote className="h-4 w-4" />
-                    </Button>
+                    {(() => {
+                      const hasNote = !!(contactId && latestNotes[contactId]);
+                      const label = hasNote ? tr.editNote : tr.addNote;
+                      return (
+                        <Button size="sm" variant="outline" onClick={() => onNote(id, contactId)} title={label} aria-label={label}>
+                          {hasNote ? <Pencil className="h-4 w-4" /> : <StickyNote className="h-4 w-4" />}
+                        </Button>
+                      );
+                    })()}
                     <Button size="sm" variant="outline" disabled={!convId} onClick={() => onChat(convId)} title={tr.viewChat}>
                       <MessageSquare className="h-4 w-4" />
                     </Button>
