@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { PublicInternshipDetail } from "@/lib/lms-internships-public.functions";
-import { getPublicInternshipBySlug } from "@/lib/lms-internships-public.functions";
 import type { ProfileRow, ProfileFileRow } from "@/lib/lms-profile";
 import type { Database } from "@/integrations/supabase/types";
 
