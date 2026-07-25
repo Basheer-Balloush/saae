@@ -3431,6 +3431,20 @@ export type Database = {
         Args: { _lms_course_id: string }
         Returns: string
       }
+      list_my_internship_applications: {
+        Args: never
+        Returns: {
+          attempt_number: number
+          id: string
+          opportunity_id: string
+          opportunity_slug: string
+          opportunity_title_ar: string
+          opportunity_title_en: string
+          status: Database["public"]["Enums"]["internship_application_status"]
+          submitted_at: string
+          withdrawn_at: string
+        }[]
+      }
       lms_approve_enrollment_request: {
         Args: { _admin_notes?: string; _request_id: string }
         Returns: Json
@@ -3650,6 +3664,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      submit_internship_application: {
+        Args: { _answers?: Json; _opportunity_id: string }
+        Returns: string
+      }
       submit_lms_assignment: {
         Args: { _assignment_id: string; _file_path: string }
         Returns: {
@@ -3682,6 +3700,10 @@ export type Database = {
           issued_at: string
           serial: string
         }[]
+      }
+      withdraw_internship_application: {
+        Args: { _application_id: string }
+        Returns: undefined
       }
     }
     Enums: {
