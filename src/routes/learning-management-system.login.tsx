@@ -45,10 +45,13 @@ function LmsLogin() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const search = Route.useSearch();
+  const target = search.redirect ?? "/learning-management-system/profile";
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/learning-management-system/profile" });
-  }, [loading, user, navigate]);
+    if (!loading && user) navigate({ to: target });
+  }, [loading, user, navigate, target]);
+
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
