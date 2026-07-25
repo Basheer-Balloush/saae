@@ -76,7 +76,7 @@ function LmsSignup() {
   const strengthInfo = useMemo(() => getStrengthInfo(passwordStrength, lang), [passwordStrength, lang]);
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/learning-management-system/student" });
+    if (!loading && user) navigate({ to: "/learning-management-system/profile" });
   }, [loading, user, navigate]);
 
   const onSubmit = async (e: React.FormEvent) => {

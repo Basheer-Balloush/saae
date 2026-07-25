@@ -40,11 +40,16 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  const links: NavLink[] = [
-    { to: "/learning-management-system", label: tr.navHome },
+  const links: NavLink[] = [];
+  if (isAuthed) {
+    links.push({ to: "/learning-management-system/profile", label: tr.navProfile });
+  } else {
+    links.push({ to: "/learning-management-system", label: tr.navHome });
+  }
+  links.push(
     { to: "/learning-management-system/catalog", label: tr.navCatalog },
     { to: "/learning-management-system/verify", label: tr.verifyCertificate },
-  ];
+  );
   if (isAuthed) {
     links.push({ to: "/learning-management-system/student", label: tr.navMyCourses });
   }
