@@ -245,10 +245,19 @@ function AdminHome() {
       to: "/learning-management-system/admin/internships",
       label: ar ? "فرص التدريب" : "Internships",
       icon: FileText,
-      desc: ar ? "إدارة فرص التدريب والطلبات" : "Manage opportunities & applications",
+      desc:
+        internshipsOverview
+          ? ar
+            ? `${internshipsOverview.opportunities.published} منشورة · ${internshipsOverview.applications.pending_review} بانتظار المراجعة`
+            : `${internshipsOverview.opportunities.published} published · ${internshipsOverview.applications.pending_review} pending review`
+          : ar
+            ? "إدارة فرص التدريب والطلبات"
+            : "Manage opportunities & applications",
+      badge:
+        internshipsOverview && internshipsOverview.applications.pending_review > 0
+          ? internshipsOverview.applications.pending_review
+          : undefined,
     },
-
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-background">
