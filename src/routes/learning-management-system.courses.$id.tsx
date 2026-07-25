@@ -46,10 +46,9 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
     const course = c as unknown as Course;
     const realCourseId = course.id;
 
-    const [{ data: ins }, { data: secs }, { data: coLinks }, { data: cf }] = await Promise.all([
-      supabase.from("lms_instructors").select("user_id,full_name,full_name_ar,full_name_en,avatar_url,specialty,specialty_ar,specialty_en").eq("user_id", course.instructor_id).maybeSingle(),
+    const [{ data: insList }, { data: secs }, { data: cf }] = await Promise.all([
+      supabase.rpc("get_public_instructors_for_course", { _course_id: realCourseId }),
       supabase.from("lms_sections").select("id,title,display_order").eq("course_id", realCourseId).order("display_order"),
-      supabase.from("lms_course_instructors").select("instructor_user_id").eq("course_id", realCourseId),
       supabase.from("lms_course_forms").select("id").eq("course_id", realCourseId).eq("is_active", true).maybeSingle(),
     ]);
     const sections = ((secs as unknown) as Section[]) ?? [];
@@ -61,20 +60,12 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
         .order("display_order");
       lessons = ((lss as unknown) as Lesson[]) ?? [];
     }
-    const coIds = (((coLinks as unknown) as { instructor_user_id: string }[]) ?? [])
-      .map((l) => l.instructor_user_id)
-      .filter((uid) => uid !== course.instructor_id);
-    let coInstructors: Instructor[] = [];
-    if (coIds.length) {
-      const { data: coIns } = await supabase
-        .from("lms_instructors")
-        .select("user_id,full_name,full_name_ar,full_name_en,avatar_url,specialty,specialty_ar,specialty_en")
-        .in("user_id", coIds);
-      coInstructors = ((coIns as unknown) as Instructor[]) ?? [];
-    }
+    const all = ((insList as unknown) as Instructor[]) ?? [];
+    const instructor = all.find((i) => i.is_primary) ?? null;
+    const coInstructors = all.filter((i) => !i.is_primary);
     return {
       course,
-      instructor: ((ins as unknown) as Instructor | null) ?? null,
+      instructor,
       coInstructors,
       sections,
       lessons,
