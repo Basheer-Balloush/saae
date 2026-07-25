@@ -2956,11 +2956,11 @@ export type Database = {
       verify_certificate: {
         Args: { _serial: string }
         Returns: {
-          course_id: string
-          id: string
+          course_title_ar: string
+          course_title_en: string
+          is_valid: boolean
           issued_at: string
           serial: string
-          student_id: string
         }[]
       }
     }

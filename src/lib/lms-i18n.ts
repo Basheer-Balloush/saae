@@ -123,6 +123,8 @@ export const lmsT: Record<Lang, {
   verify: string;
   verifyValid: string;
   verifyInvalid: string;
+  verifyError: string;
+  verifyRetry: string;
   forgotPassword: string;
   forgotTitle: string;
   forgotSubtitle: string;
@@ -251,6 +253,8 @@ export const lmsT: Record<Lang, {
     verify: "تحقّق",
     verifyValid: "الشهادة صحيحة",
     verifyInvalid: "لم نعثر على شهادةٍ بهذا الرقم",
+    verifyError: "تعذّر إتمام عمليّة التحقّق. يرجى المحاولة مرّةً أخرى.",
+    verifyRetry: "إعادة المحاولة",
     forgotPassword: "هل نسيت كلمة المرور؟",
     forgotTitle: "استعادة كلمة المرور",
     forgotSubtitle: "أدخل بريدك وسنرسل إليك رابطاً لإعادة التعيين",
@@ -379,6 +383,8 @@ export const lmsT: Record<Lang, {
     verify: "Verify",
     verifyValid: "Valid certificate",
     verifyInvalid: "No certificate found for that serial",
+    verifyError: "We couldn't complete the verification. Please try again.",
+    verifyRetry: "Try again",
     forgotPassword: "Forgot password?",
     forgotTitle: "Reset your password",
     forgotSubtitle: "Enter your email to receive a reset link",
