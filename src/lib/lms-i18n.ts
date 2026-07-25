@@ -277,6 +277,7 @@ export const lmsT: Record<Lang, {
     brand: "Training and Learning Platform",
     tagline: "Learn without limits",
     navHome: "Home",
+    navProfile: "My Profile",
     navCatalog: "Courses",
     navMyCourses: "My Courses",
     navInstructor: "Instructor",
