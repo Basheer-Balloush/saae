@@ -8,14 +8,14 @@ export function LmsCta() {
 
   const copy = isRtl
     ? {
-        eyebrow: "منصّة التعلّم",
+        eyebrow: "منصّة التدريب والتعلّم",
         title: "منصة الجمعية التعليمية",
         body: "منصة تعليمية متكاملة توفّر مسارات تدريبيّة متنوعة لتأهيل الكوادر السورية وتطوير مهاراتهم المهنية والتقنية.",
         cta: "ادخل إلى المنصّة",
       }
     : {
-        eyebrow: "Learning Platform",
-        title: "SAAE Learning Platform",
+        eyebrow: "Training and Learning Platform",
+        title: "SAAE Training and Learning Platform",
         body: "A comprehensive learning platform offering diverse training paths to develop Syrian talent and build professional and technical skills.",
         cta: "Enter the platform",
       };

@@ -85,25 +85,25 @@ export const Route = createFileRoute("/learning-management-system/")({
   },
   head: () => ({
     meta: [
-      { title: "SAAE Learning Platform — Courses & Skills" },
+      { title: "SAAE Training and Learning Platform — Courses & Skills" },
       {
         name: "description",
         content:
-          "SAAE Learning Platform — Arabic-first online courses in AI, programming, design, business and more. Learn from expert instructors and earn certificates.",
+          "SAAE Training and Learning Platform — Arabic-first online courses in AI, programming, design, business and more. Learn from expert instructors and earn certificates.",
       },
-      { property: "og:title", content: "SAAE Learning Platform — Courses & Skills" },
+      { property: "og:title", content: "SAAE Training and Learning Platform — Courses & Skills" },
       {
         property: "og:description",
         content:
-          "Browse AI, programming, design and business courses on the SAAE Learning Platform. Arabic-first, instructor-led, certificate-ready.",
+          "Browse AI, programming, design and business courses on the SAAE Training and Learning Platform. Arabic-first, instructor-led, certificate-ready.",
       },
       { property: "og:url", content: "https://aisyria.org/learning-management-system" },
       { property: "og:type", content: "website" },
-      { name: "twitter:title", content: "SAAE Learning Platform — Courses & Skills" },
+      { name: "twitter:title", content: "SAAE Training and Learning Platform — Courses & Skills" },
       {
         name: "twitter:description",
         content:
-          "Browse AI, programming, design and business courses on the SAAE Learning Platform.",
+          "Browse AI, programming, design and business courses on the SAAE Training and Learning Platform.",
       },
     ],
     links: [

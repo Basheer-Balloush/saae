@@ -526,7 +526,7 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
                         {r.full_name}
                         {r.lms_enrollment_id && (
                           <span className="inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary">
-                            {isRtl ? "من المنصة" : "LMS"}
+                            {isRtl ? "من المنصّة" : "Platform"}
                           </span>
                         )}
                       </div>

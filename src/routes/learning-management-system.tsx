@@ -8,7 +8,7 @@ import { LmsFooter } from "@/components/lms/LmsFooter";
 export const Route = createFileRoute("/learning-management-system")({
   head: () => ({
     meta: [
-      { title: "Learning Management System" },
+      { title: "Training and Learning Platform" },
       { name: "description", content: "Complete LMS platform — browse courses, learn, and grow." },
     ],
   }),

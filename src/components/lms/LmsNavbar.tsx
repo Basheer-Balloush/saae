@@ -69,7 +69,7 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
         <Link
           to="/learning-management-system"
           className="relative flex items-center gap-3"
-          aria-label="SAAE Learning Platform"
+          aria-label="SAAE Training and Learning Platform"
         >
           {(() => {
             const isEnLight = lang === "en" && theme === "light";
@@ -77,10 +77,10 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
             const isArDark = lang === "ar" && theme === "dark";
             const isArLight = lang === "ar" && theme === "light";
             const variants = [
-              { src: logoEnLight, show: isEnLight, alt: "SAAE — Learning Platform" },
-              { src: logoEnDark, show: isEnDark, alt: "SAAE — Learning Platform" },
-              { src: logoArDark, show: isArDark, alt: "منصة التعلم — SAAE" },
-              { src: logoArLight, show: isArLight, alt: "منصة التعلم — SAAE" },
+              { src: logoEnLight, show: isEnLight, alt: "SAAE — Training and Learning Platform" },
+              { src: logoEnDark, show: isEnDark, alt: "SAAE — Training and Learning Platform" },
+              { src: logoArDark, show: isArDark, alt: "منصّة التدريب والتعلّم — SAAE" },
+              { src: logoArLight, show: isArLight, alt: "منصّة التدريب والتعلّم — SAAE" },
               { src: logo, show: !(isEnLight || isEnDark || isArDark || isArLight), alt: "SAAE" },
             ];
             return variants.map((v, i) => (

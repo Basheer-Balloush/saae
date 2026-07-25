@@ -142,7 +142,7 @@ export const lmsT: Record<Lang, {
   courseFinished: string;
 }> = {
   ar: {
-    brand: "منصّة التعلّم",
+    brand: "منصّة التدريب والتعلّم",
     tagline: "تعلّمٌ بلا حدود",
     navHome: "الرئيسيّة",
     navCatalog: "الدورات",
@@ -272,7 +272,7 @@ export const lmsT: Record<Lang, {
     courseFinished: "انتهت الدورة",
   },
   en: {
-    brand: "Learning Platform",
+    brand: "Training and Learning Platform",
     tagline: "Learn without limits",
     navHome: "Home",
     navCatalog: "Courses",

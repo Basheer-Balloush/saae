@@ -22,7 +22,7 @@ const MANAGEABLE = ["lms_instructor", "lms_admin", "attendance_user", "attendanc
 
 const ROLE_LABELS: Record<string, { ar: string; en: string }> = {
   admin: { ar: "مدير عام", en: "Super Admin" },
-  lms_admin: { ar: "مدير المنصة التعليمية", en: "LMS Admin" },
+  lms_admin: { ar: "مدير منصّة التدريب والتعلّم", en: "Training & Learning Platform Admin" },
   lms_instructor: { ar: "مدرّب", en: "Instructor" },
   attendance_admin: { ar: "مدير نظام الحضور", en: "Attendance Admin" },
   attendance_user: { ar: "مستخدم نظام الحضور", en: "Attendance User" },
