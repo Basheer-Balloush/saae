@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/learning-management-system/admin/coupons")({
-  head: () => ({ meta: [{ title: "LMS Admin · Coupons" }] }),
+  head: () => ({ meta: [{ title: "Training & Learning Platform Admin · Coupons" }] }),
   component: AdminCoupons,
 });
 
