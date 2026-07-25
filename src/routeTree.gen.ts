@@ -57,11 +57,13 @@ import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCrmRouteImport } from './routes/admin.crm'
 import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system.student.index'
+import { Route as LearningManagementSystemInternshipsIndexRouteImport } from './routes/learning-management-system.internships.index'
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
 import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system.admin.index'
 import { Route as AdminFormsIndexRouteImport } from './routes/admin.forms.index'
 import { Route as AdminCrmIndexRouteImport } from './routes/admin.crm.index'
 import { Route as LearningManagementSystemStudentRequestsRouteImport } from './routes/learning-management-system.student.requests'
+import { Route as LearningManagementSystemInternshipsSlugRouteImport } from './routes/learning-management-system.internships.$slug'
 import { Route as LearningManagementSystemInstructorsIdRouteImport } from './routes/learning-management-system.instructors.$id'
 import { Route as LearningManagementSystemInstructorProfileRouteImport } from './routes/learning-management-system.instructor.profile'
 import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/learning-management-system.courses.$id'
@@ -357,6 +359,12 @@ const LearningManagementSystemStudentIndexRoute =
     path: '/',
     getParentRoute: () => LearningManagementSystemStudentRoute,
   } as any)
+const LearningManagementSystemInternshipsIndexRoute =
+  LearningManagementSystemInternshipsIndexRouteImport.update({
+    id: '/internships/',
+    path: '/internships/',
+    getParentRoute: () => LearningManagementSystemRoute,
+  } as any)
 const LearningManagementSystemInstructorIndexRoute =
   LearningManagementSystemInstructorIndexRouteImport.update({
     id: '/',
@@ -384,6 +392,12 @@ const LearningManagementSystemStudentRequestsRoute =
     id: '/requests',
     path: '/requests',
     getParentRoute: () => LearningManagementSystemStudentRoute,
+  } as any)
+const LearningManagementSystemInternshipsSlugRoute =
+  LearningManagementSystemInternshipsSlugRouteImport.update({
+    id: '/internships/$slug',
+    path: '/internships/$slug',
+    getParentRoute: () => LearningManagementSystemRoute,
   } as any)
 const LearningManagementSystemInstructorsIdRoute =
   LearningManagementSystemInstructorsIdRouteImport.update({
@@ -643,11 +657,13 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructor/profile': typeof LearningManagementSystemInstructorProfileRoute
   '/learning-management-system/instructors/$id': typeof LearningManagementSystemInstructorsIdRoute
+  '/learning-management-system/internships/$slug': typeof LearningManagementSystemInternshipsSlugRoute
   '/learning-management-system/student/requests': typeof LearningManagementSystemStudentRequestsRoute
   '/admin/crm/': typeof AdminCrmIndexRoute
   '/admin/forms/': typeof AdminFormsIndexRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
+  '/learning-management-system/internships/': typeof LearningManagementSystemInternshipsIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
   '/admin/crm/contacts/$contactId': typeof AdminCrmContactsContactIdRoute
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
@@ -723,11 +739,13 @@ export interface FileRoutesByTo {
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructor/profile': typeof LearningManagementSystemInstructorProfileRoute
   '/learning-management-system/instructors/$id': typeof LearningManagementSystemInstructorsIdRoute
+  '/learning-management-system/internships/$slug': typeof LearningManagementSystemInternshipsSlugRoute
   '/learning-management-system/student/requests': typeof LearningManagementSystemStudentRequestsRoute
   '/admin/crm': typeof AdminCrmIndexRoute
   '/admin/forms': typeof AdminFormsIndexRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorIndexRoute
+  '/learning-management-system/internships': typeof LearningManagementSystemInternshipsIndexRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentIndexRoute
   '/admin/crm/contacts/$contactId': typeof AdminCrmContactsContactIdRoute
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
@@ -813,11 +831,13 @@ export interface FileRoutesById {
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructor/profile': typeof LearningManagementSystemInstructorProfileRoute
   '/learning-management-system/instructors/$id': typeof LearningManagementSystemInstructorsIdRoute
+  '/learning-management-system/internships/$slug': typeof LearningManagementSystemInternshipsSlugRoute
   '/learning-management-system/student/requests': typeof LearningManagementSystemStudentRequestsRoute
   '/admin/crm/': typeof AdminCrmIndexRoute
   '/admin/forms/': typeof AdminFormsIndexRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
+  '/learning-management-system/internships/': typeof LearningManagementSystemInternshipsIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
   '/admin/crm/contacts/$contactId': typeof AdminCrmContactsContactIdRoute
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
@@ -904,11 +924,13 @@ export interface FileRouteTypes {
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructor/profile'
     | '/learning-management-system/instructors/$id'
+    | '/learning-management-system/internships/$slug'
     | '/learning-management-system/student/requests'
     | '/admin/crm/'
     | '/admin/forms/'
     | '/learning-management-system/admin/'
     | '/learning-management-system/instructor/'
+    | '/learning-management-system/internships/'
     | '/learning-management-system/student/'
     | '/admin/crm/contacts/$contactId'
     | '/admin/crm/forms/$formSlug'
@@ -984,11 +1006,13 @@ export interface FileRouteTypes {
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructor/profile'
     | '/learning-management-system/instructors/$id'
+    | '/learning-management-system/internships/$slug'
     | '/learning-management-system/student/requests'
     | '/admin/crm'
     | '/admin/forms'
     | '/learning-management-system/admin'
     | '/learning-management-system/instructor'
+    | '/learning-management-system/internships'
     | '/learning-management-system/student'
     | '/admin/crm/contacts/$contactId'
     | '/admin/crm/forms/$formSlug'
@@ -1073,11 +1097,13 @@ export interface FileRouteTypes {
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructor/profile'
     | '/learning-management-system/instructors/$id'
+    | '/learning-management-system/internships/$slug'
     | '/learning-management-system/student/requests'
     | '/admin/crm/'
     | '/admin/forms/'
     | '/learning-management-system/admin/'
     | '/learning-management-system/instructor/'
+    | '/learning-management-system/internships/'
     | '/learning-management-system/student/'
     | '/admin/crm/contacts/$contactId'
     | '/admin/crm/forms/$formSlug'
@@ -1465,6 +1491,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemStudentIndexRouteImport
       parentRoute: typeof LearningManagementSystemStudentRoute
     }
+    '/learning-management-system/internships/': {
+      id: '/learning-management-system/internships/'
+      path: '/internships'
+      fullPath: '/learning-management-system/internships/'
+      preLoaderRoute: typeof LearningManagementSystemInternshipsIndexRouteImport
+      parentRoute: typeof LearningManagementSystemRoute
+    }
     '/learning-management-system/instructor/': {
       id: '/learning-management-system/instructor/'
       path: '/'
@@ -1499,6 +1532,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/learning-management-system/student/requests'
       preLoaderRoute: typeof LearningManagementSystemStudentRequestsRouteImport
       parentRoute: typeof LearningManagementSystemStudentRoute
+    }
+    '/learning-management-system/internships/$slug': {
+      id: '/learning-management-system/internships/$slug'
+      path: '/internships/$slug'
+      fullPath: '/learning-management-system/internships/$slug'
+      preLoaderRoute: typeof LearningManagementSystemInternshipsSlugRouteImport
+      parentRoute: typeof LearningManagementSystemRoute
     }
     '/learning-management-system/instructors/$id': {
       id: '/learning-management-system/instructors/$id'
@@ -1999,6 +2039,8 @@ interface LearningManagementSystemRouteChildren {
   LearningManagementSystemCertificateIdRoute: typeof LearningManagementSystemCertificateIdRoute
   LearningManagementSystemCoursesIdRoute: typeof LearningManagementSystemCoursesIdRoute
   LearningManagementSystemInstructorsIdRoute: typeof LearningManagementSystemInstructorsIdRoute
+  LearningManagementSystemInternshipsSlugRoute: typeof LearningManagementSystemInternshipsSlugRoute
+  LearningManagementSystemInternshipsIndexRoute: typeof LearningManagementSystemInternshipsIndexRoute
 }
 
 const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildren =
@@ -2027,6 +2069,10 @@ const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildr
       LearningManagementSystemCoursesIdRoute,
     LearningManagementSystemInstructorsIdRoute:
       LearningManagementSystemInstructorsIdRoute,
+    LearningManagementSystemInternshipsSlugRoute:
+      LearningManagementSystemInternshipsSlugRoute,
+    LearningManagementSystemInternshipsIndexRoute:
+      LearningManagementSystemInternshipsIndexRoute,
   }
 
 const LearningManagementSystemRouteWithChildren =
