@@ -3476,6 +3476,128 @@ export type Database = {
         Args: { _approve: boolean; _payout_id: string }
         Returns: undefined
       }
+      lms_profile_clear_pointer: {
+        Args: { _kind: Database["public"]["Enums"]["lms_profile_file_kind"] }
+        Returns: {
+          avatar_file_id: string | null
+          biography: string | null
+          created_at: string
+          cv_file_id: string | null
+          full_name: string | null
+          locale: string | null
+          organization: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "lms_user_profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      lms_profile_finalize_file: {
+        Args: {
+          _bucket: string
+          _kind: Database["public"]["Enums"]["lms_profile_file_kind"]
+          _mime: string
+          _original_filename: string
+          _path: string
+          _size: number
+        }
+        Returns: {
+          bucket: string
+          created_at: string
+          id: string
+          is_current: boolean
+          kind: Database["public"]["Enums"]["lms_profile_file_kind"]
+          mime_type: string
+          original_filename: string | null
+          path: string
+          size_bytes: number
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "lms_profile_files"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      lms_profile_get_file: {
+        Args: { _file_id: string }
+        Returns: {
+          bucket: string
+          created_at: string
+          id: string
+          is_current: boolean
+          kind: Database["public"]["Enums"]["lms_profile_file_kind"]
+          mime_type: string
+          original_filename: string | null
+          path: string
+          size_bytes: number
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "lms_profile_files"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      lms_profile_get_or_init: {
+        Args: never
+        Returns: {
+          avatar_file_id: string | null
+          biography: string | null
+          created_at: string
+          cv_file_id: string | null
+          full_name: string | null
+          locale: string | null
+          organization: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "lms_user_profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      lms_profile_update: {
+        Args: {
+          _biography?: string
+          _full_name?: string
+          _locale?: string
+          _organization?: string
+          _phone?: string
+        }
+        Returns: {
+          avatar_file_id: string | null
+          biography: string | null
+          created_at: string
+          cv_file_id: string | null
+          full_name: string | null
+          locale: string | null
+          organization: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "lms_user_profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       lms_public_stats: {
         Args: never
         Returns: {
