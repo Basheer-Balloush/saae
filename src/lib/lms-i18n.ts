@@ -123,6 +123,8 @@ export const lmsT: Record<Lang, {
   verify: string;
   verifyValid: string;
   verifyInvalid: string;
+  verifyError: string;
+  verifyRetry: string;
   forgotPassword: string;
   forgotTitle: string;
   forgotSubtitle: string;
