@@ -209,7 +209,7 @@ function AdminHome() {
     { id: "categories", label: ar ? "التصنيفات" : "Categories", icon: FolderTree },
   ];
 
-  const sideLinks: { to: string; label: string; icon: typeof Users; desc: string }[] = [
+  const sideLinks: { to: string; label: string; icon: typeof Users; desc: string; badge?: number }[] = [
     {
       to: "/learning-management-system/admin/analytics",
       label: ar ? "التحليلات" : "Analytics",
