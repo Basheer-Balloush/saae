@@ -388,7 +388,14 @@ function AdminHome() {
                         <span className="block text-[11px] text-muted-foreground leading-tight">{l.desc}</span>
                       </span>
                     </span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary rtl:rotate-180 shrink-0" />
+                    <span className="flex items-center gap-2 shrink-0">
+                      {typeof l.badge === "number" && l.badge > 0 && (
+                        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                          {l.badge}
+                        </Badge>
+                      )}
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary rtl:rotate-180 shrink-0" />
+                    </span>
                   </Link>
                 );
               })}
