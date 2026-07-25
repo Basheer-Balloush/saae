@@ -396,15 +396,11 @@ function SubmissionRow({
       return;
     }
     setSaving(true);
-    const { error } = await supabase
-      .from("lms_submissions")
-      .update({
-        grade: g,
-        feedback: feedback.trim() || null,
-        graded_by: user.id,
-        graded_at: new Date().toISOString(),
-      })
-      .eq("id", submission.id);
+    const { error } = await supabase.rpc("grade_lms_submission", {
+      _submission_id: submission.id,
+      _grade: g,
+      _feedback: feedback.trim() || null,
+    });
     setSaving(false);
     if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(t(lang, "تم حفظ التقييم", "Grade saved"));
