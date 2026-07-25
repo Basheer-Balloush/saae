@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { ShieldCheck, ShieldX, Loader2, Award } from "lucide-react";
+import { ShieldCheck, ShieldX, Loader2, AlertTriangle, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
@@ -12,52 +12,65 @@ export const Route = createFileRoute("/learning-management-system/verify")({
   component: VerifyPage,
 });
 
-type Found = {
-  id: string;
+const MAX_SERIAL_LENGTH = 128;
+
+type VerifiedCertificate = {
   serial: string;
   issued_at: string;
-  course_id: string;
-  student_id: string;
-  course_title?: string;
+  course_title_ar: string;
+  course_title_en: string;
 };
+
+type VerifyState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "valid"; cert: VerifiedCertificate }
+  | { status: "invalid" }
+  | { status: "error" };
 
 function VerifyPage() {
   const { lang } = useLang();
   const tr = lmsT[lang];
   const [serial, setSerial] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ ok: boolean; cert?: Found } | null>(null);
+  const [state, setState] = useState<VerifyState>({ status: "idle" });
+
+  const loading = state.status === "loading";
+  const trimmed = serial.trim();
+  const canSubmit = trimmed.length > 0 && trimmed.length <= MAX_SERIAL_LENGTH && !loading;
 
   const run = async () => {
-    if (!serial.trim()) return;
-    setLoading(true);
-    setResult(null);
+    if (!canSubmit) return;
+    // Clear any stale result before starting a new verification.
+    setState({ status: "loading" });
     try {
-      const { data } = await supabase
-        .from("lms_certificates")
-        .select("id,serial,issued_at,course_id,student_id")
-        .eq("serial", serial.trim())
-        .maybeSingle();
-      if (!data) {
-        setResult({ ok: false });
-      } else {
-        const { data: c } = await supabase
-          .from("lms_courses")
-          .select("title_ar,title_en")
-          .eq("id", data.course_id)
-          .maybeSingle();
-        setResult({
-          ok: true,
-          cert: {
-            ...(data as Found),
-            course_title: c ? (lang === "ar" ? c.title_ar : c.title_en || c.title_ar) : "",
-          },
-        });
+      const { data, error } = await supabase.rpc("verify_certificate", {
+        _serial: trimmed,
+      });
+      if (error) {
+        setState({ status: "error" });
+        return;
       }
-    } finally {
-      setLoading(false);
+      const row = data?.[0];
+      if (!row || !row.is_valid) {
+        setState({ status: "invalid" });
+        return;
+      }
+      setState({
+        status: "valid",
+        cert: {
+          serial: row.serial,
+          issued_at: row.issued_at,
+          course_title_ar: row.course_title_ar,
+          course_title_en: row.course_title_en,
+        },
+      });
+    } catch {
+      setState({ status: "error" });
     }
   };
+
+  const courseTitle = (cert: VerifiedCertificate) =>
+    lang === "ar" ? cert.course_title_ar : cert.course_title_en || cert.course_title_ar;
 
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-12 sm:py-20">
@@ -72,57 +85,74 @@ function VerifyPage() {
       <div className="mt-8 flex flex-col sm:flex-row gap-3">
         <Input
           placeholder={tr.enterSerial}
+          aria-label={tr.enterSerial}
           value={serial}
+          maxLength={MAX_SERIAL_LENGTH}
+          disabled={loading}
           onChange={(e) => setSerial(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && run()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              void run();
+            }
+          }}
         />
-        <Button onClick={run} disabled={loading || !serial.trim()} size="lg">
-          {loading && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
+        <Button onClick={() => void run()} disabled={!canSubmit} size="lg">
+          {loading && <Loader2 className="h-4 w-4 animate-spin mx-2" aria-hidden="true" />}
           {tr.verify}
         </Button>
       </div>
 
-      {result && result.ok && result.cert && (
-        <div className="mt-8 rounded-2xl border border-primary/30 bg-primary/5 p-6">
-          <div className="flex items-center gap-3 text-primary font-bold">
-            <ShieldCheck className="h-5 w-5" />
-            {tr.verifyValid}
+      <div aria-live="polite">
+        {state.status === "valid" && (
+          <div className="mt-8 rounded-2xl border border-primary/30 bg-primary/5 p-6">
+            <div className="flex items-center gap-3 text-primary font-bold">
+              <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+              {tr.verifyValid}
+            </div>
+            <dl className="mt-4 space-y-2 text-sm">
+              <div className="flex flex-wrap justify-between gap-4">
+                <dt className="text-muted-foreground">{tr.serial}</dt>
+                <dd className="font-mono text-foreground break-all">{state.cert.serial}</dd>
+              </div>
+              <div className="flex flex-wrap justify-between gap-4">
+                <dt className="text-muted-foreground">{tr.aboutCourse}</dt>
+                <dd className="font-semibold text-foreground break-words" dir="auto">
+                  {courseTitle(state.cert)}
+                </dd>
+              </div>
+              <div className="flex flex-wrap justify-between gap-4">
+                <dt className="text-muted-foreground">{tr.issuedOn}</dt>
+                <dd className="text-foreground">
+                  {new Date(state.cert.issued_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}
+                </dd>
+              </div>
+            </dl>
           </div>
-          <dl className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">{tr.serial}</dt>
-              <dd className="font-mono text-foreground">{result.cert.serial}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">{tr.aboutCourse}</dt>
-              <dd className="font-semibold text-foreground">{result.cert.course_title}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">{tr.issuedOn}</dt>
-              <dd className="text-foreground">
-                {new Date(result.cert.issued_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}
-              </dd>
-            </div>
-          </dl>
-          <Link
-            to="/learning-management-system/certificate/$id"
-            params={{ id: result.cert.id }}
-            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
-          >
-            <Award className="h-4 w-4" />
-            {tr.viewCertificate}
-          </Link>
-        </div>
-      )}
+        )}
 
-      {result && !result.ok && (
-        <div className="mt-8 rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
-          <div className="flex items-center gap-3 text-destructive font-bold">
-            <ShieldX className="h-5 w-5" />
-            {tr.verifyInvalid}
+        {state.status === "invalid" && (
+          <div className="mt-8 rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
+            <div className="flex items-center gap-3 text-destructive font-bold">
+              <ShieldX className="h-5 w-5" aria-hidden="true" />
+              {tr.verifyInvalid}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {state.status === "error" && (
+          <div className="mt-8 rounded-2xl border border-border bg-muted/40 p-6">
+            <div className="flex items-center gap-3 font-bold text-foreground">
+              <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+              {tr.verifyError}
+            </div>
+            <Button variant="outline" size="sm" className="mt-4 gap-2" onClick={() => void run()} disabled={!canSubmit}>
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              {tr.verifyRetry}
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
