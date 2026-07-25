@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { lmsT } from "@/lib/lms-i18n";
+import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { LmsRole } from "@/hooks/useLmsAuth";
@@ -48,8 +50,10 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
   }
   links.push(
     { to: "/learning-management-system/catalog", label: tr.navCatalog },
+    { to: "/learning-management-system/internships", label: lmsInternshipsT[lang].navInternships },
     { to: "/learning-management-system/verify", label: tr.verifyCertificate },
   );
+
   if (isAuthed) {
     links.push({ to: "/learning-management-system/student", label: tr.navMyCourses });
   }
