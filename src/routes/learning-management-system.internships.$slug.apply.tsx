@@ -113,7 +113,7 @@ function ApplyPage() {
       const a = answers[q.id];
       const hasText = !!a?.text && a.text.trim().length > 0;
       const hasSel = !!a?.selected && a.selected.length > 0;
-      if (q.kind === "single" || q.kind === "multi") {
+      if (q.kind === "single_choice" || q.kind === "multi_choice") {
         if (!hasSel) {
           toast.error(lang === "ar" ? "بعض الأسئلة المطلوبة فارغة" : "Please answer all required questions");
           return;
@@ -128,12 +128,12 @@ function ApplyPage() {
       .map((q) => {
         const a = answers[q.id];
         if (!a) return null;
-        if (q.kind === "single") {
+        if (q.kind === "single_choice") {
           const sel = a.selected?.[0];
           if (!sel) return null;
           return { question_id: q.id, answer_json: sel };
         }
-        if (q.kind === "multi") {
+        if (q.kind === "multi_choice") {
           if (!a.selected?.length) return null;
           return { question_id: q.id, answer_json: a.selected };
         }
@@ -275,14 +275,14 @@ function ApplyPage() {
                     {help}
                   </p>
                 )}
-                {q.kind === "long_text" || q.kind === "textarea" ? (
+                {q.kind === "long_text" ? (
                   <Textarea
                     value={a.text ?? ""}
                     onChange={(e) => setText(e.target.value)}
                     rows={4}
                     dir="auto"
                   />
-                ) : q.kind === "single" ? (
+                ) : q.kind === "single_choice" ? (
                   <div className="space-y-1">
                     {q.options.map((opt) => (
                       <label key={opt} className="flex items-center gap-2 text-sm">
@@ -296,7 +296,7 @@ function ApplyPage() {
                       </label>
                     ))}
                   </div>
-                ) : q.kind === "multi" ? (
+                ) : q.kind === "multi_choice" ? (
                   <div className="space-y-1">
                     {q.options.map((opt) => {
                       const checked = a.selected?.includes(opt) ?? false;
