@@ -193,21 +193,3 @@ function InternshipCard({ item, lang }: { item: PublicInternshipCard; lang: "ar"
   );
 }
 
-// tiny debounce hook
-function useDebounced(value: string, ms: number, onChange: (v: string) => void) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const ref = { current: value };
-  ref.current = value;
-  // use effect
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useDebounceEffect(value, ms, onChange);
-}
-function useDebounceEffect(value: string, ms: number, cb: (v: string) => void) {
-  // separate to avoid ESLint hook-in-conditional; imported inline
-  const React = require("react") as typeof import("react");
-  React.useEffect(() => {
-    const id = setTimeout(() => cb(value), ms);
-    return () => clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, ms]);
-}
