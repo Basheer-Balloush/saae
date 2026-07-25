@@ -733,7 +733,15 @@ function ApplicationsCard({ isRtl: _isRtl, lang }: { isRtl: boolean; lang: "ar" 
                     })}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap justify-end">
+                  {r.attempt_number > 1 && (
+                    <span
+                      className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
+                      title={lang === "ar" ? "رقم المحاولة" : "Attempt number"}
+                    >
+                      {lang === "ar" ? `محاولة #${r.attempt_number}` : `Attempt #${r.attempt_number}`}
+                    </span>
+                  )}
                   <span className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">
                     {statusLabel(r.status)}
                   </span>
