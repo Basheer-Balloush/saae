@@ -383,6 +383,8 @@ export const lmsT: Record<Lang, {
     verify: "Verify",
     verifyValid: "Valid certificate",
     verifyInvalid: "No certificate found for that serial",
+    verifyError: "We couldn't complete the verification. Please try again.",
+    verifyRetry: "Try again",
     forgotPassword: "Forgot password?",
     forgotTitle: "Reset your password",
     forgotSubtitle: "Enter your email to receive a reset link",
