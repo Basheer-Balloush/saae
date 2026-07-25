@@ -5,6 +5,7 @@ export const lmsT: Record<Lang, {
   tagline: string;
   // nav
   navHome: string;
+  navProfile: string;
   navCatalog: string;
   navMyCourses: string;
   navInstructor: string;
@@ -145,6 +146,7 @@ export const lmsT: Record<Lang, {
     brand: "منصّة التدريب والتعلّم",
     tagline: "تعلّمٌ بلا حدود",
     navHome: "الرئيسيّة",
+    navProfile: "ملفّي",
     navCatalog: "الدورات",
     navMyCourses: "دوراتي",
     navInstructor: "لوحة المدرّب",
