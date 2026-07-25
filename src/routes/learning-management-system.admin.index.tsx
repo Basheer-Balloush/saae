@@ -69,6 +69,15 @@ function AdminHome() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [studentsCount, setStudentsCount] = useState(0);
   const [editInstructorId, setEditInstructorId] = useState<string | null>(null);
+  const [internshipsOverview, setInternshipsOverview] = useState<InternshipsOverview | null>(null);
+  const overviewFn = useServerFn(adminInternshipsOverview);
+  useEffect(() => {
+    let live = true;
+    overviewFn()
+      .then((res) => { if (live) setInternshipsOverview(res); })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [overviewFn]);
 
   const load = async () => {
     const [{ data: ins }, { data: cs }, { data: cats }, { count: stCount }] = await Promise.all([
