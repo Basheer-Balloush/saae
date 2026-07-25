@@ -308,3 +308,31 @@ export const adminGetCoverSignedUrl = createServerFn({ method: "POST" })
     if (sErr || !signed) return { signed_url: null };
     return { signed_url: signed.signedUrl };
   });
+
+// ---------- Phase 9: overview counts ----------
+
+export type InternshipsOverview = {
+  opportunities: {
+    total: number;
+    draft: number;
+    published: number;
+    hidden: number;
+    closed: number;
+    archived: number;
+  };
+  applications: {
+    total: number;
+    pending_review: number;
+    accepted: number;
+    rejected: number;
+  };
+};
+
+export const adminInternshipsOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<InternshipsOverview> => {
+    const { supabase } = context as { supabase: any };
+    const { data, error } = await supabase.rpc("admin_internships_overview");
+    if (error) throw new Error(error.message);
+    return data as InternshipsOverview;
+  });
