@@ -242,7 +242,7 @@ function AdminInternshipsList() {
                 </TableCell>
                 <TableCell className="text-center">
                   <Link
-                    to="/learning-management-system/admin/internships/$id/edit"
+                    to="/learning-management-system/admin/internships/$id/applications"
                     params={{ id: row.id }}
                     className="text-primary hover:underline"
                   >

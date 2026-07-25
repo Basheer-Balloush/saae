@@ -3221,6 +3221,83 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _app_status_rank: {
+        Args: {
+          _s: Database["public"]["Enums"]["internship_application_status"]
+        }
+        Returns: number
+      }
+      _require_lms_admin: { Args: never; Returns: undefined }
+      admin_add_application_note: {
+        Args: { _application_id: string; _body: string }
+        Returns: string
+      }
+      admin_assign_application_admin: {
+        Args: { _admin_user_id: string; _application_id: string }
+        Returns: undefined
+      }
+      admin_get_application_cv: {
+        Args: { _application_id: string }
+        Returns: {
+          bucket: string
+          mime_type: string
+          original_filename: string
+          path: string
+        }[]
+      }
+      admin_get_internship_application: {
+        Args: { _application_id: string }
+        Returns: Json
+      }
+      admin_list_internship_applications: {
+        Args: {
+          _assigned_admin?: string
+          _certificate_id?: string
+          _course_id?: string
+          _opportunity_id: string
+          _page?: number
+          _page_size?: number
+          _q?: string
+          _sort?: string
+          _status?: Database["public"]["Enums"]["internship_application_status"]
+          _submitted_from?: string
+          _submitted_to?: string
+        }
+        Returns: {
+          assigned_admin: string
+          assigned_admin_email: string
+          attempt_number: number
+          certificates_count: number
+          courses_count: number
+          id: string
+          notes_count: number
+          opportunity_id: string
+          snapshot_email: string
+          snapshot_full_name: string
+          snapshot_organization: string
+          snapshot_phone: string
+          status: Database["public"]["Enums"]["internship_application_status"]
+          submitted_at: string
+          total_count: number
+          user_id: string
+          withdrawn_at: string
+        }[]
+      }
+      admin_list_lms_admins: {
+        Args: never
+        Returns: {
+          email: string
+          user_id: string
+        }[]
+      }
+      admin_set_application_status: {
+        Args: {
+          _application_id: string
+          _reason?: string
+          _to_status: Database["public"]["Enums"]["internship_application_status"]
+        }
+        Returns: undefined
+      }
       ams_attach_user_to_linked_course: {
         Args: {
           _ams_course_id: string
