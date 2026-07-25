@@ -13,10 +13,23 @@ import { toast } from "sonner";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/saae-logo.png";
 
+const redirectSchema = z
+  .object({ redirect: z.string().optional() })
+  .transform((s) => ({
+    redirect:
+      typeof s.redirect === "string" &&
+      s.redirect.startsWith("/learning-management-system/") &&
+      !s.redirect.startsWith("//")
+        ? s.redirect
+        : undefined,
+  }));
+
 export const Route = createFileRoute("/learning-management-system/login")({
   head: () => ({ meta: [{ title: "LMS · Sign in" }] }),
+  validateSearch: (raw) => redirectSchema.parse(raw),
   component: LmsLogin,
 });
+
 
 const schema = z.object({
   email: z.string().trim().email().max(255),
