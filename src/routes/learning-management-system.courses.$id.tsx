@@ -26,7 +26,7 @@ type Course = {
 };
 type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; duration_seconds: number; is_preview: boolean; display_order: number };
-type Instructor = { user_id: string; full_name: string; full_name_ar: string | null; full_name_en: string | null; avatar_url: string | null; specialty: string | null; specialty_ar: string | null; specialty_en: string | null };
+type Instructor = { slug: string; full_name: string; full_name_ar: string | null; full_name_en: string | null; avatar_url: string | null; specialty: string | null; specialty_ar: string | null; specialty_en: string | null; is_primary: boolean };
 
 type CourseLoaderData = {
   course: Course | null;
