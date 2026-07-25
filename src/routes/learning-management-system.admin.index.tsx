@@ -25,6 +25,8 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { adminInternshipsOverview, type InternshipsOverview } from "@/lib/lms-internships-admin.functions";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
