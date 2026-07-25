@@ -146,7 +146,13 @@ function VerifyPage() {
               <AlertTriangle className="h-5 w-5" aria-hidden="true" />
               {tr.verifyError}
             </div>
-            <Button variant="outline" size="sm" className="mt-4 gap-2" onClick={() => void run()} disabled={!canSubmit}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4 gap-2"
+              onClick={() => void run()}
+              disabled={!canSubmit}
+            >
               <RotateCcw className="h-4 w-4" aria-hidden="true" />
               {tr.verifyRetry}
             </Button>
