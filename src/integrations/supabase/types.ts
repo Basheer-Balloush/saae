@@ -2883,10 +2883,14 @@ export type Database = {
       }
       lms_approve_enrollment_request: {
         Args: { _admin_notes?: string; _request_id: string }
-        Returns: undefined
+        Returns: Json
       }
       lms_checkout: {
         Args: { _coupon?: string; _course_id: string }
+        Returns: Json
+      }
+      lms_create_enrollment_internal: {
+        Args: { _channel: string; _course_id: string; _student_id: string }
         Returns: Json
       }
       lms_delete_course: { Args: { _course_id: string }; Returns: undefined }
