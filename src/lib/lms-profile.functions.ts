@@ -55,6 +55,137 @@ export const getMyProfile = createServerFn({ method: "GET" })
     return data as ProfileRow;
   });
 
+// ---------- aggregated overview for the /profile page ----------
+
+export type ProfileOverviewCourse = {
+  id: string;
+  title_ar: string;
+  title_en: string | null;
+  cover_url: string | null;
+  slug: string | null;
+};
+
+export type ProfileOverviewEnrollment = {
+  id: string;
+  course_id: string;
+  progress: number;
+  enrolled_at: string;
+  completed_at: string | null;
+};
+
+export type ProfileOverviewCert = {
+  id: string;
+  serial: string;
+  issued_at: string;
+  course_id: string;
+};
+
+export type ProfileOverview = {
+  profile: ProfileRow;
+  email: string | null;
+  enrollments: ProfileOverviewEnrollment[];
+  certificates: ProfileOverviewCert[];
+  courses: ProfileOverviewCourse[];
+  attendance: {
+    total: number;
+    present: number;
+    byCourse: Record<string, { total: number; present: number }>;
+    linked: boolean;
+  };
+};
+
+export const getMyProfileOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ProfileOverview> => {
+    const { supabase, userId, claims } = context as {
+      supabase: any;
+      userId: string;
+      claims: { email?: string | null } | null;
+    };
+
+    const { data: profile, error: pErr } = await supabase.rpc("lms_profile_get_or_init");
+    if (pErr) throw new Error(pErr.message);
+
+    const [enrollRes, certRes] = await Promise.all([
+      supabase
+        .from("lms_enrollments")
+        .select("id, course_id, progress, enrolled_at, completed_at")
+        .eq("student_id", userId)
+        .order("enrolled_at", { ascending: false }),
+      supabase
+        .from("lms_certificates")
+        .select("id, serial, issued_at, course_id")
+        .eq("student_id", userId)
+        .order("issued_at", { ascending: false }),
+    ]);
+
+    const enrollments = (enrollRes.data ?? []) as ProfileOverviewEnrollment[];
+    const certificates = (certRes.data ?? []) as ProfileOverviewCert[];
+
+    const courseIds = Array.from(
+      new Set([
+        ...enrollments.map((e) => e.course_id),
+        ...certificates.map((c) => c.course_id),
+      ]),
+    );
+
+    let courses: ProfileOverviewCourse[] = [];
+    if (courseIds.length) {
+      const { data } = await supabase
+        .from("lms_courses")
+        .select("id, title_ar, title_en, cover_url, slug")
+        .in("id", courseIds);
+      courses = (data ?? []) as ProfileOverviewCourse[];
+    }
+
+    const attendance = {
+      total: 0,
+      present: 0,
+      byCourse: {} as Record<string, { total: number; present: number }>,
+      linked: false,
+    };
+    const enrollmentIds = enrollments.map((e) => e.id);
+    if (enrollmentIds.length) {
+      const { data: regs } = await supabase
+        .from("ams_registrants")
+        .select("id, course_id, lms_enrollment_id")
+        .in("lms_enrollment_id", enrollmentIds);
+      const regRows = (regs ?? []) as {
+        id: string;
+        course_id: string;
+        lms_enrollment_id: string | null;
+      }[];
+      if (regRows.length) {
+        attendance.linked = true;
+        const regIds = regRows.map((r) => r.id);
+        const { data: att } = await supabase
+          .from("ams_attendance")
+          .select("registrant_id, present")
+          .in("registrant_id", regIds);
+        const regToCourse = new Map(regRows.map((r) => [r.id, r.course_id]));
+        ((att ?? []) as { registrant_id: string; present: boolean }[]).forEach((a) => {
+          attendance.total += 1;
+          if (a.present) attendance.present += 1;
+          const cid = regToCourse.get(a.registrant_id);
+          if (cid) {
+            const bucket = (attendance.byCourse[cid] ??= { total: 0, present: 0 });
+            bucket.total += 1;
+            if (a.present) bucket.present += 1;
+          }
+        });
+      }
+    }
+
+    return {
+      profile: profile as ProfileRow,
+      email: claims?.email ?? null,
+      enrollments,
+      certificates,
+      courses,
+      attendance,
+    };
+  });
+
 // ---------- update editable fields ----------
 
 export const updateMyProfile = createServerFn({ method: "POST" })
