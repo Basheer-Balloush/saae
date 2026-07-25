@@ -35,6 +35,12 @@ import {
   CV_MAX_BYTES,
   CV_MIME_TYPES,
 } from "@/lib/lms-profile";
+import {
+  listMyInternshipApplications,
+  mapApplyError,
+  withdrawInternshipApplication,
+  type MyApplicationRow,
+} from "@/lib/lms-internships-apply.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
