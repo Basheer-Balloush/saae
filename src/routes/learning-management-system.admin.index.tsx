@@ -25,6 +25,8 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { adminInternshipsOverview, type InternshipsOverview } from "@/lib/lms-internships-admin.functions";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
@@ -69,6 +71,15 @@ function AdminHome() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [studentsCount, setStudentsCount] = useState(0);
   const [editInstructorId, setEditInstructorId] = useState<string | null>(null);
+  const [internshipsOverview, setInternshipsOverview] = useState<InternshipsOverview | null>(null);
+  const overviewFn = useServerFn(adminInternshipsOverview);
+  useEffect(() => {
+    let live = true;
+    overviewFn()
+      .then((res) => { if (live) setInternshipsOverview(res); })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [overviewFn]);
 
   const load = async () => {
     const [{ data: ins }, { data: cs }, { data: cats }, { count: stCount }] = await Promise.all([
@@ -198,7 +209,7 @@ function AdminHome() {
     { id: "categories", label: ar ? "التصنيفات" : "Categories", icon: FolderTree },
   ];
 
-  const sideLinks: { to: string; label: string; icon: typeof Users; desc: string }[] = [
+  const sideLinks: { to: string; label: string; icon: typeof Users; desc: string; badge?: number }[] = [
     {
       to: "/learning-management-system/admin/analytics",
       label: ar ? "التحليلات" : "Analytics",
@@ -245,10 +256,21 @@ function AdminHome() {
       to: "/learning-management-system/admin/internships",
       label: ar ? "فرص التدريب" : "Internships",
       icon: FileText,
-      desc: ar ? "إدارة فرص التدريب والطلبات" : "Manage opportunities & applications",
+      desc:
+        internshipsOverview
+          ? ar
+            ? `${internshipsOverview.opportunities.published} منشورة · ${internshipsOverview.applications.pending_review} بانتظار المراجعة`
+            : `${internshipsOverview.opportunities.published} published · ${internshipsOverview.applications.pending_review} pending review`
+          : ar
+            ? "إدارة فرص التدريب والطلبات"
+            : "Manage opportunities & applications",
+      badge:
+        internshipsOverview && internshipsOverview.applications.pending_review > 0
+          ? internshipsOverview.applications.pending_review
+          : undefined,
     },
-
   ];
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-background">
@@ -366,7 +388,14 @@ function AdminHome() {
                         <span className="block text-[11px] text-muted-foreground leading-tight">{l.desc}</span>
                       </span>
                     </span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary rtl:rotate-180 shrink-0" />
+                    <span className="flex items-center gap-2 shrink-0">
+                      {typeof l.badge === "number" && l.badge > 0 && (
+                        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                          {l.badge}
+                        </Badge>
+                      )}
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary rtl:rotate-180 shrink-0" />
+                    </span>
                   </Link>
                 );
               })}

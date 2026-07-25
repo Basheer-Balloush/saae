@@ -3249,6 +3249,7 @@ export type Database = {
         Args: { _application_id: string }
         Returns: Json
       }
+      admin_internships_overview: { Args: never; Returns: Json }
       admin_list_internship_applications: {
         Args: {
           _assigned_admin?: string
