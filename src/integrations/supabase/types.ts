@@ -2750,7 +2750,7 @@ export type Database = {
       }
       get_initiative_survey_count: { Args: never; Returns: number }
       grade_lms_submission: {
-        Args: { _feedback: string; _grade: number; _submission_id: string }
+        Args: { _feedback?: string; _grade?: number; _submission_id: string }
         Returns: {
           feedback: string
           grade: number
