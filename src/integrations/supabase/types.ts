@@ -1837,6 +1837,7 @@ export type Database = {
           full_name_en: string | null
           github_url: string | null
           linkedin_url: string | null
+          slug: string | null
           specialty: string | null
           specialty_ar: string | null
           specialty_en: string | null
@@ -1855,6 +1856,7 @@ export type Database = {
           full_name_en?: string | null
           github_url?: string | null
           linkedin_url?: string | null
+          slug?: string | null
           specialty?: string | null
           specialty_ar?: string | null
           specialty_en?: string | null
@@ -1873,6 +1875,7 @@ export type Database = {
           full_name_en?: string | null
           github_url?: string | null
           linkedin_url?: string | null
+          slug?: string | null
           specialty?: string | null
           specialty_ar?: string | null
           specialty_en?: string | null
@@ -2749,6 +2752,43 @@ export type Database = {
         Returns: number
       }
       get_initiative_survey_count: { Args: never; Returns: number }
+      get_public_instructor: {
+        Args: { _key: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          bio_ar: string
+          bio_en: string
+          full_name: string
+          full_name_ar: string
+          full_name_en: string
+          github_url: string
+          linkedin_url: string
+          slug: string
+          specialty: string
+          specialty_ar: string
+          specialty_en: string
+        }[]
+      }
+      get_public_instructors_for_course: {
+        Args: { _course_id: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          bio_ar: string
+          bio_en: string
+          full_name: string
+          full_name_ar: string
+          full_name_en: string
+          github_url: string
+          is_primary: boolean
+          linkedin_url: string
+          slug: string
+          specialty: string
+          specialty_ar: string
+          specialty_en: string
+        }[]
+      }
       grade_lms_submission: {
         Args: { _feedback?: string; _grade?: number; _submission_id: string }
         Returns: {
@@ -2861,6 +2901,10 @@ export type Database = {
           question: string
           quiz_id: string
         }[]
+      }
+      lms_instructors_generate_slug: {
+        Args: { _base: string }
+        Returns: string
       }
       lms_list_courses_with_ams_link: {
         Args: never
