@@ -241,6 +241,13 @@ function AdminHome() {
       icon: CalendarDays,
       desc: ar ? "ربط الدورات بنظام الحضور" : "Link courses to attendance",
     },
+    {
+      to: "/learning-management-system/admin/internships",
+      label: ar ? "فرص التدريب" : "Internships",
+      icon: FileText,
+      desc: ar ? "إدارة فرص التدريب والطلبات" : "Manage opportunities & applications",
+    },
+
   ];
 
   return (
