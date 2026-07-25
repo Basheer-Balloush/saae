@@ -1238,6 +1238,457 @@ export type Database = {
         }
         Relationships: []
       }
+      internship_application_answers: {
+        Row: {
+          answer_json: Json | null
+          answer_text: string | null
+          application_id: string
+          created_at: string
+          id: string
+          question_id: string
+          question_kind:
+            | Database["public"]["Enums"]["internship_question_kind"]
+            | null
+          question_label_ar: string | null
+          question_label_en: string | null
+        }
+        Insert: {
+          answer_json?: Json | null
+          answer_text?: string | null
+          application_id: string
+          created_at?: string
+          id?: string
+          question_id: string
+          question_kind?:
+            | Database["public"]["Enums"]["internship_question_kind"]
+            | null
+          question_label_ar?: string | null
+          question_label_en?: string | null
+        }
+        Update: {
+          answer_json?: Json | null
+          answer_text?: string | null
+          application_id?: string
+          created_at?: string
+          id?: string
+          question_id?: string
+          question_kind?:
+            | Database["public"]["Enums"]["internship_question_kind"]
+            | null
+          question_label_ar?: string | null
+          question_label_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internship_application_answers_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "internship_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internship_application_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "internship_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internship_application_certificate_snapshots: {
+        Row: {
+          application_id: string
+          certificate_id: string | null
+          course_id: string | null
+          course_title_ar: string | null
+          course_title_en: string | null
+          created_at: string
+          id: string
+          issued_at: string | null
+          serial: string | null
+        }
+        Insert: {
+          application_id: string
+          certificate_id?: string | null
+          course_id?: string | null
+          course_title_ar?: string | null
+          course_title_en?: string | null
+          created_at?: string
+          id?: string
+          issued_at?: string | null
+          serial?: string | null
+        }
+        Update: {
+          application_id?: string
+          certificate_id?: string | null
+          course_id?: string | null
+          course_title_ar?: string | null
+          course_title_en?: string | null
+          created_at?: string
+          id?: string
+          issued_at?: string | null
+          serial?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internship_application_certificate_snapshot_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "internship_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internship_application_course_snapshots: {
+        Row: {
+          application_id: string
+          attendance_present: number | null
+          attendance_total: number | null
+          completed: boolean
+          course_id: string | null
+          course_title_ar: string | null
+          course_title_en: string | null
+          created_at: string
+          enrolled_at: string | null
+          id: string
+          progress_percent: number | null
+        }
+        Insert: {
+          application_id: string
+          attendance_present?: number | null
+          attendance_total?: number | null
+          completed?: boolean
+          course_id?: string | null
+          course_title_ar?: string | null
+          course_title_en?: string | null
+          created_at?: string
+          enrolled_at?: string | null
+          id?: string
+          progress_percent?: number | null
+        }
+        Update: {
+          application_id?: string
+          attendance_present?: number | null
+          attendance_total?: number | null
+          completed?: boolean
+          course_id?: string | null
+          course_title_ar?: string | null
+          course_title_en?: string | null
+          created_at?: string
+          enrolled_at?: string | null
+          id?: string
+          progress_percent?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internship_application_course_snapshots_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "internship_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internship_application_notes: {
+        Row: {
+          application_id: string
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          application_id: string
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          application_id?: string
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internship_application_notes_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "internship_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internship_application_status_history: {
+        Row: {
+          application_id: string
+          changed_by: string | null
+          created_at: string
+          from_status:
+            | Database["public"]["Enums"]["internship_application_status"]
+            | null
+          id: string
+          reason: string | null
+          to_status: Database["public"]["Enums"]["internship_application_status"]
+        }
+        Insert: {
+          application_id: string
+          changed_by?: string | null
+          created_at?: string
+          from_status?:
+            | Database["public"]["Enums"]["internship_application_status"]
+            | null
+          id?: string
+          reason?: string | null
+          to_status: Database["public"]["Enums"]["internship_application_status"]
+        }
+        Update: {
+          application_id?: string
+          changed_by?: string | null
+          created_at?: string
+          from_status?:
+            | Database["public"]["Enums"]["internship_application_status"]
+            | null
+          id?: string
+          reason?: string | null
+          to_status?: Database["public"]["Enums"]["internship_application_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internship_application_status_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "internship_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internship_applications: {
+        Row: {
+          assigned_admin: string | null
+          attempt_number: number
+          created_at: string
+          id: string
+          opportunity_id: string
+          snapshot_biography: string | null
+          snapshot_cv_file_id: string | null
+          snapshot_email: string | null
+          snapshot_full_name: string | null
+          snapshot_organization: string | null
+          snapshot_phone: string | null
+          status: Database["public"]["Enums"]["internship_application_status"]
+          submitted_at: string
+          updated_at: string
+          user_id: string
+          withdrawn_at: string | null
+        }
+        Insert: {
+          assigned_admin?: string | null
+          attempt_number?: number
+          created_at?: string
+          id?: string
+          opportunity_id: string
+          snapshot_biography?: string | null
+          snapshot_cv_file_id?: string | null
+          snapshot_email?: string | null
+          snapshot_full_name?: string | null
+          snapshot_organization?: string | null
+          snapshot_phone?: string | null
+          status?: Database["public"]["Enums"]["internship_application_status"]
+          submitted_at?: string
+          updated_at?: string
+          user_id: string
+          withdrawn_at?: string | null
+        }
+        Update: {
+          assigned_admin?: string | null
+          attempt_number?: number
+          created_at?: string
+          id?: string
+          opportunity_id?: string
+          snapshot_biography?: string | null
+          snapshot_cv_file_id?: string | null
+          snapshot_email?: string | null
+          snapshot_full_name?: string | null
+          snapshot_organization?: string | null
+          snapshot_phone?: string | null
+          status?: Database["public"]["Enums"]["internship_application_status"]
+          submitted_at?: string
+          updated_at?: string
+          user_id?: string
+          withdrawn_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internship_applications_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "internship_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internship_applications_snapshot_cv_file_id_fkey"
+            columns: ["snapshot_cv_file_id"]
+            isOneToOne: false
+            referencedRelation: "lms_profile_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internship_opportunities: {
+        Row: {
+          allow_reapply: boolean
+          capacity: number | null
+          cover_image_bucket: string | null
+          cover_image_path: string | null
+          created_at: string
+          created_by: string | null
+          deadline_at: string | null
+          description_ar: string | null
+          description_en: string | null
+          duration_ar: string | null
+          duration_en: string | null
+          ends_at: string | null
+          id: string
+          location_ar: string | null
+          location_en: string | null
+          opens_at: string | null
+          require_cv: boolean
+          required_profile_fields: string[]
+          requirements_ar: string | null
+          requirements_en: string | null
+          slug: string
+          starts_at: string | null
+          status: Database["public"]["Enums"]["internship_lifecycle"]
+          stipend_ar: string | null
+          stipend_en: string | null
+          summary_ar: string | null
+          summary_en: string | null
+          title_ar: string
+          title_en: string
+          updated_at: string
+        }
+        Insert: {
+          allow_reapply?: boolean
+          capacity?: number | null
+          cover_image_bucket?: string | null
+          cover_image_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          duration_ar?: string | null
+          duration_en?: string | null
+          ends_at?: string | null
+          id?: string
+          location_ar?: string | null
+          location_en?: string | null
+          opens_at?: string | null
+          require_cv?: boolean
+          required_profile_fields?: string[]
+          requirements_ar?: string | null
+          requirements_en?: string | null
+          slug: string
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["internship_lifecycle"]
+          stipend_ar?: string | null
+          stipend_en?: string | null
+          summary_ar?: string | null
+          summary_en?: string | null
+          title_ar: string
+          title_en: string
+          updated_at?: string
+        }
+        Update: {
+          allow_reapply?: boolean
+          capacity?: number | null
+          cover_image_bucket?: string | null
+          cover_image_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          duration_ar?: string | null
+          duration_en?: string | null
+          ends_at?: string | null
+          id?: string
+          location_ar?: string | null
+          location_en?: string | null
+          opens_at?: string | null
+          require_cv?: boolean
+          required_profile_fields?: string[]
+          requirements_ar?: string | null
+          requirements_en?: string | null
+          slug?: string
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["internship_lifecycle"]
+          stipend_ar?: string | null
+          stipend_en?: string | null
+          summary_ar?: string | null
+          summary_en?: string | null
+          title_ar?: string
+          title_en?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      internship_questions: {
+        Row: {
+          created_at: string
+          help_ar: string | null
+          help_en: string | null
+          id: string
+          is_required: boolean
+          kind: Database["public"]["Enums"]["internship_question_kind"]
+          label_ar: string
+          label_en: string
+          opportunity_id: string
+          options: Json
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          help_ar?: string | null
+          help_en?: string | null
+          id?: string
+          is_required?: boolean
+          kind: Database["public"]["Enums"]["internship_question_kind"]
+          label_ar: string
+          label_en: string
+          opportunity_id: string
+          options?: Json
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          help_ar?: string | null
+          help_en?: string | null
+          id?: string
+          is_required?: boolean
+          kind?: Database["public"]["Enums"]["internship_question_kind"]
+          label_ar?: string
+          label_en?: string
+          opportunity_id?: string
+          options?: Json
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internship_questions_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "internship_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lms_active_sessions: {
         Row: {
           created_at: string
@@ -2034,6 +2485,51 @@ export type Database = {
           },
         ]
       }
+      lms_profile_files: {
+        Row: {
+          bucket: string
+          created_at: string
+          id: string
+          is_current: boolean
+          kind: Database["public"]["Enums"]["lms_profile_file_kind"]
+          mime_type: string
+          original_filename: string | null
+          path: string
+          size_bytes: number
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          kind: Database["public"]["Enums"]["lms_profile_file_kind"]
+          mime_type: string
+          original_filename?: string | null
+          path: string
+          size_bytes: number
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          kind?: Database["public"]["Enums"]["lms_profile_file_kind"]
+          mime_type?: string
+          original_filename?: string | null
+          path?: string
+          size_bytes?: number
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
       lms_questions: {
         Row: {
           body: string
@@ -2295,6 +2791,60 @@ export type Database = {
             columns: ["assignment_id"]
             isOneToOne: false
             referencedRelation: "lms_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_user_profiles: {
+        Row: {
+          avatar_file_id: string | null
+          biography: string | null
+          created_at: string
+          cv_file_id: string | null
+          full_name: string | null
+          locale: string | null
+          organization: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_file_id?: string | null
+          biography?: string | null
+          created_at?: string
+          cv_file_id?: string | null
+          full_name?: string | null
+          locale?: string | null
+          organization?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_file_id?: string | null
+          biography?: string | null
+          created_at?: string
+          cv_file_id?: string | null
+          full_name?: string | null
+          locale?: string | null
+          organization?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_user_profiles_avatar_file_fk"
+            columns: ["avatar_file_id"]
+            isOneToOne: false
+            referencedRelation: "lms_profile_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_user_profiles_cv_file_fk"
+            columns: ["cv_file_id"]
+            isOneToOne: false
+            referencedRelation: "lms_profile_files"
             referencedColumns: ["id"]
           },
         ]
@@ -3036,10 +3586,34 @@ export type Database = {
       initiative_payment_status: "pending" | "confirmed" | "cancelled"
       initiative_seat_status: "available" | "assigned" | "claimed" | "enrolled"
       initiative_waitlist_status: "waiting" | "covered" | "claimed" | "enrolled"
+      internship_application_status:
+        | "new"
+        | "under_review"
+        | "shortlisted"
+        | "interview"
+        | "accepted"
+        | "rejected"
+        | "withdrawn"
+      internship_lifecycle:
+        | "draft"
+        | "published"
+        | "hidden"
+        | "closed"
+        | "archived"
+      internship_question_kind:
+        | "short_text"
+        | "long_text"
+        | "single_choice"
+        | "multi_choice"
+        | "number"
+        | "boolean"
+        | "date"
+        | "url"
       lms_course_level: "beginner" | "intermediate" | "advanced"
       lms_course_status: "draft" | "pending" | "rejected" | "published"
       lms_enroll_req_status: "pending" | "approved" | "rejected" | "cancelled"
       lms_payment_method: "manual" | "online"
+      lms_profile_file_kind: "cv" | "avatar"
       lms_tx_type:
         | "topup"
         | "purchase"
@@ -3212,10 +3786,37 @@ export const Constants = {
       initiative_payment_status: ["pending", "confirmed", "cancelled"],
       initiative_seat_status: ["available", "assigned", "claimed", "enrolled"],
       initiative_waitlist_status: ["waiting", "covered", "claimed", "enrolled"],
+      internship_application_status: [
+        "new",
+        "under_review",
+        "shortlisted",
+        "interview",
+        "accepted",
+        "rejected",
+        "withdrawn",
+      ],
+      internship_lifecycle: [
+        "draft",
+        "published",
+        "hidden",
+        "closed",
+        "archived",
+      ],
+      internship_question_kind: [
+        "short_text",
+        "long_text",
+        "single_choice",
+        "multi_choice",
+        "number",
+        "boolean",
+        "date",
+        "url",
+      ],
       lms_course_level: ["beginner", "intermediate", "advanced"],
       lms_course_status: ["draft", "pending", "rejected", "published"],
       lms_enroll_req_status: ["pending", "approved", "rejected", "cancelled"],
       lms_payment_method: ["manual", "online"],
+      lms_profile_file_kind: ["cv", "avatar"],
       lms_tx_type: [
         "topup",
         "purchase",
