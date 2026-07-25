@@ -34,9 +34,9 @@ export const Route = createFileRoute("/learning-management-system/catalog")({
 
   head: () => {
     const url = "https://aisyria.org/learning-management-system/catalog";
-    const title = "Course Catalog — SAAE Learning Platform";
+    const title = "Course Catalog — SAAE Training and Learning Platform";
     const description =
-      "Browse all published courses on the SAAE Learning Platform — filter by category, level, and price to find the right course for you.";
+      "Browse all published courses on the SAAE Training and Learning Platform — filter by category, level, and price to find the right course for you.";
     return {
       meta: [
         { title },

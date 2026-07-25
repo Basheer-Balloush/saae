@@ -16,11 +16,11 @@ import logo from "@/assets/saae-logo.png";
 export const Route = createFileRoute("/learning-management-system/forgot-password")({
   head: () => ({
     meta: [
-      { title: "Forgot Password — SAAE Learning Platform" },
-      { name: "description", content: "Reset your SAAE Learning Platform password by requesting a secure email link." },
+      { title: "Forgot Password — SAAE Training and Learning Platform" },
+      { name: "description", content: "Reset your SAAE Training and Learning Platform password by requesting a secure email link." },
       { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: "Forgot Password — SAAE Learning Platform" },
-      { property: "og:description", content: "Reset your SAAE Learning Platform password." },
+      { property: "og:title", content: "Forgot Password — SAAE Training and Learning Platform" },
+      { property: "og:description", content: "Reset your SAAE Training and Learning Platform password." },
     ],
   }),
   component: ForgotPage,

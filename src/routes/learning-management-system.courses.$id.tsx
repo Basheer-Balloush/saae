@@ -79,7 +79,7 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
       description: (() => {
         const title = (c.title_en ?? c.title_ar ?? "Course") as string;
         const rawDesc = (c.description_en ?? c.description_ar ?? "") as string;
-        const fullDesc = rawDesc && rawDesc.length >= 50 ? rawDesc : `${title} — course on the SAAE Learning Platform.`;
+        const fullDesc = rawDesc && rawDesc.length >= 50 ? rawDesc : `${title} — course on the SAAE Training and Learning Platform.`;
         return fullDesc.length > 160 ? `${fullDesc.slice(0, 157).trimEnd()}…` : fullDesc;
       })(),
       image: c.cover_url ?? null,
@@ -89,8 +89,8 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
       canonicalSlug: (c.slug ?? c.id) as string,
     } : null;
     const url = `https://aisyria.org/learning-management-system/courses/${m?.canonicalSlug ?? params.id}`;
-    const title = m?.title ? `${m.title} — SAAE Learning Platform` : "Course — SAAE Learning Platform";
-    const description = m?.description ?? "Course on the SAAE Learning Platform — learn from expert instructors and grow your skills.";
+    const title = m?.title ? `${m.title} — SAAE Training and Learning Platform` : "Course — SAAE Training and Learning Platform";
+    const description = m?.description ?? "Course on the SAAE Training and Learning Platform — learn from expert instructors and grow your skills.";
     const image = m?.image ?? undefined;
     return {
       meta: [
