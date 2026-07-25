@@ -38,11 +38,14 @@ function PublicInternshipsList() {
   const [debouncedQ, setDebouncedQ] = useState("");
   const [page, setPage] = useState(1);
 
-  // debounce
-  useDebounced(q, 300, (v) => {
-    setDebouncedQ(v.trim());
-    setPage(1);
-  });
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setDebouncedQ(q.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(id);
+  }, [q]);
+
 
   const opts = queryOptions({
     queryKey: ["public-internships", { page, q: debouncedQ }],
