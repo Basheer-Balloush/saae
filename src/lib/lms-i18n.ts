@@ -253,6 +253,8 @@ export const lmsT: Record<Lang, {
     verify: "تحقّق",
     verifyValid: "الشهادة صحيحة",
     verifyInvalid: "لم نعثر على شهادةٍ بهذا الرقم",
+    verifyError: "تعذّر إتمام عمليّة التحقّق. يرجى المحاولة مرّةً أخرى.",
+    verifyRetry: "إعادة المحاولة",
     forgotPassword: "هل نسيت كلمة المرور؟",
     forgotTitle: "استعادة كلمة المرور",
     forgotSubtitle: "أدخل بريدك وسنرسل إليك رابطاً لإعادة التعيين",
