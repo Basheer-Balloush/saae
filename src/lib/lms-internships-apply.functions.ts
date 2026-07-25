@@ -72,10 +72,72 @@ export const getInternshipApplyContext = createServerFn({ method: "POST" })
       claims: { email?: string | null } | null;
     };
 
-    const opp = (await getPublicInternshipBySlug({
-      data: { slug: data.slug },
-    })) as PublicInternshipDetail | null;
-    if (!opp) throw new Error("opportunity_not_found");
+    const { data: oppRow, error: oErr } = await supabase
+      .from("internship_opportunities")
+      .select(
+        "id, slug, title_ar, title_en, summary_ar, summary_en, location_ar, location_en, duration_ar, duration_en, status, opens_at, deadline_at, starts_at, ends_at, cover_image_bucket, cover_image_path, description_ar, description_en, requirements_ar, requirements_en, stipend_ar, stipend_en, capacity, require_cv, allow_reapply, required_profile_fields, updated_at",
+      )
+      .eq("slug", data.slug)
+      .in("status", ["published", "closed"])
+      .maybeSingle();
+    if (oErr) throw new Error(oErr.message);
+    if (!oppRow) throw new Error("opportunity_not_found");
+
+    const { data: qRows, error: qErr } = await supabase
+      .from("internship_questions")
+      .select("id, label_ar, label_en, help_ar, help_en, kind, is_required, options, sort_order")
+      .eq("opportunity_id", (oppRow as any).id)
+      .order("sort_order", { ascending: true });
+    if (qErr) throw new Error(qErr.message);
+
+    let cover_url: string | null = null;
+    if ((oppRow as any).cover_image_bucket && (oppRow as any).cover_image_path) {
+      const { data: signed } = await supabase.storage
+        .from((oppRow as any).cover_image_bucket)
+        .createSignedUrl((oppRow as any).cover_image_path, 60 * 60);
+      cover_url = signed?.signedUrl ?? null;
+    }
+
+    const opp: PublicInternshipDetail = {
+      id: (oppRow as any).id,
+      slug: (oppRow as any).slug,
+      title_ar: (oppRow as any).title_ar,
+      title_en: (oppRow as any).title_en,
+      summary_ar: (oppRow as any).summary_ar,
+      summary_en: (oppRow as any).summary_en,
+      location_ar: (oppRow as any).location_ar,
+      location_en: (oppRow as any).location_en,
+      duration_ar: (oppRow as any).duration_ar,
+      duration_en: (oppRow as any).duration_en,
+      status: (oppRow as any).status,
+      opens_at: (oppRow as any).opens_at,
+      deadline_at: (oppRow as any).deadline_at,
+      starts_at: (oppRow as any).starts_at,
+      ends_at: (oppRow as any).ends_at,
+      cover_url,
+      description_ar: (oppRow as any).description_ar,
+      description_en: (oppRow as any).description_en,
+      requirements_ar: (oppRow as any).requirements_ar,
+      requirements_en: (oppRow as any).requirements_en,
+      stipend_ar: (oppRow as any).stipend_ar,
+      stipend_en: (oppRow as any).stipend_en,
+      capacity: (oppRow as any).capacity,
+      require_cv: (oppRow as any).require_cv,
+      allow_reapply: (oppRow as any).allow_reapply,
+      required_profile_fields: (oppRow as any).required_profile_fields ?? [],
+      updated_at: (oppRow as any).updated_at,
+      questions: ((qRows ?? []) as any[]).map((q) => ({
+        id: q.id,
+        label_ar: q.label_ar,
+        label_en: q.label_en,
+        help_ar: q.help_ar,
+        help_en: q.help_en,
+        kind: q.kind,
+        is_required: q.is_required,
+        options: Array.isArray(q.options) ? q.options : [],
+        sort_order: q.sort_order,
+      })),
+    };
 
     const { data: profile, error: pErr } = await supabase.rpc("lms_profile_get_or_init");
     if (pErr) throw new Error(pErr.message);
