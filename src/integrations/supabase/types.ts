@@ -2749,6 +2749,15 @@ export type Database = {
         Returns: number
       }
       get_initiative_survey_count: { Args: never; Returns: number }
+      grade_lms_submission: {
+        Args: { _feedback: string; _grade: number; _submission_id: string }
+        Returns: {
+          feedback: string
+          grade: number
+          graded_at: string
+          id: string
+        }[]
+      }
       has_ams_access: { Args: { _user_id: string }; Returns: boolean }
       has_lms_role: {
         Args: {
@@ -2919,6 +2928,17 @@ export type Database = {
           message: Json
           msg_id: number
           read_ct: number
+        }[]
+      }
+      submit_lms_assignment: {
+        Args: { _assignment_id: string; _file_path: string }
+        Returns: {
+          assignment_id: string
+          feedback: string
+          file_path: string
+          grade: number
+          id: string
+          submitted_at: string
         }[]
       }
       trainer_app_transition: {
