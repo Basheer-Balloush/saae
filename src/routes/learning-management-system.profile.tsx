@@ -128,7 +128,7 @@ function ProfilePage() {
           <IdentityCard data={data} onSaved={load} isRtl={isRtl} lang={lang} />
           <CoursesCard data={data} isRtl={isRtl} lang={lang} />
           <CertificatesCard data={data} isRtl={isRtl} lang={lang} />
-          <ApplicationsPlaceholder isRtl={isRtl} lang={lang} />
+          <ApplicationsCard isRtl={isRtl} lang={lang} />
         </div>
       </div>
     </div>
