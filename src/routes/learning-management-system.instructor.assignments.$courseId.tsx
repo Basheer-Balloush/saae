@@ -396,10 +396,11 @@ function SubmissionRow({
       return;
     }
     setSaving(true);
+    const fb = feedback.trim();
     const { error } = await supabase.rpc("grade_lms_submission", {
       _submission_id: submission.id,
-      _grade: g,
-      _feedback: feedback.trim() || null,
+      ...(g !== null ? { _grade: g } : {}),
+      ...(fb ? { _feedback: fb } : {}),
     });
     setSaving(false);
     if (error) { toast.error(toUserMessage(error)); return; }
