@@ -83,7 +83,6 @@ export function QAPanel({ lessonId, user, isInstructor, lang }: Props) {
       question_id: questionId,
       author_id: user.id,
       body,
-      is_instructor_answer: isInstructor,
     });
     if (error) { toast.error(toUserMessage(error)); return; }
     setReplyDraft((d) => ({ ...d, [questionId]: "" }));
