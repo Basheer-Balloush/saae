@@ -74,29 +74,11 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
 
   const onSubmissionUploaded = async (assignment: Assignment, filePath: string) => {
     if (!user) return;
-    const existing = subsByA[assignment.id];
-    if (existing) {
-      const { error } = await supabase
-        .from("lms_submissions")
-        .update({
-          file_path: filePath,
-          submitted_at: new Date().toISOString(),
-          // Reset grade on resubmission
-          grade: null,
-          feedback: null,
-          graded_by: null,
-          graded_at: null,
-        })
-        .eq("id", existing.id);
-      if (error) { toast.error(toUserMessage(error)); return; }
-    } else {
-      const { error } = await supabase.from("lms_submissions").insert({
-        assignment_id: assignment.id,
-        student_id: user.id,
-        file_path: filePath,
-      });
-      if (error) { toast.error(toUserMessage(error)); return; }
-    }
+    const { error } = await supabase.rpc("submit_lms_assignment", {
+      _assignment_id: assignment.id,
+      _file_path: filePath,
+    });
+    if (error) { toast.error(toUserMessage(error)); return; }
     load();
   };
 
