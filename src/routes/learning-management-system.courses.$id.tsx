@@ -439,9 +439,9 @@ function CourseDetails() {
                     const insSpec = (ar ? ins.specialty_ar : ins.specialty_en) || ins.specialty;
                     return (
                       <Link
-                        key={ins.user_id}
+                        key={ins.slug}
                         to="/learning-management-system/instructors/$id"
-                        params={{ id: ins.user_id }}
+                        params={{ id: ins.slug }}
                         className="flex items-center gap-3 group"
                       >
                         {ins.avatar_url ? (
