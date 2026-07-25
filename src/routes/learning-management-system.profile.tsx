@@ -630,17 +630,131 @@ function CertificatesCard({
   );
 }
 
-// ---------- Applications placeholder (wired in Phase 9) ----------
+// ---------- Applications ----------
 
-function ApplicationsPlaceholder({ isRtl: _isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
+function ApplicationsCard({ isRtl: _isRtl, lang }: { isRtl: boolean; lang: "ar" | "en" }) {
   const t = lmsInternshipsT[lang];
+  const listFn = useServerFn(listMyInternshipApplications);
+  const withdrawFn = useServerFn(withdrawInternshipApplication);
+  const [rows, setRows] = useState<MyApplicationRow[] | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const res = await listFn();
+      setRows(res);
+    } catch {
+      setRows([]);
+    }
+  }, [listFn]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const onWithdraw = async (id: string) => {
+    if (!confirm(lang === "ar" ? "هل تريد سحب الطلب؟" : "Withdraw this application?")) return;
+    setBusy(id);
+    try {
+      await withdrawFn({ data: { application_id: id } });
+      toast.success(t.applyWithdrawn);
+      await load();
+    } catch (err) {
+      toast.error(mapApplyError(err, lang));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const statusLabel = (s: MyApplicationRow["status"]) => {
+    switch (s) {
+      case "new":
+        return t.statusNew;
+      case "under_review":
+        return t.statusUnderReview;
+      case "shortlisted":
+        return t.statusShortlisted;
+      case "interview":
+        return t.statusInterview;
+      case "accepted":
+        return t.statusAccepted;
+      case "rejected":
+        return t.statusRejected;
+      case "withdrawn":
+        return t.statusWithdrawn;
+      default:
+        return s;
+    }
+  };
+
+  const canWithdraw = (s: MyApplicationRow["status"]) =>
+    s !== "accepted" && s !== "rejected" && s !== "withdrawn";
+
   return (
     <Card className="p-6">
       <h2 className="text-lg font-semibold text-foreground">{t.profileApplications}</h2>
-      <p className="mt-2 text-sm text-muted-foreground">{t.profileNoApplications}</p>
+      {rows === null ? (
+        <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+        </div>
+      ) : rows.length === 0 ? (
+        <p className="mt-2 text-sm text-muted-foreground">{t.profileNoApplications}</p>
+      ) : (
+        <ul className="mt-3 divide-y divide-border">
+          {rows.map((r) => {
+            const title =
+              lang === "ar"
+                ? r.opportunity_title_ar
+                : r.opportunity_title_en || r.opportunity_title_ar;
+            return (
+              <li
+                key={r.id}
+                className="py-3 flex flex-wrap items-center justify-between gap-3"
+              >
+                <div className="min-w-0">
+                  <Link
+                    to="/learning-management-system/internships/$slug"
+                    params={{ slug: r.opportunity_slug }}
+                    className="text-sm font-medium text-foreground hover:text-primary"
+                    dir="auto"
+                  >
+                    {title}
+                  </Link>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(r.submitted_at).toLocaleString(lang, {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">
+                    {statusLabel(r.status)}
+                  </span>
+                  {canWithdraw(r.status) && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onWithdraw(r.id)}
+                      disabled={busy === r.id}
+                    >
+                      {busy === r.id ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        t.applyWithdraw
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </Card>
   );
 }
+
 
 // ---------- Uploader (shared) ----------
 
