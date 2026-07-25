@@ -169,15 +169,16 @@ export function InternshipForm({ mode, initial, applicationsCount = 0, onSubmit 
         </div>
         <div className="flex items-center gap-2">
           {mode === "edit" && values.slug && (
-            <Link
-              to="/learning-management-system/internships/$slug"
-              params={{ slug: values.slug }}
+            <a
+              href={`/learning-management-system/internships/${values.slug}`}
               className="text-sm text-primary inline-flex items-center gap-1 hover:underline"
               target="_blank"
+              rel="noreferrer"
             >
               {t.adminInternshipsPreview} <ExternalLink className="h-3.5 w-3.5" />
-            </Link>
+            </a>
           )}
+
           <Button type="submit" disabled={saving}>
             {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
             {t.profileSave}
