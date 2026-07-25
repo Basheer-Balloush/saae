@@ -14,6 +14,8 @@ import { toast } from "sonner";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import { sendEnrollmentApprovedEmail } from "@/lib/lms-enrollment-email.functions";
 import { BASE_FIELD_IDS } from "@/components/lms/EnrollmentFormDialog";
+import { enrollmentErrorMessage } from "@/lib/lms-enrollment-errors";
+
 
 function renderTemplate(tpl: string, vars: Record<string, string>): string {
   return tpl.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, k) => vars[k] ?? "");
@@ -322,12 +324,16 @@ function AdminEnrollmentRequests() {
   };
 
   const decide = async (req: Req, action: "approve" | "reject", notify?: "email" | "whatsapp") => {
+    if (busy) return; // prevent duplicate submissions while a request is processing
     setBusy(req.id);
     try {
-      const fn = action === "approve" ? "lms_approve_enrollment_request" : "lms_reject_enrollment_request";
-      const { error } = await supabase.rpc(fn, { _request_id: req.id, _admin_notes: noteDraft[req.id] || undefined });
-      if (error) throw error;
       if (action === "approve") {
+        const { error } = await supabase.rpc("lms_approve_enrollment_request", {
+          _request_id: req.id,
+          _admin_notes: noteDraft[req.id] || undefined,
+        });
+        if (error) throw error;
+        // Notifications run only after the approval transaction succeeded.
         if (notify === "email") {
           try {
             await sendApprovedEmail({ data: { requestId: req.id, lang: ar ? "ar" : "en" } });
@@ -342,14 +348,21 @@ function AdminEnrollmentRequests() {
             console.error("Failed to open WhatsApp", waErr);
           }
         }
+      } else {
+        const { error } = await supabase.rpc("lms_reject_enrollment_request", {
+          _request_id: req.id,
+          _admin_notes: noteDraft[req.id] || undefined,
+        });
+        if (error) throw error;
       }
       toast.success(ar ? (action === "approve" ? "تمت الموافقة" : "تم الرفض") : (action === "approve" ? "Approved" : "Rejected"));
       if (selectedCourseId) await loadReqs(selectedCourseId);
       await loadCourses();
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Error");
+      toast.error(enrollmentErrorMessage(e, ar));
     } finally { setBusy(null); }
   };
+
 
   // ===== Course picker view =====
   if (!selectedCourseId) {
