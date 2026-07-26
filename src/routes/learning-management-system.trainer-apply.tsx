@@ -13,6 +13,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import {
+  submitTrainerApplication,
+  attachTrainerApplicationFile,
+} from "@/lib/trainer-application.functions";
 import { UploadProgress } from "@/components/ui/upload-progress";
 import {
   Select,
@@ -175,14 +179,11 @@ function TrainerApplyPage() {
     }
     setSubmitting(true);
     try {
-      // 1) insert application row (RLS: user_id = auth.uid())
-      const { data: app, error: insErr } = await supabase
-        .from("trainer_applications")
-        .insert({
-          user_id: user.id,
+      // 1) create application row through the protected command (A-06)
+      const { application_id: applicationId } = await submitTrainerApplication({
+        data: {
           full_name_ar: parsed.data.fullNameAr,
           full_name_en: parsed.data.fullNameEn,
-          email: user.email ?? "",
           phone: parsed.data.phone,
           date_of_birth: parsed.data.dateOfBirth,
           city: parsed.data.city,
@@ -193,36 +194,24 @@ function TrainerApplyPage() {
           github_url: parsed.data.githubUrl || null,
           has_prev_training: parsed.data.hasPrevTraining,
           prev_training_details: parsed.data.prevTrainingDetails || null,
-          consent_ethics: parsed.data.consentEthics,
-          consent_data: parsed.data.consentData,
-          consent_process: parsed.data.consentProcess,
-        })
-        .select("id")
-        .single();
-      if (insErr || !app) throw insErr ?? new Error("insert_failed");
+          consent_ethics: true,
+          consent_data: true,
+          consent_process: true,
+        },
+      });
 
-      // 2) upload files
+      // 2) upload files, registering each one through the protected command
       const uploads: { kind: "cv" | "work_sample" | "avatar"; file: File }[] = [
         { kind: "cv", file: cvFile },
         ...workSamples.map((f) => ({ kind: "work_sample" as const, file: f })),
       ];
       if (avatarFile) uploads.push({ kind: "avatar", file: avatarFile });
 
-      const fileRows: {
-        application_id: string;
-        user_id: string;
-        kind: "cv" | "work_sample" | "avatar";
-        storage_path: string;
-        original_name: string;
-        content_type: string | null;
-        size_bytes: number;
-      }[] = [];
-
       const total = uploads.length;
       for (let i = 0; i < uploads.length; i++) {
         const u = uploads[i];
         const safeName = u.file.name.replace(/[^A-Za-z0-9._-]/g, "_");
-        const path = `${user.id}/${app.id}/${u.kind}-${Date.now()}-${safeName}`;
+        const path = `${user.id}/${applicationId}/${u.kind}-${Date.now()}-${safeName}`;
         setUploadPct({ pct: 0, loaded: 0, total: u.file.size, name: u.file.name, index: i + 1, count: total });
         await uploadToSupabaseStorage({
           bucket: "trainer-applications",
@@ -233,21 +222,21 @@ function TrainerApplyPage() {
           onProgress: (pct, loaded, tot) =>
             setUploadPct({ pct, loaded, total: tot, name: u.file.name, index: i + 1, count: total }),
         });
-        fileRows.push({
-          application_id: app.id,
-          user_id: user.id,
-          kind: u.kind,
-          storage_path: path,
-          original_name: u.file.name,
-          content_type: u.file.type || null,
-          size_bytes: u.file.size,
+        await attachTrainerApplicationFile({
+          data: {
+            application_id: applicationId,
+            kind: u.kind,
+            storage_path: path,
+            original_name: u.file.name,
+            content_type: u.file.type || null,
+            size_bytes: u.file.size,
+          },
         });
       }
-      const { error: fErr } = await supabase.from("trainer_application_files").insert(fileRows);
-      if (fErr) throw fErr;
 
       toast.success(ar ? "تم إرسال طلبك بنجاح" : "Application submitted");
-      setExisting({ id: app.id, status: "pending_review", submitted_at: new Date().toISOString() });
+      setExisting({ id: applicationId, status: "pending_review", submitted_at: new Date().toISOString() });
+
     } catch (err) {
       toast.error(toUserMessage(err));
     } finally {
