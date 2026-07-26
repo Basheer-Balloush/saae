@@ -117,36 +117,8 @@ function AdminTrainerApplications() {
 
   useEffect(() => { load(); }, []);
 
-  // ---- Cleanup unapproved instructors ----
-  const [unapprovedCount, setUnapprovedCount] = useState<number | null>(null);
-  const [cleanupOpen, setCleanupOpen] = useState(false);
-  const [cleanupRunning, setCleanupRunning] = useState(false);
-  const [cleanupResult, setCleanupResult] = useState<{ total: number; emailed: number; deleted: number; failed: string[] } | null>(null);
 
-  const loadUnapprovedCount = async () => {
-    try {
-      const res = await countUnapprovedInstructors();
-      setUnapprovedCount(res.count);
-    } catch (e) {
-      setUnapprovedCount(null);
-    }
-  };
-  useEffect(() => { loadUnapprovedCount(); }, []);
 
-  const runCleanup = async () => {
-    setCleanupRunning(true);
-    setCleanupResult(null);
-    try {
-      const res = await cleanupUnapprovedInstructors();
-      setCleanupResult(res);
-      toast.success(ar ? `تم — أُرسل ${res.emailed} بريد، حُذف ${res.deleted}` : `Done — ${res.emailed} emailed, ${res.deleted} deleted`);
-      loadUnapprovedCount();
-    } catch (e) {
-      toast.error(toUserMessage(e));
-    } finally {
-      setCleanupRunning(false);
-    }
-  };
 
   const openView = async (app: App) => {
     setSelected(app);
