@@ -10,9 +10,9 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "vitest run --dir tests/unit",
-    "test:unit": "vitest run --dir tests/unit",
-    "test:integration": "vitest run --dir tests/integration",
+    "test": "vitest run tests/unit",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
     "test:e2e": "playwright test tests/e2e",
     "typecheck": "tsgo --noEmit || tsc --noEmit",
     "check": "bun run typecheck && bun run lint && bun run test:unit"
