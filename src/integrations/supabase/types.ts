@@ -1757,8 +1757,11 @@ export type Database = {
           description_ar: string | null
           description_en: string | null
           due_date: string | null
+          grace_period_minutes: number
           id: string
           lesson_id: string | null
+          locked: boolean
+          max_attempts: number
           max_grade: number
           title_ar: string
           title_en: string | null
@@ -1772,8 +1775,11 @@ export type Database = {
           description_ar?: string | null
           description_en?: string | null
           due_date?: string | null
+          grace_period_minutes?: number
           id?: string
           lesson_id?: string | null
+          locked?: boolean
+          max_attempts?: number
           max_grade?: number
           title_ar: string
           title_en?: string | null
@@ -1787,8 +1793,11 @@ export type Database = {
           description_ar?: string | null
           description_en?: string | null
           due_date?: string | null
+          grace_period_minutes?: number
           id?: string
           lesson_id?: string | null
+          locked?: boolean
+          max_attempts?: number
           max_grade?: number
           title_ar?: string
           title_en?: string | null
@@ -1894,6 +1903,86 @@ export type Database = {
           student_id?: string
         }
         Relationships: []
+      }
+      lms_cleanup_batches: {
+        Row: {
+          archived_count: number
+          created_at: string
+          created_by: string
+          id: string
+          note: string | null
+          purged_at: string | null
+          purged_count: number
+          restored_count: number
+          retention_days: number
+        }
+        Insert: {
+          archived_count?: number
+          created_at?: string
+          created_by: string
+          id?: string
+          note?: string | null
+          purged_at?: string | null
+          purged_count?: number
+          restored_count?: number
+          retention_days?: number
+        }
+        Update: {
+          archived_count?: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          note?: string | null
+          purged_at?: string | null
+          purged_count?: number
+          restored_count?: number
+          retention_days?: number
+        }
+        Relationships: []
+      }
+      lms_cleanup_items: {
+        Row: {
+          archived_at: string
+          batch_id: string
+          detail: string | null
+          id: string
+          outcome: string
+          purged_at: string | null
+          restored_at: string | null
+          target_type: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string
+          batch_id: string
+          detail?: string | null
+          id?: string
+          outcome?: string
+          purged_at?: string | null
+          restored_at?: string | null
+          target_type: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string
+          batch_id?: string
+          detail?: string | null
+          id?: string
+          outcome?: string
+          purged_at?: string | null
+          restored_at?: string | null
+          target_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_cleanup_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "lms_cleanup_batches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lms_coupons: {
         Row: {
@@ -2326,6 +2415,9 @@ export type Database = {
       lms_instructors: {
         Row: {
           approved: boolean
+          archive_batch_id: string | null
+          archived_at: string | null
+          archived_by: string | null
           avatar_url: string | null
           bio: string | null
           bio_ar: string | null
@@ -2336,6 +2428,7 @@ export type Database = {
           full_name_en: string | null
           github_url: string | null
           linkedin_url: string | null
+          purge_after: string | null
           slug: string | null
           specialty: string | null
           specialty_ar: string | null
@@ -2345,6 +2438,9 @@ export type Database = {
         }
         Insert: {
           approved?: boolean
+          archive_batch_id?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           avatar_url?: string | null
           bio?: string | null
           bio_ar?: string | null
@@ -2355,6 +2451,7 @@ export type Database = {
           full_name_en?: string | null
           github_url?: string | null
           linkedin_url?: string | null
+          purge_after?: string | null
           slug?: string | null
           specialty?: string | null
           specialty_ar?: string | null
@@ -2364,6 +2461,9 @@ export type Database = {
         }
         Update: {
           approved?: boolean
+          archive_batch_id?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           avatar_url?: string | null
           bio?: string | null
           bio_ar?: string | null
@@ -2374,6 +2474,7 @@ export type Database = {
           full_name_en?: string | null
           github_url?: string | null
           linkedin_url?: string | null
+          purge_after?: string | null
           slug?: string | null
           specialty?: string | null
           specialty_ar?: string | null
@@ -2482,6 +2583,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lms_outbox_jobs: {
+        Row: {
+          attempts: number
+          correlation_id: string | null
+          created_at: string
+          dedupe_key: string | null
+          id: string
+          job_type: string
+          last_error: string | null
+          next_attempt_at: string
+          payload: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          correlation_id?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          job_type: string
+          last_error?: string | null
+          next_attempt_at?: string
+          payload?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          correlation_id?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          job_type?: string
+          last_error?: string | null
+          next_attempt_at?: string
+          payload?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       lms_payments: {
         Row: {
@@ -2799,37 +2942,99 @@ export type Database = {
         }
         Relationships: []
       }
-      lms_submissions: {
+      lms_submission_versions: {
         Row: {
+          archived_at: string
           assignment_id: string
+          attempt_number: number
           feedback: string | null
           file_path: string
           grade: number | null
           graded_at: string | null
           graded_by: string | null
           id: string
+          is_late: boolean
           student_id: string
+          submission_id: string
           submitted_at: string
         }
         Insert: {
+          archived_at?: string
           assignment_id: string
+          attempt_number: number
           feedback?: string | null
           file_path: string
           grade?: number | null
           graded_at?: string | null
           graded_by?: string | null
           id?: string
+          is_late?: boolean
           student_id: string
-          submitted_at?: string
+          submission_id: string
+          submitted_at: string
         }
         Update: {
+          archived_at?: string
           assignment_id?: string
+          attempt_number?: number
           feedback?: string | null
           file_path?: string
           grade?: number | null
           graded_at?: string | null
           graded_by?: string | null
           id?: string
+          is_late?: boolean
+          student_id?: string
+          submission_id?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_submission_versions_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "lms_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_submissions: {
+        Row: {
+          assignment_id: string
+          attempt_number: number
+          feedback: string | null
+          file_path: string
+          grade: number | null
+          graded_at: string | null
+          graded_by: string | null
+          id: string
+          is_late: boolean
+          student_id: string
+          submitted_at: string
+        }
+        Insert: {
+          assignment_id: string
+          attempt_number?: number
+          feedback?: string | null
+          file_path: string
+          grade?: number | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          is_late?: boolean
+          student_id: string
+          submitted_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          attempt_number?: number
+          feedback?: string | null
+          file_path?: string
+          grade?: number | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          is_late?: boolean
           student_id?: string
           submitted_at?: string
         }
@@ -3068,6 +3273,146 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_accreditation_settings: {
+        Row: {
+          id: boolean
+          min_evaluators: number
+          pass_final_score: number
+          pass_phase_min: number
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          min_evaluators?: number
+          pass_final_score?: number
+          pass_phase_min?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          min_evaluators?: number
+          pass_final_score?: number
+          pass_phase_min?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trainer_app_criteria: {
+        Row: {
+          active: boolean
+          created_at: string
+          display_order: number
+          id: string
+          label_ar: string
+          label_en: string
+          max_points: number
+          phase: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          display_order?: number
+          id?: string
+          label_ar: string
+          label_en: string
+          max_points?: number
+          phase: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          display_order?: number
+          id?: string
+          label_ar?: string
+          label_en?: string
+          max_points?: number
+          phase?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trainer_app_evaluators: {
+        Row: {
+          application_id: string
+          assigned_at: string
+          assigned_by: string | null
+          evaluator_id: string
+          id: string
+        }
+        Insert: {
+          application_id: string
+          assigned_at?: string
+          assigned_by?: string | null
+          evaluator_id: string
+          id?: string
+        }
+        Update: {
+          application_id?: string
+          assigned_at?: string
+          assigned_by?: string | null
+          evaluator_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_app_evaluators_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_app_scores: {
+        Row: {
+          application_id: string
+          comment: string | null
+          created_at: string
+          criterion_id: string
+          evaluator_id: string
+          id: string
+          points: number
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          comment?: string | null
+          created_at?: string
+          criterion_id: string
+          evaluator_id: string
+          id?: string
+          points: number
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          comment?: string | null
+          created_at?: string
+          criterion_id?: string
+          evaluator_id?: string
+          id?: string
+          points?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_app_scores_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_app_scores_criterion_id_fkey"
+            columns: ["criterion_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_app_criteria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainer_application_audit: {
         Row: {
           actor_id: string | null
@@ -3165,6 +3510,8 @@ export type Database = {
       trainer_applications: {
         Row: {
           admin_notes: string | null
+          archive_batch_id: string | null
+          archived_at: string | null
           assigned_evaluators: string[]
           bio: string
           city: string
@@ -3191,6 +3538,8 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          archive_batch_id?: string | null
+          archived_at?: string | null
           assigned_evaluators?: string[]
           bio: string
           city: string
@@ -3217,6 +3566,8 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          archive_batch_id?: string | null
+          archived_at?: string | null
           assigned_evaluators?: string[]
           bio?: string
           city?: string
@@ -3564,6 +3915,10 @@ export type Database = {
         Returns: boolean
       }
       is_lms_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_trainer_app_evaluator: {
+        Args: { _application_id: string; _user_id: string }
+        Returns: boolean
+      }
       link_lms_course_to_ams: {
         Args: { _lms_course_id: string }
         Returns: string
@@ -3590,6 +3945,23 @@ export type Database = {
         Args: { _coupon?: string; _course_id: string }
         Returns: Json
       }
+      lms_cleanup_archive: {
+        Args: { _note?: string; _retention_days?: number; _user_ids: string[] }
+        Returns: Json
+      }
+      lms_cleanup_preview: {
+        Args: never
+        Returns: {
+          course_count: number
+          created_at: string
+          enrollment_count: number
+          full_name: string
+          has_application: boolean
+          user_id: string
+        }[]
+      }
+      lms_cleanup_purge: { Args: { _batch_id: string }; Returns: Json }
+      lms_cleanup_restore: { Args: { _batch_id: string }; Returns: Json }
       lms_create_enrollment_internal: {
         Args: { _channel: string; _course_id: string; _student_id: string }
         Returns: Json
@@ -3770,6 +4142,15 @@ export type Database = {
         Returns: string
       }
       lms_slugify: { Args: { _input: string }; Returns: string }
+      lms_submit_enrollment_request: {
+        Args: {
+          _answers?: Json
+          _course_id: string
+          _notes?: string
+          _payment_method?: string
+        }
+        Returns: Json
+      }
       lms_submit_quiz: {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json
@@ -3813,14 +4194,47 @@ export type Database = {
         Args: { _assignment_id: string; _file_path: string }
         Returns: {
           assignment_id: string
+          attempt_number: number
           feedback: string
           file_path: string
           grade: number
           id: string
+          is_late: boolean
           submitted_at: string
         }[]
       }
       submit_trainer_application: { Args: { payload: Json }; Returns: string }
+      trainer_app_activate: {
+        Args: { _application_id: string; _note?: string }
+        Returns: Json
+      }
+      trainer_app_allowed_next: {
+        Args: {
+          _from: Database["public"]["Enums"]["trainer_application_status"]
+        }
+        Returns: Database["public"]["Enums"]["trainer_application_status"][]
+      }
+      trainer_app_assign_evaluator: {
+        Args: { _application_id: string; _evaluator_id: string }
+        Returns: string
+      }
+      trainer_app_remove_evaluator: {
+        Args: { _application_id: string; _evaluator_id: string }
+        Returns: undefined
+      }
+      trainer_app_score_summary: {
+        Args: { _application_id: string }
+        Returns: Json
+      }
+      trainer_app_submit_score: {
+        Args: {
+          _application_id: string
+          _comment?: string
+          _criterion_id: string
+          _points: number
+        }
+        Returns: string
+      }
       trainer_app_transition: {
         Args: {
           _application_id: string

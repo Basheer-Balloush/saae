@@ -166,14 +166,6 @@ export function EnrollmentFormDialog({
     }
     setBusy(true);
     try {
-      const { data: req, error: reqErr } = await supabase
-        .from("lms_enrollment_requests")
-        .insert({ course_id: courseId, user_id: user.id, payment_method: "manual", notes: notes || null })
-        .select("id")
-        .maybeSingle();
-      if (reqErr) throw reqErr;
-      if (!req) throw new Error("Request not created");
-
       const baseAnswers = [
         { field_id: BASE_FIELD_IDS.fullName, value: fullName.trim() },
         { field_id: BASE_FIELD_IDS.phone, value: phone.trim() },
@@ -181,10 +173,15 @@ export function EnrollmentFormDialog({
       ];
       const customAnswers = fields.map((f) => ({ field_id: f.id, value: values[f.id] ?? null }));
       const answers = [...baseAnswers, ...customAnswers];
-      const { error: respErr } = await supabase
-        .from("lms_enrollment_form_responses")
-        .insert({ request_id: req.id, course_id: courseId, user_id: user.id, answers });
-      if (respErr) throw respErr;
+
+      // Phase 4 (CF-01): request + answers are written atomically server-side.
+      const { error: rpcErr } = await supabase.rpc("lms_submit_enrollment_request", {
+        _course_id: courseId,
+        _payment_method: "manual",
+        _notes: notes || undefined,
+        _answers: answers,
+      });
+      if (rpcErr) throw rpcErr;
 
       toast.success(ar ? "تم إرسال طلبك. سيتم التواصل معك قريباً." : "Request submitted. We will contact you soon.");
       onSubmitted();
