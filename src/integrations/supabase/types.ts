@@ -1757,8 +1757,11 @@ export type Database = {
           description_ar: string | null
           description_en: string | null
           due_date: string | null
+          grace_period_minutes: number
           id: string
           lesson_id: string | null
+          locked: boolean
+          max_attempts: number
           max_grade: number
           title_ar: string
           title_en: string | null
@@ -1772,8 +1775,11 @@ export type Database = {
           description_ar?: string | null
           description_en?: string | null
           due_date?: string | null
+          grace_period_minutes?: number
           id?: string
           lesson_id?: string | null
+          locked?: boolean
+          max_attempts?: number
           max_grade?: number
           title_ar: string
           title_en?: string | null
@@ -1787,8 +1793,11 @@ export type Database = {
           description_ar?: string | null
           description_en?: string | null
           due_date?: string | null
+          grace_period_minutes?: number
           id?: string
           lesson_id?: string | null
+          locked?: boolean
+          max_attempts?: number
           max_grade?: number
           title_ar?: string
           title_en?: string | null
@@ -2933,37 +2942,99 @@ export type Database = {
         }
         Relationships: []
       }
-      lms_submissions: {
+      lms_submission_versions: {
         Row: {
+          archived_at: string
           assignment_id: string
+          attempt_number: number
           feedback: string | null
           file_path: string
           grade: number | null
           graded_at: string | null
           graded_by: string | null
           id: string
+          is_late: boolean
           student_id: string
+          submission_id: string
           submitted_at: string
         }
         Insert: {
+          archived_at?: string
           assignment_id: string
+          attempt_number: number
           feedback?: string | null
           file_path: string
           grade?: number | null
           graded_at?: string | null
           graded_by?: string | null
           id?: string
+          is_late?: boolean
           student_id: string
-          submitted_at?: string
+          submission_id: string
+          submitted_at: string
         }
         Update: {
+          archived_at?: string
           assignment_id?: string
+          attempt_number?: number
           feedback?: string | null
           file_path?: string
           grade?: number | null
           graded_at?: string | null
           graded_by?: string | null
           id?: string
+          is_late?: boolean
+          student_id?: string
+          submission_id?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_submission_versions_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "lms_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_submissions: {
+        Row: {
+          assignment_id: string
+          attempt_number: number
+          feedback: string | null
+          file_path: string
+          grade: number | null
+          graded_at: string | null
+          graded_by: string | null
+          id: string
+          is_late: boolean
+          student_id: string
+          submitted_at: string
+        }
+        Insert: {
+          assignment_id: string
+          attempt_number?: number
+          feedback?: string | null
+          file_path: string
+          grade?: number | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          is_late?: boolean
+          student_id: string
+          submitted_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          attempt_number?: number
+          feedback?: string | null
+          file_path?: string
+          grade?: number | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          is_late?: boolean
           student_id?: string
           submitted_at?: string
         }
@@ -4071,6 +4142,15 @@ export type Database = {
         Returns: string
       }
       lms_slugify: { Args: { _input: string }; Returns: string }
+      lms_submit_enrollment_request: {
+        Args: {
+          _answers?: Json
+          _course_id: string
+          _notes?: string
+          _payment_method?: string
+        }
+        Returns: Json
+      }
       lms_submit_quiz: {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json
@@ -4114,10 +4194,12 @@ export type Database = {
         Args: { _assignment_id: string; _file_path: string }
         Returns: {
           assignment_id: string
+          attempt_number: number
           feedback: string
           file_path: string
           grade: number
           id: string
+          is_late: boolean
           submitted_at: string
         }[]
       }
