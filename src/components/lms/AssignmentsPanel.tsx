@@ -18,6 +18,9 @@ type Assignment = {
   brief_file_path: string | null;
   max_grade: number;
   due_date: string | null;
+  grace_period_minutes: number;
+  max_attempts: number;
+  locked: boolean;
 };
 
 type Submission = {
@@ -27,6 +30,8 @@ type Submission = {
   submitted_at: string;
   grade: number | null;
   feedback: string | null;
+  attempt_number: number;
+  is_late: boolean;
 };
 
 interface Props {
@@ -49,7 +54,7 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
     setLoading(true);
     const { data: aData, error } = await supabase
       .from("lms_assignments")
-      .select("id,course_id,lesson_id,title_ar,title_en,description_ar,description_en,brief_file_path,max_grade,due_date")
+      .select("id,course_id,lesson_id,title_ar,title_en,description_ar,description_en,brief_file_path,max_grade,due_date,grace_period_minutes,max_attempts,locked")
       .eq("lesson_id", lessonId)
       .order("created_at", { ascending: true });
     if (error) { toast.error(toUserMessage(error)); setLoading(false); return; }
@@ -58,7 +63,8 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
     if (list.length) {
       const { data: sData } = await supabase
         .from("lms_submissions")
-        .select("id,assignment_id,file_path,submitted_at,grade,feedback")
+        .select("id,assignment_id,file_path,submitted_at,grade,feedback,attempt_number,is_late")
+        .order("attempt_number", { ascending: true })
         .eq("student_id", user.id)
         .in("assignment_id", list.map((a) => a.id));
       const map: Record<string, Submission> = {};
@@ -98,7 +104,13 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
           const desc = pick(lang, a.description_ar, a.description_en, "");
           const sub = subsByA[a.id];
           const graded = sub && sub.grade !== null;
-          const overdue = a.due_date && new Date(a.due_date) < new Date() && !sub;
+          const deadline = a.due_date
+            ? new Date(new Date(a.due_date).getTime() + (a.grace_period_minutes ?? 0) * 60_000)
+            : null;
+          const overdue = !!deadline && deadline < new Date() && !sub;
+          const attemptsUsed = sub?.attempt_number ?? 0;
+          const attemptsLeft = Math.max(0, (a.max_attempts ?? 1) - attemptsUsed);
+          const closed = a.locked || (!!deadline && deadline < new Date()) || attemptsLeft === 0;
           return (
             <li key={a.id} className="rounded-xl border border-border bg-background p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
@@ -109,8 +121,17 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
                     <p className={"mt-1.5 text-xs inline-flex items-center gap-1 " + (overdue ? "text-destructive" : "text-muted-foreground")}>
                       <Clock className="h-3 w-3" />
                       {t(lang, "الاستحقاق", "Due")}: {new Date(a.due_date).toLocaleString()}
+                      {a.grace_period_minutes > 0 && (
+                        <span className="text-muted-foreground">
+                          {" "}({t(lang, "مهلة", "grace")} {a.grace_period_minutes} {t(lang, "دقيقة", "min")})
+                        </span>
+                      )}
                     </p>
                   )}
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {t(lang, "المحاولات", "Attempts")}: {attemptsUsed}/{a.max_attempts}
+                    {a.locked && ` · ${t(lang, "مُقفلة", "locked")}`}
+                  </p>
                 </div>
                 <div className="text-xs">
                   {graded ? (
@@ -122,6 +143,9 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
                     <span className="inline-flex items-center gap-1 text-primary font-medium">
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       {t(lang, "مُسلّم — بانتظار التقييم", "Submitted — awaiting grade")}
+                      {sub.is_late && (
+                        <span className="text-amber-600">· {t(lang, "متأخر", "late")}</span>
+                      )}
                     </span>
                   ) : (
                     <span className="text-muted-foreground">{t(lang, "لم يُسلّم بعد", "Not submitted")}</span>
@@ -146,16 +170,27 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
                 <p className="text-xs font-semibold text-muted-foreground mb-2">
                   {sub ? t(lang, "تسليمك", "Your submission") : t(lang, "ارفع تسليمك", "Upload your submission")}
                 </p>
+                {closed && (
+                  <p className="mb-2 text-xs text-destructive">
+                    {a.locked
+                      ? t(lang, "التسليم مُقفل من قبل المدرّب.", "Submissions are locked by the instructor.")
+                      : attemptsLeft === 0
+                        ? t(lang, "استنفدت عدد المحاولات المسموح بها.", "You have used all allowed attempts.")
+                        : t(lang, "انتهى موعد التسليم.", "The submission deadline has passed.")}
+                  </p>
+                )}
                 <FileUploader
                   bucket="lms-assignments"
                   pathPrefix={`submissions/${a.id}/${user.id}`}
                   currentPath={sub?.file_path ?? null}
                   onUploaded={(p) => onSubmissionUploaded(a, p)}
+                  disabled={closed}
                   label={sub ? t(lang, "إعادة الرفع", "Re-upload") : t(lang, "رفع الملف", "Upload file")}
                 />
                 {sub && (
                   <p className="mt-1 text-[11px] text-muted-foreground">
                     {t(lang, "تم التسليم في", "Submitted at")}: {new Date(sub.submitted_at).toLocaleString()}
+                    {" · "}{t(lang, "المحاولة", "Attempt")} {sub.attempt_number}
                   </p>
                 )}
               </div>
