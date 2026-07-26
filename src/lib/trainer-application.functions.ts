@@ -73,7 +73,7 @@ export const attachTrainerApplicationFile = createServerFn({ method: "POST" })
         p_kind: data.kind,
         p_storage_path: data.storage_path,
         p_original_name: data.original_name,
-        p_content_type: data.content_type ?? null,
+        p_content_type: data.content_type ?? "",
         p_size_bytes: data.size_bytes,
       },
     );
