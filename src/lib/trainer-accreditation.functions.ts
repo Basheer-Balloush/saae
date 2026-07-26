@@ -39,7 +39,7 @@ export const activateTrainer = createServerFn({ method: 'POST' })
     const { processOutbox } = await import('@/lib/lms-outbox.server')
     const outbox = await processOutbox(10).catch(() => ({ picked: 0, done: 0, failed: 0 }))
 
-    return { result: result as unknown, outbox }
+    return { result: (result ?? null) as Record<string, unknown> | null, outbox }
   })
 
 /** Phase 2 — manual outbox drain (also used for retrying failed notifications). */
