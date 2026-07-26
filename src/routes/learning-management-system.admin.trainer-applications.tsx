@@ -282,8 +282,16 @@ function AdminTrainerApplications() {
                 <p>✅ {selected.consent_process ? (ar ? "شروط نظام المعادلة" : "Accreditation process") : "—"}</p>
               </section>
 
+              <TrainerScoringPanel
+                applicationId={selected.id}
+                applicantId={selected.user_id}
+                status={selected.status}
+                onChanged={() => { setSelected(null); load(); }}
+              />
+
               <section className="rounded-xl border border-border p-4 space-y-3">
                 <h3 className="font-bold">{ar ? "تحديث الحالة" : "Update status"}</h3>
+
                 <div className="grid sm:grid-cols-2 gap-2">
                   <Select value={newStatus} onValueChange={setNewStatus}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
