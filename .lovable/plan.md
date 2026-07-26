@@ -13,7 +13,7 @@ Remaining defaults I will apply unless you say otherwise: accreditation uses the
 
 ## Phase roadmap
 
-**Phase 0 — Baseline, decisions, tests, observability (CF-07).** Freeze the baseline commit; inventory affected tables, functions, policies, grants, buckets, and FK delete actions; caller map for every privilege that will change. Add a Vitest unit + RPC/RLS integration harness and Playwright smoke E2E with `test:unit`, `test:integration`, `test:e2e`, `typecheck`, `check` scripts. Create the nine authorization fixtures (anon → site admin). Define the redacted structured audit-event shape and the `lms_audit_events` append-only table.
+**Phase 0 — Baseline, decisions, tests, observability (CF-07). ✅ DONE.** Baseline recorded in `.lovable/phase0-baseline.md` (70 tables, 219 functions, 183 policies, 37 storage policies, row counts, full FK cascade map, privilege caller map). Vitest harness added (`tests/unit`, `tests/integration`, `tests/e2e`) with `test`, `test:unit`, `test:integration`, `test:e2e`, `typecheck`, `check` scripts; 13 baseline tests pass. Audit foundation shipped: `src/lib/audit-events.ts` (typed redacted event contract), `src/lib/audit-log.server.ts` (durable + structured-log sink), and append-only `public.lms_audit_events` (admin-read-only, anon revoked, update/delete blocked by trigger — verified).
 
 **Phase 1 — Applicant authorization + evidence integrity (A-06).** Field-ownership allowlist for `trainer_applications`; protected commands for draft save, submit, evidence attach/replace/remove; reviewer-owned columns (status, scores, notes, decisions) become non-writable by applicants; storage policies aligned to lifecycle state (no deletes after submission); direct table/storage privileges revoked only after every caller is migrated.
 
