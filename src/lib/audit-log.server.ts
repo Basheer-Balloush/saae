@@ -34,7 +34,7 @@ export async function logAuditEvent(event: AuditEvent): Promise<{ ok: boolean; c
       next_state: built.next_state ?? null,
       correlation_id: correlationId,
       reason: built.reason ?? null,
-      metadata: built.metadata,
+      metadata: built.metadata as Record<string, never>,
     });
     if (error) {
       console.error(`audit_write_failed: ${error.message}`);
