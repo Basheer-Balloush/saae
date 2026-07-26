@@ -1796,6 +1796,54 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_audit_events: {
+        Row: {
+          actor_id: string | null
+          actor_role: string
+          correlation_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          next_state: string | null
+          prior_state: string | null
+          reason: string | null
+          schema_version: number
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_role?: string
+          correlation_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          next_state?: string | null
+          prior_state?: string | null
+          reason?: string | null
+          schema_version?: number
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_role?: string
+          correlation_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          next_state?: string | null
+          prior_state?: string | null
+          reason?: string | null
+          schema_version?: number
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: []
+      }
       lms_categories: {
         Row: {
           created_at: string
