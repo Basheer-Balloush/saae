@@ -3362,6 +3362,17 @@ export type Database = {
         Args: { _present: boolean; _registrant_id: string; _session_id: string }
         Returns: undefined
       }
+      attach_trainer_application_file: {
+        Args: {
+          p_application_id: string
+          p_content_type: string
+          p_kind: Database["public"]["Enums"]["trainer_file_kind"]
+          p_original_name: string
+          p_size_bytes: number
+          p_storage_path: string
+        }
+        Returns: string
+      }
       can_access_ams_course: { Args: { _course_id: string }; Returns: boolean }
       can_access_ams_registrant: {
         Args: { _registrant_id: string }
@@ -3790,6 +3801,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      remove_trainer_application_file: {
+        Args: { p_file_id: string }
+        Returns: string
+      }
       submit_internship_application: {
         Args: { _answers?: Json; _opportunity_id: string }
         Returns: string
@@ -3805,6 +3820,7 @@ export type Database = {
           submitted_at: string
         }[]
       }
+      submit_trainer_application: { Args: { payload: Json }; Returns: string }
       trainer_app_transition: {
         Args: {
           _application_id: string
