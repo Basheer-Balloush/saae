@@ -13,6 +13,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import {
+  submitTrainerApplication,
+  attachTrainerApplicationFile,
+} from "@/lib/trainer-application.functions";
 import { UploadProgress } from "@/components/ui/upload-progress";
 import {
   Select,
