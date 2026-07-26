@@ -1895,6 +1895,86 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_cleanup_batches: {
+        Row: {
+          archived_count: number
+          created_at: string
+          created_by: string
+          id: string
+          note: string | null
+          purged_at: string | null
+          purged_count: number
+          restored_count: number
+          retention_days: number
+        }
+        Insert: {
+          archived_count?: number
+          created_at?: string
+          created_by: string
+          id?: string
+          note?: string | null
+          purged_at?: string | null
+          purged_count?: number
+          restored_count?: number
+          retention_days?: number
+        }
+        Update: {
+          archived_count?: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          note?: string | null
+          purged_at?: string | null
+          purged_count?: number
+          restored_count?: number
+          retention_days?: number
+        }
+        Relationships: []
+      }
+      lms_cleanup_items: {
+        Row: {
+          archived_at: string
+          batch_id: string
+          detail: string | null
+          id: string
+          outcome: string
+          purged_at: string | null
+          restored_at: string | null
+          target_type: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string
+          batch_id: string
+          detail?: string | null
+          id?: string
+          outcome?: string
+          purged_at?: string | null
+          restored_at?: string | null
+          target_type: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string
+          batch_id?: string
+          detail?: string | null
+          id?: string
+          outcome?: string
+          purged_at?: string | null
+          restored_at?: string | null
+          target_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_cleanup_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "lms_cleanup_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lms_coupons: {
         Row: {
           active: boolean
@@ -2326,6 +2406,9 @@ export type Database = {
       lms_instructors: {
         Row: {
           approved: boolean
+          archive_batch_id: string | null
+          archived_at: string | null
+          archived_by: string | null
           avatar_url: string | null
           bio: string | null
           bio_ar: string | null
@@ -2336,6 +2419,7 @@ export type Database = {
           full_name_en: string | null
           github_url: string | null
           linkedin_url: string | null
+          purge_after: string | null
           slug: string | null
           specialty: string | null
           specialty_ar: string | null
@@ -2345,6 +2429,9 @@ export type Database = {
         }
         Insert: {
           approved?: boolean
+          archive_batch_id?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           avatar_url?: string | null
           bio?: string | null
           bio_ar?: string | null
@@ -2355,6 +2442,7 @@ export type Database = {
           full_name_en?: string | null
           github_url?: string | null
           linkedin_url?: string | null
+          purge_after?: string | null
           slug?: string | null
           specialty?: string | null
           specialty_ar?: string | null
@@ -2364,6 +2452,9 @@ export type Database = {
         }
         Update: {
           approved?: boolean
+          archive_batch_id?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           avatar_url?: string | null
           bio?: string | null
           bio_ar?: string | null
@@ -2374,6 +2465,7 @@ export type Database = {
           full_name_en?: string | null
           github_url?: string | null
           linkedin_url?: string | null
+          purge_after?: string | null
           slug?: string | null
           specialty?: string | null
           specialty_ar?: string | null
@@ -3347,6 +3439,8 @@ export type Database = {
       trainer_applications: {
         Row: {
           admin_notes: string | null
+          archive_batch_id: string | null
+          archived_at: string | null
           assigned_evaluators: string[]
           bio: string
           city: string
@@ -3373,6 +3467,8 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          archive_batch_id?: string | null
+          archived_at?: string | null
           assigned_evaluators?: string[]
           bio: string
           city: string
@@ -3399,6 +3495,8 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          archive_batch_id?: string | null
+          archived_at?: string | null
           assigned_evaluators?: string[]
           bio?: string
           city?: string
@@ -3776,6 +3874,23 @@ export type Database = {
         Args: { _coupon?: string; _course_id: string }
         Returns: Json
       }
+      lms_cleanup_archive: {
+        Args: { _note?: string; _retention_days?: number; _user_ids: string[] }
+        Returns: Json
+      }
+      lms_cleanup_preview: {
+        Args: never
+        Returns: {
+          course_count: number
+          created_at: string
+          enrollment_count: number
+          full_name: string
+          has_application: boolean
+          user_id: string
+        }[]
+      }
+      lms_cleanup_purge: { Args: { _batch_id: string }; Returns: Json }
+      lms_cleanup_restore: { Args: { _batch_id: string }; Returns: Json }
       lms_create_enrollment_internal: {
         Args: { _channel: string; _course_id: string; _student_id: string }
         Returns: Json
