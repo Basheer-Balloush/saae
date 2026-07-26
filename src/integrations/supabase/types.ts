@@ -2483,6 +2483,48 @@ export type Database = {
           },
         ]
       }
+      lms_outbox_jobs: {
+        Row: {
+          attempts: number
+          correlation_id: string | null
+          created_at: string
+          dedupe_key: string | null
+          id: string
+          job_type: string
+          last_error: string | null
+          next_attempt_at: string
+          payload: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          correlation_id?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          job_type: string
+          last_error?: string | null
+          next_attempt_at?: string
+          payload?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          correlation_id?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          job_type?: string
+          last_error?: string | null
+          next_attempt_at?: string
+          payload?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lms_payments: {
         Row: {
           amount: number
@@ -3068,6 +3110,146 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_accreditation_settings: {
+        Row: {
+          id: boolean
+          min_evaluators: number
+          pass_final_score: number
+          pass_phase_min: number
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          min_evaluators?: number
+          pass_final_score?: number
+          pass_phase_min?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          min_evaluators?: number
+          pass_final_score?: number
+          pass_phase_min?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trainer_app_criteria: {
+        Row: {
+          active: boolean
+          created_at: string
+          display_order: number
+          id: string
+          label_ar: string
+          label_en: string
+          max_points: number
+          phase: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          display_order?: number
+          id?: string
+          label_ar: string
+          label_en: string
+          max_points?: number
+          phase: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          display_order?: number
+          id?: string
+          label_ar?: string
+          label_en?: string
+          max_points?: number
+          phase?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trainer_app_evaluators: {
+        Row: {
+          application_id: string
+          assigned_at: string
+          assigned_by: string | null
+          evaluator_id: string
+          id: string
+        }
+        Insert: {
+          application_id: string
+          assigned_at?: string
+          assigned_by?: string | null
+          evaluator_id: string
+          id?: string
+        }
+        Update: {
+          application_id?: string
+          assigned_at?: string
+          assigned_by?: string | null
+          evaluator_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_app_evaluators_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_app_scores: {
+        Row: {
+          application_id: string
+          comment: string | null
+          created_at: string
+          criterion_id: string
+          evaluator_id: string
+          id: string
+          points: number
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          comment?: string | null
+          created_at?: string
+          criterion_id: string
+          evaluator_id: string
+          id?: string
+          points: number
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          comment?: string | null
+          created_at?: string
+          criterion_id?: string
+          evaluator_id?: string
+          id?: string
+          points?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_app_scores_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_app_scores_criterion_id_fkey"
+            columns: ["criterion_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_app_criteria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainer_application_audit: {
         Row: {
           actor_id: string | null
@@ -3564,6 +3746,10 @@ export type Database = {
         Returns: boolean
       }
       is_lms_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_trainer_app_evaluator: {
+        Args: { _application_id: string; _user_id: string }
+        Returns: boolean
+      }
       link_lms_course_to_ams: {
         Args: { _lms_course_id: string }
         Returns: string
@@ -3821,6 +4007,37 @@ export type Database = {
         }[]
       }
       submit_trainer_application: { Args: { payload: Json }; Returns: string }
+      trainer_app_activate: {
+        Args: { _application_id: string; _note?: string }
+        Returns: Json
+      }
+      trainer_app_allowed_next: {
+        Args: {
+          _from: Database["public"]["Enums"]["trainer_application_status"]
+        }
+        Returns: Database["public"]["Enums"]["trainer_application_status"][]
+      }
+      trainer_app_assign_evaluator: {
+        Args: { _application_id: string; _evaluator_id: string }
+        Returns: string
+      }
+      trainer_app_remove_evaluator: {
+        Args: { _application_id: string; _evaluator_id: string }
+        Returns: undefined
+      }
+      trainer_app_score_summary: {
+        Args: { _application_id: string }
+        Returns: Json
+      }
+      trainer_app_submit_score: {
+        Args: {
+          _application_id: string
+          _comment?: string
+          _criterion_id: string
+          _points: number
+        }
+        Returns: string
+      }
       trainer_app_transition: {
         Args: {
           _application_id: string
