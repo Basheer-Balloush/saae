@@ -1,15 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const SESSION_KEY = "lms-device-session-id";
+const WARNED_KEY = "lms-device-session-warned";
 
-/**
- * Single-device login enforcement. When the user signs in, we register a
- * new session id in the DB. The current device stores that id in localStorage.
- * Every 30s we validate. If another device logs in, ours will be rejected.
- */
+// Phase 7B (Advisory) — we no longer force sign-out when another device
+// logs in with the same account. The user is warned once per session so
+// they can act if they didn't recognize the new device. This preserves
+// the audit signal from `lms_register_session` / `lms_validate_session`
+// while removing the disruptive hard-logout behavior.
 export function useSingleDeviceSession(userId: string | null) {
+  const notifiedRef = useRef(false);
+
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
@@ -23,28 +26,34 @@ export function useSingleDeviceSession(userId: string | null) {
       await supabase.rpc("lms_register_session", {
         _session_id: sessionId,
         _device: navigator.userAgent.slice(0, 100),
-      } as any);
+      } as never);
+      sessionStorage.removeItem(WARNED_KEY);
+      notifiedRef.current = false;
     };
 
     const validate = async () => {
       const sessionId = localStorage.getItem(SESSION_KEY);
       if (!sessionId) return;
-      const { data } = await supabase.rpc("lms_validate_session", { _session_id: sessionId } as any);
-      if (!cancelled && data === false) {
-        localStorage.removeItem(SESSION_KEY);
-        toast.error("تم تسجيل الدخول من جهاز آخر. سيتم إنهاء جلستك.");
-        setTimeout(async () => {
-          await supabase.auth.signOut();
-          window.location.href = "/learning-management-system/login";
-        }, 1500);
-      }
+      const { data } = await supabase.rpc("lms_validate_session", { _session_id: sessionId } as never);
+      if (cancelled || data !== false) return;
+      if (notifiedRef.current || sessionStorage.getItem(WARNED_KEY) === "1") return;
+      notifiedRef.current = true;
+      sessionStorage.setItem(WARNED_KEY, "1");
+      toast.warning(
+        "تم تسجيل الدخول إلى حسابك من جهاز آخر. إن لم يكن أنت، غيّر كلمة المرور فوراً.",
+        { duration: 12000 },
+      );
     };
 
     register().then(validate);
-    const t = setInterval(validate, 30000);
+    const t = setInterval(validate, 60000);
     const onFocus = () => validate();
     window.addEventListener("focus", onFocus);
 
-    return () => { cancelled = true; clearInterval(t); window.removeEventListener("focus", onFocus); };
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+      window.removeEventListener("focus", onFocus);
+    };
   }, [userId]);
 }
