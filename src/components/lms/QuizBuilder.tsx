@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
-type Quiz = { id: string; title: string; pass_score: number };
+type Quiz = { id: string; title: string; pass_score: number; version: number; max_attempts: number; cooldown_minutes: number };
 type Question = { id: string; question: string; choices: unknown; correct_index: number; display_order: number };
 
 export function QuizBuilder({ courseId }: { courseId: string }) {
