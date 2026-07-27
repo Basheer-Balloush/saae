@@ -11,7 +11,7 @@ import {
   GraduationCap,
   FolderTree,
   BarChart3,
-  Ticket,
+  
   Star,
   Clock,
   CheckCircle2,
