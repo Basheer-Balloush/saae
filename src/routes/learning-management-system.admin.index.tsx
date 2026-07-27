@@ -235,12 +235,10 @@ function AdminHome() {
       icon: Inbox,
       desc: ar ? "طلبات الدفع اليدوي" : "Manual payment requests",
     },
-    {
-      to: "/learning-management-system/admin/coupons",
-      label: ar ? "الكوبونات" : "Coupons",
-      icon: Ticket,
-      desc: ar ? "أكواد الخصم" : "Discount codes",
-    },
+    // Phase 8 (Branch A) — Coupons hidden. Enrollment is manual-approval only;
+    // discount codes have no checkout to apply against. The page is preserved
+    // in read-only mode for historical records at /admin/coupons.
+
     {
       to: "/learning-management-system/admin/reviews",
       label: ar ? "التقييمات" : "Reviews",
