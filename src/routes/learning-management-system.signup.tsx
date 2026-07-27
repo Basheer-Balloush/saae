@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, MailCheck, Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/saae-logo.png";
+import { PASSWORD_MIN, scorePasswordStrength } from "@/lib/password-policy";
 
 export const Route = createFileRoute("/learning-management-system/signup")({
   head: () => ({ meta: [{ title: "LMS · Sign up" }] }),
@@ -20,17 +21,6 @@ export const Route = createFileRoute("/learning-management-system/signup")({
 });
 
 const ARABIC_NAME_RE = /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]+$/;
-
-function calculatePasswordStrength(pw: string): number {
-  let score = 0;
-  if (pw.length >= 6) score += 1;
-  if (pw.length >= 10) score += 1;
-  if (/[a-z]/.test(pw)) score += 1;
-  if (/[A-Z]/.test(pw)) score += 1;
-  if (/[0-9]/.test(pw)) score += 1;
-  if (/[^A-Za-z0-9]/.test(pw)) score += 1;
-  return score;
-}
 
 function getStrengthInfo(score: number, lang: "ar" | "en") {
   const t = lmsT[lang];
@@ -49,8 +39,8 @@ const schema = z.object({
     { message: "ARABIC_TRIPLE" },
   ),
   email: z.string().trim().email().max(255),
-  password: z.string().min(6).max(72),
-  confirmPassword: z.string().min(6).max(72),
+  password: z.string().min(PASSWORD_MIN).max(72),
+  confirmPassword: z.string().min(PASSWORD_MIN).max(72),
 }).refine((d) => d.password === d.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
