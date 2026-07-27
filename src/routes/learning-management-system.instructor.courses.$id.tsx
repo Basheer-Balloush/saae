@@ -930,10 +930,49 @@ function CourseBuilder() {
                             disabled={videoProgress[l.id] !== undefined}
                             onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
                         </label>
-                        {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && l.video_ready && (
+                        {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && l.video_status === "ready" && (
                           <span className="text-emerald-600">
-                            ✓ {lang === "ar" ? "تم رفع الفيديو بنجاح" : "Video uploaded successfully"}
+                            ✓ {lang === "ar" ? "الفيديو جاهز" : "Video ready"}
                           </span>
+                        )}
+                        {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && (l.video_status === "processing" || l.video_status === "uploading") && (
+                          <>
+                            <span className="text-amber-600">
+                              ⏳ {lang === "ar" ? "قيد المعالجة على Bunny" : "Processing on Bunny"}
+                            </span>
+                            <button
+                              type="button"
+                              className="text-primary underline"
+                              onClick={async () => {
+                                try {
+                                  const r = await refreshBunnyLessonStatus({ data: { lessonId: l.id } });
+                                  setLessons((curr) => curr.map((x) => x.id === l.id ? { ...x, video_status: r.status, video_ready: r.status === "ready" } : x));
+                                  toast.success(lang === "ar" ? `الحالة: ${r.status}` : `Status: ${r.status}`);
+                                } catch (e) { toast.error(toUserMessage(e)); }
+                              }}
+                            >
+                              {lang === "ar" ? "تحديث الحالة" : "Refresh status"}
+                            </button>
+                          </>
+                        )}
+                        {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && l.video_status === "failed" && (
+                          <>
+                            <span className="text-destructive">
+                              ✗ {lang === "ar" ? "فشلت المعالجة" : "Processing failed"}
+                            </span>
+                            <button
+                              type="button"
+                              className="text-primary underline"
+                              onClick={async () => {
+                                try {
+                                  const r = await refreshBunnyLessonStatus({ data: { lessonId: l.id } });
+                                  setLessons((curr) => curr.map((x) => x.id === l.id ? { ...x, video_status: r.status, video_ready: r.status === "ready" } : x));
+                                } catch (e) { toast.error(toUserMessage(e)); }
+                              }}
+                            >
+                              {lang === "ar" ? "إعادة الفحص" : "Recheck"}
+                            </button>
+                          </>
                         )}
                         {videoProgress[l.id] === undefined && l.video_provider !== "bunny" && l.video_url && (
                           <span className="text-amber-600">
