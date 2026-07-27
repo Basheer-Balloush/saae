@@ -364,7 +364,7 @@ function CourseBuilder() {
       setLessons((curr) =>
         curr.map((x) =>
           x.id === lesson.id
-            ? { ...x, video_provider: "bunny", video_uid: creds.videoId, video_ready: true, video_url: null }
+            ? { ...x, video_provider: "bunny", video_uid: creds.videoId, video_ready: false, video_status: "processing", video_url: null }
             : x,
         ),
       );
