@@ -81,8 +81,8 @@ function AdminCoupons() {
                 {c.percent_off}% off · {lang === "ar" ? "استُخدم" : "used"} {c.used_count}{c.max_uses ? `/${c.max_uses}` : ""}
               </div>
             </div>
-            <Switch checked={c.active} onCheckedChange={(v) => toggle(c.id, v)} />
-            <Button size="icon" variant="ghost" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+            <Switch checked={c.active} disabled onCheckedChange={(v) => toggle(c.id, v)} />
+            <Button size="icon" variant="ghost" disabled onClick={() => remove(c.id)}><Trash2 className="h-4 w-4 text-muted-foreground" /></Button>
           </div>
         ))}
       </div>
