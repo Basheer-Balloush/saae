@@ -73,3 +73,11 @@ All new RPCs shipped with grants + audit; every instructor screen routed through
 3. Migration 5C + admin reconcile button + tests.
 
 Reply "go" to start with 5A.
+
+---
+
+Delivered:
+- Phase 5A ✓
+- Phase 5B ✓
+- Phase 5C ✓ — central `lms_evaluate_certificate` + `lms_reconcile_certificates`; quiz + progress paths route through it; admin reconcile button on LMS admin dashboard.
+- Phase 6 ✓ — lessons now track `video_status` (uploading/processing/ready/failed) with a trigger that resets state when the provider identifier changes; Bunny upload finalization writes `processing`; `/api/public/bunny-webhook` (shared-secret authenticated, idempotent, guid-scoped) reconciles state; `refreshBunnyLessonStatus` server fn provides a manual recheck; student player shows localized processing / failed states; instructor UI exposes status + refresh/recheck actions. Set `BUNNY_WEBHOOK_SECRET` and configure the webhook URL `https://.../api/public/bunny-webhook?secret=<value>` in the Bunny library.
