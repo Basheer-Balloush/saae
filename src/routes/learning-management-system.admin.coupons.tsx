@@ -16,9 +16,6 @@ type Coupon = { id: string; code: string; percent_off: number; max_uses: number 
 function AdminCoupons() {
   const { lang } = useLang();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [code, setCode] = useState("");
-  const [pct, setPct] = useState("10");
-  const [maxUses, setMaxUses] = useState("");
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -28,26 +25,10 @@ function AdminCoupons() {
   };
   useEffect(() => { load(); }, []);
 
-  const create = async () => {
-    if (!code.trim()) return;
-    const { error } = await supabase.from("lms_coupons").insert({
-      code: code.trim().toUpperCase(),
-      percent_off: parseInt(pct) || 10,
-      max_uses: maxUses ? parseInt(maxUses) : null,
-    });
-    if (error) toast.error(toUserMessage(error));
-    else { toast.success(lang === "ar" ? "تم إنشاء الكوبون" : "Coupon created"); setCode(""); setMaxUses(""); load(); }
-  };
-
-  const toggle = async (id: string, active: boolean) => {
-    await supabase.from("lms_coupons").update({ active }).eq("id", id);
-    load();
-  };
-
-  const remove = async (id: string) => {
-    await supabase.from("lms_coupons").delete().eq("id", id);
-    load();
-  };
+  // Phase 8 (Branch A) — mutations disabled. Handlers preserved but no-op so
+  // the UI can render controls in a disabled state without accidental writes.
+  const toggle = async (_id: string, _active: boolean) => { /* disabled */ };
+  const remove = async (_id: string) => { /* disabled */ };
 
   if (loading) return <p className="text-center py-20 text-muted-foreground">{lang === "ar" ? "جارٍ التحميل..." : "Loading...‎"}</p>;
 
