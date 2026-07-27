@@ -57,19 +57,19 @@ function AdminCoupons() {
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
       <div className="flex items-center gap-3 mb-6">
-        <Ticket className="h-7 w-7 text-primary" />
-        <h1 className="text-2xl font-bold text-foreground">{lang === "ar" ? "أكواد الخصم" : "Coupons"}</h1>
+        <Ticket className="h-7 w-7 text-muted-foreground" />
+        <h1 className="text-2xl font-bold text-foreground">{lang === "ar" ? "أكواد الخصم (أرشيف)" : "Coupons (archived)"}</h1>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6 mb-6">
-        <h2 className="font-bold text-foreground mb-4">{lang === "ar" ? "إنشاء كوبون" : "Create coupon"}</h2>
-        <div className="grid sm:grid-cols-4 gap-3">
-          <Input placeholder={lang === "ar" ? "الكود" : "Code"} value={code} onChange={(e) => setCode(e.target.value)} />
-          <Input type="number" placeholder="% off" value={pct} onChange={(e) => setPct(e.target.value)} />
-          <Input type="number" placeholder={lang === "ar" ? "حد الاستخدام (اختياري)" : "Max uses (opt)"} value={maxUses} onChange={(e) => setMaxUses(e.target.value)} />
-          <Button onClick={create}><Plus className="h-4 w-4 mx-1" />{lang === "ar" ? "إضافة" : "Add"}</Button>
-        </div>
+      {/* Phase 8 (Branch A) — Coupons are inactive. Enrollment is manual-approval only, so
+          there is no checkout to apply a discount against. The list below is retained for
+          historical audit. Creating new codes is disabled. */}
+      <div className="rounded-2xl border border-amber-300 bg-amber-50 dark:bg-amber-950/20 p-4 mb-6 text-sm text-amber-900 dark:text-amber-200">
+        {lang === "ar"
+          ? "نظام الدفع يعمل حالياً بالموافقة اليدوية فقط، لذلك لم تعُد أكواد الخصم مفعّلة. تُعرض السجلات التالية للأرشيف فقط."
+          : "Enrollment currently runs on manual approval only, so discount codes are no longer applied at checkout. The records below are shown for archival reference only."}
       </div>
+
 
       <div className="rounded-2xl border border-border bg-card divide-y divide-border">
         {coupons.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">—</p>}
