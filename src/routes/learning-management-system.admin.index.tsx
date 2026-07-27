@@ -873,3 +873,45 @@ function StatusBadge({ status, ar }: { status: string; ar: boolean }) {
     </span>
   );
 }
+
+function ReconcileCertificatesCard({ ar }: { ar: boolean }) {
+  const [busy, setBusy] = useState(false);
+  const run = useServerFn(reconcileCertificates);
+  const onClick = async () => {
+    if (busy) return;
+    if (!confirm(ar ? "فحص جميع التسجيلات المؤهلة وإصدار الشهادات الناقصة؟" : "Scan eligible enrollments and issue any missing certificates?")) return;
+    setBusy(true);
+    try {
+      const res = await run({ data: { limit: 500 } });
+      toast.success(
+        ar
+          ? `تم الفحص: ${res.scanned} — تم إصدار: ${res.issued}`
+          : `Scanned: ${res.scanned} — Issued: ${res.issued}`,
+      );
+    } catch (e) {
+      toast.error(toUserMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="rounded-2xl border border-border bg-card p-3 shadow-sm">
+      <p className="px-2 pt-1 pb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {ar ? "الصيانة" : "Maintenance"}
+      </p>
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full justify-start gap-2"
+        onClick={onClick}
+        disabled={busy}
+      >
+        <CheckCircle2 className="h-4 w-4" />
+        {busy
+          ? ar ? "جارٍ التدقيق..." : "Reconciling..."
+          : ar ? "تدقيق الشهادات المؤهلة" : "Reconcile eligible certificates"}
+      </Button>
+    </div>
+  );
+}
+
