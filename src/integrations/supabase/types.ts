@@ -2543,6 +2543,9 @@ export type Database = {
           video_duration_sec: number | null
           video_provider: string
           video_ready: boolean
+          video_status: string
+          video_status_error: string | null
+          video_status_updated_at: string
           video_uid: string | null
           video_url: string | null
         }
@@ -2563,6 +2566,9 @@ export type Database = {
           video_duration_sec?: number | null
           video_provider?: string
           video_ready?: boolean
+          video_status?: string
+          video_status_error?: string | null
+          video_status_updated_at?: string
           video_uid?: string | null
           video_url?: string | null
         }
@@ -2583,6 +2589,9 @@ export type Database = {
           video_duration_sec?: number | null
           video_provider?: string
           video_ready?: boolean
+          video_status?: string
+          video_status_error?: string | null
+          video_status_updated_at?: string
           video_uid?: string | null
           video_url?: string | null
         }
@@ -4047,6 +4056,10 @@ export type Database = {
       }
       lms_delete_course: { Args: { _course_id: string }; Returns: undefined }
       lms_enroll: { Args: { _course_id: string }; Returns: string }
+      lms_evaluate_certificate: {
+        Args: { _course_id: string; _student_id: string }
+        Returns: Json
+      }
       lms_get_quiz_for_attempt: { Args: { _quiz_id: string }; Returns: Json }
       lms_get_quiz_questions: {
         Args: { _quiz_id: string }
@@ -4209,6 +4222,7 @@ export type Database = {
           students: number
         }[]
       }
+      lms_reconcile_certificates: { Args: { _limit?: number }; Returns: Json }
       lms_register_session: {
         Args: { _device?: string; _session_id: string }
         Returns: undefined

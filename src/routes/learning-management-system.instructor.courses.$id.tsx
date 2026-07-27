@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { QuizBuilder } from "@/components/lms/QuizBuilder";
 import { CourseFormBuilder } from "@/components/lms/CourseFormBuilder";
-import { createBunnyUpload, setLessonBunnyVideo } from "@/lib/bunny-stream.functions";
+import { createBunnyUpload, setLessonBunnyVideo, refreshBunnyLessonStatus } from "@/lib/bunny-stream.functions";
 import * as tus from "tus-js-client";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import { CourseCoInstructors } from "@/components/lms/CourseCoInstructors";
@@ -46,7 +46,7 @@ type Course = {
 };
 type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
 type LessonAttachment = { name: string; url: string; path?: string };
-type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; is_preview: boolean; duration_seconds: number; display_order: number; attachments: LessonAttachment[] | null };
+type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; video_status: string; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; is_preview: boolean; duration_seconds: number; display_order: number; attachments: LessonAttachment[] | null };
 type Category = { id: string; name_ar: string; name_en: string | null };
 
 function CourseBuilder() {
@@ -98,7 +98,7 @@ function CourseBuilder() {
       setSections(sList);
       if (sList.length) {
         const { data: lss } = await supabase.from("lms_lessons")
-          .select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,content_md,content_md_ar,content_md_en,is_preview,duration_seconds,display_order,attachments")
+          .select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,video_status,content_md,content_md_ar,content_md_en,is_preview,duration_seconds,display_order,attachments")
           .in("section_id", sList.map((s) => s.id)).order("display_order");
         setLessons((lss as Lesson[]) ?? []);
       }
@@ -364,7 +364,7 @@ function CourseBuilder() {
       setLessons((curr) =>
         curr.map((x) =>
           x.id === lesson.id
-            ? { ...x, video_provider: "bunny", video_uid: creds.videoId, video_ready: true, video_url: null }
+            ? { ...x, video_provider: "bunny", video_uid: creds.videoId, video_ready: false, video_status: "processing", video_url: null }
             : x,
         ),
       );
@@ -930,10 +930,49 @@ function CourseBuilder() {
                             disabled={videoProgress[l.id] !== undefined}
                             onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
                         </label>
-                        {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && l.video_ready && (
+                        {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && l.video_status === "ready" && (
                           <span className="text-emerald-600">
-                            ✓ {lang === "ar" ? "تم رفع الفيديو بنجاح" : "Video uploaded successfully"}
+                            ✓ {lang === "ar" ? "الفيديو جاهز" : "Video ready"}
                           </span>
+                        )}
+                        {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && (l.video_status === "processing" || l.video_status === "uploading") && (
+                          <>
+                            <span className="text-amber-600">
+                              ⏳ {lang === "ar" ? "قيد المعالجة على Bunny" : "Processing on Bunny"}
+                            </span>
+                            <button
+                              type="button"
+                              className="text-primary underline"
+                              onClick={async () => {
+                                try {
+                                  const r = await refreshBunnyLessonStatus({ data: { lessonId: l.id } });
+                                  setLessons((curr) => curr.map((x) => x.id === l.id ? { ...x, video_status: r.status, video_ready: r.status === "ready" } : x));
+                                  toast.success(lang === "ar" ? `الحالة: ${r.status}` : `Status: ${r.status}`);
+                                } catch (e) { toast.error(toUserMessage(e)); }
+                              }}
+                            >
+                              {lang === "ar" ? "تحديث الحالة" : "Refresh status"}
+                            </button>
+                          </>
+                        )}
+                        {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && l.video_status === "failed" && (
+                          <>
+                            <span className="text-destructive">
+                              ✗ {lang === "ar" ? "فشلت المعالجة" : "Processing failed"}
+                            </span>
+                            <button
+                              type="button"
+                              className="text-primary underline"
+                              onClick={async () => {
+                                try {
+                                  const r = await refreshBunnyLessonStatus({ data: { lessonId: l.id } });
+                                  setLessons((curr) => curr.map((x) => x.id === l.id ? { ...x, video_status: r.status, video_ready: r.status === "ready" } : x));
+                                } catch (e) { toast.error(toUserMessage(e)); }
+                              }}
+                            >
+                              {lang === "ar" ? "إعادة الفحص" : "Recheck"}
+                            </button>
+                          </>
                         )}
                         {videoProgress[l.id] === undefined && l.video_provider !== "bunny" && l.video_url && (
                           <span className="text-amber-600">

@@ -20,7 +20,7 @@ export const Route = createFileRoute("/learning-management-system/student/player
 });
 
 type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
-type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; attachments: unknown; display_order: number };
+type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; video_status: string; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; attachments: unknown; display_order: number };
 
 const pick = (lang: "ar" | "en", ar: string | null | undefined, en: string | null | undefined, fallback: string) => {
   if (lang === "en") return en || ar || fallback;
@@ -54,7 +54,7 @@ function Player() {
       if (secs && secs.length) {
         const ids = secs.map((s) => s.id);
         const [{ data: lss }, { data: prs }] = await Promise.all([
-          supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids).order("display_order"),
+          supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,video_status,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids).order("display_order"),
           supabase.from("lms_lesson_progress").select("lesson_id,is_completed").eq("student_id", user.id),
         ]);
         const list = (lss as Lesson[]) ?? [];
@@ -80,6 +80,7 @@ function Player() {
     (async () => {
       if (!current) return;
       if (current.video_provider === "bunny" && current.video_uid) {
+        if (current.video_status && current.video_status !== "ready") return;
         try {
           const res = await getBunnyPlayback({ data: { lessonId: current.id } });
           if (!active) return;
@@ -186,6 +187,12 @@ function Player() {
               onEnded={markComplete}
               className="w-full h-full"
             />
+          ) : current && current.video_provider === "bunny" && current.video_uid && current.video_status !== "ready" ? (
+            <div className="text-white/85 text-sm px-6 text-center">
+              {current.video_status === "failed"
+                ? (lang === "ar" ? "تعذّر معالجة الفيديو. يرجى إبلاغ المدرّب." : "Video processing failed. Please notify the instructor.")
+                : (lang === "ar" ? "الفيديو قيد المعالجة، سيصبح جاهزاً خلال دقائق." : "Video is processing — it will be ready in a few minutes.")}
+            </div>
           ) : (
             <div className="text-white/85 text-sm">{tr.selectLesson}</div>
           )}
