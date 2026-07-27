@@ -37,6 +37,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { AdminInstructorEditDialog } from "@/components/lms/AdminInstructorEditDialog";
+import { reconcileCertificates } from "@/lib/lms-certificates.functions";
 
 export const Route = createFileRoute("/learning-management-system/admin/")({
   head: () => ({ meta: [{ title: "LMS · Admin" }] }),
