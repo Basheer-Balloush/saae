@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, KeyRound } from "lucide-react";
+import { PASSWORD_MIN } from "@/lib/password-policy";
+import { localizeAuthError } from "@/lib/auth-error-i18n";
 
 export const Route = createFileRoute("/learning-management-system/reset-password")({
   head: () => ({ meta: [{ title: "LMS · Reset password" }] }),
@@ -24,7 +26,7 @@ function ResetPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = z.string().min(6).max(72).safeParse(password);
+    const parsed = z.string().min(PASSWORD_MIN).max(72).safeParse(password);
     if (!parsed.success) {
       toast.error(tr.passwordMin);
       return;
@@ -36,7 +38,7 @@ function ResetPage() {
       toast.success(tr.passwordUpdated);
       navigate({ to: "/learning-management-system/student" });
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : tr.authFailed);
+      toast.error(localizeAuthError(err, lang, tr.authFailed));
     } finally {
       setSubmitting(false);
     }

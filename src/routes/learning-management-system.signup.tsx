@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, MailCheck, Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/saae-logo.png";
+import { PASSWORD_MIN, scorePasswordStrength } from "@/lib/password-policy";
 
 export const Route = createFileRoute("/learning-management-system/signup")({
   head: () => ({ meta: [{ title: "LMS · Sign up" }] }),
@@ -20,17 +21,6 @@ export const Route = createFileRoute("/learning-management-system/signup")({
 });
 
 const ARABIC_NAME_RE = /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]+$/;
-
-function calculatePasswordStrength(pw: string): number {
-  let score = 0;
-  if (pw.length >= 6) score += 1;
-  if (pw.length >= 10) score += 1;
-  if (/[a-z]/.test(pw)) score += 1;
-  if (/[A-Z]/.test(pw)) score += 1;
-  if (/[0-9]/.test(pw)) score += 1;
-  if (/[^A-Za-z0-9]/.test(pw)) score += 1;
-  return score;
-}
 
 function getStrengthInfo(score: number, lang: "ar" | "en") {
   const t = lmsT[lang];
@@ -49,8 +39,8 @@ const schema = z.object({
     { message: "ARABIC_TRIPLE" },
   ),
   email: z.string().trim().email().max(255),
-  password: z.string().min(6).max(72),
-  confirmPassword: z.string().min(6).max(72),
+  password: z.string().min(PASSWORD_MIN).max(72),
+  confirmPassword: z.string().min(PASSWORD_MIN).max(72),
 }).refine((d) => d.password === d.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -72,7 +62,7 @@ function LmsSignup() {
   const [sentTo, setSentTo] = useState<string | null>(null);
   const signUpUser = useServerFn(signUpLmsUser);
 
-  const passwordStrength = useMemo(() => calculatePasswordStrength(password), [password]);
+  const passwordStrength = useMemo(() => scorePasswordStrength(password), [password]);
   const strengthInfo = useMemo(() => getStrengthInfo(passwordStrength, lang), [passwordStrength, lang]);
 
   useEffect(() => {
@@ -196,7 +186,7 @@ function LmsSignup() {
                       <div className={`h-full rounded-full transition-all duration-300 ${strengthInfo.color}`} style={{ width: strengthInfo.width }} />
                     </div>
                     <div className="flex flex-wrap gap-1">
-                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${password.length >= 6 ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>6+</span>
+                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${password.length >= PASSWORD_MIN ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>{PASSWORD_MIN}+</span>
                       <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[a-z]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>abc</span>
                       <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[A-Z]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>ABC</span>
                       <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[0-9]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>123</span>
