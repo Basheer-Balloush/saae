@@ -2543,6 +2543,9 @@ export type Database = {
           video_duration_sec: number | null
           video_provider: string
           video_ready: boolean
+          video_status: string
+          video_status_error: string | null
+          video_status_updated_at: string
           video_uid: string | null
           video_url: string | null
         }
@@ -2563,6 +2566,9 @@ export type Database = {
           video_duration_sec?: number | null
           video_provider?: string
           video_ready?: boolean
+          video_status?: string
+          video_status_error?: string | null
+          video_status_updated_at?: string
           video_uid?: string | null
           video_url?: string | null
         }
@@ -2583,6 +2589,9 @@ export type Database = {
           video_duration_sec?: number | null
           video_provider?: string
           video_ready?: boolean
+          video_status?: string
+          video_status_error?: string | null
+          video_status_updated_at?: string
           video_uid?: string | null
           video_url?: string | null
         }
