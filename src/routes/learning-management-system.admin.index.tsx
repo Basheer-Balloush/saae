@@ -401,6 +401,8 @@ function AdminHome() {
                 );
               })}
             </div>
+
+            <ReconcileCertificatesCard ar={ar} />
           </aside>
 
           {/* Main */}
