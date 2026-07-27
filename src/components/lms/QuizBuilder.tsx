@@ -23,7 +23,7 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
 
   const load = async () => {
     const { data: q } = await supabase.from("lms_quizzes")
-      .select("id,title,pass_score").eq("course_id", courseId).maybeSingle();
+      .select("id,title,pass_score,version,max_attempts,cooldown_minutes").eq("course_id", courseId).maybeSingle();
     setQuiz(q as Quiz | null);
     if (q) {
       const { data: qs } = await supabase.from("lms_quiz_questions")
