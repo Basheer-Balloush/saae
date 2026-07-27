@@ -54,7 +54,7 @@ function Player() {
       if (secs && secs.length) {
         const ids = secs.map((s) => s.id);
         const [{ data: lss }, { data: prs }] = await Promise.all([
-          supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids).order("display_order"),
+          supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,video_status,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids).order("display_order"),
           supabase.from("lms_lesson_progress").select("lesson_id,is_completed").eq("student_id", user.id),
         ]);
         const list = (lss as Lesson[]) ?? [];
