@@ -1,58 +1,75 @@
-# LMS Audit Remediation — Phased Execution Plan
+# Phase 5 — Co-instructors, Quiz Integrity, Certificates
 
-Execution contract for `plan-4.md`. We ship **one phase at a time**; the next phase does not start until the current one's exit gate passes. All migrations are additive and reversible. Existing CRM, AMS, internship, public-site, and initiative behavior stays untouched.
+Scope from `.lovable/plan.md`: A-09, A-10, A-11. Delivered in one migration per sub-phase to keep rollback surgical.
 
-## Decisions locked (from your answers)
+## 5A — Co-instructor reachability matrix (A-09)
 
-- **Payments (Phase 8):** build self-service checkout with authoritative server-side coupon/price calculation.
-- **Single device (Phase 7B):** enforced server-side — server-owned session registry, older sessions revoked, protected commands reject stale sessions.
-- **Quiz attempts (Phase 5B):** attempt limit is **admin-configurable per quiz** (default carried from a course/global setting), not hardcoded.
-- **Instructor cleanup (Phase 3):** 90-day recoverable archive, purge only by explicit admin action after retention.
+**Problem.** Instructor screens sometimes check `courses.instructor_id = auth.uid()` and sometimes `lms_course_instructors`. Co-instructors get inconsistent access.
 
-Remaining defaults I will apply unless you say otherwise: accreditation uses the existing `trainer-scoring.ts` weighting with 2 evaluators and an admin-set pass threshold; assignment late policy = configurable due date + grace window + admin-set resubmission cap; reviews are publicly readable only after admin approval.
+**Migration.**
+- New SQL helper `public.can_manage_lms_course(_course_id uuid, _user_id uuid)` (SECURITY DEFINER, `search_path=public`) returning true when the user is admin, primary instructor, or listed in `lms_course_instructors` with an active row.
+- Extend `lms_course_instructors` with `role text NOT NULL DEFAULT 'co_instructor' CHECK (role IN ('co_instructor','assistant'))` and `can_edit boolean NOT NULL DEFAULT true`, `can_grade boolean NOT NULL DEFAULT true`, `can_manage_enrollments boolean NOT NULL DEFAULT false`. Primary instructor is implicit — no row required.
+- Rewrite RLS on `lms_courses`, `lms_sections`, `lms_lessons`, `lms_assignments`, `lms_quizzes`, `lms_quiz_questions`, `lms_submissions`, `lms_reviews` (instructor-side policies only) to call `can_manage_lms_course`. Public/student policies untouched.
+- Permission matrix documented in `src/lib/lms-permissions.ts` (client-side mirror for UI gating only).
 
-## Phase roadmap
+**UI.**
+- Every instructor route (`/instructor/courses/$id`, `/instructor/assignments/$courseId`, quiz builder, co-instructors editor) reads permissions via a single `useCourseAccess(courseId)` hook backed by `can_manage_lms_course`.
+- Hide grade/manage buttons for co-instructors whose flags are off.
 
-**Phase 0 — Baseline, decisions, tests, observability (CF-07). ✅ DONE.** Baseline recorded in `.lovable/phase0-baseline.md` (70 tables, 219 functions, 183 policies, 37 storage policies, row counts, full FK cascade map, privilege caller map). Vitest harness added (`tests/unit`, `tests/integration`, `tests/e2e`) with `test`, `test:unit`, `test:integration`, `test:e2e`, `typecheck`, `check` scripts; 13 baseline tests pass. Audit foundation shipped: `src/lib/audit-events.ts` (typed redacted event contract), `src/lib/audit-log.server.ts` (durable + structured-log sink), and append-only `public.lms_audit_events` (admin-read-only, anon revoked, update/delete blocked by trigger — verified).
+## 5B — Versioned quizzes with configurable attempts (A-10)
 
-**Phase 1 — Applicant authorization + evidence integrity (A-06). ✅ DONE.** Reviewer-owned columns (`status`, `admin_notes`, `assigned_evaluators`, `decision_at`, `submitted_at`, `email`, `user_id`) are now blocked for non-admin updates by a `BEFORE UPDATE` guard trigger. Submit and evidence attach/remove run through `submit_trainer_application`, `attach_trainer_application_file`, and `remove_trainer_application_file` (SECURITY DEFINER, fixed `search_path`, authenticated-only EXECUTE), wrapped by audited server fns in `src/lib/trainer-application.functions.ts`. Direct `INSERT` on `trainer_applications` and all writes on `trainer_application_files` are revoked from `authenticated`; storage insert requires an open owned application and delete is only allowed while the application is `incomplete`. The apply route now calls the protected commands.
+**Problem.** Quiz answers are keyed by array index. Editing a question invalidates prior attempts and lets learners retake unlimited times.
 
-**Phase 2 — Scored accreditation + atomic provisioning (A-07, CF-02).** Additive tables for phases, evaluator assignments, rubric criteria, and scores. `trainer_app_transition` enforces ordered phases, rubric completion, evaluator count, and minimum score using the real `trainer-scoring.ts` formula. Reviewer UI for scoring. Final activation (auth account + role + instructor profile + approval) becomes one transaction plus an idempotent outbox job for the email. Signup provisioning gets the same outbox repair path.
+**Migration.**
+- Add `lms_quizzes.version int NOT NULL DEFAULT 1`, `max_attempts int NOT NULL DEFAULT 3`, `cooldown_minutes int NOT NULL DEFAULT 0`, `attempt_default_source text` (for admin default reference).
+- Add `lms_quiz_questions.version int NOT NULL DEFAULT 1` and a per-question stable `question_key uuid NOT NULL DEFAULT gen_random_uuid()` (backfilled from `id`).
+- New table `lms_quiz_question_versions(quiz_id, question_key, version, question, choices jsonb, correct_index, display_order, created_at)` — append-only frozen snapshots keyed by version.
+- Trigger on `lms_quiz_questions` insert/update: bump `lms_quizzes.version`, snapshot the new question set to `lms_quiz_question_versions`.
+- Rewrite `lms_quiz_attempts`:
+  - `answers` becomes `{ question_key: choice_index }` (jsonb keyed by question_key, migrated from array by resolving index → id at migration time).
+  - Add `quiz_version int NOT NULL` and `attempt_number int NOT NULL`.
+- New RPC `lms_submit_quiz_v2(_quiz_id, _answers jsonb)`: locks quiz row, reads current version's snapshot, enforces `max_attempts` and `cooldown_minutes`, grades against frozen version, returns `{score, passed, attempt_number, remaining_attempts, next_attempt_at, certificate_id}`. Old `lms_submit_quiz` kept as thin wrapper for one release, then revoked.
+- New RPC `lms_get_quiz_for_attempt(_quiz_id)` returning frozen current-version questions plus attempt state.
 
-**Phase 3 — Recoverable archive/restore/purge (A-08).** Disable the current global delete. Add `lms_cleanup_batches` + per-record outcomes, admin preview with explicit row selection, archive-instead-of-delete (soft state, no cascade), 90-day retention, restore command, and an explicit admin purge command gated on retention expiry with audit rows.
+**UI.**
+- `QuizBuilder.tsx`: expose `max_attempts` and `cooldown_minutes` inputs; show current version and a "publishing changes will invalidate learner attempts in progress" notice.
+- Student quiz page reads via new RPC, shows attempts left / cooldown countdown, disables submit when exhausted.
 
-**Phase 4 — Atomic enrollment, safe files, assignment lifecycle (CF-01, CF-04, A-12).** Generalize the profile prepare→upload→verify→finalize protocol into one shared file service; `FileUploader` stops deleting the old object before the new reference commits. Enrollment becomes a single RPC (request + responses + file references + server-side required-field validation). Assignment submissions become immutable attempts with due date, grace window, late flag, resubmission cap, lock state, and version history behind the existing protected submit/grade commands.
+## 5C — Central certificate eligibility + reconciliation (A-11)
 
-**Phase 5 — Co-instructors, quiz integrity, certificates (A-09, A-10, A-11).**
-- 5A: single reachability helper based on `lms_course_instructors`; every instructor screen/route/policy uses it with a defined co-instructor permission matrix.
-- 5B: versioned quizzes; answers keyed by question ID against a frozen version; attempt records with an **admin-configured attempt limit** per quiz plus optional cooldown.
-- 5C: one central certificate-eligibility evaluator invoked from quiz submission *and* lesson completion, plus a reconciliation job for historical eligible-but-unissued cases.
+**Problem.** Certificate issuance logic is duplicated in `lms_submit_quiz` and lesson-completion paths; historical passers with completed progress may be missing certs.
 
-**Phase 6 — Provider-backed video readiness (A-14/B-6).** One processing-state model on lessons (uploading → processing → ready → failed) driven by Bunny status polling/webhook; player gates on `ready`; timeout and failure states surfaced in the UI. Single schema, single migration — no duplicate B-series work.
+**Migration.**
+- New RPC `lms_evaluate_certificate(_student_id uuid, _course_id uuid)` (SECURITY DEFINER):
+  1. Verify enrollment.
+  2. Require `progress = 100` (all lessons complete) OR course has no lessons.
+  3. Require passing quiz attempt (latest, current version) if course has a quiz.
+  4. Insert `lms_certificates` if missing (unique on `(student_id, course_id)`).
+  5. Return `{ certificate_id, issued: boolean, reason?: string }`.
+- Invoke it from:
+  - `lms_submit_quiz_v2` (after grading).
+  - `lms_mark_lesson_complete` / progress-update trigger (when progress hits 100).
+- Audit event `certificate.issued` on new inserts.
+- Reconciliation RPC `lms_reconcile_certificates(_limit int default 500)` (admin-only) that scans enrollments meeting eligibility without a cert and issues them, returning counts. Wired into a new "Reconcile certificates" admin button on the LMS admin dashboard.
 
-**Phase 7 — Auth resilience + enforced sessions (CF-03, A-15).**
-- 7A: raise password minimum to 8+ with strength rules, order account creation so role/profile persist before success is reported, outbox-retry the confirmation email, add signup/reset abuse throttling.
-- 7B: server-owned active-session registry — sessions minted server-side, users cannot forge/delete their own row, new login revokes prior sessions, protected commands validate the session, with an admin override and clear localized "signed out on another device" UX.
+**UI.**
+- Student quiz result reads `certificate_id` from the new response.
+- Admin: `learning-management-system.admin.index.tsx` gains a small "Reconcile eligible certificates" action calling the RPC and showing counts.
 
-**Phase 8 — Self-service checkout (A-16).** Enable Lovable's built-in payments, model course price/currency (SYP display handled explicitly), coupon validation and authoritative discount calculation server-side, payment state machine, idempotent webhook → enrollment grant, refund/failure handling, and admin payment views. Manual path stays as fallback until checkout passes its gate.
+## Tests
 
-**Phase 9 — Bounded queries, public reviews, truthful JSON-LD (A-17, A-18, A-19).** Server-side list contracts (validated filters/sort, bounded pages, totals, authorization before retrieval) for the catalogue and every unbounded admin list. Public review reads via a narrow anon-safe boundary with moderation state. Course JSON-LD reports real rating count/value, correct currency, and real availability.
+- Unit: scoring against a frozen version after questions edited; attempt-limit enforcement; cooldown gate; certificate evaluator idempotency.
+- RLS: co-instructor with `can_grade=false` cannot call `grade_lms_submission`; primary instructor unaffected.
+- Integration: end-to-end enroll → complete lessons → pass quiz → certificate issued exactly once; reconciliation issues missing historicals without duplicating.
 
-**Phase 10 — Authoring reliability, a11y, localization (CF-05, CF-06).** Multi-write authoring flows become single commands or checked sequences with rollback and per-mutation error surfacing. Bounded interface audit: localized enum labels, icon-button names/focus, replace native `confirm()` with accessible dialogs, RTL/LTR edge cases, AR/EN parity.
+## Exit gate
 
-**Phase 11 — Reconciliation, rollout, handoff (all).** Full authorization matrix run on fresh + upgraded databases, reconciliation jobs for certificates/orphan uploads/partial provisioning, staged deployment sequence with rollback notes per migration, alerting on stuck outbox jobs and rejected authorization attempts, and operator documentation.
+All new RPCs shipped with grants + audit; every instructor screen routed through `can_manage_lms_course`; quiz attempts stable across question edits; certificate issuance single-sourced; reconciliation run once on the live DB and count recorded in the phase note.
 
-## Technical notes
+## Delivery order (single response each)
 
-- Every sensitive mutation moves behind a `createServerFn` + narrow `SECURITY DEFINER` RPC with fixed `search_path`, explicit grants, and allowlisted mutable fields.
-- Direct table/storage privileges are revoked only after callers migrate and authorization tests exist (never in the same phase as the new command's first release).
-- External calls (Auth, email, storage, Bunny, payment provider) never share a DB transaction — they run through idempotent commands plus a durable outbox with attempt count, next retry, terminal failure, and correlation ID.
-- Audit events use one shared shape: type + version, actor + role, target, prior/next state, correlation ID, reason, redacted metadata. No tokens, passwords, or raw private documents.
+1. Migration 5A + hook + policy sweep.
+2. Migration 5B + quiz builder & student UI + RPC swap.
+3. Migration 5C + admin reconcile button + tests.
 
-## Definition of done (every phase)
-
-Migration review · authorization review · unit + RLS/RPC tests green · complete diff review · all UI states covered · AR/EN and RTL/LTR parity · residual-risk and rollback note recorded · no regressions in CRM, AMS, internship, or public site.
-
-## Kickoff
-
-On approval I start with **Phase 0** (baseline inventory + test harness + audit-event foundation), then stop for your go before Phase 1.
+Reply "go" to start with 5A.
