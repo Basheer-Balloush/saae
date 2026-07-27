@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, KeyRound } from "lucide-react";
+import { PASSWORD_MIN } from "@/lib/password-policy";
+import { localizeAuthError } from "@/lib/auth-error-i18n";
 
 export const Route = createFileRoute("/learning-management-system/reset-password")({
   head: () => ({ meta: [{ title: "LMS · Reset password" }] }),
