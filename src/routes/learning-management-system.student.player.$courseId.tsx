@@ -187,6 +187,12 @@ function Player() {
               onEnded={markComplete}
               className="w-full h-full"
             />
+          ) : current && current.video_provider === "bunny" && current.video_uid && current.video_status !== "ready" ? (
+            <div className="text-white/85 text-sm px-6 text-center">
+              {current.video_status === "failed"
+                ? (lang === "ar" ? "تعذّر معالجة الفيديو. يرجى إبلاغ المدرّب." : "Video processing failed. Please notify the instructor.")
+                : (lang === "ar" ? "الفيديو قيد المعالجة، سيصبح جاهزاً خلال دقائق." : "Video is processing — it will be ready in a few minutes.")}
+            </div>
           ) : (
             <div className="text-white/85 text-sm">{tr.selectLesson}</div>
           )}
