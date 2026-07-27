@@ -93,10 +93,20 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
   return (
     <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-foreground">{tr.finalTest}</h2>
+        <div>
+          <h2 className="font-bold text-foreground">{tr.finalTest}</h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            {lang === "ar" ? `النسخة الحالية: ${quiz.version}` : `Current version: ${quiz.version}`}
+          </p>
+        </div>
         <Button size="sm" onClick={addQuestion}><Plus className="h-4 w-4 mx-1" />{tr.addQuestion}</Button>
       </div>
-      <div className="grid sm:grid-cols-2 gap-3">
+      <p className="text-xs rounded-md bg-muted/40 px-3 py-2 text-muted-foreground">
+        {lang === "ar"
+          ? "أي تعديل على الأسئلة يزيد رقم النسخة، ومحاولات المتدرّبين السابقة تبقى مصحّحة على النسخة التي أدّوها."
+          : "Editing any question bumps the version; existing learner attempts stay graded against the version they took."}
+      </p>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div><Label>{lang === "ar" ? "العنوان" : "Title"}</Label>
           <Input value={quiz.title} onChange={(e) => setQuiz({ ...quiz, title: e.target.value })}
             onBlur={() => saveQuiz({ title: quiz.title })} /></div>
@@ -104,7 +114,16 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
           <Input type="number" min={0} max={100} value={quiz.pass_score}
             onChange={(e) => setQuiz({ ...quiz, pass_score: parseInt(e.target.value) || 0 })}
             onBlur={() => saveQuiz({ pass_score: quiz.pass_score })} /></div>
+        <div><Label>{lang === "ar" ? "الحد الأقصى للمحاولات" : "Max attempts"}</Label>
+          <Input type="number" min={1} max={20} value={quiz.max_attempts}
+            onChange={(e) => setQuiz({ ...quiz, max_attempts: Math.max(1, Math.min(20, parseInt(e.target.value) || 1)) })}
+            onBlur={() => saveQuiz({ max_attempts: quiz.max_attempts })} /></div>
+        <div><Label>{lang === "ar" ? "فترة الانتظار (دقائق)" : "Cooldown (minutes)"}</Label>
+          <Input type="number" min={0} max={43200} value={quiz.cooldown_minutes}
+            onChange={(e) => setQuiz({ ...quiz, cooldown_minutes: Math.max(0, parseInt(e.target.value) || 0) })}
+            onBlur={() => saveQuiz({ cooldown_minutes: quiz.cooldown_minutes })} /></div>
       </div>
+
 
       <div className="space-y-3">
         {questions.length === 0 && <p className="text-sm text-muted-foreground">{lang === "ar" ? "لا توجد أسئلة بعد" : "No questions yet"}</p>}
