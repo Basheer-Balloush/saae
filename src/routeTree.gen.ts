@@ -75,6 +75,7 @@ import { Route as LearningManagementSystemAdminEnrollmentRequestsRouteImport } f
 import { Route as LearningManagementSystemAdminCouponsRouteImport } from './routes/learning-management-system.admin.coupons'
 import { Route as LearningManagementSystemAdminAttendanceLinkRouteImport } from './routes/learning-management-system.admin.attendance-link'
 import { Route as LearningManagementSystemAdminAnalyticsRouteImport } from './routes/learning-management-system.admin.analytics'
+import { Route as ApiPublicBunnyWebhookRouteImport } from './routes/api/public/bunny-webhook'
 import { Route as AdminFormsNewRouteImport } from './routes/admin.forms.new'
 import { Route as AdminCrmStudentsRouteImport } from './routes/admin.crm.students'
 import { Route as AdminCrmLeadsRouteImport } from './routes/admin.crm.leads'
@@ -468,6 +469,11 @@ const LearningManagementSystemAdminAnalyticsRoute =
     path: '/analytics',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const ApiPublicBunnyWebhookRoute = ApiPublicBunnyWebhookRouteImport.update({
+  id: '/api/public/bunny-webhook',
+  path: '/api/public/bunny-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminFormsNewRoute = AdminFormsNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -670,6 +676,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm/leads': typeof AdminCrmLeadsRouteWithChildren
   '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
+  '/api/public/bunny-webhook': typeof ApiPublicBunnyWebhookRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
@@ -755,6 +762,7 @@ export interface FileRoutesByTo {
   '/admin/crm/leads': typeof AdminCrmLeadsRouteWithChildren
   '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
+  '/api/public/bunny-webhook': typeof ApiPublicBunnyWebhookRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
@@ -850,6 +858,7 @@ export interface FileRoutesById {
   '/admin/crm/leads': typeof AdminCrmLeadsRouteWithChildren
   '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
+  '/api/public/bunny-webhook': typeof ApiPublicBunnyWebhookRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
@@ -946,6 +955,7 @@ export interface FileRouteTypes {
     | '/admin/crm/leads'
     | '/admin/crm/students'
     | '/admin/forms/new'
+    | '/api/public/bunny-webhook'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
@@ -1031,6 +1041,7 @@ export interface FileRouteTypes {
     | '/admin/crm/leads'
     | '/admin/crm/students'
     | '/admin/forms/new'
+    | '/api/public/bunny-webhook'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
@@ -1125,6 +1136,7 @@ export interface FileRouteTypes {
     | '/admin/crm/leads'
     | '/admin/crm/students'
     | '/admin/forms/new'
+    | '/api/public/bunny-webhook'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
     | '/learning-management-system/admin/coupons'
@@ -1190,6 +1202,7 @@ export interface RootRouteChildren {
   NewsIdRoute: typeof NewsIdRoute
   ResourcesAiToolsRoute: typeof ResourcesAiToolsRoute
   NewsIndexRoute: typeof NewsIndexRoute
+  ApiPublicBunnyWebhookRoute: typeof ApiPublicBunnyWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -1658,6 +1671,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/learning-management-system/admin/analytics'
       preLoaderRoute: typeof LearningManagementSystemAdminAnalyticsRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
+    }
+    '/api/public/bunny-webhook': {
+      id: '/api/public/bunny-webhook'
+      path: '/api/public/bunny-webhook'
+      fullPath: '/api/public/bunny-webhook'
+      preLoaderRoute: typeof ApiPublicBunnyWebhookRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/forms/new': {
       id: '/admin/forms/new'
@@ -2199,6 +2219,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewsIdRoute: NewsIdRoute,
   ResourcesAiToolsRoute: ResourcesAiToolsRoute,
   NewsIndexRoute: NewsIndexRoute,
+  ApiPublicBunnyWebhookRoute: ApiPublicBunnyWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
