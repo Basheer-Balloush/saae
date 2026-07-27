@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { sendPasswordResetWithResend, signUpWithResendConfirmation } from './lms-auth-email.server'
+import { PASSWORD_MIN } from './password-policy'
 
 const langSchema = z.enum(['ar', 'en'])
 
@@ -13,7 +14,7 @@ const signupSchema = z.object({
     return parts.length >= 3
   }, { message: 'Full name must be three Arabic words' }),
   email: z.string().trim().email().max(255),
-  password: z.string().min(6).max(72),
+  password: z.string().min(PASSWORD_MIN).max(72),
   asInstructor: z.boolean(),
   lang: langSchema,
 })
