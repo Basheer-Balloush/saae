@@ -20,9 +20,9 @@ const MAP: Array<{ match: RegExp; ar: string; en: string }> = [
     en: "This email is already registered — please log in instead",
   },
   {
-    match: /password should be at least/i,
-    ar: "يجب ألّا تقلّ كلمة المرور عن 6 أحرف",
-    en: "Password must be at least 6 characters",
+    match: /password should be at least|password.*(?:min|short)|PASSWORD_TOO_SHORT/i,
+    ar: "يجب ألّا تقلّ كلمة المرور عن 10 أحرف",
+    en: "Password must be at least 10 characters",
   },
   {
     match: /password is too weak|weak password|password strength|strength.*weak/i,
@@ -45,9 +45,14 @@ const MAP: Array<{ match: RegExp; ar: string; en: string }> = [
     en: "Invalid email address",
   },
   {
-    match: /rate limit|too many requests/i,
-    ar: "محاولات كثيرة جداً، حاول لاحقاً",
-    en: "Too many attempts, please try again later",
+    match: /rate limit|too many requests|RATE_LIMITED/i,
+    ar: "محاولات كثيرة جداً، يرجى الانتظار قبل المحاولة مرّة أخرى",
+    en: "Too many attempts — please wait a few minutes before trying again",
+  },
+  {
+    match: /SIGNUP_FAILED/i,
+    ar: "تعذّر إنشاء الحساب حالياً — حاول مرة أخرى",
+    en: "We couldn't create your account right now — please try again",
   },
   {
     match: /network|failed to fetch/i,
