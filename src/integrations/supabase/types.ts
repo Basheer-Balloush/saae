@@ -2130,21 +2130,33 @@ export type Database = {
       lms_course_instructors: {
         Row: {
           added_by: string | null
+          can_edit: boolean
+          can_grade: boolean
+          can_manage_enrollments: boolean
           course_id: string
           created_at: string
           instructor_user_id: string
+          role: string
         }
         Insert: {
           added_by?: string | null
+          can_edit?: boolean
+          can_grade?: boolean
+          can_manage_enrollments?: boolean
           course_id: string
           created_at?: string
           instructor_user_id: string
+          role?: string
         }
         Update: {
           added_by?: string | null
+          can_edit?: boolean
+          can_grade?: boolean
+          can_manage_enrollments?: boolean
           course_id?: string
           created_at?: string
           instructor_user_id?: string
+          role?: string
         }
         Relationships: [
           {
@@ -3733,6 +3745,10 @@ export type Database = {
         Args: { _session_id: string }
         Returns: boolean
       }
+      can_manage_lms_course: {
+        Args: { _course_id: string; _user_id: string }
+        Returns: boolean
+      }
       crm_add_lead_note_tx: {
         Args: { _body: string; _lead_id: string; _lead_type: string }
         Returns: Json
@@ -3837,6 +3853,10 @@ export type Database = {
         }[]
       }
       has_ams_access: { Args: { _user_id: string }; Returns: boolean }
+      has_lms_course_capability: {
+        Args: { _cap: string; _course_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_lms_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
