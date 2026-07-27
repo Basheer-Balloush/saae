@@ -186,7 +186,7 @@ function LmsSignup() {
                       <div className={`h-full rounded-full transition-all duration-300 ${strengthInfo.color}`} style={{ width: strengthInfo.width }} />
                     </div>
                     <div className="flex flex-wrap gap-1">
-                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${password.length >= 6 ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>6+</span>
+                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${password.length >= PASSWORD_MIN ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>{PASSWORD_MIN}+</span>
                       <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[a-z]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>abc</span>
                       <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[A-Z]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>ABC</span>
                       <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[0-9]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>123</span>
