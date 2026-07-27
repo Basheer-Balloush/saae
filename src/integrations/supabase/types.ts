@@ -2760,27 +2760,33 @@ export type Database = {
       lms_quiz_attempts: {
         Row: {
           answers: Json
+          attempt_number: number
           id: string
           passed: boolean
           quiz_id: string
+          quiz_version: number
           score: number
           student_id: string
           submitted_at: string
         }
         Insert: {
           answers?: Json
+          attempt_number?: number
           id?: string
           passed?: boolean
           quiz_id: string
+          quiz_version?: number
           score?: number
           student_id: string
           submitted_at?: string
         }
         Update: {
           answers?: Json
+          attempt_number?: number
           id?: string
           passed?: boolean
           quiz_id?: string
+          quiz_version?: number
           score?: number
           student_id?: string
           submitted_at?: string
@@ -2788,6 +2794,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "lms_quiz_attempts_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "lms_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_quiz_question_versions: {
+        Row: {
+          choices: Json
+          correct_index: number
+          created_at: string
+          display_order: number
+          question: string
+          question_key: string
+          quiz_id: string
+          version: number
+        }
+        Insert: {
+          choices?: Json
+          correct_index?: number
+          created_at?: string
+          display_order?: number
+          question: string
+          question_key: string
+          quiz_id: string
+          version: number
+        }
+        Update: {
+          choices?: Json
+          correct_index?: number
+          created_at?: string
+          display_order?: number
+          question?: string
+          question_key?: string
+          quiz_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_quiz_question_versions_quiz_id_fkey"
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "lms_quizzes"
@@ -2803,6 +2850,7 @@ export type Database = {
           display_order: number
           id: string
           question: string
+          question_key: string
           quiz_id: string
         }
         Insert: {
@@ -2812,6 +2860,7 @@ export type Database = {
           display_order?: number
           id?: string
           question: string
+          question_key?: string
           quiz_id: string
         }
         Update: {
@@ -2821,6 +2870,7 @@ export type Database = {
           display_order?: number
           id?: string
           question?: string
+          question_key?: string
           quiz_id?: string
         }
         Relationships: [
@@ -2835,25 +2885,34 @@ export type Database = {
       }
       lms_quizzes: {
         Row: {
+          cooldown_minutes: number
           course_id: string
           created_at: string
           id: string
+          max_attempts: number
           pass_score: number
           title: string
+          version: number
         }
         Insert: {
+          cooldown_minutes?: number
           course_id: string
           created_at?: string
           id?: string
+          max_attempts?: number
           pass_score?: number
           title: string
+          version?: number
         }
         Update: {
+          cooldown_minutes?: number
           course_id?: string
           created_at?: string
           id?: string
+          max_attempts?: number
           pass_score?: number
           title?: string
+          version?: number
         }
         Relationships: []
       }
@@ -3988,6 +4047,7 @@ export type Database = {
       }
       lms_delete_course: { Args: { _course_id: string }; Returns: undefined }
       lms_enroll: { Args: { _course_id: string }; Returns: string }
+      lms_get_quiz_for_attempt: { Args: { _quiz_id: string }; Returns: Json }
       lms_get_quiz_questions: {
         Args: { _quiz_id: string }
         Returns: {
@@ -4172,6 +4232,10 @@ export type Database = {
         Returns: Json
       }
       lms_submit_quiz: {
+        Args: { _answers: Json; _quiz_id: string }
+        Returns: Json
+      }
+      lms_submit_quiz_v2: {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json
       }
