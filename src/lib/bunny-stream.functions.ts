@@ -219,16 +219,83 @@ export const setLessonBunnyVideo = createServerFn({ method: "POST" })
       throw new Error("Forbidden");
     }
 
+    // Phase 6: mark as processing (not ready). The trigger resets status when
+    // video_uid changes; we explicitly set it here so the initial insert path
+    // for a lesson with a fresh guid is also honest about readiness.
     const { error: upErr } = await supabase
       .from("lms_lessons")
       .update({
         video_provider: "bunny",
         video_uid: data.videoId,
-        video_ready: true,
+        video_ready: false,
+        video_status: "processing",
+        video_status_error: null,
         video_url: null,
       })
       .eq("id", data.lessonId);
     if (upErr) throw new Error(upErr.message);
 
-    return { ok: true };
+    return { ok: true, status: "processing" as const };
+  });
+
+/**
+ * Phase 6: instructor/admin can ask the server to re-check a lesson's video
+ * status directly from Bunny — recovery path when the webhook is missed.
+ */
+export const refreshBunnyLessonStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ lessonId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { libraryId, apiKey } = getBunnyEnv();
+
+    const { data: lesson, error } = await supabase
+      .from("lms_lessons")
+      .select("id, video_provider, video_uid, video_status, lms_sections!inner(lms_courses!inner(instructor_id))")
+      .eq("id", data.lessonId)
+      .maybeSingle();
+    if (error || !lesson) throw new Error("Lesson not found");
+
+    const l = lesson as unknown as {
+      video_provider: string;
+      video_uid: string | null;
+      video_status: string;
+      lms_sections: { lms_courses: { instructor_id: string } };
+    };
+
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    const isAdmin = (roles ?? []).some((r) => r.role === "lms_admin" || r.role === "admin");
+    const isInstructor = l.lms_sections.lms_courses.instructor_id === userId;
+    if (!isAdmin && !isInstructor) throw new Error("Forbidden");
+
+    if (l.video_provider !== "bunny" || !l.video_uid) {
+      return { status: l.video_status, changed: false };
+    }
+
+    const res = await fetch(`https://video.bunnycdn.com/library/${libraryId}/videos/${l.video_uid}`, {
+      headers: { AccessKey: apiKey, Accept: "application/json" },
+    });
+    if (!res.ok) throw new Error(`Bunny fetch failed (${res.status})`);
+    const body = (await res.json()) as { status?: number; guid?: string };
+
+    // Bunny status codes: 0 Created, 1 Uploaded, 2 Processing, 3 Transcoding,
+    // 4 Finished, 5 Error, 6 UploadFailed, 7 JitSegmenting, 8 JitPlaylistsCreated.
+    const s =
+      body.status === 4 || body.status === 8
+        ? "ready"
+        : body.status === 5 || body.status === 6
+          ? "failed"
+          : "processing";
+
+    // Guard against stale identifiers: only update the row that still matches.
+    const { data: updated, error: upErr } = await supabase
+      .from("lms_lessons")
+      .update({ video_status: s, video_ready: s === "ready" })
+      .eq("id", data.lessonId)
+      .eq("video_uid", l.video_uid)
+      .select("id")
+      .maybeSingle();
+    if (upErr) throw new Error(upErr.message);
+
+    return { status: s, changed: !!updated };
   });
