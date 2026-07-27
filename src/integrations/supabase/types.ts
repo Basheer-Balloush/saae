@@ -1853,6 +1853,33 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_auth_rate_limits: {
+        Row: {
+          count: number
+          id: string
+          identifier_hash: string
+          kind: string
+          last_attempt_at: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          id?: string
+          identifier_hash: string
+          kind: string
+          last_attempt_at?: string
+          window_start?: string
+        }
+        Update: {
+          count?: number
+          id?: string
+          identifier_hash?: string
+          kind?: string
+          last_attempt_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       lms_categories: {
         Row: {
           created_at: string
@@ -4029,6 +4056,16 @@ export type Database = {
         Args: { _admin_notes?: string; _request_id: string }
         Returns: Json
       }
+      lms_auth_check_rate_limit: {
+        Args: {
+          _identifier_hash: string
+          _kind: string
+          _max_per_window?: number
+          _window_seconds?: number
+        }
+        Returns: Json
+      }
+      lms_auth_purge_rate_limits: { Args: never; Returns: number }
       lms_checkout: {
         Args: { _coupon?: string; _course_id: string }
         Returns: Json
