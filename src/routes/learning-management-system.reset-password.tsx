@@ -26,7 +26,7 @@ function ResetPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = z.string().min(6).max(72).safeParse(password);
+    const parsed = z.string().min(PASSWORD_MIN).max(72).safeParse(password);
     if (!parsed.success) {
       toast.error(tr.passwordMin);
       return;
@@ -38,7 +38,7 @@ function ResetPage() {
       toast.success(tr.passwordUpdated);
       navigate({ to: "/learning-management-system/student" });
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : tr.authFailed);
+      toast.error(localizeAuthError(err, lang, tr.authFailed));
     } finally {
       setSubmitting(false);
     }
