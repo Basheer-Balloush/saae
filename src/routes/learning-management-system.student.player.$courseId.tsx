@@ -80,6 +80,7 @@ function Player() {
     (async () => {
       if (!current) return;
       if (current.video_provider === "bunny" && current.video_uid) {
+        if (current.video_status && current.video_status !== "ready") return;
         try {
           const res = await getBunnyPlayback({ data: { lessonId: current.id } });
           if (!active) return;
