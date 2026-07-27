@@ -62,7 +62,7 @@ function LmsSignup() {
   const [sentTo, setSentTo] = useState<string | null>(null);
   const signUpUser = useServerFn(signUpLmsUser);
 
-  const passwordStrength = useMemo(() => calculatePasswordStrength(password), [password]);
+  const passwordStrength = useMemo(() => scorePasswordStrength(password), [password]);
   const strengthInfo = useMemo(() => getStrengthInfo(passwordStrength, lang), [passwordStrength, lang]);
 
   useEffect(() => {
