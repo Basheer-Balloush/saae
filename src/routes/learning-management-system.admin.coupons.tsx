@@ -1,13 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useState } from "react";
-import { Plus, Trash2, Ticket } from "lucide-react";
+import { Trash2, Ticket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/learning-management-system/admin/coupons")({
   head: () => ({ meta: [{ title: "Training & Learning Platform Admin · Coupons" }] }),
