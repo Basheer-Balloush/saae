@@ -50,14 +50,21 @@ function Player() {
 
       const { data: secs } = await supabase.from("lms_sections")
         .select("id,title,title_ar,title_en,display_order").eq("course_id", courseId).order("display_order");
-      setSections((secs as Section[]) ?? []);
-      if (secs && secs.length) {
-        const ids = secs.map((s) => s.id);
+      const orderedSecs = ((secs as Section[]) ?? []).slice().sort((a, b) => a.display_order - b.display_order);
+      setSections(orderedSecs);
+      if (orderedSecs.length) {
+        const ids = orderedSecs.map((s) => s.id);
         const [{ data: lss }, { data: prs }] = await Promise.all([
-          supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,video_status,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids).order("display_order"),
+          supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,video_status,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids),
           supabase.from("lms_lesson_progress").select("lesson_id,is_completed").eq("student_id", user.id),
         ]);
-        const list = (lss as Lesson[]) ?? [];
+        const secOrder = new Map(orderedSecs.map((s, i) => [s.id, i]));
+        const list = ((lss as Lesson[]) ?? []).slice().sort((a, b) => {
+          const sa = secOrder.get(a.section_id) ?? 0;
+          const sb = secOrder.get(b.section_id) ?? 0;
+          if (sa !== sb) return sa - sb;
+          return a.display_order - b.display_order;
+        });
         setLessons(list);
         setProgress((prs as Progress[]) ?? []);
         if (list.length) setCurrentId(list[0].id);
