@@ -15,7 +15,7 @@ type Course = {
   id: string; title_ar: string; title_en: string | null;
   description_ar: string | null; description_en: string | null;
   cover_url: string | null; level: string; price: number; is_free: boolean;
-  students_count: number; rating_avg: number; instructor_id: string;
+  students_count: number; rating_avg: number; review_count: number; instructor_id: string;
   enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null;
   start_date: string | null; end_date: string | null;
   schedule_days: string[] | null;
