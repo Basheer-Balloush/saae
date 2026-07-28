@@ -121,12 +121,19 @@ function LmsHome() {
   const isRtl = dir === "rtl";
   const tr = lmsT[lang];
   const navigate = useNavigate();
-  const { user, role } = useLmsAuth();
+  const { user, role, loading } = useLmsAuth();
   const loaderData = Route.useLoaderData();
   const categories = loaderData.categories as Category[];
   const stats = loaderData.stats as { courses: number; students: number; instructors: number };
   const coursesByCategory = loaderData.coursesByCategory as Record<string, number>;
   const [applying, setApplying] = useState(false);
+
+  // Redirect authenticated users to their profile (My Profile is their home).
+  useEffect(() => {
+    if (!loading && user) {
+      navigate({ to: "/learning-management-system/profile", replace: true });
+    }
+  }, [loading, user, navigate]);
 
   const handleBecomeInstructor = async () => {
     if (!user) {
