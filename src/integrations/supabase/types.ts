@@ -4142,6 +4142,10 @@ export type Database = {
         Args: { _base: string }
         Returns: string
       }
+      lms_issue_certificate: {
+        Args: { _course_id: string; _student_id: string }
+        Returns: Json
+      }
       lms_list_catalog_public: {
         Args: {
           _category_slug?: string
