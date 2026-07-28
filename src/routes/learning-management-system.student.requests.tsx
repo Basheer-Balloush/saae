@@ -7,6 +7,7 @@ import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/student/requests")({
   head: () => ({ meta: [{ title: "LMS · My requests" }] }),
@@ -58,7 +59,7 @@ function StudentRequestsPage() {
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
 
   const cancel = async (id: string) => {
-    if (!confirm(ar ? "إلغاء الطلب؟" : "Cancel this request?")) return;
+    if (!await confirmDialog({ title: ar ? "إلغاء الطلب؟" : "Cancel this request?", destructive: true })) return;
     setBusy(id);
     const { error } = await supabase.from("lms_enrollment_requests").update({ status: "cancelled" }).eq("id", id);
     setBusy(null);

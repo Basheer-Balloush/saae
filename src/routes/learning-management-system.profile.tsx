@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
+import { confirmDialog } from "@/hooks/useConfirm";
   Award,
   BookOpen,
   Camera,
@@ -659,7 +660,7 @@ function ApplicationsCard({ isRtl: _isRtl, lang }: { isRtl: boolean; lang: "ar" 
   }, [load]);
 
   const onWithdraw = async (id: string) => {
-    if (!confirm(lang === "ar" ? "هل تريد سحب الطلب؟" : "Withdraw this application?")) return;
+    if (!await confirmDialog({ title: lang === "ar" ? "هل تريد سحب الطلب؟" : "Withdraw this application?", destructive: true })) return;
     setBusy(id);
     try {
       await withdrawFn({ data: { application_id: id } });

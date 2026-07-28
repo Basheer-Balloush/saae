@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/ui/upload-progress";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 const ALLOWED_EXTS = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "zip", "rar", "7z", "txt", "md", "png", "jpg", "jpeg", "webp"];
 const MAX_BYTES = 25 * 1024 * 1024; // 25MB
@@ -103,7 +104,7 @@ export function FileUploader({
 
   const handleRemove = async () => {
     if (!currentPath || !onRemoved) return;
-    if (!confirm("Remove this file?")) return;
+    if (!await confirmDialog({ title: "Remove this file?", destructive: true })) return;
     await supabase.storage.from(bucket).remove([currentPath]).catch(() => {});
     await onRemoved();
   };

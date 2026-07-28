@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/ui/upload-progress";
 import {
+import { confirmDialog } from "@/hooks/useConfirm";
   getInitiativeStats, getInitiativeSettings,
   adminListDonations, adminListWaitlist, adminConfirmDonation,
   adminCreateDonation, adminDeleteDonation, adminUpdateSettings, adminListCourses,
@@ -143,7 +144,7 @@ function AdminInitiative() {
                           <CheckCircle2 className="h-3 w-3 me-1" />تأكيد
                         </Button>
                       )}
-                      <Button size="sm" variant="ghost" onClick={async () => { if (!confirm("حذف؟")) return; await deleteFn({ data: { id: d.id } }); reloadAll(); }}><Trash2 className="h-3 w-3" /></Button>
+                      <Button size="sm" variant="ghost" onClick={async () => { if (!await confirmDialog({ title: "حذف؟", destructive: true })) return; await deleteFn({ data: { id: d.id } }); reloadAll(); }}><Trash2 className="h-3 w-3" /></Button>
                     </td>
                   </tr>
                 ))}

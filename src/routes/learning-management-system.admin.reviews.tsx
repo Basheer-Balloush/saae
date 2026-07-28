@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import {
+import { confirmDialog } from "@/hooks/useConfirm";
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -61,7 +62,7 @@ function AdminReviews() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm(isAr ? "حذف هذا التقييم؟" : "Delete this review?")) return;
+    if (!await confirmDialog({ title: isAr ? "حذف هذا التقييم؟" : "Delete this review?", destructive: true })) return;
     const { error } = await supabase.from("lms_reviews").delete().eq("id", id);
     if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(isAr ? "تم الحذف" : "Deleted");

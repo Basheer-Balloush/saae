@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
+import { confirmDialog } from "@/hooks/useConfirm";
   Select,
   SelectContent,
   SelectItem,
@@ -255,7 +256,7 @@ function AdminDashboard() {
   const refresh = () => setRefreshKey((k) => k + 1);
 
   const handleDelete = async (id: string) => {
-    if (!confirm(labels.deleteNewsConfirm)) return;
+    if (!await confirmDialog({ title: labels.deleteNewsConfirm, destructive: true })) return;
     const { error } = await supabase.from("news").delete().eq("id", id);
     if (error) toast.error(toUserMessage(error));
     else {
@@ -971,7 +972,7 @@ export function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en"
   }, [bump]);
 
   const remove = async (id: string) => {
-    if (!confirm(labels.deleteMemberConfirm)) return;
+    if (!await confirmDialog({ title: labels.deleteMemberConfirm, destructive: true })) return;
     const { error } = await supabase.from("members").delete().eq("id", id);
     if (error) toast.error(toUserMessage(error));
     else { toast.success(labels.deleted); setBump((k) => k + 1); }
@@ -1285,7 +1286,7 @@ export function PartnersAdmin({ lang }: { lang: "en" | "ar" }) {
   }, [bump]);
 
   const remove = async (id: string) => {
-    if (!confirm(ar ? "هل تريد حذف هذا الشريك؟" : "Delete this partner?")) return;
+    if (!await confirmDialog({ title: ar ? "هل تريد حذف هذا الشريك؟" : "Delete this partner?", destructive: true })) return;
     const { error } = await supabase.from("partners").delete().eq("id", id);
     if (error) toast.error(toUserMessage(error));
     else { toast.success(ar ? "تم الحذف" : "Deleted"); setBump((k) => k + 1); }

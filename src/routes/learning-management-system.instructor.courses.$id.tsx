@@ -20,6 +20,7 @@ import { CourseCoInstructors } from "@/components/lms/CourseCoInstructors";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/ui/upload-progress";
 import {
+import { confirmDialog } from "@/hooks/useConfirm";
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -66,7 +67,7 @@ function CourseBuilder() {
   const [coverPct, setCoverPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
   const [attachPct, setAttachPct] = useState<Record<string, { pct: number; loaded: number; total: number; name: string }>>({});
   const [videoProgress, setVideoProgress] = useState<Record<string, { pct: number; speedMbps: number; etaSec: number }>>({});
-  // In-app dialog state replacing native prompt()/confirm()
+  // In-app dialog state replacing native prompt()/await confirmDialog({ title: , destructive: true })
   const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
   const [sectionTitleArDraft, setSectionTitleArDraft] = useState("");
   const [sectionTitleEnDraft, setSectionTitleEnDraft] = useState("");
@@ -1224,9 +1225,9 @@ function AttendanceLink({ courseId, lang, isAdmin }: { courseId: string; lang: "
 
   const handleUnlink = async () => {
     if (!amsId) return;
-    if (!confirm(lang === "ar"
+    if (!await confirmDialog({ title: lang === "ar"
       ? "إلغاء ربط نظام الحضور؟ سيُحذف الطلاب المتزامنون."
-      : "Unlink attendance? Synced students will be removed.")) return;
+      : "Unlink attendance? Synced students will be removed.", destructive: true })) return;
     setBusy(true);
     const { error } = await supabase.rpc("unlink_lms_course_from_ams", { _ams_course_id: amsId });
     setBusy(false);

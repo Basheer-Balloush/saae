@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useMemo, useState } from "react";
 import {
+import { confirmDialog } from "@/hooks/useConfirm";
   Check,
   X,
   Plus,
@@ -120,7 +121,7 @@ function AdminHome() {
   };
 
   const rejectInstructor = async (uid: string) => {
-    if (!confirm(ar ? "رفض هذا الطلب وحذفه نهائياً؟" : "Reject and remove this request?")) return;
+    if (!await confirmDialog({ title: ar ? "رفض هذا الطلب وحذفه نهائياً؟" : "Reject and remove this request?", destructive: true })) return;
     const { error } = await supabase.from("lms_instructors").delete().eq("user_id", uid);
     if (error) {
       toast.error(toUserMessage(error));
@@ -160,7 +161,7 @@ function AdminHome() {
     load();
   };
   const deleteCategory = async (id: string) => {
-    if (!confirm(ar ? "حذف؟" : "Delete?")) return;
+    if (!await confirmDialog({ title: ar ? "حذف؟" : "Delete?", destructive: true })) return;
     await supabase.from("lms_categories").delete().eq("id", id);
     load();
   };
@@ -877,7 +878,7 @@ function ReconcileCertificatesCard({ ar }: { ar: boolean }) {
   const run = useServerFn(reconcileCertificates);
   const onClick = async () => {
     if (busy) return;
-    if (!confirm(ar ? "فحص جميع التسجيلات المؤهلة وإصدار الشهادات الناقصة؟" : "Scan eligible enrollments and issue any missing certificates?")) return;
+    if (!await confirmDialog({ title: ar ? "فحص جميع التسجيلات المؤهلة وإصدار الشهادات الناقصة؟" : "Scan eligible enrollments and issue any missing certificates?", destructive: true })) return;
     setBusy(true);
     try {
       const res = await run({ data: { limit: 500 } });
