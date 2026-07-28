@@ -52,7 +52,7 @@ function AttendanceLinkPage() {
   const unlink = async (amsCourseId: string) => {
     if (!(await confirmDialog({ title: ar
       ? "إلغاء الربط؟ سيُحذف الطلاب المتزامنون من نظام الحضور، لكن الجلسات والإضافات اليدوية تبقى."
-      : "Unlink? Synced students will be removed from attendance, but sessions and manual entries remain.", destructive: true })) return;
+      : "Unlink? Synced students will be removed from attendance, but sessions and manual entries remain.", destructive: true }))) return;
     setBusy(amsCourseId);
     const { error } = await supabase.rpc("unlink_lms_course_from_ams", { _ams_course_id: amsCourseId });
     setBusy(null);
