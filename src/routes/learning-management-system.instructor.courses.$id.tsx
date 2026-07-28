@@ -1230,14 +1230,8 @@ function AttendanceLink({ courseId, lang, isAdmin }: { courseId: string; lang: "
     return () => { active = false; };
   }, [courseId]);
 
-  const handleLink = async () => {
-    setBusy(true);
-    const { data, error } = await supabase.rpc("link_lms_course_to_ams", { _lms_course_id: courseId });
-    setBusy(false);
-    if (error) { toast.error(toUserMessage(error)); return; }
-    setAmsId(data as string);
-    toast.success(lang === "ar" ? "تم تفعيل نظام الحضور" : "Attendance enabled");
-  };
+
+
 
   const handleUnlink = async () => {
     if (!amsId) return;
