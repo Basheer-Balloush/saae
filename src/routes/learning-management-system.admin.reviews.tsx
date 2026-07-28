@@ -53,7 +53,7 @@ function AdminReviews() {
 
   const moderate = async (id: string, next: ReviewStatus) => {
     setBusy(id);
-    const { error } = await supabase.rpc("lms_moderate_review", { _review_id: id, _status: next, _reason: null });
+    const { error } = await supabase.rpc("lms_moderate_review", { _review_id: id, _status: next, _reason: undefined });
     setBusy(null);
     if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(isAr ? "تم التحديث" : "Updated");
