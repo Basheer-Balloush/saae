@@ -917,7 +917,9 @@ function CourseBuilder() {
                     onBlur={() => updateSection(s.id, { title_en: s.title_en, title: s.title_ar || s.title_en || s.title })} className="flex-1 h-8" />
                 </div>
                 <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => openAddLesson(s.id)}><Plus className="h-4 w-4" /></Button>
+                  {course.delivery_mode !== "onsite" && (
+                    <Button size="sm" variant="ghost" onClick={() => openAddLesson(s.id)}><Plus className="h-4 w-4" /></Button>
+                  )}
                   <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: "section", id: s.id })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                 </div>
               </div>
@@ -939,6 +941,8 @@ function CourseBuilder() {
                       </label>
                       <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: "lesson", id: l.id })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
+                    {course.delivery_mode !== "onsite" && (
+                      <>
                     <div className="space-y-2 text-xs">
                       <div className="flex items-center gap-2 flex-wrap">
                         <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
@@ -1049,6 +1053,8 @@ function CourseBuilder() {
                         </ul>
                       )}
                     </div>
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -1064,13 +1070,17 @@ function CourseBuilder() {
             {lang === "ar" ? "إدارة الوظائف" : "Manage Assignments"}
           </Button>
         </Link>
-        <Link to="/learning-management-system/instructor/quiz-results/$courseId" params={{ courseId: course.id }}>
-          <Button variant="outline">
-            <FileText className="h-4 w-4 mx-1" />
-            {lang === "ar" ? "نتائج الاختبارات" : "Quiz results"}
-          </Button>
-        </Link>
-        <AttendanceLink courseId={course.id} lang={lang} isAdmin={isAdmin} />
+        {course.delivery_mode !== "onsite" && (
+          <Link to="/learning-management-system/instructor/quiz-results/$courseId" params={{ courseId: course.id }}>
+            <Button variant="outline">
+              <FileText className="h-4 w-4 mx-1" />
+              {lang === "ar" ? "نتائج الاختبارات" : "Quiz results"}
+            </Button>
+          </Link>
+        )}
+        {course.delivery_mode === "onsite" && (
+          <AttendanceLink courseId={course.id} lang={lang} isAdmin={isAdmin} />
+        )}
       </div>
 
       {course.delivery_mode === "onsite" && (
@@ -1078,7 +1088,7 @@ function CourseBuilder() {
       )}
 
 
-      <QuizBuilder courseId={course.id} />
+      {course.delivery_mode !== "onsite" && <QuizBuilder courseId={course.id} />}
 
       <CourseFormBuilder courseId={course.id} />
 

@@ -364,6 +364,14 @@ function CourseDetails() {
             const isFull = course.max_students != null && course.students_count >= course.max_students;
             const closed = !course.enrollment_open;
             if (enrolled) {
+              if (course.delivery_mode === "onsite") {
+                return (
+                  <div className="mt-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 p-4 text-center text-sm text-emerald-700 dark:text-emerald-300 font-semibold">
+                    <CheckCircle className="h-5 w-5 mx-auto mb-1" />
+                    {ar ? "أنت مسجّل — يتم تتبّع تقدّمك عبر الحضور" : "You're enrolled — progress is tracked via attendance"}
+                  </div>
+                );
+              }
               return (
                 <Link to="/learning-management-system/student/player/$courseId" params={{ courseId: course.id }}>
                   <Button className="w-full mt-4" size="lg">{tr.goToCourse}</Button>
