@@ -41,6 +41,7 @@ import { reconcileCertificates } from "@/lib/lms-certificates.functions";
 import {
   reconcileOrphanUploads,
   reconcilePartialProvisioning,
+  reconcileInternshipFiles,
   getOpsHealthSummary,
   type OpsHealthSummary,
 } from "@/lib/lms-ops.functions";
