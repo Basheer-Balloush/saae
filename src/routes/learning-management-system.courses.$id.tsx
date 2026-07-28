@@ -22,6 +22,7 @@ type Course = {
   schedule_time_from: string | null; schedule_time_to: string | null;
   location_ar: string | null; location_en: string | null;
   duration_hours: number | null;
+  delivery_mode: string | null;
   slug?: string | null;
 };
 type Section = { id: string; title: string; display_order: number };
@@ -40,7 +41,7 @@ type CourseLoaderData = {
 export const Route = createFileRoute("/learning-management-system/courses/$id")({
   loader: async ({ params }): Promise<CourseLoaderData> => {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
-    const baseQ = supabase.from("lms_courses").select("id,instructor_id,category_id,title_ar,title_en,description_ar,description_en,level,price,is_free,cover_url,status,rating_avg,review_count,students_count,created_at,updated_at,enrollment_open,max_students,enrollment_deadline,slug,start_date,end_date,schedule_days,schedule_time_from,schedule_time_to,location_ar,location_en,duration_hours");
+    const baseQ = supabase.from("lms_courses").select("id,instructor_id,category_id,title_ar,title_en,description_ar,description_en,level,price,is_free,cover_url,status,rating_avg,review_count,students_count,created_at,updated_at,enrollment_open,max_students,enrollment_deadline,slug,start_date,end_date,schedule_days,schedule_time_from,schedule_time_to,location_ar,location_en,duration_hours,delivery_mode");
     const { data: c } = await (isUuid ? baseQ.eq("id", params.id) : baseQ.eq("slug", params.id)).maybeSingle();
     if (!c) return { course: null, instructor: null, coInstructors: [], sections: [], lessons: [], hasForm: false };
     const course = c as unknown as Course;
@@ -237,6 +238,11 @@ function CourseDetails() {
             <span className="inline-flex items-center gap-1"><Users className="h-4 w-4" />{course.students_count} {tr.students}</span>
             <span className="inline-flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" />{Number(course.rating_avg).toFixed(1)}</span>
             <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold">{tr[course.level as keyof typeof tr] as string}</span>
+            {course.delivery_mode === "online" ? (
+              <span className="rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 px-2 py-0.5 text-xs font-semibold">{tr.deliveryOnline}</span>
+            ) : course.delivery_mode === "onsite" ? (
+              <span className="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-xs font-semibold">{tr.deliveryOnsite}</span>
+            ) : null}
           </div>
 
           {(() => {
