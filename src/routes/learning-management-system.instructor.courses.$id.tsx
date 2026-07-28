@@ -125,6 +125,19 @@ function CourseBuilder() {
 
   const update = (patch: Partial<Course>) => setCourse({ ...course, ...patch });
 
+  // Delivery mode gates lessons/quizzes server-side, so persist it immediately
+  // instead of waiting for a full course save — otherwise the UI shows the
+  // online-only tools while the database still considers the course on-site.
+  const persistDeliveryMode = async (mode: "onsite" | "online") => {
+    const prev = course.delivery_mode;
+    update({ delivery_mode: mode });
+    const { error } = await supabase.from("lms_courses").update({ delivery_mode: mode }).eq("id", course.id);
+    if (error) {
+      setCourse({ ...course, delivery_mode: prev });
+      toast.error(toUserMessage(error));
+    }
+  };
+
   const saveCourse = async () => {
     // Validate slug locally
     const slugVal = (course.slug ?? "").trim();
