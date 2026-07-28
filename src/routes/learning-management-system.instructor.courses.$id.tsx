@@ -579,7 +579,7 @@ function CourseBuilder() {
           <div><Label>{lang === "ar" ? "نمط التقديم" : "Delivery mode"}</Label>
             <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
               value={course.delivery_mode ?? "onsite"}
-              onChange={(e) => update({ delivery_mode: e.target.value as "onsite" | "online" })}>
+              onChange={(e) => persistDeliveryMode(e.target.value as "onsite" | "online")}>
               <option value="onsite">{tr.deliveryOnsite}</option>
               <option value="online">{tr.deliveryOnline}</option>
             </select>
