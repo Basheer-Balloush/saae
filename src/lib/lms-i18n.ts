@@ -38,6 +38,8 @@ export const lmsT: Record<Lang, {
   beginner: string;
   intermediate: string;
   advanced: string;
+  deliveryOnsite: string;
+  deliveryOnline: string;
   noCourses: string;
   // course card / details
   byInstructor: string;
