@@ -2229,6 +2229,7 @@ export type Database = {
           price: number
           rating_avg: number
           rejection_reason: string | null
+          review_count: number
           schedule_days: string[] | null
           schedule_time_from: string | null
           schedule_time_to: string | null
@@ -2266,6 +2267,7 @@ export type Database = {
           price?: number
           rating_avg?: number
           rejection_reason?: string | null
+          review_count?: number
           schedule_days?: string[] | null
           schedule_time_from?: string | null
           schedule_time_to?: string | null
@@ -2303,6 +2305,7 @@ export type Database = {
           price?: number
           rating_avg?: number
           rejection_reason?: string | null
+          review_count?: number
           schedule_days?: string[] | null
           schedule_time_from?: string | null
           schedule_time_to?: string | null
@@ -2958,7 +2961,11 @@ export type Database = {
           course_id: string
           created_at: string
           id: string
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_reason: string | null
           rating: number
+          status: string
           student_id: string
         }
         Insert: {
@@ -2966,7 +2973,11 @@ export type Database = {
           course_id: string
           created_at?: string
           id?: string
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
           rating: number
+          status?: string
           student_id: string
         }
         Update: {
@@ -2974,7 +2985,11 @@ export type Database = {
           course_id?: string
           created_at?: string
           id?: string
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
           rating?: number
+          status?: string
           student_id?: string
         }
         Relationships: [
@@ -4113,6 +4128,42 @@ export type Database = {
         Args: { _base: string }
         Returns: string
       }
+      lms_list_catalog_public: {
+        Args: {
+          _category_slug?: string
+          _level?: string
+          _limit?: number
+          _offset?: number
+          _search?: string
+        }
+        Returns: {
+          category_id: string
+          cover_url: string
+          description_ar: string
+          description_en: string
+          id: string
+          is_free: boolean
+          level: string
+          price: number
+          rating_avg: number
+          review_count: number
+          slug: string
+          students_count: number
+          title_ar: string
+          title_en: string
+          total_count: number
+        }[]
+      }
+      lms_list_course_reviews_public: {
+        Args: { _course_id: string; _limit?: number; _offset?: number }
+        Returns: {
+          comment: string
+          created_at: string
+          id: string
+          rating: number
+          total_count: number
+        }[]
+      }
       lms_list_courses_with_ams_link: {
         Args: never
         Returns: {
@@ -4124,6 +4175,27 @@ export type Database = {
           title_ar: string
           title_en: string
         }[]
+      }
+      lms_moderate_review: {
+        Args: { _reason?: string; _review_id: string; _status: string }
+        Returns: {
+          comment: string | null
+          course_id: string
+          created_at: string
+          id: string
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_reason: string | null
+          rating: number
+          status: string
+          student_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "lms_reviews"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       lms_process_payout: {
         Args: { _approve: boolean; _payout_id: string }
