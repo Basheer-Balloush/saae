@@ -44,6 +44,7 @@ type Course = {
   schedule_time_from: string | null; schedule_time_to: string | null;
   location_ar: string | null; location_en: string | null;
   duration_hours: number | null;
+  delivery_mode: "onsite" | "online";
 };
 type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
 type LessonAttachment = { name: string; url: string; path?: string };
@@ -146,6 +147,7 @@ function CourseBuilder() {
       schedule_days: course.schedule_days, schedule_time_from: course.schedule_time_from, schedule_time_to: course.schedule_time_to,
       location_ar: course.location_ar, location_en: course.location_en,
       duration_hours: course.duration_hours,
+      delivery_mode: course.delivery_mode,
       slug: slugVal || null,
     };
     payload.price = course.is_free ? 0 : course.price;
@@ -573,6 +575,20 @@ function CourseBuilder() {
         </div>
 
         <div className="grid sm:grid-cols-2 gap-3">
+
+          <div><Label>{lang === "ar" ? "نمط التقديم" : "Delivery mode"}</Label>
+            <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={course.delivery_mode ?? "onsite"}
+              onChange={(e) => update({ delivery_mode: e.target.value as "onsite" | "online" })}>
+              <option value="onsite">{tr.deliveryOnsite}</option>
+              <option value="online">{tr.deliveryOnline}</option>
+            </select>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {lang === "ar"
+                ? "حضوري: الإكمال بالحضور. أونلاين: فيديو واختبار."
+                : "On-site: completes by attendance. Online: video + quiz."}
+            </p>
+          </div>
 
           <div><Label>{tr.filterLevel}</Label>
             <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
