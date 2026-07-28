@@ -1910,22 +1910,28 @@ export type Database = {
       lms_certificates: {
         Row: {
           course_id: string
+          email_error: string | null
           id: string
           issued_at: string
+          sent_at: string | null
           serial: string
           student_id: string
         }
         Insert: {
           course_id: string
+          email_error?: string | null
           id?: string
           issued_at?: string
+          sent_at?: string | null
           serial: string
           student_id: string
         }
         Update: {
           course_id?: string
+          email_error?: string | null
           id?: string
           issued_at?: string
+          sent_at?: string | null
           serial?: string
           student_id?: string
         }
