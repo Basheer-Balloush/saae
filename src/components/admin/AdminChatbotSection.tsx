@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
-import { confirmDialog } from "@/hooks/useConfirm";
   Dialog,
   DialogContent,
   DialogHeader,
@@ -24,6 +23,7 @@ import {
   addKnowledgeText,
   deleteKnowledgeDocument,
 } from "@/lib/admin-chat.functions";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 type SubTab = "stats" | "conversations" | "knowledge";
 

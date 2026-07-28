@@ -6,10 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import {
-import { confirmDialog } from "@/hooks/useConfirm";
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/admin/reviews")({
   head: () => ({ meta: [{ title: "LMS · Admin · Reviews" }] }),

@@ -10,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
-import { confirmDialog } from "@/hooks/useConfirm";
   Select,
   SelectContent,
   SelectItem,
@@ -30,6 +29,7 @@ import {
   communityLabel,
   type NewsCategoryKey,
 } from "@/lib/communityCategories";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 
 export const ADMIN_TEXT = {

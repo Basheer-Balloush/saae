@@ -14,11 +14,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/ui/upload-progress";
 import {
-import { confirmDialog } from "@/hooks/useConfirm";
   getInitiativeStats, getInitiativeSettings,
   adminListDonations, adminListWaitlist, adminConfirmDonation,
   adminCreateDonation, adminDeleteDonation, adminUpdateSettings, adminListCourses,
 } from "@/lib/initiative.functions";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/admin/initiative")({
   ssr: false,

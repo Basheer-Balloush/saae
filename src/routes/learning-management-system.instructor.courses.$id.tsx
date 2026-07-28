@@ -20,13 +20,13 @@ import { CourseCoInstructors } from "@/components/lms/CourseCoInstructors";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/ui/upload-progress";
 import {
-import { confirmDialog } from "@/hooks/useConfirm";
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/instructor/courses/$id")({
   head: () => ({ meta: [{ title: "LMS · Edit course" }] }),

@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useMemo, useState } from "react";
 import {
-import { confirmDialog } from "@/hooks/useConfirm";
   Check,
   X,
   Plus,
@@ -39,6 +38,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { AdminInstructorEditDialog } from "@/components/lms/AdminInstructorEditDialog";
 import { reconcileCertificates } from "@/lib/lms-certificates.functions";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/admin/")({
   head: () => ({ meta: [{ title: "LMS · Admin" }] }),
