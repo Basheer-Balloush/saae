@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Plus, Trash2, Users, CalendarDays, Loader2, Eye,
 import ExcelJS from "exceljs";
 import { supabase } from "@/integrations/supabase/client";
 import { addAmsRegistrantWithLms } from "@/lib/ams-registrant.functions";
+import { sendCertificateEmail } from "@/lib/certificate-email.functions";
 import { useLang } from "@/lib/i18n";
 import { amsT } from "@/lib/ams-i18n";
 import { Button } from "@/components/ui/button";
