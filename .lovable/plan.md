@@ -1,57 +1,82 @@
-# Training and Learning Platform — Internships & My Profile
+# Separating On-site and Online Courses — Full Phased Plan
 
-Most of the spec (admin CRUD, per-internship applications dashboard, public list + detail, apply flow, snapshotting, RLS, signed CV URLs) is already implemented under `learning-management-system.internships.*`, `.admin.internships.*`, `learning-management-system.profile.tsx`, and the `lms-internships-*` server functions. This plan closes the remaining gaps from the PDF and hardens what exists.
+Every course becomes exactly one type: **on-site** (completes by attendance) or **online** (completes by video + quiz). The type is picked by the instructor at creation and confirmed via the existing admin approval flow. Shared surfaces (card, details, syllabus, registration, enrolment approval, assignments, co-instructors, reviews) stay unchanged.
 
-## Phase 1 — Naming: "Training and Learning Platform"
+We ship one phase per turn. After phase 3 we hard-stop and test with one real on-site course before touching certificates.
 
-Rename LMS-facing copy across AR/EN without changing routes.
-- `src/lib/lms-i18n.ts`, `LmsNavbar`, `LmsFooter`, admin sidebar/menu labels.
-- Route `head()` titles/descriptions for `learning-management-system*` routes.
-- Admin dashboard section header + login screen title.
-- Keep internal keys/URLs (`/learning-management-system/*`) unchanged.
+---
 
-## Phase 2 — Authenticated landing = My Profile
+## Phase 0 — Clean existing data (SMALL)
+Remove records that would misbehave under the new rules.
+- Delete/merge the 2 AMS courses not linked to any LMS course.
+- Reassign or drop the 4 registrants stranded in the duplicate course.
+- Remove the 3 empty quizzes attached to on-site courses.
 
-- After login, redirect to `/learning-management-system/profile` (login page + post-signup + post-verify).
-- In `LmsNavbar`, when `user` is present: hide "Home" and show "My Profile" in its place. Logged-out users keep Home.
-- Instructors/admins keep their role links; add "My Profile" entry.
+## Phase 1 — Add course type field (FOUNDATION)
+Introduce the distinction; behaviour unchanged.
+- Add `delivery_mode` enum (`onsite` | `online`) to `lms_courses`.
+- Instructor course form: selector in the basic info panel.
+- Course card + details: type badge.
+- Backfill: all existing → `onsite`; flip known online ones by hand.
 
-## Phase 3 — My Profile page audit
+## Phase 2 — Attendance switches on automatically (AMS EDIT)
+Remove the manual activation step and fix the linker.
+- Approving an on-site course auto-links it to AMS.
+- Delete the "activate attendance" button.
+- Rewrite `ams_attach_user_to_linked_course` / sync trigger to **upsert only**, never delete existing sessions or attendance.
+- Session dates derived from course start date + schedule, not row creation time.
+- Drop admin-only restriction (approval is the gate).
+- Handle section delete → delete matching session (only if no attendance recorded).
 
-Compare `learning-management-system.profile.tsx` to spec sections and fill gaps:
-- Profile Identity card: photo, full name, email, phone, biography.
-- CV Management: upload/replace/view/download with client+server type/size validation; keep previous file until new one is stored.
-- Learning History: current, assigned, completed courses, progress %, attendance.
-- Certificates list + Internship Applications list with statuses (links to detail).
+## Phase 3 — On-site completion from attendance (CORE, fixes B2)
+The critical fix.
+- Branch `ams_mark_attendance_and_complete` and `lms_recalc_progress` on `delivery_mode`.
+- On-site progress = sessions attended ÷ total sessions; complete at 100%.
+- Online path unchanged.
+- **STOP + manual test** on one real on-site course before phase 4.
 
-## Phase 4 — Apply flow: snapshot preview + duplicate guard
+## Phase 4 — One shared certificate function (CORE, fixes B3)
+- Extract issuance from `lms_submit_quiz` into `lms_issue_certificate(course, user)`.
+- On-site rule: every session attended.
+- Online rule: all lessons complete AND quiz passed.
+- Idempotent — never issues twice, never revokes.
+- Called from both attendance completion and quiz submission.
 
-- On `/internships/$slug/apply`: preload profile, CV, course + certificate summary; show a "What will be sent" review panel before Confirm.
-- Server: enforce CV presence when `require_cv`, block re-application unless `allow_reapply`, keep snapshot copy on `internship_applications` (already present — verify).
-- Post-submit: confirmation + My Profile shows the new application row.
+## Phase 5 — Email the certificate (NEW WORK)
+- Add `sent_at` column on `lms_certificates`.
+- Enqueue via existing email outbox; template includes serial + verification URL.
+- Guard against double-send using `sent_at`.
 
-## Phase 5 — Admin management + per-internship dashboard audit
+## Phase 6 — Quiz retry limits (ONLINE ONLY)
+- Add `max_attempts` on `lms_quizzes` (empty = unlimited, documented default).
+- Enforce server-side in `lms_submit_quiz` (count prior attempts, reject over limit).
+- UI shows attempts remaining; hide retake button when exhausted.
 
-- Confirm columns (Title, Slug, Status, Applications, Deadline, Updated, Actions) and "View Applications" routes to `/admin/internships/:id/applications`.
-- Applications dashboard: search, filters (status, date, course, certificate, assigned admin), pagination via existing bounded RPC, notes, status change, assigned admin, xlsx export via `admin-xlsx-export`.
-- Verify destructive actions use `confirmDialog` (Phase 10 CF-06 already shipped).
+## Phase 7 — Instructor views (NEW WORK)
+- Quiz results page: student, score, attempt #, pass/fail.
+- Instructor course list includes co-taught courses.
+- Attendance RPCs recognise co-instructors, not just owner.
+- Attendance summary panel for on-site courses.
 
-## Phase 6 — Snapshot integrity + files
+## Phase 8 — Hide what does not apply (POLISH)
+Prevents regression.
+- On-site: hide video player + final test panel; block adding lessons/quiz.
+- Online: hide attendance UI.
+- Server-side guards mirror the UI hides.
 
-- Verify `internship_applications` retains `snapshot_full_name/email/phone/organization/cv_bucket/cv_path` at submit-time and never mutates when profile changes.
-- CV bucket private; signed URLs only via `adminGetApplicationCvUrl` and student self-serve.
-- Storage lifecycle: replacing profile CV never deletes an application-snapshot CV.
+---
 
-## Phase 7 — Permissions & RLS sweep
+## Related LMS fixes (scheduled alongside phase 3)
 
-- `internship_opportunities`, `internship_applications`, `internship_application_answers`, notes/history: RLS reviewed against roles matrix (visitor / user / admin / other). Add missing policies or GRANTs found during audit.
-- Enforce server-side in every server-fn; no UI-only checks.
+### R1 — Streamed lessons never auto-complete (HIGH)
+Bunny/streamed lessons have no completion event; fix concurrent with phase 3 or the online chain breaks at step one.
 
-## Phase 8 — Acceptance checks + reconciliation
+### R2 — Lesson order wrong across sections (HIGH)
+Sort lessons within their section using `(section.position, lesson.position)`; correct before relying on the online flow.
 
-- Automated tests for the acceptance table (admin create/publish, login lands on profile, upload validation, apply submits snapshot, admin sees only that internship's applicants, profile edits don't rewrite snapshots).
-- Extend `lms_ops_health_summary` with counts for stuck internship applications and orphan CV files; add reconciliation action in ops card.
+---
 
-## Delivery order
+## Suggested execution order
+0 → 1 → 2 → 3 → **test** → 4 → 5. Phases 6, 7, 8 and R1/R2 can slot in any time after phase 1 (R1/R2 ideally with 3).
 
-One phase per response. Reply "phase 1" (or "go") to begin with the naming pass.
+Reply "phase 0" (or any phase number) to start.
