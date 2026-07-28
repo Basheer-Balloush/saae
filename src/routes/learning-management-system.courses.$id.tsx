@@ -86,7 +86,19 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
       price: Number(c.price ?? 0),
       isFree: Boolean(c.is_free),
       rating: Number(c.rating_avg ?? 0),
+      reviewCount: Number(c.review_count ?? 0),
       canonicalSlug: (c.slug ?? c.id) as string,
+      // A-19: truthful availability signal
+      availability: (() => {
+        const now = new Date();
+        const finished = !!c.end_date && new Date(c.end_date) < now;
+        const deadlinePassed = !!c.enrollment_deadline && new Date(c.enrollment_deadline) < now;
+        const isFull = c.max_students != null && Number(c.students_count) >= Number(c.max_students);
+        if (finished) return "https://schema.org/Discontinued";
+        if (!c.enrollment_open || deadlinePassed) return "https://schema.org/SoldOut";
+        if (isFull) return "https://schema.org/SoldOut";
+        return "https://schema.org/InStock";
+      })(),
     } : null;
     const url = `https://aisyria.org/learning-management-system/courses/${m?.canonicalSlug ?? params.id}`;
     const title = m?.title ? `${m.title} — SAAE Training and Learning Platform` : "Course — SAAE Training and Learning Platform";
@@ -118,21 +130,23 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
                   name: "SAAE — Syrian Association for AI & Entrepreneurship",
                   sameAs: "https://aisyria.org",
                 },
-                ...(m.rating > 0
+                // A-19: only emit aggregateRating when we actually have approved reviews.
+                ...(m.reviewCount > 0 && m.rating > 0
                   ? {
                       aggregateRating: {
                         "@type": "AggregateRating",
                         ratingValue: m.rating,
                         bestRating: 5,
-                        ratingCount: 1,
+                        ratingCount: m.reviewCount,
+                        reviewCount: m.reviewCount,
                       },
                     }
                   : {}),
                 offers: {
                   "@type": "Offer",
                   price: m.isFree ? 0 : m.price,
-                  priceCurrency: "USD",
-                  availability: "https://schema.org/InStock",
+                  priceCurrency: m.isFree ? "USD" : "SYP",
+                  availability: m.availability,
                   url,
                 },
                 url,
