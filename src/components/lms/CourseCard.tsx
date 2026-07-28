@@ -41,6 +41,15 @@ export function CourseCard({ course }: { course: CourseCardData }) {
       <div className="p-4 flex-1 flex flex-col">
         <div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground">
           <span className="rounded-full bg-muted px-2 py-0.5">{tr[course.level as keyof typeof tr] as string}</span>
+          {course.delivery_mode === "online" ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 px-2 py-0.5">
+              <PlayCircle className="h-3 w-3" />{tr.deliveryOnline}
+            </span>
+          ) : course.delivery_mode === "onsite" ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5">
+              <MapPin className="h-3 w-3" />{tr.deliveryOnsite}
+            </span>
+          ) : null}
           {course.is_free ? (
             <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">{tr.free}</span>
           ) : (
