@@ -4197,6 +4197,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      lms_ops_health_summary: { Args: never; Returns: Json }
       lms_process_payout: {
         Args: { _approve: boolean; _payout_id: string }
         Returns: undefined
@@ -4332,6 +4333,11 @@ export type Database = {
         }[]
       }
       lms_reconcile_certificates: { Args: { _limit?: number }; Returns: Json }
+      lms_reconcile_orphan_uploads: { Args: { _limit?: number }; Returns: Json }
+      lms_reconcile_partial_provisioning: {
+        Args: { _limit?: number }
+        Returns: Json
+      }
       lms_register_session: {
         Args: { _device?: string; _session_id: string }
         Returns: undefined
