@@ -38,6 +38,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { AdminInstructorEditDialog } from "@/components/lms/AdminInstructorEditDialog";
 import { reconcileCertificates } from "@/lib/lms-certificates.functions";
+import {
+  reconcileOrphanUploads,
+  reconcilePartialProvisioning,
+  getOpsHealthSummary,
+  type OpsHealthSummary,
+} from "@/lib/lms-ops.functions";
 import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/admin/")({
@@ -402,6 +408,7 @@ function AdminHome() {
             </div>
 
             <ReconcileCertificatesCard ar={ar} />
+            <OpsHealthCard ar={ar} />
           </aside>
 
           {/* Main */}
@@ -909,6 +916,99 @@ function ReconcileCertificatesCard({ ar }: { ar: boolean }) {
         {busy
           ? ar ? "جارٍ التدقيق..." : "Reconciling..."
           : ar ? "تدقيق الشهادات المؤهلة" : "Reconcile eligible certificates"}
+      </Button>
+    </div>
+  );
+}
+
+function OpsHealthCard({ ar }: { ar: boolean }) {
+  const [busy, setBusy] = useState<null | "health" | "orphans" | "provisioning">(null);
+  const [health, setHealth] = useState<OpsHealthSummary | null>(null);
+  const runHealth = useServerFn(getOpsHealthSummary);
+  const runOrphans = useServerFn(reconcileOrphanUploads);
+  const runProvisioning = useServerFn(reconcilePartialProvisioning);
+
+  const loadHealth = async () => {
+    setBusy("health");
+    try {
+      setHealth(await runHealth());
+    } catch (e) {
+      toast.error(toUserMessage(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const scanOrphans = async () => {
+    setBusy("orphans");
+    try {
+      const r = await runOrphans({ data: { limit: 200 } });
+      toast.success(
+        ar
+          ? `ملفات يتيمة: ${r.orphan_profile_files}`
+          : `Orphan files: ${r.orphan_profile_files}`,
+      );
+    } catch (e) {
+      toast.error(toUserMessage(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const scanProvisioning = async () => {
+    setBusy("provisioning");
+    try {
+      const r = await runProvisioning({ data: { limit: 200 } });
+      toast.success(
+        ar
+          ? `تسجيلات ناقصة: ${r.missing_enrollments}`
+          : `Missing enrollments: ${r.missing_enrollments}`,
+      );
+    } catch (e) {
+      toast.error(toUserMessage(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const outbox = health?.outbox;
+  const totalStuck = (outbox?.stuck ?? 0) + (outbox?.failed ?? 0);
+  const authFlags = Object.values(health?.auth_rate_flags_24h ?? {}).reduce(
+    (a, b) => a + (b as number),
+    0,
+  );
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-3 shadow-sm mt-3 space-y-2">
+      <p className="px-2 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {ar ? "العمليات والمراقبة" : "Operations & health"}
+      </p>
+
+      {health && (
+        <div className="px-2 pb-1 space-y-1 text-[11px]">
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">{ar ? "مهام معلّقة/فاشلة" : "Stuck / failed jobs"}</span>
+            <span className={`font-bold ${totalStuck > 0 ? "text-destructive" : "text-foreground"}`}>
+              {outbox?.stuck ?? 0} / {outbox?.failed ?? 0}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">{ar ? "تنبيهات حدود المصادقة (24س)" : "Auth rate flags (24h)"}</span>
+            <span className={`font-bold ${authFlags > 0 ? "text-destructive" : "text-foreground"}`}>
+              {authFlags}
+            </span>
+          </div>
+        </div>
+      )}
+
+      <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={loadHealth} disabled={busy !== null}>
+        {busy === "health" ? (ar ? "جارٍ..." : "Loading...") : ar ? "تحديث حالة النظام" : "Refresh system health"}
+      </Button>
+      <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={scanOrphans} disabled={busy !== null}>
+        {busy === "orphans" ? (ar ? "جارٍ..." : "Scanning...") : ar ? "فحص الملفات اليتيمة" : "Scan orphan uploads"}
+      </Button>
+      <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={scanProvisioning} disabled={busy !== null}>
+        {busy === "provisioning" ? (ar ? "جارٍ..." : "Scanning...") : ar ? "فحص التسجيلات الناقصة" : "Scan partial provisioning"}
       </Button>
     </div>
   );
