@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Archive, Loader2, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLang } from "@/lib/i18n";
+import { useConfirm } from "@/hooks/useConfirm";
 import { toUserMessage } from "@/lib/safe-error";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
