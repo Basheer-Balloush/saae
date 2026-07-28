@@ -38,6 +38,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { AdminInstructorEditDialog } from "@/components/lms/AdminInstructorEditDialog";
 import { reconcileCertificates } from "@/lib/lms-certificates.functions";
+import {
+  reconcileOrphanUploads,
+  reconcilePartialProvisioning,
+  getOpsHealthSummary,
+  type OpsHealthSummary,
+} from "@/lib/lms-ops.functions";
 import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/admin/")({
