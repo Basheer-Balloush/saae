@@ -54,13 +54,13 @@ export const sendCertificateEmail = createServerFn({ method: 'POST' })
     // Load course name
     const { data: course } = await supabaseAdmin
       .from('lms_courses')
-      .select('title, title_en')
+      .select('title_ar, title_en')
       .eq('id', data.courseId)
       .maybeSingle()
     const courseName =
       data.lang === 'ar'
-        ? ((course as { title?: string } | null)?.title || (course as { title_en?: string } | null)?.title_en || 'Course')
-        : ((course as { title_en?: string } | null)?.title_en || (course as { title?: string } | null)?.title || 'Course')
+        ? (course?.title_ar || course?.title_en || 'Course')
+        : (course?.title_en || course?.title_ar || 'Course')
 
     try {
       const { sendCertificateIssuedEmail } = await import('./certificate-email.server')
