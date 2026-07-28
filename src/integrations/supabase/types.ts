@@ -4142,6 +4142,7 @@ export type Database = {
         Returns: {
           category_id: string
           cover_url: string
+          delivery_mode: string
           description_ar: string
           description_en: string
           id: string
