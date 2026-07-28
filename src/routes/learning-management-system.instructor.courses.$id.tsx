@@ -1227,7 +1227,7 @@ function AttendanceLink({ courseId, lang, isAdmin }: { courseId: string; lang: "
     if (!amsId) return;
     if (!(await confirmDialog({ title: lang === "ar"
       ? "إلغاء ربط نظام الحضور؟ سيُحذف الطلاب المتزامنون."
-      : "Unlink attendance? Synced students will be removed.", destructive: true })) return;
+      : "Unlink attendance? Synced students will be removed.", destructive: true }))) return;
     setBusy(true);
     const { error } = await supabase.rpc("unlink_lms_course_from_ams", { _ams_course_id: amsId });
     setBusy(false);
