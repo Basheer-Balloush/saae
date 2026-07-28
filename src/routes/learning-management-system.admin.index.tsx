@@ -41,6 +41,7 @@ import { reconcileCertificates } from "@/lib/lms-certificates.functions";
 import {
   reconcileOrphanUploads,
   reconcilePartialProvisioning,
+  reconcileInternshipFiles,
   getOpsHealthSummary,
   type OpsHealthSummary,
 } from "@/lib/lms-ops.functions";
@@ -922,11 +923,12 @@ function ReconcileCertificatesCard({ ar }: { ar: boolean }) {
 }
 
 function OpsHealthCard({ ar }: { ar: boolean }) {
-  const [busy, setBusy] = useState<null | "health" | "orphans" | "provisioning">(null);
+  const [busy, setBusy] = useState<null | "health" | "orphans" | "provisioning" | "internships">(null);
   const [health, setHealth] = useState<OpsHealthSummary | null>(null);
   const runHealth = useServerFn(getOpsHealthSummary);
   const runOrphans = useServerFn(reconcileOrphanUploads);
   const runProvisioning = useServerFn(reconcilePartialProvisioning);
+  const runInternshipFiles = useServerFn(reconcileInternshipFiles);
 
   const loadHealth = async () => {
     setBusy("health");
@@ -971,12 +973,31 @@ function OpsHealthCard({ ar }: { ar: boolean }) {
     }
   };
 
+  const scanInternshipFiles = async () => {
+    setBusy("internships");
+    try {
+      const r = await runInternshipFiles({ data: { limit: 200 } });
+      toast.success(
+        ar
+          ? `ملفات تدريب يتيمة: ${r.orphan_internship_files} · محمية بلقطة: ${r.snapshot_protected_files}`
+          : `Orphan internship files: ${r.orphan_internship_files} · Snapshot-protected: ${r.snapshot_protected_files}`,
+      );
+    } catch (e) {
+      toast.error(toUserMessage(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const outbox = health?.outbox;
   const totalStuck = (outbox?.stuck ?? 0) + (outbox?.failed ?? 0);
   const authFlags = Object.values(health?.auth_rate_flags_24h ?? {}).reduce(
     (a, b) => a + (b as number),
     0,
   );
+  const internStuck = health?.internships?.stuck_applications ?? 0;
+  const internByStatus = health?.internships?.by_status ?? {};
+  const internTotal = Object.values(internByStatus).reduce((a, b) => a + (b as number), 0);
 
   return (
     <div className="rounded-2xl border border-border bg-card p-3 shadow-sm mt-3 space-y-2">
@@ -998,6 +1019,16 @@ function OpsHealthCard({ ar }: { ar: boolean }) {
               {authFlags}
             </span>
           </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">{ar ? "طلبات تدريب متأخرة (>14 يوم)" : "Stuck internship apps (>14d)"}</span>
+            <span className={`font-bold ${internStuck > 0 ? "text-destructive" : "text-foreground"}`}>
+              {internStuck}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">{ar ? "إجمالي طلبات التدريب" : "Total internship apps"}</span>
+            <span className="font-bold text-foreground">{internTotal}</span>
+          </div>
         </div>
       )}
 
@@ -1010,7 +1041,11 @@ function OpsHealthCard({ ar }: { ar: boolean }) {
       <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={scanProvisioning} disabled={busy !== null}>
         {busy === "provisioning" ? (ar ? "جارٍ..." : "Scanning...") : ar ? "فحص التسجيلات الناقصة" : "Scan partial provisioning"}
       </Button>
+      <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={scanInternshipFiles} disabled={busy !== null}>
+        {busy === "internships" ? (ar ? "جارٍ..." : "Scanning...") : ar ? "فحص ملفات التدريب" : "Scan internship files"}
+      </Button>
     </div>
   );
 }
+
 

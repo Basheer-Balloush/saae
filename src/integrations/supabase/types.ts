@@ -4333,6 +4333,10 @@ export type Database = {
         }[]
       }
       lms_reconcile_certificates: { Args: { _limit?: number }; Returns: Json }
+      lms_reconcile_internship_files: {
+        Args: { _limit?: number }
+        Returns: Json
+      }
       lms_reconcile_orphan_uploads: { Args: { _limit?: number }; Returns: Json }
       lms_reconcile_partial_provisioning: {
         Args: { _limit?: number }
