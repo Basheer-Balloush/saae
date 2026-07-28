@@ -79,7 +79,7 @@ export default function InstructorCleanupPanel() {
   };
 
   const doPurge = async (id: string) => {
-    if (!window.confirm(ar ? "حذف نهائي لهذه الدفعة؟" : "Permanently purge this batch?")) return;
+    if (!(await confirm({ title: ar ? "حذف نهائي لهذه الدفعة؟" : "Permanently purge this batch?", destructive: true }))) return;
     setBusy(true);
     try {
       const res = await purgeCleanupBatch({ data: { batch_id: id } });
