@@ -59,6 +59,8 @@ function QuizPage() {
   const [now, setNow] = useState(Date.now());
   const [noQuiz, setNoQuiz] = useState(false);
 
+  const sendCertEmail = useServerFn(sendCertificateEmail);
+
   useEffect(() => {
     if (!user) return;
     (async () => {
