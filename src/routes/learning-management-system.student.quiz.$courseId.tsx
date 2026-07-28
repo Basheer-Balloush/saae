@@ -8,6 +8,8 @@ import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { sendCertificateEmail } from "@/lib/certificate-email.functions";
 
 export const Route = createFileRoute("/learning-management-system/student/quiz/$courseId")({
   head: () => ({ meta: [{ title: "LMS · Final test" }] }),
@@ -56,6 +58,8 @@ function QuizPage() {
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(Date.now());
   const [noQuiz, setNoQuiz] = useState(false);
+
+  const sendCertEmail = useServerFn(sendCertificateEmail);
 
   useEffect(() => {
     if (!user) return;
@@ -110,6 +114,9 @@ function QuizPage() {
       return;
     }
     setResult(data as Result);
+    if ((data as Result | null)?.certificate_id) {
+      sendCertEmail({ data: { courseId, lang } }).catch((e) => console.error("cert email failed", e));
+    }
   };
 
   if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;

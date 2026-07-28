@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Plus, Trash2, Users, CalendarDays, Loader2, Eye,
 import ExcelJS from "exceljs";
 import { supabase } from "@/integrations/supabase/client";
 import { addAmsRegistrantWithLms } from "@/lib/ams-registrant.functions";
+import { sendCertificateEmail } from "@/lib/certificate-email.functions";
 import { useLang } from "@/lib/i18n";
 import { amsT } from "@/lib/ams-i18n";
 import { Button } from "@/components/ui/button";
@@ -1065,6 +1066,7 @@ function SessionAttendanceDialog({
   const [presentMap, setPresentMap] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const sendCertEmail = useServerFn(sendCertificateEmail);
 
   useEffect(() => {
     (async () => {
@@ -1093,7 +1095,24 @@ function SessionAttendanceDialog({
       _present: next,
     });
     setSavingId(null);
-    if (error) toast.error(toUserMessage(error));
+    if (error) { toast.error(toUserMessage(error)); return; }
+    // If marking present, opportunistically try to send the cert email; the
+    // server fn is idempotent — it silently returns when no certificate exists.
+    if (next) {
+      const reg = registrants.find((r) => r.id === registrantId);
+      if (reg?.lms_enrollment_id) {
+        const { data: enr } = await supabase
+          .from("lms_enrollments")
+          .select("student_id, course_id")
+          .eq("id", reg.lms_enrollment_id)
+          .maybeSingle();
+        if (enr?.student_id && enr?.course_id) {
+          sendCertEmail({
+            data: { courseId: enr.course_id, studentId: enr.student_id, lang },
+          }).catch((e) => console.error("cert email failed", e));
+        }
+      }
+    }
   };
 
   return (
