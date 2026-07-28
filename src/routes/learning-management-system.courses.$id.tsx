@@ -15,7 +15,7 @@ type Course = {
   id: string; title_ar: string; title_en: string | null;
   description_ar: string | null; description_en: string | null;
   cover_url: string | null; level: string; price: number; is_free: boolean;
-  students_count: number; rating_avg: number; instructor_id: string;
+  students_count: number; rating_avg: number; review_count: number; instructor_id: string;
   enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null;
   start_date: string | null; end_date: string | null;
   schedule_days: string[] | null;
@@ -40,7 +40,7 @@ type CourseLoaderData = {
 export const Route = createFileRoute("/learning-management-system/courses/$id")({
   loader: async ({ params }): Promise<CourseLoaderData> => {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
-    const baseQ = supabase.from("lms_courses").select("id,instructor_id,category_id,title_ar,title_en,description_ar,description_en,level,price,is_free,cover_url,status,rating_avg,students_count,created_at,updated_at,enrollment_open,max_students,enrollment_deadline,slug,start_date,end_date,schedule_days,schedule_time_from,schedule_time_to,location_ar,location_en,duration_hours");
+    const baseQ = supabase.from("lms_courses").select("id,instructor_id,category_id,title_ar,title_en,description_ar,description_en,level,price,is_free,cover_url,status,rating_avg,review_count,students_count,created_at,updated_at,enrollment_open,max_students,enrollment_deadline,slug,start_date,end_date,schedule_days,schedule_time_from,schedule_time_to,location_ar,location_en,duration_hours");
     const { data: c } = await (isUuid ? baseQ.eq("id", params.id) : baseQ.eq("slug", params.id)).maybeSingle();
     if (!c) return { course: null, instructor: null, coInstructors: [], sections: [], lessons: [], hasForm: false };
     const course = c as unknown as Course;
@@ -86,7 +86,19 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
       price: Number(c.price ?? 0),
       isFree: Boolean(c.is_free),
       rating: Number(c.rating_avg ?? 0),
+      reviewCount: Number(c.review_count ?? 0),
       canonicalSlug: (c.slug ?? c.id) as string,
+      // A-19: truthful availability signal
+      availability: (() => {
+        const now = new Date();
+        const finished = !!c.end_date && new Date(c.end_date) < now;
+        const deadlinePassed = !!c.enrollment_deadline && new Date(c.enrollment_deadline) < now;
+        const isFull = c.max_students != null && Number(c.students_count) >= Number(c.max_students);
+        if (finished) return "https://schema.org/Discontinued";
+        if (!c.enrollment_open || deadlinePassed) return "https://schema.org/SoldOut";
+        if (isFull) return "https://schema.org/SoldOut";
+        return "https://schema.org/InStock";
+      })(),
     } : null;
     const url = `https://aisyria.org/learning-management-system/courses/${m?.canonicalSlug ?? params.id}`;
     const title = m?.title ? `${m.title} — SAAE Training and Learning Platform` : "Course — SAAE Training and Learning Platform";
@@ -118,21 +130,23 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
                   name: "SAAE — Syrian Association for AI & Entrepreneurship",
                   sameAs: "https://aisyria.org",
                 },
-                ...(m.rating > 0
+                // A-19: only emit aggregateRating when we actually have approved reviews.
+                ...(m.reviewCount > 0 && m.rating > 0
                   ? {
                       aggregateRating: {
                         "@type": "AggregateRating",
                         ratingValue: m.rating,
                         bestRating: 5,
-                        ratingCount: 1,
+                        ratingCount: m.reviewCount,
+                        reviewCount: m.reviewCount,
                       },
                     }
                   : {}),
                 offers: {
                   "@type": "Offer",
                   price: m.isFree ? 0 : m.price,
-                  priceCurrency: "USD",
-                  availability: "https://schema.org/InStock",
+                  priceCurrency: m.isFree ? "USD" : "SYP",
+                  availability: m.availability,
                   url,
                 },
                 url,

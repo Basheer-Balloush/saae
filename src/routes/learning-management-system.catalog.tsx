@@ -18,12 +18,9 @@ type Category = { id: string; name_ar: string; name_en: string | null; slug: str
 
 export const Route = createFileRoute("/learning-management-system/catalog")({
   loader: async (): Promise<{ courses: CourseCardData[]; categories: Category[] }> => {
+    // A-17: bounded server-side list contract (page cap = 60).
     const [{ data: cs }, { data: cats }] = await Promise.all([
-      supabase
-        .from("lms_courses")
-        .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,level,price,is_free,students_count,rating_avg,category_id")
-        .eq("status", "published")
-        .order("created_at", { ascending: false }),
+      supabase.rpc("lms_list_catalog_public", { _limit: 60, _offset: 0 }),
       supabase.from("lms_categories").select("id,name_ar,name_en,slug").order("display_order"),
     ]);
     return {
