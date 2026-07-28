@@ -917,7 +917,9 @@ function CourseBuilder() {
                     onBlur={() => updateSection(s.id, { title_en: s.title_en, title: s.title_ar || s.title_en || s.title })} className="flex-1 h-8" />
                 </div>
                 <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => openAddLesson(s.id)}><Plus className="h-4 w-4" /></Button>
+                  {course.delivery_mode !== "onsite" && (
+                    <Button size="sm" variant="ghost" onClick={() => openAddLesson(s.id)}><Plus className="h-4 w-4" /></Button>
+                  )}
                   <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: "section", id: s.id })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                 </div>
               </div>
