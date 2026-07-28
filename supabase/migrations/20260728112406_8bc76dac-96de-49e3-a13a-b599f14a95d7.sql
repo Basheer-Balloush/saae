@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.can_manage_lms_course(uuid, uuid) TO anon, authenticated, service_role;
