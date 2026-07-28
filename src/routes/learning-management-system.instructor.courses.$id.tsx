@@ -44,6 +44,7 @@ type Course = {
   schedule_time_from: string | null; schedule_time_to: string | null;
   location_ar: string | null; location_en: string | null;
   duration_hours: number | null;
+  delivery_mode: "onsite" | "online";
 };
 type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
 type LessonAttachment = { name: string; url: string; path?: string };
@@ -146,6 +147,7 @@ function CourseBuilder() {
       schedule_days: course.schedule_days, schedule_time_from: course.schedule_time_from, schedule_time_to: course.schedule_time_to,
       location_ar: course.location_ar, location_en: course.location_en,
       duration_hours: course.duration_hours,
+      delivery_mode: course.delivery_mode,
       slug: slugVal || null,
     };
     payload.price = course.is_free ? 0 : course.price;
