@@ -16,6 +16,7 @@ export type CourseCardData = {
   is_free: boolean;
   students_count: number;
   rating_avg: number;
+  delivery_mode?: string | null;
 };
 
 export function CourseCard({ course }: { course: CourseCardData }) {
