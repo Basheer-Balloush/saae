@@ -3745,6 +3745,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _ams_derive_session_dates: {
+        Args: { _count: number; _lms_course_id: string }
+        Returns: {
+          dt: string
+          idx: number
+        }[]
+      }
+      _ams_link_course_internal: {
+        Args: { _actor: string; _lms_course_id: string }
+        Returns: string
+      }
       _app_status_rank: {
         Args: {
           _s: Database["public"]["Enums"]["internship_application_status"]
