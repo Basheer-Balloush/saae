@@ -115,6 +115,7 @@ function Player() {
 
   // Attach HLS source to <video> when current lesson is a Bunny stream
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !videoSrc) return;
@@ -134,6 +135,40 @@ function Player() {
     // Fallback
     video.src = videoSrc;
   }, [videoSrc]);
+
+  const markCompleteRef = useRef<() => void>(() => {});
+
+  // Auto-complete for streamed (Bunny) iframe lessons via player.js postMessage protocol
+  useEffect(() => {
+    if (!current || !isEmbedSrc || !videoSrc) return;
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    const listenerId = `saae-${current.id}`;
+
+    const send = (msg: Record<string, unknown>) => {
+      try { iframe.contentWindow?.postMessage(JSON.stringify({ context: "player.js", ...msg }), "*"); } catch { /* noop */ }
+    };
+    const onReady = () => {
+      send({ method: "addEventListener", value: "ended", listener: listenerId });
+    };
+    const onMessage = (e: MessageEvent) => {
+      try {
+        const origin = e.origin || "";
+        if (!/mediadelivery\.net|b-cdn\.net/i.test(origin)) return;
+        const data = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+        if (!data || data.context !== "player.js") return;
+        if (data.event === "ready") onReady();
+        if (data.event === "ended") markCompleteRef.current?.();
+      } catch { /* ignore non-JSON messages */ }
+    };
+    window.addEventListener("message", onMessage);
+    // Ask for a ready ping in case we missed it
+    send({ method: "addEventListener", value: "ready", listener: listenerId });
+    // Also proactively subscribe (some player.js impls accept before ready)
+    onReady();
+    return () => { window.removeEventListener("message", onMessage); };
+  }, [current, isEmbedSrc, videoSrc]);
+
 
   const markComplete = async () => {
     if (!user || !current) return;
