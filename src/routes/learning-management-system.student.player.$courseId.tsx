@@ -213,6 +213,7 @@ function Player() {
           {current && videoSrc && isEmbedSrc ? (
             <iframe
               key={current.id}
+              ref={iframeRef}
               src={videoSrc}
               title={currentTitle}
               allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
