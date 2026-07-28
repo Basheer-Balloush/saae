@@ -195,7 +195,13 @@ function CourseDetails() {
   }, [course, user]);
 
   const requireAuth = () => {
-    if (!user) { navigate({ to: "/learning-management-system/login" }); return false; }
+    if (!user) {
+      navigate({
+        to: "/learning-management-system/login",
+        search: { redirect: `/learning-management-system/courses/${id}` },
+      });
+      return false;
+    }
     return true;
   };
 
