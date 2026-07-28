@@ -941,6 +941,8 @@ function CourseBuilder() {
                       </label>
                       <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: "lesson", id: l.id })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
+                    {course.delivery_mode !== "onsite" && (
+                      <>
                     <div className="space-y-2 text-xs">
                       <div className="flex items-center gap-2 flex-wrap">
                         <label className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-input bg-background cursor-pointer hover:bg-muted">
@@ -1051,6 +1053,8 @@ function CourseBuilder() {
                         </ul>
                       )}
                     </div>
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>
