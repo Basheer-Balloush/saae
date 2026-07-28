@@ -71,7 +71,7 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
   };
 
   const deleteQ = async (qid: string) => {
-    if (!await confirmDialog({ title: lang === "ar" ? "حذف؟" : "Delete?", destructive: true })) return;
+    if (!(await confirmDialog({ title: lang === "ar" ? "حذف؟" : "Delete?", destructive: true }))) return;
     await supabase.from("lms_quiz_questions").delete().eq("id", qid);
     setQuestions(questions.filter((q) => q.id !== qid));
   };

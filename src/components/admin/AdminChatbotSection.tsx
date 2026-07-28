@@ -252,7 +252,7 @@ function ConversationsPanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "
   };
 
   const remove = async (id: string) => {
-    if (!await confirmDialog({ title: tr.confirmDelete, destructive: true })) return;
+    if (!(await confirmDialog({ title: tr.confirmDelete, destructive: true }))) return;
     try {
       await delConv({ data: { conversationId: id } });
       toast.success(tr.deleted);
@@ -379,7 +379,7 @@ function KnowledgePanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "en" 
   };
 
   const remove = async (id: string) => {
-    if (!await confirmDialog({ title: "?", destructive: true })) return;
+    if (!(await confirmDialog({ title: "?", destructive: true }))) return;
     try {
       await delDoc({ data: { documentId: id } });
       setDocs((p) => p.filter((d) => d.id !== id));

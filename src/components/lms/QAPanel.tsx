@@ -91,14 +91,14 @@ export function QAPanel({ lessonId, user, isInstructor, lang }: Props) {
   };
 
   const deleteQuestion = async (id: string) => {
-    if (!await confirmDialog({ title: t(lang, "حذف هذا السؤال؟", "Delete this question?"), destructive: true })) return;
+    if (!(await confirmDialog({ title: t(lang, "حذف هذا السؤال؟", "Delete this question?"), destructive: true }))) return;
     const { error } = await supabase.from("lms_questions").delete().eq("id", id);
     if (error) { toast.error(toUserMessage(error)); return; }
     load();
   };
 
   const deleteAnswer = async (id: string) => {
-    if (!await confirmDialog({ title: t(lang, "حذف هذا الرد؟", "Delete this answer?"), destructive: true })) return;
+    if (!(await confirmDialog({ title: t(lang, "حذف هذا الرد؟", "Delete this answer?"), destructive: true }))) return;
     const { error } = await supabase.from("lms_answers").delete().eq("id", id);
     if (error) { toast.error(toUserMessage(error)); return; }
     load();

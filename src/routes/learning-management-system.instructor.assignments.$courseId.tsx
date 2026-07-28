@@ -125,7 +125,7 @@ function InstructorAssignments() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!await confirmDialog({ title: t(lang, "حذف هذه الوظيفة وكل تسليماتها؟", "Delete this assignment and all submissions?"), destructive: true })) return;
+    if (!(await confirmDialog({ title: t(lang, "حذف هذه الوظيفة وكل تسليماتها؟", "Delete this assignment and all submissions?"), destructive: true }))) return;
     const { error } = await supabase.from("lms_assignments").delete().eq("id", id);
     if (error) { toast.error(toUserMessage(error)); return; }
     load();

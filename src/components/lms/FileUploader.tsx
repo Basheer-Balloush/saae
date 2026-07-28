@@ -104,7 +104,7 @@ export function FileUploader({
 
   const handleRemove = async () => {
     if (!currentPath || !onRemoved) return;
-    if (!await confirmDialog({ title: "Remove this file?", destructive: true })) return;
+    if (!(await confirmDialog({ title: "Remove this file?", destructive: true }))) return;
     await supabase.storage.from(bucket).remove([currentPath]).catch(() => {});
     await onRemoved();
   };

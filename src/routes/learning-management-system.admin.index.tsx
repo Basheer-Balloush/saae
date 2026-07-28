@@ -121,7 +121,7 @@ function AdminHome() {
   };
 
   const rejectInstructor = async (uid: string) => {
-    if (!await confirmDialog({ title: ar ? "رفض هذا الطلب وحذفه نهائياً؟" : "Reject and remove this request?", destructive: true })) return;
+    if (!(await confirmDialog({ title: ar ? "رفض هذا الطلب وحذفه نهائياً؟" : "Reject and remove this request?", destructive: true }))) return;
     const { error } = await supabase.from("lms_instructors").delete().eq("user_id", uid);
     if (error) {
       toast.error(toUserMessage(error));
@@ -161,7 +161,7 @@ function AdminHome() {
     load();
   };
   const deleteCategory = async (id: string) => {
-    if (!await confirmDialog({ title: ar ? "حذف؟" : "Delete?", destructive: true })) return;
+    if (!(await confirmDialog({ title: ar ? "حذف؟" : "Delete?", destructive: true }))) return;
     await supabase.from("lms_categories").delete().eq("id", id);
     load();
   };
@@ -878,7 +878,7 @@ function ReconcileCertificatesCard({ ar }: { ar: boolean }) {
   const run = useServerFn(reconcileCertificates);
   const onClick = async () => {
     if (busy) return;
-    if (!await confirmDialog({ title: ar ? "فحص جميع التسجيلات المؤهلة وإصدار الشهادات الناقصة؟" : "Scan eligible enrollments and issue any missing certificates?", destructive: true })) return;
+    if (!(await confirmDialog({ title: ar ? "فحص جميع التسجيلات المؤهلة وإصدار الشهادات الناقصة؟" : "Scan eligible enrollments and issue any missing certificates?", destructive: true }))) return;
     setBusy(true);
     try {
       const res = await run({ data: { limit: 500 } });

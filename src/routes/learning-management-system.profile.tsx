@@ -660,7 +660,7 @@ function ApplicationsCard({ isRtl: _isRtl, lang }: { isRtl: boolean; lang: "ar" 
   }, [load]);
 
   const onWithdraw = async (id: string) => {
-    if (!await confirmDialog({ title: lang === "ar" ? "هل تريد سحب الطلب؟" : "Withdraw this application?", destructive: true })) return;
+    if (!(await confirmDialog({ title: lang === "ar" ? "هل تريد سحب الطلب؟" : "Withdraw this application?", destructive: true }))) return;
     setBusy(id);
     try {
       await withdrawFn({ data: { application_id: id } });

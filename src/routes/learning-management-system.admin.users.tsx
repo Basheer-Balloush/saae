@@ -85,7 +85,7 @@ function UsersPage() {
   };
 
   const revoke = async (id: string) => {
-    if (!await confirmDialog({ title: ar ? "إزالة الدور؟" : "Revoke role?", destructive: true })) return;
+    if (!(await confirmDialog({ title: ar ? "إزالة الدور؟" : "Revoke role?", destructive: true }))) return;
     const { error } = await supabase.from("user_roles").delete().eq("id", id);
     if (error) { toast.error(toUserMessage(error)); return; }
     load();

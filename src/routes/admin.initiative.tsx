@@ -144,7 +144,7 @@ function AdminInitiative() {
                           <CheckCircle2 className="h-3 w-3 me-1" />تأكيد
                         </Button>
                       )}
-                      <Button size="sm" variant="ghost" onClick={async () => { if (!await confirmDialog({ title: "حذف؟", destructive: true })) return; await deleteFn({ data: { id: d.id } }); reloadAll(); }}><Trash2 className="h-3 w-3" /></Button>
+                      <Button size="sm" variant="ghost" onClick={async () => { if (!(await confirmDialog({ title: "حذف؟", destructive: true }))) return; await deleteFn({ data: { id: d.id } }); reloadAll(); }}><Trash2 className="h-3 w-3" /></Button>
                     </td>
                   </tr>
                 ))}

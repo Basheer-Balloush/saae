@@ -1225,7 +1225,7 @@ function AttendanceLink({ courseId, lang, isAdmin }: { courseId: string; lang: "
 
   const handleUnlink = async () => {
     if (!amsId) return;
-    if (!await confirmDialog({ title: lang === "ar"
+    if (!(await confirmDialog({ title: lang === "ar"
       ? "إلغاء ربط نظام الحضور؟ سيُحذف الطلاب المتزامنون."
       : "Unlink attendance? Synced students will be removed.", destructive: true })) return;
     setBusy(true);

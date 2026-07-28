@@ -59,7 +59,7 @@ function StudentRequestsPage() {
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
 
   const cancel = async (id: string) => {
-    if (!await confirmDialog({ title: ar ? "إلغاء الطلب؟" : "Cancel this request?", destructive: true })) return;
+    if (!(await confirmDialog({ title: ar ? "إلغاء الطلب؟" : "Cancel this request?", destructive: true }))) return;
     setBusy(id);
     const { error } = await supabase.from("lms_enrollment_requests").update({ status: "cancelled" }).eq("id", id);
     setBusy(null);
