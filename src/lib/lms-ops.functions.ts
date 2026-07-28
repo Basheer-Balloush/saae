@@ -52,6 +52,25 @@ export const reconcilePartialProvisioning = createServerFn({ method: "POST" })
     return res as unknown as PartialProvisioningReport;
   });
 
+export type InternshipFilesReport = {
+  orphan_internship_files: number;
+  snapshot_protected_files: number;
+  sample: Array<{ id: string; bucket: string; path: string; kind: string; created_at: string }>;
+  checked_at: string;
+};
+
+export const reconcileInternshipFiles = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => limitSchema.parse(input ?? {}))
+  .handler(async ({ data, context }) => {
+    const { data: res, error } = await context.supabase.rpc(
+      "lms_reconcile_internship_files" as never,
+      { _limit: data.limit ?? 200 } as never,
+    );
+    if (error) throw new Error(error.message);
+    return res as unknown as InternshipFilesReport;
+  });
+
 export type OpsHealthSummary = {
   outbox: {
     pending: number;
@@ -67,6 +86,10 @@ export type OpsHealthSummary = {
     }>;
   };
   auth_rate_flags_24h: Record<string, number>;
+  internships: {
+    stuck_applications: number;
+    by_status: Record<string, number>;
+  };
   checked_at: string;
 };
 
@@ -79,3 +102,4 @@ export const getOpsHealthSummary = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return res as unknown as OpsHealthSummary;
   });
+
