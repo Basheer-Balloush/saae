@@ -75,13 +75,13 @@ function AttendanceLinkPage() {
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">
         {ar
-          ? "اربط دورات المنصة التعليمية بنظام الحضور ليتمكن المدرّب من تسجيل حضور الجلسات. الطلاب المعتمَدون يتزامنون تلقائياً."
-          : "Link LMS courses to the attendance system so instructors can record session attendance. Approved students are synced automatically."}
+          ? "اربط دورات منصّة التدريب والتعلّم بنظام الحضور ليتمكن المدرّب من تسجيل حضور الجلسات. الطلاب المعتمَدون يتزامنون تلقائياً."
+          : "Link Training and Learning Platform courses to the attendance system so instructors can record session attendance. Approved students are synced automatically."}
       </p>
       <p className="mt-2 text-xs rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300 px-3 py-2">
         {ar
           ? "ملاحظة: عند الربط، تُستبدل جلسات الحضور الحالية بجلسة واحدة لكل قسم من أقسام الدورة، وتحديد \"حاضر\" لطالب يُكمل تلقائياً قسم الدورة المرتبط بالجلسة."
-          : "Note: on linking, existing attendance sessions are replaced with one session per LMS section. Marking a student present auto-completes the linked section for them."}
+          : "Note: on linking, existing attendance sessions are replaced with one session per course section. Marking a student present auto-completes the linked section for them."}
       </p>
 
       {loading ? (
