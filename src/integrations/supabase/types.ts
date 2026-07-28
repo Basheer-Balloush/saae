@@ -2213,6 +2213,7 @@ export type Database = {
           category_id: string | null
           cover_url: string | null
           created_at: string
+          delivery_mode: Database["public"]["Enums"]["lms_delivery_mode"]
           description_ar: string | null
           description_en: string | null
           duration_hours: number | null
@@ -2251,6 +2252,7 @@ export type Database = {
           category_id?: string | null
           cover_url?: string | null
           created_at?: string
+          delivery_mode?: Database["public"]["Enums"]["lms_delivery_mode"]
           description_ar?: string | null
           description_en?: string | null
           duration_hours?: number | null
@@ -2289,6 +2291,7 @@ export type Database = {
           category_id?: string | null
           cover_url?: string | null
           created_at?: string
+          delivery_mode?: Database["public"]["Enums"]["lms_delivery_mode"]
           description_ar?: string | null
           description_en?: string | null
           duration_hours?: number | null
@@ -4528,6 +4531,7 @@ export type Database = {
         | "url"
       lms_course_level: "beginner" | "intermediate" | "advanced"
       lms_course_status: "draft" | "pending" | "rejected" | "published"
+      lms_delivery_mode: "onsite" | "online"
       lms_enroll_req_status: "pending" | "approved" | "rejected" | "cancelled"
       lms_payment_method: "manual" | "online"
       lms_profile_file_kind: "cv" | "avatar"
@@ -4731,6 +4735,7 @@ export const Constants = {
       ],
       lms_course_level: ["beginner", "intermediate", "advanced"],
       lms_course_status: ["draft", "pending", "rejected", "published"],
+      lms_delivery_mode: ["onsite", "online"],
       lms_enroll_req_status: ["pending", "approved", "rejected", "cancelled"],
       lms_payment_method: ["manual", "online"],
       lms_profile_file_kind: ["cv", "avatar"],
