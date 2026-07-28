@@ -114,6 +114,9 @@ function QuizPage() {
       return;
     }
     setResult(data as Result);
+    if ((data as Result | null)?.certificate_id) {
+      sendCertEmail({ data: { courseId, lang } }).catch((e) => console.error("cert email failed", e));
+    }
   };
 
   if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
