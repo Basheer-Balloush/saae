@@ -50,14 +50,21 @@ function Player() {
 
       const { data: secs } = await supabase.from("lms_sections")
         .select("id,title,title_ar,title_en,display_order").eq("course_id", courseId).order("display_order");
-      setSections((secs as Section[]) ?? []);
-      if (secs && secs.length) {
-        const ids = secs.map((s) => s.id);
+      const orderedSecs = ((secs as Section[]) ?? []).slice().sort((a, b) => a.display_order - b.display_order);
+      setSections(orderedSecs);
+      if (orderedSecs.length) {
+        const ids = orderedSecs.map((s) => s.id);
         const [{ data: lss }, { data: prs }] = await Promise.all([
-          supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,video_status,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids).order("display_order"),
+          supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,video_status,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids),
           supabase.from("lms_lesson_progress").select("lesson_id,is_completed").eq("student_id", user.id),
         ]);
-        const list = (lss as Lesson[]) ?? [];
+        const secOrder = new Map(orderedSecs.map((s, i) => [s.id, i]));
+        const list = ((lss as Lesson[]) ?? []).slice().sort((a, b) => {
+          const sa = secOrder.get(a.section_id) ?? 0;
+          const sb = secOrder.get(b.section_id) ?? 0;
+          if (sa !== sb) return sa - sb;
+          return a.display_order - b.display_order;
+        });
         setLessons(list);
         setProgress((prs as Progress[]) ?? []);
         if (list.length) setCurrentId(list[0].id);
@@ -108,6 +115,7 @@ function Player() {
 
   // Attach HLS source to <video> when current lesson is a Bunny stream
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !videoSrc) return;
@@ -128,6 +136,40 @@ function Player() {
     video.src = videoSrc;
   }, [videoSrc]);
 
+  const markCompleteRef = useRef<() => void>(() => {});
+
+  // Auto-complete for streamed (Bunny) iframe lessons via player.js postMessage protocol
+  useEffect(() => {
+    if (!current || !isEmbedSrc || !videoSrc) return;
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    const listenerId = `saae-${current.id}`;
+
+    const send = (msg: Record<string, unknown>) => {
+      try { iframe.contentWindow?.postMessage(JSON.stringify({ context: "player.js", ...msg }), "*"); } catch { /* noop */ }
+    };
+    const onReady = () => {
+      send({ method: "addEventListener", value: "ended", listener: listenerId });
+    };
+    const onMessage = (e: MessageEvent) => {
+      try {
+        const origin = e.origin || "";
+        if (!/mediadelivery\.net|b-cdn\.net/i.test(origin)) return;
+        const data = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+        if (!data || data.context !== "player.js") return;
+        if (data.event === "ready") onReady();
+        if (data.event === "ended") markCompleteRef.current?.();
+      } catch { /* ignore non-JSON messages */ }
+    };
+    window.addEventListener("message", onMessage);
+    // Ask for a ready ping in case we missed it
+    send({ method: "addEventListener", value: "ready", listener: listenerId });
+    // Also proactively subscribe (some player.js impls accept before ready)
+    onReady();
+    return () => { window.removeEventListener("message", onMessage); };
+  }, [current, isEmbedSrc, videoSrc]);
+
+
   const markComplete = async () => {
     if (!user || !current) return;
     const { error } = await supabase.from("lms_lesson_progress").upsert({
@@ -146,6 +188,8 @@ function Player() {
     const idx = lessons.findIndex((l) => l.id === current.id);
     if (idx >= 0 && idx < lessons.length - 1) setCurrentId(lessons[idx + 1].id);
   };
+  markCompleteRef.current = markComplete;
+
 
   if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
 
@@ -169,6 +213,7 @@ function Player() {
           {current && videoSrc && isEmbedSrc ? (
             <iframe
               key={current.id}
+              ref={iframeRef}
               src={videoSrc}
               title={currentTitle}
               allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
