@@ -8,6 +8,8 @@ import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { sendCertificateEmail } from "@/lib/certificate-email.functions";
 
 export const Route = createFileRoute("/learning-management-system/student/quiz/$courseId")({
   head: () => ({ meta: [{ title: "LMS · Final test" }] }),
