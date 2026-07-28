@@ -12,7 +12,7 @@ export const Route = createFileRoute("/learning-management-system/instructor/qui
   component: QuizResultsPage,
 });
 
-type Quiz = { id: string; title: string; passing_score: number };
+type Quiz = { id: string; title: string; pass_score: number };
 type Attempt = {
   id: string;
   quiz_id: string;
@@ -43,7 +43,7 @@ function QuizResultsPage() {
       setCourse(c as { title_ar: string; title_en: string | null } | null);
 
       const { data: qs } = await supabase.from("lms_quizzes")
-        .select("id,title,passing_score").eq("course_id", courseId).order("created_at");
+        .select("id,title,pass_score").eq("course_id", courseId).order("created_at");
       const qList = (qs as Quiz[]) ?? [];
       setQuizzes(qList);
 
