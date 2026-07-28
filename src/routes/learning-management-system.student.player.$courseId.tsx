@@ -188,6 +188,8 @@ function Player() {
     const idx = lessons.findIndex((l) => l.id === current.id);
     if (idx >= 0 && idx < lessons.length - 1) setCurrentId(lessons[idx + 1].id);
   };
+  markCompleteRef.current = markComplete;
+
 
   if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
 
