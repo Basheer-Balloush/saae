@@ -17,7 +17,7 @@ export const Route = createFileRoute("/learning-management-system/instructor/")(
   component: InstructorHome,
 });
 
-type Course = { id: string; title_ar: string; title_en: string | null; status: string; students_count: number; is_free: boolean; price: number };
+type Course = { id: string; title_ar: string; title_en: string | null; status: string; students_count: number; is_free: boolean; price: number; instructor_id: string };
 
 function InstructorHome() {
   const { user } = useLmsAuth();
@@ -33,11 +33,20 @@ function InstructorHome() {
   const load = async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase.from("lms_courses")
-      .select("id,title_ar,title_en,status,students_count,is_free,price")
+    const ownedP = supabase.from("lms_courses")
+      .select("id,title_ar,title_en,status,students_count,is_free,price,instructor_id")
       .eq("instructor_id", user.id)
       .order("created_at", { ascending: false });
-    setCourses((data as Course[]) ?? []);
+    const coP = supabase.from("lms_course_instructors")
+      .select("course:lms_courses(id,title_ar,title_en,status,students_count,is_free,price,instructor_id)")
+      .eq("instructor_user_id", user.id);
+    const [{ data: owned }, { data: co }] = await Promise.all([ownedP, coP]);
+    const map = new Map<string, Course>();
+    for (const c of (owned as Course[]) ?? []) map.set(c.id, c);
+    for (const row of ((co as unknown) as Array<{ course: Course | null }>) ?? []) {
+      if (row.course && !map.has(row.course.id)) map.set(row.course.id, row.course);
+    }
+    setCourses(Array.from(map.values()));
     setLoading(false);
   };
 
