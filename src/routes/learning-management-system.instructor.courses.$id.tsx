@@ -1064,8 +1064,19 @@ function CourseBuilder() {
             {lang === "ar" ? "إدارة الوظائف" : "Manage Assignments"}
           </Button>
         </Link>
+        <Link to="/learning-management-system/instructor/quiz-results/$courseId" params={{ courseId: course.id }}>
+          <Button variant="outline">
+            <FileText className="h-4 w-4 mx-1" />
+            {lang === "ar" ? "نتائج الاختبارات" : "Quiz results"}
+          </Button>
+        </Link>
         <AttendanceLink courseId={course.id} lang={lang} isAdmin={isAdmin} />
       </div>
+
+      {course.delivery_mode === "onsite" && (
+        <AttendanceSummary courseId={course.id} lang={lang} />
+      )}
+
 
       <QuizBuilder courseId={course.id} />
 
