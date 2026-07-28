@@ -206,7 +206,7 @@ function AmsDashboard() {
                 )}
                 {(c as { lms_course_id?: string | null }).lms_course_id && (
                   <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                    {isRtl ? "مربوطة بالمنصة التعليمية" : "Linked to LMS"}
+                    {isRtl ? "مربوطة بمنصّة التدريب والتعلّم" : "Linked to Training and Learning Platform"}
                   </span>
                 )}
                 <div className="mt-4 inline-flex items-center gap-1 text-xs text-primary">
