@@ -69,7 +69,7 @@ function AdminReviews() {
   };
 
   const statusBadge = (s: ReviewStatus) => {
-    const map: Record<ReviewStatus, { cls: string; ar: string; en: string; icon: JSX.Element }> = {
+    const map: Record<ReviewStatus, { cls: string; ar: string; en: string; icon: ReactNode }> = {
       pending:  { cls: "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300", ar: "قيد المراجعة", en: "Pending",  icon: <Clock className="h-3 w-3" /> },
       approved: { cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300", ar: "مُعتمد", en: "Approved", icon: <Check className="h-3 w-3" /> },
       rejected: { cls: "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300", ar: "مرفوض", en: "Rejected", icon: <X className="h-3 w-3" /> },
