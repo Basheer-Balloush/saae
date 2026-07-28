@@ -50,7 +50,7 @@ const CONTENT = {
     },
   },
   en: {
-    title1: "International Business Bridge",
+    title1: "International Business Bridge\u00A0",
     title2: "to Syrian Talent",
     subtitle:
       "Together we connect Syrian talent with international opportunities and build the future of business and technology",
