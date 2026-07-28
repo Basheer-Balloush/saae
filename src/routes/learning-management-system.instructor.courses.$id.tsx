@@ -1064,8 +1064,19 @@ function CourseBuilder() {
             {lang === "ar" ? "إدارة الوظائف" : "Manage Assignments"}
           </Button>
         </Link>
+        <Link to="/learning-management-system/instructor/quiz-results/$courseId" params={{ courseId: course.id }}>
+          <Button variant="outline">
+            <FileText className="h-4 w-4 mx-1" />
+            {lang === "ar" ? "نتائج الاختبارات" : "Quiz results"}
+          </Button>
+        </Link>
         <AttendanceLink courseId={course.id} lang={lang} isAdmin={isAdmin} />
       </div>
+
+      {course.delivery_mode === "onsite" && (
+        <AttendanceSummary courseId={course.id} lang={lang} />
+      )}
+
 
       <QuizBuilder courseId={course.id} />
 
@@ -1273,5 +1284,101 @@ function AttendanceLink({ courseId, lang, isAdmin }: { courseId: string; lang: "
         </Button>
       )}
     </div>
+  );
+}
+
+function AttendanceSummary({ courseId, lang }: { courseId: string; lang: "ar" | "en" }) {
+  const [loading, setLoading] = useState(true);
+  const [rows, setRows] = useState<Array<{ name: string; attended: number; total: number }>>([]);
+  const [totalSessions, setTotalSessions] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setLoading(true);
+      const { data: ams } = await supabase.from("ams_courses").select("id").eq("lms_course_id", courseId).maybeSingle();
+      const amsId = (ams as { id: string } | null)?.id;
+      if (!amsId) { if (active) { setRows([]); setTotalSessions(0); setLoading(false); } return; }
+
+      const { data: sessions } = await supabase.from("ams_sessions").select("id").eq("course_id", amsId);
+      const sessionIds = (sessions as Array<{ id: string }> | null)?.map((s) => s.id) ?? [];
+      const total = sessionIds.length;
+
+      const { data: regs } = await supabase.from("ams_registrants")
+        .select("id,full_name").eq("course_id", amsId).order("full_name");
+      const regList = (regs as Array<{ id: string; full_name: string }> | null) ?? [];
+
+      let att: Array<{ registrant_id: string; present: boolean }> = [];
+      if (sessionIds.length && regList.length) {
+        const { data } = await supabase.from("ams_attendance")
+          .select("registrant_id,present").in("session_id", sessionIds);
+        att = (data as Array<{ registrant_id: string; present: boolean }> | null) ?? [];
+      }
+      const counts = new Map<string, number>();
+      for (const a of att) if (a.present) counts.set(a.registrant_id, (counts.get(a.registrant_id) ?? 0) + 1);
+
+      if (active) {
+        setTotalSessions(total);
+        setRows(regList.map((r) => ({ name: r.full_name, attended: counts.get(r.id) ?? 0, total })));
+        setLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, [courseId]);
+
+  if (loading) return null;
+  if (rows.length === 0) {
+    return (
+      <section className="mt-6 rounded-2xl border border-border bg-card p-5">
+        <h3 className="font-bold text-foreground">{lang === "ar" ? "ملخص الحضور" : "Attendance summary"}</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {lang === "ar" ? "لا يوجد مسجّلون بعد." : "No registrants yet."}
+        </p>
+      </section>
+    );
+  }
+
+  const overall = rows.reduce((s, r) => s + r.attended, 0);
+  const overallTotal = rows.length * totalSessions;
+  const overallPct = overallTotal === 0 ? 0 : Math.round((overall / overallTotal) * 100);
+
+  return (
+    <section className="mt-6 rounded-2xl border border-border bg-card p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-bold text-foreground">{lang === "ar" ? "ملخص الحضور" : "Attendance summary"}</h3>
+        <div className="text-xs text-muted-foreground">
+          {lang === "ar"
+            ? `${rows.length} طالب · ${totalSessions} جلسة · متوسط الحضور ${overallPct}%`
+            : `${rows.length} students · ${totalSessions} sessions · avg ${overallPct}%`}
+        </div>
+      </div>
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2 text-start">{lang === "ar" ? "الطالب" : "Student"}</th>
+              <th className="px-3 py-2 text-center">{lang === "ar" ? "الحضور" : "Attended"}</th>
+              <th className="px-3 py-2 text-center">%</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => {
+              const pct = r.total === 0 ? 0 : Math.round((r.attended / r.total) * 100);
+              return (
+                <tr key={i} className="border-t border-border">
+                  <td className="px-3 py-2">{r.name}</td>
+                  <td className="px-3 py-2 text-center font-mono">{r.attended} / {r.total}</td>
+                  <td className="px-3 py-2 text-center">
+                    <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${pct >= 100 ? "bg-emerald-500/15 text-emerald-600" : pct >= 50 ? "bg-amber-500/15 text-amber-600" : "bg-destructive/15 text-destructive"}`}>
+                      {pct}%
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }

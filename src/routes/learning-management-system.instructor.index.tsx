@@ -17,7 +17,7 @@ export const Route = createFileRoute("/learning-management-system/instructor/")(
   component: InstructorHome,
 });
 
-type Course = { id: string; title_ar: string; title_en: string | null; status: string; students_count: number; is_free: boolean; price: number };
+type Course = { id: string; title_ar: string; title_en: string | null; status: string; students_count: number; is_free: boolean; price: number; instructor_id: string };
 
 function InstructorHome() {
   const { user } = useLmsAuth();
@@ -33,11 +33,20 @@ function InstructorHome() {
   const load = async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase.from("lms_courses")
-      .select("id,title_ar,title_en,status,students_count,is_free,price")
+    const ownedP = supabase.from("lms_courses")
+      .select("id,title_ar,title_en,status,students_count,is_free,price,instructor_id")
       .eq("instructor_id", user.id)
       .order("created_at", { ascending: false });
-    setCourses((data as Course[]) ?? []);
+    const coP = supabase.from("lms_course_instructors")
+      .select("course:lms_courses(id,title_ar,title_en,status,students_count,is_free,price,instructor_id)")
+      .eq("instructor_user_id", user.id);
+    const [{ data: owned }, { data: co }] = await Promise.all([ownedP, coP]);
+    const map = new Map<string, Course>();
+    for (const c of (owned as Course[]) ?? []) map.set(c.id, c);
+    for (const row of ((co as unknown) as Array<{ course: Course | null }>) ?? []) {
+      if (row.course && !map.has(row.course.id)) map.set(row.course.id, row.course);
+    }
+    setCourses(Array.from(map.values()));
     setLoading(false);
   };
 
@@ -102,7 +111,14 @@ function InstructorHome() {
               className="rounded-2xl border border-border bg-card p-5 hover:border-primary transition-colors">
               <div className="flex items-start justify-between gap-2">
                 <h3 className="font-bold text-foreground line-clamp-2">{lang === "ar" ? c.title_ar : c.title_en || c.title_ar}</h3>
-                <StatusBadge status={c.status} />
+                <div className="flex flex-col items-end gap-1">
+                  <StatusBadge status={c.status} />
+                  {user && c.instructor_id !== user.id && (
+                    <span className="text-[10px] font-bold rounded-full px-2 py-0.5 bg-primary/10 text-primary">
+                      {lang === "ar" ? "تدريس مشترك" : "Co-taught"}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" />{c.students_count}</span>
