@@ -19,6 +19,7 @@ import {
 
 export default function InstructorCleanupPanel() {
   const { lang } = useLang();
+  const confirm = useConfirm();
   const ar = lang === "ar";
   const [candidates, setCandidates] = useState<CleanupCandidate[]>([]);
   const [batches, setBatches] = useState<CleanupBatch[]>([]);
