@@ -402,6 +402,7 @@ function AdminHome() {
             </div>
 
             <ReconcileCertificatesCard ar={ar} />
+            <OpsHealthCard ar={ar} />
           </aside>
 
           {/* Main */}
