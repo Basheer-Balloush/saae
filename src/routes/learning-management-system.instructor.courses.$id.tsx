@@ -1230,14 +1230,8 @@ function AttendanceLink({ courseId, lang, isAdmin }: { courseId: string; lang: "
     return () => { active = false; };
   }, [courseId]);
 
-  const handleLink = async () => {
-    setBusy(true);
-    const { data, error } = await supabase.rpc("link_lms_course_to_ams", { _lms_course_id: courseId });
-    setBusy(false);
-    if (error) { toast.error(toUserMessage(error)); return; }
-    setAmsId(data as string);
-    toast.success(lang === "ar" ? "تم تفعيل نظام الحضور" : "Attendance enabled");
-  };
+
+
 
   const handleUnlink = async () => {
     if (!amsId) return;
@@ -1255,22 +1249,15 @@ function AttendanceLink({ courseId, lang, isAdmin }: { courseId: string; lang: "
   if (loading) return null;
 
   if (!amsId) {
-    if (isAdmin) {
-      return (
-        <Button variant="outline" onClick={handleLink} disabled={busy}>
-          {busy ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <ClipboardList className="h-4 w-4 mx-1" />}
-          {lang === "ar" ? "تفعيل نظام الحضور" : "Enable Attendance"}
-        </Button>
-      );
-    }
     return (
       <span className="text-xs text-muted-foreground self-center px-2">
         {lang === "ar"
-          ? "نظام الحضور غير مفعّل — اطلب من الأدمن ربط الدورة"
-          : "Attendance not enabled — ask admin to link this course"}
+          ? "سيُفعَّل نظام الحضور تلقائياً عند نشر الدورة."
+          : "Attendance activates automatically once the course is published."}
       </span>
     );
   }
+
 
   return (
     <div className="flex items-center gap-2">
