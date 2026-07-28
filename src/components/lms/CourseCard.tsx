@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen, Users, Star } from "lucide-react";
+import { BookOpen, Users, Star, MapPin, PlayCircle } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 
