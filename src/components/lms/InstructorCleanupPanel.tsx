@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Archive, Loader2, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLang } from "@/lib/i18n";
+import { useConfirm } from "@/hooks/useConfirm";
 import { toUserMessage } from "@/lib/safe-error";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,6 +19,7 @@ import {
 
 export default function InstructorCleanupPanel() {
   const { lang } = useLang();
+  const confirm = useConfirm();
   const ar = lang === "ar";
   const [candidates, setCandidates] = useState<CleanupCandidate[]>([]);
   const [batches, setBatches] = useState<CleanupBatch[]>([]);
@@ -77,7 +79,7 @@ export default function InstructorCleanupPanel() {
   };
 
   const doPurge = async (id: string) => {
-    if (!window.confirm(ar ? "حذف نهائي لهذه الدفعة؟" : "Permanently purge this batch?")) return;
+    if (!(await confirm({ title: ar ? "حذف نهائي لهذه الدفعة؟" : "Permanently purge this batch?", destructive: true }))) return;
     setBusy(true);
     try {
       const res = await purgeCleanupBatch({ data: { batch_id: id } });

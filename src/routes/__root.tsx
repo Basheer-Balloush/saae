@@ -21,6 +21,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AssistantFab } from "@/components/site/AssistantFab";
 import { RouteProgress } from "@/components/site/RouteProgress";
 import { ScrollToHash } from "@/components/site/ScrollToHash";
+import { ConfirmProvider } from "@/hooks/useConfirm";
 
 
 function NotFoundComponent() {
@@ -291,24 +292,25 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <LanguageProvider>
-          <FormValidationHandler />
-          <ScrollRestoration />
-          <ScrollToHash />
-          <RouteProgress />
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.12, ease: "easeOut" }}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
-          {!isAms && !isLms && !isAdmin && <AssistantFab />}
-          <Toaster richColors position="top-center" />
-
+          <ConfirmProvider>
+            <FormValidationHandler />
+            <ScrollRestoration />
+            <ScrollToHash />
+            <RouteProgress />
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.12, ease: "easeOut" }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
+            {!isAms && !isLms && !isAdmin && <AssistantFab />}
+            <Toaster richColors position="top-center" />
+          </ConfirmProvider>
         </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>

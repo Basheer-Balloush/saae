@@ -26,6 +26,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/instructor/courses/$id")({
   head: () => ({ meta: [{ title: "LMS · Edit course" }] }),
@@ -1224,9 +1225,9 @@ function AttendanceLink({ courseId, lang, isAdmin }: { courseId: string; lang: "
 
   const handleUnlink = async () => {
     if (!amsId) return;
-    if (!confirm(lang === "ar"
+    if (!(await confirmDialog({ title: lang === "ar"
       ? "إلغاء ربط نظام الحضور؟ سيُحذف الطلاب المتزامنون."
-      : "Unlink attendance? Synced students will be removed.")) return;
+      : "Unlink attendance? Synced students will be removed.", destructive: true }))) return;
     setBusy(true);
     const { error } = await supabase.rpc("unlink_lms_course_from_ams", { _ams_course_id: amsId });
     setBusy(false);

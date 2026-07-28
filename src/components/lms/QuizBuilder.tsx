@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 type Quiz = { id: string; title: string; pass_score: number; version: number; max_attempts: number; cooldown_minutes: number };
 type Question = { id: string; question: string; choices: unknown; correct_index: number; display_order: number };
@@ -70,7 +71,7 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
   };
 
   const deleteQ = async (qid: string) => {
-    if (!confirm(lang === "ar" ? "حذف؟" : "Delete?")) return;
+    if (!(await confirmDialog({ title: lang === "ar" ? "حذف؟" : "Delete?", destructive: true }))) return;
     await supabase.from("lms_quiz_questions").delete().eq("id", qid);
     setQuestions(questions.filter((q) => q.id !== qid));
   };

@@ -48,6 +48,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/profile")({
   head: () => ({
@@ -659,7 +660,7 @@ function ApplicationsCard({ isRtl: _isRtl, lang }: { isRtl: boolean; lang: "ar" 
   }, [load]);
 
   const onWithdraw = async (id: string) => {
-    if (!confirm(lang === "ar" ? "هل تريد سحب الطلب؟" : "Withdraw this application?")) return;
+    if (!(await confirmDialog({ title: lang === "ar" ? "هل تريد سحب الطلب؟" : "Withdraw this application?", destructive: true }))) return;
     setBusy(id);
     try {
       await withdrawFn({ data: { application_id: id } });

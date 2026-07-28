@@ -9,6 +9,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/admin/reviews")({
   head: () => ({ meta: [{ title: "LMS · Admin · Reviews" }] }),
@@ -61,7 +62,7 @@ function AdminReviews() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm(isAr ? "حذف هذا التقييم؟" : "Delete this review?")) return;
+    if (!(await confirmDialog({ title: isAr ? "حذف هذا التقييم؟" : "Delete this review?", destructive: true }))) return;
     const { error } = await supabase.from("lms_reviews").delete().eq("id", id);
     if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(isAr ? "تم الحذف" : "Deleted");

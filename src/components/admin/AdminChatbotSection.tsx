@@ -23,6 +23,7 @@ import {
   addKnowledgeText,
   deleteKnowledgeDocument,
 } from "@/lib/admin-chat.functions";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 type SubTab = "stats" | "conversations" | "knowledge";
 
@@ -251,7 +252,7 @@ function ConversationsPanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "
   };
 
   const remove = async (id: string) => {
-    if (!confirm(tr.confirmDelete)) return;
+    if (!(await confirmDialog({ title: tr.confirmDelete, destructive: true }))) return;
     try {
       await delConv({ data: { conversationId: id } });
       toast.success(tr.deleted);
@@ -378,7 +379,7 @@ function KnowledgePanel({ tr, lang }: { tr: (typeof T)["ar"]; lang: "ar" | "en" 
   };
 
   const remove = async (id: string) => {
-    if (!confirm("?")) return;
+    if (!(await confirmDialog({ title: "?", destructive: true }))) return;
     try {
       await delDoc({ data: { documentId: id } });
       setDocs((p) => p.filter((d) => d.id !== id));

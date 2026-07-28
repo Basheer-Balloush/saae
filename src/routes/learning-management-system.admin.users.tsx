@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { grantRoleByEmail, getEmailsForUsers } from "@/lib/lms-admin-users.functions";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/admin/users")({
   head: () => ({ meta: [{ title: "LMS · Users" }] }),
@@ -84,7 +85,7 @@ function UsersPage() {
   };
 
   const revoke = async (id: string) => {
-    if (!confirm(ar ? "إزالة الدور؟" : "Revoke role?")) return;
+    if (!(await confirmDialog({ title: ar ? "إزالة الدور؟" : "Revoke role?", destructive: true }))) return;
     const { error } = await supabase.from("user_roles").delete().eq("id", id);
     if (error) { toast.error(toUserMessage(error)); return; }
     load();

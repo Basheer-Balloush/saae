@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { FileUploader } from "@/components/lms/FileUploader";
 import { toast } from "sonner";
 import type { Lang } from "@/lib/translations";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/instructor/assignments/$courseId")({
   head: () => ({ meta: [{ title: "LMS · Manage Assignments" }] }),
@@ -124,7 +125,7 @@ function InstructorAssignments() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t(lang, "حذف هذه الوظيفة وكل تسليماتها؟", "Delete this assignment and all submissions?"))) return;
+    if (!(await confirmDialog({ title: t(lang, "حذف هذه الوظيفة وكل تسليماتها؟", "Delete this assignment and all submissions?"), destructive: true }))) return;
     const { error } = await supabase.from("lms_assignments").delete().eq("id", id);
     if (error) { toast.error(toUserMessage(error)); return; }
     load();

@@ -18,6 +18,7 @@ import {
   adminListDonations, adminListWaitlist, adminConfirmDonation,
   adminCreateDonation, adminDeleteDonation, adminUpdateSettings, adminListCourses,
 } from "@/lib/initiative.functions";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/admin/initiative")({
   ssr: false,
@@ -143,7 +144,7 @@ function AdminInitiative() {
                           <CheckCircle2 className="h-3 w-3 me-1" />تأكيد
                         </Button>
                       )}
-                      <Button size="sm" variant="ghost" onClick={async () => { if (!confirm("حذف؟")) return; await deleteFn({ data: { id: d.id } }); reloadAll(); }}><Trash2 className="h-3 w-3" /></Button>
+                      <Button size="sm" variant="ghost" onClick={async () => { if (!(await confirmDialog({ title: "حذف؟", destructive: true }))) return; await deleteFn({ data: { id: d.id } }); reloadAll(); }}><Trash2 className="h-3 w-3" /></Button>
                     </td>
                   </tr>
                 ))}

@@ -7,6 +7,7 @@ import { Trash2, MessageSquare, GraduationCap, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
 import type { Lang } from "@/lib/translations";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 type Question = { id: string; lesson_id: string; student_id: string; body: string; created_at: string };
 type Answer = { id: string; question_id: string; author_id: string; body: string; is_instructor_answer: boolean; created_at: string };
@@ -90,14 +91,14 @@ export function QAPanel({ lessonId, user, isInstructor, lang }: Props) {
   };
 
   const deleteQuestion = async (id: string) => {
-    if (!confirm(t(lang, "حذف هذا السؤال؟", "Delete this question?"))) return;
+    if (!(await confirmDialog({ title: t(lang, "حذف هذا السؤال؟", "Delete this question?"), destructive: true }))) return;
     const { error } = await supabase.from("lms_questions").delete().eq("id", id);
     if (error) { toast.error(toUserMessage(error)); return; }
     load();
   };
 
   const deleteAnswer = async (id: string) => {
-    if (!confirm(t(lang, "حذف هذا الرد؟", "Delete this answer?"))) return;
+    if (!(await confirmDialog({ title: t(lang, "حذف هذا الرد؟", "Delete this answer?"), destructive: true }))) return;
     const { error } = await supabase.from("lms_answers").delete().eq("id", id);
     if (error) { toast.error(toUserMessage(error)); return; }
     load();

@@ -48,6 +48,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/attendance-management-system/")({
   head: () => ({
@@ -386,14 +387,14 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
     attendance.filter((a) => a.registrant_id === registrantId && a.present).length;
 
   const deleteRegistrant = async (id: string) => {
-    if (!confirm(tr.confirmDelete)) return;
+    if (!(await confirmDialog({ title: tr.confirmDelete, destructive: true }))) return;
     const { error } = await supabase.from("ams_registrants").delete().eq("id", id);
     if (error) return toast.error(toUserMessage(error));
     load();
   };
 
   const deleteSession = async (id: string) => {
-    if (!confirm(tr.confirmDelete)) return;
+    if (!(await confirmDialog({ title: tr.confirmDelete, destructive: true }))) return;
     const { error } = await supabase.from("ams_sessions").delete().eq("id", id);
     if (error) return toast.error(toUserMessage(error));
     load();
