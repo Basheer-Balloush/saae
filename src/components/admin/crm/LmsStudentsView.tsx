@@ -55,7 +55,7 @@ export function LmsStudentsView() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">{ar ? "طلاب المنصة التعليمية" : "LMS Students"}</h1>
+          <h1 className="text-2xl font-bold">{ar ? "طلاب منصّة التدريب والتعلّم" : "Training & Learning Platform Students"}</h1>
           <p className="text-sm text-muted-foreground">
             {ar ? "الإجمالي" : "Total"}: <span className="font-semibold">{filtered.length}</span>
           </p>
