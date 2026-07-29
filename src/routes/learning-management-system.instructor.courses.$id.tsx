@@ -75,6 +75,7 @@ function CourseBuilder() {
   const [sections, setSections] = useState<Section[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [saving, setSaving] = useState(false);
+  const [switchingMode, setSwitchingMode] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [coverPct, setCoverPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
   const [attachPct, setAttachPct] = useState<Record<string, { pct: number; loaded: number; total: number; name: string }>>({});
@@ -147,17 +148,51 @@ function CourseBuilder() {
 
   const update = (patch: Partial<Course>) => setCourse({ ...course, ...patch });
 
-  // Delivery mode gates lessons/quizzes server-side, so persist it immediately
-  // instead of waiting for a full course save — otherwise the UI shows the
-  // online-only tools while the database still considers the course on-site.
+  // Delivery mode is the single source of truth for the whole student journey,
+  // so it can only be changed through the authorized transactional command,
+  // which also creates/restores the AMS link and recalculates progress.
   const persistDeliveryMode = async (mode: "onsite" | "online") => {
     const prev = course.delivery_mode;
+    if (prev === mode || switchingMode) return;
+    const ok = await confirmDialog({
+      title:
+        mode === "onsite"
+          ? (lang === "ar" ? "التحويل إلى دورة حضورية؟" : "Switch to an onsite course?")
+          : (lang === "ar" ? "التحويل إلى دورة أونلاين؟" : "Switch to an online course?"),
+      description:
+        mode === "onsite"
+          ? (lang === "ar"
+              ? "سيتم إنشاء/استعادة سجل الحضور المرتبط، ومزامنة الجلسات وجميع الطلاب المسجّلين، وإعادة احتساب التقدّم من الحضور بدل الدروس. تبقى الدروس والاختبارات والمحاولات والشهادات الصادرة كما هي."
+              : "The linked attendance course will be created/restored, sessions and all enrolled students synced, and progress recalculated from attendance instead of lessons. Lessons, quizzes, attempts and issued certificates are preserved.")
+          : (lang === "ar"
+              ? "سيعود التقدّم ليُحتسب من إكمال الدروس، ويصبح مشغّل الدروس والاختبار متاحين للطلاب. تبقى سجلات الحضور محفوظة دون حذف."
+              : "Progress will be calculated from lesson completion again, and the online player and quiz become available to students. Attendance records are kept, not deleted."),
+      confirmLabel: lang === "ar" ? "تأكيد التحويل" : "Confirm switch",
+    });
+    if (!ok) return;
+    setSwitchingMode(true);
     update({ delivery_mode: mode });
-    const { error } = await supabase.from("lms_courses").update({ delivery_mode: mode }).eq("id", course.id);
+    const { error } = await supabase.rpc("lms_set_delivery_mode" as never, {
+      _course_id: course.id,
+      _mode: mode,
+    } as never);
+    setSwitchingMode(false);
     if (error) {
       setCourse({ ...course, delivery_mode: prev });
-      toast.error(toUserMessage(error));
+      const msg = String((error as { message?: string }).message ?? "");
+      if (msg.includes("ams_sync_failed")) {
+        toast.error(lang === "ar"
+          ? "تعذّرت مزامنة الحضور، ولم يتم تغيير نمط التقديم."
+          : "Attendance sync failed — delivery mode was not changed.");
+      } else if (msg.includes("forbidden")) {
+        toast.error(lang === "ar" ? "غير مصرّح لك بتغيير نمط التقديم" : "You are not allowed to change delivery mode");
+      } else {
+        toast.error(toUserMessage(error));
+      }
+      return;
     }
+    toast.success(lang === "ar" ? "تم تحديث نمط التقديم" : "Delivery mode updated");
+    await load();
   };
 
   const saveCourse = async (opts?: { requireComplete?: boolean }): Promise<boolean> => {
@@ -202,7 +237,6 @@ function CourseBuilder() {
       schedule_days: course.schedule_days, schedule_time_from: course.schedule_time_from, schedule_time_to: course.schedule_time_to,
       location_ar: course.location_ar, location_en: course.location_en,
       duration_hours: course.duration_hours,
-      delivery_mode: course.delivery_mode,
       slug: slugVal || null,
     };
     payload.price = course.is_free ? 0 : course.price;
@@ -661,8 +695,9 @@ function CourseBuilder() {
         <div className="grid sm:grid-cols-2 gap-3">
 
           <div><Label>{lang === "ar" ? "نمط التقديم" : "Delivery mode"}</Label>
-            <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+            <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm disabled:opacity-60"
               value={course.delivery_mode ?? "onsite"}
+              disabled={switchingMode}
               onChange={(e) => persistDeliveryMode(e.target.value as "onsite" | "online")}>
               <option value="onsite">{tr.deliveryOnsite}</option>
               <option value="online">{tr.deliveryOnline}</option>

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, PlayCircle, Circle, Paperclip, Award } from "lucide-react";
@@ -13,6 +13,7 @@ import { QAPanel } from "@/components/lms/QAPanel";
 import { AssignmentsPanel } from "@/components/lms/AssignmentsPanel";
 import { getBunnyPlayback } from "@/lib/bunny-stream.functions";
 import Hls from "hls.js";
+import { isOnsite } from "@/lib/lms-course-destination";
 
 export const Route = createFileRoute("/learning-management-system/student/player/$courseId")({
   head: () => ({ meta: [{ title: "LMS · Player" }] }),
@@ -30,6 +31,7 @@ type Progress = { lesson_id: string; is_completed: boolean };
 
 function Player() {
   const { courseId } = Route.useParams();
+  const navigate = useNavigate();
   const { user, role } = useLmsAuth();
   const { lang } = useLang();
   const tr = lmsT[lang];
@@ -45,8 +47,18 @@ function Player() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: course } = await supabase.from("lms_courses").select("instructor_id").eq("id", courseId).maybeSingle();
-      setCourseInstructorId((course as { instructor_id: string } | null)?.instructor_id ?? null);
+      const { data: course } = await supabase
+        .from("lms_courses")
+        .select("instructor_id,delivery_mode")
+        .eq("id", courseId)
+        .maybeSingle();
+      const courseRow = course as { instructor_id: string; delivery_mode: string | null } | null;
+      // Onsite courses have no online lessons: send deep links to the onsite course page.
+      if (courseRow && isOnsite(courseRow.delivery_mode)) {
+        navigate({ to: "/learning-management-system/courses/$id", params: { id: courseId }, replace: true });
+        return;
+      }
+      setCourseInstructorId(courseRow?.instructor_id ?? null);
 
       const { data: secs } = await supabase.from("lms_sections")
         .select("id,title,title_ar,title_en,display_order").eq("course_id", courseId).order("display_order");
@@ -71,7 +83,7 @@ function Player() {
       }
       setLoading(false);
     })();
-  }, [courseId, user]);
+  }, [courseId, user, navigate]);
 
   const current = useMemo(() => lessons.find((l) => l.id === currentId) ?? null, [lessons, currentId]);
   const isDone = (id: string) => progress.find((p) => p.lesson_id === id)?.is_completed === true;
