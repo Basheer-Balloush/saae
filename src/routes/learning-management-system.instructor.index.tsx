@@ -27,8 +27,9 @@ function InstructorHome() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [titleAr, setTitleAr] = useState("");
-  const [titleEn, setTitleEn] = useState("");
+  const [form, setForm] = useState({ title_ar: "", title_en: "", description_ar: "", description_en: "" });
+  const [errors, setErrors] = useState<CourseFieldErrors>({});
+  const fieldRefs = useRef<Partial<Record<RequiredCourseField, HTMLInputElement | HTMLTextAreaElement | null>>>({});
 
   const load = async () => {
     if (!user) return;
@@ -54,16 +55,26 @@ function InstructorHome() {
 
   const onCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !titleAr.trim()) return;
+    if (!user || creating) return;
+    const nextErrors = validateCourseI18n(form, lang);
+    setErrors(nextErrors);
+    const firstBad = firstInvalidCourseField(nextErrors);
+    if (firstBad) { fieldRefs.current[firstBad]?.focus(); return; }
+    const values = trimCourseI18n(form);
     setCreating(true);
     const { data, error } = await supabase.from("lms_courses").insert({
       instructor_id: user.id,
-      title_ar: titleAr.trim(),
-      title_en: titleEn.trim() || null,
+      ...values,
     }).select("id").maybeSingle();
     setCreating(false);
-    if (error) { toast.error(toUserMessage(error)); return; }
-    setOpen(false); setTitleAr(""); setTitleEn("");
+    if (error) {
+      const msg = toUserMessage(error);
+      toast.error(courseI18nWriteErrorMessage(error.message ?? msg, lang) ?? msg);
+      return;
+    }
+    setOpen(false);
+    setForm({ title_ar: "", title_en: "", description_ar: "", description_en: "" });
+    setErrors({});
     if (data) window.location.href = `/learning-management-system/instructor/courses/${data.id}`;
   };
 
@@ -86,11 +97,53 @@ function InstructorHome() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>{lang === "ar" ? "دورة جديدة" : "New course"}</DialogTitle></DialogHeader>
-            <form onSubmit={onCreate} className="space-y-3">
-              <div><Label>{lang === "ar" ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
-                <Input required value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></div>
-              <div><Label>{lang === "ar" ? "العنوان (إنجليزي)" : "Title (English)"}</Label>
-                <Input value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></div>
+            <form onSubmit={onCreate} noValidate className="space-y-3">
+              <div>
+                <Label>{lang === "ar" ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
+                <Input
+                  dir="rtl"
+                  ref={(el) => { fieldRefs.current.title_ar = el; }}
+                  aria-invalid={!!errors.title_ar}
+                  value={form.title_ar}
+                  onChange={(e) => setForm({ ...form, title_ar: e.target.value })}
+                />
+                {errors.title_ar && <p className="mt-1 text-xs text-destructive">{errors.title_ar}</p>}
+              </div>
+              <div>
+                <Label>{lang === "ar" ? "العنوان (إنجليزي)" : "Title (English)"}</Label>
+                <Input
+                  dir="ltr"
+                  ref={(el) => { fieldRefs.current.title_en = el; }}
+                  aria-invalid={!!errors.title_en}
+                  value={form.title_en}
+                  onChange={(e) => setForm({ ...form, title_en: e.target.value })}
+                />
+                {errors.title_en && <p className="mt-1 text-xs text-destructive">{errors.title_en}</p>}
+              </div>
+              <div>
+                <Label>{lang === "ar" ? "الوصف (عربي)" : "Description (Arabic)"}</Label>
+                <Textarea
+                  dir="rtl"
+                  rows={3}
+                  ref={(el) => { fieldRefs.current.description_ar = el; }}
+                  aria-invalid={!!errors.description_ar}
+                  value={form.description_ar}
+                  onChange={(e) => setForm({ ...form, description_ar: e.target.value })}
+                />
+                {errors.description_ar && <p className="mt-1 text-xs text-destructive">{errors.description_ar}</p>}
+              </div>
+              <div>
+                <Label>{lang === "ar" ? "الوصف (إنجليزي)" : "Description (English)"}</Label>
+                <Textarea
+                  dir="ltr"
+                  rows={3}
+                  ref={(el) => { fieldRefs.current.description_en = el; }}
+                  aria-invalid={!!errors.description_en}
+                  value={form.description_en}
+                  onChange={(e) => setForm({ ...form, description_en: e.target.value })}
+                />
+                {errors.description_en && <p className="mt-1 text-xs text-destructive">{errors.description_en}</p>}
+              </div>
               <Button type="submit" className="w-full" disabled={creating}>
                 {creating && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
                 {lang === "ar" ? "إنشاء" : "Create"}
