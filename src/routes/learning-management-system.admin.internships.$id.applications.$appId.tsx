@@ -25,6 +25,8 @@ import {
   adminGetApplicationCvUrl,
   ADMIN_ASSIGNABLE_STATUSES,
   type ApplicationStatus,
+  type ApplicationBundle,
+
 } from "@/lib/lms-internships-applications-admin.functions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
