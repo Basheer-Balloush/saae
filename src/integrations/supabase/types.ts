@@ -4359,6 +4359,10 @@ export type Database = {
           students: number
         }[]
       }
+      lms_recalc_course_progress: {
+        Args: { _course_id: string }
+        Returns: undefined
+      }
       lms_reconcile_certificates: { Args: { _limit?: number }; Returns: Json }
       lms_reconcile_internship_files: {
         Args: { _limit?: number }
@@ -4380,6 +4384,13 @@ export type Database = {
       lms_request_payout: {
         Args: { _amount: number; _method?: string; _notes?: string }
         Returns: string
+      }
+      lms_set_delivery_mode: {
+        Args: {
+          _course_id: string
+          _mode: Database["public"]["Enums"]["lms_delivery_mode"]
+        }
+        Returns: Json
       }
       lms_slugify: { Args: { _input: string }; Returns: string }
       lms_submit_enrollment_request: {

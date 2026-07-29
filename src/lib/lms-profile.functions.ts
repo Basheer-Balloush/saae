@@ -63,6 +63,7 @@ export type ProfileOverviewCourse = {
   title_en: string | null;
   cover_url: string | null;
   slug: string | null;
+  delivery_mode: string | null;
 };
 
 export type ProfileOverviewEnrollment = {
@@ -133,7 +134,7 @@ export const getMyProfileOverview = createServerFn({ method: "GET" })
     if (courseIds.length) {
       const { data } = await supabase
         .from("lms_courses")
-        .select("id, title_ar, title_en, cover_url, slug")
+        .select("id, title_ar, title_en, cover_url, slug, delivery_mode")
         .in("id", courseIds);
       courses = (data ?? []) as ProfileOverviewCourse[];
     }

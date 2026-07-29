@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { sendCertificateEmail } from "@/lib/certificate-email.functions";
+import { isOnsite } from "@/lib/lms-course-destination";
 
 export const Route = createFileRoute("/learning-management-system/student/quiz/$courseId")({
   head: () => ({ meta: [{ title: "LMS · Final test" }] }),
@@ -70,6 +71,17 @@ function QuizPage() {
       setLoading(true);
       setLoadError(false);
       setNoQuiz(false);
+      const { data: course, error: cErr } = await supabase
+        .from("lms_courses")
+        .select("delivery_mode")
+        .eq("id", courseId)
+        .maybeSingle();
+      if (cancelled) return;
+      if (cErr) { setLoadError(true); setLoading(false); return; }
+      if (course && isOnsite((course as { delivery_mode: string | null }).delivery_mode)) {
+        navigate({ to: "/learning-management-system/courses/$id", params: { id: courseId }, replace: true });
+        return;
+      }
       const { data: q, error: qErr } = await supabase
         .from("lms_quizzes")
         .select("id")
@@ -88,7 +100,7 @@ function QuizPage() {
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [courseId, user, reloadKey]);
+  }, [courseId, user, reloadKey, navigate]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);

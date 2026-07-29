@@ -49,6 +49,7 @@ import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { confirmDialog } from "@/hooks/useConfirm";
+import { courseDestination } from "@/lib/lms-course-destination";
 
 export const Route = createFileRoute("/learning-management-system/profile")({
   head: () => ({
@@ -540,8 +541,7 @@ function CoursesCard({
             <div key={e.id} className="rounded-lg border border-border p-3">
               <div className="flex items-center justify-between gap-3">
                 <Link
-                  to="/learning-management-system/student/player/$courseId"
-                  params={{ courseId: e.course_id }}
+                  {...courseDestination(e.course_id, c?.delivery_mode)}
                   className="font-medium text-foreground hover:text-primary truncate"
                   dir="auto"
                 >

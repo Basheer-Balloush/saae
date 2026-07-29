@@ -6,16 +6,24 @@ import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
+import { courseDestination } from "@/lib/lms-course-destination";
 
 export const Route = createFileRoute("/learning-management-system/student/")({
   head: () => ({ meta: [{ title: "LMS · My Courses" }] }),
   component: StudentHome,
 });
 
+type CourseRow = {
+  id: string;
+  title_ar: string;
+  title_en: string | null;
+  cover_url: string | null;
+  delivery_mode: string | null;
+};
 type Row = {
   id: string;
   progress: number;
-  course: { id: string; title_ar: string; title_en: string | null; cover_url: string | null } | null;
+  course: CourseRow | null;
 };
 type Cert = { id: string; serial: string; issued_at: string; course_id: string; title?: string };
 
@@ -45,13 +53,13 @@ function StudentHome() {
       const list = (enrolls as { id: string; progress: number; course_id: string }[] | null) ?? [];
       const certList = (cs as Cert[] | null) ?? [];
       const ids = Array.from(new Set([...list.map((r) => r.course_id), ...certList.map((c) => c.course_id)]));
-      let courses: { id: string; title_ar: string; title_en: string | null; cover_url: string | null }[] = [];
+      let courses: CourseRow[] = [];
       if (ids.length) {
         const { data: csR } = await supabase
           .from("lms_courses")
-          .select("id,title_ar,title_en,cover_url")
+          .select("id,title_ar,title_en,cover_url,delivery_mode")
           .in("id", ids);
-        courses = csR ?? [];
+        courses = (csR as CourseRow[] | null) ?? [];
       }
       setRows(list.map((r) => ({ id: r.id, progress: r.progress, course: courses.find((c) => c.id === r.course_id) ?? null })));
       setCerts(certList.map((c) => ({
@@ -101,8 +109,7 @@ function StudentHome() {
           {rows.map((r) => r.course && (
             <Link
               key={r.id}
-              to="/learning-management-system/student/player/$courseId"
-              params={{ courseId: r.course.id }}
+              {...courseDestination(r.course.id, r.course.delivery_mode)}
               className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-primary transition-colors"
             >
               <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
