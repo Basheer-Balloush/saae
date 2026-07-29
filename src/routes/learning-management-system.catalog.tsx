@@ -32,7 +32,9 @@ export type CatalogSearch = {
 
 /** URL search validation — unknown/invalid values collapse to safe defaults. */
 export function parseCatalogSearch(raw: Record<string, unknown>): CatalogSearch {
-  const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+  // Search params arrive JSON-parsed, so a numeric slug like "1" comes back as a number.
+  const str = (v: unknown) =>
+    typeof v === "string" ? v.trim() : typeof v === "number" && Number.isFinite(v) ? String(v) : "";
   const level = str(raw?.level);
   const price = str(raw?.price);
   const pageRaw = Number(raw?.page);
