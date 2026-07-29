@@ -497,25 +497,37 @@ function ApplicationDetail() {
             )}
           </Card>
 
-          {bundle.answers.length > 0 && (
-            <Card className="p-5">
-              <h2 className="font-semibold mb-3">{t.applyQuestionsSection}</h2>
+          <Card className="p-5">
+            <h2 className="font-semibold mb-3">{t.applyQuestionsSection}</h2>
+            {bundle.answers.length === 0 ? (
+              <p className="text-sm italic text-muted-foreground">
+                {lang === "ar" ? "لا توجد إجابات — غير متوفر" : "No answers — Not provided"}
+              </p>
+            ) : (
               <div className="space-y-4">
                 {bundle.answers.map((a) => {
-                  const label = (lang === "ar" ? a.question_label_ar : a.question_label_en) || a.question_label_ar || a.question_label_en || "";
-                  const value =
-                    a.answer_text ??
-                    (a.answer_json != null ? JSON.stringify(a.answer_json) : "");
+                  const label =
+                    (lang === "ar" ? a.question_label_ar : a.question_label_en) ||
+                    a.question_label_ar ||
+                    a.question_label_en ||
+                    (lang === "ar" ? "سؤال" : "Question");
+                  const value = formatAnswer(a, lang);
                   return (
                     <div key={a.id}>
                       <div className="text-xs text-muted-foreground mb-1" dir="auto">{label}</div>
-                      <div className="text-sm whitespace-pre-wrap break-words" dir="auto">{value || "—"}</div>
+                      <div
+                        className={`text-sm whitespace-pre-wrap break-words ${value.trim() ? "" : "italic text-muted-foreground"}`}
+                        dir="auto"
+                      >
+                        {value.trim() || notProvided(lang)}
+                      </div>
                     </div>
                   );
                 })}
               </div>
-            </Card>
-          )}
+            )}
+          </Card>
+
 
           <Card className="p-5">
             <h2 className="font-semibold mb-3 flex items-center gap-2">
