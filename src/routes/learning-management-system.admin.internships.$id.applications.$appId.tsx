@@ -75,66 +75,67 @@ const RANK: Record<ApplicationStatus, number> = {
   rejected: 5,
 };
 
-type Bundle = {
-  application: {
-    id: string;
-    opportunity_id: string;
-    status: ApplicationStatus;
-    attempt_number: number;
-    submitted_at: string;
-    withdrawn_at: string | null;
-    snapshot_full_name: string | null;
-    snapshot_email: string | null;
-    snapshot_phone: string | null;
-    snapshot_organization: string | null;
-    snapshot_biography: string | null;
-    assigned_admin: string | null;
-    assigned_admin_email: string | null;
+type Bundle = ApplicationBundle;
+
+function notProvided(lang: "ar" | "en") {
+  return lang === "ar" ? "غير متوفر" : "Not provided";
+}
+
+function Field({
+  label,
+  value,
+  lang,
+  ltr,
+}: {
+  label: string;
+  value: string | null | undefined;
+  lang: "ar" | "en";
+  ltr?: boolean;
+}) {
+  const has = typeof value === "string" && value.trim().length > 0;
+  return (
+    <div>
+      <div className="text-xs text-muted-foreground mb-0.5">{label}</div>
+      <div
+        className={`text-sm break-words whitespace-pre-wrap ${has ? "" : "italic text-muted-foreground"}`}
+        dir={ltr && has ? "ltr" : "auto"}
+      >
+        {has ? value : notProvided(lang)}
+      </div>
+    </div>
+  );
+}
+
+/** Renders a stored answer as readable localized plain text (never raw JSON). */
+function formatAnswer(
+  a: Bundle["answers"][number],
+  lang: "ar" | "en",
+): string {
+  const text = a.answer_text?.trim();
+  if (text) return text;
+  const v = a.answer_json;
+  const yes = lang === "ar" ? "نعم" : "Yes";
+  const no = lang === "ar" ? "لا" : "No";
+  const render = (x: unknown): string => {
+    if (x === null || x === undefined || x === "") return "";
+    if (typeof x === "boolean") return x ? yes : no;
+    if (typeof x === "number") return String(x);
+    if (typeof x === "string") return x;
+    if (Array.isArray(x)) return x.map(render).filter(Boolean).join("، ");
+    if (typeof x === "object") {
+      return Object.entries(x as Record<string, unknown>)
+        .map(([k, val]) => {
+          const rv = render(val);
+          return rv ? `${k}: ${rv}` : "";
+        })
+        .filter(Boolean)
+        .join("\n");
+    }
+    return "";
   };
-  opportunity: { id: string; slug: string; title_ar: string; title_en: string };
-  cv: { id: string; original_filename: string | null; mime_type: string; size_bytes: number } | null;
-  courses: Array<{
-    id: string;
-    course_title_ar: string | null;
-    course_title_en: string | null;
-    progress_percent: number | null;
-    completed: boolean;
-    enrolled_at: string | null;
-    attendance_present: number | null;
-    attendance_total: number | null;
-  }>;
-  certificates: Array<{
-    id: string;
-    serial: string | null;
-    course_title_ar: string | null;
-    course_title_en: string | null;
-    issued_at: string | null;
-  }>;
-  answers: Array<{
-    id: string;
-    question_label_ar: string | null;
-    question_label_en: string | null;
-    question_kind: string | null;
-    answer_text: string | null;
-    answer_json: unknown;
-  }>;
-  notes: Array<{
-    id: string;
-    body: string;
-    created_at: string;
-    author_id: string | null;
-    author_email: string | null;
-  }>;
-  history: Array<{
-    id: string;
-    from_status: ApplicationStatus | null;
-    to_status: ApplicationStatus;
-    reason: string | null;
-    created_at: string;
-    changed_by: string | null;
-    changed_by_email: string | null;
-  }>;
-};
+  return render(v);
+}
+
 
 function mapErr(err: unknown, lang: "ar" | "en") {
   const msg = err instanceof Error ? err.message : String(err);
