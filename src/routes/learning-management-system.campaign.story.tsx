@@ -156,13 +156,9 @@ function CampaignStory() {
           {busy ? t.sharing : t.share}
         </Button>
 
-        {shared && (
-          <p className="mt-3 text-sm font-medium text-primary">{t.done}</p>
-        )}
+        {shared && <p className="mt-3 text-sm font-medium text-primary">{t.done}</p>}
 
-        {manual && (
-          <p className="mt-3 text-sm text-muted-foreground">{t.manual}</p>
-        )}
+        {manual && <p className="mt-3 text-sm text-muted-foreground">{t.manual}</p>}
 
         <div className="mt-3 grid gap-2">
           <Button asChild variant="outline" className="w-full">
@@ -172,11 +168,7 @@ function CampaignStory() {
             </a>
           </Button>
           <Button asChild variant="ghost" className="w-full">
-            <a
-              href="https://www.instagram.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
               <Instagram className="h-4 w-4 mx-2" />
               {t.openInstagram}
             </a>
@@ -193,9 +185,7 @@ function CampaignStory() {
           {claiming ? t.claiming : t.claim}
         </Button>
 
-        {claimError && (
-          <p className="mt-3 text-sm text-destructive">{claimError}</p>
-        )}
+        {claimError && <p className="mt-3 text-sm text-destructive">{claimError}</p>}
       </div>
     </div>
   );
