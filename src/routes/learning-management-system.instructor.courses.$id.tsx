@@ -84,6 +84,11 @@ function CourseBuilder() {
   const [enrolledStudents, setEnrolledStudents] = useState<Array<{ id: string; student_id: string; enrolled_at: string; progress: number }>>([]);
   const [showAllStudents, setShowAllStudents] = useState(false);
   const [viewing, setViewing] = useState<{ requestId: string; courseId: string } | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<CourseFieldErrors>({});
+  // Which of the four required fields already had content when the course loaded.
+  // Existing incomplete drafts stay editable, but a filled field can never be emptied.
+  const originallyFilled = useRef<Partial<Record<RequiredCourseField, boolean>>>({});
+  const fieldRefs = useRef<Partial<Record<RequiredCourseField, HTMLInputElement | HTMLTextAreaElement | null>>>({});
 
   const load = async () => {
     const [{ data: c }, { data: cats }, { data: links }] = await Promise.all([
