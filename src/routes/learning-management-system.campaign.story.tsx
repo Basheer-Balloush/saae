@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
+import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { Button } from "@/components/ui/button";
 import { Download, Instagram, Loader2, Share2 } from "lucide-react";
 import storyAsset from "@/assets/saae-story-campaign.jpg.asset.json";
@@ -10,6 +11,8 @@ import { safeLmsRedirect } from "@/lib/lms-redirect";
 
 const CAMPAIGN_SLUG = "gen-ai-event-2026-07-31";
 const DEFAULT_DESTINATION = "/learning-management-system/student";
+const STORY_PATH = "/learning-management-system/campaign/story";
+
 
 export const Route = createFileRoute("/learning-management-system/campaign/story")({
   head: () => ({
