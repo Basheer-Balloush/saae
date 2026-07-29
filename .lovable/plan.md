@@ -35,5 +35,14 @@ Goal: one short guided path — account choice → sign in/up → two-option scr
 ## Phase 6 — Admin configuration screen
 - Admin LMS panel to edit campaign fields (active window, titles, artwork, handle, course, destination).
 
-## Phase 7 — QA and release gate
+## Phase 7 — QA and release gate (done)
 - Verify AR/EN, redirect survival, real file share, fallback, no private data, existing LMS behavior unchanged. Device testing on iPhone + Android with Instagram, plus Safari/Chrome without it.
+
+
+### Phase 7 QA results (29 Jul 2026)
+- Typecheck, campaign-file lint, production build: pass.
+- Anonymous `/campaign` and `/campaign/choice` gate correctly; `/campaign/story` now also gates (fixed during QA) and returns to the Story step after auth.
+- Redirect chain stays internal through login/signup (`safeLmsRedirect`).
+- AR RTL and EN LTR verified on entry, choice, and story screens.
+- Admin campaign page denies anonymous access; `lms_claim_story_campaign` has no anon EXECUTE and handles missing/unpublished course gracefully.
+- Open item: campaign row has no `course_ref` set yet — set the Generative AI course in the admin Story campaign page before the event.
