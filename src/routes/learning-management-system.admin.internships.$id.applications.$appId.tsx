@@ -25,6 +25,8 @@ import {
   adminGetApplicationCvUrl,
   ADMIN_ASSIGNABLE_STATUSES,
   type ApplicationStatus,
+  type ApplicationBundle,
+
 } from "@/lib/lms-internships-applications-admin.functions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -75,66 +77,67 @@ const RANK: Record<ApplicationStatus, number> = {
   rejected: 5,
 };
 
-type Bundle = {
-  application: {
-    id: string;
-    opportunity_id: string;
-    status: ApplicationStatus;
-    attempt_number: number;
-    submitted_at: string;
-    withdrawn_at: string | null;
-    snapshot_full_name: string | null;
-    snapshot_email: string | null;
-    snapshot_phone: string | null;
-    snapshot_organization: string | null;
-    snapshot_biography: string | null;
-    assigned_admin: string | null;
-    assigned_admin_email: string | null;
+type Bundle = ApplicationBundle;
+
+function notProvided(lang: "ar" | "en") {
+  return lang === "ar" ? "غير متوفر" : "Not provided";
+}
+
+function Field({
+  label,
+  value,
+  lang,
+  ltr,
+}: {
+  label: string;
+  value: string | null | undefined;
+  lang: "ar" | "en";
+  ltr?: boolean;
+}) {
+  const has = typeof value === "string" && value.trim().length > 0;
+  return (
+    <div>
+      <div className="text-xs text-muted-foreground mb-0.5">{label}</div>
+      <div
+        className={`text-sm break-words whitespace-pre-wrap ${has ? "" : "italic text-muted-foreground"}`}
+        dir={ltr && has ? "ltr" : "auto"}
+      >
+        {has ? value : notProvided(lang)}
+      </div>
+    </div>
+  );
+}
+
+/** Renders a stored answer as readable localized plain text (never raw JSON). */
+function formatAnswer(
+  a: Bundle["answers"][number],
+  lang: "ar" | "en",
+): string {
+  const text = a.answer_text?.trim();
+  if (text) return text;
+  const v = a.answer_json;
+  const yes = lang === "ar" ? "نعم" : "Yes";
+  const no = lang === "ar" ? "لا" : "No";
+  const render = (x: unknown): string => {
+    if (x === null || x === undefined || x === "") return "";
+    if (typeof x === "boolean") return x ? yes : no;
+    if (typeof x === "number") return String(x);
+    if (typeof x === "string") return x;
+    if (Array.isArray(x)) return x.map(render).filter(Boolean).join("، ");
+    if (typeof x === "object") {
+      return Object.entries(x as Record<string, unknown>)
+        .map(([k, val]) => {
+          const rv = render(val);
+          return rv ? `${k}: ${rv}` : "";
+        })
+        .filter(Boolean)
+        .join("\n");
+    }
+    return "";
   };
-  opportunity: { id: string; slug: string; title_ar: string; title_en: string };
-  cv: { id: string; original_filename: string | null; mime_type: string; size_bytes: number } | null;
-  courses: Array<{
-    id: string;
-    course_title_ar: string | null;
-    course_title_en: string | null;
-    progress_percent: number | null;
-    completed: boolean;
-    enrolled_at: string | null;
-    attendance_present: number | null;
-    attendance_total: number | null;
-  }>;
-  certificates: Array<{
-    id: string;
-    serial: string | null;
-    course_title_ar: string | null;
-    course_title_en: string | null;
-    issued_at: string | null;
-  }>;
-  answers: Array<{
-    id: string;
-    question_label_ar: string | null;
-    question_label_en: string | null;
-    question_kind: string | null;
-    answer_text: string | null;
-    answer_json: unknown;
-  }>;
-  notes: Array<{
-    id: string;
-    body: string;
-    created_at: string;
-    author_id: string | null;
-    author_email: string | null;
-  }>;
-  history: Array<{
-    id: string;
-    from_status: ApplicationStatus | null;
-    to_status: ApplicationStatus;
-    reason: string | null;
-    created_at: string;
-    changed_by: string | null;
-    changed_by_email: string | null;
-  }>;
-};
+  return render(v);
+}
+
 
 function mapErr(err: unknown, lang: "ar" | "en") {
   const msg = err instanceof Error ? err.message : String(err);
@@ -161,6 +164,7 @@ function ApplicationDetail() {
 
   const [bundle, setBundle] = useState<Bundle | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<{ kind: "notfound" | "error"; message: string } | null>(null);
   const [admins, setAdmins] = useState<Array<{ user_id: string; email: string | null }>>([]);
 
   const [nextStatus, setNextStatus] = useState<ApplicationStatus | "">("");
@@ -177,18 +181,29 @@ function ApplicationDetail() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
-      const res = (await getFn({ data: { application_id: appId } })) as Bundle;
+      const res = await getFn({
+        data: { application_id: appId, opportunity_id: opportunityId },
+      });
       setBundle(res);
       setAssignValue(res.application.assigned_admin ?? "__none__");
       setNextStatus("");
       setReason("");
     } catch (err) {
-      toast.error(mapErr(err, lang));
+      const msg = err instanceof Error ? err.message : String(err);
+      const notFound =
+        msg.includes("application_not_found") || msg.includes("P0002");
+      setBundle(null);
+      setLoadError({
+        kind: notFound ? "notfound" : "error",
+        message: mapErr(err, lang),
+      });
     } finally {
       setLoading(false);
     }
-  }, [getFn, appId, lang]);
+  }, [getFn, appId, opportunityId, lang]);
+
 
   useEffect(() => {
     void load();
@@ -281,13 +296,61 @@ function ApplicationDetail() {
     }
   };
 
-  if (loading || !bundle) {
+  const backLink = (
+    <Link
+      to="/learning-management-system/admin/internships/$id/applications"
+      params={{ id: opportunityId }}
+      className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
+    >
+      <ArrowLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
+      {lang === "ar" ? "العودة إلى الطلبات" : "Back to applications"}
+    </Link>
+  );
+
+  if (loading) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-16 text-center">
+      <div className="mx-auto max-w-5xl px-4 py-16 text-center" dir={dir}>
         <Loader2 className="h-6 w-6 animate-spin inline text-muted-foreground" />
+        <p className="mt-3 text-sm text-muted-foreground">
+          {lang === "ar" ? "جارٍ تحميل الطلب…" : "Loading application…"}
+        </p>
       </div>
     );
   }
+
+  if (!bundle) {
+    const isNotFound = loadError?.kind === "notfound";
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-12 space-y-4" dir={dir}>
+        {backLink}
+        <Card className="p-8 text-center space-y-3">
+          <h1 className="text-lg font-semibold">
+            {isNotFound
+              ? lang === "ar"
+                ? "الطلب غير موجود"
+                : "Application not found"
+              : lang === "ar"
+                ? "تعذّر تحميل الطلب"
+                : "Could not load the application"}
+          </h1>
+          <p className="text-sm text-muted-foreground break-words" dir="auto">
+            {isNotFound
+              ? lang === "ar"
+                ? "قد يكون الطلب محذوفًا أو لا ينتمي إلى هذه الفرصة."
+                : "It may have been deleted or does not belong to this opportunity."
+              : (loadError?.message ??
+                (lang === "ar" ? "حدث خطأ غير متوقع" : "An unexpected error occurred"))}
+          </p>
+          {!isNotFound && (
+            <Button onClick={() => void load()}>
+              {lang === "ar" ? "إعادة المحاولة" : "Retry"}
+            </Button>
+          )}
+        </Card>
+      </div>
+    );
+  }
+
 
   const app = bundle.application;
   const from = app.status;
@@ -298,32 +361,17 @@ function ApplicationDetail() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 space-y-6" dir={dir}>
-      <div>
-        <Link
-          to="/learning-management-system/admin/internships/$id/applications"
-          params={{ id: opportunityId }}
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
-        >
-          <ArrowLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-          {lang === "ar" ? "العودة إلى الطلبات" : "Back to applications"}
-        </Link>
-      </div>
+      <div>{backLink}</div>
 
       <Card className="p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="text-xs text-muted-foreground" dir="auto">{oppTitle}</div>
             <h1 className="text-2xl font-bold mt-1" dir="auto">
-              {app.snapshot_full_name || (lang === "ar" ? "بدون اسم" : "No name")}
+              {app.snapshot_full_name?.trim() || notProvided(lang)}
             </h1>
-            <div className="text-sm text-muted-foreground mt-1" dir="ltr">
-              {app.snapshot_email} {app.snapshot_phone ? `• ${app.snapshot_phone}` : ""}
-            </div>
-            {app.snapshot_organization && (
-              <div className="text-sm mt-1" dir="auto">{app.snapshot_organization}</div>
-            )}
           </div>
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col items-start sm:items-end gap-2">
             <Badge variant="outline" className="text-sm">{statusLabel(app.status, lang)}</Badge>
             <div className="text-xs text-muted-foreground" dir="ltr">
               {lang === "ar" ? "أُرسل: " : "Submitted: "}
@@ -334,21 +382,46 @@ function ApplicationDetail() {
             </div>
           </div>
         </div>
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Field
+            label={lang === "ar" ? "الاسم الكامل" : "Full name"}
+            value={app.snapshot_full_name}
+            lang={lang}
+          />
+          <Field
+            label={lang === "ar" ? "البريد الإلكتروني" : "Email"}
+            value={app.snapshot_email}
+            lang={lang}
+            ltr
+          />
+          <Field
+            label={lang === "ar" ? "الهاتف" : "Phone"}
+            value={app.snapshot_phone}
+            lang={lang}
+            ltr
+          />
+          <Field
+            label={lang === "ar" ? "الجهة / المؤسسة" : "Organization"}
+            value={app.snapshot_organization}
+            lang={lang}
+          />
+        </div>
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {app.snapshot_biography && (
-            <Card className="p-5">
-              <h2 className="font-semibold mb-2">{t.profileBiography}</h2>
-              <p className="text-sm whitespace-pre-wrap break-words" dir="auto">
-                {app.snapshot_biography}
-              </p>
-            </Card>
-          )}
+          <Card className="p-5">
+            <h2 className="font-semibold mb-2">{t.profileBiography}</h2>
+            <p
+              className={`text-sm whitespace-pre-wrap break-words ${app.snapshot_biography?.trim() ? "" : "italic text-muted-foreground"}`}
+              dir="auto"
+            >
+              {app.snapshot_biography?.trim() || notProvided(lang)}
+            </p>
+          </Card>
 
           <Card className="p-5">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 gap-3">
               <h2 className="font-semibold flex items-center gap-2">
                 <FileText className="h-4 w-4" /> {t.profileCv}
               </h2>
@@ -360,15 +433,20 @@ function ApplicationDetail() {
               )}
             </div>
             {bundle.cv ? (
-              <div className="text-xs text-muted-foreground" dir="ltr">
-                {bundle.cv.original_filename ?? bundle.cv.id} · {Math.round(bundle.cv.size_bytes / 1024)} KB
+              <div className="text-xs text-muted-foreground" dir="auto">
+                {bundle.cv.original_filename?.trim() ||
+                  (lang === "ar" ? "ملف السيرة الذاتية" : "CV file")}
+                {bundle.cv.size_bytes
+                  ? ` · ${Math.max(1, Math.round(bundle.cv.size_bytes / 1024))} KB`
+                  : ""}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">
-                {lang === "ar" ? "لا يوجد سيرة ذاتية مرفقة" : "No CV attached"}
+              <p className="text-sm italic text-muted-foreground">
+                {lang === "ar" ? "لا توجد سيرة ذاتية مرفقة — غير متوفر" : "No CV attached — Not provided"}
               </p>
             )}
           </Card>
+
 
           <Card className="p-5">
             <h2 className="font-semibold mb-3 flex items-center gap-2">
@@ -419,25 +497,37 @@ function ApplicationDetail() {
             )}
           </Card>
 
-          {bundle.answers.length > 0 && (
-            <Card className="p-5">
-              <h2 className="font-semibold mb-3">{t.applyQuestionsSection}</h2>
+          <Card className="p-5">
+            <h2 className="font-semibold mb-3">{t.applyQuestionsSection}</h2>
+            {bundle.answers.length === 0 ? (
+              <p className="text-sm italic text-muted-foreground">
+                {lang === "ar" ? "لا توجد إجابات — غير متوفر" : "No answers — Not provided"}
+              </p>
+            ) : (
               <div className="space-y-4">
                 {bundle.answers.map((a) => {
-                  const label = (lang === "ar" ? a.question_label_ar : a.question_label_en) || a.question_label_ar || a.question_label_en || "";
-                  const value =
-                    a.answer_text ??
-                    (a.answer_json != null ? JSON.stringify(a.answer_json) : "");
+                  const label =
+                    (lang === "ar" ? a.question_label_ar : a.question_label_en) ||
+                    a.question_label_ar ||
+                    a.question_label_en ||
+                    (lang === "ar" ? "سؤال" : "Question");
+                  const value = formatAnswer(a, lang);
                   return (
                     <div key={a.id}>
                       <div className="text-xs text-muted-foreground mb-1" dir="auto">{label}</div>
-                      <div className="text-sm whitespace-pre-wrap break-words" dir="auto">{value || "—"}</div>
+                      <div
+                        className={`text-sm whitespace-pre-wrap break-words ${value.trim() ? "" : "italic text-muted-foreground"}`}
+                        dir="auto"
+                      >
+                        {value.trim() || notProvided(lang)}
+                      </div>
                     </div>
                   );
                 })}
               </div>
-            </Card>
-          )}
+            )}
+          </Card>
+
 
           <Card className="p-5">
             <h2 className="font-semibold mb-3 flex items-center gap-2">

@@ -96,18 +96,155 @@ export const adminListApplications = createServerFn({ method: "POST" })
 
 const IdSchema = z.object({ application_id: z.string().uuid() });
 
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+const JsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(JsonValueSchema),
+    z.record(z.string(), JsonValueSchema),
+  ]),
+);
+
+
+const nullableText = z.string().nullable().catch(null);
+const nullableDate = z.string().nullable().catch(null);
+
+const BundleSchema = z.object({
+  application: z.object({
+    id: z.string(),
+    opportunity_id: z.string(),
+    status: z.enum(STATUSES),
+    attempt_number: z.number().catch(1),
+    submitted_at: z.string(),
+    withdrawn_at: nullableDate,
+    snapshot_full_name: nullableText,
+    snapshot_email: nullableText,
+    snapshot_phone: nullableText,
+    snapshot_organization: nullableText,
+    snapshot_biography: nullableText,
+    assigned_admin: z.string().nullable().catch(null),
+    assigned_admin_email: nullableText,
+  }),
+  opportunity: z.object({
+    id: z.string(),
+    slug: z.string(),
+    title_ar: z.string().catch(""),
+    title_en: z.string().nullable().catch(null),
+  }),
+  cv: z
+    .object({
+      id: z.string(),
+      original_filename: nullableText,
+      mime_type: z.string().nullable().catch(null),
+      size_bytes: z.number().nullable().catch(null),
+    })
+    .nullable()
+    .catch(null),
+  courses: z
+    .array(
+      z.object({
+        id: z.string(),
+        course_title_ar: nullableText,
+        course_title_en: nullableText,
+        progress_percent: z.coerce.number().nullable().catch(null),
+        completed: z.boolean().catch(false),
+        enrolled_at: nullableDate,
+        attendance_present: z.number().nullable().catch(null),
+        attendance_total: z.number().nullable().catch(null),
+      }),
+    )
+    .catch([]),
+  certificates: z
+    .array(
+      z.object({
+        id: z.string(),
+        serial: nullableText,
+        course_title_ar: nullableText,
+        course_title_en: nullableText,
+        issued_at: nullableDate,
+      }),
+    )
+    .catch([]),
+  answers: z
+    .array(
+      z.object({
+        id: z.string(),
+        question_label_ar: nullableText,
+        question_label_en: nullableText,
+        question_kind: nullableText,
+        answer_text: nullableText,
+        answer_json: JsonValueSchema.nullable().catch(null),
+      }),
+    )
+    .catch([]),
+  notes: z
+    .array(
+      z.object({
+        id: z.string(),
+        body: z.string().catch(""),
+        created_at: z.string(),
+        author_email: nullableText,
+      }),
+    )
+    .catch([]),
+  history: z
+    .array(
+      z.object({
+        id: z.string(),
+        from_status: z.enum(STATUSES).nullable().catch(null),
+        to_status: z.enum(STATUSES),
+        reason: nullableText,
+        created_at: z.string(),
+        changed_by_email: nullableText,
+      }),
+    )
+    .catch([]),
+});
+
+export type ApplicationBundle = z.infer<typeof BundleSchema>;
+
+const GetSchema = z.object({
+  application_id: z.string().uuid(),
+  opportunity_id: z.string().uuid().optional(),
+});
+
 export const adminGetApplication = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => IdSchema.parse(i))
-  .handler(async ({ data, context }) => {
+  .inputValidator((i: unknown) => GetSchema.parse(i))
+  .handler(async ({ data, context }): Promise<ApplicationBundle> => {
     const { supabase } = context as { supabase: any };
     const { data: bundle, error } = await supabase.rpc(
       "admin_get_internship_application",
       { _application_id: data.application_id },
     );
     if (error) throw new Error(error.message);
-    return bundle;
+    if (!bundle || typeof bundle !== "object") {
+      throw new Error("application_not_found");
+    }
+    const parsed = BundleSchema.safeParse(bundle);
+    if (!parsed.success) throw new Error("invalid_application_bundle");
+    const result = parsed.data;
+    // The application must belong to the opportunity addressed in the URL.
+    if (
+      data.opportunity_id &&
+      result.application.opportunity_id !== data.opportunity_id
+    ) {
+      throw new Error("application_not_found");
+    }
+    // Never leak private storage locations or unrelated internal identifiers.
+    return result;
   });
+
 
 export const adminSetApplicationStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
