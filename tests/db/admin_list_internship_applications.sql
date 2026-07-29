@@ -29,8 +29,8 @@ BEGIN
   INSERT INTO public.user_roles(user_id, role) VALUES (v_admin, 'lms_admin')
   ON CONFLICT (user_id, role) DO NOTHING;
 
-  INSERT INTO public.internship_opportunities(id, slug, title_ar, lifecycle)
-  VALUES (v_opp, 'regr-' || replace(v_opp::text, '-', ''), 'اختبار', 'draft');
+  INSERT INTO public.internship_opportunities(id, slug, title_ar, title_en, status)
+  VALUES (v_opp, 'regr-' || replace(v_opp::text, '-', ''), 'اختبار', 'Regression', 'draft');
 
   -- two applications with IDENTICAL submitted_at: one assigned, one unassigned
   INSERT INTO public.internship_applications
