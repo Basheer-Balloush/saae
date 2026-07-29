@@ -546,21 +546,52 @@ function AdminHome() {
                       <DialogHeader>
                         <DialogTitle>{ar ? "دورة جديدة" : "New course"}</DialogTitle>
                       </DialogHeader>
-                      <form onSubmit={createCourse} className="space-y-3">
+                      <form onSubmit={createCourse} noValidate className="space-y-3">
                         <div>
                           <Label>{ar ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
                           <Input
-                            required
+                            dir="rtl"
+                            ref={(el) => { courseFieldRefs.current.title_ar = el; }}
+                            aria-invalid={!!courseErrors.title_ar}
                             value={newCourse.title_ar}
                             onChange={(e) => setNewCourse({ ...newCourse, title_ar: e.target.value })}
                           />
+                          {courseErrors.title_ar && <p className="mt-1 text-xs text-destructive">{courseErrors.title_ar}</p>}
                         </div>
                         <div>
                           <Label>{ar ? "العنوان (إنجليزي)" : "Title (English)"}</Label>
                           <Input
+                            dir="ltr"
+                            ref={(el) => { courseFieldRefs.current.title_en = el; }}
+                            aria-invalid={!!courseErrors.title_en}
                             value={newCourse.title_en}
                             onChange={(e) => setNewCourse({ ...newCourse, title_en: e.target.value })}
                           />
+                          {courseErrors.title_en && <p className="mt-1 text-xs text-destructive">{courseErrors.title_en}</p>}
+                        </div>
+                        <div>
+                          <Label>{ar ? "الوصف (عربي)" : "Description (Arabic)"}</Label>
+                          <Textarea
+                            dir="rtl"
+                            rows={3}
+                            ref={(el) => { courseFieldRefs.current.description_ar = el; }}
+                            aria-invalid={!!courseErrors.description_ar}
+                            value={newCourse.description_ar}
+                            onChange={(e) => setNewCourse({ ...newCourse, description_ar: e.target.value })}
+                          />
+                          {courseErrors.description_ar && <p className="mt-1 text-xs text-destructive">{courseErrors.description_ar}</p>}
+                        </div>
+                        <div>
+                          <Label>{ar ? "الوصف (إنجليزي)" : "Description (English)"}</Label>
+                          <Textarea
+                            dir="ltr"
+                            rows={3}
+                            ref={(el) => { courseFieldRefs.current.description_en = el; }}
+                            aria-invalid={!!courseErrors.description_en}
+                            value={newCourse.description_en}
+                            onChange={(e) => setNewCourse({ ...newCourse, description_en: e.target.value })}
+                          />
+                          {courseErrors.description_en && <p className="mt-1 text-xs text-destructive">{courseErrors.description_en}</p>}
                         </div>
                         <div>
                           <Label>{ar ? "المدرّب" : "Instructor"}</Label>
@@ -582,6 +613,7 @@ function AdminHome() {
                           </Select>
                         </div>
                         <Button type="submit" className="w-full" disabled={creatingCourse || !newCourse.instructor_id}>
+                          {creatingCourse && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
                           {ar ? "إنشاء" : "Create"}
                         </Button>
                       </form>
