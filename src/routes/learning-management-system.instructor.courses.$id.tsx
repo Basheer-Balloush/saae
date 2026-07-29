@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList, ArrowRight, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
@@ -27,6 +27,16 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { confirmDialog } from "@/hooks/useConfirm";
+import {
+  validateCourseI18n,
+  firstInvalidCourseField,
+  trimCourseI18n,
+  courseI18nWriteErrorMessage,
+  isCourseI18nComplete,
+  REQUIRED_COURSE_FIELDS,
+  type CourseFieldErrors,
+  type RequiredCourseField,
+} from "@/lib/lms-course-fields";
 
 export const Route = createFileRoute("/learning-management-system/instructor/courses/$id")({
   head: () => ({ meta: [{ title: "LMS · Edit course" }] }),
