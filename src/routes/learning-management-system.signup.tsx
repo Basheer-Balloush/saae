@@ -144,8 +144,9 @@ function LmsSignup() {
                 </p>
                 <p className="text-xs opacity-90">
                   {lang === "ar"
-                    ? "بعد تأكيد بريدك، سجّل الدخول ثم املأ نموذج طلب الاعتماد (٤ مراحل تقييم: نظري، عملي، تدريب، مقابلة) قبل نشر أي دورة."
-                    : "After confirming your email, sign in and complete the accreditation application (4 evaluation phases) before publishing any course."}
+                    ? "سجّل الدخول ثم املأ نموذج طلب الاعتماد (٤ مراحل تقييم: نظري، عملي، تدريب، مقابلة) قبل نشر أي دورة."
+                    : "Sign in and complete the accreditation application (4 evaluation phases) before publishing any course."}
+
                 </p>
                 <Link
                   to="/learning-management-system/trainer-apply"
