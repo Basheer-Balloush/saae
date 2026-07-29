@@ -29,21 +29,64 @@ export const Route = createFileRoute("/learning-management-system/campaign/story
 const copy = {
   ar: {
     heading: "صورة الحملة",
-    sub: "احفظ الصورة وشاركها في ستوري إنستغرام.",
+    sub: "أضف الصورة إلى ستوري إنستغرام لتحصل على الدورة مجاناً.",
+    share: "أضِف إلى الستوري",
+    sharing: "جارٍ التحضير…",
     save: "حفظ الصورة",
+    openInstagram: "فتح إنستغرام",
     alt: "صورة ستوري فعالية سآء",
+    manual:
+      "المشاركة المباشرة غير متاحة على هذا الجهاز. احفظ الصورة ثم افتح إنستغرام وأضفها إلى الستوري.",
+    done: "تمت المشاركة! تابع للحصول على الدورة.",
   },
   en: {
     heading: "Campaign Story image",
-    sub: "Save the image and share it to your Instagram Story.",
+    sub: "Add the image to your Instagram Story to unlock the free course.",
+    share: "Add to your Story",
+    sharing: "Preparing…",
     save: "Save the image",
+    openInstagram: "Open Instagram",
     alt: "SAAE event Story image",
+    manual:
+      "Direct sharing isn't available on this device. Save the image, then open Instagram and add it to your Story.",
+    done: "Shared! Continue to get your course.",
   },
 } as const;
 
 function CampaignStory() {
   const { lang } = useLang();
   const t = copy[lang];
+  const [busy, setBusy] = useState(false);
+  const [manual, setManual] = useState(false);
+  const [shared, setShared] = useState(false);
+
+  const handleShare = async () => {
+    setBusy(true);
+    try {
+      const res = await fetch(storyAsset.url);
+      if (!res.ok) throw new Error("fetch failed");
+      const blob = await res.blob();
+      const file = new File([blob], "saae-story.jpg", {
+        type: blob.type || "image/jpeg",
+      });
+      const nav = navigator as Navigator & {
+        canShare?: (data: ShareData) => boolean;
+      };
+      if (nav.share && nav.canShare?.({ files: [file] })) {
+        await nav.share({ files: [file] });
+        setShared(true);
+        setManual(false);
+        return;
+      }
+      setManual(true);
+    } catch (err) {
+      if ((err as Error)?.name === "AbortError") return;
+      setManual(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+
 
   return (
     <div className="flex-1 px-4 py-10">
