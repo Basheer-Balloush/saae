@@ -94,11 +94,12 @@ BEGIN
   RAISE NOTICE 'PASS: admin_list_internship_applications regression';
 END $$;
 
+RESET ROLE;
+
 -- non-admin rejection
 DO $$
-DECLARE v_uid uuid; v_ok boolean := false;
+DECLARE v_ok boolean := false;
 BEGIN
-  SELECT id INTO v_uid FROM auth.users ORDER BY created_at LIMIT 1;
   PERFORM set_config('request.jwt.claims', json_build_object('sub', gen_random_uuid()::text, 'role', 'authenticated')::text, true);
   SET LOCAL ROLE authenticated;
   BEGIN
