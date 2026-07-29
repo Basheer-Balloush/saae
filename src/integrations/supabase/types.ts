@@ -3936,6 +3936,7 @@ export type Database = {
         Returns: number
       }
       get_initiative_survey_count: { Args: never; Returns: number }
+      get_public_course: { Args: { _ref: string }; Returns: Json }
       get_public_instructor: {
         Args: { _key: string }
         Returns: {

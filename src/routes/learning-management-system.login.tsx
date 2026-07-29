@@ -12,23 +12,15 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/saae-logo.png";
+import { lmsRedirectSearchSchema } from "@/lib/lms-redirect";
 
-const redirectSchema = z
-  .object({ redirect: z.string().optional() })
-  .transform((s) => ({
-    redirect:
-      typeof s.redirect === "string" &&
-      s.redirect.startsWith("/learning-management-system/") &&
-      !s.redirect.startsWith("//")
-        ? s.redirect
-        : undefined,
-  }));
 
 export const Route = createFileRoute("/learning-management-system/login")({
   head: () => ({ meta: [{ title: "LMS · Sign in" }] }),
-  validateSearch: (raw) => redirectSchema.parse(raw),
+  validateSearch: (raw: Record<string, unknown>) => lmsRedirectSearchSchema(raw),
   component: LmsLogin,
 });
+
 
 
 const schema = z.object({
@@ -114,7 +106,7 @@ function LmsLogin() {
           </Button>
         </form>
         <div className="mt-4 flex items-center justify-between text-sm">
-          <Link to="/learning-management-system/signup" className="text-primary hover:underline font-medium">
+          <Link to="/learning-management-system/signup" search={{ redirect: search.redirect }} className="text-primary hover:underline font-medium">
             {tr.needAccount}
           </Link>
           <Link to="/learning-management-system/forgot-password" className="text-muted-foreground hover:text-primary">
