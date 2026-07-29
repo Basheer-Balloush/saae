@@ -86,6 +86,19 @@ function CampaignStory() {
   const [claiming, setClaiming] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
 
+  // Sharing unlocks a course, so the Story step requires a signed-in visitor.
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate({
+        to: "/learning-management-system/campaign",
+        search: { redirect: STORY_PATH },
+        replace: true,
+      });
+    }
+  }, [authLoading, user, navigate]);
+
+
+
   const handleShare = async () => {
     setBusy(true);
     try {
