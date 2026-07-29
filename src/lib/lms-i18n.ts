@@ -101,6 +101,10 @@ export const lmsT: Record<Lang, {
   testFailed: string;
   retakeTest: string;
   noTestYet: string;
+  quizNotReady: string;
+  quizNotReadyHint: string;
+  quizLoadError: string;
+  retry: string;
   certificate: string;
   certificateIssued: string;
   viewCertificate: string;
@@ -234,6 +238,10 @@ export const lmsT: Record<Lang, {
     testFailed: "لم تنجح، حاول مرّةً أخرى",
     retakeTest: "أعد الاختبار",
     noTestYet: "لا يوجد اختبارٌ بعد",
+    quizNotReady: "الاختبار غير جاهز",
+    quizNotReadyHint: "لم يُضِف المدرّب أسئلةً بعد. يرجى المحاولة لاحقًا.",
+    quizLoadError: "تعذّر تحميل الاختبار",
+    retry: "إعادة المحاولة",
     certificate: "الشهادة",
     certificateIssued: "تمّ إصدار شهادتك",
     viewCertificate: "عرض الشهادة",
@@ -367,6 +375,10 @@ export const lmsT: Record<Lang, {
     testFailed: "Not passed, try again",
     retakeTest: "Retake test",
     noTestYet: "No test yet",
+    quizNotReady: "Quiz is not ready",
+    quizNotReadyHint: "The instructor has not added any questions yet. Please check back later.",
+    quizLoadError: "Could not load the quiz",
+    retry: "Retry",
     certificate: "Certificate",
     certificateIssued: "Your certificate was issued",
     viewCertificate: "View certificate",

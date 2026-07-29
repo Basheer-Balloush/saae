@@ -58,27 +58,37 @@ function QuizPage() {
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(Date.now());
   const [noQuiz, setNoQuiz] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const sendCertEmail = useServerFn(sendCertificateEmail);
 
   useEffect(() => {
     if (!user) return;
+    let cancelled = false;
     (async () => {
-      const { data: q } = await supabase
+      setLoading(true);
+      setLoadError(false);
+      setNoQuiz(false);
+      const { data: q, error: qErr } = await supabase
         .from("lms_quizzes")
         .select("id")
         .eq("course_id", courseId)
         .maybeSingle();
+      if (cancelled) return;
+      if (qErr) { setLoadError(true); setLoading(false); return; }
       if (!q) { setNoQuiz(true); setLoading(false); return; }
       const { data, error } = await supabase.rpc(
         "lms_get_quiz_for_attempt" as never,
         { _quiz_id: (q as { id: string }).id } as never,
       );
-      if (error) { toast.error(toUserMessage(error)); setLoading(false); return; }
+      if (cancelled) return;
+      if (error) { setLoadError(true); setLoading(false); return; }
       setState(data as unknown as LoadedState);
       setLoading(false);
     })();
-  }, [courseId, user]);
+    return () => { cancelled = true; };
+  }, [courseId, user, reloadKey]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -119,12 +129,42 @@ function QuizPage() {
     }
   };
 
-  if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
+  if (loading) {
+    return (
+      <p className="text-center py-20 text-muted-foreground">
+        <Loader2 className="inline h-5 w-5 animate-spin mx-2" />
+        {tr.loading}
+      </p>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="mx-auto max-w-xl px-6 py-20 text-center">
+        <p className="text-muted-foreground">{tr.quizLoadError}</p>
+        <Button className="mt-4" onClick={() => setReloadKey((k) => k + 1)}>{tr.retry}</Button>
+      </div>
+    );
+  }
+
   if (noQuiz || !state) {
     return (
       <div className="mx-auto max-w-xl px-6 py-20 text-center">
         <p className="text-muted-foreground">{tr.noTestYet}</p>
         <Button className="mt-4" onClick={() => navigate({ to: "/learning-management-system/student" })}>{tr.myCourses}</Button>
+      </div>
+    );
+  }
+
+  if (!result && state.questions.length === 0) {
+    return (
+      <div className="mx-auto max-w-xl px-6 py-20 text-center">
+        <h2 className="text-xl font-bold text-foreground">{tr.quizNotReady}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{tr.quizNotReadyHint}</p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <Button variant="outline" onClick={() => setReloadKey((k) => k + 1)}>{tr.retry}</Button>
+          <Button onClick={() => navigate({ to: "/learning-management-system/student" })}>{tr.myCourses}</Button>
+        </div>
       </div>
     );
   }
