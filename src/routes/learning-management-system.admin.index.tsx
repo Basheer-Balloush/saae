@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
   X,
@@ -23,6 +23,7 @@ import {
   Inbox,
   Pencil,
   CalendarDays,
+  Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
@@ -32,6 +33,15 @@ import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  validateCourseI18n,
+  firstInvalidCourseField,
+  trimCourseI18n,
+  courseI18nWriteErrorMessage,
+  type CourseFieldErrors,
+  type RequiredCourseField,
+} from "@/lib/lms-course-fields";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -175,29 +185,36 @@ function AdminHome() {
 
   // ---- Admin create course on behalf of an approved instructor ----
   const [newCourseOpen, setNewCourseOpen] = useState(false);
-  const [newCourse, setNewCourse] = useState({ title_ar: "", title_en: "", instructor_id: "" });
+  const [newCourse, setNewCourse] = useState({ title_ar: "", title_en: "", description_ar: "", description_en: "", instructor_id: "" });
+  const [courseErrors, setCourseErrors] = useState<CourseFieldErrors>({});
+  const courseFieldRefs = useRef<Partial<Record<RequiredCourseField, HTMLInputElement | HTMLTextAreaElement | null>>>({});
   const [creatingCourse, setCreatingCourse] = useState(false);
   const createCourse = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCourse.title_ar.trim() || !newCourse.instructor_id) return;
+    if (creatingCourse || !newCourse.instructor_id) return;
+    const nextErrors = validateCourseI18n(newCourse, lang);
+    setCourseErrors(nextErrors);
+    const firstBad = firstInvalidCourseField(nextErrors);
+    if (firstBad) { courseFieldRefs.current[firstBad]?.focus(); return; }
     setCreatingCourse(true);
     const { data, error } = await supabase
       .from("lms_courses")
       .insert({
         instructor_id: newCourse.instructor_id,
-        title_ar: newCourse.title_ar.trim(),
-        title_en: newCourse.title_en.trim() || null,
+        ...trimCourseI18n(newCourse),
       })
       .select("id")
       .maybeSingle();
     setCreatingCourse(false);
     if (error) {
-      toast.error(toUserMessage(error));
+      const msg = toUserMessage(error);
+      toast.error(courseI18nWriteErrorMessage(error.message ?? msg, lang) ?? msg);
       return;
     }
     toast.success(ar ? "تم إنشاء الدورة" : "Course created");
     setNewCourseOpen(false);
-    setNewCourse({ title_ar: "", title_en: "", instructor_id: "" });
+    setNewCourse({ title_ar: "", title_en: "", description_ar: "", description_en: "", instructor_id: "" });
+    setCourseErrors({});
     if (data) window.location.href = `/learning-management-system/instructor/courses/${data.id}`;
   };
 
@@ -546,21 +563,52 @@ function AdminHome() {
                       <DialogHeader>
                         <DialogTitle>{ar ? "دورة جديدة" : "New course"}</DialogTitle>
                       </DialogHeader>
-                      <form onSubmit={createCourse} className="space-y-3">
+                      <form onSubmit={createCourse} noValidate className="space-y-3">
                         <div>
                           <Label>{ar ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
                           <Input
-                            required
+                            dir="rtl"
+                            ref={(el) => { courseFieldRefs.current.title_ar = el; }}
+                            aria-invalid={!!courseErrors.title_ar}
                             value={newCourse.title_ar}
                             onChange={(e) => setNewCourse({ ...newCourse, title_ar: e.target.value })}
                           />
+                          {courseErrors.title_ar && <p className="mt-1 text-xs text-destructive">{courseErrors.title_ar}</p>}
                         </div>
                         <div>
                           <Label>{ar ? "العنوان (إنجليزي)" : "Title (English)"}</Label>
                           <Input
+                            dir="ltr"
+                            ref={(el) => { courseFieldRefs.current.title_en = el; }}
+                            aria-invalid={!!courseErrors.title_en}
                             value={newCourse.title_en}
                             onChange={(e) => setNewCourse({ ...newCourse, title_en: e.target.value })}
                           />
+                          {courseErrors.title_en && <p className="mt-1 text-xs text-destructive">{courseErrors.title_en}</p>}
+                        </div>
+                        <div>
+                          <Label>{ar ? "الوصف (عربي)" : "Description (Arabic)"}</Label>
+                          <Textarea
+                            dir="rtl"
+                            rows={3}
+                            ref={(el) => { courseFieldRefs.current.description_ar = el; }}
+                            aria-invalid={!!courseErrors.description_ar}
+                            value={newCourse.description_ar}
+                            onChange={(e) => setNewCourse({ ...newCourse, description_ar: e.target.value })}
+                          />
+                          {courseErrors.description_ar && <p className="mt-1 text-xs text-destructive">{courseErrors.description_ar}</p>}
+                        </div>
+                        <div>
+                          <Label>{ar ? "الوصف (إنجليزي)" : "Description (English)"}</Label>
+                          <Textarea
+                            dir="ltr"
+                            rows={3}
+                            ref={(el) => { courseFieldRefs.current.description_en = el; }}
+                            aria-invalid={!!courseErrors.description_en}
+                            value={newCourse.description_en}
+                            onChange={(e) => setNewCourse({ ...newCourse, description_en: e.target.value })}
+                          />
+                          {courseErrors.description_en && <p className="mt-1 text-xs text-destructive">{courseErrors.description_en}</p>}
                         </div>
                         <div>
                           <Label>{ar ? "المدرّب" : "Instructor"}</Label>
@@ -582,6 +630,7 @@ function AdminHome() {
                           </Select>
                         </div>
                         <Button type="submit" className="w-full" disabled={creatingCourse || !newCourse.instructor_id}>
+                          {creatingCourse && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
                           {ar ? "إنشاء" : "Create"}
                         </Button>
                       </form>
