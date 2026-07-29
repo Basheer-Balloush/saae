@@ -75,6 +75,7 @@ import { Route as LearningManagementSystemAdminTrainerApplicationsRouteImport } 
 import { Route as LearningManagementSystemAdminReviewsRouteImport } from './routes/learning-management-system.admin.reviews'
 import { Route as LearningManagementSystemAdminEnrollmentRequestsRouteImport } from './routes/learning-management-system.admin.enrollment-requests'
 import { Route as LearningManagementSystemAdminCouponsRouteImport } from './routes/learning-management-system.admin.coupons'
+import { Route as LearningManagementSystemAdminCampaignRouteImport } from './routes/learning-management-system.admin.campaign'
 import { Route as LearningManagementSystemAdminAttendanceLinkRouteImport } from './routes/learning-management-system.admin.attendance-link'
 import { Route as LearningManagementSystemAdminAnalyticsRouteImport } from './routes/learning-management-system.admin.analytics'
 import { Route as ApiPublicBunnyWebhookRouteImport } from './routes/api/public/bunny-webhook'
@@ -473,6 +474,12 @@ const LearningManagementSystemAdminCouponsRoute =
     path: '/coupons',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const LearningManagementSystemAdminCampaignRoute =
+  LearningManagementSystemAdminCampaignRouteImport.update({
+    id: '/campaign',
+    path: '/campaign',
+    getParentRoute: () => LearningManagementSystemAdminRoute,
+  } as any)
 const LearningManagementSystemAdminAttendanceLinkRoute =
   LearningManagementSystemAdminAttendanceLinkRouteImport.update({
     id: '/attendance-link',
@@ -707,6 +714,7 @@ export interface FileRoutesByFullPath {
   '/api/public/bunny-webhook': typeof ApiPublicBunnyWebhookRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
+  '/learning-management-system/admin/campaign': typeof LearningManagementSystemAdminCampaignRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
@@ -797,6 +805,7 @@ export interface FileRoutesByTo {
   '/api/public/bunny-webhook': typeof ApiPublicBunnyWebhookRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
+  '/learning-management-system/admin/campaign': typeof LearningManagementSystemAdminCampaignRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
@@ -897,6 +906,7 @@ export interface FileRoutesById {
   '/api/public/bunny-webhook': typeof ApiPublicBunnyWebhookRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
+  '/learning-management-system/admin/campaign': typeof LearningManagementSystemAdminCampaignRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
@@ -998,6 +1008,7 @@ export interface FileRouteTypes {
     | '/api/public/bunny-webhook'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
+    | '/learning-management-system/admin/campaign'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
     | '/learning-management-system/admin/reviews'
@@ -1088,6 +1099,7 @@ export interface FileRouteTypes {
     | '/api/public/bunny-webhook'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
+    | '/learning-management-system/admin/campaign'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
     | '/learning-management-system/admin/reviews'
@@ -1187,6 +1199,7 @@ export interface FileRouteTypes {
     | '/api/public/bunny-webhook'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
+    | '/learning-management-system/admin/campaign'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
     | '/learning-management-system/admin/reviews'
@@ -1724,6 +1737,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemAdminCouponsRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
     }
+    '/learning-management-system/admin/campaign': {
+      id: '/learning-management-system/admin/campaign'
+      path: '/campaign'
+      fullPath: '/learning-management-system/admin/campaign'
+      preLoaderRoute: typeof LearningManagementSystemAdminCampaignRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRoute
+    }
     '/learning-management-system/admin/attendance-link': {
       id: '/learning-management-system/admin/attendance-link'
       path: '/attendance-link'
@@ -2111,6 +2131,7 @@ const LearningManagementSystemAdminInternshipsIdApplicationsRouteWithChildren =
 interface LearningManagementSystemAdminRouteChildren {
   LearningManagementSystemAdminAnalyticsRoute: typeof LearningManagementSystemAdminAnalyticsRoute
   LearningManagementSystemAdminAttendanceLinkRoute: typeof LearningManagementSystemAdminAttendanceLinkRoute
+  LearningManagementSystemAdminCampaignRoute: typeof LearningManagementSystemAdminCampaignRoute
   LearningManagementSystemAdminCouponsRoute: typeof LearningManagementSystemAdminCouponsRoute
   LearningManagementSystemAdminEnrollmentRequestsRoute: typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   LearningManagementSystemAdminReviewsRoute: typeof LearningManagementSystemAdminReviewsRoute
@@ -2129,6 +2150,8 @@ const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminR
       LearningManagementSystemAdminAnalyticsRoute,
     LearningManagementSystemAdminAttendanceLinkRoute:
       LearningManagementSystemAdminAttendanceLinkRoute,
+    LearningManagementSystemAdminCampaignRoute:
+      LearningManagementSystemAdminCampaignRoute,
     LearningManagementSystemAdminCouponsRoute:
       LearningManagementSystemAdminCouponsRoute,
     LearningManagementSystemAdminEnrollmentRequestsRoute:
@@ -2307,3 +2330,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

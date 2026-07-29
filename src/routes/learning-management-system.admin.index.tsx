@@ -271,6 +271,13 @@ function AdminHome() {
       desc: ar ? "تقييمات الطلاب" : "Student ratings",
     },
     {
+      to: "/learning-management-system/admin/campaign",
+      label: ar ? "حملة الستوري" : "Story campaign",
+      icon: Megaphone,
+      desc: ar ? "إعدادات حملة الفعالية" : "Event campaign settings",
+    },
+
+    {
       to: "/learning-management-system/admin/attendance-link",
       label: ar ? "ربط الحضور" : "Attendance link",
       icon: CalendarDays,
