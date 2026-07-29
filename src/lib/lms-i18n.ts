@@ -77,6 +77,7 @@ export const lmsT: Record<Lang, {
   authFailed: string;
   signedIn: string;
   signedUp: string;
+  signedUpConfirmed: string;
   invalidEmail: string;
   passwordMin: string;
   // student dashboard
@@ -217,6 +218,7 @@ export const lmsT: Record<Lang, {
     authFailed: "فشل تسجيل الدخول",
     signedIn: "تمّ تسجيل الدخول",
     signedUp: "أرسلنا لك إيميل تأكيد — راجع صندوق الوارد",
+    signedUpConfirmed: "تمّ إنشاء حسابك بنجاح — يمكنك تسجيل الدخول الآن",
     invalidEmail: "بريد إلكترونيّ غير صالح",
     passwordMin: "يجب ألّا تقلّ كلمة المرور عن 6 أحرف",
     welcomeBack: "مرحباً بعودتك",
@@ -354,6 +356,7 @@ export const lmsT: Record<Lang, {
     authFailed: "Sign in failed",
     signedIn: "Signed in",
     signedUp: "Confirmation email sent — check your inbox",
+    signedUpConfirmed: "Account created successfully — you can sign in now",
     invalidEmail: "Invalid email",
     passwordMin: "Password must be at least 6 characters",
     welcomeBack: "Welcome back",
