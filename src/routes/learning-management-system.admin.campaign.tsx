@@ -34,10 +34,8 @@ type Campaign = {
 };
 
 // <input type="datetime-local"> works in local time without a zone suffix.
-const toLocalInput = (iso: string | null) =>
-  iso ? new Date(iso).toISOString().slice(0, 16) : "";
-const fromLocalInput = (value: string) =>
-  value ? new Date(value).toISOString() : null;
+const toLocalInput = (iso: string | null) => (iso ? new Date(iso).toISOString().slice(0, 16) : "");
+const fromLocalInput = (value: string) => (value ? new Date(value).toISOString() : null);
 
 function AdminCampaign() {
   const { lang } = useLang();
@@ -128,11 +126,7 @@ function AdminCampaign() {
       <div className="rounded-2xl border border-border bg-card p-5 space-y-5">
         <div className="flex items-center justify-between">
           <Label htmlFor="active">{ar ? "الحملة مفعّلة" : "Campaign active"}</Label>
-          <Switch
-            id="active"
-            checked={campaign.active}
-            onCheckedChange={(v) => set("active", v)}
-          />
+          <Switch id="active" checked={campaign.active} onCheckedChange={(v) => set("active", v)} />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -167,9 +161,7 @@ function AdminCampaign() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="title_en">
-              {ar ? "العنوان (إنجليزي)" : "Title (English)"}
-            </Label>
+            <Label htmlFor="title_en">{ar ? "العنوان (إنجليزي)" : "Title (English)"}</Label>
             <Input
               id="title_en"
               dir="ltr"
@@ -201,9 +193,7 @@ function AdminCampaign() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="course">
-              {ar ? "الدورة (معرّف أو slug)" : "Course (ID or slug)"}
-            </Label>
+            <Label htmlFor="course">{ar ? "الدورة (معرّف أو slug)" : "Course (ID or slug)"}</Label>
             <Input
               id="course"
               dir="ltr"
@@ -214,9 +204,7 @@ function AdminCampaign() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="dest">
-            {ar ? "الوجهة بعد المشاركة" : "Destination after sharing"}
-          </Label>
+          <Label htmlFor="dest">{ar ? "الوجهة بعد المشاركة" : "Destination after sharing"}</Label>
           <Input
             id="dest"
             dir="ltr"
@@ -238,9 +226,7 @@ function AdminCampaign() {
         </div>
 
         {error && <p className="text-sm text-destructive">{error}</p>}
-        {saved && !error && (
-          <p className="text-sm text-primary">{ar ? "تم الحفظ" : "Saved"}</p>
-        )}
+        {saved && !error && <p className="text-sm text-primary">{ar ? "تم الحفظ" : "Saved"}</p>}
 
         <Button onClick={save} disabled={saving} className="w-full sm:w-auto">
           {saving ? (
