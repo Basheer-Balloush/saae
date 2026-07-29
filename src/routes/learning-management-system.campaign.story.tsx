@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Instagram, Share2 } from "lucide-react";
 import storyAsset from "@/assets/saae-story-campaign.jpg.asset.json";
 
 export const Route = createFileRoute("/learning-management-system/campaign/story")({
