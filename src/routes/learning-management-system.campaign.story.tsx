@@ -77,7 +77,9 @@ const copy = {
 function CampaignStory() {
   const { lang } = useLang();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useLmsAuth();
   const t = copy[lang];
+
   const [busy, setBusy] = useState(false);
   const [manual, setManual] = useState(false);
   const [shared, setShared] = useState(false);
