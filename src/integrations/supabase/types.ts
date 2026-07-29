@@ -4159,6 +4159,7 @@ export type Database = {
           _level?: string
           _limit?: number
           _offset?: number
+          _price?: string
           _search?: string
         }
         Returns: {
