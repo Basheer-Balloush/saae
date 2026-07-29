@@ -235,11 +235,12 @@ function CourseBuilder() {
       if (insErr) {
         setSaving(false);
         toast.error(toUserMessage(insErr));
-        return;
+        return false;
       }
     }
     setSaving(false);
     toast.success(lang === "ar" ? "تم الحفظ" : "Saved");
+    return true;
   };
 
 
@@ -542,7 +543,7 @@ function CourseBuilder() {
           </div>
           <div className="flex gap-2 shrink-0 flex-wrap">
             {course.status === "published" ? (
-              <Button onClick={saveCourse} variant="outline" disabled={saving}>
+              <Button onClick={() => saveCourse()} variant="outline" disabled={saving}>
                 {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
                 {lang === "ar" ? "حفظ" : "Save"}
               </Button>
