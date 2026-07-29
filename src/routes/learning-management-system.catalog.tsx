@@ -14,14 +14,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CourseCard, type CourseCardData } from "@/components/lms/CourseCard";
-
-type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
-
 import {
   PAGE_SIZE,
   parseCatalogSearch,
   type CatalogSearch,
 } from "@/lib/lms-catalog-search";
+
+type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
+
 
 
 type LoaderData = {
