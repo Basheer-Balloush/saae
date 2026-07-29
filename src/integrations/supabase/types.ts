@@ -3073,6 +3073,57 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_story_campaigns: {
+        Row: {
+          active: boolean
+          allow_download_fallback: boolean
+          course_ref: string | null
+          created_at: string
+          ends_at: string | null
+          id: string
+          instagram_handle: string
+          post_share_destination: string | null
+          slug: string
+          starts_at: string | null
+          story_image_url: string | null
+          title_ar: string
+          title_en: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          allow_download_fallback?: boolean
+          course_ref?: string | null
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          instagram_handle?: string
+          post_share_destination?: string | null
+          slug: string
+          starts_at?: string | null
+          story_image_url?: string | null
+          title_ar: string
+          title_en: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          allow_download_fallback?: boolean
+          course_ref?: string | null
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          instagram_handle?: string
+          post_share_destination?: string | null
+          slug?: string
+          starts_at?: string | null
+          story_image_url?: string | null
+          title_ar?: string
+          title_en?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lms_submission_versions: {
         Row: {
           archived_at: string
