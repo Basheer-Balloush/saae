@@ -69,6 +69,8 @@ const copy = {
     claiming: "Unlocking your course…",
     claimError: "We couldn't unlock the course right now. Please try again.",
     unavailable: "This campaign isn't available right now.",
+    loading: "Loading…",
+
   },
 } as const;
 
