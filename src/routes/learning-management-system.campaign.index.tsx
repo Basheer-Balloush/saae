@@ -12,10 +12,7 @@ const CHOICE_PATH = "/learning-management-system/campaign/choice";
 
 export const Route = createFileRoute("/learning-management-system/campaign/")({
   validateSearch: (search: Record<string, unknown>) => ({
-    redirect: safeLmsRedirect(
-      typeof search.redirect === "string" ? search.redirect : undefined,
-      CHOICE_PATH,
-    ),
+    redirect: safeLmsRedirect(search.redirect) ?? CHOICE_PATH,
   }),
   head: () => ({
     meta: [
@@ -62,7 +59,7 @@ function CampaignEntry() {
   const { lang } = useLang();
   const t = copy[lang];
 
-  const target = safeLmsRedirect(redirect, CHOICE_PATH);
+  const target = safeLmsRedirect(redirect) ?? CHOICE_PATH;
 
   // Signed-in visitors go straight to the choice screen — never the public home page.
   useEffect(() => {
