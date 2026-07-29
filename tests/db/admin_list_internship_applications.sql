@@ -17,9 +17,9 @@ DECLARE
   v_email text;
   v_sort text;
 BEGIN
-  -- pick two existing auth users (one acts as admin, one as an assignee)
-  SELECT id INTO v_admin FROM auth.users ORDER BY created_at LIMIT 1;
-  SELECT id INTO v_other FROM auth.users ORDER BY created_at DESC LIMIT 1;
+  -- pick two existing users (one acts as admin, one as an assignee)
+  SELECT p.user_id INTO v_admin FROM public.lms_user_profiles p ORDER BY p.user_id LIMIT 1;
+  SELECT p.user_id INTO v_other FROM public.lms_user_profiles p ORDER BY p.user_id DESC LIMIT 1;
   IF v_admin IS NULL THEN
     RAISE NOTICE 'SKIP: no auth users available';
     RETURN;
