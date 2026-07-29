@@ -296,13 +296,61 @@ function ApplicationDetail() {
     }
   };
 
-  if (loading || !bundle) {
+  const backLink = (
+    <Link
+      to="/learning-management-system/admin/internships/$id/applications"
+      params={{ id: opportunityId }}
+      className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
+    >
+      <ArrowLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
+      {lang === "ar" ? "العودة إلى الطلبات" : "Back to applications"}
+    </Link>
+  );
+
+  if (loading) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-16 text-center">
+      <div className="mx-auto max-w-5xl px-4 py-16 text-center" dir={dir}>
         <Loader2 className="h-6 w-6 animate-spin inline text-muted-foreground" />
+        <p className="mt-3 text-sm text-muted-foreground">
+          {lang === "ar" ? "جارٍ تحميل الطلب…" : "Loading application…"}
+        </p>
       </div>
     );
   }
+
+  if (!bundle) {
+    const isNotFound = loadError?.kind === "notfound";
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-12 space-y-4" dir={dir}>
+        {backLink}
+        <Card className="p-8 text-center space-y-3">
+          <h1 className="text-lg font-semibold">
+            {isNotFound
+              ? lang === "ar"
+                ? "الطلب غير موجود"
+                : "Application not found"
+              : lang === "ar"
+                ? "تعذّر تحميل الطلب"
+                : "Could not load the application"}
+          </h1>
+          <p className="text-sm text-muted-foreground break-words" dir="auto">
+            {isNotFound
+              ? lang === "ar"
+                ? "قد يكون الطلب محذوفًا أو لا ينتمي إلى هذه الفرصة."
+                : "It may have been deleted or does not belong to this opportunity."
+              : (loadError?.message ??
+                (lang === "ar" ? "حدث خطأ غير متوقع" : "An unexpected error occurred"))}
+          </p>
+          {!isNotFound && (
+            <Button onClick={() => void load()}>
+              {lang === "ar" ? "إعادة المحاولة" : "Retry"}
+            </Button>
+          )}
+        </Card>
+      </div>
+    );
+  }
+
 
   const app = bundle.application;
   const from = app.status;
