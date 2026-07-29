@@ -1320,9 +1320,10 @@ function CourseBuilder() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               {lang === "ar"
-                ? "سيتم حذف كل الأقسام، الدروس، الاختبارات، الواجبات، التقييمات، الشهادات، التسجيلات والطلبات. لا يمكن التراجع."
-                : "All sections, lessons, quizzes, assignments, reviews, certificates, enrollments and requests will be permanently removed. This cannot be undone."}
+                ? "سيتم حذف كل الأقسام، الدروس، الاختبارات، الواجبات، التقييمات، الشهادات، التسجيلات والطلبات. كما سيتم حذف دورة الحضور المرتبطة نهائيًا بما فيها الجلسات والمسجَّلين وسجلات الحضور. لا يمكن التراجع."
+                : "All sections, lessons, quizzes, assignments, reviews, certificates, enrollments and requests will be permanently removed. The linked attendance course — including its sessions, registrants and attendance records — will also be permanently deleted. This cannot be undone."}
             </AlertDialogDescription>
+
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{lang === "ar" ? "إلغاء" : "Cancel"}</AlertDialogCancel>
