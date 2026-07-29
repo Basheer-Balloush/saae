@@ -11,7 +11,6 @@ import {
   GraduationCap,
   FolderTree,
   BarChart3,
-  
   Star,
   Clock,
   CheckCircle2,
@@ -24,10 +23,14 @@ import {
   Pencil,
   CalendarDays,
   Loader2,
+  Megaphone,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { adminInternshipsOverview, type InternshipsOverview } from "@/lib/lms-internships-admin.functions";
+import {
+  adminInternshipsOverview,
+  type InternshipsOverview,
+} from "@/lib/lms-internships-admin.functions";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
@@ -43,8 +46,20 @@ import {
   type RequiredCourseField,
 } from "@/lib/lms-course-fields";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { AdminInstructorEditDialog } from "@/components/lms/AdminInstructorEditDialog";
 import { reconcileCertificates } from "@/lib/lms-certificates.functions";
@@ -78,7 +93,13 @@ type Course = {
   rejection_reason: string | null;
   created_at?: string;
 };
-type Category = { id: string; name_ar: string; name_en: string | null; slug: string; display_order: number };
+type Category = {
+  id: string;
+  name_ar: string;
+  name_en: string | null;
+  slug: string;
+  display_order: number;
+};
 
 function AdminHome() {
   const { lang } = useLang();
@@ -95,15 +116,25 @@ function AdminHome() {
   useEffect(() => {
     let live = true;
     overviewFn()
-      .then((res) => { if (live) setInternshipsOverview(res); })
+      .then((res) => {
+        if (live) setInternshipsOverview(res);
+      })
       .catch(() => {});
-    return () => { live = false; };
+    return () => {
+      live = false;
+    };
   }, [overviewFn]);
 
   const load = async () => {
     const [{ data: ins }, { data: cs }, { data: cats }, { count: stCount }] = await Promise.all([
-      supabase.from("lms_instructors").select("user_id,full_name,specialty,approved,bio,created_at").order("created_at", { ascending: false }),
-      supabase.from("lms_courses").select("id,title_ar,status,instructor_id,rejection_reason,created_at").order("created_at", { ascending: false }),
+      supabase
+        .from("lms_instructors")
+        .select("user_id,full_name,specialty,approved,bio,created_at")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("lms_courses")
+        .select("id,title_ar,status,instructor_id,rejection_reason,created_at")
+        .order("created_at", { ascending: false }),
       supabase.from("lms_categories").select("*").order("display_order"),
       supabase.from("lms_enrollments").select("*", { count: "exact", head: true }),
     ]);
@@ -119,26 +150,44 @@ function AdminHome() {
   const pendingInstructors = useMemo(() => instructors.filter((i) => !i.approved), [instructors]);
   const approvedInstructors = useMemo(() => instructors.filter((i) => i.approved), [instructors]);
   const pendingCourses = useMemo(() => courses.filter((c) => c.status === "pending"), [courses]);
-  const publishedCourses = useMemo(() => courses.filter((c) => c.status === "published"), [courses]);
+  const publishedCourses = useMemo(
+    () => courses.filter((c) => c.status === "published"),
+    [courses],
+  );
 
   const approveInstructor = async (uid: string, approve: boolean) => {
-    const { error } = await supabase.from("lms_instructors").update({ approved: approve }).eq("user_id", uid);
+    const { error } = await supabase
+      .from("lms_instructors")
+      .update({ approved: approve })
+      .eq("user_id", uid);
     if (error) {
       toast.error(toUserMessage(error));
       return;
     }
     if (approve) {
       await supabase.from("user_roles").insert({ user_id: uid, role: "lms_instructor" as never });
-      toast.success(ar ? "تمت الموافقة وتفعيل صلاحيات التدريس" : "Approved and instructor role granted");
+      toast.success(
+        ar ? "تمت الموافقة وتفعيل صلاحيات التدريس" : "Approved and instructor role granted",
+      );
     } else {
-      await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", "lms_instructor" as never);
+      await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", uid)
+        .eq("role", "lms_instructor" as never);
       toast.success(ar ? "تم إلغاء الموافقة" : "Approval revoked");
     }
     load();
   };
 
   const rejectInstructor = async (uid: string) => {
-    if (!(await confirmDialog({ title: ar ? "رفض هذا الطلب وحذفه نهائياً؟" : "Reject and remove this request?", destructive: true }))) return;
+    if (
+      !(await confirmDialog({
+        title: ar ? "رفض هذا الطلب وحذفه نهائياً؟" : "Reject and remove this request?",
+        destructive: true,
+      }))
+    )
+      return;
     const { error } = await supabase.from("lms_instructors").delete().eq("user_id", uid);
     if (error) {
       toast.error(toUserMessage(error));
@@ -148,7 +197,11 @@ function AdminHome() {
     load();
   };
 
-  const setCourseStatus = async (cid: string, status: "draft" | "pending" | "published" | "rejected", reason?: string) => {
+  const setCourseStatus = async (
+    cid: string,
+    status: "draft" | "pending" | "published" | "rejected",
+    reason?: string,
+  ) => {
     const patch: { status: typeof status; rejection_reason?: string | null } = { status };
     if (status === "rejected") patch.rejection_reason = reason ?? null;
     const { error } = await supabase.from("lms_courses").update(patch).eq("id", cid);
@@ -185,9 +238,17 @@ function AdminHome() {
 
   // ---- Admin create course on behalf of an approved instructor ----
   const [newCourseOpen, setNewCourseOpen] = useState(false);
-  const [newCourse, setNewCourse] = useState({ title_ar: "", title_en: "", description_ar: "", description_en: "", instructor_id: "" });
+  const [newCourse, setNewCourse] = useState({
+    title_ar: "",
+    title_en: "",
+    description_ar: "",
+    description_en: "",
+    instructor_id: "",
+  });
   const [courseErrors, setCourseErrors] = useState<CourseFieldErrors>({});
-  const courseFieldRefs = useRef<Partial<Record<RequiredCourseField, HTMLInputElement | HTMLTextAreaElement | null>>>({});
+  const courseFieldRefs = useRef<
+    Partial<Record<RequiredCourseField, HTMLInputElement | HTMLTextAreaElement | null>>
+  >({});
   const [creatingCourse, setCreatingCourse] = useState(false);
   const createCourse = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,7 +256,10 @@ function AdminHome() {
     const nextErrors = validateCourseI18n(newCourse, lang);
     setCourseErrors(nextErrors);
     const firstBad = firstInvalidCourseField(nextErrors);
-    if (firstBad) { courseFieldRefs.current[firstBad]?.focus(); return; }
+    if (firstBad) {
+      courseFieldRefs.current[firstBad]?.focus();
+      return;
+    }
     setCreatingCourse(true);
     const { data, error } = await supabase
       .from("lms_courses")
@@ -213,7 +277,13 @@ function AdminHome() {
     }
     toast.success(ar ? "تم إنشاء الدورة" : "Course created");
     setNewCourseOpen(false);
-    setNewCourse({ title_ar: "", title_en: "", description_ar: "", description_en: "", instructor_id: "" });
+    setNewCourse({
+      title_ar: "",
+      title_en: "",
+      description_ar: "",
+      description_en: "",
+      instructor_id: "",
+    });
     setCourseErrors({});
     if (data) window.location.href = `/learning-management-system/instructor/courses/${data.id}`;
   };
@@ -235,7 +305,13 @@ function AdminHome() {
     { id: "categories", label: ar ? "التصنيفات" : "Categories", icon: FolderTree },
   ];
 
-  const sideLinks: { to: string; label: string; icon: typeof Users; desc: string; badge?: number }[] = [
+  const sideLinks: {
+    to: string;
+    label: string;
+    icon: typeof Users;
+    desc: string;
+    badge?: number;
+  }[] = [
     {
       to: "/learning-management-system/admin/analytics",
       label: ar ? "التحليلات" : "Analytics",
@@ -271,6 +347,13 @@ function AdminHome() {
       desc: ar ? "تقييمات الطلاب" : "Student ratings",
     },
     {
+      to: "/learning-management-system/admin/campaign",
+      label: ar ? "حملة الستوري" : "Story campaign",
+      icon: Megaphone,
+      desc: ar ? "إعدادات حملة الفعالية" : "Event campaign settings",
+    },
+
+    {
       to: "/learning-management-system/admin/attendance-link",
       label: ar ? "ربط الحضور" : "Attendance link",
       icon: CalendarDays,
@@ -280,21 +363,19 @@ function AdminHome() {
       to: "/learning-management-system/admin/internships",
       label: ar ? "فرص التدريب" : "Internships",
       icon: FileText,
-      desc:
-        internshipsOverview
-          ? ar
-            ? `${internshipsOverview.opportunities.published} منشورة · ${internshipsOverview.applications.pending_review} بانتظار المراجعة`
-            : `${internshipsOverview.opportunities.published} published · ${internshipsOverview.applications.pending_review} pending review`
-          : ar
-            ? "إدارة فرص التدريب والطلبات"
-            : "Manage opportunities & applications",
+      desc: internshipsOverview
+        ? ar
+          ? `${internshipsOverview.opportunities.published} منشورة · ${internshipsOverview.applications.pending_review} بانتظار المراجعة`
+          : `${internshipsOverview.opportunities.published} published · ${internshipsOverview.applications.pending_review} pending review`
+        : ar
+          ? "إدارة فرص التدريب والطلبات"
+          : "Manage opportunities & applications",
       badge:
         internshipsOverview && internshipsOverview.applications.pending_review > 0
           ? internshipsOverview.applications.pending_review
           : undefined,
     },
   ];
-
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-background">
@@ -380,7 +461,9 @@ function AdminHome() {
                     {t.badge ? (
                       <span
                         className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
-                          active ? "bg-primary-foreground/20 text-primary-foreground" : "bg-amber-500 text-white"
+                          active
+                            ? "bg-primary-foreground/20 text-primary-foreground"
+                            : "bg-amber-500 text-white"
                         }`}
                       >
                         {t.badge}
@@ -409,12 +492,17 @@ function AdminHome() {
                       </span>
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold leading-tight">{l.label}</span>
-                        <span className="block text-[11px] text-muted-foreground leading-tight">{l.desc}</span>
+                        <span className="block text-[11px] text-muted-foreground leading-tight">
+                          {l.desc}
+                        </span>
                       </span>
                     </span>
                     <span className="flex items-center gap-2 shrink-0">
                       {typeof l.badge === "number" && l.badge > 0 && (
-                        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                        <Badge
+                          variant="secondary"
+                          className="bg-primary/10 text-primary border-primary/20"
+                        >
                           {l.badge}
                         </Badge>
                       )}
@@ -435,12 +523,17 @@ function AdminHome() {
               <div className="space-y-6">
                 {/* Pending instructor requests highlight */}
                 <Section
-                  title={ar ? "طلبات مدرّبين بانتظار الموافقة" : "Instructor requests pending approval"}
+                  title={
+                    ar ? "طلبات مدرّبين بانتظار الموافقة" : "Instructor requests pending approval"
+                  }
                   count={pendingInstructors.length}
                   emptyText={ar ? "لا توجد طلبات حالياً." : "No pending requests."}
                   action={
                     pendingInstructors.length > 3 ? (
-                      <button onClick={() => setTab("instructors")} className="text-xs font-bold text-primary hover:underline">
+                      <button
+                        onClick={() => setTab("instructors")}
+                        className="text-xs font-bold text-primary hover:underline"
+                      >
                         {ar ? "عرض الكل" : "View all"}
                       </button>
                     ) : null
@@ -464,7 +557,10 @@ function AdminHome() {
                   emptyText={ar ? "لا توجد دورات بانتظار النشر." : "No courses awaiting review."}
                   action={
                     pendingCourses.length > 3 ? (
-                      <button onClick={() => setTab("courses")} className="text-xs font-bold text-primary hover:underline">
+                      <button
+                        onClick={() => setTab("courses")}
+                        className="text-xs font-bold text-primary hover:underline"
+                      >
                         {ar ? "عرض الكل" : "View all"}
                       </button>
                     ) : null
@@ -520,15 +616,25 @@ function AdminHome() {
                         </span>
                         <div className="min-w-0">
                           <div className="font-bold text-foreground truncate">{i.full_name}</div>
-                          <div className="text-xs text-muted-foreground truncate">{i.specialty || (ar ? "بدون تخصّص" : "No specialty")}</div>
+                          <div className="text-xs text-muted-foreground truncate">
+                            {i.specialty || (ar ? "بدون تخصّص" : "No specialty")}
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button size="sm" variant="outline" onClick={() => setEditInstructorId(i.user_id)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditInstructorId(i.user_id)}
+                        >
                           <Pencil className="h-3.5 w-3.5 mx-1" />
                           {ar ? "تعديل" : "Edit"}
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => approveInstructor(i.user_id, false)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => approveInstructor(i.user_id, false)}
+                        >
                           {ar ? "إلغاء الموافقة" : "Revoke"}
                         </Button>
                       </div>
@@ -568,47 +674,75 @@ function AdminHome() {
                           <Label>{ar ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
                           <Input
                             dir="rtl"
-                            ref={(el) => { courseFieldRefs.current.title_ar = el; }}
+                            ref={(el) => {
+                              courseFieldRefs.current.title_ar = el;
+                            }}
                             aria-invalid={!!courseErrors.title_ar}
                             value={newCourse.title_ar}
-                            onChange={(e) => setNewCourse({ ...newCourse, title_ar: e.target.value })}
+                            onChange={(e) =>
+                              setNewCourse({ ...newCourse, title_ar: e.target.value })
+                            }
                           />
-                          {courseErrors.title_ar && <p className="mt-1 text-xs text-destructive">{courseErrors.title_ar}</p>}
+                          {courseErrors.title_ar && (
+                            <p className="mt-1 text-xs text-destructive">{courseErrors.title_ar}</p>
+                          )}
                         </div>
                         <div>
                           <Label>{ar ? "العنوان (إنجليزي)" : "Title (English)"}</Label>
                           <Input
                             dir="ltr"
-                            ref={(el) => { courseFieldRefs.current.title_en = el; }}
+                            ref={(el) => {
+                              courseFieldRefs.current.title_en = el;
+                            }}
                             aria-invalid={!!courseErrors.title_en}
                             value={newCourse.title_en}
-                            onChange={(e) => setNewCourse({ ...newCourse, title_en: e.target.value })}
+                            onChange={(e) =>
+                              setNewCourse({ ...newCourse, title_en: e.target.value })
+                            }
                           />
-                          {courseErrors.title_en && <p className="mt-1 text-xs text-destructive">{courseErrors.title_en}</p>}
+                          {courseErrors.title_en && (
+                            <p className="mt-1 text-xs text-destructive">{courseErrors.title_en}</p>
+                          )}
                         </div>
                         <div>
                           <Label>{ar ? "الوصف (عربي)" : "Description (Arabic)"}</Label>
                           <Textarea
                             dir="rtl"
                             rows={3}
-                            ref={(el) => { courseFieldRefs.current.description_ar = el; }}
+                            ref={(el) => {
+                              courseFieldRefs.current.description_ar = el;
+                            }}
                             aria-invalid={!!courseErrors.description_ar}
                             value={newCourse.description_ar}
-                            onChange={(e) => setNewCourse({ ...newCourse, description_ar: e.target.value })}
+                            onChange={(e) =>
+                              setNewCourse({ ...newCourse, description_ar: e.target.value })
+                            }
                           />
-                          {courseErrors.description_ar && <p className="mt-1 text-xs text-destructive">{courseErrors.description_ar}</p>}
+                          {courseErrors.description_ar && (
+                            <p className="mt-1 text-xs text-destructive">
+                              {courseErrors.description_ar}
+                            </p>
+                          )}
                         </div>
                         <div>
                           <Label>{ar ? "الوصف (إنجليزي)" : "Description (English)"}</Label>
                           <Textarea
                             dir="ltr"
                             rows={3}
-                            ref={(el) => { courseFieldRefs.current.description_en = el; }}
+                            ref={(el) => {
+                              courseFieldRefs.current.description_en = el;
+                            }}
                             aria-invalid={!!courseErrors.description_en}
                             value={newCourse.description_en}
-                            onChange={(e) => setNewCourse({ ...newCourse, description_en: e.target.value })}
+                            onChange={(e) =>
+                              setNewCourse({ ...newCourse, description_en: e.target.value })
+                            }
                           />
-                          {courseErrors.description_en && <p className="mt-1 text-xs text-destructive">{courseErrors.description_en}</p>}
+                          {courseErrors.description_en && (
+                            <p className="mt-1 text-xs text-destructive">
+                              {courseErrors.description_en}
+                            </p>
+                          )}
                         </div>
                         <div>
                           <Label>{ar ? "المدرّب" : "Instructor"}</Label>
@@ -617,7 +751,11 @@ function AdminHome() {
                             onValueChange={(v) => setNewCourse({ ...newCourse, instructor_id: v })}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder={ar ? "اختر مدرّباً معتمَداً" : "Pick an approved instructor"} />
+                              <SelectValue
+                                placeholder={
+                                  ar ? "اختر مدرّباً معتمَداً" : "Pick an approved instructor"
+                                }
+                              />
                             </SelectTrigger>
                             <SelectContent>
                               {approvedInstructors.map((i) => (
@@ -629,7 +767,11 @@ function AdminHome() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button type="submit" className="w-full" disabled={creatingCourse || !newCourse.instructor_id}>
+                        <Button
+                          type="submit"
+                          className="w-full"
+                          disabled={creatingCourse || !newCourse.instructor_id}
+                        >
                           {creatingCourse && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
                           {ar ? "إنشاء" : "Create"}
                         </Button>
@@ -683,7 +825,11 @@ function AdminHome() {
                             {ar ? "تعديل" : "Edit"}
                           </Link>
                           {c.status === "published" ? (
-                            <Button size="sm" variant="outline" onClick={() => setCourseStatus(c.id, "draft")}>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setCourseStatus(c.id, "draft")}
+                            >
                               {ar ? "إلغاء النشر" : "Unpublish"}
                             </Button>
                           ) : c.status === "draft" || c.status === "rejected" ? (
@@ -699,7 +845,10 @@ function AdminHome() {
             )}
 
             {tab === "categories" && (
-              <Section title={ar ? "إدارة التصنيفات" : "Manage categories"} count={categories.length}>
+              <Section
+                title={ar ? "إدارة التصنيفات" : "Manage categories"}
+                count={categories.length}
+              >
                 <form
                   onSubmit={addCategory}
                   className="grid sm:grid-cols-[1fr_1fr_1fr_auto] gap-2 rounded-xl border border-border bg-card p-4"
@@ -782,10 +931,14 @@ function StatCard({
   return (
     <div className={`rounded-2xl border bg-gradient-to-br ${tones[tone]} p-4 sm:p-5 shadow-sm`}>
       <div className="flex items-center justify-between">
-        <span className={`inline-flex h-9 w-9 items-center justify-center rounded-xl bg-background/70`}>
+        <span
+          className={`inline-flex h-9 w-9 items-center justify-center rounded-xl bg-background/70`}
+        >
           <Icon className="h-4.5 w-4.5" />
         </span>
-        <span className="text-3xl font-extrabold tracking-tight text-foreground tabular-nums">{value}</span>
+        <span className="text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
+          {value}
+        </span>
       </div>
       <p className="mt-3 text-sm font-bold text-foreground">{label}</p>
       {hint && <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p>}
@@ -856,11 +1009,17 @@ function InstructorRequestCard({
               {ar ? "طلب تفعيل حساب مدرّب" : "Instructor activation request"}
             </div>
             {ins.specialty && <div className="mt-1 text-xs text-foreground">{ins.specialty}</div>}
-            {ins.bio && <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{ins.bio}</p>}
+            {ins.bio && (
+              <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{ins.bio}</p>
+            )}
           </div>
         </div>
         <div className="flex gap-2 shrink-0">
-          <Button size="sm" onClick={onApprove} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+          <Button
+            size="sm"
+            onClick={onApprove}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+          >
             <Check className="h-4 w-4 mx-1" />
             {ar ? "موافقة" : "Approve"}
           </Button>
@@ -916,14 +1075,31 @@ function CourseRow({
 function StatusBadge({ status, ar }: { status: string; ar: boolean }) {
   const map: Record<string, { cls: string; ar: string; en: string; Icon: typeof Clock }> = {
     draft: { cls: "bg-muted text-muted-foreground", ar: "مسودّة", en: "Draft", Icon: FileText },
-    pending: { cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300", ar: "بانتظار المراجعة", en: "Pending", Icon: Clock },
-    published: { cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300", ar: "منشورة", en: "Published", Icon: CheckCircle2 },
-    rejected: { cls: "bg-destructive/15 text-destructive", ar: "مرفوضة", en: "Rejected", Icon: XCircle },
+    pending: {
+      cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+      ar: "بانتظار المراجعة",
+      en: "Pending",
+      Icon: Clock,
+    },
+    published: {
+      cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+      ar: "منشورة",
+      en: "Published",
+      Icon: CheckCircle2,
+    },
+    rejected: {
+      cls: "bg-destructive/15 text-destructive",
+      ar: "مرفوضة",
+      en: "Rejected",
+      Icon: XCircle,
+    },
   };
   const m = map[status] ?? map.draft;
   const Icon = m.Icon;
   return (
-    <span className={`mt-1 inline-flex items-center gap-1 text-[11px] font-bold rounded-full px-2 py-0.5 ${m.cls}`}>
+    <span
+      className={`mt-1 inline-flex items-center gap-1 text-[11px] font-bold rounded-full px-2 py-0.5 ${m.cls}`}
+    >
       <Icon className="h-3 w-3" />
       {ar ? m.ar : m.en}
     </span>
@@ -935,7 +1111,15 @@ function ReconcileCertificatesCard({ ar }: { ar: boolean }) {
   const run = useServerFn(reconcileCertificates);
   const onClick = async () => {
     if (busy) return;
-    if (!(await confirmDialog({ title: ar ? "فحص جميع التسجيلات المؤهلة وإصدار الشهادات الناقصة؟" : "Scan eligible enrollments and issue any missing certificates?", destructive: true }))) return;
+    if (
+      !(await confirmDialog({
+        title: ar
+          ? "فحص جميع التسجيلات المؤهلة وإصدار الشهادات الناقصة؟"
+          : "Scan eligible enrollments and issue any missing certificates?",
+        destructive: true,
+      }))
+    )
+      return;
     setBusy(true);
     try {
       const res = await run({ data: { limit: 500 } });
@@ -964,15 +1148,21 @@ function ReconcileCertificatesCard({ ar }: { ar: boolean }) {
       >
         <CheckCircle2 className="h-4 w-4" />
         {busy
-          ? ar ? "جارٍ التدقيق..." : "Reconciling..."
-          : ar ? "تدقيق الشهادات المؤهلة" : "Reconcile eligible certificates"}
+          ? ar
+            ? "جارٍ التدقيق..."
+            : "Reconciling..."
+          : ar
+            ? "تدقيق الشهادات المؤهلة"
+            : "Reconcile eligible certificates"}
       </Button>
     </div>
   );
 }
 
 function OpsHealthCard({ ar }: { ar: boolean }) {
-  const [busy, setBusy] = useState<null | "health" | "orphans" | "provisioning" | "internships">(null);
+  const [busy, setBusy] = useState<null | "health" | "orphans" | "provisioning" | "internships">(
+    null,
+  );
   const [health, setHealth] = useState<OpsHealthSummary | null>(null);
   const runHealth = useServerFn(getOpsHealthSummary);
   const runOrphans = useServerFn(reconcileOrphanUploads);
@@ -995,9 +1185,7 @@ function OpsHealthCard({ ar }: { ar: boolean }) {
     try {
       const r = await runOrphans({ data: { limit: 200 } });
       toast.success(
-        ar
-          ? `ملفات يتيمة: ${r.orphan_profile_files}`
-          : `Orphan files: ${r.orphan_profile_files}`,
+        ar ? `ملفات يتيمة: ${r.orphan_profile_files}` : `Orphan files: ${r.orphan_profile_files}`,
       );
     } catch (e) {
       toast.error(toUserMessage(e));
@@ -1057,44 +1245,102 @@ function OpsHealthCard({ ar }: { ar: boolean }) {
       {health && (
         <div className="px-2 pb-1 space-y-1 text-[11px]">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">{ar ? "مهام معلّقة/فاشلة" : "Stuck / failed jobs"}</span>
-            <span className={`font-bold ${totalStuck > 0 ? "text-destructive" : "text-foreground"}`}>
+            <span className="text-muted-foreground">
+              {ar ? "مهام معلّقة/فاشلة" : "Stuck / failed jobs"}
+            </span>
+            <span
+              className={`font-bold ${totalStuck > 0 ? "text-destructive" : "text-foreground"}`}
+            >
               {outbox?.stuck ?? 0} / {outbox?.failed ?? 0}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">{ar ? "تنبيهات حدود المصادقة (24س)" : "Auth rate flags (24h)"}</span>
+            <span className="text-muted-foreground">
+              {ar ? "تنبيهات حدود المصادقة (24س)" : "Auth rate flags (24h)"}
+            </span>
             <span className={`font-bold ${authFlags > 0 ? "text-destructive" : "text-foreground"}`}>
               {authFlags}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">{ar ? "طلبات تدريب متأخرة (>14 يوم)" : "Stuck internship apps (>14d)"}</span>
-            <span className={`font-bold ${internStuck > 0 ? "text-destructive" : "text-foreground"}`}>
+            <span className="text-muted-foreground">
+              {ar ? "طلبات تدريب متأخرة (>14 يوم)" : "Stuck internship apps (>14d)"}
+            </span>
+            <span
+              className={`font-bold ${internStuck > 0 ? "text-destructive" : "text-foreground"}`}
+            >
               {internStuck}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">{ar ? "إجمالي طلبات التدريب" : "Total internship apps"}</span>
+            <span className="text-muted-foreground">
+              {ar ? "إجمالي طلبات التدريب" : "Total internship apps"}
+            </span>
             <span className="font-bold text-foreground">{internTotal}</span>
           </div>
         </div>
       )}
 
-      <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={loadHealth} disabled={busy !== null}>
-        {busy === "health" ? (ar ? "جارٍ..." : "Loading...") : ar ? "تحديث حالة النظام" : "Refresh system health"}
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full justify-start gap-2"
+        onClick={loadHealth}
+        disabled={busy !== null}
+      >
+        {busy === "health"
+          ? ar
+            ? "جارٍ..."
+            : "Loading..."
+          : ar
+            ? "تحديث حالة النظام"
+            : "Refresh system health"}
       </Button>
-      <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={scanOrphans} disabled={busy !== null}>
-        {busy === "orphans" ? (ar ? "جارٍ..." : "Scanning...") : ar ? "فحص الملفات اليتيمة" : "Scan orphan uploads"}
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full justify-start gap-2"
+        onClick={scanOrphans}
+        disabled={busy !== null}
+      >
+        {busy === "orphans"
+          ? ar
+            ? "جارٍ..."
+            : "Scanning..."
+          : ar
+            ? "فحص الملفات اليتيمة"
+            : "Scan orphan uploads"}
       </Button>
-      <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={scanProvisioning} disabled={busy !== null}>
-        {busy === "provisioning" ? (ar ? "جارٍ..." : "Scanning...") : ar ? "فحص التسجيلات الناقصة" : "Scan partial provisioning"}
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full justify-start gap-2"
+        onClick={scanProvisioning}
+        disabled={busy !== null}
+      >
+        {busy === "provisioning"
+          ? ar
+            ? "جارٍ..."
+            : "Scanning..."
+          : ar
+            ? "فحص التسجيلات الناقصة"
+            : "Scan partial provisioning"}
       </Button>
-      <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={scanInternshipFiles} disabled={busy !== null}>
-        {busy === "internships" ? (ar ? "جارٍ..." : "Scanning...") : ar ? "فحص ملفات التدريب" : "Scan internship files"}
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full justify-start gap-2"
+        onClick={scanInternshipFiles}
+        disabled={busy !== null}
+      >
+        {busy === "internships"
+          ? ar
+            ? "جارٍ..."
+            : "Scanning..."
+          : ar
+            ? "فحص ملفات التدريب"
+            : "Scan internship files"}
       </Button>
     </div>
   );
 }
-
-
