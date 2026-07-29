@@ -126,18 +126,17 @@ function LmsSignup() {
               <MailCheck className="h-7 w-7 text-primary" />
             </div>
             <h2 className="text-base font-semibold text-foreground">
-              {lang === "ar" ? "تحقّق من بريدك الإلكتروني" : "Check your email"}
+              {lang === "ar" ? "تم إنشاء حسابك" : "Your account is ready"}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {lang === "ar"
-                ? "أرسلنا رابط تأكيد إلى"
-                : "We sent a confirmation link to"}{" "}
+              {lang === "ar" ? "تم تفعيل الحساب" : "We activated the account for"}{" "}
               <span className="font-semibold text-foreground" dir="ltr">{sentTo}</span>
               {". "}
               {lang === "ar"
-                ? "افتح الرابط لتفعيل حسابك."
-                : "Open the link to activate your account."}
+                ? "يمكنك تسجيل الدخول مباشرة."
+                : "You can sign in right away."}
             </p>
+
             {asInstructor && (
               <div className="mt-2 w-full rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-900 dark:text-amber-200 space-y-2">
                 <p className="font-semibold">
@@ -145,8 +144,9 @@ function LmsSignup() {
                 </p>
                 <p className="text-xs opacity-90">
                   {lang === "ar"
-                    ? "بعد تأكيد بريدك، سجّل الدخول ثم املأ نموذج طلب الاعتماد (٤ مراحل تقييم: نظري، عملي، تدريب، مقابلة) قبل نشر أي دورة."
-                    : "After confirming your email, sign in and complete the accreditation application (4 evaluation phases) before publishing any course."}
+                    ? "سجّل الدخول ثم املأ نموذج طلب الاعتماد (٤ مراحل تقييم: نظري، عملي، تدريب، مقابلة) قبل نشر أي دورة."
+                    : "Sign in and complete the accreditation application (4 evaluation phases) before publishing any course."}
+
                 </p>
                 <Link
                   to="/learning-management-system/trainer-apply"
