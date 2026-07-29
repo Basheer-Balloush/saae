@@ -161,17 +161,17 @@ function Catalog() {
     if (!typedRef.current) return;
     const t = setTimeout(() => {
       if (q === urlQ) return;
-      navigate({ search: (prev) => ({ ...prev, q, page: 1 }), replace: true });
+      navigate({ search: (prev: CatalogSearch) => ({ ...prev, q, page: 1 }), replace: true });
     }, 350);
     return () => clearTimeout(t);
   }, [q, urlQ, navigate]);
 
   const setFilter = (key: "category" | "level" | "price", value: string) =>
     // Any filter change resets pagination.
-    navigate({ search: (prev) => ({ ...prev, [key]: value === "all" ? "" : value, page: 1 }) });
+    navigate({ search: (prev: CatalogSearch) => ({ ...prev, [key]: value === "all" ? "" : value, page: 1 }) });
 
   const goToPage = (page: number) =>
-    navigate({ search: (prev) => ({ ...prev, page: Math.max(1, Math.min(totalPages, page)) }) });
+    navigate({ search: (prev: CatalogSearch) => ({ ...prev, page: Math.max(1, Math.min(totalPages, page)) }) });
 
   const hasFilters = !!(search.q || search.category || search.level || search.price);
 
@@ -199,7 +199,7 @@ function Catalog() {
           label={tr.filterCategory}
           options={[
             { value: "all", label: tr.all },
-            ...categories.map((c) => ({
+            ...categories.map((c: Category) => ({
               value: c.slug,
               label: ar ? c.name_ar : c.name_en || c.name_ar,
             })),
@@ -251,7 +251,7 @@ function Catalog() {
         <p className="mt-16 text-center text-muted-foreground">{tr.noCourses}</p>
       ) : (
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {courses.map((c) => (
+          {courses.map((c: CourseCardData) => (
             <CourseCard key={c.id} course={c} />
           ))}
         </div>
