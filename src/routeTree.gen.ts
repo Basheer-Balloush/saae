@@ -68,6 +68,7 @@ import { Route as LearningManagementSystemInstructorsIdRouteImport } from './rou
 import { Route as LearningManagementSystemInstructorProfileRouteImport } from './routes/learning-management-system.instructor.profile'
 import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/learning-management-system.courses.$id'
 import { Route as LearningManagementSystemCertificateIdRouteImport } from './routes/learning-management-system.certificate.$id'
+import { Route as LearningManagementSystemCampaignChoiceRouteImport } from './routes/learning-management-system.campaign.choice'
 import { Route as LearningManagementSystemAdminUsersRouteImport } from './routes/learning-management-system.admin.users'
 import { Route as LearningManagementSystemAdminTrainerApplicationsRouteImport } from './routes/learning-management-system.admin.trainer-applications'
 import { Route as LearningManagementSystemAdminReviewsRouteImport } from './routes/learning-management-system.admin.reviews'
@@ -429,6 +430,12 @@ const LearningManagementSystemCertificateIdRoute =
     path: '/certificate/$id',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
+const LearningManagementSystemCampaignChoiceRoute =
+  LearningManagementSystemCampaignChoiceRouteImport.update({
+    id: '/choice',
+    path: '/choice',
+    getParentRoute: () => LearningManagementSystemCampaignRoute,
+  } as any)
 const LearningManagementSystemAdminUsersRoute =
   LearningManagementSystemAdminUsersRouteImport.update({
     id: '/users',
@@ -669,7 +676,7 @@ export interface FileRoutesByFullPath {
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
-  '/learning-management-system/campaign': typeof LearningManagementSystemCampaignRoute
+  '/learning-management-system/campaign': typeof LearningManagementSystemCampaignRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorRouteWithChildren
@@ -699,6 +706,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/trainer-applications': typeof LearningManagementSystemAdminTrainerApplicationsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
+  '/learning-management-system/campaign/choice': typeof LearningManagementSystemCampaignChoiceRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructor/profile': typeof LearningManagementSystemInstructorProfileRoute
@@ -760,7 +768,7 @@ export interface FileRoutesByTo {
   '/communities/$key': typeof CommunitiesKeyRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
-  '/learning-management-system/campaign': typeof LearningManagementSystemCampaignRoute
+  '/learning-management-system/campaign': typeof LearningManagementSystemCampaignRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
@@ -787,6 +795,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/trainer-applications': typeof LearningManagementSystemAdminTrainerApplicationsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
+  '/learning-management-system/campaign/choice': typeof LearningManagementSystemCampaignChoiceRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructor/profile': typeof LearningManagementSystemInstructorProfileRoute
@@ -855,7 +864,7 @@ export interface FileRoutesById {
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
-  '/learning-management-system/campaign': typeof LearningManagementSystemCampaignRoute
+  '/learning-management-system/campaign': typeof LearningManagementSystemCampaignRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorRouteWithChildren
@@ -885,6 +894,7 @@ export interface FileRoutesById {
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/trainer-applications': typeof LearningManagementSystemAdminTrainerApplicationsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
+  '/learning-management-system/campaign/choice': typeof LearningManagementSystemCampaignChoiceRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructor/profile': typeof LearningManagementSystemInstructorProfileRoute
@@ -984,6 +994,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/trainer-applications'
     | '/learning-management-system/admin/users'
+    | '/learning-management-system/campaign/choice'
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructor/profile'
@@ -1072,6 +1083,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/trainer-applications'
     | '/learning-management-system/admin/users'
+    | '/learning-management-system/campaign/choice'
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructor/profile'
@@ -1169,6 +1181,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/trainer-applications'
     | '/learning-management-system/admin/users'
+    | '/learning-management-system/campaign/choice'
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructor/profile'
@@ -1649,6 +1662,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemCertificateIdRouteImport
       parentRoute: typeof LearningManagementSystemRoute
     }
+    '/learning-management-system/campaign/choice': {
+      id: '/learning-management-system/campaign/choice'
+      path: '/choice'
+      fullPath: '/learning-management-system/campaign/choice'
+      preLoaderRoute: typeof LearningManagementSystemCampaignChoiceRouteImport
+      parentRoute: typeof LearningManagementSystemCampaignRoute
+    }
     '/learning-management-system/admin/users': {
       id: '/learning-management-system/admin/users'
       path: '/users'
@@ -2116,6 +2136,21 @@ const LearningManagementSystemAdminRouteWithChildren =
     LearningManagementSystemAdminRouteChildren,
   )
 
+interface LearningManagementSystemCampaignRouteChildren {
+  LearningManagementSystemCampaignChoiceRoute: typeof LearningManagementSystemCampaignChoiceRoute
+}
+
+const LearningManagementSystemCampaignRouteChildren: LearningManagementSystemCampaignRouteChildren =
+  {
+    LearningManagementSystemCampaignChoiceRoute:
+      LearningManagementSystemCampaignChoiceRoute,
+  }
+
+const LearningManagementSystemCampaignRouteWithChildren =
+  LearningManagementSystemCampaignRoute._addFileChildren(
+    LearningManagementSystemCampaignRouteChildren,
+  )
+
 interface LearningManagementSystemInstructorRouteChildren {
   LearningManagementSystemInstructorProfileRoute: typeof LearningManagementSystemInstructorProfileRoute
   LearningManagementSystemInstructorIndexRoute: typeof LearningManagementSystemInstructorIndexRoute
@@ -2169,7 +2204,7 @@ const LearningManagementSystemStudentRouteWithChildren =
 
 interface LearningManagementSystemRouteChildren {
   LearningManagementSystemAdminRoute: typeof LearningManagementSystemAdminRouteWithChildren
-  LearningManagementSystemCampaignRoute: typeof LearningManagementSystemCampaignRoute
+  LearningManagementSystemCampaignRoute: typeof LearningManagementSystemCampaignRouteWithChildren
   LearningManagementSystemCatalogRoute: typeof LearningManagementSystemCatalogRoute
   LearningManagementSystemForgotPasswordRoute: typeof LearningManagementSystemForgotPasswordRoute
   LearningManagementSystemInstructorRoute: typeof LearningManagementSystemInstructorRouteWithChildren
@@ -2194,7 +2229,7 @@ const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildr
     LearningManagementSystemAdminRoute:
       LearningManagementSystemAdminRouteWithChildren,
     LearningManagementSystemCampaignRoute:
-      LearningManagementSystemCampaignRoute,
+      LearningManagementSystemCampaignRouteWithChildren,
     LearningManagementSystemCatalogRoute: LearningManagementSystemCatalogRoute,
     LearningManagementSystemForgotPasswordRoute:
       LearningManagementSystemForgotPasswordRoute,
