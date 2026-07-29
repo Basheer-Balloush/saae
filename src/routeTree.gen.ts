@@ -40,6 +40,7 @@ import { Route as LearningManagementSystemLoginRouteImport } from './routes/lear
 import { Route as LearningManagementSystemInstructorRouteImport } from './routes/learning-management-system.instructor'
 import { Route as LearningManagementSystemForgotPasswordRouteImport } from './routes/learning-management-system.forgot-password'
 import { Route as LearningManagementSystemCatalogRouteImport } from './routes/learning-management-system.catalog'
+import { Route as LearningManagementSystemCampaignRouteImport } from './routes/learning-management-system.campaign'
 import { Route as LearningManagementSystemAdminRouteImport } from './routes/learning-management-system.admin'
 import { Route as InitiativeClaimRouteImport } from './routes/initiative.claim'
 import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
@@ -274,6 +275,12 @@ const LearningManagementSystemCatalogRoute =
   LearningManagementSystemCatalogRouteImport.update({
     id: '/catalog',
     path: '/catalog',
+    getParentRoute: () => LearningManagementSystemRoute,
+  } as any)
+const LearningManagementSystemCampaignRoute =
+  LearningManagementSystemCampaignRouteImport.update({
+    id: '/campaign',
+    path: '/campaign',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
 const LearningManagementSystemAdminRoute =
@@ -662,6 +669,7 @@ export interface FileRoutesByFullPath {
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
+  '/learning-management-system/campaign': typeof LearningManagementSystemCampaignRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorRouteWithChildren
@@ -752,6 +760,7 @@ export interface FileRoutesByTo {
   '/communities/$key': typeof CommunitiesKeyRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
+  '/learning-management-system/campaign': typeof LearningManagementSystemCampaignRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
@@ -846,6 +855,7 @@ export interface FileRoutesById {
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
+  '/learning-management-system/campaign': typeof LearningManagementSystemCampaignRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorRouteWithChildren
@@ -944,6 +954,7 @@ export interface FileRouteTypes {
     | '/forms/$slug'
     | '/initiative/claim'
     | '/learning-management-system/admin'
+    | '/learning-management-system/campaign'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
     | '/learning-management-system/instructor'
@@ -1034,6 +1045,7 @@ export interface FileRouteTypes {
     | '/communities/$key'
     | '/forms/$slug'
     | '/initiative/claim'
+    | '/learning-management-system/campaign'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
     | '/learning-management-system/login'
@@ -1127,6 +1139,7 @@ export interface FileRouteTypes {
     | '/forms/$slug'
     | '/initiative/claim'
     | '/learning-management-system/admin'
+    | '/learning-management-system/campaign'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
     | '/learning-management-system/instructor'
@@ -1438,6 +1451,13 @@ declare module '@tanstack/react-router' {
       path: '/catalog'
       fullPath: '/learning-management-system/catalog'
       preLoaderRoute: typeof LearningManagementSystemCatalogRouteImport
+      parentRoute: typeof LearningManagementSystemRoute
+    }
+    '/learning-management-system/campaign': {
+      id: '/learning-management-system/campaign'
+      path: '/campaign'
+      fullPath: '/learning-management-system/campaign'
+      preLoaderRoute: typeof LearningManagementSystemCampaignRouteImport
       parentRoute: typeof LearningManagementSystemRoute
     }
     '/learning-management-system/admin': {
@@ -2149,6 +2169,7 @@ const LearningManagementSystemStudentRouteWithChildren =
 
 interface LearningManagementSystemRouteChildren {
   LearningManagementSystemAdminRoute: typeof LearningManagementSystemAdminRouteWithChildren
+  LearningManagementSystemCampaignRoute: typeof LearningManagementSystemCampaignRoute
   LearningManagementSystemCatalogRoute: typeof LearningManagementSystemCatalogRoute
   LearningManagementSystemForgotPasswordRoute: typeof LearningManagementSystemForgotPasswordRoute
   LearningManagementSystemInstructorRoute: typeof LearningManagementSystemInstructorRouteWithChildren
@@ -2172,6 +2193,8 @@ const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildr
   {
     LearningManagementSystemAdminRoute:
       LearningManagementSystemAdminRouteWithChildren,
+    LearningManagementSystemCampaignRoute:
+      LearningManagementSystemCampaignRoute,
     LearningManagementSystemCatalogRoute: LearningManagementSystemCatalogRoute,
     LearningManagementSystemForgotPasswordRoute:
       LearningManagementSystemForgotPasswordRoute,
@@ -2238,3 +2261,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
