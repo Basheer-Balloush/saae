@@ -163,7 +163,7 @@ const BundleSchema = z.object({
         question_label_en: nullableText,
         question_kind: nullableText,
         answer_text: nullableText,
-        answer_json: z.unknown().nullable().catch(null),
+        answer_json: JsonValueSchema.nullable().catch(null),
       }),
     )
     .catch([]),
