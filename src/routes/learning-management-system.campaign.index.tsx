@@ -25,8 +25,7 @@ export const Route = createFileRoute("/learning-management-system/campaign/")({
       { property: "og:title", content: "SAAE Event Story Campaign" },
       {
         property: "og:description",
-        content:
-          "Share the SAAE event Story and unlock the free Generative AI course.",
+        content: "Share the SAAE event Story and unlock the free Generative AI course.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

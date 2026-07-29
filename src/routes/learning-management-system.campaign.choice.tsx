@@ -19,8 +19,7 @@ export const Route = createFileRoute("/learning-management-system/campaign/choic
       { property: "og:title", content: "Choose Your Next Step · SAAE Campaign" },
       {
         property: "og:description",
-        content:
-          "Explore the SAAE platform or get the Generative AI course for free.",
+        content: "Explore the SAAE platform or get the Generative AI course for free.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
