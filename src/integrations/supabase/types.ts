@@ -4399,6 +4399,7 @@ export type Database = {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json
       }
+      lms_sync_quiz_version: { Args: { _quiz_id: string }; Returns: undefined }
       lms_validate_session: { Args: { _session_id: string }; Returns: boolean }
       match_chat_chunks: {
         Args: { match_count?: number; query_embedding: string }
