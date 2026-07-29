@@ -351,20 +351,18 @@ function ApplicationsList() {
                   {new Date(r.submitted_at).toLocaleDateString(lang)}
                 </TableCell>
                 <TableCell className={dir === "rtl" ? "text-left" : "text-right"}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        to: "/learning-management-system/admin/internships/$id/applications/$appId",
-                        params: { id: opportunityId, appId: r.id },
-                      })
-                    }
-                  >
-                    <Eye className="h-4 w-4 mx-1" />
-                    {lang === "ar" ? "عرض" : "View"}
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link
+                      to="/learning-management-system/admin/internships/$id/applications/$appId"
+                      params={{ id: r.opportunity_id ?? opportunityId, appId: r.id }}
+                      aria-label={lang === "ar" ? "عرض الطلب" : "View application"}
+                    >
+                      <Eye className="h-4 w-4 mx-1" />
+                      {lang === "ar" ? "عرض" : "View"}
+                    </Link>
                   </Button>
                 </TableCell>
+
               </TableRow>
             ))}
           </TableBody>
