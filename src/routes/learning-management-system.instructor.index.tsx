@@ -9,6 +9,15 @@ import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  validateCourseI18n,
+  firstInvalidCourseField,
+  trimCourseI18n,
+  courseI18nWriteErrorMessage,
+  type CourseFieldErrors,
+  type RequiredCourseField,
+} from "@/lib/lms-course-fields";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
