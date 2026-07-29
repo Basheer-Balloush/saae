@@ -14,11 +14,15 @@ import { toast } from "sonner";
 import { Loader2, MailCheck, Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/saae-logo.png";
 import { PASSWORD_MIN, scorePasswordStrength } from "@/lib/password-policy";
+import { lmsRedirectSearchSchema } from "@/lib/lms-redirect";
+
 
 export const Route = createFileRoute("/learning-management-system/signup")({
   head: () => ({ meta: [{ title: "LMS · Sign up" }] }),
+  validateSearch: (raw: Record<string, unknown>) => lmsRedirectSearchSchema(raw),
   component: LmsSignup,
 });
+
 
 const ARABIC_NAME_RE = /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]+$/;
 
@@ -51,6 +55,8 @@ function LmsSignup() {
   const { user, loading } = useLmsAuth();
   const { lang } = useLang();
   const tr = lmsT[lang];
+  const search = Route.useSearch();
+  const returnTo = search.redirect;
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -66,8 +72,11 @@ function LmsSignup() {
   const strengthInfo = useMemo(() => getStrengthInfo(passwordStrength, lang), [passwordStrength, lang]);
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/learning-management-system/profile" });
-  }, [loading, user, navigate]);
+    // Once the account is active, land the user back where they started.
+    if (!loading && user) navigate({ to: returnTo ?? "/learning-management-system/profile" });
+  }, [loading, user, navigate, returnTo]);
+
+
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,8 +158,10 @@ function LmsSignup() {
             )}
             <Link
               to="/learning-management-system/login"
+              search={{ redirect: returnTo }}
               className="mt-2 text-sm text-primary hover:underline font-medium"
             >
+
               {tr.haveAccount}
             </Link>
           </div>
@@ -220,7 +231,7 @@ function LmsSignup() {
               </Button>
             </form>
             <p className="mt-4 text-center text-sm text-muted-foreground">
-              <Link to="/learning-management-system/login" className="text-primary hover:underline font-medium">
+              <Link to="/learning-management-system/login" search={{ redirect: returnTo }} className="text-primary hover:underline font-medium">
                 {tr.haveAccount}
               </Link>
             </p>

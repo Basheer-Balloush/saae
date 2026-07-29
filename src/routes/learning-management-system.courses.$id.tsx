@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouter, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, Clock, Calendar, MapPin, Hourglass, CheckCircle } from "lucide-react";
+import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, Clock, Calendar, MapPin, Hourglass, CheckCircle, AlertTriangle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -11,11 +11,12 @@ import { toast } from "sonner";
 import { CourseReviews } from "@/components/lms/CourseReviews";
 import { EnrollmentFormDialog } from "@/components/lms/EnrollmentFormDialog";
 
+
 type Course = {
   id: string; title_ar: string; title_en: string | null;
   description_ar: string | null; description_en: string | null;
   cover_url: string | null; level: string; price: number; is_free: boolean;
-  students_count: number; rating_avg: number; review_count: number; instructor_id: string;
+  students_count: number; rating_avg: number; review_count: number;
   enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null;
   start_date: string | null; end_date: string | null;
   schedule_days: string[] | null;
@@ -29,8 +30,16 @@ type Section = { id: string; title: string; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; duration_seconds: number; is_preview: boolean; display_order: number };
 type Instructor = { slug: string; full_name: string; full_name_ar: string | null; full_name_en: string | null; avatar_url: string | null; specialty: string | null; specialty_ar: string | null; specialty_en: string | null; is_primary: boolean };
 
+type PublicCoursePayload = {
+  course: Course;
+  instructors: Instructor[] | null;
+  sections: Section[] | null;
+  lessons: Lesson[] | null;
+  has_form: boolean;
+};
+
 type CourseLoaderData = {
-  course: Course | null;
+  course: Course;
   instructor: Instructor | null;
   coInstructors: Instructor[];
   sections: Section[];
@@ -40,39 +49,22 @@ type CourseLoaderData = {
 
 export const Route = createFileRoute("/learning-management-system/courses/$id")({
   loader: async ({ params }): Promise<CourseLoaderData> => {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
-    const baseQ = supabase.from("lms_courses").select("id,instructor_id,category_id,title_ar,title_en,description_ar,description_en,level,price,is_free,cover_url,status,rating_avg,review_count,students_count,created_at,updated_at,enrollment_open,max_students,enrollment_deadline,slug,start_date,end_date,schedule_days,schedule_time_from,schedule_time_to,location_ar,location_en,duration_hours,delivery_mode");
-    const { data: c } = await (isUuid ? baseQ.eq("id", params.id) : baseQ.eq("slug", params.id)).maybeSingle();
-    if (!c) return { course: null, instructor: null, coInstructors: [], sections: [], lessons: [], hasForm: false };
-    const course = c as unknown as Course;
-    const realCourseId = course.id;
-
-    const [{ data: insList }, { data: secs }, { data: cf }] = await Promise.all([
-      supabase.rpc("get_public_instructors_for_course", { _course_id: realCourseId }),
-      supabase.from("lms_sections").select("id,title,display_order").eq("course_id", realCourseId).order("display_order"),
-      supabase.from("lms_course_forms").select("id").eq("course_id", realCourseId).eq("is_active", true).maybeSingle(),
-    ]);
-    const sections = ((secs as unknown) as Section[]) ?? [];
-    let lessons: Lesson[] = [];
-    if (sections.length) {
-      const { data: lss } = await supabase.from("lms_lessons")
-        .select("id,section_id,title,duration_seconds,is_preview,display_order")
-        .in("section_id", sections.map((s) => s.id))
-        .order("display_order");
-      lessons = ((lss as unknown) as Lesson[]) ?? [];
-    }
-    const all = ((insList as unknown) as Instructor[]) ?? [];
-    const instructor = all.find((i) => i.is_primary) ?? null;
-    const coInstructors = all.filter((i) => !i.is_primary);
+    // Public, read-only projection of a published course (safe fields only).
+    const { data, error } = await supabase.rpc("get_public_course", { _ref: params.id });
+    if (error) throw new Error("course_load_failed");
+    if (!data) throw notFound();
+    const payload = data as unknown as PublicCoursePayload;
+    const all = payload.instructors ?? [];
     return {
-      course,
-      instructor,
-      coInstructors,
-      sections,
-      lessons,
-      hasForm: !!cf,
+      course: payload.course,
+      instructor: all.find((i) => i.is_primary) ?? null,
+      coInstructors: all.filter((i) => !i.is_primary),
+      sections: payload.sections ?? [],
+      lessons: payload.lessons ?? [],
+      hasForm: !!payload.has_form,
     };
   },
+
   head: ({ params, loaderData }) => {
     const c = loaderData?.course;
     const m = c ? {
@@ -158,7 +150,58 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
     };
   },
   component: CourseDetails,
+  errorComponent: CourseLoadError,
+  notFoundComponent: CourseNotFound,
 });
+
+function CourseNotFound() {
+  const { lang } = useLang();
+  const ar = lang === "ar";
+  return (
+    <div className="mx-auto max-w-xl px-6 py-24 text-center">
+      <BookOpen className="mx-auto h-12 w-12 text-muted-foreground" />
+      <h1 className="mt-4 text-2xl font-bold text-foreground">
+        {ar ? "الدورة غير موجودة" : "Course not found"}
+      </h1>
+      <p className="mt-2 text-muted-foreground">
+        {ar
+          ? "هذه الدورة غير متاحة أو لم يتم نشرها بعد."
+          : "This course does not exist or is not published yet."}
+      </p>
+      <Link to="/learning-management-system/catalog" className="inline-block mt-6">
+        <Button size="lg">{ar ? "تصفّح الدورات" : "Browse courses"}</Button>
+      </Link>
+    </div>
+  );
+}
+
+function CourseLoadError({ reset }: { reset: () => void }) {
+  const { lang } = useLang();
+  const ar = lang === "ar";
+  const router = useRouter();
+  return (
+    <div className="mx-auto max-w-xl px-6 py-24 text-center">
+      <AlertTriangle className="mx-auto h-12 w-12 text-amber-500" />
+      <h1 className="mt-4 text-2xl font-bold text-foreground">
+        {ar ? "تعذّر تحميل الدورة" : "Couldn't load this course"}
+      </h1>
+      <p className="mt-2 text-muted-foreground">
+        {ar
+          ? "حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى."
+          : "A connection error occurred. Please try again."}
+      </p>
+      <Button
+        size="lg"
+        className="mt-6"
+        onClick={() => { router.invalidate(); reset(); }}
+      >
+        <RefreshCw className="h-4 w-4 mx-2" />
+        {ar ? "إعادة المحاولة" : "Retry"}
+      </Button>
+    </div>
+  );
+}
+
 
 function CourseDetails() {
   const { id } = Route.useParams();
@@ -196,9 +239,10 @@ function CourseDetails() {
 
   const requireAuth = () => {
     if (!user) {
+      // Anonymous visitors are sent to sign-up with a safe internal return URL.
       navigate({
-        to: "/learning-management-system/login",
-        search: { redirect: `/learning-management-system/courses/${id}` },
+        to: "/learning-management-system/signup",
+        search: { redirect: `/learning-management-system/courses/${encodeURIComponent(course.slug ?? id)}` },
       });
       return false;
     }
@@ -215,7 +259,7 @@ function CourseDetails() {
     setFormDialogOpen(true);
   };
 
-  if (!course) return <p className="text-center py-20 text-muted-foreground">404</p>;
+
 
 
   const title = lang === "ar" ? course.title_ar : course.title_en || course.title_ar;
