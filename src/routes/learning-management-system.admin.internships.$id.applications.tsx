@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -90,7 +90,6 @@ function ApplicationsList() {
   const { id: opportunityId } = Route.useParams();
   const { lang, dir } = useLang();
   const t = lmsInternshipsT[lang];
-  const navigate = useNavigate();
 
   const listFn = useServerFn(adminListApplications);
   const exportFn = useServerFn(adminExportApplications);
