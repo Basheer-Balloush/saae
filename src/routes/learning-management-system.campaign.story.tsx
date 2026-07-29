@@ -1,9 +1,15 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { Download, Instagram, Share2 } from "lucide-react";
+import { Download, Instagram, Loader2, Share2 } from "lucide-react";
 import storyAsset from "@/assets/saae-story-campaign.jpg.asset.json";
+import { supabase } from "@/integrations/supabase/client";
+import { courseDestination } from "@/lib/lms-course-destination";
+import { safeLmsRedirect } from "@/lib/lms-redirect";
+
+const CAMPAIGN_SLUG = "gen-ai-event-2026-07-31";
+const DEFAULT_DESTINATION = "/learning-management-system/student";
 
 export const Route = createFileRoute("/learning-management-system/campaign/story")({
   head: () => ({
@@ -38,6 +44,10 @@ const copy = {
     manual:
       "المشاركة المباشرة غير متاحة على هذا الجهاز. احفظ الصورة ثم افتح إنستغرام وأضفها إلى الستوري.",
     done: "تمت المشاركة! تابع للحصول على الدورة.",
+    claim: "لقد شاركت الصورة — تابع إلى الدورة",
+    claiming: "جارٍ تفعيل الدورة…",
+    claimError: "تعذّر تفعيل الدورة الآن. حاول مرة أخرى.",
+    unavailable: "الحملة غير متاحة حالياً.",
   },
   en: {
     heading: "Campaign Story image",
@@ -50,15 +60,22 @@ const copy = {
     manual:
       "Direct sharing isn't available on this device. Save the image, then open Instagram and add it to your Story.",
     done: "Shared! Continue to get your course.",
+    claim: "I shared it — continue to my course",
+    claiming: "Unlocking your course…",
+    claimError: "We couldn't unlock the course right now. Please try again.",
+    unavailable: "This campaign isn't available right now.",
   },
 } as const;
 
 function CampaignStory() {
   const { lang } = useLang();
+  const navigate = useNavigate();
   const t = copy[lang];
   const [busy, setBusy] = useState(false);
   const [manual, setManual] = useState(false);
   const [shared, setShared] = useState(false);
+  const [claiming, setClaiming] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
   const handleShare = async () => {
     setBusy(true);
@@ -87,6 +104,38 @@ function CampaignStory() {
     }
   };
 
+  // Idempotent: grants the free campaign course (if configured) and routes onward.
+  const handleClaim = async () => {
+    setClaiming(true);
+    setClaimError(null);
+    try {
+      const { data, error } = await supabase.rpc("lms_claim_story_campaign", {
+        _slug: CAMPAIGN_SLUG,
+      });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row) throw new Error("empty");
+
+      if (row.status === "campaign_unavailable") {
+        setClaimError(t.unavailable);
+        return;
+      }
+
+      if (row.course_id) {
+        const dest = courseDestination(row.course_id, row.delivery_mode);
+        navigate(dest);
+        return;
+      }
+
+      navigate({
+        to: safeLmsRedirect(row.destination) ?? DEFAULT_DESTINATION,
+      });
+    } catch {
+      setClaimError(t.claimError);
+    } finally {
+      setClaiming(false);
+    }
+  };
 
   return (
     <div className="flex-1 px-4 py-10">
@@ -107,13 +156,9 @@ function CampaignStory() {
           {busy ? t.sharing : t.share}
         </Button>
 
-        {shared && (
-          <p className="mt-3 text-sm font-medium text-primary">{t.done}</p>
-        )}
+        {shared && <p className="mt-3 text-sm font-medium text-primary">{t.done}</p>}
 
-        {manual && (
-          <p className="mt-3 text-sm text-muted-foreground">{t.manual}</p>
-        )}
+        {manual && <p className="mt-3 text-sm text-muted-foreground">{t.manual}</p>}
 
         <div className="mt-3 grid gap-2">
           <Button asChild variant="outline" className="w-full">
@@ -123,17 +168,24 @@ function CampaignStory() {
             </a>
           </Button>
           <Button asChild variant="ghost" className="w-full">
-            <a
-              href="https://www.instagram.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
               <Instagram className="h-4 w-4 mx-2" />
               {t.openInstagram}
             </a>
           </Button>
         </div>
 
+        <Button
+          variant={shared ? "default" : "secondary"}
+          className="mt-6 w-full"
+          onClick={handleClaim}
+          disabled={claiming}
+        >
+          {claiming && <Loader2 className="h-4 w-4 mx-2 animate-spin" />}
+          {claiming ? t.claiming : t.claim}
+        </Button>
+
+        {claimError && <p className="mt-3 text-sm text-destructive">{claimError}</p>}
       </div>
     </div>
   );

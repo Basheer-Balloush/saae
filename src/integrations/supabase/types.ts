@@ -4157,6 +4157,15 @@ export type Database = {
         Args: { _coupon?: string; _course_id: string }
         Returns: Json
       }
+      lms_claim_story_campaign: {
+        Args: { _slug: string }
+        Returns: {
+          course_id: string
+          delivery_mode: string
+          destination: string
+          status: string
+        }[]
+      }
       lms_cleanup_archive: {
         Args: { _note?: string; _retention_days?: number; _user_ids: string[] }
         Returns: Json
