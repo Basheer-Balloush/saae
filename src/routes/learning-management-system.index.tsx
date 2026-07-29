@@ -287,6 +287,8 @@ function LmsHome() {
                 >
                   <Link
                     to="/learning-management-system/catalog"
+                    search={{ q: "", category: c.slug, level: "", price: "", page: 1 }}
+
                     className="group relative block overflow-hidden rounded-3xl border border-white/20 min-h-[200px] sm:min-h-[220px] p-6 sm:p-7 shadow-lift transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                     style={{ background: surface }}
                   >
