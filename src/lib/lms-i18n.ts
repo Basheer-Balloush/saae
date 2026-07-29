@@ -101,6 +101,10 @@ export const lmsT: Record<Lang, {
   testFailed: string;
   retakeTest: string;
   noTestYet: string;
+  quizNotReady: string;
+  quizNotReadyHint: string;
+  quizLoadError: string;
+  retry: string;
   certificate: string;
   certificateIssued: string;
   viewCertificate: string;
