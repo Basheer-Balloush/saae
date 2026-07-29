@@ -164,6 +164,7 @@ function ApplicationDetail() {
 
   const [bundle, setBundle] = useState<Bundle | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<{ kind: "notfound" | "error"; message: string } | null>(null);
   const [admins, setAdmins] = useState<Array<{ user_id: string; email: string | null }>>([]);
 
   const [nextStatus, setNextStatus] = useState<ApplicationStatus | "">("");
@@ -180,18 +181,29 @@ function ApplicationDetail() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
-      const res = (await getFn({ data: { application_id: appId } })) as Bundle;
+      const res = await getFn({
+        data: { application_id: appId, opportunity_id: opportunityId },
+      });
       setBundle(res);
       setAssignValue(res.application.assigned_admin ?? "__none__");
       setNextStatus("");
       setReason("");
     } catch (err) {
-      toast.error(mapErr(err, lang));
+      const msg = err instanceof Error ? err.message : String(err);
+      const notFound =
+        msg.includes("application_not_found") || msg.includes("P0002");
+      setBundle(null);
+      setLoadError({
+        kind: notFound ? "notfound" : "error",
+        message: mapErr(err, lang),
+      });
     } finally {
       setLoading(false);
     }
-  }, [getFn, appId, lang]);
+  }, [getFn, appId, opportunityId, lang]);
+
 
   useEffect(() => {
     void load();
