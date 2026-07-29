@@ -96,6 +96,26 @@ export const adminListApplications = createServerFn({ method: "POST" })
 
 const IdSchema = z.object({ application_id: z.string().uuid() });
 
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+const JsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(JsonValueSchema),
+    z.record(z.string(), JsonValueSchema),
+  ]),
+);
+
+
 const nullableText = z.string().nullable().catch(null);
 const nullableDate = z.string().nullable().catch(null);
 
