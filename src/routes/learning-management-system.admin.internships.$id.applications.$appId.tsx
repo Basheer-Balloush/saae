@@ -361,32 +361,17 @@ function ApplicationDetail() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 space-y-6" dir={dir}>
-      <div>
-        <Link
-          to="/learning-management-system/admin/internships/$id/applications"
-          params={{ id: opportunityId }}
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
-        >
-          <ArrowLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-          {lang === "ar" ? "العودة إلى الطلبات" : "Back to applications"}
-        </Link>
-      </div>
+      <div>{backLink}</div>
 
       <Card className="p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="text-xs text-muted-foreground" dir="auto">{oppTitle}</div>
             <h1 className="text-2xl font-bold mt-1" dir="auto">
-              {app.snapshot_full_name || (lang === "ar" ? "بدون اسم" : "No name")}
+              {app.snapshot_full_name?.trim() || notProvided(lang)}
             </h1>
-            <div className="text-sm text-muted-foreground mt-1" dir="ltr">
-              {app.snapshot_email} {app.snapshot_phone ? `• ${app.snapshot_phone}` : ""}
-            </div>
-            {app.snapshot_organization && (
-              <div className="text-sm mt-1" dir="auto">{app.snapshot_organization}</div>
-            )}
           </div>
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col items-start sm:items-end gap-2">
             <Badge variant="outline" className="text-sm">{statusLabel(app.status, lang)}</Badge>
             <div className="text-xs text-muted-foreground" dir="ltr">
               {lang === "ar" ? "أُرسل: " : "Submitted: "}
@@ -397,21 +382,46 @@ function ApplicationDetail() {
             </div>
           </div>
         </div>
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Field
+            label={lang === "ar" ? "الاسم الكامل" : "Full name"}
+            value={app.snapshot_full_name}
+            lang={lang}
+          />
+          <Field
+            label={lang === "ar" ? "البريد الإلكتروني" : "Email"}
+            value={app.snapshot_email}
+            lang={lang}
+            ltr
+          />
+          <Field
+            label={lang === "ar" ? "الهاتف" : "Phone"}
+            value={app.snapshot_phone}
+            lang={lang}
+            ltr
+          />
+          <Field
+            label={lang === "ar" ? "الجهة / المؤسسة" : "Organization"}
+            value={app.snapshot_organization}
+            lang={lang}
+          />
+        </div>
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {app.snapshot_biography && (
-            <Card className="p-5">
-              <h2 className="font-semibold mb-2">{t.profileBiography}</h2>
-              <p className="text-sm whitespace-pre-wrap break-words" dir="auto">
-                {app.snapshot_biography}
-              </p>
-            </Card>
-          )}
+          <Card className="p-5">
+            <h2 className="font-semibold mb-2">{t.profileBiography}</h2>
+            <p
+              className={`text-sm whitespace-pre-wrap break-words ${app.snapshot_biography?.trim() ? "" : "italic text-muted-foreground"}`}
+              dir="auto"
+            >
+              {app.snapshot_biography?.trim() || notProvided(lang)}
+            </p>
+          </Card>
 
           <Card className="p-5">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 gap-3">
               <h2 className="font-semibold flex items-center gap-2">
                 <FileText className="h-4 w-4" /> {t.profileCv}
               </h2>
@@ -423,15 +433,20 @@ function ApplicationDetail() {
               )}
             </div>
             {bundle.cv ? (
-              <div className="text-xs text-muted-foreground" dir="ltr">
-                {bundle.cv.original_filename ?? bundle.cv.id} · {Math.round(bundle.cv.size_bytes / 1024)} KB
+              <div className="text-xs text-muted-foreground" dir="auto">
+                {bundle.cv.original_filename?.trim() ||
+                  (lang === "ar" ? "ملف السيرة الذاتية" : "CV file")}
+                {bundle.cv.size_bytes
+                  ? ` · ${Math.max(1, Math.round(bundle.cv.size_bytes / 1024))} KB`
+                  : ""}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">
-                {lang === "ar" ? "لا يوجد سيرة ذاتية مرفقة" : "No CV attached"}
+              <p className="text-sm italic text-muted-foreground">
+                {lang === "ar" ? "لا توجد سيرة ذاتية مرفقة — غير متوفر" : "No CV attached — Not provided"}
               </p>
             )}
           </Card>
+
 
           <Card className="p-5">
             <h2 className="font-semibold mb-3 flex items-center gap-2">
