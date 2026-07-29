@@ -51,6 +51,8 @@ const copy = {
     claiming: "جارٍ تفعيل الدورة…",
     claimError: "تعذّر تفعيل الدورة الآن. حاول مرة أخرى.",
     unavailable: "الحملة غير متاحة حالياً.",
+    loading: "جارٍ التحميل…",
+
   },
   en: {
     heading: "Campaign Story image",
