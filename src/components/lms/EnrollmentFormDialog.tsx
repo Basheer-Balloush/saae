@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/safe-error";
+import { enrollmentErrorMessage } from "@/lib/lms-enrollment-errors";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/ui/upload-progress";
 
@@ -175,19 +176,22 @@ export function EnrollmentFormDialog({
       const answers = [...baseAnswers, ...customAnswers];
 
       // Phase 4 (CF-01): request + answers are written atomically server-side.
-      const { error: rpcErr } = await supabase.rpc("lms_submit_enrollment_request", {
+      const { data: rpcData, error: rpcErr } = await supabase.rpc("lms_submit_enrollment_request", {
         _course_id: courseId,
         _payment_method: "manual",
         _notes: notes || undefined,
         _answers: answers,
       });
       if (rpcErr) throw rpcErr;
+      const requestId = (rpcData as { request_id?: string } | null)?.request_id;
+      if (!requestId) throw new Error("invalid_arguments");
 
       toast.success(ar ? "تم إرسال طلبك. سيتم التواصل معك قريباً." : "Request submitted. We will contact you soon.");
       onSubmitted();
       onOpenChange(false);
     } catch (e) {
-      toast.error(toUserMessage(e));
+      toast.error(enrollmentErrorMessage(e, ar));
+
     } finally {
       setBusy(false);
     }

@@ -16,6 +16,9 @@ export type EnrollmentErrorCode =
   | "request_not_found"
   | "request_not_pending"
   | "invalid_arguments"
+  | "invalid_answers"
+  | "missing_required_fields"
+  | "request_already_pending"
   | "invalid_channel";
 
 const MESSAGES: Record<EnrollmentErrorCode, { ar: string; en: string }> = {
@@ -31,6 +34,9 @@ const MESSAGES: Record<EnrollmentErrorCode, { ar: string; en: string }> = {
   request_not_found: { ar: "الطلب غير موجود", en: "Request not found" },
   request_not_pending: { ar: "تمت معالجة هذا الطلب مسبقاً", en: "This request has already been decided" },
   invalid_arguments: { ar: "بيانات غير صالحة", en: "Invalid data" },
+  invalid_answers: { ar: "بيانات غير صالحة", en: "Invalid data" },
+  missing_required_fields: { ar: "يرجى تعبئة جميع الحقول المطلوبة", en: "Please fill in all required fields" },
+  request_already_pending: { ar: "لديك طلب تسجيل قيد المراجعة لهذه الدورة", en: "You already have a pending request for this course" },
   invalid_channel: { ar: "بيانات غير صالحة", en: "Invalid data" },
 };
 

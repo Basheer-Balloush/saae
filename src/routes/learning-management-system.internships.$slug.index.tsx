@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 
 const detailQueryKey = (slug: string) => ["public-internship", slug] as const;
 
-export const Route = createFileRoute("/learning-management-system/internships/$slug")({
+export const Route = createFileRoute("/learning-management-system/internships/$slug/")({
   loader: async ({ params, context }) => {
     // TanStack Query cache via context.queryClient
     const detail = await context.queryClient.ensureQueryData(

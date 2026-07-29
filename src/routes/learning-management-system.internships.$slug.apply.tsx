@@ -144,7 +144,10 @@ function ApplyPage() {
 
     setSubmitting(true);
     try {
-      await submit({ data: { opportunity_id: ctx.opportunity.id, answers: payload } });
+      const res = await submit({
+        data: { opportunity_id: ctx.opportunity.id, answers: payload },
+      });
+      if (!res?.id) throw new Error("application_not_found");
       toast.success(t.applySubmitted);
       navigate({ to: "/learning-management-system/profile" });
     } catch (err) {
@@ -152,6 +155,7 @@ function ApplyPage() {
     } finally {
       setSubmitting(false);
     }
+
   };
 
   const p = ctx.profile;
