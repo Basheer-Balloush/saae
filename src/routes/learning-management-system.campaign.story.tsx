@@ -13,7 +13,6 @@ const CAMPAIGN_SLUG = "gen-ai-event-2026-07-31";
 const DEFAULT_DESTINATION = "/learning-management-system/student";
 const STORY_PATH = "/learning-management-system/campaign/story";
 
-
 export const Route = createFileRoute("/learning-management-system/campaign/story")({
   head: () => ({
     meta: [
@@ -52,7 +51,6 @@ const copy = {
     claimError: "تعذّر تفعيل الدورة الآن. حاول مرة أخرى.",
     unavailable: "الحملة غير متاحة حالياً.",
     loading: "جارٍ التحميل…",
-
   },
   en: {
     heading: "Campaign Story image",
@@ -70,7 +68,6 @@ const copy = {
     claimError: "We couldn't unlock the course right now. Please try again.",
     unavailable: "This campaign isn't available right now.",
     loading: "Loading…",
-
   },
 } as const;
 
@@ -96,8 +93,6 @@ function CampaignStory() {
       });
     }
   }, [authLoading, user, navigate]);
-
-
 
   const handleShare = async () => {
     setBusy(true);
@@ -169,7 +164,6 @@ function CampaignStory() {
   }
 
   return (
-
     <div className="flex-1 px-4 py-10">
       <div className="mx-auto w-full max-w-sm text-center">
         <h1 className="text-xl font-bold text-foreground">{t.heading}</h1>
