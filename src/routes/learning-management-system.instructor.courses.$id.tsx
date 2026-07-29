@@ -577,14 +577,22 @@ function CourseBuilder() {
         <h2 className="font-bold text-foreground">{lang === "ar" ? "المعلومات الأساسية" : "Basic info"}</h2>
         <div className="grid sm:grid-cols-2 gap-3">
           <div><Label>{lang === "ar" ? "العنوان (عربي)" : "Title (AR)"}</Label>
-            <Input value={course.title_ar} onChange={(e) => update({ title_ar: e.target.value })} /></div>
+            <Input dir="rtl" ref={(el) => { fieldRefs.current.title_ar = el; }} aria-invalid={!!fieldErrors.title_ar}
+              value={course.title_ar} onChange={(e) => update({ title_ar: e.target.value })} />
+            {fieldErrors.title_ar && <p className="mt-1 text-xs text-destructive">{fieldErrors.title_ar}</p>}</div>
           <div><Label>{lang === "ar" ? "العنوان (إنجليزي)" : "Title (EN)"}</Label>
-            <Input value={course.title_en ?? ""} onChange={(e) => update({ title_en: e.target.value })} /></div>
+            <Input dir="ltr" ref={(el) => { fieldRefs.current.title_en = el; }} aria-invalid={!!fieldErrors.title_en}
+              value={course.title_en ?? ""} onChange={(e) => update({ title_en: e.target.value })} />
+            {fieldErrors.title_en && <p className="mt-1 text-xs text-destructive">{fieldErrors.title_en}</p>}</div>
         </div>
         <div><Label>{lang === "ar" ? "الوصف (عربي)" : "Description (AR)"}</Label>
-          <Textarea rows={3} value={course.description_ar ?? ""} onChange={(e) => update({ description_ar: e.target.value })} /></div>
+          <Textarea dir="rtl" rows={3} ref={(el) => { fieldRefs.current.description_ar = el; }} aria-invalid={!!fieldErrors.description_ar}
+            value={course.description_ar ?? ""} onChange={(e) => update({ description_ar: e.target.value })} />
+          {fieldErrors.description_ar && <p className="mt-1 text-xs text-destructive">{fieldErrors.description_ar}</p>}</div>
         <div><Label>{lang === "ar" ? "الوصف (إنجليزي)" : "Description (EN)"}</Label>
-          <Textarea rows={3} value={course.description_en ?? ""} onChange={(e) => update({ description_en: e.target.value })} /></div>
+          <Textarea dir="ltr" rows={3} ref={(el) => { fieldRefs.current.description_en = el; }} aria-invalid={!!fieldErrors.description_en}
+            value={course.description_en ?? ""} onChange={(e) => update({ description_en: e.target.value })} />
+          {fieldErrors.description_en && <p className="mt-1 text-xs text-destructive">{fieldErrors.description_en}</p>}</div>
 
         <div>
           <Label>{lang === "ar" ? "الرابط المخصّص للدورة (Slug)" : "Custom course URL (Slug)"}</Label>
