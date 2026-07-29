@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
+import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { Button } from "@/components/ui/button";
 import { Download, Instagram, Loader2, Share2 } from "lucide-react";
 import storyAsset from "@/assets/saae-story-campaign.jpg.asset.json";
@@ -10,6 +11,7 @@ import { safeLmsRedirect } from "@/lib/lms-redirect";
 
 const CAMPAIGN_SLUG = "gen-ai-event-2026-07-31";
 const DEFAULT_DESTINATION = "/learning-management-system/student";
+const STORY_PATH = "/learning-management-system/campaign/story";
 
 export const Route = createFileRoute("/learning-management-system/campaign/story")({
   head: () => ({
@@ -48,6 +50,7 @@ const copy = {
     claiming: "جارٍ تفعيل الدورة…",
     claimError: "تعذّر تفعيل الدورة الآن. حاول مرة أخرى.",
     unavailable: "الحملة غير متاحة حالياً.",
+    loading: "جارٍ التحميل…",
   },
   en: {
     heading: "Campaign Story image",
@@ -64,18 +67,32 @@ const copy = {
     claiming: "Unlocking your course…",
     claimError: "We couldn't unlock the course right now. Please try again.",
     unavailable: "This campaign isn't available right now.",
+    loading: "Loading…",
   },
 } as const;
 
 function CampaignStory() {
   const { lang } = useLang();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useLmsAuth();
   const t = copy[lang];
+
   const [busy, setBusy] = useState(false);
   const [manual, setManual] = useState(false);
   const [shared, setShared] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
+
+  // Sharing unlocks a course, so the Story step requires a signed-in visitor.
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate({
+        to: "/learning-management-system/campaign",
+        search: { redirect: STORY_PATH },
+        replace: true,
+      });
+    }
+  }, [authLoading, user, navigate]);
 
   const handleShare = async () => {
     setBusy(true);
@@ -136,6 +153,15 @@ function CampaignStory() {
       setClaiming(false);
     }
   };
+
+  if (authLoading || !user) {
+    return (
+      <div className="flex-1 flex items-center justify-center py-24 text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin mx-2" />
+        {t.loading}
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 px-4 py-10">
