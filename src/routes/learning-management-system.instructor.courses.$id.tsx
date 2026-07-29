@@ -35,6 +35,7 @@ import {
   isCourseI18nComplete,
   REQUIRED_COURSE_FIELDS,
   type CourseFieldErrors,
+  type CourseI18nInput,
   type RequiredCourseField,
 } from "@/lib/lms-course-fields";
 
@@ -107,6 +108,12 @@ function CourseBuilder() {
       supabase.from("lms_course_categories").select("category_id").eq("course_id", id),
     ]);
     setCourse(c as Course | null);
+    if (c) {
+      const trimmed = trimCourseI18n(c as CourseI18nInput);
+      originallyFilled.current = Object.fromEntries(
+        REQUIRED_COURSE_FIELDS.map((f) => [f, trimmed[f].length > 0]),
+      ) as Partial<Record<RequiredCourseField, boolean>>;
+    }
     setCategories((cats as Category[]) ?? []);
     setSelectedCategoryIds(((links as { category_id: string }[]) ?? []).map((l) => l.category_id));
     if (c) {
@@ -153,21 +160,41 @@ function CourseBuilder() {
     }
   };
 
-  const saveCourse = async () => {
+  const saveCourse = async (opts?: { requireComplete?: boolean }): Promise<boolean> => {
+    if (saving) return false;
+    // Required bilingual fields. Existing incomplete drafts stay editable, but
+    // a field that already had content may never be emptied, and completing all
+    // four is mandatory before publishing / submitting for review.
+    const requireComplete = opts?.requireComplete || course.status === "published";
+    const allErrors = validateCourseI18n(course, lang);
+    const errors: CourseFieldErrors = requireComplete
+      ? allErrors
+      : Object.fromEntries(
+          REQUIRED_COURSE_FIELDS.filter((f) => allErrors[f] && originallyFilled.current[f]).map((f) => [f, allErrors[f]!]),
+        );
+    setFieldErrors(errors);
+    const firstBad = firstInvalidCourseField(errors);
+    if (firstBad) {
+      fieldRefs.current[firstBad]?.focus();
+      return false;
+    }
+    const i18n = trimCourseI18n(course);
     // Validate slug locally
     const slugVal = (course.slug ?? "").trim();
     if (slugVal && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slugVal)) {
       toast.error(lang === "ar" ? "الرابط يجب أن يحتوي فقط على أحرف إنجليزية صغيرة وأرقام وشرطات" : "Slug may only contain lowercase letters, digits, and hyphens");
-      return;
+      return false;
     }
     if (slugVal && (slugVal.length < 3 || slugVal.length > 60)) {
       toast.error(lang === "ar" ? "طول الرابط يجب أن يكون بين 3 و 60 حرفاً" : "Slug must be between 3 and 60 characters");
-      return;
+      return false;
     }
     setSaving(true);
     const payload: Record<string, unknown> = {
-      title_ar: course.title_ar, title_en: course.title_en,
-      description_ar: course.description_ar, description_en: course.description_en,
+      title_ar: i18n.title_ar || course.title_ar,
+      title_en: i18n.title_en || course.title_en,
+      description_ar: i18n.description_ar || course.description_ar,
+      description_en: i18n.description_en || course.description_en,
       level: course.level as "beginner" | "intermediate" | "advanced",
       cover_url: course.cover_url,
       enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline, max_students: course.max_students,
@@ -187,9 +214,9 @@ function CourseBuilder() {
       if (/duplicate|unique|slug/i.test(msg)) {
         toast.error(lang === "ar" ? "هذا الرابط مستخدم من قِبل دورة أخرى" : "This slug is already used by another course");
       } else {
-        toast.error(msg);
+        toast.error(courseI18nWriteErrorMessage(error.message ?? msg, lang) ?? msg);
       }
-      return;
+      return false;
     }
     // Sync many-to-many categories
     const { data: existing } = await supabase
@@ -217,8 +244,22 @@ function CourseBuilder() {
 
 
   const submitForReview = async () => {
+    if (!isCourseI18nComplete(course)) {
+      const errors = validateCourseI18n(course, lang);
+      setFieldErrors(errors);
+      const firstBad = firstInvalidCourseField(errors);
+      fieldRefs.current[firstBad!]?.focus();
+      toast.error(lang === "ar"
+        ? "يجب إكمال العنوان والوصف بالعربية والإنجليزية قبل الإرسال للمراجعة."
+        : "Complete the Arabic and English title and description before submitting for review.");
+      return;
+    }
     const { error } = await supabase.from("lms_courses").update({ status: "pending" }).eq("id", course.id);
-    if (error) { toast.error(toUserMessage(error)); return; }
+    if (error) {
+      const msg = toUserMessage(error);
+      toast.error(courseI18nWriteErrorMessage(error.message ?? msg, lang) ?? msg);
+      return;
+    }
     setCourse({ ...course, status: "pending" });
     toast.success(lang === "ar" ? "تم الإرسال للمراجعة" : "Submitted for review");
   };
@@ -510,10 +551,16 @@ function CourseBuilder() {
                 {lang === "ar" ? "بانتظار المراجعة" : "Pending review"}
               </span>
             ) : (
-              <Button onClick={async () => { await saveCourse(); await submitForReview(); }} disabled={saving}>
+              <>
+              <Button onClick={() => saveCourse()} variant="outline" disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
+                {lang === "ar" ? "حفظ" : "Save"}
+              </Button>
+              <Button onClick={async () => { if (await saveCourse({ requireComplete: true })) await submitForReview(); }} disabled={saving}>
                 {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Send className="h-4 w-4 mx-1" />}
                 {lang === "ar" ? "إرسال للمراجعة" : "Submit for review"}
               </Button>
+              </>
             )}
             <Button variant="destructive" onClick={() => setConfirmDeleteCourse(true)} disabled={deletingCourse}>
               <Trash2 className="h-4 w-4 mx-1" />
