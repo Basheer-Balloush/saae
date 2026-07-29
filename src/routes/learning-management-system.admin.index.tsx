@@ -175,29 +175,36 @@ function AdminHome() {
 
   // ---- Admin create course on behalf of an approved instructor ----
   const [newCourseOpen, setNewCourseOpen] = useState(false);
-  const [newCourse, setNewCourse] = useState({ title_ar: "", title_en: "", instructor_id: "" });
+  const [newCourse, setNewCourse] = useState({ title_ar: "", title_en: "", description_ar: "", description_en: "", instructor_id: "" });
+  const [courseErrors, setCourseErrors] = useState<CourseFieldErrors>({});
+  const courseFieldRefs = useRef<Partial<Record<RequiredCourseField, HTMLInputElement | HTMLTextAreaElement | null>>>({});
   const [creatingCourse, setCreatingCourse] = useState(false);
   const createCourse = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCourse.title_ar.trim() || !newCourse.instructor_id) return;
+    if (creatingCourse || !newCourse.instructor_id) return;
+    const nextErrors = validateCourseI18n(newCourse, lang);
+    setCourseErrors(nextErrors);
+    const firstBad = firstInvalidCourseField(nextErrors);
+    if (firstBad) { courseFieldRefs.current[firstBad]?.focus(); return; }
     setCreatingCourse(true);
     const { data, error } = await supabase
       .from("lms_courses")
       .insert({
         instructor_id: newCourse.instructor_id,
-        title_ar: newCourse.title_ar.trim(),
-        title_en: newCourse.title_en.trim() || null,
+        ...trimCourseI18n(newCourse),
       })
       .select("id")
       .maybeSingle();
     setCreatingCourse(false);
     if (error) {
-      toast.error(toUserMessage(error));
+      const msg = toUserMessage(error);
+      toast.error(courseI18nWriteErrorMessage(error.message ?? msg, lang) ?? msg);
       return;
     }
     toast.success(ar ? "تم إنشاء الدورة" : "Course created");
     setNewCourseOpen(false);
-    setNewCourse({ title_ar: "", title_en: "", instructor_id: "" });
+    setNewCourse({ title_ar: "", title_en: "", description_ar: "", description_en: "", instructor_id: "" });
+    setCourseErrors({});
     if (data) window.location.href = `/learning-management-system/instructor/courses/${data.id}`;
   };
 
