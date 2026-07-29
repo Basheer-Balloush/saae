@@ -159,7 +159,17 @@ function CampaignStory() {
     }
   };
 
+  if (authLoading || !user) {
+    return (
+      <div className="flex-1 flex items-center justify-center py-24 text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin mx-2" />
+        {t.loading}
+      </div>
+    );
+  }
+
   return (
+
     <div className="flex-1 px-4 py-10">
       <div className="mx-auto w-full max-w-sm text-center">
         <h1 className="text-xl font-bold text-foreground">{t.heading}</h1>
