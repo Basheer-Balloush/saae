@@ -42,7 +42,6 @@ BEGIN
 
   PERFORM set_config('request.jwt.claims',
     json_build_object('sub', v_admin::text, 'role', 'authenticated')::text, true);
-  SET LOCAL ROLE authenticated;
 
   -- all sort modes must execute and return both rows with correct types
   FOREACH v_sort IN ARRAY ARRAY['submitted_desc','submitted_asc','name_asc','status'] LOOP
@@ -90,24 +89,20 @@ BEGIN
   ) x;
   IF v_rows <> 2 THEN RAISE EXCEPTION 'pagination distinct ids = %', v_rows; END IF;
 
-  RESET ROLE;
   RAISE NOTICE 'PASS: admin_list_internship_applications regression';
 END $$;
 
-RESET ROLE;
 
 -- non-admin rejection
 DO $$
 DECLARE v_ok boolean := false;
 BEGIN
   PERFORM set_config('request.jwt.claims', json_build_object('sub', gen_random_uuid()::text, 'role', 'authenticated')::text, true);
-  SET LOCAL ROLE authenticated;
   BEGIN
     PERFORM * FROM public.admin_list_internship_applications(gen_random_uuid());
   EXCEPTION WHEN OTHERS THEN
     v_ok := true;
   END;
-  RESET ROLE;
   IF NOT v_ok THEN RAISE EXCEPTION 'non-admin was not rejected'; END IF;
   RAISE NOTICE 'PASS: non-admin rejected';
 END $$;
