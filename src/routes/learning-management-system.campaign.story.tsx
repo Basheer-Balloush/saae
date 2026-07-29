@@ -102,12 +102,38 @@ function CampaignStory() {
           className="mt-6 w-full aspect-[9/16] object-cover rounded-2xl border border-border shadow-soft"
         />
 
-        <Button asChild className="mt-6 w-full">
-          <a href={storyAsset.url} download="saae-story.jpg">
-            <Download className="h-4 w-4 mx-2" />
-            {t.save}
-          </a>
+        <Button className="mt-6 w-full" onClick={handleShare} disabled={busy}>
+          <Share2 className="h-4 w-4 mx-2" />
+          {busy ? t.sharing : t.share}
         </Button>
+
+        {shared && (
+          <p className="mt-3 text-sm font-medium text-primary">{t.done}</p>
+        )}
+
+        {manual && (
+          <p className="mt-3 text-sm text-muted-foreground">{t.manual}</p>
+        )}
+
+        <div className="mt-3 grid gap-2">
+          <Button asChild variant="outline" className="w-full">
+            <a href={storyAsset.url} download="saae-story.jpg">
+              <Download className="h-4 w-4 mx-2" />
+              {t.save}
+            </a>
+          </Button>
+          <Button asChild variant="ghost" className="w-full">
+            <a
+              href="https://www.instagram.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Instagram className="h-4 w-4 mx-2" />
+              {t.openInstagram}
+            </a>
+          </Button>
+        </div>
+
       </div>
     </div>
   );
