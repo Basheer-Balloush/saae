@@ -96,6 +96,7 @@ function CampaignStory() {
   const [shared, setShared] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
+  const [claimDone, setClaimDone] = useState<string | null>(null);
 
   // Sharing unlocks a course, so the Story step requires a signed-in visitor.
   useEffect(() => {
