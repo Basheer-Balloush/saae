@@ -65,7 +65,7 @@ function LmsSignup() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [asInstructor, setAsInstructor] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [result, setResult] = useState<{ email: string; confirmationRequired: boolean } | null>(null);
   const signUpUser = useServerFn(signUpLmsUser);
 
   const passwordStrength = useMemo(() => scorePasswordStrength(password), [password]);
@@ -95,9 +95,11 @@ function LmsSignup() {
     }
     setSubmitting(true);
     try {
-      await signUpUser({ data: { fullName: parsed.data.fullName, email: parsed.data.email, password: parsed.data.password, asInstructor, lang } });
-      setSentTo(parsed.data.email);
-      toast.success(tr.signedUp);
+      const res = await signUpUser({ data: { fullName: parsed.data.fullName, email: parsed.data.email, password: parsed.data.password, asInstructor, lang } });
+      // The server is the single source of truth for whether confirmation is required.
+      const confirmationRequired = res?.confirmationRequired !== false;
+      setResult({ email: res?.email ?? parsed.data.email, confirmationRequired });
+      toast.success(confirmationRequired ? tr.signedUp : tr.signedUpConfirmed);
     } catch (err: unknown) {
       toast.error(localizeAuthError(err, lang, tr.authFailed));
     } finally {
@@ -120,21 +122,34 @@ function LmsSignup() {
         <h1 className="mt-3 text-xl font-bold text-foreground text-center">{tr.signUpTitle}</h1>
         <p className="mt-1 text-sm text-muted-foreground text-center">{tr.signUpSubtitle}</p>
 
-        {sentTo ? (
+        {result ? (
           <div className="mt-6 flex flex-col items-center text-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-5">
             <div className="rounded-full bg-primary/10 p-3">
               <MailCheck className="h-7 w-7 text-primary" />
             </div>
             <h2 className="text-base font-semibold text-foreground">
-              {lang === "ar" ? "تم إنشاء حسابك" : "Your account is ready"}
+              {result.confirmationRequired
+                ? (lang === "ar" ? "تحقّق من بريدك الإلكتروني" : "Check your email")
+                : (lang === "ar" ? "تم إنشاء حسابك" : "Your account is ready")}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {lang === "ar" ? "تم تفعيل الحساب" : "We activated the account for"}{" "}
-              <span className="font-semibold text-foreground" dir="ltr">{sentTo}</span>
-              {". "}
-              {lang === "ar"
-                ? "يمكنك تسجيل الدخول مباشرة."
-                : "You can sign in right away."}
+              {result.confirmationRequired ? (
+                <>
+                  {lang === "ar" ? "أرسلنا رابط تأكيد إلى" : "We sent a confirmation link to"}{" "}
+                  <span className="font-semibold text-foreground" dir="ltr">{result.email}</span>
+                  {". "}
+                  {lang === "ar"
+                    ? "افتح الرابط لتأكيد بريدك قبل تسجيل الدخول."
+                    : "Open the link to confirm your email before signing in."}
+                </>
+              ) : (
+                <>
+                  {lang === "ar" ? "تم تفعيل الحساب" : "We activated the account for"}{" "}
+                  <span className="font-semibold text-foreground" dir="ltr">{result.email}</span>
+                  {". "}
+                  {lang === "ar" ? "يمكنك تسجيل الدخول مباشرة." : "You can sign in right away."}
+                </>
+              )}
             </p>
 
             {asInstructor && (

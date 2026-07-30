@@ -97,12 +97,89 @@ function getActionLink(data: unknown) {
   return actionLink
 }
 
-export async function signUpWithResendConfirmation(input: SignupInput) {
+/**
+ * Trusted, server-only read of the LMS email-confirmation switch.
+ * Fails closed: any error / missing row / non-boolean value ⇒ confirmation required.
+ * Flip it with:
+ *   UPDATE public.lms_settings SET email_confirmation_required = true, updated_at = now() WHERE id = true;
+ */
+export async function isEmailConfirmationRequired(): Promise<boolean> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('lms_settings')
+      .select('email_confirmation_required')
+      .eq('id', true)
+      .maybeSingle()
+
+    if (error) {
+      console.error('lms_settings lookup failed — failing closed', { message: error.message })
+      return true
+    }
+    const value = (data as { email_confirmation_required?: unknown } | null)?.email_confirmation_required
+    return typeof value === 'boolean' ? value : true
+  } catch (e) {
+    console.error('lms_settings lookup threw — failing closed', { message: e instanceof Error ? e.message : String(e) })
+    return true
+  }
+}
+
+async function assignLmsRoles(userId: string, input: SignupInput) {
+  const { error: roleError } = await supabaseAdmin
+    .from('user_roles')
+    .upsert({ user_id: userId, role: 'lms_student' }, { onConflict: 'user_id,role', ignoreDuplicates: true })
+
+  if (roleError) console.error('Failed to assign LMS student role', { error: roleError.message, userId })
+
+  if (input.asInstructor) {
+    const { error: instructorError } = await supabaseAdmin
+      .from('lms_instructors')
+      .upsert({ user_id: userId, full_name: input.fullName, approved: false }, { onConflict: 'user_id' })
+
+    if (instructorError) console.error('Failed to create LMS instructor request', { error: instructorError.message, userId })
+  }
+}
+
+function mapSignupError(error: { code?: string; status?: number; message: string }): never {
+  const code = (error as { code?: string }).code
+  const status = (error as { status?: number }).status
+  if (code === 'email_exists' || status === 422 || /already.*registered/i.test(error.message)) {
+    throw new Error('EMAIL_ALREADY_REGISTERED')
+  }
+  // Never leak raw provider error text to the client.
+  console.error('signup failed', { code, status, message: error.message })
+  throw new Error('SIGNUP_FAILED')
+}
+
+export type CreateAccountResult = { sentTo: string; email: string; confirmationRequired: boolean }
+
+/**
+ * Account creation service. Behaviour depends solely on the server-side
+ * `lms_settings.email_confirmation_required` switch — never on client input.
+ */
+export async function createLmsAccount(input: SignupInput): Promise<CreateAccountResult> {
   const email = input.email.trim().toLowerCase()
   const redirectTo = `${SITE_URL}/learning-management-system/student`
 
   // Phase 7A — bound signup abuse per normalized email. Six attempts per 15 min.
   await enforceRateLimit('signup', email, 6, 900)
+
+  const confirmationRequired = await isEmailConfirmationRequired()
+
+  if (!confirmationRequired) {
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password: input.password,
+      email_confirm: true,
+      user_metadata: { full_name: input.fullName, lang: input.lang },
+    })
+
+    if (error) mapSignupError(error as never)
+
+    const userId = data.user?.id
+    if (userId) await assignLmsRoles(userId, input)
+
+    return { sentTo: email, email, confirmationRequired: false }
+  }
 
   const { data, error } = await supabaseAdmin.auth.admin.generateLink({
     type: 'signup',
@@ -114,33 +191,10 @@ export async function signUpWithResendConfirmation(input: SignupInput) {
     },
   })
 
-  if (error) {
-    const code = (error as { code?: string }).code
-    const status = (error as { status?: number }).status
-    if (code === 'email_exists' || status === 422 || /already.*registered/i.test(error.message)) {
-      throw new Error('EMAIL_ALREADY_REGISTERED')
-    }
-    // Never leak raw provider error text to the client.
-    console.error('signup generateLink failed', { code, status, message: error.message })
-    throw new Error('SIGNUP_FAILED')
-  }
+  if (error) mapSignupError(error as never)
 
   const userId = data.user?.id
-  if (userId) {
-    const { error: roleError } = await supabaseAdmin
-      .from('user_roles')
-      .upsert({ user_id: userId, role: 'lms_student' }, { onConflict: 'user_id,role', ignoreDuplicates: true })
-
-    if (roleError) console.error('Failed to assign LMS student role', { error: roleError.message, userId })
-
-    if (input.asInstructor) {
-      const { error: instructorError } = await supabaseAdmin
-        .from('lms_instructors')
-        .upsert({ user_id: userId, full_name: input.fullName, approved: false }, { onConflict: 'user_id' })
-
-      if (instructorError) console.error('Failed to create LMS instructor request', { error: instructorError.message, userId })
-    }
-  }
+  if (userId) await assignLmsRoles(userId, input)
 
   const confirmationUrl = getActionLink(data)
   const siteName = SITE_NAMES[input.lang]
@@ -160,8 +214,12 @@ export async function signUpWithResendConfirmation(input: SignupInput) {
     ...rendered,
   })
 
-  return { sentTo: email }
+  return { sentTo: email, email, confirmationRequired: true }
 }
+
+/** Back-compat alias for the previous export name. */
+export const signUpWithResendConfirmation = createLmsAccount
+
 
 export async function sendPasswordResetWithResend(input: ResetInput) {
   const email = input.email.trim().toLowerCase()

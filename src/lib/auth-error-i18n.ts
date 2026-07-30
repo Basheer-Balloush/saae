@@ -61,7 +61,43 @@ const MAP: Array<{ match: RegExp; ar: string; en: string }> = [
   },
 ];
 
+// Stable Supabase auth error codes take priority over English message matching.
+const CODE_MAP: Record<string, { ar: string; en: string }> = {
+  invalid_credentials: {
+    ar: "بيانات تسجيل الدخول غير صحيحة",
+    en: "Invalid login credentials",
+  },
+  email_not_confirmed: {
+    ar: "لم يتمّ تأكيد البريد الإلكترونيّ بعد",
+    en: "Email not confirmed",
+  },
+  email_exists: {
+    ar: "هذا البريد الإلكترونيّ مسجَّل مسبقاً — سجّل الدخول بدلاً من إنشاء حساب جديد",
+    en: "This email is already registered — please log in instead",
+  },
+  user_already_exists: {
+    ar: "هذا البريد الإلكترونيّ مسجَّل مسبقاً — سجّل الدخول بدلاً من إنشاء حساب جديد",
+    en: "This email is already registered — please log in instead",
+  },
+  weak_password: {
+    ar: "كلمة المرور ضعيفة — استخدم أحرفاً كبيرة وصغيرة وأرقام ورموز",
+    en: "Password is too weak — use uppercase, lowercase, numbers and symbols",
+  },
+  over_request_rate_limit: {
+    ar: "محاولات كثيرة جداً، يرجى الانتظار قبل المحاولة مرّة أخرى",
+    en: "Too many attempts — please wait a few minutes before trying again",
+  },
+  over_email_send_rate_limit: {
+    ar: "محاولات كثيرة جداً، يرجى الانتظار قبل المحاولة مرّة أخرى",
+    en: "Too many attempts — please wait a few minutes before trying again",
+  },
+};
+
 export function localizeAuthError(err: unknown, lang: Lang, fallback: string): string {
+  const code = typeof err === "object" && err !== null ? (err as { code?: unknown }).code : undefined;
+  if (typeof code === "string" && CODE_MAP[code]) {
+    return lang === "ar" ? CODE_MAP[code].ar : CODE_MAP[code].en;
+  }
   const msg = err instanceof Error ? err.message : typeof err === "string" ? err : "";
   for (const entry of MAP) {
     if (entry.match.test(msg)) return lang === "ar" ? entry.ar : entry.en;

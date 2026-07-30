@@ -3053,6 +3053,7 @@ export type Database = {
         Row: {
           commission_pct: number
           currency: string
+          email_confirmation_required: boolean
           id: boolean
           min_payout: number
           updated_at: string
@@ -3060,6 +3061,7 @@ export type Database = {
         Insert: {
           commission_pct?: number
           currency?: string
+          email_confirmation_required?: boolean
           id?: boolean
           min_payout?: number
           updated_at?: string
@@ -3067,6 +3069,7 @@ export type Database = {
         Update: {
           commission_pct?: number
           currency?: string
+          email_confirmation_required?: boolean
           id?: boolean
           min_payout?: number
           updated_at?: string
