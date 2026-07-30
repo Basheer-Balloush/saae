@@ -33,6 +33,13 @@ type Campaign = {
   allow_download_fallback: boolean;
 };
 
+type PublishedCourse = {
+  id: string;
+  slug: string | null;
+  title_ar: string;
+  title_en: string | null;
+};
+
 // <input type="datetime-local"> works in local time without a zone suffix.
 const toLocalInput = (iso: string | null) => (iso ? new Date(iso).toISOString().slice(0, 16) : "");
 const fromLocalInput = (value: string) => (value ? new Date(value).toISOString() : null);
