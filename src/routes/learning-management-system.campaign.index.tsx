@@ -76,7 +76,8 @@ function CampaignEntry() {
     );
   }
 
-  const authSearch = { redirect: `${CAMPAIGN_PATH}?redirect=${encodeURIComponent(target)}` };
+  // Send the user straight back to the intended campaign page after auth.
+  const authSearch = { redirect: target };
 
   return (
     <div className="flex-1 flex items-center justify-center px-6 py-20">
