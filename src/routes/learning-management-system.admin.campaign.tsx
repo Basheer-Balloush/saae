@@ -193,13 +193,27 @@ function AdminCampaign() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="course">{ar ? "الدورة (معرّف أو slug)" : "Course (ID or slug)"}</Label>
-            <Input
+            <Label htmlFor="course">{ar ? "الدورة المرتبطة" : "Assigned course"}</Label>
+            <select
               id="course"
-              dir="ltr"
-              value={campaign.course_ref ?? ""}
-              onChange={(e) => set("course_ref", e.target.value)}
-            />
+              dir={ar ? "rtl" : "ltr"}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              value={courses.some((c) => c.id === campaign.course_ref) ? campaign.course_ref! : ""}
+              onChange={(e) => set("course_ref", e.target.value || null)}
+            >
+              <option value="">{ar ? "— بدون دورة —" : "— No course —"}</option>
+              {courses.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {(ar ? c.title_ar : c.title_en || c.title_ar) || c.slug} ({c.slug})
+                </option>
+              ))}
+            </select>
+            {campaign.course_ref && !courses.some((c) => c.id === campaign.course_ref) && (
+              <p className="text-xs text-muted-foreground" dir="ltr">
+                {ar ? "القيمة المحفوظة حالياً: " : "Currently stored value: "}
+                {campaign.course_ref}
+              </p>
+            )}
           </div>
         </div>
 
