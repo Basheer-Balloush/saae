@@ -7,7 +7,7 @@ import { Loader2, LogIn, UserPlus } from "lucide-react";
 import { safeLmsRedirect } from "@/lib/lms-redirect";
 import logo from "@/assets/saae-logo.png";
 
-const CAMPAIGN_PATH = "/learning-management-system/campaign";
+
 const CHOICE_PATH = "/learning-management-system/campaign/choice";
 
 export const Route = createFileRoute("/learning-management-system/campaign/")({
