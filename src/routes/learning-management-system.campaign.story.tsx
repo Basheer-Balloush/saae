@@ -174,7 +174,6 @@ function CampaignStory() {
     }
   };
 
-
   if (authLoading || !user) {
     return (
       <div className="flex-1 flex items-center justify-center py-24 text-muted-foreground">
