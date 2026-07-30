@@ -41,6 +41,7 @@ function AdminCampaign() {
   const { lang } = useLang();
   const ar = lang === "ar";
   const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [courses, setCourses] = useState<PublishedCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
