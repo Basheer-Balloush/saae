@@ -232,6 +232,9 @@ function CampaignStory() {
           {claiming ? t.claiming : t.claim}
         </Button>
 
+        {claimDone && !claimError && (
+          <p className="mt-3 text-sm font-medium text-primary">{claimDone}</p>
+        )}
         {claimError && <p className="mt-3 text-sm text-destructive">{claimError}</p>}
       </div>
     </div>
