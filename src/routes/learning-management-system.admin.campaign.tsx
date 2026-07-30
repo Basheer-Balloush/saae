@@ -66,6 +66,12 @@ function AdminCampaign() {
       .maybeSingle();
     if (err) setError(toUserMessage(err));
     else setCampaign((data as Campaign) ?? null);
+    const { data: cs } = await supabase
+      .from("lms_courses")
+      .select("id, slug, title_ar, title_en")
+      .eq("status", "published")
+      .order("title_ar");
+    setCourses((cs as PublishedCourse[] | null) ?? []);
     setLoading(false);
   };
 
