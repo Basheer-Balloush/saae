@@ -4505,6 +4505,10 @@ export type Database = {
         Args: { p_file_id: string }
         Returns: string
       }
+      storage_lms_media_is_public_safe: {
+        Args: { _metadata: Json; _name: string }
+        Returns: boolean
+      }
       submit_internship_application: {
         Args: { _answers?: Json; _opportunity_id: string }
         Returns: string
