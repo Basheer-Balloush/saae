@@ -33,6 +33,13 @@ type Campaign = {
   allow_download_fallback: boolean;
 };
 
+type PublishedCourse = {
+  id: string;
+  slug: string | null;
+  title_ar: string;
+  title_en: string | null;
+};
+
 // <input type="datetime-local"> works in local time without a zone suffix.
 const toLocalInput = (iso: string | null) => (iso ? new Date(iso).toISOString().slice(0, 16) : "");
 const fromLocalInput = (value: string) => (value ? new Date(value).toISOString() : null);
@@ -41,6 +48,7 @@ function AdminCampaign() {
   const { lang } = useLang();
   const ar = lang === "ar";
   const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [courses, setCourses] = useState<PublishedCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +66,12 @@ function AdminCampaign() {
       .maybeSingle();
     if (err) setError(toUserMessage(err));
     else setCampaign((data as Campaign) ?? null);
+    const { data: cs } = await supabase
+      .from("lms_courses")
+      .select("id, slug, title_ar, title_en")
+      .eq("status", "published")
+      .order("title_ar");
+    setCourses((cs as PublishedCourse[] | null) ?? []);
     setLoading(false);
   };
 
@@ -193,13 +207,27 @@ function AdminCampaign() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="course">{ar ? "الدورة (معرّف أو slug)" : "Course (ID or slug)"}</Label>
-            <Input
+            <Label htmlFor="course">{ar ? "الدورة المرتبطة" : "Assigned course"}</Label>
+            <select
               id="course"
-              dir="ltr"
-              value={campaign.course_ref ?? ""}
-              onChange={(e) => set("course_ref", e.target.value)}
-            />
+              dir={ar ? "rtl" : "ltr"}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              value={courses.some((c) => c.id === campaign.course_ref) ? campaign.course_ref! : ""}
+              onChange={(e) => set("course_ref", e.target.value || null)}
+            >
+              <option value="">{ar ? "— بدون دورة —" : "— No course —"}</option>
+              {courses.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {(ar ? c.title_ar : c.title_en || c.title_ar) || c.slug} ({c.slug})
+                </option>
+              ))}
+            </select>
+            {campaign.course_ref && !courses.some((c) => c.id === campaign.course_ref) && (
+              <p className="text-xs text-muted-foreground" dir="ltr">
+                {ar ? "القيمة المحفوظة حالياً: " : "Currently stored value: "}
+                {campaign.course_ref}
+              </p>
+            )}
           </div>
         </div>
 

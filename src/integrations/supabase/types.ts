@@ -4163,9 +4163,11 @@ export type Database = {
       lms_claim_story_campaign: {
         Args: { _slug: string }
         Returns: {
+          already_enrolled: boolean
           course_id: string
-          delivery_mode: string
+          created: boolean
           destination: string
+          enrollment_id: string
           status: string
         }[]
       }

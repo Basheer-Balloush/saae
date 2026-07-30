@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Instagram, Loader2, Share2 } from "lucide-react";
 import storyAsset from "@/assets/saae-story-campaign.jpg.asset.json";
 import { supabase } from "@/integrations/supabase/client";
-import { courseDestination } from "@/lib/lms-course-destination";
+
 import { safeLmsRedirect } from "@/lib/lms-redirect";
 
 const CAMPAIGN_SLUG = "gen-ai-event-2026-07-31";
@@ -46,10 +46,17 @@ const copy = {
     manual:
       "المشاركة المباشرة غير متاحة على هذا الجهاز. احفظ الصورة ثم افتح إنستغرام وأضفها إلى الستوري.",
     done: "تمت المشاركة! تابع للحصول على الدورة.",
-    claim: "لقد شاركت الصورة — تابع إلى الدورة",
-    claiming: "جارٍ تفعيل الدورة…",
-    claimError: "تعذّر تفعيل الدورة الآن. حاول مرة أخرى.",
+    claim: "لقد شاركت الصورة — أضف الدورة إلى دوراتي",
+    claiming: "جارٍ إضافة الدورة إلى دوراتي…",
+    claimError: "تعذّر إضافة الدورة الآن. حاول مرة أخرى.",
     unavailable: "الحملة غير متاحة حالياً.",
+    notConfigured: "لم يتم تعيين دورة لهذه الحملة بعد.",
+    courseUnavailable: "الدورة غير متاحة حالياً.",
+    enrollmentClosed: "التسجيل في هذه الدورة مغلق حالياً.",
+    deadlinePassed: "انتهى الموعد النهائي للتسجيل في هذه الدورة.",
+    courseFull: "اكتمل عدد المقاعد في هذه الدورة.",
+    added: "تمت إضافة الدورة إلى دوراتك",
+    alreadyAdded: "الدورة موجودة بالفعل في دوراتك",
     loading: "جارٍ التحميل…",
   },
   en: {
@@ -63,10 +70,17 @@ const copy = {
     manual:
       "Direct sharing isn't available on this device. Save the image, then open Instagram and add it to your Story.",
     done: "Shared! Continue to get your course.",
-    claim: "I shared it — continue to my course",
-    claiming: "Unlocking your course…",
-    claimError: "We couldn't unlock the course right now. Please try again.",
+    claim: "I shared the image — add the course to My Courses",
+    claiming: "Adding the course to My Courses…",
+    claimError: "We couldn't add the course right now. Please try again.",
     unavailable: "This campaign isn't available right now.",
+    notConfigured: "No course has been assigned to this campaign yet.",
+    courseUnavailable: "This course isn't available right now.",
+    enrollmentClosed: "Enrollment for this course is currently closed.",
+    deadlinePassed: "The enrollment deadline for this course has passed.",
+    courseFull: "This course has reached its capacity.",
+    added: "The course was added to My Courses",
+    alreadyAdded: "This course is already in My Courses",
     loading: "Loading…",
   },
 } as const;
@@ -82,6 +96,7 @@ function CampaignStory() {
   const [shared, setShared] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
+  const [claimDone, setClaimDone] = useState<string | null>(null);
 
   // Sharing unlocks a course, so the Story step requires a signed-in visitor.
   useEffect(() => {
@@ -121,10 +136,13 @@ function CampaignStory() {
     }
   };
 
-  // Idempotent: grants the free campaign course (if configured) and routes onward.
+  // Explicit self-attestation: the server resolves the campaign course, enrolls
+  // idempotently, and we only navigate on a confirmed success status.
   const handleClaim = async () => {
+    if (claiming) return;
     setClaiming(true);
     setClaimError(null);
+    setClaimDone(null);
     try {
       const { data, error } = await supabase.rpc("lms_claim_story_campaign", {
         _slug: CAMPAIGN_SLUG,
@@ -133,20 +151,22 @@ function CampaignStory() {
       const row = Array.isArray(data) ? data[0] : data;
       if (!row) throw new Error("empty");
 
-      if (row.status === "campaign_unavailable") {
-        setClaimError(t.unavailable);
+      const failures: Record<string, string> = {
+        campaign_unavailable: t.unavailable,
+        campaign_not_configured: t.notConfigured,
+        course_unavailable: t.courseUnavailable,
+        enrollment_closed: t.enrollmentClosed,
+        enrollment_deadline_passed: t.deadlinePassed,
+        course_full: t.courseFull,
+      };
+
+      if (row.status === "enrolled" || row.status === "already_enrolled") {
+        setClaimDone(row.status === "already_enrolled" ? t.alreadyAdded : t.added);
+        navigate({ to: safeLmsRedirect(row.destination) ?? DEFAULT_DESTINATION });
         return;
       }
 
-      if (row.course_id) {
-        const dest = courseDestination(row.course_id, row.delivery_mode);
-        navigate(dest);
-        return;
-      }
-
-      navigate({
-        to: safeLmsRedirect(row.destination) ?? DEFAULT_DESTINATION,
-      });
+      setClaimError(failures[row.status] ?? t.claimError);
     } catch {
       setClaimError(t.claimError);
     } finally {
@@ -211,6 +231,9 @@ function CampaignStory() {
           {claiming ? t.claiming : t.claim}
         </Button>
 
+        {claimDone && !claimError && (
+          <p className="mt-3 text-sm font-medium text-primary">{claimDone}</p>
+        )}
         {claimError && <p className="mt-3 text-sm text-destructive">{claimError}</p>}
       </div>
     </div>
