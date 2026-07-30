@@ -135,10 +135,13 @@ function CampaignStory() {
     }
   };
 
-  // Idempotent: grants the free campaign course (if configured) and routes onward.
+  // Explicit self-attestation: the server resolves the campaign course, enrolls
+  // idempotently, and we only navigate on a confirmed success status.
   const handleClaim = async () => {
+    if (claiming) return;
     setClaiming(true);
     setClaimError(null);
+    setClaimDone(null);
     try {
       const { data, error } = await supabase.rpc("lms_claim_story_campaign", {
         _slug: CAMPAIGN_SLUG,
@@ -147,26 +150,29 @@ function CampaignStory() {
       const row = Array.isArray(data) ? data[0] : data;
       if (!row) throw new Error("empty");
 
-      if (row.status === "campaign_unavailable") {
-        setClaimError(t.unavailable);
+      const failures: Record<string, string> = {
+        campaign_unavailable: t.unavailable,
+        campaign_not_configured: t.notConfigured,
+        course_unavailable: t.courseUnavailable,
+        enrollment_closed: t.enrollmentClosed,
+        enrollment_deadline_passed: t.deadlinePassed,
+        course_full: t.courseFull,
+      };
+
+      if (row.status === "enrolled" || row.status === "already_enrolled") {
+        setClaimDone(row.status === "already_enrolled" ? t.alreadyAdded : t.added);
+        navigate({ to: safeLmsRedirect(row.destination) ?? DEFAULT_DESTINATION });
         return;
       }
 
-      if (row.course_id) {
-        const dest = courseDestination(row.course_id, row.delivery_mode);
-        navigate(dest);
-        return;
-      }
-
-      navigate({
-        to: safeLmsRedirect(row.destination) ?? DEFAULT_DESTINATION,
-      });
+      setClaimError(failures[row.status] ?? t.claimError);
     } catch {
       setClaimError(t.claimError);
     } finally {
       setClaiming(false);
     }
   };
+
 
   if (authLoading || !user) {
     return (
