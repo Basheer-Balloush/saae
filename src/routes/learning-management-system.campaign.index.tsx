@@ -7,7 +7,7 @@ import { Loader2, LogIn, UserPlus } from "lucide-react";
 import { safeLmsRedirect } from "@/lib/lms-redirect";
 import logo from "@/assets/saae-logo.png";
 
-const CAMPAIGN_PATH = "/learning-management-system/campaign";
+
 const CHOICE_PATH = "/learning-management-system/campaign/choice";
 
 export const Route = createFileRoute("/learning-management-system/campaign/")({
@@ -76,7 +76,8 @@ function CampaignEntry() {
     );
   }
 
-  const authSearch = { redirect: `${CAMPAIGN_PATH}?redirect=${encodeURIComponent(target)}` };
+  // Send the user straight back to the intended campaign page after auth.
+  const authSearch = { redirect: target };
 
   return (
     <div className="flex-1 flex items-center justify-center px-6 py-20">
