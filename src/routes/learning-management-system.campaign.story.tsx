@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Instagram, Loader2, Share2 } from "lucide-react";
 import storyAsset from "@/assets/saae-story-campaign.jpg.asset.json";
 import { supabase } from "@/integrations/supabase/client";
-import { courseDestination } from "@/lib/lms-course-destination";
+
 import { safeLmsRedirect } from "@/lib/lms-redirect";
 
 const CAMPAIGN_SLUG = "gen-ai-event-2026-07-31";
