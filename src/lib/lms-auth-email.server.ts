@@ -220,6 +220,42 @@ export async function createLmsAccount(input: SignupInput): Promise<CreateAccoun
 /** Back-compat alias for the previous export name. */
 export const signUpWithResendConfirmation = createLmsAccount
 
+/**
+ * Re-send the signup confirmation link.
+ * Enumeration-safe: always returns the same shape, whatever the account state.
+ * No-ops when the server-side switch has confirmation disabled (accounts are
+ * already active in that mode). Delegates the send to Supabase Auth so the
+ * user's password is never touched; the auth email hook renders the same
+ * localized SignupEmail template through Resend.
+ */
+export async function resendLmsConfirmation(input: ResetInput) {
+  const email = input.email.trim().toLowerCase()
+
+  if (!(await isEmailConfirmationRequired())) return { sent: true }
+
+  try {
+    await enforceRateLimit('resend', email, 3, 900)
+  } catch {
+    return { sent: true }
+  }
+
+  const { error } = await supabaseAdmin.auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: `${SITE_URL}/learning-management-system/student` },
+  })
+
+  if (error) {
+    // Includes "already confirmed" / "not found" — never leak that to the client.
+    console.error('resend confirmation failed', { message: error.message })
+  }
+
+  return { sent: true }
+}
+
+
+
+
 
 export async function sendPasswordResetWithResend(input: ResetInput) {
   const email = input.email.trim().toLowerCase()

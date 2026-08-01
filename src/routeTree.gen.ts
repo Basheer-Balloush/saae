@@ -59,7 +59,6 @@ import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system.student.index'
 import { Route as LearningManagementSystemInternshipsIndexRouteImport } from './routes/learning-management-system.internships.index'
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system.instructor.index'
-import { Route as LearningManagementSystemCampaignIndexRouteImport } from './routes/learning-management-system.campaign.index'
 import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system.admin.index'
 import { Route as AdminFormsIndexRouteImport } from './routes/admin.forms.index'
 import { Route as AdminCrmIndexRouteImport } from './routes/admin.crm.index'
@@ -68,14 +67,11 @@ import { Route as LearningManagementSystemInstructorsIdRouteImport } from './rou
 import { Route as LearningManagementSystemInstructorProfileRouteImport } from './routes/learning-management-system.instructor.profile'
 import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/learning-management-system.courses.$id'
 import { Route as LearningManagementSystemCertificateIdRouteImport } from './routes/learning-management-system.certificate.$id'
-import { Route as LearningManagementSystemCampaignStoryRouteImport } from './routes/learning-management-system.campaign.story'
-import { Route as LearningManagementSystemCampaignChoiceRouteImport } from './routes/learning-management-system.campaign.choice'
 import { Route as LearningManagementSystemAdminUsersRouteImport } from './routes/learning-management-system.admin.users'
 import { Route as LearningManagementSystemAdminTrainerApplicationsRouteImport } from './routes/learning-management-system.admin.trainer-applications'
 import { Route as LearningManagementSystemAdminReviewsRouteImport } from './routes/learning-management-system.admin.reviews'
 import { Route as LearningManagementSystemAdminEnrollmentRequestsRouteImport } from './routes/learning-management-system.admin.enrollment-requests'
 import { Route as LearningManagementSystemAdminCouponsRouteImport } from './routes/learning-management-system.admin.coupons'
-import { Route as LearningManagementSystemAdminCampaignRouteImport } from './routes/learning-management-system.admin.campaign'
 import { Route as LearningManagementSystemAdminAttendanceLinkRouteImport } from './routes/learning-management-system.admin.attendance-link'
 import { Route as LearningManagementSystemAdminAnalyticsRouteImport } from './routes/learning-management-system.admin.analytics'
 import { Route as ApiPublicBunnyWebhookRouteImport } from './routes/api/public/bunny-webhook'
@@ -380,12 +376,6 @@ const LearningManagementSystemInstructorIndexRoute =
     path: '/',
     getParentRoute: () => LearningManagementSystemInstructorRoute,
   } as any)
-const LearningManagementSystemCampaignIndexRoute =
-  LearningManagementSystemCampaignIndexRouteImport.update({
-    id: '/campaign/',
-    path: '/campaign/',
-    getParentRoute: () => LearningManagementSystemRoute,
-  } as any)
 const LearningManagementSystemAdminIndexRoute =
   LearningManagementSystemAdminIndexRouteImport.update({
     id: '/',
@@ -432,18 +422,6 @@ const LearningManagementSystemCertificateIdRoute =
     path: '/certificate/$id',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
-const LearningManagementSystemCampaignStoryRoute =
-  LearningManagementSystemCampaignStoryRouteImport.update({
-    id: '/campaign/story',
-    path: '/campaign/story',
-    getParentRoute: () => LearningManagementSystemRoute,
-  } as any)
-const LearningManagementSystemCampaignChoiceRoute =
-  LearningManagementSystemCampaignChoiceRouteImport.update({
-    id: '/campaign/choice',
-    path: '/campaign/choice',
-    getParentRoute: () => LearningManagementSystemRoute,
-  } as any)
 const LearningManagementSystemAdminUsersRoute =
   LearningManagementSystemAdminUsersRouteImport.update({
     id: '/users',
@@ -472,12 +450,6 @@ const LearningManagementSystemAdminCouponsRoute =
   LearningManagementSystemAdminCouponsRouteImport.update({
     id: '/coupons',
     path: '/coupons',
-    getParentRoute: () => LearningManagementSystemAdminRoute,
-  } as any)
-const LearningManagementSystemAdminCampaignRoute =
-  LearningManagementSystemAdminCampaignRouteImport.update({
-    id: '/campaign',
-    path: '/campaign',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
 const LearningManagementSystemAdminAttendanceLinkRoute =
@@ -714,14 +686,11 @@ export interface FileRoutesByFullPath {
   '/api/public/bunny-webhook': typeof ApiPublicBunnyWebhookRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
-  '/learning-management-system/admin/campaign': typeof LearningManagementSystemAdminCampaignRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/trainer-applications': typeof LearningManagementSystemAdminTrainerApplicationsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
-  '/learning-management-system/campaign/choice': typeof LearningManagementSystemCampaignChoiceRoute
-  '/learning-management-system/campaign/story': typeof LearningManagementSystemCampaignStoryRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructor/profile': typeof LearningManagementSystemInstructorProfileRoute
@@ -730,7 +699,6 @@ export interface FileRoutesByFullPath {
   '/admin/crm/': typeof AdminCrmIndexRoute
   '/admin/forms/': typeof AdminFormsIndexRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
-  '/learning-management-system/campaign/': typeof LearningManagementSystemCampaignIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/internships/': typeof LearningManagementSystemInternshipsIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
@@ -805,14 +773,11 @@ export interface FileRoutesByTo {
   '/api/public/bunny-webhook': typeof ApiPublicBunnyWebhookRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
-  '/learning-management-system/admin/campaign': typeof LearningManagementSystemAdminCampaignRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/trainer-applications': typeof LearningManagementSystemAdminTrainerApplicationsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
-  '/learning-management-system/campaign/choice': typeof LearningManagementSystemCampaignChoiceRoute
-  '/learning-management-system/campaign/story': typeof LearningManagementSystemCampaignStoryRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructor/profile': typeof LearningManagementSystemInstructorProfileRoute
@@ -821,7 +786,6 @@ export interface FileRoutesByTo {
   '/admin/crm': typeof AdminCrmIndexRoute
   '/admin/forms': typeof AdminFormsIndexRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminIndexRoute
-  '/learning-management-system/campaign': typeof LearningManagementSystemCampaignIndexRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/internships': typeof LearningManagementSystemInternshipsIndexRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentIndexRoute
@@ -906,14 +870,11 @@ export interface FileRoutesById {
   '/api/public/bunny-webhook': typeof ApiPublicBunnyWebhookRoute
   '/learning-management-system/admin/analytics': typeof LearningManagementSystemAdminAnalyticsRoute
   '/learning-management-system/admin/attendance-link': typeof LearningManagementSystemAdminAttendanceLinkRoute
-  '/learning-management-system/admin/campaign': typeof LearningManagementSystemAdminCampaignRoute
   '/learning-management-system/admin/coupons': typeof LearningManagementSystemAdminCouponsRoute
   '/learning-management-system/admin/enrollment-requests': typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/trainer-applications': typeof LearningManagementSystemAdminTrainerApplicationsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
-  '/learning-management-system/campaign/choice': typeof LearningManagementSystemCampaignChoiceRoute
-  '/learning-management-system/campaign/story': typeof LearningManagementSystemCampaignStoryRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructor/profile': typeof LearningManagementSystemInstructorProfileRoute
@@ -922,7 +883,6 @@ export interface FileRoutesById {
   '/admin/crm/': typeof AdminCrmIndexRoute
   '/admin/forms/': typeof AdminFormsIndexRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
-  '/learning-management-system/campaign/': typeof LearningManagementSystemCampaignIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/internships/': typeof LearningManagementSystemInternshipsIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
@@ -1008,14 +968,11 @@ export interface FileRouteTypes {
     | '/api/public/bunny-webhook'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
-    | '/learning-management-system/admin/campaign'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/trainer-applications'
     | '/learning-management-system/admin/users'
-    | '/learning-management-system/campaign/choice'
-    | '/learning-management-system/campaign/story'
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructor/profile'
@@ -1024,7 +981,6 @@ export interface FileRouteTypes {
     | '/admin/crm/'
     | '/admin/forms/'
     | '/learning-management-system/admin/'
-    | '/learning-management-system/campaign/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/internships/'
     | '/learning-management-system/student/'
@@ -1099,14 +1055,11 @@ export interface FileRouteTypes {
     | '/api/public/bunny-webhook'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
-    | '/learning-management-system/admin/campaign'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/trainer-applications'
     | '/learning-management-system/admin/users'
-    | '/learning-management-system/campaign/choice'
-    | '/learning-management-system/campaign/story'
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructor/profile'
@@ -1115,7 +1068,6 @@ export interface FileRouteTypes {
     | '/admin/crm'
     | '/admin/forms'
     | '/learning-management-system/admin'
-    | '/learning-management-system/campaign'
     | '/learning-management-system/instructor'
     | '/learning-management-system/internships'
     | '/learning-management-system/student'
@@ -1199,14 +1151,11 @@ export interface FileRouteTypes {
     | '/api/public/bunny-webhook'
     | '/learning-management-system/admin/analytics'
     | '/learning-management-system/admin/attendance-link'
-    | '/learning-management-system/admin/campaign'
     | '/learning-management-system/admin/coupons'
     | '/learning-management-system/admin/enrollment-requests'
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/trainer-applications'
     | '/learning-management-system/admin/users'
-    | '/learning-management-system/campaign/choice'
-    | '/learning-management-system/campaign/story'
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructor/profile'
@@ -1215,7 +1164,6 @@ export interface FileRouteTypes {
     | '/admin/crm/'
     | '/admin/forms/'
     | '/learning-management-system/admin/'
-    | '/learning-management-system/campaign/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/internships/'
     | '/learning-management-system/student/'
@@ -1625,13 +1573,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemInstructorIndexRouteImport
       parentRoute: typeof LearningManagementSystemInstructorRoute
     }
-    '/learning-management-system/campaign/': {
-      id: '/learning-management-system/campaign/'
-      path: '/campaign'
-      fullPath: '/learning-management-system/campaign/'
-      preLoaderRoute: typeof LearningManagementSystemCampaignIndexRouteImport
-      parentRoute: typeof LearningManagementSystemRoute
-    }
     '/learning-management-system/admin/': {
       id: '/learning-management-system/admin/'
       path: '/'
@@ -1688,20 +1629,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemCertificateIdRouteImport
       parentRoute: typeof LearningManagementSystemRoute
     }
-    '/learning-management-system/campaign/story': {
-      id: '/learning-management-system/campaign/story'
-      path: '/campaign/story'
-      fullPath: '/learning-management-system/campaign/story'
-      preLoaderRoute: typeof LearningManagementSystemCampaignStoryRouteImport
-      parentRoute: typeof LearningManagementSystemRoute
-    }
-    '/learning-management-system/campaign/choice': {
-      id: '/learning-management-system/campaign/choice'
-      path: '/campaign/choice'
-      fullPath: '/learning-management-system/campaign/choice'
-      preLoaderRoute: typeof LearningManagementSystemCampaignChoiceRouteImport
-      parentRoute: typeof LearningManagementSystemRoute
-    }
     '/learning-management-system/admin/users': {
       id: '/learning-management-system/admin/users'
       path: '/users'
@@ -1735,13 +1662,6 @@ declare module '@tanstack/react-router' {
       path: '/coupons'
       fullPath: '/learning-management-system/admin/coupons'
       preLoaderRoute: typeof LearningManagementSystemAdminCouponsRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRoute
-    }
-    '/learning-management-system/admin/campaign': {
-      id: '/learning-management-system/admin/campaign'
-      path: '/campaign'
-      fullPath: '/learning-management-system/admin/campaign'
-      preLoaderRoute: typeof LearningManagementSystemAdminCampaignRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
     }
     '/learning-management-system/admin/attendance-link': {
@@ -2131,7 +2051,6 @@ const LearningManagementSystemAdminInternshipsIdApplicationsRouteWithChildren =
 interface LearningManagementSystemAdminRouteChildren {
   LearningManagementSystemAdminAnalyticsRoute: typeof LearningManagementSystemAdminAnalyticsRoute
   LearningManagementSystemAdminAttendanceLinkRoute: typeof LearningManagementSystemAdminAttendanceLinkRoute
-  LearningManagementSystemAdminCampaignRoute: typeof LearningManagementSystemAdminCampaignRoute
   LearningManagementSystemAdminCouponsRoute: typeof LearningManagementSystemAdminCouponsRoute
   LearningManagementSystemAdminEnrollmentRequestsRoute: typeof LearningManagementSystemAdminEnrollmentRequestsRoute
   LearningManagementSystemAdminReviewsRoute: typeof LearningManagementSystemAdminReviewsRoute
@@ -2150,8 +2069,6 @@ const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminR
       LearningManagementSystemAdminAnalyticsRoute,
     LearningManagementSystemAdminAttendanceLinkRoute:
       LearningManagementSystemAdminAttendanceLinkRoute,
-    LearningManagementSystemAdminCampaignRoute:
-      LearningManagementSystemAdminCampaignRoute,
     LearningManagementSystemAdminCouponsRoute:
       LearningManagementSystemAdminCouponsRoute,
     LearningManagementSystemAdminEnrollmentRequestsRoute:
@@ -2243,12 +2160,9 @@ interface LearningManagementSystemRouteChildren {
   LearningManagementSystemTrainerApplyRoute: typeof LearningManagementSystemTrainerApplyRoute
   LearningManagementSystemVerifyRoute: typeof LearningManagementSystemVerifyRoute
   LearningManagementSystemIndexRoute: typeof LearningManagementSystemIndexRoute
-  LearningManagementSystemCampaignChoiceRoute: typeof LearningManagementSystemCampaignChoiceRoute
-  LearningManagementSystemCampaignStoryRoute: typeof LearningManagementSystemCampaignStoryRoute
   LearningManagementSystemCertificateIdRoute: typeof LearningManagementSystemCertificateIdRoute
   LearningManagementSystemCoursesIdRoute: typeof LearningManagementSystemCoursesIdRoute
   LearningManagementSystemInstructorsIdRoute: typeof LearningManagementSystemInstructorsIdRoute
-  LearningManagementSystemCampaignIndexRoute: typeof LearningManagementSystemCampaignIndexRoute
   LearningManagementSystemInternshipsIndexRoute: typeof LearningManagementSystemInternshipsIndexRoute
   LearningManagementSystemInternshipsSlugApplyRoute: typeof LearningManagementSystemInternshipsSlugApplyRoute
   LearningManagementSystemInternshipsSlugIndexRoute: typeof LearningManagementSystemInternshipsSlugIndexRoute
@@ -2274,18 +2188,12 @@ const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildr
       LearningManagementSystemTrainerApplyRoute,
     LearningManagementSystemVerifyRoute: LearningManagementSystemVerifyRoute,
     LearningManagementSystemIndexRoute: LearningManagementSystemIndexRoute,
-    LearningManagementSystemCampaignChoiceRoute:
-      LearningManagementSystemCampaignChoiceRoute,
-    LearningManagementSystemCampaignStoryRoute:
-      LearningManagementSystemCampaignStoryRoute,
     LearningManagementSystemCertificateIdRoute:
       LearningManagementSystemCertificateIdRoute,
     LearningManagementSystemCoursesIdRoute:
       LearningManagementSystemCoursesIdRoute,
     LearningManagementSystemInstructorsIdRoute:
       LearningManagementSystemInstructorsIdRoute,
-    LearningManagementSystemCampaignIndexRoute:
-      LearningManagementSystemCampaignIndexRoute,
     LearningManagementSystemInternshipsIndexRoute:
       LearningManagementSystemInternshipsIndexRoute,
     LearningManagementSystemInternshipsSlugApplyRoute:
@@ -2330,3 +2238,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
