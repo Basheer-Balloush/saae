@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-// The Instagram Story campaign was retired. Old links land on the LMS home.
-export const Route = createFileRoute("/learning-management-system/campaign/")({
+// Retired campaign sub-pages (choice / story) redirect to the LMS home.
+export const Route = createFileRoute("/learning-management-system/campaign/$")({
   beforeLoad: () => {
     throw redirect({ to: "/learning-management-system", replace: true });
   },

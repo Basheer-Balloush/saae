@@ -23,7 +23,6 @@ import {
   Pencil,
   CalendarDays,
   Loader2,
-  Megaphone,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
@@ -345,12 +344,6 @@ function AdminHome() {
       label: ar ? "التقييمات" : "Reviews",
       icon: Star,
       desc: ar ? "تقييمات الطلاب" : "Student ratings",
-    },
-    {
-      to: "/learning-management-system/admin/campaign",
-      label: ar ? "حملة الستوري" : "Story campaign",
-      icon: Megaphone,
-      desc: ar ? "إعدادات حملة الفعالية" : "Event campaign settings",
     },
 
     {

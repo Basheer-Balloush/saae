@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { sendPasswordResetWithResend, createLmsAccount } from './lms-auth-email.server'
+import { sendPasswordResetWithResend, createLmsAccount, resendLmsConfirmation } from './lms-auth-email.server'
 import { PASSWORD_MIN } from './password-policy'
 
 const langSchema = z.enum(['ar', 'en'])
@@ -31,3 +31,8 @@ export const signUpLmsUser = createServerFn({ method: 'POST' })
 export const sendLmsPasswordReset = createServerFn({ method: 'POST' })
   .inputValidator((input) => resetSchema.parse(input))
   .handler(async ({ data }) => sendPasswordResetWithResend(data))
+
+export const resendLmsConfirmationEmail = createServerFn({ method: 'POST' })
+  .inputValidator((input) => resetSchema.parse(input))
+  .handler(async ({ data }) => resendLmsConfirmation(data))
+

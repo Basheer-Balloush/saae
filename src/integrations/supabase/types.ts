@@ -3076,57 +3076,6 @@ export type Database = {
         }
         Relationships: []
       }
-      lms_story_campaigns: {
-        Row: {
-          active: boolean
-          allow_download_fallback: boolean
-          course_ref: string | null
-          created_at: string
-          ends_at: string | null
-          id: string
-          instagram_handle: string
-          post_share_destination: string | null
-          slug: string
-          starts_at: string | null
-          story_image_url: string | null
-          title_ar: string
-          title_en: string
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          allow_download_fallback?: boolean
-          course_ref?: string | null
-          created_at?: string
-          ends_at?: string | null
-          id?: string
-          instagram_handle?: string
-          post_share_destination?: string | null
-          slug: string
-          starts_at?: string | null
-          story_image_url?: string | null
-          title_ar: string
-          title_en: string
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          allow_download_fallback?: boolean
-          course_ref?: string | null
-          created_at?: string
-          ends_at?: string | null
-          id?: string
-          instagram_handle?: string
-          post_share_destination?: string | null
-          slug?: string
-          starts_at?: string | null
-          story_image_url?: string | null
-          title_ar?: string
-          title_en?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       lms_submission_versions: {
         Row: {
           archived_at: string
@@ -4159,17 +4108,6 @@ export type Database = {
       lms_checkout: {
         Args: { _coupon?: string; _course_id: string }
         Returns: Json
-      }
-      lms_claim_story_campaign: {
-        Args: { _slug: string }
-        Returns: {
-          already_enrolled: boolean
-          course_id: string
-          created: boolean
-          destination: string
-          enrollment_id: string
-          status: string
-        }[]
       }
       lms_cleanup_archive: {
         Args: { _note?: string; _retention_days?: number; _user_ids: string[] }

@@ -6,7 +6,7 @@ import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { localizeAuthError } from "@/lib/auth-error-i18n";
-import { signUpLmsUser } from "@/lib/lms-auth.functions";
+import { signUpLmsUser, resendLmsConfirmationEmail } from "@/lib/lms-auth.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -66,7 +66,23 @@ function LmsSignup() {
   const [asInstructor, setAsInstructor] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ email: string; confirmationRequired: boolean } | null>(null);
+  const [resending, setResending] = useState(false);
   const signUpUser = useServerFn(signUpLmsUser);
+  const resendConfirmation = useServerFn(resendLmsConfirmationEmail);
+
+  const onResend = async () => {
+    if (!result || resending) return;
+    setResending(true);
+    try {
+      await resendConfirmation({ data: { email: result.email, lang } });
+      toast.success(lang === "ar" ? "أعدنا إرسال رابط التأكيد" : "Confirmation link sent again");
+    } catch (err: unknown) {
+      toast.error(localizeAuthError(err, lang, tr.authFailed));
+    } finally {
+      setResending(false);
+    }
+  };
+
 
   const passwordStrength = useMemo(() => scorePasswordStrength(password), [password]);
   const strengthInfo = useMemo(() => getStrengthInfo(passwordStrength, lang), [passwordStrength, lang]);
@@ -151,6 +167,21 @@ function LmsSignup() {
                 </>
               )}
             </p>
+
+            {result.confirmationRequired && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={onResend}
+                disabled={resending}
+              >
+                {resending && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
+                {lang === "ar" ? "إعادة إرسال رابط التأكيد" : "Resend confirmation email"}
+              </Button>
+            )}
+
+
 
             {asInstructor && (
               <div className="mt-2 w-full rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-900 dark:text-amber-200 space-y-2">
