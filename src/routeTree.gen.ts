@@ -68,7 +68,6 @@ import { Route as LearningManagementSystemInstructorsIdRouteImport } from './rou
 import { Route as LearningManagementSystemInstructorProfileRouteImport } from './routes/learning-management-system.instructor.profile'
 import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/learning-management-system.courses.$id'
 import { Route as LearningManagementSystemCertificateIdRouteImport } from './routes/learning-management-system.certificate.$id'
-import { Route as LearningManagementSystemCampaignSplatRouteImport } from './routes/learning-management-system.campaign.$'
 import { Route as LearningManagementSystemAdminUsersRouteImport } from './routes/learning-management-system.admin.users'
 import { Route as LearningManagementSystemAdminTrainerApplicationsRouteImport } from './routes/learning-management-system.admin.trainer-applications'
 import { Route as LearningManagementSystemAdminReviewsRouteImport } from './routes/learning-management-system.admin.reviews'
@@ -430,12 +429,6 @@ const LearningManagementSystemCertificateIdRoute =
     path: '/certificate/$id',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
-const LearningManagementSystemCampaignSplatRoute =
-  LearningManagementSystemCampaignSplatRouteImport.update({
-    id: '/campaign/$',
-    path: '/campaign/$',
-    getParentRoute: () => LearningManagementSystemRoute,
-  } as any)
 const LearningManagementSystemAdminUsersRoute =
   LearningManagementSystemAdminUsersRouteImport.update({
     id: '/users',
@@ -705,7 +698,6 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/trainer-applications': typeof LearningManagementSystemAdminTrainerApplicationsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
-  '/learning-management-system/campaign/$': typeof LearningManagementSystemCampaignSplatRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructor/profile': typeof LearningManagementSystemInstructorProfileRoute
@@ -794,7 +786,6 @@ export interface FileRoutesByTo {
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/trainer-applications': typeof LearningManagementSystemAdminTrainerApplicationsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
-  '/learning-management-system/campaign/$': typeof LearningManagementSystemCampaignSplatRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructor/profile': typeof LearningManagementSystemInstructorProfileRoute
@@ -893,7 +884,6 @@ export interface FileRoutesById {
   '/learning-management-system/admin/reviews': typeof LearningManagementSystemAdminReviewsRoute
   '/learning-management-system/admin/trainer-applications': typeof LearningManagementSystemAdminTrainerApplicationsRoute
   '/learning-management-system/admin/users': typeof LearningManagementSystemAdminUsersRoute
-  '/learning-management-system/campaign/$': typeof LearningManagementSystemCampaignSplatRoute
   '/learning-management-system/certificate/$id': typeof LearningManagementSystemCertificateIdRoute
   '/learning-management-system/courses/$id': typeof LearningManagementSystemCoursesIdRoute
   '/learning-management-system/instructor/profile': typeof LearningManagementSystemInstructorProfileRoute
@@ -993,7 +983,6 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/trainer-applications'
     | '/learning-management-system/admin/users'
-    | '/learning-management-system/campaign/$'
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructor/profile'
@@ -1082,7 +1071,6 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/trainer-applications'
     | '/learning-management-system/admin/users'
-    | '/learning-management-system/campaign/$'
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructor/profile'
@@ -1180,7 +1168,6 @@ export interface FileRouteTypes {
     | '/learning-management-system/admin/reviews'
     | '/learning-management-system/admin/trainer-applications'
     | '/learning-management-system/admin/users'
-    | '/learning-management-system/campaign/$'
     | '/learning-management-system/certificate/$id'
     | '/learning-management-system/courses/$id'
     | '/learning-management-system/instructor/profile'
@@ -1660,13 +1647,6 @@ declare module '@tanstack/react-router' {
       path: '/certificate/$id'
       fullPath: '/learning-management-system/certificate/$id'
       preLoaderRoute: typeof LearningManagementSystemCertificateIdRouteImport
-      parentRoute: typeof LearningManagementSystemRoute
-    }
-    '/learning-management-system/campaign/$': {
-      id: '/learning-management-system/campaign/$'
-      path: '/campaign/$'
-      fullPath: '/learning-management-system/campaign/$'
-      preLoaderRoute: typeof LearningManagementSystemCampaignSplatRouteImport
       parentRoute: typeof LearningManagementSystemRoute
     }
     '/learning-management-system/admin/users': {
@@ -2200,7 +2180,6 @@ interface LearningManagementSystemRouteChildren {
   LearningManagementSystemTrainerApplyRoute: typeof LearningManagementSystemTrainerApplyRoute
   LearningManagementSystemVerifyRoute: typeof LearningManagementSystemVerifyRoute
   LearningManagementSystemIndexRoute: typeof LearningManagementSystemIndexRoute
-  LearningManagementSystemCampaignSplatRoute: typeof LearningManagementSystemCampaignSplatRoute
   LearningManagementSystemCertificateIdRoute: typeof LearningManagementSystemCertificateIdRoute
   LearningManagementSystemCoursesIdRoute: typeof LearningManagementSystemCoursesIdRoute
   LearningManagementSystemInstructorsIdRoute: typeof LearningManagementSystemInstructorsIdRoute
@@ -2230,8 +2209,6 @@ const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildr
       LearningManagementSystemTrainerApplyRoute,
     LearningManagementSystemVerifyRoute: LearningManagementSystemVerifyRoute,
     LearningManagementSystemIndexRoute: LearningManagementSystemIndexRoute,
-    LearningManagementSystemCampaignSplatRoute:
-      LearningManagementSystemCampaignSplatRoute,
     LearningManagementSystemCertificateIdRoute:
       LearningManagementSystemCertificateIdRoute,
     LearningManagementSystemCoursesIdRoute:
@@ -2284,13 +2261,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
