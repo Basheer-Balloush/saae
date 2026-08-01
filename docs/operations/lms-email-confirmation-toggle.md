@@ -18,7 +18,15 @@ Roles (`lms_student`), instructor-request creation, rate limiting, password
 policy, duplicate handling and safe error mapping are identical in both modes.
 Password recovery links are unaffected by this switch.
 
-## Temporarily disable (current state)
+## Current state — ENABLED
+
+`email_confirmation_required = true`, and Auth `auto_confirm_email` is `false`.
+New registrations receive a localized confirmation email via Resend and can
+only sign in after confirming. The signup screen exposes a
+"Resend confirmation email" action (`resendLmsConfirmationEmail` server fn),
+which is rate limited (3 per 15 min per email) and enumeration-safe.
+
+## Temporarily disable
 
 ```sql
 UPDATE public.lms_settings
@@ -37,22 +45,14 @@ WHERE id = true;
 ```
 
 Run these only as an authorized database administrator. Accounts confirmed
-during the temporary-off period stay valid — never "unconfirm" them.
+during a temporary-off period stay valid — never "unconfirm" them.
 
-## One-time remediation of accounts left unconfirmed
+## Remediation history
 
-Accounts created before this change (via `generateLink`) remain unconfirmed and
-cannot sign in. Repair them with the admin-only server functions in
-`src/lib/lms-auth-remediation.functions.ts`:
+The one-time admin remediation helpers used to confirm accounts left
+unconfirmed during the temporary-off period have been completed and removed.
+If a similar remediation is ever needed again, reintroduce an admin-only,
+allowlist-based server function that sets nothing but `email_confirm` via
+`auth.admin.updateUserById`, and record the affected accounts in the
+operations log.
 
-1. `previewUnconfirmedLmsAccounts({ createdAfter?, limit })` — returns a count
-   and the candidate ids/emails. Review this list first.
-2. `confirmLmsAccounts({ emails: [...] })` — confirms **only** the explicitly
-   reviewed allowlist (max 50 per call) via
-   `auth.admin.updateUserById(id, { email_confirm: true })`.
-
-Both require an authenticated `lms_admin`/`admin` caller, are idempotent
-(already-confirmed accounts are skipped), touch nothing but `email_confirm`,
-and log only user ids and aggregate counts. There is no public endpoint and no
-"confirm on failed login" behaviour. Record which accounts were remediated in
-the operations log.
