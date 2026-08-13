@@ -79,6 +79,7 @@ import { Route as AdminFormsNewRouteImport } from './routes/admin.forms.new'
 import { Route as AdminCrmStudentsRouteImport } from './routes/admin.crm.students'
 import { Route as AdminCrmLeadsRouteImport } from './routes/admin.crm.leads'
 import { Route as AdminCrmFormsRouteImport } from './routes/admin.crm.forms'
+import { Route as AdminCrmFeedbackRouteImport } from './routes/admin.crm.feedback'
 import { Route as AdminCrmContactsRouteImport } from './routes/admin.crm.contacts'
 import { Route as LearningManagementSystemInternshipsSlugIndexRouteImport } from './routes/learning-management-system.internships.$slug.index'
 import { Route as LearningManagementSystemAdminInternshipsIndexRouteImport } from './routes/learning-management-system.admin.internships.index'
@@ -489,6 +490,11 @@ const AdminCrmFormsRoute = AdminCrmFormsRouteImport.update({
   path: '/forms',
   getParentRoute: () => AdminCrmRoute,
 } as any)
+const AdminCrmFeedbackRoute = AdminCrmFeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => AdminCrmRoute,
+} as any)
 const AdminCrmContactsRoute = AdminCrmContactsRouteImport.update({
   id: '/contacts',
   path: '/contacts',
@@ -679,6 +685,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
   '/admin/crm/contacts': typeof AdminCrmContactsRouteWithChildren
+  '/admin/crm/feedback': typeof AdminCrmFeedbackRoute
   '/admin/crm/forms': typeof AdminCrmFormsRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteWithChildren
   '/admin/crm/students': typeof AdminCrmStudentsRoute
@@ -767,6 +774,7 @@ export interface FileRoutesByTo {
   '/learning-management-system': typeof LearningManagementSystemIndexRoute
   '/news': typeof NewsIndexRoute
   '/admin/crm/contacts': typeof AdminCrmContactsRouteWithChildren
+  '/admin/crm/feedback': typeof AdminCrmFeedbackRoute
   '/admin/crm/leads': typeof AdminCrmLeadsRouteWithChildren
   '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
@@ -863,6 +871,7 @@ export interface FileRoutesById {
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
   '/admin/crm/contacts': typeof AdminCrmContactsRouteWithChildren
+  '/admin/crm/feedback': typeof AdminCrmFeedbackRoute
   '/admin/crm/forms': typeof AdminCrmFormsRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteWithChildren
   '/admin/crm/students': typeof AdminCrmStudentsRoute
@@ -961,6 +970,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/'
     | '/news/'
     | '/admin/crm/contacts'
+    | '/admin/crm/feedback'
     | '/admin/crm/forms'
     | '/admin/crm/leads'
     | '/admin/crm/students'
@@ -1049,6 +1059,7 @@ export interface FileRouteTypes {
     | '/learning-management-system'
     | '/news'
     | '/admin/crm/contacts'
+    | '/admin/crm/feedback'
     | '/admin/crm/leads'
     | '/admin/crm/students'
     | '/admin/forms/new'
@@ -1144,6 +1155,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/'
     | '/news/'
     | '/admin/crm/contacts'
+    | '/admin/crm/feedback'
     | '/admin/crm/forms'
     | '/admin/crm/leads'
     | '/admin/crm/students'
@@ -1713,6 +1725,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCrmFormsRouteImport
       parentRoute: typeof AdminCrmRoute
     }
+    '/admin/crm/feedback': {
+      id: '/admin/crm/feedback'
+      path: '/feedback'
+      fullPath: '/admin/crm/feedback'
+      preLoaderRoute: typeof AdminCrmFeedbackRouteImport
+      parentRoute: typeof AdminCrmRoute
+    }
     '/admin/crm/contacts': {
       id: '/admin/crm/contacts'
       path: '/contacts'
@@ -1953,6 +1972,7 @@ const AdminCrmLeadsRouteWithChildren = AdminCrmLeadsRoute._addFileChildren(
 
 interface AdminCrmRouteChildren {
   AdminCrmContactsRoute: typeof AdminCrmContactsRouteWithChildren
+  AdminCrmFeedbackRoute: typeof AdminCrmFeedbackRoute
   AdminCrmFormsRoute: typeof AdminCrmFormsRouteWithChildren
   AdminCrmLeadsRoute: typeof AdminCrmLeadsRouteWithChildren
   AdminCrmStudentsRoute: typeof AdminCrmStudentsRoute
@@ -1961,6 +1981,7 @@ interface AdminCrmRouteChildren {
 
 const AdminCrmRouteChildren: AdminCrmRouteChildren = {
   AdminCrmContactsRoute: AdminCrmContactsRouteWithChildren,
+  AdminCrmFeedbackRoute: AdminCrmFeedbackRoute,
   AdminCrmFormsRoute: AdminCrmFormsRouteWithChildren,
   AdminCrmLeadsRoute: AdminCrmLeadsRouteWithChildren,
   AdminCrmStudentsRoute: AdminCrmStudentsRoute,
