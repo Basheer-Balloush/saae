@@ -8,6 +8,7 @@ import {
   Camera,
   CheckCircle2,
   FileText,
+  GraduationCap,
   Loader2,
   Mail,
   Phone,
