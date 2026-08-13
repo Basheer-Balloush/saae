@@ -14,6 +14,8 @@ export function safeLmsRedirect(value: unknown): string | undefined {
   return v;
 }
 
-export const lmsRedirectSearchSchema = (raw: Record<string, unknown>) => ({
+export const lmsRedirectSearchSchema = (
+  raw: Record<string, unknown>,
+): { redirect?: string } => ({
   redirect: safeLmsRedirect(raw?.redirect),
 });
