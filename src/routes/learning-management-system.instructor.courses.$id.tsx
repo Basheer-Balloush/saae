@@ -47,7 +47,7 @@ export const Route = createFileRoute("/learning-management-system/instructor/cou
 type Course = {
   id: string; slug: string | null; title_ar: string; title_en: string | null;
   description_ar: string | null; description_en: string | null;
-  cover_url: string | null; level: string; price: number; is_free: boolean;
+  cover_url: string | null; level: string; price: number; sale_price: number | null; is_free: boolean;
   status: string; category_id: string | null; instructor_id: string;
   enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null; students_count: number;
   start_date: string | null; end_date: string | null;
@@ -240,6 +240,10 @@ function CourseBuilder() {
       slug: slugVal || null,
     };
     payload.price = course.is_free ? 0 : course.price;
+    payload.sale_price =
+      course.is_free || course.sale_price == null || Number(course.sale_price) >= Number(course.price)
+        ? null
+        : Number(course.sale_price);
     payload.is_free = course.is_free;
     const { error } = await supabase.from("lms_courses").update(payload as never).eq("id", course.id);
     if (error) {
@@ -729,6 +733,30 @@ function CourseBuilder() {
               )}
             </div>
           </div>
+          {!course.is_free && (
+            <div>
+              <Label>
+                {lang === "ar" ? "سعر بعد الخصم (اختياري)" : "Sale price (optional)"}
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                step={0.01}
+                value={course.sale_price ?? ""}
+                placeholder={lang === "ar" ? "بدون خصم" : "No discount"}
+                onChange={(e) => {
+                  const v = e.target.value.trim();
+                  update({ sale_price: v === "" ? null : Math.max(0, parseFloat(v) || 0) });
+                }}
+                className="h-10"
+              />
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                {lang === "ar"
+                  ? "إذا كان أقل من السعر الأساسي، سيظهر السعر الأساسي مشطوباً بجانب سعر الخصم."
+                  : "When lower than the regular price, the regular price is shown struck through next to it."}
+              </p>
+            </div>
+          )}
         </div>
 
         <div>
