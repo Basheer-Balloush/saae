@@ -10,10 +10,7 @@ import {
   setChatFeedbackHandled,
   deleteChatFeedback,
 } from "@/lib/admin-chat.functions";
-import {
-  FEEDBACK_CATEGORIES,
-  feedbackCategoryLabel,
-} from "@/components/site/AssistantFeedbackForm";
+import { FEEDBACK_CATEGORIES, feedbackCategoryLabel } from "@/lib/chat-feedback";
 
 type Row = {
   id: string;

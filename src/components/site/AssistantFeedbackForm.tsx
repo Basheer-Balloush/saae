@@ -7,28 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
-export const FEEDBACK_CATEGORIES = ["suggestion", "complaint", "praise", "bug", "other"] as const;
-export type FeedbackCategory = (typeof FEEDBACK_CATEGORIES)[number];
-
-export const feedbackCategoryLabel: Record<"ar" | "en", Record<string, string>> = {
-  ar: {
-    general: "عام",
-    suggestion: "اقتراح",
-    complaint: "شكوى",
-    praise: "شكر وثناء",
-    bug: "مشكلة تقنية",
-    other: "أخرى",
-  },
-  en: {
-    general: "General",
-    suggestion: "Suggestion",
-    complaint: "Complaint",
-    praise: "Praise",
-    bug: "Technical issue",
-    other: "Other",
-  },
-};
+import {
+  FEEDBACK_CATEGORIES,
+  feedbackCategoryLabel,
+  type FeedbackCategory,
+} from "@/lib/chat-feedback";
 
 const T = {
   ar: {
