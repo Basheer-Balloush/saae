@@ -122,8 +122,14 @@ function ProfilePage() {
       className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12"
       dir={dir}
     >
-      <header className="mb-8">
+      <header className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t.profileTitle}</h1>
+        <Button asChild variant="outline" className="gap-2">
+          <Link to="/learning-management-system/trainer-apply">
+            <GraduationCap className="h-4 w-4" />
+            {lang === "ar" ? "كن مدرّباً" : "Be an instructor"}
+          </Link>
+        </Button>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
