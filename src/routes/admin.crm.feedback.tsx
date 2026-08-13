@@ -7,10 +7,7 @@ export const Route = createFileRoute("/admin/crm/feedback")({
   ssr: false,
   beforeLoad: requireAdminBeforeLoad,
   head: () => ({
-    meta: [
-      { title: "Feedback — CRM" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "Feedback — CRM" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: FeedbackPage,
 });

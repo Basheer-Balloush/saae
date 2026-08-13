@@ -10,7 +10,10 @@ import {
   setChatFeedbackHandled,
   deleteChatFeedback,
 } from "@/lib/admin-chat.functions";
-import { FEEDBACK_CATEGORIES, feedbackCategoryLabel } from "@/components/site/AssistantFeedbackForm";
+import {
+  FEEDBACK_CATEGORIES,
+  feedbackCategoryLabel,
+} from "@/components/site/AssistantFeedbackForm";
 
 type Row = {
   id: string;
@@ -162,7 +165,9 @@ export function ChatFeedbackPanel({ lang }: { lang: "ar" | "en" }) {
                   <td className="px-4 py-3 text-muted-foreground" dir="ltr">
                     {r.email || "—"}
                   </td>
-                  <td className="max-w-md whitespace-pre-wrap px-4 py-3 text-foreground">{r.message}</td>
+                  <td className="max-w-md whitespace-pre-wrap px-4 py-3 text-foreground">
+                    {r.message}
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {new Date(r.created_at).toLocaleString(lang === "ar" ? "ar" : "en")}
                   </td>

@@ -119,10 +119,7 @@ function ProfilePage() {
   if (!data) return null;
 
   return (
-    <div
-      className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12"
-      dir={dir}
-    >
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12" dir={dir}>
       <header className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t.profileTitle}</h1>
         <Button asChild variant="outline" className="gap-2">
@@ -200,7 +197,10 @@ function IdentityCard({
       <form onSubmit={onSubmit} className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label>{t.profileEmail}</Label>
-          <div className="mt-1 flex items-center gap-2 rounded-md border border-input bg-muted/30 px-3 py-2 text-sm text-muted-foreground" dir="ltr">
+          <div
+            className="mt-1 flex items-center gap-2 rounded-md border border-input bg-muted/30 px-3 py-2 text-sm text-muted-foreground"
+            dir="ltr"
+          >
             <Mail className="h-4 w-4 shrink-0" />
             <span className="truncate">{data.email ?? "—"}</span>
           </div>
@@ -248,7 +248,9 @@ function IdentityCard({
             dir="auto"
             className="mt-1 min-h-[120px]"
           />
-          <div className={`mt-1 text-xs text-muted-foreground ${isRtl ? "text-left" : "text-right"}`}>
+          <div
+            className={`mt-1 text-xs text-muted-foreground ${isRtl ? "text-left" : "text-right"}`}
+          >
             {biography.length}/4000
           </div>
         </div>
@@ -363,14 +365,32 @@ function AvatarCard({
         />
         <div className="flex flex-wrap items-center justify-center gap-2">
           <Button variant="outline" size="sm" onClick={onPick} disabled={busy === "upload"}>
-            {busy === "upload" ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Upload className="h-4 w-4 mx-1" />}
+            {busy === "upload" ? (
+              <Loader2 className="h-4 w-4 animate-spin mx-1" />
+            ) : (
+              <Upload className="h-4 w-4 mx-1" />
+            )}
             {fileId
-              ? lang === "ar" ? "تغيير الصورة" : "Change photo"
-              : lang === "ar" ? "رفع صورة" : "Upload photo"}
+              ? lang === "ar"
+                ? "تغيير الصورة"
+                : "Change photo"
+              : lang === "ar"
+                ? "رفع صورة"
+                : "Upload photo"}
           </Button>
           {fileId && (
-            <Button variant="ghost" size="sm" onClick={onClear} disabled={busy === "clear"} className="text-destructive">
-              {busy === "clear" ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Trash2 className="h-4 w-4 mx-1" />}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClear}
+              disabled={busy === "clear"}
+              className="text-destructive"
+            >
+              {busy === "clear" ? (
+                <Loader2 className="h-4 w-4 animate-spin mx-1" />
+              ) : (
+                <Trash2 className="h-4 w-4 mx-1" />
+              )}
               {lang === "ar" ? "إزالة" : "Remove"}
             </Button>
           )}
@@ -473,17 +493,36 @@ function CvCard({
         />
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={onPick} disabled={busy === "upload"}>
-            {busy === "upload" ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Upload className="h-4 w-4 mx-1" />}
+            {busy === "upload" ? (
+              <Loader2 className="h-4 w-4 animate-spin mx-1" />
+            ) : (
+              <Upload className="h-4 w-4 mx-1" />
+            )}
             {fileId ? t.profileReplaceCv : t.profileUploadCv}
           </Button>
           {fileId && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => onView(false)} disabled={busy === "view"}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onView(false)}
+                disabled={busy === "view"}
+              >
                 {busy === "view" ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : null}
                 {t.profileViewCv}
               </Button>
-              <Button variant="ghost" size="sm" onClick={onClear} disabled={busy === "clear"} className="text-destructive">
-                {busy === "clear" ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Trash2 className="h-4 w-4 mx-1" />}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClear}
+                disabled={busy === "clear"}
+                className="text-destructive"
+              >
+                {busy === "clear" ? (
+                  <Loader2 className="h-4 w-4 animate-spin mx-1" />
+                ) : (
+                  <Trash2 className="h-4 w-4 mx-1" />
+                )}
                 {lang === "ar" ? "إزالة" : "Remove"}
               </Button>
             </>
@@ -509,17 +548,13 @@ function CoursesCard({
   lang: "ar" | "en";
 }) {
   const t = lmsInternshipsT[lang];
-  const courseMap = useMemo(
-    () => new Map(data.courses.map((c) => [c.id, c])),
-    [data.courses],
-  );
+  const courseMap = useMemo(() => new Map(data.courses.map((c) => [c.id, c])), [data.courses]);
   const active = data.enrollments.filter((e) => !e.completed_at);
   const completed = data.enrollments.filter((e) => e.completed_at);
 
   const avg = data.enrollments.length
     ? Math.round(
-        data.enrollments.reduce((s, e) => s + Number(e.progress ?? 0), 0) /
-          data.enrollments.length,
+        data.enrollments.reduce((s, e) => s + Number(e.progress ?? 0), 0) / data.enrollments.length,
       )
     : 0;
 
@@ -554,7 +589,9 @@ function CoursesCard({
                 >
                   {title}
                 </Link>
-                <span className="text-xs text-muted-foreground shrink-0">{Number(e.progress)}%</span>
+                <span className="text-xs text-muted-foreground shrink-0">
+                  {Number(e.progress)}%
+                </span>
               </div>
               <Progress value={Number(e.progress)} className="mt-2 h-1.5" />
               {att && (
@@ -575,7 +612,11 @@ function CoursesCard({
           <ul className="mt-2 space-y-1 text-sm">
             {completed.map((e) => {
               const c = courseMap.get(e.course_id);
-              const title = c ? (lang === "ar" ? c.title_ar : c.title_en || c.title_ar) : e.course_id;
+              const title = c
+                ? lang === "ar"
+                  ? c.title_ar
+                  : c.title_en || c.title_ar
+                : e.course_id;
               return (
                 <li key={e.id} className="truncate" dir="auto">
                   • {title}
@@ -601,10 +642,7 @@ function CertificatesCard({
   lang: "ar" | "en";
 }) {
   const t = lmsInternshipsT[lang];
-  const courseMap = useMemo(
-    () => new Map(data.courses.map((c) => [c.id, c])),
-    [data.courses],
-  );
+  const courseMap = useMemo(() => new Map(data.courses.map((c) => [c.id, c])), [data.courses]);
 
   return (
     <Card className="p-6">
@@ -620,12 +658,23 @@ function CertificatesCard({
           <ul className="space-y-2">
             {data.certificates.map((c) => {
               const co = courseMap.get(c.course_id);
-              const title = co ? (lang === "ar" ? co.title_ar : co.title_en || co.title_ar) : c.course_id;
+              const title = co
+                ? lang === "ar"
+                  ? co.title_ar
+                  : co.title_en || co.title_ar
+                : c.course_id;
               return (
-                <li key={c.id} className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2">
+                <li
+                  key={c.id}
+                  className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2"
+                >
                   <div className="min-w-0">
-                    <p className="font-medium truncate" dir="auto">{title}</p>
-                    <p className="text-xs text-muted-foreground" dir="ltr">{c.serial}</p>
+                    <p className="font-medium truncate" dir="auto">
+                      {title}
+                    </p>
+                    <p className="text-xs text-muted-foreground" dir="ltr">
+                      {c.serial}
+                    </p>
                   </div>
                   <Link
                     to="/learning-management-system/certificate/$id"
@@ -667,7 +716,13 @@ function ApplicationsCard({ isRtl: _isRtl, lang }: { isRtl: boolean; lang: "ar" 
   }, [load]);
 
   const onWithdraw = async (id: string) => {
-    if (!(await confirmDialog({ title: lang === "ar" ? "هل تريد سحب الطلب؟" : "Withdraw this application?", destructive: true }))) return;
+    if (
+      !(await confirmDialog({
+        title: lang === "ar" ? "هل تريد سحب الطلب؟" : "Withdraw this application?",
+        destructive: true,
+      }))
+    )
+      return;
     setBusy(id);
     try {
       await withdrawFn({ data: { application_id: id } });
@@ -721,10 +776,7 @@ function ApplicationsCard({ isRtl: _isRtl, lang }: { isRtl: boolean; lang: "ar" 
                 ? r.opportunity_title_ar
                 : r.opportunity_title_en || r.opportunity_title_ar;
             return (
-              <li
-                key={r.id}
-                className="py-3 flex flex-wrap items-center justify-between gap-3"
-              >
+              <li key={r.id} className="py-3 flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
                   <Link
                     to="/learning-management-system/internships/$slug"
@@ -747,7 +799,9 @@ function ApplicationsCard({ isRtl: _isRtl, lang }: { isRtl: boolean; lang: "ar" 
                       className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
                       title={lang === "ar" ? "رقم المحاولة" : "Attempt number"}
                     >
-                      {lang === "ar" ? `محاولة #${r.attempt_number}` : `Attempt #${r.attempt_number}`}
+                      {lang === "ar"
+                        ? `محاولة #${r.attempt_number}`
+                        : `Attempt #${r.attempt_number}`}
                     </span>
                   )}
                   <span className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">
@@ -776,7 +830,6 @@ function ApplicationsCard({ isRtl: _isRtl, lang }: { isRtl: boolean; lang: "ar" 
     </Card>
   );
 }
-
 
 // ---------- Uploader (shared) ----------
 
@@ -830,7 +883,8 @@ function mapUploadError(err: unknown, kind: "avatar" | "cv", lang: "ar" | "en"):
   if (msg.includes("cv_mime") || msg.includes("cv_ext")) return t.profileCvInvalidType;
   if (msg.includes("avatar_size")) return t.profileAvatarTooLarge;
   if (msg.includes("avatar_mime")) return t.profileAvatarInvalidType;
-  if (msg.includes("magic_bytes")) return kind === "cv" ? t.profileCvInvalidType : t.profileAvatarInvalidType;
+  if (msg.includes("magic_bytes"))
+    return kind === "cv" ? t.profileCvInvalidType : t.profileAvatarInvalidType;
   return t.errorValidation;
 }
 

@@ -64,8 +64,7 @@ export const getChatStats = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
     const sb = context.supabase;
-    const since = (days: number) =>
-      new Date(Date.now() - days * 86400000).toISOString();
+    const since = (days: number) => new Date(Date.now() - days * 86400000).toISOString();
 
     const [convAll, conv7, conv30, msgAll, indLeads, compLeads] = await Promise.all([
       sb.from("chat_conversations").select("id", { count: "exact", head: true }),
@@ -93,7 +92,6 @@ export const getChatStats = createServerFn({ method: "GET" })
   });
 
 // listLeads moved to src/lib/crm.functions.ts as listIndividualLeads / listCompanyLeads
-
 
 export const listKnowledgeDocuments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -156,9 +154,7 @@ export const addKnowledgeText = createServerFn({ method: "POST" })
         }
       }
       if (rows.length > 0) {
-        const { error: chunkErr } = await sb
-          .from("chat_knowledge_chunks")
-          .insert(rows);
+        const { error: chunkErr } = await sb.from("chat_knowledge_chunks").insert(rows);
         if (chunkErr) throw new Error(chunkErr.message);
       }
       await sb
@@ -192,10 +188,7 @@ export const deleteKnowledgeDocument = createServerFn({ method: "POST" })
     if (doc?.file_path) {
       await sb.storage.from("chat-knowledge").remove([doc.file_path]);
     }
-    const { error } = await sb
-      .from("chat_knowledge_documents")
-      .delete()
-      .eq("id", data.documentId);
+    const { error } = await sb.from("chat_knowledge_documents").delete().eq("id", data.documentId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -205,9 +198,7 @@ export const deleteKnowledgeDocument = createServerFn({ method: "POST" })
 export const listChatFeedback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { category?: string } | undefined) =>
-    z
-      .object({ category: z.string().max(40).optional() })
-      .parse(d ?? {}),
+    z.object({ category: z.string().max(40).optional() }).parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);

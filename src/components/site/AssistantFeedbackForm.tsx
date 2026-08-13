@@ -116,7 +116,10 @@ export function AssistantFeedbackForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-2xl border border-border bg-muted/30 p-4 text-start">
+    <form
+      onSubmit={submit}
+      className="space-y-3 rounded-2xl border border-border bg-muted/30 p-4 text-start"
+    >
       <div className="flex items-center justify-between">
         <p className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
           <MessageSquarePlus className="h-4 w-4 text-primary" />
@@ -151,7 +154,12 @@ export function AssistantFeedbackForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <Label className="text-xs">{tr.name}</Label>
-          <Input className="mt-1 h-9" value={name} maxLength={200} onChange={(e) => setName(e.target.value)} />
+          <Input
+            className="mt-1 h-9"
+            value={name}
+            maxLength={200}
+            onChange={(e) => setName(e.target.value)}
+          />
         </div>
         <div>
           <Label className="text-xs">{tr.email}</Label>

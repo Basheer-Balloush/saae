@@ -157,16 +157,14 @@ export function AssistantChatModal({
                   <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                     <Bot className="h-7 w-7" />
                   </span>
-                  <h3 className="mt-4 text-base font-semibold text-foreground">
-                    {a.title}
-                  </h3>
-                  <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-                    {a.subtitle}
-                  </p>
+                  <h3 className="mt-4 text-base font-semibold text-foreground">{a.title}</h3>
+                  <p className="mt-2 max-w-sm text-sm text-muted-foreground">{a.subtitle}</p>
                   <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
                     {[
                       isRtl ? "أنا فرد مهتم بالتدريب" : "I'm an individual interested in training",
-                      isRtl ? "أمثّل شركة وأبحث عن شراكة" : "I represent a company looking to partner",
+                      isRtl
+                        ? "أمثّل شركة وأبحث عن شراكة"
+                        : "I represent a company looking to partner",
                       isRtl ? "أخبرني عن الجمعية" : "Tell me about the association",
                     ].map((q) => (
                       <button
@@ -200,9 +198,7 @@ export function AssistantChatModal({
 
               <div className="space-y-4">
                 {messages.map((m) => {
-                  const text = m.parts
-                    .map((p) => (p.type === "text" ? p.text : ""))
-                    .join("");
+                  const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
                   const isUser = m.role === "user";
                   return (
                     <div
@@ -219,9 +215,7 @@ export function AssistantChatModal({
                     >
                       <div
                         className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                          isUser
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-foreground"
+                          isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
                         }`}
                       >
                         {text}
@@ -231,11 +225,7 @@ export function AssistantChatModal({
                 })}
 
                 {isLoading && (
-                  <div
-                    className={`flex ${
-                      isRtl ? "justify-end" : "justify-start"
-                    }`}
-                  >
+                  <div className={`flex ${isRtl ? "justify-end" : "justify-start"}`}>
                     <div className="inline-flex items-center gap-2 rounded-2xl bg-muted px-4 py-2.5 text-sm text-muted-foreground">
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       {a.chat.typing}
