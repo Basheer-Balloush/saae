@@ -8,6 +8,7 @@ import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { CoursePrice } from "@/components/lms/CoursePrice";
 import { CourseReviews } from "@/components/lms/CourseReviews";
 import { EnrollmentFormDialog } from "@/components/lms/EnrollmentFormDialog";
 import { displayStudentsCount } from "@/lib/lms-display-count";
@@ -16,7 +17,7 @@ import { displayStudentsCount } from "@/lib/lms-display-count";
 type Course = {
   id: string; title_ar: string; title_en: string | null;
   description_ar: string | null; description_en: string | null;
-  cover_url: string | null; level: string; price: number; is_free: boolean;
+  cover_url: string | null; level: string; price: number; sale_price?: number | null; is_free: boolean;
   students_count: number; rating_avg: number; review_count: number;
   enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null;
   start_date: string | null; end_date: string | null;
@@ -77,7 +78,7 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
         return fullDesc.length > 160 ? `${fullDesc.slice(0, 157).trimEnd()}…` : fullDesc;
       })(),
       image: c.cover_url ?? null,
-      price: Number(c.price ?? 0),
+      price: Number(c.sale_price ?? c.price ?? 0),
       isFree: Boolean(c.is_free),
       rating: Number(c.rating_avg ?? 0),
       reviewCount: Number(c.review_count ?? 0),
@@ -394,21 +395,13 @@ function CourseDetails() {
 
         <aside className="lg:sticky lg:top-24 self-start rounded-2xl border border-border bg-card p-6 shadow-soft">
           <div className="text-3xl font-bold text-foreground">
-            {course.is_free ? tr.free : (
-              <span dir="ltr" className="inline-flex flex-row items-center gap-2">
-                {lang === "ar" ? (
-                  <>
-                    <span dir="rtl">ل.س</span>
-                    <span>{Number(course.price).toLocaleString()}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{Number(course.price).toLocaleString()}</span>
-                    <span>SYP</span>
-                  </>
-                )}
-              </span>
-            )}
+            <CoursePrice
+              price={Number(course.price)}
+              salePrice={course.sale_price == null ? null : Number(course.sale_price)}
+              isFree={course.is_free}
+              lang={lang}
+              freeLabel={tr.free}
+            />
           </div>
           {(() => {
             const deadlinePassed = !!course.enrollment_deadline && new Date(course.enrollment_deadline) < new Date();

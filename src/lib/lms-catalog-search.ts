@@ -34,3 +34,10 @@ export function parseCatalogSearch(raw: Record<string, unknown>): CatalogSearch 
     page,
   };
 }
+
+/** Router-facing shape: every param is optional so links need no `search` prop. */
+export type CatalogSearchInput = Partial<CatalogSearch>;
+
+export function validateCatalogSearch(raw: Record<string, unknown>): CatalogSearchInput {
+  return parseCatalogSearch(raw);
+}

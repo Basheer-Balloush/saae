@@ -17,7 +17,8 @@ import { CourseCard, type CourseCardData } from "@/components/lms/CourseCard";
 import {
   PAGE_SIZE,
   parseCatalogSearch,
-  type CatalogSearch,
+  validateCatalogSearch,
+  type CatalogSearchInput,
 } from "@/lib/lms-catalog-search";
 
 type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
@@ -31,14 +32,8 @@ type LoaderData = {
 };
 
 export const Route = createFileRoute("/learning-management-system/catalog")({
-  validateSearch: parseCatalogSearch,
-  loaderDeps: ({ search }) => ({
-    q: search.q,
-    category: search.category,
-    level: search.level,
-    price: search.price,
-    page: search.page,
-  }),
+  validateSearch: validateCatalogSearch,
+  loaderDeps: ({ search }) => parseCatalogSearch(search as Record<string, unknown>),
   loader: async ({ deps }): Promise<LoaderData> => {
     // Bounded, server-side filtered + paginated public list.
     const [{ data: cs, error }, { data: cats }] = await Promise.all([
@@ -116,7 +111,7 @@ function Catalog() {
   const ar = lang === "ar";
   const dir: "rtl" | "ltr" = ar ? "rtl" : "ltr";
   const data = Route.useLoaderData();
-  const search = Route.useSearch();
+  const search = parseCatalogSearch(Route.useSearch() as Record<string, unknown>);
   const navigate = useNavigate({ from: Route.fullPath });
 
   const { courses, categories, total } = data;
@@ -137,17 +132,17 @@ function Catalog() {
     if (!typedRef.current) return;
     const t = setTimeout(() => {
       if (q === urlQ) return;
-      navigate({ search: (prev: CatalogSearch) => ({ ...prev, q, page: 1 }), replace: true });
+      navigate({ search: (prev: CatalogSearchInput) => ({ ...prev, q, page: 1 }), replace: true });
     }, 350);
     return () => clearTimeout(t);
   }, [q, urlQ, navigate]);
 
   const setFilter = (key: "category" | "level" | "price", value: string) =>
     // Any filter change resets pagination.
-    navigate({ search: (prev: CatalogSearch) => ({ ...prev, [key]: value === "all" ? "" : value, page: 1 }) });
+    navigate({ search: (prev: CatalogSearchInput) => ({ ...prev, [key]: value === "all" ? "" : value, page: 1 }) });
 
   const goToPage = (page: number) =>
-    navigate({ search: (prev: CatalogSearch) => ({ ...prev, page: Math.max(1, Math.min(totalPages, page)) }) });
+    navigate({ search: (prev: CatalogSearchInput) => ({ ...prev, page: Math.max(1, Math.min(totalPages, page)) }) });
 
   const hasFilters = !!(search.q || search.category || search.level || search.price);
 
