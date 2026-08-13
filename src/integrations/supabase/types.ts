@@ -223,6 +223,56 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_feedback: {
+        Row: {
+          category: string
+          conversation_id: string | null
+          created_at: string
+          email: string | null
+          handled: boolean
+          id: string
+          lang: string | null
+          message: string
+          name: string | null
+          session_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          conversation_id?: string | null
+          created_at?: string
+          email?: string | null
+          handled?: boolean
+          id?: string
+          lang?: string | null
+          message: string
+          name?: string | null
+          session_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          conversation_id?: string | null
+          created_at?: string
+          email?: string | null
+          handled?: boolean
+          id?: string
+          lang?: string | null
+          message?: string
+          name?: string | null
+          session_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_feedback_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_knowledge_chunks: {
         Row: {
           chunk_index: number
@@ -2237,6 +2287,7 @@ export type Database = {
           rating_avg: number
           rejection_reason: string | null
           review_count: number
+          sale_price: number | null
           schedule_days: string[] | null
           schedule_time_from: string | null
           schedule_time_to: string | null
@@ -2276,6 +2327,7 @@ export type Database = {
           rating_avg?: number
           rejection_reason?: string | null
           review_count?: number
+          sale_price?: number | null
           schedule_days?: string[] | null
           schedule_time_from?: string | null
           schedule_time_to?: string | null
@@ -2315,6 +2367,7 @@ export type Database = {
           rating_avg?: number
           rejection_reason?: string | null
           review_count?: number
+          sale_price?: number | null
           schedule_days?: string[] | null
           schedule_time_from?: string | null
           schedule_time_to?: string | null
@@ -4177,6 +4230,7 @@ export type Database = {
           price: number
           rating_avg: number
           review_count: number
+          sale_price: number
           slug: string
           students_count: number
           title_ar: string
