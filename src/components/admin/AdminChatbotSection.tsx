@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toUserMessage } from "@/lib/safe-error";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Loader2, Trash2, Upload, Eye, MessageSquare, BookOpen, BarChart3 } from "lucide-react";
+import { Loader2, Trash2, Upload, Eye, MessageSquare, BookOpen, BarChart3, MessageSquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,14 +24,16 @@ import {
   deleteKnowledgeDocument,
 } from "@/lib/admin-chat.functions";
 import { confirmDialog } from "@/hooks/useConfirm";
+import { ChatFeedbackPanel } from "@/components/admin/ChatFeedbackPanel";
 
-type SubTab = "stats" | "conversations" | "knowledge";
+type SubTab = "stats" | "conversations" | "feedback" | "knowledge";
 
 const T = {
   ar: {
     title: "الشات بوت",
     stats: "إحصائيات",
     conversations: "المحادثات",
+    feedback: "الملاحظات",
     leads: "الـ Leads",
     knowledge: "قاعدة المعرفة (تدريب)",
     conversationsTotal: "إجمالي المحادثات",
@@ -85,6 +87,7 @@ const T = {
     title: "Chatbot",
     stats: "Stats",
     conversations: "Conversations",
+    feedback: "Feedback",
     leads: "Leads",
     knowledge: "Knowledge base (training)",
     conversationsTotal: "Total conversations",
@@ -143,6 +146,7 @@ export function AdminChatbotSection({ lang }: { lang: "ar" | "en" }) {
   const tabs: Array<{ key: SubTab; label: string; icon: typeof BarChart3 }> = [
     { key: "stats", label: tr.stats, icon: BarChart3 },
     { key: "conversations", label: tr.conversations, icon: MessageSquare },
+    { key: "feedback", label: tr.feedback, icon: MessageSquarePlus },
     { key: "knowledge", label: tr.knowledge, icon: BookOpen },
   ];
 
@@ -172,6 +176,7 @@ export function AdminChatbotSection({ lang }: { lang: "ar" | "en" }) {
       {sub === "stats" && <StatsPanel tr={tr} />}
       {sub === "conversations" && <ConversationsPanel tr={tr} lang={lang} />}
       
+      {sub === "feedback" && <ChatFeedbackPanel lang={lang} />}
       {sub === "knowledge" && <KnowledgePanel tr={tr} lang={lang} />}
     </div>
   );

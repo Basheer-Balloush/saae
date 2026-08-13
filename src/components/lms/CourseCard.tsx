@@ -36,21 +36,30 @@ export function CourseCard({ course }: { course: CourseCardData }) {
     >
       <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center overflow-hidden">
         {course.cover_url ? (
-          <img src={course.cover_url} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
+          <img
+            src={course.cover_url}
+            alt={title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+            loading="lazy"
+          />
         ) : (
           <BookOpen className="h-12 w-12 text-primary/40" />
         )}
       </div>
       <div className="p-4 flex-1 flex flex-col">
         <div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground">
-          <span className="rounded-full bg-muted px-2 py-0.5">{tr[course.level as keyof typeof tr] as string}</span>
+          <span className="rounded-full bg-muted px-2 py-0.5">
+            {tr[course.level as keyof typeof tr] as string}
+          </span>
           {course.delivery_mode === "online" ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 px-2 py-0.5">
-              <PlayCircle className="h-3 w-3" />{tr.deliveryOnline}
+              <PlayCircle className="h-3 w-3" />
+              {tr.deliveryOnline}
             </span>
           ) : course.delivery_mode === "onsite" ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5">
-              <MapPin className="h-3 w-3" />{tr.deliveryOnsite}
+              <MapPin className="h-3 w-3" />
+              {tr.deliveryOnsite}
             </span>
           ) : null}
           <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">
@@ -69,8 +78,14 @@ export function CourseCard({ course }: { course: CourseCardData }) {
         </h3>
         {desc && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{desc}</p>}
         <div className="mt-auto pt-3 flex items-center justify-between text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" />{displayStudentsCount(course.id, course.students_count)}</span>
-          <span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />{Number(course.rating_avg).toFixed(1)}</span>
+          <span className="inline-flex items-center gap-1">
+            <Users className="h-3.5 w-3.5" />
+            {displayStudentsCount(course.id, course.students_count)}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+            {Number(course.rating_avg).toFixed(1)}
+          </span>
         </div>
       </div>
     </Link>

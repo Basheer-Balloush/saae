@@ -4,6 +4,7 @@ import { Bot, Send, X, Loader2 } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useLang } from "@/lib/i18n";
+import { AssistantFeedbackForm } from "@/components/site/AssistantFeedbackForm";
 
 function getOrCreateSessionId(): string {
   if (typeof window === "undefined") return "ssr";
@@ -34,6 +35,7 @@ export function AssistantChatModal({
   const isRtl = dir === "rtl";
 
   const [input, setInput] = useState("");
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -155,16 +157,14 @@ export function AssistantChatModal({
                   <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                     <Bot className="h-7 w-7" />
                   </span>
-                  <h3 className="mt-4 text-base font-semibold text-foreground">
-                    {a.title}
-                  </h3>
-                  <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-                    {a.subtitle}
-                  </p>
+                  <h3 className="mt-4 text-base font-semibold text-foreground">{a.title}</h3>
+                  <p className="mt-2 max-w-sm text-sm text-muted-foreground">{a.subtitle}</p>
                   <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
                     {[
                       isRtl ? "أنا فرد مهتم بالتدريب" : "I'm an individual interested in training",
-                      isRtl ? "أمثّل شركة وأبحث عن شراكة" : "I represent a company looking to partner",
+                      isRtl
+                        ? "أمثّل شركة وأبحث عن شراكة"
+                        : "I represent a company looking to partner",
                       isRtl ? "أخبرني عن الجمعية" : "Tell me about the association",
                     ].map((q) => (
                       <button
@@ -176,15 +176,29 @@ export function AssistantChatModal({
                         {q}
                       </button>
                     ))}
+                    <button
+                      type="button"
+                      onClick={() => setFeedbackOpen(true)}
+                      className="rounded-full border border-primary bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                    >
+                      {isRtl ? "إرسال ملاحظة / رأي" : "Send feedback"}
+                    </button>
                   </div>
+                  {feedbackOpen && (
+                    <div className="mt-6 w-full max-w-md">
+                      <AssistantFeedbackForm
+                        lang={lang === "ar" ? "ar" : "en"}
+                        sessionId={sessionId}
+                        onClose={() => setFeedbackOpen(false)}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
               <div className="space-y-4">
                 {messages.map((m) => {
-                  const text = m.parts
-                    .map((p) => (p.type === "text" ? p.text : ""))
-                    .join("");
+                  const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
                   const isUser = m.role === "user";
                   return (
                     <div
@@ -201,9 +215,7 @@ export function AssistantChatModal({
                     >
                       <div
                         className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                          isUser
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-foreground"
+                          isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
                         }`}
                       >
                         {text}
@@ -213,11 +225,7 @@ export function AssistantChatModal({
                 })}
 
                 {isLoading && (
-                  <div
-                    className={`flex ${
-                      isRtl ? "justify-end" : "justify-start"
-                    }`}
-                  >
+                  <div className={`flex ${isRtl ? "justify-end" : "justify-start"}`}>
                     <div className="inline-flex items-center gap-2 rounded-2xl bg-muted px-4 py-2.5 text-sm text-muted-foreground">
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       {a.chat.typing}
