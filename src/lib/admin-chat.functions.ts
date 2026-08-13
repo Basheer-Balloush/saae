@@ -199,3 +199,50 @@ export const deleteKnowledgeDocument = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ---- Chatbot feedback (also surfaced in CRM) ----
+
+export const listChatFeedback = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { category?: string } | undefined) =>
+    z
+      .object({ category: z.string().max(40).optional() })
+      .parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    let q = context.supabase
+      .from("chat_feedback")
+      .select("id, session_id, category, name, email, message, lang, handled, created_at")
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (data.category && data.category !== "all") q = q.eq("category", data.category);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return { feedback: rows ?? [] };
+  });
+
+export const setChatFeedbackHandled = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; handled: boolean }) =>
+    z.object({ id: z.string().uuid(), handled: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { error } = await context.supabase
+      .from("chat_feedback")
+      .update({ handled: data.handled })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteChatFeedback = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { error } = await context.supabase.from("chat_feedback").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
