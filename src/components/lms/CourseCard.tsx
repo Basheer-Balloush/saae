@@ -3,6 +3,7 @@ import { BookOpen, Users, Star, MapPin, PlayCircle } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { displayStudentsCount } from "@/lib/lms-display-count";
+import { CoursePrice } from "@/components/lms/CoursePrice";
 
 export type CourseCardData = {
   id: string;
@@ -14,6 +15,7 @@ export type CourseCardData = {
   cover_url: string | null;
   level: string;
   price: number;
+  sale_price?: number | null;
   is_free: boolean;
   students_count: number;
   rating_avg: number;
@@ -51,23 +53,16 @@ export function CourseCard({ course }: { course: CourseCardData }) {
               <MapPin className="h-3 w-3" />{tr.deliveryOnsite}
             </span>
           ) : null}
-          {course.is_free ? (
-            <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">{tr.free}</span>
-          ) : (
-            <span dir="ltr" className="inline-flex flex-row items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5">
-              {lang === "ar" ? (
-                <>
-                  <span dir="rtl">ل.س</span>
-                  <span>{course.price.toLocaleString()}</span>
-                </>
-              ) : (
-                <>
-                  <span>{course.price.toLocaleString()}</span>
-                  <span>SYP</span>
-                </>
-              )}
-            </span>
-          )}
+          <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5">
+            <CoursePrice
+              price={course.price}
+              salePrice={course.sale_price}
+              isFree={course.is_free}
+              lang={lang}
+              freeLabel={tr.free}
+              size="sm"
+            />
+          </span>
         </div>
         <h3 className="mt-2 font-bold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
           {title}
