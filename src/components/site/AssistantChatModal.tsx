@@ -4,6 +4,7 @@ import { Bot, Send, X, Loader2 } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useLang } from "@/lib/i18n";
+import { AssistantFeedbackForm } from "@/components/site/AssistantFeedbackForm";
 
 function getOrCreateSessionId(): string {
   if (typeof window === "undefined") return "ssr";
@@ -34,6 +35,7 @@ export function AssistantChatModal({
   const isRtl = dir === "rtl";
 
   const [input, setInput] = useState("");
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -176,7 +178,23 @@ export function AssistantChatModal({
                         {q}
                       </button>
                     ))}
+                    <button
+                      type="button"
+                      onClick={() => setFeedbackOpen(true)}
+                      className="rounded-full border border-primary bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                    >
+                      {isRtl ? "إرسال ملاحظة / رأي" : "Send feedback"}
+                    </button>
                   </div>
+                  {feedbackOpen && (
+                    <div className="mt-6 w-full max-w-md">
+                      <AssistantFeedbackForm
+                        lang={lang === "ar" ? "ar" : "en"}
+                        sessionId={sessionId}
+                        onClose={() => setFeedbackOpen(false)}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
