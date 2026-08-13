@@ -4126,6 +4126,7 @@ export type Database = {
         Args: { _application_id: string; _user_id: string }
         Returns: boolean
       }
+      is_trainer_evaluator_any: { Args: { _user_id: string }; Returns: boolean }
       link_lms_course_to_ams: {
         Args: { _lms_course_id: string }
         Returns: string
