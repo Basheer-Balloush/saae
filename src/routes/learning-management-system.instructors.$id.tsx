@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { CourseCard } from "@/components/lms/CourseCard";
-import { displayStudentsCount } from "@/lib/lms-display-count";
 
 export const Route = createFileRoute("/learning-management-system/instructors/$id")({
   head: () => ({ meta: [{ title: "LMS · Instructor" }] }),
@@ -36,6 +35,7 @@ type Course = {
   cover_url: string | null;
   level: string;
   price: number;
+  sale_price: number | null;
   is_free: boolean;
   students_count: number;
   rating_avg: number;
@@ -82,7 +82,7 @@ function InstructorProfile() {
       setIns(row);
       const { data: cs } = await supabase
         .from("lms_courses")
-        .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,level,price,is_free,students_count,rating_avg,instructor_id")
+        .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,level,price,sale_price,is_free,students_count,rating_avg,instructor_id")
         .eq("status", "published")
         .order("created_at", { ascending: false });
       if (cancelled) return;
@@ -107,7 +107,7 @@ function InstructorProfile() {
   if (errored) return <p className="text-center py-20 text-muted-foreground">{lang === "ar" ? "تعذّر تحميل الملف. حاول مجدداً." : "Could not load profile. Please try again."}</p>;
   if (!ins) return <p className="text-center py-20 text-muted-foreground">404</p>;
 
-  const totalStudents = courses.reduce((s, c) => s + displayStudentsCount(c.id, c.students_count), 0);
+  const totalStudents = courses.reduce((s, c) => s + Number(c.students_count ?? 0), 0);
   const avgRating = courses.length
     ? (courses.reduce((s, c) => s + Number(c.rating_avg), 0) / courses.length).toFixed(1)
     : "0.0";

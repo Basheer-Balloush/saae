@@ -721,7 +721,7 @@ function CourseBuilder() {
               <option value="advanced">{tr.advanced}</option>
             </select>
           </div>
-          <div><Label>{tr.filterPrice}</Label>
+          <div><Label>{lang === "ar" ? "السعر الأساسي" : "Original price"}</Label>
             <div className="flex items-center gap-2 h-10">
               <label className="flex items-center gap-1 text-sm">
                 <input type="checkbox" checked={course.is_free}
@@ -736,7 +736,7 @@ function CourseBuilder() {
           {!course.is_free && (
             <div>
               <Label>
-                {lang === "ar" ? "سعر بعد الخصم (اختياري)" : "Sale price (optional)"}
+                {lang === "ar" ? "السعر بعد الخصم (اختياري)" : "Discounted price (optional)"}
               </Label>
               <Input
                 type="number"
