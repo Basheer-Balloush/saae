@@ -35,6 +35,7 @@ type Course = {
   cover_url: string | null;
   level: string;
   price: number;
+  sale_price: number | null;
   is_free: boolean;
   students_count: number;
   rating_avg: number;
