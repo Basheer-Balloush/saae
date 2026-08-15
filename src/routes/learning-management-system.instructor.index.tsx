@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useRef, useState } from "react";
 import { Plus, Edit3, Users, Loader2 } from "lucide-react";
+import { CoursePrice } from "@/components/lms/CoursePrice";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/learning-management-system/instructor/")(
   component: InstructorHome,
 });
 
-type Course = { id: string; title_ar: string; title_en: string | null; status: string; students_count: number; is_free: boolean; price: number; instructor_id: string };
+type Course = { id: string; title_ar: string; title_en: string | null; status: string; students_count: number; is_free: boolean; price: number; sale_price: number | null; instructor_id: string };
 
 function InstructorHome() {
   const { user } = useLmsAuth();
@@ -44,11 +45,11 @@ function InstructorHome() {
     if (!user) return;
     setLoading(true);
     const ownedP = supabase.from("lms_courses")
-      .select("id,title_ar,title_en,status,students_count,is_free,price,instructor_id")
+      .select("id,title_ar,title_en,status,students_count,is_free,price,sale_price,instructor_id")
       .eq("instructor_id", user.id)
       .order("created_at", { ascending: false });
     const coP = supabase.from("lms_course_instructors")
-      .select("course:lms_courses(id,title_ar,title_en,status,students_count,is_free,price,instructor_id)")
+      .select("course:lms_courses(id,title_ar,title_en,status,students_count,is_free,price,sale_price,instructor_id)")
       .eq("instructor_user_id", user.id);
     const [{ data: owned }, { data: co }] = await Promise.all([ownedP, coP]);
     const map = new Map<string, Course>();
@@ -184,23 +185,14 @@ function InstructorHome() {
               </div>
               <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" />{c.students_count}</span>
-                <span>
-                  {c.is_free ? tr.free : (
-                    <span dir="ltr" className="inline-flex flex-row items-center gap-1">
-                      {lang === "ar" ? (
-                        <>
-                          <span dir="rtl">ل.س</span>
-                          <span>{c.price.toLocaleString()}</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>{c.price.toLocaleString()}</span>
-                          <span>SYP</span>
-                        </>
-                      )}
-                    </span>
-                  )}
-                </span>
+                <CoursePrice
+                  price={Number(c.price ?? 0)}
+                  salePrice={c.sale_price == null ? null : Number(c.sale_price)}
+                  isFree={!!c.is_free}
+                  lang={lang}
+                  freeLabel={tr.free}
+                  size="sm"
+                />
                 <span className="inline-flex items-center gap-1 text-primary"><Edit3 className="h-3.5 w-3.5" />{lang === "ar" ? "تعديل" : "Edit"}</span>
               </div>
             </Link>
