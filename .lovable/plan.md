@@ -1,48 +1,48 @@
-# Event Story Sharing Campaign — Phased Plan
+# Real registration counts + dual pricing display
 
-Goal: one short guided path — account choice → sign in/up → two-option screen → campaign page with ready-made Story image → Add to Your Story. Bilingual (AR RTL / EN LTR), mobile-first, configurable, no extra forms.
+## 1. Show real registration counts everywhere
 
-## Phase 0 — Campaign configuration foundation (DB only)
-- New table `lms_story_campaigns`: slug, active, starts_at, ends_at, title_ar/en, story_image_url, instagram_handle, course_ref (id or slug), post_share_destination, allow_download fallback flag.
-- Public read limited to the currently active campaign; admin-only writes; GRANTs + RLS.
-- Seed the 31 July 2026 event row (artwork URL filled in Phase 3).
-- No UI change yet.
+Today course cards, the course detail page, and instructor profiles run the real
+enrollment number through a helper that pushes every course up to a "at least 50–60
+students" display value. The database itself is accurate: for example "Marketing 360°"
+has 0 real enrollments, Generative AI has 18, Modern Software Engineering has 71.
 
-## Phase 1 — Campaign entry + auth continuity
-- Route `/learning-management-system/campaign` (Screen A: "Do you have an account?" → Yes/No).
-- Yes → LMS login, No → LMS signup, both carrying a validated internal `redirect` back to the campaign.
-- Reuse `safeLmsRedirect`; reject external URLs. SAAE logo on screen.
+Changes:
+- Delete the display-count helper (`src/lib/lms-display-count.ts`).
+- Course card, course detail page, and instructor profile totals show the real
+  `students_count` value straight from the database (which already matches the
+  enrollment rows exactly and is kept in sync on enroll/unenroll).
+- No mock or padded numbers remain anywhere on the platform, now or for future courses.
 
-## Phase 2 — Two-option choice screen
-- After auth, land directly on the choice screen (never the public home page).
-- Two cards: "Explore the Platform" and "Get the Generative AI Course for Free" (visually dominant).
-- Bilingual labels through the existing translation system.
+## 2. Dual pricing with strikethrough
 
-## Phase 3 — Campaign page + artwork
-- Page shows only the vertical 1080×1920 Story image and one button below it.
-- Artwork hosted as a real downloadable file (asset/storage URL), not a CSS background.
-- Vertical ratio preserved on mobile and desktop.
+The discounted price field (`sale_price`) already exists in the database, is returned by
+the public catalogue query, and the shared price component already renders the original
+price struck through next to the discounted one. Two gaps remain:
 
-## Phase 4 — Add to Your Story behavior
-- `navigator.share` with the image as a File where supported.
-- Fallback: save image + one clear "Open Instagram" action; friendly message only when sharing is unavailable.
-- No technical errors surfaced.
+- The instructor/admin course editor has the sale-price field, but the admin course
+  screens that also edit price need the same field so admins can set both prices.
+- The instructor profile page loads courses without `sale_price`, so cards there never
+  show the discount.
 
-## Phase 5 — Course access after sharing
-- Route the user to the campaign's course-access destination per the approved enrollment rule (free grant for the configured Generative AI course).
-- Idempotent; no screenshot verification step.
+Changes:
+- Add `sale_price` to the instructor-profile course query so those cards render the
+  discount correctly.
+- Make sure both price inputs (Original price, Discounted price) are available in every
+  course create/edit surface an admin or instructor uses, with the discounted field
+  optional and clearly labelled in Arabic and English.
+- Behaviour stays: both prices present and discount lower than original → original shown
+  struck through beside the active discounted price; one price only → plain price; free
+  courses → "Free" label.
 
-## Phase 6 — Admin configuration screen
-- Admin LMS panel to edit campaign fields (active window, titles, artwork, handle, course, destination).
+## Technical notes
 
-## Phase 7 — QA and release gate (done)
-- Verify AR/EN, redirect survival, real file share, fallback, no private data, existing LMS behavior unchanged. Device testing on iPhone + Android with Instagram, plus Safari/Chrome without it.
-
-
-### Phase 7 QA results (29 Jul 2026)
-- Typecheck, campaign-file lint, production build: pass.
-- Anonymous `/campaign` and `/campaign/choice` gate correctly; `/campaign/story` now also gates (fixed during QA) and returns to the Story step after auth.
-- Redirect chain stays internal through login/signup (`safeLmsRedirect`).
-- AR RTL and EN LTR verified on entry, choice, and story screens.
-- Admin campaign page denies anonymous access; `lms_claim_story_campaign` has no anon EXECUTE and handles missing/unpublished course gracefully.
-- Open item: campaign row has no `course_ref` set yet — set the Generative AI course in the admin Story campaign page before the event.
+- Files touched: `src/lib/lms-display-count.ts` (removed),
+  `src/components/lms/CourseCard.tsx`, `src/routes/learning-management-system.courses.$id.tsx`,
+  `src/routes/learning-management-system.instructors.$id.tsx`, and the course editor
+  screens for the price fields.
+- No destructive migration; `sale_price` already exists with public read access.
+- Capacity checks (`max_students`) already use the real count and are unaffected.
+- Verification: check a course with 0 enrollments shows 0, one with 71 shows 71, set a
+  discount on a course and confirm the strikethrough on card + detail page in both
+  Arabic RTL and English LTR, then run typecheck, lint, tests, and the production build.
