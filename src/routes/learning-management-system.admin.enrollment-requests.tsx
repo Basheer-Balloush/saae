@@ -220,7 +220,7 @@ function AdminEnrollmentRequests() {
     }
     const { data: cs } = await supabase
       .from("lms_courses")
-      .select("id,title_ar,title_en,price,students_count,enrollment_deadline,max_students")
+      .select("id,title_ar,title_en,price,students_count,enrollment_deadline,max_students,created_at")
       .in("id", courseIds);
     const cMap = new Map((cs ?? []).map((c) => [c.id, c]));
     const summaries: CourseSummary[] = courseIds.map((id) => {
@@ -243,7 +243,12 @@ function AdminEnrollmentRequests() {
         max_students: c?.max_students ?? null,
         counts,
       };
-    }).sort((a, b) => b.counts.pending - a.counts.pending || b.counts.total - a.counts.total);
+    }).sort((a, b) => {
+      const at = cMap.get(a.id)?.created_at ?? "";
+      const bt = cMap.get(b.id)?.created_at ?? "";
+      // Newest courses first
+      return bt.localeCompare(at);
+    });
     setCourses(summaries);
     setLoadingCourses(false);
   };
@@ -257,7 +262,7 @@ function AdminEnrollmentRequests() {
     if (list.length) {
       const { data: c } = await supabase
         .from("lms_courses")
-        .select("id,title_ar,title_en,price,students_count,enrollment_deadline,max_students")
+        .select("id,title_ar,title_en,price,students_count,enrollment_deadline,max_students,created_at")
         .eq("id", courseId)
         .single();
       list.forEach((r) => {
