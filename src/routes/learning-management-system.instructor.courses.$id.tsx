@@ -755,6 +755,19 @@ function CourseBuilder() {
                   ? "إذا كان أقل من السعر الأساسي، سيظهر السعر الأساسي مشطوباً بجانب سعر الخصم."
                   : "When lower than the regular price, the regular price is shown struck through next to it."}
               </p>
+              <div className="mt-2 text-sm font-semibold text-foreground">
+                <span className="text-[11px] font-normal text-muted-foreground mx-1">
+                  {lang === "ar" ? "المعاينة:" : "Preview:"}
+                </span>
+                <CoursePrice
+                  price={Number(course.price ?? 0)}
+                  salePrice={course.sale_price == null ? null : Number(course.sale_price)}
+                  isFree={!!course.is_free}
+                  lang={lang}
+                  freeLabel={tr.free}
+                  size="sm"
+                />
+              </div>
             </div>
           )}
         </div>
