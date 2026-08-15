@@ -91,6 +91,9 @@ type Course = {
   instructor_id: string;
   rejection_reason: string | null;
   created_at?: string;
+  price: number;
+  sale_price: number | null;
+  is_free: boolean;
 };
 type Category = {
   id: string;
