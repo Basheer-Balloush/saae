@@ -59,23 +59,23 @@ const EXPERIENCE_LEVELS = [
 ] as const;
 
 const schema = z.object({
-  fullNameAr: z.string().trim().min(3).max(120),
-  fullNameEn: z.string().trim().min(3).max(120),
-  phone: z.string().trim().min(6).max(30),
+  fullNameAr: z.string().trim().min(1),
+  fullNameEn: z.string().trim().min(1),
+  phone: z.string().trim().min(1),
   dateOfBirth: z.string().refine((v) => {
     const d = new Date(v);
     if (Number.isNaN(d.getTime())) return false;
     const age = (Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000);
     return age >= 18;
   }, { message: "min_age_18" }),
-  city: z.string().trim().min(2).max(80),
+  city: z.string().trim().min(1),
   experienceLevel: z.enum(["lt_1", "1_2", "3_5", "5_plus"]),
   specializations: z.array(z.string()).min(1),
-  bio: z.string().trim().refine((v) => v.split(/\s+/).filter(Boolean).length >= 100, { message: "bio_min_100_words" }),
-  linkedinUrl: z.string().trim().url().max(255),
-  githubUrl: z.string().trim().url().max(255).optional().or(z.literal("")),
+  bio: z.string().trim().min(1),
+  linkedinUrl: z.string().trim().url(),
+  githubUrl: z.string().trim().url().optional().or(z.literal("")),
   hasPrevTraining: z.boolean(),
-  prevTrainingDetails: z.string().max(2000).optional().or(z.literal("")),
+  prevTrainingDetails: z.string().optional().or(z.literal("")),
   consentEthics: z.literal(true),
   consentData: z.literal(true),
   consentProcess: z.literal(true),
@@ -139,11 +139,7 @@ function TrainerApplyPage() {
     e.preventDefault();
     if (!user) return;
     if (!cvFile) {
-      toast.error(ar ? "يجب رفع السيرة الذاتية (PDF)" : "CV file (PDF) is required");
-      return;
-    }
-    if (cvFile.type !== "application/pdf") {
-      toast.error(ar ? "السيرة الذاتية يجب أن تكون PDF" : "CV must be a PDF");
+      toast.error(ar ? "يجب رفع السيرة الذاتية" : "CV file is required");
       return;
     }
     if (workSamples.length < 1) {
@@ -172,7 +168,6 @@ function TrainerApplyPage() {
       const msg = issue.message;
       const map: Record<string, string> = {
         min_age_18: ar ? "يجب أن يكون عمرك 18 سنة أو أكثر" : "You must be at least 18 years old",
-        bio_min_100_words: ar ? "النبذة يجب أن تحتوي على 100 كلمة على الأقل" : "Bio must contain at least 100 words",
       };
       toast.error(map[msg] ?? (ar ? `تحقق من الحقل: ${issue.path.join(".")}` : `Check field: ${issue.path.join(".")}`));
       return;
@@ -369,12 +364,9 @@ function TrainerApplyPage() {
             </div>
             <div className="sm:col-span-2">
               <Label>
-                {ar ? "نبذة عن الخبرة (100 كلمة على الأقل)" : "Experience summary (min 100 words)"} *
+                {ar ? "نبذة عن الخبرة" : "Experience summary"} *
               </Label>
               <Textarea rows={5} required value={bio} onChange={(e) => setBio(e.target.value)} />
-              <p className="mt-1 text-xs text-muted-foreground">
-                {bio.split(/\s+/).filter(Boolean).length} / 100 {ar ? "كلمة" : "words"}
-              </p>
             </div>
             <div>
               <Label>{ar ? "رابط GitHub / Portfolio" : "GitHub / Portfolio URL"}</Label>
@@ -393,8 +385,8 @@ function TrainerApplyPage() {
               </div>
             )}
             <div className="sm:col-span-2">
-              <Label>{ar ? "السيرة الذاتية (PDF)" : "CV (PDF)"} *</Label>
-              <Input type="file" accept="application/pdf" onChange={(e) => setCvFile(e.target.files?.[0] ?? null)} />
+              <Label>{ar ? "السيرة الذاتية" : "CV"} *</Label>
+              <Input type="file" onChange={(e) => setCvFile(e.target.files?.[0] ?? null)} />
               {cvFile && (
                 <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1">
                   <FileText className="h-3 w-3" /> {cvFile.name}
@@ -406,7 +398,6 @@ function TrainerApplyPage() {
               <Input
                 type="file"
                 multiple
-                accept="application/pdf,image/*"
                 onChange={(e) => setWorkSamples(Array.from(e.target.files ?? []))}
               />
               {workSamples.length > 0 && (

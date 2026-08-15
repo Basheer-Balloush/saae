@@ -11,18 +11,18 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
  */
 
 const SubmitSchema = z.object({
-  full_name_ar: z.string().trim().min(2).max(200),
-  full_name_en: z.string().trim().min(2).max(200),
-  phone: z.string().trim().min(5).max(40),
+  full_name_ar: z.string().trim().min(1),
+  full_name_en: z.string().trim().min(1),
+  phone: z.string().trim().min(1),
   date_of_birth: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
-  city: z.string().trim().min(2).max(120),
+  city: z.string().trim().min(1),
   experience_level: z.enum(["lt_1", "1_2", "3_5", "5_plus"]),
-  specializations: z.array(z.string().trim().min(1).max(80)).min(1).max(20),
-  bio: z.string().trim().min(10).max(20000),
-  linkedin_url: z.string().trim().url().max(500),
-  github_url: z.string().trim().max(500).optional().nullable(),
+  specializations: z.array(z.string().trim().min(1)).min(1),
+  bio: z.string().trim().min(1),
+  linkedin_url: z.string().trim().url(),
+  github_url: z.string().trim().optional().nullable(),
   has_prev_training: z.boolean(),
-  prev_training_details: z.string().trim().max(5000).optional().nullable(),
+  prev_training_details: z.string().trim().optional().nullable(),
   consent_ethics: z.literal(true),
   consent_data: z.literal(true),
   consent_process: z.literal(true),
@@ -32,8 +32,8 @@ const AttachSchema = z.object({
   application_id: z.string().uuid(),
   kind: z.enum(["cv", "work_sample", "avatar"]),
   storage_path: z.string().trim().min(3).max(500),
-  original_name: z.string().trim().min(1).max(200),
-  content_type: z.string().trim().max(200).nullable().optional(),
+  original_name: z.string().trim().min(1),
+  content_type: z.string().trim().nullable().optional(),
   size_bytes: z.number().int().positive().max(52_428_800),
 });
 
