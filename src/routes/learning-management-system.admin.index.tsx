@@ -60,6 +60,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { CoursePrice } from "@/components/lms/CoursePrice";
 import { AdminInstructorEditDialog } from "@/components/lms/AdminInstructorEditDialog";
 import { reconcileCertificates } from "@/lib/lms-certificates.functions";
 import {
@@ -91,6 +92,9 @@ type Course = {
   instructor_id: string;
   rejection_reason: string | null;
   created_at?: string;
+  price: number;
+  sale_price: number | null;
+  is_free: boolean;
 };
 type Category = {
   id: string;
@@ -132,7 +136,7 @@ function AdminHome() {
         .order("created_at", { ascending: false }),
       supabase
         .from("lms_courses")
-        .select("id,title_ar,status,instructor_id,rejection_reason,created_at")
+        .select("id,title_ar,status,instructor_id,rejection_reason,created_at,price,sale_price,is_free")
         .order("created_at", { ascending: false }),
       supabase.from("lms_categories").select("*").order("display_order"),
       supabase.from("lms_enrollments").select("*", { count: "exact", head: true }),
@@ -806,7 +810,19 @@ function AdminHome() {
                       >
                         <div className="min-w-0">
                           <div className="font-bold text-foreground truncate">{c.title_ar}</div>
-                          <StatusBadge status={c.status} ar={ar} />
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <StatusBadge status={c.status} ar={ar} />
+                            <span className="text-xs font-semibold text-muted-foreground">
+                              <CoursePrice
+                                price={Number(c.price ?? 0)}
+                                salePrice={c.sale_price == null ? null : Number(c.sale_price)}
+                                isFree={!!c.is_free}
+                                lang={lang}
+                                freeLabel={tr.free}
+                                size="sm"
+                              />
+                            </span>
+                          </div>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <Link

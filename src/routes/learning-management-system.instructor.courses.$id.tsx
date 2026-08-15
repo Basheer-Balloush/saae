@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useRef, useState } from "react";
 import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList, ArrowRight, FileText } from "lucide-react";
+import { CoursePrice } from "@/components/lms/CoursePrice";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -755,6 +756,19 @@ function CourseBuilder() {
                   ? "إذا كان أقل من السعر الأساسي، سيظهر السعر الأساسي مشطوباً بجانب سعر الخصم."
                   : "When lower than the regular price, the regular price is shown struck through next to it."}
               </p>
+              <div className="mt-2 text-sm font-semibold text-foreground">
+                <span className="text-[11px] font-normal text-muted-foreground mx-1">
+                  {lang === "ar" ? "المعاينة:" : "Preview:"}
+                </span>
+                <CoursePrice
+                  price={Number(course.price ?? 0)}
+                  salePrice={course.sale_price == null ? null : Number(course.sale_price)}
+                  isFree={!!course.is_free}
+                  lang={lang}
+                  freeLabel={tr.free}
+                  size="sm"
+                />
+              </div>
             </div>
           )}
         </div>

@@ -1,3 +1,5 @@
+type Size = "xs" | "sm" | "lg";
+
 type Props = {
   price: number;
   salePrice?: number | null;
@@ -5,23 +7,30 @@ type Props = {
   lang: "ar" | "en";
   freeLabel: string;
   className?: string;
-  size?: "sm" | "lg";
+  size?: Size;
 };
 
-function Amount({ value, lang }: { value: number; lang: "ar" | "en" }) {
+function Amount({
+  value,
+  lang,
+  struck,
+  className,
+}: {
+  value: number;
+  lang: "ar" | "en";
+  struck?: boolean;
+  className?: string;
+}) {
+  // The line-through lives on this single inline element (not on a flex wrapper),
+  // so the rule paints across the amount + currency in both RTL and LTR.
   return (
-    <span dir="ltr" className="inline-flex flex-row items-center gap-1">
-      {lang === "ar" ? (
-        <>
-          <span dir="rtl">ل.س</span>
-          <span>{Number(value).toLocaleString()}</span>
-        </>
-      ) : (
-        <>
-          <span>{Number(value).toLocaleString()}</span>
-          <span>SYP</span>
-        </>
-      )}
+    <span
+      dir="ltr"
+      className={`inline-block whitespace-nowrap ${struck ? "line-through decoration-from-font" : ""} ${className ?? ""}`}
+    >
+      {lang === "ar"
+        ? `\u200Eل.س ${Number(value).toLocaleString("en-US")}`
+        : `${Number(value).toLocaleString("en-US")} SYP`}
     </span>
   );
 }
@@ -42,19 +51,19 @@ export function CoursePrice({
   if (isFree) return <span className={className}>{freeLabel}</span>;
 
   const hasSale = salePrice != null && Number(salePrice) >= 0 && Number(salePrice) < Number(price);
+  const oldSize = size === "lg" ? "text-base font-medium" : size === "sm" ? "text-[11px]" : "text-[10px]";
 
   return (
-    <span className={`inline-flex flex-wrap items-center gap-2 ${className ?? ""}`}>
+    <span className={`inline-flex flex-nowrap items-center gap-2 ${className ?? ""}`}>
       {hasSale && (
-        <span
-          className={`text-muted-foreground line-through ${size === "sm" ? "text-[11px]" : "text-base font-medium"}`}
-        >
-          <Amount value={Number(price)} lang={lang} />
-        </span>
+        <Amount
+          value={Number(price)}
+          lang={lang}
+          struck
+          className={`text-muted-foreground ${oldSize}`}
+        />
       )}
-      <span>
-        <Amount value={hasSale ? Number(salePrice) : Number(price)} lang={lang} />
-      </span>
+      <Amount value={hasSale ? Number(salePrice) : Number(price)} lang={lang} />
     </span>
   );
 }
