@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { BookOpen, Users, Star, MapPin, PlayCircle } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
-import { displayStudentsCount } from "@/lib/lms-display-count";
 import { CoursePrice } from "@/components/lms/CoursePrice";
 
 export type CourseCardData = {
@@ -80,7 +79,7 @@ export function CourseCard({ course }: { course: CourseCardData }) {
         <div className="mt-auto pt-3 flex items-center justify-between text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1">
             <Users className="h-3.5 w-3.5" />
-            {displayStudentsCount(course.id, course.students_count)}
+            {Number(course.students_count ?? 0)}
           </span>
           <span className="inline-flex items-center gap-1">
             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />

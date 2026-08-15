@@ -11,7 +11,6 @@ import { toast } from "sonner";
 import { CoursePrice } from "@/components/lms/CoursePrice";
 import { CourseReviews } from "@/components/lms/CourseReviews";
 import { EnrollmentFormDialog } from "@/components/lms/EnrollmentFormDialog";
-import { displayStudentsCount } from "@/lib/lms-display-count";
 
 
 type Course = {
@@ -287,7 +286,7 @@ function CourseDetails() {
           {desc && <p className="mt-3 text-muted-foreground leading-relaxed">{desc}</p>}
 
           <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><Users className="h-4 w-4" />{displayStudentsCount(course.id, course.students_count)} {tr.students}</span>
+            <span className="inline-flex items-center gap-1"><Users className="h-4 w-4" />{Number(course.students_count ?? 0)} {tr.students}</span>
             <span className="inline-flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" />{Number(course.rating_avg).toFixed(1)}</span>
             <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold">{tr[course.level as keyof typeof tr] as string}</span>
             {course.delivery_mode === "online" ? (
