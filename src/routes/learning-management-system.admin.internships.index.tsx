@@ -163,7 +163,9 @@ function AdminInternshipsList() {
               : "Create, publish, hide, close, or archive internship opportunities."}
           </p>
         </div>
-        <Button onClick={() => navigate({ to: "/learning-management-system/admin/internships/new" })}>
+        <Button
+          onClick={() => navigate({ to: "/learning-management-system/admin/internships/new" })}
+        >
           <Plus className="h-4 w-4 mx-1" /> {t.adminInternshipsNew}
         </Button>
       </header>
@@ -171,7 +173,9 @@ function AdminInternshipsList() {
       <Card className="p-4 mb-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ${dir === "rtl" ? "right-3" : "left-3"}`} />
+            <Search
+              className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ${dir === "rtl" ? "right-3" : "left-3"}`}
+            />
             <Input
               value={q}
               onChange={(e) => {
@@ -196,7 +200,9 @@ function AdminInternshipsList() {
             <SelectContent>
               <SelectItem value="all">{lang === "ar" ? "كل الحالات" : "All statuses"}</SelectItem>
               {LIFECYCLE.map((s) => (
-                <SelectItem key={s} value={s}>{lifecycleLabel(s, lang)}</SelectItem>
+                <SelectItem key={s} value={s}>
+                  {lifecycleLabel(s, lang)}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -373,9 +379,7 @@ function AdminInternshipsList() {
         <AlertDialogContent dir={dir}>
           <AlertDialogHeader>
             <AlertDialogTitle>{t.adminInternshipsRestore}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t.adminInternshipsRestoreConfirm}
-            </AlertDialogDescription>
+            <AlertDialogDescription>{t.adminInternshipsRestoreConfirm}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{lang === "ar" ? "إلغاء" : "Cancel"}</AlertDialogCancel>
@@ -433,17 +437,26 @@ export function StatusBadge({ status, lang }: { status: Lifecycle; lang: "ar" | 
     closed: "bg-slate-500/10 text-slate-700 dark:text-slate-300",
     archived: "bg-destructive/10 text-destructive",
   };
-  return <Badge variant="outline" className={map[status]}>{lifecycleLabel(status, lang)}</Badge>;
+  return (
+    <Badge variant="outline" className={map[status]}>
+      {lifecycleLabel(status, lang)}
+    </Badge>
+  );
 }
 
 export function lifecycleLabel(s: Lifecycle, lang: "ar" | "en"): string {
   const t = lmsInternshipsT[lang];
   switch (s) {
-    case "draft": return t.lifecycleDraft;
-    case "published": return t.lifecyclePublished;
-    case "hidden": return t.lifecycleHidden;
-    case "closed": return t.lifecycleClosed;
-    case "archived": return t.lifecycleArchived;
+    case "draft":
+      return t.lifecycleDraft;
+    case "published":
+      return t.lifecyclePublished;
+    case "hidden":
+      return t.lifecycleHidden;
+    case "closed":
+      return t.lifecycleClosed;
+    case "archived":
+      return t.lifecycleArchived;
   }
 }
 
@@ -451,10 +464,16 @@ export function mapErr(err: unknown, lang: "ar" | "en"): string {
   const msg = err instanceof Error ? err.message : String(err);
   const AR = lang === "ar";
   if (msg.includes("slug_taken")) return AR ? "هذا الرابط مستخدم مسبقًا" : "Slug is already in use";
-  if (msg.includes("has_applications")) return AR ? "لا يمكن الحذف: توجد طلبات مرتبطة. استخدم الأرشفة." : "Cannot delete: applications exist. Use Archive.";
-  if (msg.includes("question_has_answers")) return AR ? "لا يمكن حذف سؤال أُجيب عليه" : "Cannot delete a question that has answers";
-  if (msg.includes("status_transition_invalid")) return AR ? "لا يمكن تغيير الحالة بهذا الاتجاه" : "That status change isn't allowed";
-  if (msg.includes("date_range_invalid")) return AR ? "التواريخ غير متسقة" : "Date range is invalid";
+  if (msg.includes("has_applications"))
+    return AR
+      ? "لا يمكن الحذف: توجد طلبات مرتبطة. استخدم الأرشفة."
+      : "Cannot delete: applications exist. Use Archive.";
+  if (msg.includes("question_has_answers"))
+    return AR ? "لا يمكن حذف سؤال أُجيب عليه" : "Cannot delete a question that has answers";
+  if (msg.includes("status_transition_invalid"))
+    return AR ? "لا يمكن تغيير الحالة بهذا الاتجاه" : "That status change isn't allowed";
+  if (msg.includes("date_range_invalid"))
+    return AR ? "التواريخ غير متسقة" : "Date range is invalid";
   if (msg.includes("unauthorized")) return AR ? "لا تملك صلاحية هذا الإجراء" : "Unauthorized";
   if (msg.includes("not_found")) return AR ? "غير موجود" : "Not found";
   return msg;

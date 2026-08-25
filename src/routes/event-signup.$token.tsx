@@ -119,7 +119,9 @@ function EventSignupPage() {
             : "Too many attempts. Please try again later.",
         );
     } catch {
-      setFormError(ar ? "تعذّر إرسال الطلب. حاول مرة أخرى." : "Could not submit. Please try again.");
+      setFormError(
+        ar ? "تعذّر إرسال الطلب. حاول مرة أخرى." : "Could not submit. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -217,9 +219,7 @@ function EventSignupPage() {
                   value={values.biography}
                   onChange={(e) => set("biography", e.target.value)}
                 />
-                {errors.biography && (
-                  <p className="text-xs text-destructive">{errors.biography}</p>
-                )}
+                {errors.biography && <p className="text-xs text-destructive">{errors.biography}</p>}
               </div>
 
               {formError && <p className="text-sm text-destructive">{formError}</p>}

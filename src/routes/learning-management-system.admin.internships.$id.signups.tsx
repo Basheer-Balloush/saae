@@ -28,9 +28,7 @@ import {
 } from "@/lib/event-signup.functions";
 import { exportRowsToXlsx } from "@/lib/admin-xlsx-export";
 
-export const Route = createFileRoute(
-  "/learning-management-system/admin/internships/$id/signups",
-)({
+export const Route = createFileRoute("/learning-management-system/admin/internships/$id/signups")({
   component: SignupsPage,
 });
 
@@ -135,7 +133,12 @@ function SignupsPage() {
         { header: ar ? "الهاتف" : "Phone", get: (r) => r.phone, width: 18 },
         { header: ar ? "الجهة" : "Organization", get: (r) => r.organization, width: 24 },
         { header: ar ? "نبذة" : "Bio", get: (r) => r.biography, width: 40 },
-        { header: ar ? "التاريخ" : "Submitted at", type: "date", get: (r) => r.created_at, width: 20 },
+        {
+          header: ar ? "التاريخ" : "Submitted at",
+          type: "date",
+          get: (r) => r.created_at,
+          width: 20,
+        },
       ],
     });
   };
@@ -187,13 +190,7 @@ function SignupsPage() {
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant={link.is_active ? "default" : "secondary"}>
-                    {link.is_active
-                      ? ar
-                        ? "فعّال"
-                        : "Active"
-                      : ar
-                        ? "موقوف"
-                        : "Deactivated"}
+                    {link.is_active ? (ar ? "فعّال" : "Active") : ar ? "موقوف" : "Deactivated"}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {ar ? "عدد التسجيلات:" : "Sign-ups:"} {rows.length}
@@ -211,7 +208,11 @@ function SignupsPage() {
                     <Copy className="h-4 w-4 mx-2" />
                     {ar ? "نسخ" : "Copy"}
                   </Button>
-                  <Button variant={link.is_active ? "destructive" : "default"} onClick={onToggle} disabled={busy}>
+                  <Button
+                    variant={link.is_active ? "destructive" : "default"}
+                    onClick={onToggle}
+                    disabled={busy}
+                  >
                     {link.is_active ? (
                       <PowerOff className="h-4 w-4 mx-2" />
                     ) : (
@@ -234,7 +235,12 @@ function SignupsPage() {
             <h2 className="text-lg font-semibold text-foreground">
               {ar ? "التسجيلات" : "Sign-ups"}
             </h2>
-            <Button variant="outline" size="sm" onClick={() => void onExport()} disabled={rows.length === 0}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void onExport()}
+              disabled={rows.length === 0}
+            >
               {ar ? "تصدير Excel" : "Export Excel"}
             </Button>
           </div>
