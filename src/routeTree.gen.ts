@@ -98,6 +98,7 @@ import { Route as LearningManagementSystemInstructorCoursesIdRouteImport } from 
 import { Route as LearningManagementSystemInstructorAssignmentsCourseIdRouteImport } from './routes/learning-management-system.instructor.assignments.$courseId'
 import { Route as LearningManagementSystemAdminInternshipsNewRouteImport } from './routes/learning-management-system.admin.internships.new'
 import { Route as AdminFormsFormIdEditRouteImport } from './routes/admin.forms.$formId.edit'
+import { Route as AdminCrmRegistrationLinksIdRouteImport } from './routes/admin.crm.registration-links.$id'
 import { Route as AdminCrmLeadsIndividualsRouteImport } from './routes/admin.crm.leads.individuals'
 import { Route as AdminCrmLeadsCompaniesRouteImport } from './routes/admin.crm.leads.companies'
 import { Route as AdminCrmFormsFormSlugRouteImport } from './routes/admin.crm.forms.$formSlug'
@@ -600,6 +601,12 @@ const AdminFormsFormIdEditRoute = AdminFormsFormIdEditRouteImport.update({
   path: '/$formId/edit',
   getParentRoute: () => AdminFormsRoute,
 } as any)
+const AdminCrmRegistrationLinksIdRoute =
+  AdminCrmRegistrationLinksIdRouteImport.update({
+    id: '/registration-links/$id',
+    path: '/registration-links/$id',
+    getParentRoute: () => AdminCrmRoute,
+  } as any)
 const AdminCrmLeadsIndividualsRoute =
   AdminCrmLeadsIndividualsRouteImport.update({
     id: '/individuals',
@@ -741,6 +748,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRouteWithChildren
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRouteWithChildren
+  '/admin/crm/registration-links/$id': typeof AdminCrmRegistrationLinksIdRoute
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/learning-management-system/admin/internships/new': typeof LearningManagementSystemAdminInternshipsNewRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
@@ -833,6 +841,7 @@ export interface FileRoutesByTo {
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRouteWithChildren
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRouteWithChildren
+  '/admin/crm/registration-links/$id': typeof AdminCrmRegistrationLinksIdRoute
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/learning-management-system/admin/internships/new': typeof LearningManagementSystemAdminInternshipsNewRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
@@ -935,6 +944,7 @@ export interface FileRoutesById {
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRouteWithChildren
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRouteWithChildren
+  '/admin/crm/registration-links/$id': typeof AdminCrmRegistrationLinksIdRoute
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/learning-management-system/admin/internships/new': typeof LearningManagementSystemAdminInternshipsNewRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
@@ -1038,6 +1048,7 @@ export interface FileRouteTypes {
     | '/admin/crm/forms/$formSlug'
     | '/admin/crm/leads/companies'
     | '/admin/crm/leads/individuals'
+    | '/admin/crm/registration-links/$id'
     | '/admin/forms/$formId/edit'
     | '/learning-management-system/admin/internships/new'
     | '/learning-management-system/instructor/assignments/$courseId'
@@ -1130,6 +1141,7 @@ export interface FileRouteTypes {
     | '/admin/crm/forms/$formSlug'
     | '/admin/crm/leads/companies'
     | '/admin/crm/leads/individuals'
+    | '/admin/crm/registration-links/$id'
     | '/admin/forms/$formId/edit'
     | '/learning-management-system/admin/internships/new'
     | '/learning-management-system/instructor/assignments/$courseId'
@@ -1231,6 +1243,7 @@ export interface FileRouteTypes {
     | '/admin/crm/forms/$formSlug'
     | '/admin/crm/leads/companies'
     | '/admin/crm/leads/individuals'
+    | '/admin/crm/registration-links/$id'
     | '/admin/forms/$formId/edit'
     | '/learning-management-system/admin/internships/new'
     | '/learning-management-system/instructor/assignments/$courseId'
@@ -1910,6 +1923,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFormsFormIdEditRouteImport
       parentRoute: typeof AdminFormsRoute
     }
+    '/admin/crm/registration-links/$id': {
+      id: '/admin/crm/registration-links/$id'
+      path: '/registration-links/$id'
+      fullPath: '/admin/crm/registration-links/$id'
+      preLoaderRoute: typeof AdminCrmRegistrationLinksIdRouteImport
+      parentRoute: typeof AdminCrmRoute
+    }
     '/admin/crm/leads/individuals': {
       id: '/admin/crm/leads/individuals'
       path: '/individuals'
@@ -2057,6 +2077,7 @@ interface AdminCrmRouteChildren {
   AdminCrmLeadsRoute: typeof AdminCrmLeadsRouteWithChildren
   AdminCrmStudentsRoute: typeof AdminCrmStudentsRoute
   AdminCrmIndexRoute: typeof AdminCrmIndexRoute
+  AdminCrmRegistrationLinksIdRoute: typeof AdminCrmRegistrationLinksIdRoute
   AdminCrmRegistrationLinksIndexRoute: typeof AdminCrmRegistrationLinksIndexRoute
 }
 
@@ -2067,6 +2088,7 @@ const AdminCrmRouteChildren: AdminCrmRouteChildren = {
   AdminCrmLeadsRoute: AdminCrmLeadsRouteWithChildren,
   AdminCrmStudentsRoute: AdminCrmStudentsRoute,
   AdminCrmIndexRoute: AdminCrmIndexRoute,
+  AdminCrmRegistrationLinksIdRoute: AdminCrmRegistrationLinksIdRoute,
   AdminCrmRegistrationLinksIndexRoute: AdminCrmRegistrationLinksIndexRoute,
 }
 
