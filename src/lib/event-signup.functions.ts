@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // ---------- shared validation ----------
@@ -29,6 +30,7 @@ export type SubmitResult =
 function sanitize(v: string | undefined | null): string | null {
   if (!v) return null;
   // Strip control characters; the DB stores plain text only.
+  // eslint-disable-next-line no-control-regex
   const s = v.replace(/[\u0000-\u001f\u007f]/g, " ").trim();
   return s.length ? s.slice(0, 2000) : null;
 }
@@ -144,7 +146,7 @@ export const adminGetSignupLink = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => OppSchema.parse(i))
   .handler(async ({ data, context }): Promise<SignupLink | null> => {
-    const { supabase } = context as { supabase: any };
+    const { supabase } = context as { supabase: SupabaseClient };
     const { data: link, error } = await supabase
       .from("internship_signup_links")
       .select("id, opportunity_id, token, is_active, created_at")
@@ -163,7 +165,7 @@ export const adminCreateSignupLink = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => OppSchema.parse(i))
   .handler(async ({ data, context }): Promise<SignupLink> => {
-    const { supabase, userId } = context as { supabase: any; userId: string };
+    const { supabase, userId } = context as { supabase: SupabaseClient; userId: string };
     const { data: link, error } = await supabase
       .from("internship_signup_links")
       .upsert(
@@ -187,7 +189,7 @@ export const adminSetSignupLinkActive = createServerFn({ method: "POST" })
     z.object({ opportunity_id: z.string().uuid(), is_active: z.boolean() }).parse(i),
   )
   .handler(async ({ data, context }) => {
-    const { supabase } = context as { supabase: any };
+    const { supabase } = context as { supabase: SupabaseClient };
     const { error } = await supabase
       .from("internship_signup_links")
       .update({ is_active: data.is_active })
@@ -210,7 +212,7 @@ export const adminListSignupSubmissions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => OppSchema.parse(i))
   .handler(async ({ data, context }): Promise<SignupSubmission[]> => {
-    const { supabase } = context as { supabase: any };
+    const { supabase } = context as { supabase: SupabaseClient };
     const { data: rows, error } = await supabase
       .from("internship_signup_submissions")
       .select("id, full_name, email, phone, organization, biography, created_at")
@@ -225,7 +227,7 @@ export const adminDeleteSignupSubmission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
-    const { supabase } = context as { supabase: any };
+    const { supabase } = context as { supabase: SupabaseClient };
     const { error } = await supabase
       .from("internship_signup_submissions")
       .delete()
