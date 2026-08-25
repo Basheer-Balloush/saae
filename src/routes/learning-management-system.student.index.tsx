@@ -58,7 +58,7 @@ function StudentHome() {
       if (ids.length) {
         const { data: csR } = await supabase
           .from("lms_courses")
-          .select("id,title_ar,title_en,cover_url,delivery_mode")
+          .select("id,title_ar,title_en,cover_url,delivery_mode,end_date")
           .in("id", ids);
         courses = (csR as CourseRow[] | null) ?? [];
       }
