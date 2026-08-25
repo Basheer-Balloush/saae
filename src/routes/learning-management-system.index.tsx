@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import {
@@ -68,7 +68,9 @@ export const Route = createFileRoute("/learning-management-system/")({
       supabase.rpc("lms_public_stats"),
       supabase.from("lms_courses").select("category_id").eq("status", "published"),
     ]);
-    const s = (statsRows as { courses: number; students: number; instructors: number }[] | null)?.[0];
+    const s = (
+      statsRows as { courses: number; students: number; instructors: number }[] | null
+    )?.[0];
     const counts: Record<string, number> = {};
     ((courseRows as { category_id: string | null }[]) ?? []).forEach((r) => {
       if (r.category_id) counts[r.category_id] = (counts[r.category_id] ?? 0) + 1;
@@ -106,13 +108,10 @@ export const Route = createFileRoute("/learning-management-system/")({
           "Browse AI, programming, design and business courses on the SAAE Training and Learning Platform.",
       },
     ],
-    links: [
-      { rel: "canonical", href: "https://aisyria.org/learning-management-system" },
-    ],
+    links: [{ rel: "canonical", href: "https://aisyria.org/learning-management-system" }],
   }),
   component: LmsHome,
 });
-
 
 type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
 
@@ -121,12 +120,11 @@ function LmsHome() {
   const isRtl = dir === "rtl";
   const tr = lmsT[lang];
   const navigate = useNavigate();
-  const { user, role, loading } = useLmsAuth();
+  const { user, loading } = useLmsAuth();
   const loaderData = Route.useLoaderData();
   const categories = loaderData.categories as Category[];
   const stats = loaderData.stats as { courses: number; students: number; instructors: number };
   const coursesByCategory = loaderData.coursesByCategory as Record<string, number>;
-  const [applying, setApplying] = useState(false);
 
   // Redirect authenticated users to their profile (My Profile is their home).
   useEffect(() => {
@@ -134,21 +132,6 @@ function LmsHome() {
       navigate({ to: "/learning-management-system/profile", replace: true });
     }
   }, [loading, user, navigate]);
-
-  const handleBecomeInstructor = async () => {
-    if (!user) {
-      navigate({ to: "/learning-management-system/signup" });
-      return;
-    }
-    if (role === "lms_instructor" || role === "lms_admin") {
-      navigate({ to: "/learning-management-system/instructor" });
-      return;
-    }
-    navigate({ to: "/learning-management-system/trainer-apply" });
-  };
-
-
-
 
   return (
     <div className="flex flex-col">
@@ -175,15 +158,6 @@ function LmsHome() {
                 {tr.heroBrowse} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
               </Button>
             </Link>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-12 px-7 text-base"
-              onClick={handleBecomeInstructor}
-              disabled={applying}
-            >
-              {tr.heroBecomeInstructor}
-            </Button>
           </div>
         </div>
       </section>
@@ -288,7 +262,6 @@ function LmsHome() {
                   <Link
                     to="/learning-management-system/catalog"
                     search={{ q: "", category: c.slug, level: "", price: "", page: 1 }}
-
                     className="group relative block overflow-hidden rounded-3xl border border-white/20 min-h-[200px] sm:min-h-[220px] p-6 sm:p-7 shadow-lift transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                     style={{ background: surface }}
                   >
