@@ -14,6 +14,7 @@ import {
   Lock,
   Archive,
   ArchiveRestore,
+  Link2,
 } from "lucide-react";
 
 import { useLang } from "@/lib/i18n";
