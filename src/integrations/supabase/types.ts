@@ -644,6 +644,36 @@ export type Database = {
           },
         ]
       }
+      crm_registration_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          label: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       dynamic_form_submissions: {
         Row: {
           contact_id: string | null
@@ -897,6 +927,7 @@ export type Database = {
           id: string
           phone: string | null
           raw: Json | null
+          registration_link_id: string | null
           short_description: string | null
           source: string
           specialty: string | null
@@ -917,6 +948,7 @@ export type Database = {
           id?: string
           phone?: string | null
           raw?: Json | null
+          registration_link_id?: string | null
           short_description?: string | null
           source?: string
           specialty?: string | null
@@ -937,6 +969,7 @@ export type Database = {
           id?: string
           phone?: string | null
           raw?: Json | null
+          registration_link_id?: string | null
           short_description?: string | null
           source?: string
           specialty?: string | null
@@ -958,6 +991,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "individual_leads_registration_link_id_fkey"
+            columns: ["registration_link_id"]
+            isOneToOne: false
+            referencedRelation: "crm_registration_links"
             referencedColumns: ["id"]
           },
         ]
