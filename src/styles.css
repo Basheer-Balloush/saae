@@ -494,3 +494,46 @@ html {
   }
 }
 
+
+/* Ended-course card treatment (shared by all course card surfaces). */
+@utility course-card-ended {
+  border-color: var(--border);
+  background-color: color-mix(in oklab, var(--muted) 60%, var(--card));
+  opacity: 0.85;
+  filter: saturate(0.15);
+
+  &:hover {
+    border-color: var(--border);
+    box-shadow: none;
+    filter: saturate(0.15);
+  }
+}
+
+@utility course-card-ended-media {
+  filter: grayscale(1);
+
+  .group:hover & {
+    filter: grayscale(1);
+    transform: none;
+  }
+}
+
+@utility course-ended-stamp {
+  position: absolute;
+  top: 0.5rem;
+  inset-inline-start: 0.5rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: color-mix(in oklab, var(--muted) 85%, transparent);
+  color: var(--muted-foreground);
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(2px);
+}

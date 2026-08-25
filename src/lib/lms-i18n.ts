@@ -40,6 +40,9 @@ export const lmsT: Record<Lang, {
   advanced: string;
   deliveryOnsite: string;
   deliveryOnline: string;
+  courseEnded: string;
+  courseEndedShort: string;
+  courseEndedSr: string;
   noCourses: string;
   // course card / details
   byInstructor: string;
@@ -184,6 +187,9 @@ export const lmsT: Record<Lang, {
     advanced: "متقدّم",
     deliveryOnsite: "حضوري",
     deliveryOnline: "أونلاين",
+    courseEnded: "دورة منتهية",
+    courseEndedShort: "منتهية",
+    courseEndedSr: "انتهت هذه الدورة",
     noCourses: "لا توجد دورات حاليّاً",
     byInstructor: "بواسطة",
     students: "طالب",
@@ -322,6 +328,9 @@ export const lmsT: Record<Lang, {
     advanced: "Advanced",
     deliveryOnsite: "On-site",
     deliveryOnline: "Online",
+    courseEnded: "Course ended",
+    courseEndedShort: "Ended",
+    courseEndedSr: "This course has ended",
     noCourses: "No courses yet",
     byInstructor: "By",
     students: "students",

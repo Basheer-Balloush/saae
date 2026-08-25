@@ -3,6 +3,8 @@ import { BookOpen, Users, Star, MapPin, PlayCircle } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { CoursePrice } from "@/components/lms/CoursePrice";
+import { isCourseEnded } from "@/lib/lms-course-ended";
+import { cn } from "@/lib/utils";
 
 export type CourseCardData = {
   id: string;
@@ -19,6 +21,7 @@ export type CourseCardData = {
   students_count: number;
   rating_avg: number;
   delivery_mode?: string | null;
+  end_date?: string | null;
 };
 
 export function CourseCard({ course }: { course: CourseCardData }) {
@@ -26,19 +29,27 @@ export function CourseCard({ course }: { course: CourseCardData }) {
   const tr = lmsT[lang];
   const title = lang === "ar" ? course.title_ar : course.title_en || course.title_ar;
   const desc = lang === "ar" ? course.description_ar : course.description_en;
+  const ended = isCourseEnded(course);
 
   return (
     <Link
       to="/learning-management-system/courses/$id"
       params={{ id: course.slug ?? course.id }}
-      className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all hover:border-primary hover:shadow-soft"
+      className={cn(
+        "group flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all hover:border-primary hover:shadow-soft",
+        ended && "course-card-ended",
+      )}
     >
-      <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center overflow-hidden">
+      <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center overflow-hidden">
+        {ended && <CourseEndedStamp />}
         {course.cover_url ? (
           <img
             src={course.cover_url}
             alt={title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+            className={cn(
+              "w-full h-full object-cover group-hover:scale-105 transition-transform",
+              ended && "course-card-ended-media",
+            )}
             loading="lazy"
           />
         ) : (
@@ -88,5 +99,17 @@ export function CourseCard({ course }: { course: CourseCardData }) {
         </div>
       </div>
     </Link>
+  );
+}
+
+/** Corner stamp shown on cards for courses that already ended. */
+export function CourseEndedStamp({ short = false }: { short?: boolean }) {
+  const { lang } = useLang();
+  const tr = lmsT[lang];
+  return (
+    <span className="course-ended-stamp">
+      <span aria-hidden="true">{short ? tr.courseEndedShort : tr.courseEnded}</span>
+      <span className="sr-only">{tr.courseEndedSr}</span>
+    </span>
   );
 }
