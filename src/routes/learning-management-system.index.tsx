@@ -135,17 +135,6 @@ function LmsHome() {
     }
   }, [loading, user, navigate]);
 
-  const handleBecomeInstructor = async () => {
-    if (!user) {
-      navigate({ to: "/learning-management-system/signup" });
-      return;
-    }
-    if (role === "lms_instructor" || role === "lms_admin") {
-      navigate({ to: "/learning-management-system/instructor" });
-      return;
-    }
-    navigate({ to: "/learning-management-system/trainer-apply" });
-  };
 
 
 
