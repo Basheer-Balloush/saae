@@ -101,3 +101,15 @@ export function CourseCard({ course }: { course: CourseCardData }) {
     </Link>
   );
 }
+
+/** Corner stamp shown on cards for courses that already ended. */
+export function CourseEndedStamp({ short = false }: { short?: boolean }) {
+  const { lang } = useLang();
+  const tr = lmsT[lang];
+  return (
+    <span className="course-ended-stamp">
+      <span aria-hidden="true">{short ? tr.courseEndedShort : tr.courseEnded}</span>
+      <span className="sr-only">{tr.courseEndedSr}</span>
+    </span>
+  );
+}
