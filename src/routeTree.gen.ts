@@ -41,6 +41,7 @@ import { Route as LearningManagementSystemInstructorRouteImport } from './routes
 import { Route as LearningManagementSystemForgotPasswordRouteImport } from './routes/learning-management-system.forgot-password'
 import { Route as LearningManagementSystemCatalogRouteImport } from './routes/learning-management-system.catalog'
 import { Route as LearningManagementSystemAdminRouteImport } from './routes/learning-management-system.admin'
+import { Route as JoinTokenRouteImport } from './routes/join.$token'
 import { Route as InitiativeClaimRouteImport } from './routes/initiative.claim'
 import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
 import { Route as EventSignupTokenRouteImport } from './routes/event-signup.$token'
@@ -84,6 +85,7 @@ import { Route as AdminCrmFeedbackRouteImport } from './routes/admin.crm.feedbac
 import { Route as AdminCrmContactsRouteImport } from './routes/admin.crm.contacts'
 import { Route as LearningManagementSystemInternshipsSlugIndexRouteImport } from './routes/learning-management-system.internships.$slug.index'
 import { Route as LearningManagementSystemAdminInternshipsIndexRouteImport } from './routes/learning-management-system.admin.internships.index'
+import { Route as AdminCrmRegistrationLinksIndexRouteImport } from './routes/admin.crm.registration-links.index'
 import { Route as AdminCrmFormsIndexRouteImport } from './routes/admin.crm.forms.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -96,6 +98,7 @@ import { Route as LearningManagementSystemInstructorCoursesIdRouteImport } from 
 import { Route as LearningManagementSystemInstructorAssignmentsCourseIdRouteImport } from './routes/learning-management-system.instructor.assignments.$courseId'
 import { Route as LearningManagementSystemAdminInternshipsNewRouteImport } from './routes/learning-management-system.admin.internships.new'
 import { Route as AdminFormsFormIdEditRouteImport } from './routes/admin.forms.$formId.edit'
+import { Route as AdminCrmRegistrationLinksIdRouteImport } from './routes/admin.crm.registration-links.$id'
 import { Route as AdminCrmLeadsIndividualsRouteImport } from './routes/admin.crm.leads.individuals'
 import { Route as AdminCrmLeadsCompaniesRouteImport } from './routes/admin.crm.leads.companies'
 import { Route as AdminCrmFormsFormSlugRouteImport } from './routes/admin.crm.forms.$formSlug'
@@ -285,6 +288,11 @@ const LearningManagementSystemAdminRoute =
     path: '/admin',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
+const JoinTokenRoute = JoinTokenRouteImport.update({
+  id: '/join/$token',
+  path: '/join/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InitiativeClaimRoute = InitiativeClaimRouteImport.update({
   id: '/initiative/claim',
   path: '/initiative/claim',
@@ -519,6 +527,12 @@ const LearningManagementSystemAdminInternshipsIndexRoute =
     path: '/internships/',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const AdminCrmRegistrationLinksIndexRoute =
+  AdminCrmRegistrationLinksIndexRouteImport.update({
+    id: '/registration-links/',
+    path: '/registration-links/',
+    getParentRoute: () => AdminCrmRoute,
+  } as any)
 const AdminCrmFormsIndexRoute = AdminCrmFormsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -587,6 +601,12 @@ const AdminFormsFormIdEditRoute = AdminFormsFormIdEditRouteImport.update({
   path: '/$formId/edit',
   getParentRoute: () => AdminFormsRoute,
 } as any)
+const AdminCrmRegistrationLinksIdRoute =
+  AdminCrmRegistrationLinksIdRouteImport.update({
+    id: '/registration-links/$id',
+    path: '/registration-links/$id',
+    getParentRoute: () => AdminCrmRoute,
+  } as any)
 const AdminCrmLeadsIndividualsRoute =
   AdminCrmLeadsIndividualsRouteImport.update({
     id: '/individuals',
@@ -681,6 +701,7 @@ export interface FileRoutesByFullPath {
   '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
+  '/join/$token': typeof JoinTokenRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
@@ -727,6 +748,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRouteWithChildren
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRouteWithChildren
+  '/admin/crm/registration-links/$id': typeof AdminCrmRegistrationLinksIdRoute
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/learning-management-system/admin/internships/new': typeof LearningManagementSystemAdminInternshipsNewRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
@@ -739,6 +761,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/crm/forms/': typeof AdminCrmFormsIndexRoute
+  '/admin/crm/registration-links/': typeof AdminCrmRegistrationLinksIndexRoute
   '/learning-management-system/admin/internships/': typeof LearningManagementSystemAdminInternshipsIndexRoute
   '/learning-management-system/internships/$slug/': typeof LearningManagementSystemInternshipsSlugIndexRoute
   '/admin/crm/leads/companies/$leadId': typeof AdminCrmLeadsCompaniesLeadIdRoute
@@ -775,6 +798,7 @@ export interface FileRoutesByTo {
   '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
+  '/join/$token': typeof JoinTokenRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
@@ -817,6 +841,7 @@ export interface FileRoutesByTo {
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRouteWithChildren
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRouteWithChildren
+  '/admin/crm/registration-links/$id': typeof AdminCrmRegistrationLinksIdRoute
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/learning-management-system/admin/internships/new': typeof LearningManagementSystemAdminInternshipsNewRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
@@ -829,6 +854,7 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/crm/forms': typeof AdminCrmFormsIndexRoute
+  '/admin/crm/registration-links': typeof AdminCrmRegistrationLinksIndexRoute
   '/learning-management-system/admin/internships': typeof LearningManagementSystemAdminInternshipsIndexRoute
   '/learning-management-system/internships/$slug': typeof LearningManagementSystemInternshipsSlugIndexRoute
   '/admin/crm/leads/companies/$leadId': typeof AdminCrmLeadsCompaniesLeadIdRoute
@@ -871,6 +897,7 @@ export interface FileRoutesById {
   '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
+  '/join/$token': typeof JoinTokenRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
@@ -917,6 +944,7 @@ export interface FileRoutesById {
   '/admin/crm/forms/$formSlug': typeof AdminCrmFormsFormSlugRoute
   '/admin/crm/leads/companies': typeof AdminCrmLeadsCompaniesRouteWithChildren
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRouteWithChildren
+  '/admin/crm/registration-links/$id': typeof AdminCrmRegistrationLinksIdRoute
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/learning-management-system/admin/internships/new': typeof LearningManagementSystemAdminInternshipsNewRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
@@ -929,6 +957,7 @@ export interface FileRoutesById {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/crm/forms/': typeof AdminCrmFormsIndexRoute
+  '/admin/crm/registration-links/': typeof AdminCrmRegistrationLinksIndexRoute
   '/learning-management-system/admin/internships/': typeof LearningManagementSystemAdminInternshipsIndexRoute
   '/learning-management-system/internships/$slug/': typeof LearningManagementSystemInternshipsSlugIndexRoute
   '/admin/crm/leads/companies/$leadId': typeof AdminCrmLeadsCompaniesLeadIdRoute
@@ -972,6 +1001,7 @@ export interface FileRouteTypes {
     | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
+    | '/join/$token'
     | '/learning-management-system/admin'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
@@ -1018,6 +1048,7 @@ export interface FileRouteTypes {
     | '/admin/crm/forms/$formSlug'
     | '/admin/crm/leads/companies'
     | '/admin/crm/leads/individuals'
+    | '/admin/crm/registration-links/$id'
     | '/admin/forms/$formId/edit'
     | '/learning-management-system/admin/internships/new'
     | '/learning-management-system/instructor/assignments/$courseId'
@@ -1030,6 +1061,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/crm/forms/'
+    | '/admin/crm/registration-links/'
     | '/learning-management-system/admin/internships/'
     | '/learning-management-system/internships/$slug/'
     | '/admin/crm/leads/companies/$leadId'
@@ -1066,6 +1098,7 @@ export interface FileRouteTypes {
     | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
+    | '/join/$token'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
     | '/learning-management-system/login'
@@ -1108,6 +1141,7 @@ export interface FileRouteTypes {
     | '/admin/crm/forms/$formSlug'
     | '/admin/crm/leads/companies'
     | '/admin/crm/leads/individuals'
+    | '/admin/crm/registration-links/$id'
     | '/admin/forms/$formId/edit'
     | '/learning-management-system/admin/internships/new'
     | '/learning-management-system/instructor/assignments/$courseId'
@@ -1120,6 +1154,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/crm/forms'
+    | '/admin/crm/registration-links'
     | '/learning-management-system/admin/internships'
     | '/learning-management-system/internships/$slug'
     | '/admin/crm/leads/companies/$leadId'
@@ -1161,6 +1196,7 @@ export interface FileRouteTypes {
     | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
+    | '/join/$token'
     | '/learning-management-system/admin'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
@@ -1207,6 +1243,7 @@ export interface FileRouteTypes {
     | '/admin/crm/forms/$formSlug'
     | '/admin/crm/leads/companies'
     | '/admin/crm/leads/individuals'
+    | '/admin/crm/registration-links/$id'
     | '/admin/forms/$formId/edit'
     | '/learning-management-system/admin/internships/new'
     | '/learning-management-system/instructor/assignments/$courseId'
@@ -1219,6 +1256,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/crm/forms/'
+    | '/admin/crm/registration-links/'
     | '/learning-management-system/admin/internships/'
     | '/learning-management-system/internships/$slug/'
     | '/admin/crm/leads/companies/$leadId'
@@ -1250,6 +1288,7 @@ export interface RootRouteChildren {
   EventSignupTokenRoute: typeof EventSignupTokenRoute
   FormsSlugRoute: typeof FormsSlugRoute
   InitiativeClaimRoute: typeof InitiativeClaimRoute
+  JoinTokenRoute: typeof JoinTokenRoute
   NewsIdRoute: typeof NewsIdRoute
   ResourcesAiToolsRoute: typeof ResourcesAiToolsRoute
   NewsIndexRoute: typeof NewsIndexRoute
@@ -1484,6 +1523,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/learning-management-system/admin'
       preLoaderRoute: typeof LearningManagementSystemAdminRouteImport
       parentRoute: typeof LearningManagementSystemRoute
+    }
+    '/join/$token': {
+      id: '/join/$token'
+      path: '/join/$token'
+      fullPath: '/join/$token'
+      preLoaderRoute: typeof JoinTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/initiative/claim': {
       id: '/initiative/claim'
@@ -1786,6 +1832,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemAdminInternshipsIndexRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
     }
+    '/admin/crm/registration-links/': {
+      id: '/admin/crm/registration-links/'
+      path: '/registration-links'
+      fullPath: '/admin/crm/registration-links/'
+      preLoaderRoute: typeof AdminCrmRegistrationLinksIndexRouteImport
+      parentRoute: typeof AdminCrmRoute
+    }
     '/admin/crm/forms/': {
       id: '/admin/crm/forms/'
       path: '/'
@@ -1869,6 +1922,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/forms/$formId/edit'
       preLoaderRoute: typeof AdminFormsFormIdEditRouteImport
       parentRoute: typeof AdminFormsRoute
+    }
+    '/admin/crm/registration-links/$id': {
+      id: '/admin/crm/registration-links/$id'
+      path: '/registration-links/$id'
+      fullPath: '/admin/crm/registration-links/$id'
+      preLoaderRoute: typeof AdminCrmRegistrationLinksIdRouteImport
+      parentRoute: typeof AdminCrmRoute
     }
     '/admin/crm/leads/individuals': {
       id: '/admin/crm/leads/individuals'
@@ -2017,6 +2077,8 @@ interface AdminCrmRouteChildren {
   AdminCrmLeadsRoute: typeof AdminCrmLeadsRouteWithChildren
   AdminCrmStudentsRoute: typeof AdminCrmStudentsRoute
   AdminCrmIndexRoute: typeof AdminCrmIndexRoute
+  AdminCrmRegistrationLinksIdRoute: typeof AdminCrmRegistrationLinksIdRoute
+  AdminCrmRegistrationLinksIndexRoute: typeof AdminCrmRegistrationLinksIndexRoute
 }
 
 const AdminCrmRouteChildren: AdminCrmRouteChildren = {
@@ -2026,6 +2088,8 @@ const AdminCrmRouteChildren: AdminCrmRouteChildren = {
   AdminCrmLeadsRoute: AdminCrmLeadsRouteWithChildren,
   AdminCrmStudentsRoute: AdminCrmStudentsRoute,
   AdminCrmIndexRoute: AdminCrmIndexRoute,
+  AdminCrmRegistrationLinksIdRoute: AdminCrmRegistrationLinksIdRoute,
+  AdminCrmRegistrationLinksIndexRoute: AdminCrmRegistrationLinksIndexRoute,
 }
 
 const AdminCrmRouteWithChildren = AdminCrmRoute._addFileChildren(
@@ -2292,6 +2356,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventSignupTokenRoute: EventSignupTokenRoute,
   FormsSlugRoute: FormsSlugRoute,
   InitiativeClaimRoute: InitiativeClaimRoute,
+  JoinTokenRoute: JoinTokenRoute,
   NewsIdRoute: NewsIdRoute,
   ResourcesAiToolsRoute: ResourcesAiToolsRoute,
   NewsIndexRoute: NewsIndexRoute,
