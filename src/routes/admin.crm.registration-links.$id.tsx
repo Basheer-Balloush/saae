@@ -27,7 +27,7 @@ import {
   type RegistrationLink,
   type RegistrationSubmission,
 } from "@/lib/crm-registration-links.functions";
-import { publicJoinUrl } from "./admin.crm.registration-links.index";
+import { publicJoinUrl } from "@/lib/registration-link-url";
 
 export const Route = createFileRoute("/admin/crm/registration-links/$id")({
   ssr: false,

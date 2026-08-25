@@ -28,6 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { IconActionButton } from "@/components/admin/IconActionButton";
+import { publicJoinUrl } from "@/lib/registration-link-url";
 import {
   adminCreateRegistrationLink,
   adminListRegistrationLinks,
@@ -43,11 +44,6 @@ export const Route = createFileRoute("/admin/crm/registration-links/")({
   }),
   component: RegistrationLinksPage,
 });
-
-export function publicJoinUrl(token: string) {
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  return `${origin}/join/${token}`;
-}
 
 function RegistrationLinksPage() {
   const { lang, dir } = useLang();
