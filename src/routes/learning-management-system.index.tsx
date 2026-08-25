@@ -175,15 +175,6 @@ function LmsHome() {
                 {tr.heroBrowse} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
               </Button>
             </Link>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-12 px-7 text-base"
-              onClick={handleBecomeInstructor}
-              disabled={applying}
-            >
-              {tr.heroBecomeInstructor}
-            </Button>
           </div>
         </div>
       </section>
