@@ -40,6 +40,9 @@ export const lmsT: Record<Lang, {
   advanced: string;
   deliveryOnsite: string;
   deliveryOnline: string;
+  courseEnded: string;
+  courseEndedShort: string;
+  courseEndedSr: string;
   noCourses: string;
   // course card / details
   byInstructor: string;
