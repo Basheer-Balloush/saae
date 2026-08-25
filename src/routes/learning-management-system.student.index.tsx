@@ -111,10 +111,14 @@ function StudentHome() {
             <Link
               key={r.id}
               {...courseDestination(r.course.id, r.course.delivery_mode)}
-              className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-primary transition-colors"
+              className={cn(
+                "group rounded-2xl border border-border bg-card overflow-hidden hover:border-primary transition-colors",
+                isCourseEnded(r.course) && "course-card-ended",
+              )}
             >
-              <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                {r.course.cover_url ? <img src={r.course.cover_url} alt="" className="w-full h-full object-cover" /> : <PlayCircle className="h-12 w-12 text-primary/50" />}
+              <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                {isCourseEnded(r.course) && <CourseEndedStamp short />}
+                {r.course.cover_url ? <img src={r.course.cover_url} alt="" className={cn("w-full h-full object-cover", isCourseEnded(r.course) && "course-card-ended-media")} /> : <PlayCircle className="h-12 w-12 text-primary/50" />}
               </div>
               <div className="p-4">
                 <h3 className="font-bold text-foreground line-clamp-1">{lang === "ar" ? r.course.title_ar : r.course.title_en || r.course.title_ar}</h3>
