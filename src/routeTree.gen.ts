@@ -43,6 +43,7 @@ import { Route as LearningManagementSystemCatalogRouteImport } from './routes/le
 import { Route as LearningManagementSystemAdminRouteImport } from './routes/learning-management-system.admin'
 import { Route as InitiativeClaimRouteImport } from './routes/initiative.claim'
 import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
+import { Route as EventSignupTokenRouteImport } from './routes/event-signup.$token'
 import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system.login'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -99,6 +100,7 @@ import { Route as AdminCrmLeadsIndividualsRouteImport } from './routes/admin.crm
 import { Route as AdminCrmLeadsCompaniesRouteImport } from './routes/admin.crm.leads.companies'
 import { Route as AdminCrmFormsFormSlugRouteImport } from './routes/admin.crm.forms.$formSlug'
 import { Route as AdminCrmContactsContactIdRouteImport } from './routes/admin.crm.contacts.$contactId'
+import { Route as LearningManagementSystemAdminInternshipsIdSignupsRouteImport } from './routes/learning-management-system.admin.internships.$id.signups'
 import { Route as LearningManagementSystemAdminInternshipsIdEditRouteImport } from './routes/learning-management-system.admin.internships.$id.edit'
 import { Route as LearningManagementSystemAdminInternshipsIdApplicationsRouteImport } from './routes/learning-management-system.admin.internships.$id.applications'
 import { Route as AdminCrmLeadsIndividualsLeadIdRouteImport } from './routes/admin.crm.leads.individuals.$leadId'
@@ -291,6 +293,11 @@ const InitiativeClaimRoute = InitiativeClaimRouteImport.update({
 const FormsSlugRoute = FormsSlugRouteImport.update({
   id: '/forms/$slug',
   path: '/forms/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventSignupTokenRoute = EventSignupTokenRouteImport.update({
+  id: '/event-signup/$token',
+  path: '/event-signup/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunitiesKeyRoute = CommunitiesKeyRouteImport.update({
@@ -602,6 +609,12 @@ const AdminCrmContactsContactIdRoute =
     path: '/$contactId',
     getParentRoute: () => AdminCrmContactsRoute,
   } as any)
+const LearningManagementSystemAdminInternshipsIdSignupsRoute =
+  LearningManagementSystemAdminInternshipsIdSignupsRouteImport.update({
+    id: '/internships/$id/signups',
+    path: '/internships/$id/signups',
+    getParentRoute: () => LearningManagementSystemAdminRoute,
+  } as any)
 const LearningManagementSystemAdminInternshipsIdEditRoute =
   LearningManagementSystemAdminInternshipsIdEditRouteImport.update({
     id: '/internships/$id/edit',
@@ -665,6 +678,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
@@ -731,6 +745,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm/leads/individuals/$leadId': typeof AdminCrmLeadsIndividualsLeadIdRoute
   '/learning-management-system/admin/internships/$id/applications': typeof LearningManagementSystemAdminInternshipsIdApplicationsRouteWithChildren
   '/learning-management-system/admin/internships/$id/edit': typeof LearningManagementSystemAdminInternshipsIdEditRoute
+  '/learning-management-system/admin/internships/$id/signups': typeof LearningManagementSystemAdminInternshipsIdSignupsRoute
   '/learning-management-system/admin/internships/$id/applications/$appId': typeof LearningManagementSystemAdminInternshipsIdApplicationsAppIdRoute
 }
 export interface FileRoutesByTo {
@@ -757,6 +772,7 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
@@ -819,6 +835,7 @@ export interface FileRoutesByTo {
   '/admin/crm/leads/individuals/$leadId': typeof AdminCrmLeadsIndividualsLeadIdRoute
   '/learning-management-system/admin/internships/$id/applications': typeof LearningManagementSystemAdminInternshipsIdApplicationsRouteWithChildren
   '/learning-management-system/admin/internships/$id/edit': typeof LearningManagementSystemAdminInternshipsIdEditRoute
+  '/learning-management-system/admin/internships/$id/signups': typeof LearningManagementSystemAdminInternshipsIdSignupsRoute
   '/learning-management-system/admin/internships/$id/applications/$appId': typeof LearningManagementSystemAdminInternshipsIdApplicationsAppIdRoute
 }
 export interface FileRoutesById {
@@ -851,6 +868,7 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
@@ -917,6 +935,7 @@ export interface FileRoutesById {
   '/admin/crm/leads/individuals/$leadId': typeof AdminCrmLeadsIndividualsLeadIdRoute
   '/learning-management-system/admin/internships/$id/applications': typeof LearningManagementSystemAdminInternshipsIdApplicationsRouteWithChildren
   '/learning-management-system/admin/internships/$id/edit': typeof LearningManagementSystemAdminInternshipsIdEditRoute
+  '/learning-management-system/admin/internships/$id/signups': typeof LearningManagementSystemAdminInternshipsIdSignupsRoute
   '/learning-management-system/admin/internships/$id/applications/$appId': typeof LearningManagementSystemAdminInternshipsIdApplicationsAppIdRoute
 }
 export interface FileRouteTypes {
@@ -950,6 +969,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
     | '/learning-management-system/admin'
@@ -1016,6 +1036,7 @@ export interface FileRouteTypes {
     | '/admin/crm/leads/individuals/$leadId'
     | '/learning-management-system/admin/internships/$id/applications'
     | '/learning-management-system/admin/internships/$id/edit'
+    | '/learning-management-system/admin/internships/$id/signups'
     | '/learning-management-system/admin/internships/$id/applications/$appId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1042,6 +1063,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
     | '/learning-management-system/catalog'
@@ -1104,6 +1126,7 @@ export interface FileRouteTypes {
     | '/admin/crm/leads/individuals/$leadId'
     | '/learning-management-system/admin/internships/$id/applications'
     | '/learning-management-system/admin/internships/$id/edit'
+    | '/learning-management-system/admin/internships/$id/signups'
     | '/learning-management-system/admin/internships/$id/applications/$appId'
   id:
     | '__root__'
@@ -1135,6 +1158,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
     | '/learning-management-system/admin'
@@ -1201,6 +1225,7 @@ export interface FileRouteTypes {
     | '/admin/crm/leads/individuals/$leadId'
     | '/learning-management-system/admin/internships/$id/applications'
     | '/learning-management-system/admin/internships/$id/edit'
+    | '/learning-management-system/admin/internships/$id/signups'
     | '/learning-management-system/admin/internships/$id/applications/$appId'
   fileRoutesById: FileRoutesById
 }
@@ -1222,6 +1247,7 @@ export interface RootRouteChildren {
   SuperAdminRoute: typeof SuperAdminRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
+  EventSignupTokenRoute: typeof EventSignupTokenRoute
   FormsSlugRoute: typeof FormsSlugRoute
   InitiativeClaimRoute: typeof InitiativeClaimRoute
   NewsIdRoute: typeof NewsIdRoute
@@ -1471,6 +1497,13 @@ declare module '@tanstack/react-router' {
       path: '/forms/$slug'
       fullPath: '/forms/$slug'
       preLoaderRoute: typeof FormsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event-signup/$token': {
+      id: '/event-signup/$token'
+      path: '/event-signup/$token'
+      fullPath: '/event-signup/$token'
+      preLoaderRoute: typeof EventSignupTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/communities/$key': {
@@ -1865,6 +1898,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCrmContactsContactIdRouteImport
       parentRoute: typeof AdminCrmContactsRoute
     }
+    '/learning-management-system/admin/internships/$id/signups': {
+      id: '/learning-management-system/admin/internships/$id/signups'
+      path: '/internships/$id/signups'
+      fullPath: '/learning-management-system/admin/internships/$id/signups'
+      preLoaderRoute: typeof LearningManagementSystemAdminInternshipsIdSignupsRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRoute
+    }
     '/learning-management-system/admin/internships/$id/edit': {
       id: '/learning-management-system/admin/internships/$id/edit'
       path: '/internships/$id/edit'
@@ -2082,6 +2122,7 @@ interface LearningManagementSystemAdminRouteChildren {
   LearningManagementSystemAdminInternshipsIndexRoute: typeof LearningManagementSystemAdminInternshipsIndexRoute
   LearningManagementSystemAdminInternshipsIdApplicationsRoute: typeof LearningManagementSystemAdminInternshipsIdApplicationsRouteWithChildren
   LearningManagementSystemAdminInternshipsIdEditRoute: typeof LearningManagementSystemAdminInternshipsIdEditRoute
+  LearningManagementSystemAdminInternshipsIdSignupsRoute: typeof LearningManagementSystemAdminInternshipsIdSignupsRoute
 }
 
 const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminRouteChildren =
@@ -2110,6 +2151,8 @@ const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminR
       LearningManagementSystemAdminInternshipsIdApplicationsRouteWithChildren,
     LearningManagementSystemAdminInternshipsIdEditRoute:
       LearningManagementSystemAdminInternshipsIdEditRoute,
+    LearningManagementSystemAdminInternshipsIdSignupsRoute:
+      LearningManagementSystemAdminInternshipsIdSignupsRoute,
   }
 
 const LearningManagementSystemAdminRouteWithChildren =
@@ -2246,6 +2289,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuperAdminRoute: SuperAdminRoute,
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,
+  EventSignupTokenRoute: EventSignupTokenRoute,
   FormsSlugRoute: FormsSlugRoute,
   InitiativeClaimRoute: InitiativeClaimRoute,
   NewsIdRoute: NewsIdRoute,

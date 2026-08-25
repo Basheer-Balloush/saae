@@ -13,6 +13,8 @@ import {
   Users,
   Lock,
   Archive,
+  ArchiveRestore,
+  Link2,
 } from "lucide-react";
 
 import { useLang } from "@/lib/i18n";
@@ -25,6 +27,7 @@ import {
 } from "@/lib/lms-internships-admin.functions";
 import { LIFECYCLE, type Lifecycle } from "@/lib/lms-internships-admin";
 import { Button } from "@/components/ui/button";
+import { IconActionButton } from "@/components/admin/IconActionButton";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -83,6 +86,7 @@ function AdminInternshipsList() {
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<string | null>(null);
   const [toDelete, setToDelete] = useState<AdminInternshipRow | null>(null);
+  const [toRestore, setToRestore] = useState<AdminInternshipRow | null>(null);
 
   const load = useCallback(async () => {
     setBusy(true);
@@ -122,6 +126,13 @@ function AdminInternshipsList() {
     }
   };
 
+  const confirmRestore = async () => {
+    if (!toRestore) return;
+    const row = toRestore;
+    setToRestore(null);
+    await onStatusChange(row, "draft");
+  };
+
   const confirmDelete = async () => {
     if (!toDelete) return;
     setPending(toDelete.id);
@@ -152,7 +163,9 @@ function AdminInternshipsList() {
               : "Create, publish, hide, close, or archive internship opportunities."}
           </p>
         </div>
-        <Button onClick={() => navigate({ to: "/learning-management-system/admin/internships/new" })}>
+        <Button
+          onClick={() => navigate({ to: "/learning-management-system/admin/internships/new" })}
+        >
           <Plus className="h-4 w-4 mx-1" /> {t.adminInternshipsNew}
         </Button>
       </header>
@@ -160,7 +173,9 @@ function AdminInternshipsList() {
       <Card className="p-4 mb-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ${dir === "rtl" ? "right-3" : "left-3"}`} />
+            <Search
+              className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ${dir === "rtl" ? "right-3" : "left-3"}`}
+            />
             <Input
               value={q}
               onChange={(e) => {
@@ -185,7 +200,9 @@ function AdminInternshipsList() {
             <SelectContent>
               <SelectItem value="all">{lang === "ar" ? "كل الحالات" : "All statuses"}</SelectItem>
               {LIFECYCLE.map((s) => (
-                <SelectItem key={s} value={s}>{lifecycleLabel(s, lang)}</SelectItem>
+                <SelectItem key={s} value={s}>
+                  {lifecycleLabel(s, lang)}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -283,7 +300,14 @@ function AdminInternshipsList() {
                         pending={pending === row.id}
                       />
                     )}
-                    {row.status !== "archived" && (
+                    {row.status === "archived" ? (
+                      <ActionBtn
+                        icon={ArchiveRestore}
+                        label={t.adminInternshipsRestore}
+                        onClick={() => setToRestore(row)}
+                        pending={pending === row.id}
+                      />
+                    ) : (
                       <ActionBtn
                         icon={Archive}
                         label={t.adminInternshipsArchive}
@@ -291,23 +315,32 @@ function AdminInternshipsList() {
                         pending={pending === row.id}
                       />
                     )}
-                    <Link
-                      to="/learning-management-system/admin/internships/$id/edit"
-                      params={{ id: row.id }}
-                    >
-                      <Button variant="ghost" size="icon" title={lang === "ar" ? "تحرير" : "Edit"}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      size="icon"
+                    <IconActionButton
+                      icon={Link2}
+                      label={lang === "ar" ? "رابط التسجيل الخارجي" : "External sign-up link"}
+                      onClick={() =>
+                        navigate({
+                          to: "/learning-management-system/admin/internships/$id/signups",
+                          params: { id: row.id },
+                        })
+                      }
+                    />
+                    <IconActionButton
+                      icon={Edit}
+                      label={lang === "ar" ? "تحرير" : "Edit"}
+                      onClick={() =>
+                        navigate({
+                          to: "/learning-management-system/admin/internships/$id/edit",
+                          params: { id: row.id },
+                        })
+                      }
+                    />
+                    <IconActionButton
+                      icon={Trash2}
+                      label={t.adminInternshipsDelete}
                       className="text-destructive"
                       onClick={() => setToDelete(row)}
-                      title={t.adminInternshipsDelete}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    />
                   </div>
                 </TableCell>
               </TableRow>
@@ -341,6 +374,21 @@ function AdminInternshipsList() {
           </div>
         </div>
       )}
+
+      <AlertDialog open={!!toRestore} onOpenChange={(o) => !o && setToRestore(null)}>
+        <AlertDialogContent dir={dir}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.adminInternshipsRestore}</AlertDialogTitle>
+            <AlertDialogDescription>{t.adminInternshipsRestoreConfirm}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{lang === "ar" ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRestore}>
+              {t.adminInternshipsRestore}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
         <AlertDialogContent dir={dir}>
@@ -378,11 +426,7 @@ function ActionBtn({
   onClick: () => void;
   pending: boolean;
 }) {
-  return (
-    <Button variant="ghost" size="icon" onClick={onClick} disabled={pending} title={label}>
-      {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
-    </Button>
-  );
+  return <IconActionButton icon={Icon} label={label} onClick={onClick} pending={pending} />;
 }
 
 export function StatusBadge({ status, lang }: { status: Lifecycle; lang: "ar" | "en" }) {
@@ -393,17 +437,26 @@ export function StatusBadge({ status, lang }: { status: Lifecycle; lang: "ar" | 
     closed: "bg-slate-500/10 text-slate-700 dark:text-slate-300",
     archived: "bg-destructive/10 text-destructive",
   };
-  return <Badge variant="outline" className={map[status]}>{lifecycleLabel(status, lang)}</Badge>;
+  return (
+    <Badge variant="outline" className={map[status]}>
+      {lifecycleLabel(status, lang)}
+    </Badge>
+  );
 }
 
 export function lifecycleLabel(s: Lifecycle, lang: "ar" | "en"): string {
   const t = lmsInternshipsT[lang];
   switch (s) {
-    case "draft": return t.lifecycleDraft;
-    case "published": return t.lifecyclePublished;
-    case "hidden": return t.lifecycleHidden;
-    case "closed": return t.lifecycleClosed;
-    case "archived": return t.lifecycleArchived;
+    case "draft":
+      return t.lifecycleDraft;
+    case "published":
+      return t.lifecyclePublished;
+    case "hidden":
+      return t.lifecycleHidden;
+    case "closed":
+      return t.lifecycleClosed;
+    case "archived":
+      return t.lifecycleArchived;
   }
 }
 
@@ -411,10 +464,16 @@ export function mapErr(err: unknown, lang: "ar" | "en"): string {
   const msg = err instanceof Error ? err.message : String(err);
   const AR = lang === "ar";
   if (msg.includes("slug_taken")) return AR ? "هذا الرابط مستخدم مسبقًا" : "Slug is already in use";
-  if (msg.includes("has_applications")) return AR ? "لا يمكن الحذف: توجد طلبات مرتبطة. استخدم الأرشفة." : "Cannot delete: applications exist. Use Archive.";
-  if (msg.includes("question_has_answers")) return AR ? "لا يمكن حذف سؤال أُجيب عليه" : "Cannot delete a question that has answers";
-  if (msg.includes("status_transition_invalid")) return AR ? "لا يمكن تغيير الحالة بهذا الاتجاه" : "That status change isn't allowed";
-  if (msg.includes("date_range_invalid")) return AR ? "التواريخ غير متسقة" : "Date range is invalid";
+  if (msg.includes("has_applications"))
+    return AR
+      ? "لا يمكن الحذف: توجد طلبات مرتبطة. استخدم الأرشفة."
+      : "Cannot delete: applications exist. Use Archive.";
+  if (msg.includes("question_has_answers"))
+    return AR ? "لا يمكن حذف سؤال أُجيب عليه" : "Cannot delete a question that has answers";
+  if (msg.includes("status_transition_invalid"))
+    return AR ? "لا يمكن تغيير الحالة بهذا الاتجاه" : "That status change isn't allowed";
+  if (msg.includes("date_range_invalid"))
+    return AR ? "التواريخ غير متسقة" : "Date range is invalid";
   if (msg.includes("unauthorized")) return AR ? "لا تملك صلاحية هذا الإجراء" : "Unauthorized";
   if (msg.includes("not_found")) return AR ? "غير موجود" : "Not found";
   return msg;

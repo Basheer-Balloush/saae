@@ -576,7 +576,7 @@ function ApplicationDetail() {
               <SelectContent>
                 <SelectItem value="__none__">{lang === "ar" ? "بلا إسناد" : "Unassigned"}</SelectItem>
                 {admins.map((a) => (
-                  <SelectItem key={a.user_id} value={a.user_id}>{a.email ?? a.user_id.slice(0, 8)}</SelectItem>
+                  <SelectItem key={a.user_id} value={a.user_id}>{a.email ?? (lang === "ar" ? "مشرف بدون بريد" : "Admin (no email)")}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

@@ -1739,6 +1739,122 @@ export type Database = {
           },
         ]
       }
+      internship_signup_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          opportunity_id: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          opportunity_id: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          opportunity_id?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internship_signup_links_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: true
+            referencedRelation: "internship_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internship_signup_rate_limits: {
+        Row: {
+          bucket_key: string
+          created_at: string
+          hits: number
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          bucket_key: string
+          created_at?: string
+          hits?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          bucket_key?: string
+          created_at?: string
+          hits?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      internship_signup_submissions: {
+        Row: {
+          biography: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          link_id: string | null
+          opportunity_id: string
+          organization: string | null
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          biography?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          link_id?: string | null
+          opportunity_id: string
+          organization?: string | null
+          phone: string
+          updated_at?: string
+        }
+        Update: {
+          biography?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          link_id?: string | null
+          opportunity_id?: string
+          organization?: string | null
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internship_signup_submissions_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "internship_signup_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internship_signup_submissions_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "internship_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lms_active_sessions: {
         Row: {
           created_at: string
