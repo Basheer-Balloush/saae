@@ -121,7 +121,7 @@ function LmsHome() {
   const isRtl = dir === "rtl";
   const tr = lmsT[lang];
   const navigate = useNavigate();
-  const { user, role, loading } = useLmsAuth();
+  const { user, loading } = useLmsAuth();
   const loaderData = Route.useLoaderData();
   const categories = loaderData.categories as Category[];
   const stats = loaderData.stats as { courses: number; students: number; instructors: number };
