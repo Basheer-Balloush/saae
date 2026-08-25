@@ -56,6 +56,7 @@ function buildNav(lang: "ar" | "en"): NavItem[] {
         { title: ar ? "الملاحظات" : "Feedback", url: "/admin/crm/feedback" },
         { title: ar ? "طلاب المنصة" : "LMS Students", url: "/admin/crm/students" },
         { title: ar ? "استجابات النماذج" : "Form submissions", url: "/admin/crm/forms" },
+        { title: ar ? "روابط التسجيل" : "Registration links", url: "/admin/crm/registration-links" },
       ],
     },
     { title: ar ? "مبادرة المليون" : "Million Initiative", url: "/admin/initiative", icon: Sparkles },
