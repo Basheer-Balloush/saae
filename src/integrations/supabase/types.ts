@@ -4341,6 +4341,7 @@ export type Database = {
           delivery_mode: string
           description_ar: string
           description_en: string
+          end_date: string
           id: string
           is_free: boolean
           level: string
