@@ -1,4 +1,5 @@
-import { createServerFn, getRequest } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -67,7 +68,7 @@ export const submitEventSignup = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<SubmitResult> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const headers = getRequest().headers;
+    const headers = getRequest()?.headers ?? new Headers();
     const ip =
       (headers.get("x-forwarded-for") ?? "").split(",")[0]?.trim() ||
       headers.get("cf-connecting-ip") ||
