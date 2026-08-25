@@ -3,13 +3,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
+  AlertCircle,
   ArrowLeft,
   Award,
   BookOpen,
+  Download,
+  ExternalLink,
   FileText,
   History,
   Loader2,
   MessageSquare,
+  RefreshCw,
   Save,
   UserCog,
 } from "lucide-react";
@@ -26,7 +30,6 @@ import {
   ADMIN_ASSIGNABLE_STATUSES,
   type ApplicationStatus,
   type ApplicationBundle,
-
 } from "@/lib/lms-internships-applications-admin.functions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -79,6 +82,17 @@ const RANK: Record<ApplicationStatus, number> = {
 
 type Bundle = ApplicationBundle;
 
+type CvAccessState =
+  | { status: "idle" | "loading" }
+  | { status: "error"; message: string }
+  | {
+      status: "ready";
+      previewUrl: string;
+      downloadUrl: string;
+      filename: string | null;
+      mimeType: string | null;
+    };
+
 function notProvided(lang: "ar" | "en") {
   return lang === "ar" ? "غير متوفر" : "Not provided";
 }
@@ -109,10 +123,7 @@ function Field({
 }
 
 /** Renders a stored answer as readable localized plain text (never raw JSON). */
-function formatAnswer(
-  a: Bundle["answers"][number],
-  lang: "ar" | "en",
-): string {
+function formatAnswer(a: Bundle["answers"][number], lang: "ar" | "en"): string {
   const text = a.answer_text?.trim();
   if (text) return text;
   const v = a.answer_json;
@@ -138,14 +149,16 @@ function formatAnswer(
   return render(v);
 }
 
-
 function mapErr(err: unknown, lang: "ar" | "en") {
   const msg = err instanceof Error ? err.message : String(err);
   const AR = lang === "ar";
-  if (msg.includes("reason_required")) return AR ? "السبب مطلوب لهذا التغيير" : "A reason is required for this change";
+  if (msg.includes("reason_required"))
+    return AR ? "السبب مطلوب لهذا التغيير" : "A reason is required for this change";
   if (msg.includes("application_withdrawn")) return AR ? "الطلب مسحوب" : "Application is withdrawn";
-  if (msg.includes("admin_cannot_withdraw")) return AR ? "لا يمكن تعيين حالة مسحوب" : "Admins cannot set the withdrawn status";
-  if (msg.includes("assignee_not_admin")) return AR ? "المستخدم المحدد ليس مسؤولًا" : "Selected user is not an admin";
+  if (msg.includes("admin_cannot_withdraw"))
+    return AR ? "لا يمكن تعيين حالة مسحوب" : "Admins cannot set the withdrawn status";
+  if (msg.includes("assignee_not_admin"))
+    return AR ? "المستخدم المحدد ليس مسؤولًا" : "Selected user is not an admin";
   if (msg.includes("unauthorized")) return AR ? "غير مصرح" : "Unauthorized";
   return msg;
 }
@@ -164,7 +177,10 @@ function ApplicationDetail() {
 
   const [bundle, setBundle] = useState<Bundle | null>(null);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<{ kind: "notfound" | "error"; message: string } | null>(null);
+  const [loadError, setLoadError] = useState<{
+    kind: "notfound" | "error";
+    message: string;
+  } | null>(null);
   const [admins, setAdmins] = useState<Array<{ user_id: string; email: string | null }>>([]);
 
   const [nextStatus, setNextStatus] = useState<ApplicationStatus | "">("");
@@ -178,6 +194,8 @@ function ApplicationDetail() {
   const [assignValue, setAssignValue] = useState<string>("__none__");
 
   const [openingCv, setOpeningCv] = useState(false);
+  const [cvAccess, setCvAccess] = useState<CvAccessState>({ status: "idle" });
+  const [cvPreviewFailed, setCvPreviewFailed] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -187,13 +205,14 @@ function ApplicationDetail() {
         data: { application_id: appId, opportunity_id: opportunityId },
       });
       setBundle(res);
+      setCvAccess({ status: "idle" });
+      setCvPreviewFailed(false);
       setAssignValue(res.application.assigned_admin ?? "__none__");
       setNextStatus("");
       setReason("");
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      const notFound =
-        msg.includes("application_not_found") || msg.includes("P0002");
+      const notFound = msg.includes("application_not_found") || msg.includes("P0002");
       setBundle(null);
       setLoadError({
         kind: notFound ? "notfound" : "error",
@@ -204,10 +223,35 @@ function ApplicationDetail() {
     }
   }, [getFn, appId, opportunityId, lang]);
 
+  const loadCv = useCallback(async () => {
+    if (!bundle?.cv) {
+      setCvAccess({ status: "idle" });
+      return;
+    }
+    setCvAccess({ status: "loading" });
+    setCvPreviewFailed(false);
+    try {
+      const result = await cvFn({ data: { application_id: appId } });
+      if (!result.url || !result.download_url) throw new Error("cv_file_unavailable");
+      setCvAccess({
+        status: "ready",
+        previewUrl: result.url,
+        downloadUrl: result.download_url,
+        filename: result.filename,
+        mimeType: result.mime_type,
+      });
+    } catch (err) {
+      setCvAccess({ status: "error", message: mapErr(err, lang) });
+    }
+  }, [bundle?.cv, cvFn, appId, lang]);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (bundle?.cv) void loadCv();
+  }, [bundle?.cv, loadCv]);
 
   useEffect(() => {
     (async () => {
@@ -221,6 +265,10 @@ function ApplicationDetail() {
   }, [listAdminsFn]);
 
   const openCv = async () => {
+    if (cvAccess.status === "ready") {
+      window.open(cvAccess.previewUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
     setOpeningCv(true);
     try {
       const { url } = await cvFn({ data: { application_id: appId } });
@@ -239,8 +287,7 @@ function ApplicationDetail() {
   const changeStatus = async () => {
     if (!bundle || !nextStatus) return;
     const from = bundle.application.status;
-    const needsReason =
-      nextStatus === "rejected" || RANK[nextStatus] < RANK[from];
+    const needsReason = nextStatus === "rejected" || RANK[nextStatus] < RANK[from];
     if (needsReason && reason.trim().length === 0) {
       toast.error(lang === "ar" ? "السبب مطلوب" : "Reason is required");
       return;
@@ -351,13 +398,17 @@ function ApplicationDetail() {
     );
   }
 
-
   const app = bundle.application;
   const from = app.status;
-  const needsReason =
-    !!nextStatus && (nextStatus === "rejected" || RANK[nextStatus] < RANK[from]);
+  const needsReason = !!nextStatus && (nextStatus === "rejected" || RANK[nextStatus] < RANK[from]);
   const readOnly = from === "withdrawn";
-  const oppTitle = lang === "ar" ? bundle.opportunity.title_ar : bundle.opportunity.title_en || bundle.opportunity.title_ar;
+  const oppTitle =
+    lang === "ar"
+      ? bundle.opportunity.title_ar
+      : bundle.opportunity.title_en || bundle.opportunity.title_ar;
+  const readyCv = cvAccess.status === "ready" ? cvAccess : null;
+  const cvMimeType = readyCv?.mimeType ?? bundle.cv?.mime_type;
+  const cvIsPdf = cvMimeType === "application/pdf";
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 space-y-6" dir={dir}>
@@ -366,19 +417,24 @@ function ApplicationDetail() {
       <Card className="p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="text-xs text-muted-foreground" dir="auto">{oppTitle}</div>
+            <div className="text-xs text-muted-foreground" dir="auto">
+              {oppTitle}
+            </div>
             <h1 className="text-2xl font-bold mt-1" dir="auto">
               {app.snapshot_full_name?.trim() || notProvided(lang)}
             </h1>
           </div>
           <div className="flex flex-col items-start sm:items-end gap-2">
-            <Badge variant="outline" className="text-sm">{statusLabel(app.status, lang)}</Badge>
+            <Badge variant="outline" className="text-sm">
+              {statusLabel(app.status, lang)}
+            </Badge>
             <div className="text-xs text-muted-foreground" dir="ltr">
               {lang === "ar" ? "أُرسل: " : "Submitted: "}
               {new Date(app.submitted_at).toLocaleString(lang)}
             </div>
             <div className="text-xs text-muted-foreground" dir="ltr">
-              {lang === "ar" ? "المحاولة #" : "Attempt #"}{app.attempt_number}
+              {lang === "ar" ? "المحاولة #" : "Attempt #"}
+              {app.attempt_number}
             </div>
           </div>
         </div>
@@ -421,32 +477,99 @@ function ApplicationDetail() {
           </Card>
 
           <Card className="p-5">
-            <div className="flex items-center justify-between mb-3 gap-3">
+            <div className="flex flex-wrap items-center justify-between mb-3 gap-3">
               <h2 className="font-semibold flex items-center gap-2">
                 <FileText className="h-4 w-4" /> {t.profileCv}
               </h2>
-              {bundle.cv && (
-                <Button size="sm" variant="outline" onClick={openCv} disabled={openingCv}>
-                  {openingCv ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <FileText className="h-4 w-4 mx-1" />}
-                  {t.profileViewCv}
-                </Button>
+              {cvAccess.status === "ready" && (
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" variant="outline" onClick={openCv}>
+                    <ExternalLink className="h-4 w-4 mx-1" />
+                    {lang === "ar" ? "فتح في نافذة جديدة" : "Open in new tab"}
+                  </Button>
+                  <Button size="sm" asChild>
+                    <a href={cvAccess.downloadUrl} download={cvAccess.filename ?? undefined}>
+                      <Download className="h-4 w-4 mx-1" />
+                      {lang === "ar" ? "تنزيل السيرة الذاتية" : "Download CV"}
+                    </a>
+                  </Button>
+                </div>
               )}
             </div>
             {bundle.cv ? (
-              <div className="text-xs text-muted-foreground" dir="auto">
-                {bundle.cv.original_filename?.trim() ||
-                  (lang === "ar" ? "ملف السيرة الذاتية" : "CV file")}
-                {bundle.cv.size_bytes
-                  ? ` · ${Math.max(1, Math.round(bundle.cv.size_bytes / 1024))} KB`
-                  : ""}
+              <div className="space-y-4">
+                <div className="text-xs text-muted-foreground" dir="auto">
+                  {bundle.cv.original_filename?.trim() ||
+                    (lang === "ar" ? "ملف السيرة الذاتية" : "CV file")}
+                  {bundle.cv.size_bytes
+                    ? ` · ${Math.max(1, Math.round(bundle.cv.size_bytes / 1024))} KB`
+                    : ""}
+                </div>
+
+                {cvAccess.status === "idle" || cvAccess.status === "loading" ? (
+                  <div className="flex h-40 items-center justify-center rounded-md border border-border bg-muted/30">
+                    <div className="text-center text-sm text-muted-foreground">
+                      <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />
+                      {lang === "ar" ? "جارٍ تحميل السيرة الذاتية…" : "Loading CV…"}
+                    </div>
+                  </div>
+                ) : cvAccess.status === "error" ? (
+                  <div className="rounded-md border border-destructive/40 bg-destructive/5 p-4">
+                    <div className="flex items-start gap-2 text-sm text-destructive">
+                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                      <div>
+                        <p className="font-medium">
+                          {lang === "ar"
+                            ? "تعذّر تحميل ملف السيرة الذاتية"
+                            : "Could not load the CV file"}
+                        </p>
+                        <p className="mt-1 break-words text-xs text-muted-foreground" dir="auto">
+                          {cvAccess.message}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      className="mt-3"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => void loadCv()}
+                    >
+                      <RefreshCw className="h-4 w-4 mx-1" />
+                      {lang === "ar" ? "إعادة المحاولة" : "Retry"}
+                    </Button>
+                  </div>
+                ) : cvIsPdf && !cvPreviewFailed && readyCv ? (
+                  <iframe
+                    src={readyCv.previewUrl}
+                    title={lang === "ar" ? "معاينة السيرة الذاتية" : "CV preview"}
+                    className="h-[420px] w-full rounded-md border border-border bg-muted sm:h-[560px]"
+                    onError={() => setCvPreviewFailed(true)}
+                  />
+                ) : cvIsPdf && cvPreviewFailed ? (
+                  <div className="rounded-md border border-destructive/40 bg-destructive/5 p-4 text-sm">
+                    <div className="flex items-start gap-2 text-destructive">
+                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                      <p>
+                        {lang === "ar"
+                          ? "تعذّرت معاينة ملف PDF. يمكنك تنزيل الملف أو فتحه في نافذة جديدة."
+                          : "The PDF preview could not be displayed. Download it or open it in a new tab."}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-md border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+                    {lang === "ar"
+                      ? "هذا النوع من الملفات لا يدعم المعاينة هنا. استخدم زر التنزيل لعرضه على جهازك."
+                      : "This file type cannot be previewed here. Use Download CV to open it on your device."}
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-sm italic text-muted-foreground">
-                {lang === "ar" ? "لا توجد سيرة ذاتية مرفقة — غير متوفر" : "No CV attached — Not provided"}
+                {lang === "ar" ? "لم يتم رفع سيرة ذاتية" : "No CV uploaded"}
               </p>
             )}
           </Card>
-
 
           <Card className="p-5">
             <h2 className="font-semibold mb-3 flex items-center gap-2">
@@ -461,11 +584,20 @@ function ApplicationDetail() {
                 {bundle.courses.map((c) => (
                   <li key={c.id} className="py-2 flex flex-wrap justify-between gap-2">
                     <span dir="auto">
-                      {(lang === "ar" ? c.course_title_ar : c.course_title_en) || c.course_title_ar || c.course_title_en || "—"}
+                      {(lang === "ar" ? c.course_title_ar : c.course_title_en) ||
+                        c.course_title_ar ||
+                        c.course_title_en ||
+                        "—"}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {c.completed ? (lang === "ar" ? "مكتملة" : "Completed") : `${Math.round(Number(c.progress_percent ?? 0))}%`}
-                      {c.attendance_total ? ` · ${c.attendance_present ?? 0}/${c.attendance_total}` : ""}
+                      {c.completed
+                        ? lang === "ar"
+                          ? "مكتملة"
+                          : "Completed"
+                        : `${Math.round(Number(c.progress_percent ?? 0))}%`}
+                      {c.attendance_total
+                        ? ` · ${c.attendance_present ?? 0}/${c.attendance_total}`
+                        : ""}
                     </span>
                   </li>
                 ))}
@@ -486,10 +618,14 @@ function ApplicationDetail() {
                 {bundle.certificates.map((c) => (
                   <li key={c.id} className="py-2 flex flex-wrap justify-between gap-2">
                     <span dir="auto">
-                      {(lang === "ar" ? c.course_title_ar : c.course_title_en) || c.course_title_ar || c.course_title_en || "—"}
+                      {(lang === "ar" ? c.course_title_ar : c.course_title_en) ||
+                        c.course_title_ar ||
+                        c.course_title_en ||
+                        "—"}
                     </span>
                     <span className="text-xs text-muted-foreground" dir="ltr">
-                      {c.serial ?? ""} {c.issued_at ? ` · ${new Date(c.issued_at).toLocaleDateString(lang)}` : ""}
+                      {c.serial ?? ""}{" "}
+                      {c.issued_at ? ` · ${new Date(c.issued_at).toLocaleDateString(lang)}` : ""}
                     </span>
                   </li>
                 ))}
@@ -514,7 +650,9 @@ function ApplicationDetail() {
                   const value = formatAnswer(a, lang);
                   return (
                     <div key={a.id}>
-                      <div className="text-xs text-muted-foreground mb-1" dir="auto">{label}</div>
+                      <div className="text-xs text-muted-foreground mb-1" dir="auto">
+                        {label}
+                      </div>
                       <div
                         className={`text-sm whitespace-pre-wrap break-words ${value.trim() ? "" : "italic text-muted-foreground"}`}
                         dir="auto"
@@ -527,7 +665,6 @@ function ApplicationDetail() {
               </div>
             )}
           </Card>
-
 
           <Card className="p-5">
             <h2 className="font-semibold mb-3 flex items-center gap-2">
@@ -545,7 +682,9 @@ function ApplicationDetail() {
                     <span dir="ltr">{n.author_email ?? ""}</span>
                     <span dir="ltr">{new Date(n.created_at).toLocaleString(lang)}</span>
                   </div>
-                  <p className="text-sm mt-2 whitespace-pre-wrap break-words" dir="auto">{n.body}</p>
+                  <p className="text-sm mt-2 whitespace-pre-wrap break-words" dir="auto">
+                    {n.body}
+                  </p>
                 </div>
               ))}
             </div>
@@ -559,7 +698,11 @@ function ApplicationDetail() {
             />
             <div className="mt-2 flex justify-end">
               <Button onClick={submitNote} disabled={savingNote || note.trim().length === 0}>
-                {savingNote ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <MessageSquare className="h-4 w-4 mx-1" />}
+                {savingNote ? (
+                  <Loader2 className="h-4 w-4 animate-spin mx-1" />
+                ) : (
+                  <MessageSquare className="h-4 w-4 mx-1" />
+                )}
                 {t.adminApplicationsAddNote}
               </Button>
             </div>
@@ -572,17 +715,27 @@ function ApplicationDetail() {
               <UserCog className="h-4 w-4" /> {t.adminApplicationsAssignAdmin}
             </h2>
             <Select value={assignValue} onValueChange={setAssignValue}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">{lang === "ar" ? "بلا إسناد" : "Unassigned"}</SelectItem>
+                <SelectItem value="__none__">
+                  {lang === "ar" ? "بلا إسناد" : "Unassigned"}
+                </SelectItem>
                 {admins.map((a) => (
-                  <SelectItem key={a.user_id} value={a.user_id}>{a.email ?? (lang === "ar" ? "مشرف بدون بريد" : "Admin (no email)")}</SelectItem>
+                  <SelectItem key={a.user_id} value={a.user_id}>
+                    {a.email ?? (lang === "ar" ? "مشرف بدون بريد" : "Admin (no email)")}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <div className="mt-3 flex justify-end">
               <Button size="sm" onClick={saveAssignment} disabled={savingAssign}>
-                {savingAssign ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
+                {savingAssign ? (
+                  <Loader2 className="h-4 w-4 animate-spin mx-1" />
+                ) : (
+                  <Save className="h-4 w-4 mx-1" />
+                )}
                 {lang === "ar" ? "حفظ" : "Save"}
               </Button>
             </div>
@@ -592,17 +745,24 @@ function ApplicationDetail() {
             <h2 className="font-semibold mb-3">{t.adminApplicationsChangeStatus}</h2>
             {readOnly ? (
               <p className="text-sm text-muted-foreground">
-                {lang === "ar" ? "الطلب مسحوب — لا يمكن تعديل الحالة" : "Application is withdrawn — status is locked"}
+                {lang === "ar"
+                  ? "الطلب مسحوب — لا يمكن تعديل الحالة"
+                  : "Application is withdrawn — status is locked"}
               </p>
             ) : (
               <>
-                <Select value={nextStatus} onValueChange={(v) => setNextStatus(v as ApplicationStatus)}>
+                <Select
+                  value={nextStatus}
+                  onValueChange={(v) => setNextStatus(v as ApplicationStatus)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder={lang === "ar" ? "اختر حالة" : "Select status"} />
                   </SelectTrigger>
                   <SelectContent>
                     {ADMIN_ASSIGNABLE_STATUSES.filter((s) => s !== from).map((s) => (
-                      <SelectItem key={s} value={s}>{statusLabel(s, lang)}</SelectItem>
+                      <SelectItem key={s} value={s}>
+                        {statusLabel(s, lang)}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -621,7 +781,11 @@ function ApplicationDetail() {
                 )}
                 <div className="mt-3 flex justify-end">
                   <Button size="sm" onClick={changeStatus} disabled={!nextStatus || savingStatus}>
-                    {savingStatus ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
+                    {savingStatus ? (
+                      <Loader2 className="h-4 w-4 animate-spin mx-1" />
+                    ) : (
+                      <Save className="h-4 w-4 mx-1" />
+                    )}
                     {lang === "ar" ? "تطبيق" : "Apply"}
                   </Button>
                 </div>
@@ -640,17 +804,28 @@ function ApplicationDetail() {
             ) : (
               <ul className="space-y-3 text-sm">
                 {bundle.history.map((h) => (
-                  <li key={h.id} className="border-l-2 border-primary/40 pl-3 rtl:border-l-0 rtl:border-r-2 rtl:pl-0 rtl:pr-3">
+                  <li
+                    key={h.id}
+                    className="border-l-2 border-primary/40 pl-3 rtl:border-l-0 rtl:border-r-2 rtl:pl-0 rtl:pr-3"
+                  >
                     <div className="flex items-center gap-2">
                       {h.from_status && (
                         <>
-                          <Badge variant="outline" className="text-xs">{statusLabel(h.from_status, lang)}</Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {statusLabel(h.from_status, lang)}
+                          </Badge>
                           <span className="text-muted-foreground">→</span>
                         </>
                       )}
-                      <Badge variant="outline" className="text-xs">{statusLabel(h.to_status, lang)}</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {statusLabel(h.to_status, lang)}
+                      </Badge>
                     </div>
-                    {h.reason && <p className="mt-1 text-muted-foreground text-xs" dir="auto">{h.reason}</p>}
+                    {h.reason && (
+                      <p className="mt-1 text-muted-foreground text-xs" dir="auto">
+                        {h.reason}
+                      </p>
+                    )}
                     <div className="text-xs text-muted-foreground mt-1" dir="ltr">
                       {h.changed_by_email ?? ""} · {new Date(h.created_at).toLocaleString(lang)}
                     </div>

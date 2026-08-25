@@ -22,12 +22,7 @@ export const ADMIN_ASSIGNABLE_STATUSES: readonly ApplicationStatus[] = [
   "rejected",
 ];
 
-export const SORT_OPTIONS = [
-  "submitted_desc",
-  "submitted_asc",
-  "name_asc",
-  "status",
-] as const;
+export const SORT_OPTIONS = ["submitted_desc", "submitted_asc", "name_asc", "status"] as const;
 
 const ListSchema = z.object({
   opportunity_id: z.string().uuid(),
@@ -67,22 +62,19 @@ export const adminListApplications = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => ListSchema.parse(i))
   .handler(async ({ data, context }) => {
     const { supabase } = context as { supabase: any };
-    const { data: rows, error } = await supabase.rpc(
-      "admin_list_internship_applications",
-      {
-        _opportunity_id: data.opportunity_id,
-        _q: data.q ?? null,
-        _status: data.status ?? null,
-        _course_id: data.course_id ?? null,
-        _certificate_id: data.certificate_id ?? null,
-        _assigned_admin: data.assigned_admin ?? null,
-        _submitted_from: data.submitted_from ?? null,
-        _submitted_to: data.submitted_to ?? null,
-        _sort: data.sort,
-        _page: data.page,
-        _page_size: data.page_size,
-      },
-    );
+    const { data: rows, error } = await supabase.rpc("admin_list_internship_applications", {
+      _opportunity_id: data.opportunity_id,
+      _q: data.q ?? null,
+      _status: data.status ?? null,
+      _course_id: data.course_id ?? null,
+      _certificate_id: data.certificate_id ?? null,
+      _assigned_admin: data.assigned_admin ?? null,
+      _submitted_from: data.submitted_from ?? null,
+      _submitted_to: data.submitted_to ?? null,
+      _sort: data.sort,
+      _page: data.page,
+      _page_size: data.page_size,
+    });
     if (error) throw new Error(error.message);
     const list = (rows ?? []) as Array<ApplicationListRow & { total_count: number }>;
     const total = list.length > 0 ? Number(list[0].total_count) : 0;
@@ -114,7 +106,6 @@ const JsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
     z.record(z.string(), JsonValueSchema),
   ]),
 );
-
 
 const nullableText = z.string().nullable().catch(null);
 const nullableDate = z.string().nullable().catch(null);
@@ -223,10 +214,9 @@ export const adminGetApplication = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => GetSchema.parse(i))
   .handler(async ({ data, context }): Promise<ApplicationBundle> => {
     const { supabase } = context as { supabase: any };
-    const { data: bundle, error } = await supabase.rpc(
-      "admin_get_internship_application",
-      { _application_id: data.application_id },
-    );
+    const { data: bundle, error } = await supabase.rpc("admin_get_internship_application", {
+      _application_id: data.application_id,
+    });
     if (error) throw new Error(error.message);
     if (!bundle || typeof bundle !== "object") {
       throw new Error("application_not_found");
@@ -235,16 +225,12 @@ export const adminGetApplication = createServerFn({ method: "POST" })
     if (!parsed.success) throw new Error("invalid_application_bundle");
     const result = parsed.data;
     // The application must belong to the opportunity addressed in the URL.
-    if (
-      data.opportunity_id &&
-      result.application.opportunity_id !== data.opportunity_id
-    ) {
+    if (data.opportunity_id && result.application.opportunity_id !== data.opportunity_id) {
       throw new Error("application_not_found");
     }
     // Never leak private storage locations or unrelated internal identifiers.
     return result;
   });
-
 
 export const adminSetApplicationStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -329,12 +315,29 @@ export const adminGetApplicationCvUrl = createServerFn({ method: "POST" })
     const file = (rows ?? [])[0] as
       | { bucket: string; path: string; original_filename: string | null; mime_type: string }
       | undefined;
-    if (!file) return { url: null as string | null, filename: null as string | null };
-    const { data: signed, error: sErr } = await supabase.storage
-      .from(file.bucket)
-      .createSignedUrl(file.path, 600);
-    if (sErr) throw new Error(sErr.message);
-    return { url: signed?.signedUrl ?? null, filename: file.original_filename };
+    if (!file) {
+      return {
+        url: null as string | null,
+        download_url: null as string | null,
+        filename: null as string | null,
+        mime_type: null as string | null,
+      };
+    }
+    const storage = supabase.storage.from(file.bucket);
+    const [previewResult, downloadResult] = await Promise.all([
+      storage.createSignedUrl(file.path, 600),
+      storage.createSignedUrl(file.path, 600, {
+        download: file.original_filename || true,
+      }),
+    ]);
+    if (previewResult.error) throw new Error(previewResult.error.message);
+    if (downloadResult.error) throw new Error(downloadResult.error.message);
+    return {
+      url: previewResult.data?.signedUrl ?? null,
+      download_url: downloadResult.data?.signedUrl ?? null,
+      filename: file.original_filename,
+      mime_type: file.mime_type,
+    };
   });
 
 // Full export (bounded server-side)
@@ -346,9 +349,28 @@ export const adminExportApplications = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase } = context as { supabase: any };
     const LIMIT = 5000;
-    const { data: rows, error } = await supabase.rpc(
-      "admin_list_internship_applications",
-      {
+    const { data: rows, error } = await supabase.rpc("admin_list_internship_applications", {
+      _opportunity_id: data.opportunity_id,
+      _q: data.q ?? null,
+      _status: data.status ?? null,
+      _course_id: data.course_id ?? null,
+      _certificate_id: data.certificate_id ?? null,
+      _assigned_admin: data.assigned_admin ?? null,
+      _submitted_from: data.submitted_from ?? null,
+      _submitted_to: data.submitted_to ?? null,
+      _sort: data.sort,
+      _page: 1,
+      _page_size: 100,
+    });
+    if (error) throw new Error(error.message);
+    const list = (rows ?? []) as Array<ApplicationListRow & { total_count: number }>;
+    const total = list.length > 0 ? Number(list[0].total_count) : 0;
+
+    // Fetch remaining pages up to LIMIT
+    const all: ApplicationListRow[] = list.map(({ total_count: _tc, ...r }) => r);
+    let page = 2;
+    while (all.length < Math.min(total, LIMIT)) {
+      const { data: more, error: e2 } = await supabase.rpc("admin_list_internship_applications", {
         _opportunity_id: data.opportunity_id,
         _q: data.q ?? null,
         _status: data.status ?? null,
@@ -358,34 +380,9 @@ export const adminExportApplications = createServerFn({ method: "POST" })
         _submitted_from: data.submitted_from ?? null,
         _submitted_to: data.submitted_to ?? null,
         _sort: data.sort,
-        _page: 1,
+        _page: page,
         _page_size: 100,
-      },
-    );
-    if (error) throw new Error(error.message);
-    const list = (rows ?? []) as Array<ApplicationListRow & { total_count: number }>;
-    const total = list.length > 0 ? Number(list[0].total_count) : 0;
-
-    // Fetch remaining pages up to LIMIT
-    const all: ApplicationListRow[] = list.map(({ total_count: _tc, ...r }) => r);
-    let page = 2;
-    while (all.length < Math.min(total, LIMIT)) {
-      const { data: more, error: e2 } = await supabase.rpc(
-        "admin_list_internship_applications",
-        {
-          _opportunity_id: data.opportunity_id,
-          _q: data.q ?? null,
-          _status: data.status ?? null,
-          _course_id: data.course_id ?? null,
-          _certificate_id: data.certificate_id ?? null,
-          _assigned_admin: data.assigned_admin ?? null,
-          _submitted_from: data.submitted_from ?? null,
-          _submitted_to: data.submitted_to ?? null,
-          _sort: data.sort,
-          _page: page,
-          _page_size: 100,
-        },
-      );
+      });
       if (e2) throw new Error(e2.message);
       const chunk = (more ?? []) as Array<ApplicationListRow & { total_count: number }>;
       if (chunk.length === 0) break;
