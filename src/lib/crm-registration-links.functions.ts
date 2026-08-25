@@ -27,9 +27,7 @@ export type RegistrationSubmission = {
   created_at: string;
 };
 
-export type PublicLinkState =
-  | { state: "ok"; label: string }
-  | { state: "inactive" };
+export type PublicLinkState = { state: "ok"; label: string } | { state: "inactive" };
 
 export type RegistrationSubmitResult =
   | { result: "created" }
@@ -226,7 +224,9 @@ export const adminGetRegistrationLink = createServerFn({ method: "POST" })
 
     const { data: rows, error: sErr } = await supabase
       .from("individual_leads")
-      .select("id, full_name, email, phone, specialty, work_field, address, short_description, created_at")
+      .select(
+        "id, full_name, email, phone, specialty, work_field, address, short_description, created_at",
+      )
       .eq("registration_link_id", data.id)
       .order("created_at", { ascending: false })
       .limit(2000);

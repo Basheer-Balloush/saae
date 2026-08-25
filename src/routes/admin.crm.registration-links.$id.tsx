@@ -40,7 +40,10 @@ export const Route = createFileRoute("/admin/crm/registration-links/$id")({
   }),
   component: RegistrationLinkDetailPage,
   errorComponent: ({ error }) => (
-    <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+    <div
+      role="alert"
+      className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive"
+    >
       {error.message}
     </div>
   ),

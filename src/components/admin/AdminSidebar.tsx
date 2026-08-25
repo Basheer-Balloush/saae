@@ -56,10 +56,17 @@ function buildNav(lang: "ar" | "en"): NavItem[] {
         { title: ar ? "الملاحظات" : "Feedback", url: "/admin/crm/feedback" },
         { title: ar ? "طلاب المنصة" : "LMS Students", url: "/admin/crm/students" },
         { title: ar ? "استجابات النماذج" : "Form submissions", url: "/admin/crm/forms" },
-        { title: ar ? "روابط التسجيل" : "Registration links", url: "/admin/crm/registration-links" },
+        {
+          title: ar ? "روابط التسجيل" : "Registration links",
+          url: "/admin/crm/registration-links",
+        },
       ],
     },
-    { title: ar ? "مبادرة المليون" : "Million Initiative", url: "/admin/initiative", icon: Sparkles },
+    {
+      title: ar ? "مبادرة المليون" : "Million Initiative",
+      url: "/admin/initiative",
+      icon: Sparkles,
+    },
     { title: ar ? "الشات بوت" : "Chatbot", url: "/admin/chatbot", icon: Bot },
   ];
 }
@@ -98,12 +105,20 @@ export function AdminSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel>{lang === "ar" ? "التنقل" : "Navigation"}</SidebarGroupLabel>}
+          {!collapsed && (
+            <SidebarGroupLabel>{lang === "ar" ? "التنقل" : "Navigation"}</SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) =>
                 isGroup(item) ? (
-                  <NestedItem key={item.title} item={item} collapsed={collapsed} isActive={isActive} lang={lang} />
+                  <NestedItem
+                    key={item.title}
+                    item={item}
+                    collapsed={collapsed}
+                    isActive={isActive}
+                    lang={lang}
+                  />
                 ) : (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
@@ -114,7 +129,9 @@ export function AdminSidebar() {
                         "group/nav relative transition-colors",
                         "data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold",
                         "data-[active=true]:before:absolute data-[active=true]:before:inset-y-1 data-[active=true]:before:w-1 data-[active=true]:before:rounded-full data-[active=true]:before:bg-primary",
-                        lang === "ar" ? "data-[active=true]:before:right-0" : "data-[active=true]:before:left-0",
+                        lang === "ar"
+                          ? "data-[active=true]:before:right-0"
+                          : "data-[active=true]:before:left-0",
                       )}
                     >
                       <Link to={item.url}>
@@ -171,7 +188,10 @@ function NestedItem({
           <span className="truncate">{item.title}</span>
           {!collapsed && (
             <ChevronDown
-              className={cn("ms-auto h-4 w-4 shrink-0 transition-transform duration-200", open && "rotate-180")}
+              className={cn(
+                "ms-auto h-4 w-4 shrink-0 transition-transform duration-200",
+                open && "rotate-180",
+              )}
             />
           )}
         </SidebarMenuButton>
@@ -187,7 +207,9 @@ function NestedItem({
                   "relative transition-colors",
                   "data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold",
                   "data-[active=true]:before:absolute data-[active=true]:before:inset-y-1 data-[active=true]:before:w-0.5 data-[active=true]:before:rounded-full data-[active=true]:before:bg-primary",
-                  lang === "ar" ? "data-[active=true]:before:right-0" : "data-[active=true]:before:left-0",
+                  lang === "ar"
+                    ? "data-[active=true]:before:right-0"
+                    : "data-[active=true]:before:left-0",
                 )}
               >
                 <Link to={child.url}>

@@ -39,10 +39,7 @@ export const Route = createFileRoute("/admin/crm/registration-links/")({
   ssr: false,
   beforeLoad: requireAdminBeforeLoad,
   head: () => ({
-    meta: [
-      { title: "Registration links — CRM" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "Registration links — CRM" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: RegistrationLinksPage,
 });
@@ -223,7 +220,12 @@ function RegistrationLinksPage() {
                         label={ar ? "نسخ الرابط" : "Copy link"}
                         onClick={() => void onCopy(r.token)}
                       />
-                      <Button asChild variant="ghost" size="icon" aria-label={ar ? "عرض التسجيلات" : "View submissions"}>
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="icon"
+                        aria-label={ar ? "عرض التسجيلات" : "View submissions"}
+                      >
                         <Link to="/admin/crm/registration-links/$id" params={{ id: r.id }}>
                           <Eye className="h-4 w-4" />
                         </Link>
