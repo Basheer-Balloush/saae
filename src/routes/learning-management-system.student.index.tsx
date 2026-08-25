@@ -19,6 +19,7 @@ type CourseRow = {
   title_en: string | null;
   cover_url: string | null;
   delivery_mode: string | null;
+  end_date: string | null;
 };
 type Row = {
   id: string;
