@@ -43,6 +43,7 @@ import { Route as LearningManagementSystemCatalogRouteImport } from './routes/le
 import { Route as LearningManagementSystemAdminRouteImport } from './routes/learning-management-system.admin'
 import { Route as InitiativeClaimRouteImport } from './routes/initiative.claim'
 import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
+import { Route as EventSignupTokenRouteImport } from './routes/event-signup.$token'
 import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system.login'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -291,6 +292,11 @@ const InitiativeClaimRoute = InitiativeClaimRouteImport.update({
 const FormsSlugRoute = FormsSlugRouteImport.update({
   id: '/forms/$slug',
   path: '/forms/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventSignupTokenRoute = EventSignupTokenRouteImport.update({
+  id: '/event-signup/$token',
+  path: '/event-signup/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunitiesKeyRoute = CommunitiesKeyRouteImport.update({
@@ -665,6 +671,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
@@ -757,6 +764,7 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
@@ -851,6 +859,7 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
@@ -950,6 +959,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
     | '/learning-management-system/admin'
@@ -1042,6 +1052,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
     | '/learning-management-system/catalog'
@@ -1135,6 +1146,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
     | '/learning-management-system/admin'
@@ -1222,6 +1234,7 @@ export interface RootRouteChildren {
   SuperAdminRoute: typeof SuperAdminRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
+  EventSignupTokenRoute: typeof EventSignupTokenRoute
   FormsSlugRoute: typeof FormsSlugRoute
   InitiativeClaimRoute: typeof InitiativeClaimRoute
   NewsIdRoute: typeof NewsIdRoute
@@ -1471,6 +1484,13 @@ declare module '@tanstack/react-router' {
       path: '/forms/$slug'
       fullPath: '/forms/$slug'
       preLoaderRoute: typeof FormsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event-signup/$token': {
+      id: '/event-signup/$token'
+      path: '/event-signup/$token'
+      fullPath: '/event-signup/$token'
+      preLoaderRoute: typeof EventSignupTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/communities/$key': {
@@ -2246,6 +2266,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuperAdminRoute: SuperAdminRoute,
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,
+  EventSignupTokenRoute: EventSignupTokenRoute,
   FormsSlugRoute: FormsSlugRoute,
   InitiativeClaimRoute: InitiativeClaimRoute,
   NewsIdRoute: NewsIdRoute,
