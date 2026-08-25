@@ -126,7 +126,7 @@ function LmsHome() {
   const categories = loaderData.categories as Category[];
   const stats = loaderData.stats as { courses: number; students: number; instructors: number };
   const coursesByCategory = loaderData.coursesByCategory as Record<string, number>;
-  const [applying, setApplying] = useState(false);
+  
 
   // Redirect authenticated users to their profile (My Profile is their home).
   useEffect(() => {
