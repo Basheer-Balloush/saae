@@ -82,7 +82,7 @@ function InstructorProfile() {
       setIns(row);
       const { data: cs } = await supabase
         .from("lms_courses")
-        .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,level,price,sale_price,is_free,students_count,rating_avg,instructor_id")
+        .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,level,price,sale_price,is_free,students_count,rating_avg,instructor_id,delivery_mode,end_date")
         .eq("status", "published")
         .order("created_at", { ascending: false });
       if (cancelled) return;
