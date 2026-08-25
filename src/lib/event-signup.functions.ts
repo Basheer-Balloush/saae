@@ -1,4 +1,4 @@
-import { createServerFn, getRequestHeader } from "@tanstack/react-start";
+import { createServerFn, getRequest } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -67,9 +67,10 @@ export const submitEventSignup = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<SubmitResult> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    const headers = getRequest().headers;
     const ip =
-      (getRequestHeader("x-forwarded-for") ?? "").split(",")[0]?.trim() ||
-      getRequestHeader("cf-connecting-ip") ||
+      (headers.get("x-forwarded-for") ?? "").split(",")[0]?.trim() ||
+      headers.get("cf-connecting-ip") ||
       "unknown";
 
     // Rate limit per token + client address.
