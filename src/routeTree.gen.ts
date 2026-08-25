@@ -85,6 +85,7 @@ import { Route as AdminCrmFeedbackRouteImport } from './routes/admin.crm.feedbac
 import { Route as AdminCrmContactsRouteImport } from './routes/admin.crm.contacts'
 import { Route as LearningManagementSystemInternshipsSlugIndexRouteImport } from './routes/learning-management-system.internships.$slug.index'
 import { Route as LearningManagementSystemAdminInternshipsIndexRouteImport } from './routes/learning-management-system.admin.internships.index'
+import { Route as AdminCrmRegistrationLinksIndexRouteImport } from './routes/admin.crm.registration-links.index'
 import { Route as AdminCrmFormsIndexRouteImport } from './routes/admin.crm.forms.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -525,6 +526,12 @@ const LearningManagementSystemAdminInternshipsIndexRoute =
     path: '/internships/',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const AdminCrmRegistrationLinksIndexRoute =
+  AdminCrmRegistrationLinksIndexRouteImport.update({
+    id: '/registration-links/',
+    path: '/registration-links/',
+    getParentRoute: () => AdminCrmRoute,
+  } as any)
 const AdminCrmFormsIndexRoute = AdminCrmFormsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -746,6 +753,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/crm/forms/': typeof AdminCrmFormsIndexRoute
+  '/admin/crm/registration-links/': typeof AdminCrmRegistrationLinksIndexRoute
   '/learning-management-system/admin/internships/': typeof LearningManagementSystemAdminInternshipsIndexRoute
   '/learning-management-system/internships/$slug/': typeof LearningManagementSystemInternshipsSlugIndexRoute
   '/admin/crm/leads/companies/$leadId': typeof AdminCrmLeadsCompaniesLeadIdRoute
@@ -837,6 +845,7 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/crm/forms': typeof AdminCrmFormsIndexRoute
+  '/admin/crm/registration-links': typeof AdminCrmRegistrationLinksIndexRoute
   '/learning-management-system/admin/internships': typeof LearningManagementSystemAdminInternshipsIndexRoute
   '/learning-management-system/internships/$slug': typeof LearningManagementSystemInternshipsSlugIndexRoute
   '/admin/crm/leads/companies/$leadId': typeof AdminCrmLeadsCompaniesLeadIdRoute
@@ -938,6 +947,7 @@ export interface FileRoutesById {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/crm/forms/': typeof AdminCrmFormsIndexRoute
+  '/admin/crm/registration-links/': typeof AdminCrmRegistrationLinksIndexRoute
   '/learning-management-system/admin/internships/': typeof LearningManagementSystemAdminInternshipsIndexRoute
   '/learning-management-system/internships/$slug/': typeof LearningManagementSystemInternshipsSlugIndexRoute
   '/admin/crm/leads/companies/$leadId': typeof AdminCrmLeadsCompaniesLeadIdRoute
@@ -1040,6 +1050,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/crm/forms/'
+    | '/admin/crm/registration-links/'
     | '/learning-management-system/admin/internships/'
     | '/learning-management-system/internships/$slug/'
     | '/admin/crm/leads/companies/$leadId'
@@ -1131,6 +1142,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/crm/forms'
+    | '/admin/crm/registration-links'
     | '/learning-management-system/admin/internships'
     | '/learning-management-system/internships/$slug'
     | '/admin/crm/leads/companies/$leadId'
@@ -1231,6 +1243,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/crm/forms/'
+    | '/admin/crm/registration-links/'
     | '/learning-management-system/admin/internships/'
     | '/learning-management-system/internships/$slug/'
     | '/admin/crm/leads/companies/$leadId'
@@ -1806,6 +1819,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemAdminInternshipsIndexRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
     }
+    '/admin/crm/registration-links/': {
+      id: '/admin/crm/registration-links/'
+      path: '/registration-links'
+      fullPath: '/admin/crm/registration-links/'
+      preLoaderRoute: typeof AdminCrmRegistrationLinksIndexRouteImport
+      parentRoute: typeof AdminCrmRoute
+    }
     '/admin/crm/forms/': {
       id: '/admin/crm/forms/'
       path: '/'
@@ -2037,6 +2057,7 @@ interface AdminCrmRouteChildren {
   AdminCrmLeadsRoute: typeof AdminCrmLeadsRouteWithChildren
   AdminCrmStudentsRoute: typeof AdminCrmStudentsRoute
   AdminCrmIndexRoute: typeof AdminCrmIndexRoute
+  AdminCrmRegistrationLinksIndexRoute: typeof AdminCrmRegistrationLinksIndexRoute
 }
 
 const AdminCrmRouteChildren: AdminCrmRouteChildren = {
@@ -2046,6 +2067,7 @@ const AdminCrmRouteChildren: AdminCrmRouteChildren = {
   AdminCrmLeadsRoute: AdminCrmLeadsRouteWithChildren,
   AdminCrmStudentsRoute: AdminCrmStudentsRoute,
   AdminCrmIndexRoute: AdminCrmIndexRoute,
+  AdminCrmRegistrationLinksIndexRoute: AdminCrmRegistrationLinksIndexRoute,
 }
 
 const AdminCrmRouteWithChildren = AdminCrmRoute._addFileChildren(
