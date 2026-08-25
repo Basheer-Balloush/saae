@@ -27,6 +27,8 @@ type Instructor = {
   github_url: string | null;
 };
 type Course = {
+  delivery_mode?: string | null;
+  end_date?: string | null;
   id: string;
   title_ar: string;
   title_en: string | null;
