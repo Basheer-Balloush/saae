@@ -14,8 +14,9 @@ describe("internship lifecycle (baseline regression guard)", () => {
     expect(canTransition("draft", "closed")).toBe(false);
   });
 
-  it("treats archived as terminal", () => {
-    expect(LIFECYCLE_TRANSITIONS.archived).toHaveLength(0);
+  it("allows archived to be restored to draft only", () => {
+    expect(LIFECYCLE_TRANSITIONS.archived).toEqual(["draft"]);
+    expect(canTransition("archived", "draft")).toBe(true);
     expect(canTransition("archived", "published")).toBe(false);
     expect(canTransition("archived", "archived")).toBe(true);
   });
