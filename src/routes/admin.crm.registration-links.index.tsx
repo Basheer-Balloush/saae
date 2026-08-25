@@ -72,7 +72,7 @@ function RegistrationLinksPage() {
     setLoading(true);
     setError(null);
     try {
-      setRows(await listFn({ data: undefined }));
+      setRows(await listFn({}));
     } catch (e) {
       setError(e instanceof Error ? e.message : "load_failed");
     } finally {
