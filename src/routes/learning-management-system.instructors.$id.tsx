@@ -78,13 +78,19 @@ function InstructorProfile() {
       }
       // Redirect uuid URLs to canonical slug URL
       if (UUID_RE.test(id) && row.slug && row.slug !== id) {
-        navigate({ to: "/learning-management-system/instructors/$id", params: { id: row.slug }, replace: true });
+        navigate({
+          to: "/learning-management-system/instructors/$id",
+          params: { id: row.slug },
+          replace: true,
+        });
         return;
       }
       setIns(row);
       const { data: cs } = await supabase
         .from("lms_courses")
-        .select("id,slug,title_ar,title_en,description_ar,description_en,cover_url,level,price,sale_price,is_free,students_count,rating_avg,instructor_id,delivery_mode,end_date")
+        .select(
+          "id,slug,title_ar,title_en,description_ar,description_en,cover_url,level,price,sale_price,is_free,students_count,rating_avg,instructor_id,delivery_mode,end_date",
+        )
         .eq("status", "published")
         .order("created_at", { ascending: false });
       if (cancelled) return;
@@ -94,19 +100,30 @@ function InstructorProfile() {
       // just show any published course whose primary instructor matches this slug.
       // Use the public course-instructors RPC to check membership per course.
       const filtered: Course[] = [];
-      for (const c of ((cs ?? []) as (Course & { instructor_id: string })[])) {
-        const { data: list } = await supabase.rpc("get_public_instructors_for_course", { _course_id: c.id });
+      for (const c of (cs ?? []) as (Course & { instructor_id: string })[]) {
+        const { data: list } = await supabase.rpc("get_public_instructors_for_course", {
+          _course_id: c.id,
+        });
         const hit = (list as { slug: string }[] | null)?.some((x) => x.slug === row.slug);
         if (hit) filtered.push(c);
       }
       setCourses(filtered);
       setLoading(false);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [id, navigate]);
 
   if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
-  if (errored) return <p className="text-center py-20 text-muted-foreground">{lang === "ar" ? "تعذّر تحميل الملف. حاول مجدداً." : "Could not load profile. Please try again."}</p>;
+  if (errored)
+    return (
+      <p className="text-center py-20 text-muted-foreground">
+        {lang === "ar"
+          ? "تعذّر تحميل الملف. حاول مجدداً."
+          : "Could not load profile. Please try again."}
+      </p>
+    );
   if (!ins) return <p className="text-center py-20 text-muted-foreground">404</p>;
 
   const totalStudents = courses.reduce((s, c) => s + Number(c.students_count ?? 0), 0);
@@ -123,9 +140,16 @@ function InstructorProfile() {
       <div className="rounded-3xl border border-border bg-gradient-to-br from-primary/5 to-accent/5 p-6 sm:p-10">
         <div className="flex flex-col sm:flex-row items-start gap-6">
           {ins.avatar_url ? (
-            <img src={ins.avatar_url} alt={name} className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl object-cover" />
+            <img
+              src={ins.avatar_url}
+              alt={name}
+              className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl object-cover"
+            />
           ) : (
-            <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-3xl font-bold" aria-hidden="true">
+            <div
+              className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-3xl font-bold"
+              aria-hidden="true"
+            >
               {(name ?? "?").charAt(0)}
             </div>
           )}
@@ -135,12 +159,22 @@ function InstructorProfile() {
             {bio && <p className="mt-3 text-muted-foreground leading-relaxed">{bio}</p>}
             <div className="mt-4 flex flex-wrap gap-3">
               {ins.linkedin_url && (
-                <a href={ins.linkedin_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs hover:border-primary hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                <a
+                  href={ins.linkedin_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs hover:border-primary hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
                   <Linkedin className="h-3.5 w-3.5" /> LinkedIn
                 </a>
               )}
               {ins.github_url && (
-                <a href={ins.github_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs hover:border-primary hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                <a
+                  href={ins.github_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs hover:border-primary hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
                   <Github className="h-3.5 w-3.5" /> GitHub
                 </a>
               )}
@@ -149,9 +183,17 @@ function InstructorProfile() {
         </div>
 
         <div className="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
-          <Stat icon={<BookOpen className="h-4 w-4" />} value={courses.length} label={tr.navCatalog} />
+          <Stat
+            icon={<BookOpen className="h-4 w-4" />}
+            value={courses.length}
+            label={tr.navCatalog}
+          />
           <Stat icon={<Users className="h-4 w-4" />} value={totalStudents} label={tr.students} />
-          <Stat icon={<Star className="h-4 w-4 fill-amber-400 text-amber-400" />} value={avgRating} label={tr.reviews} />
+          <Stat
+            icon={<Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
+            value={avgRating}
+            label={tr.reviews}
+          />
         </div>
       </div>
 
@@ -161,7 +203,11 @@ function InstructorProfile() {
       ) : (
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map((c) => (
-            <Link key={c.id} to="/learning-management-system/courses/$id" params={{ id: (c as { slug?: string | null }).slug ?? c.id }}>
+            <Link
+              key={c.id}
+              to="/learning-management-system/courses/$id"
+              params={{ id: (c as { slug?: string | null }).slug ?? c.id }}
+            >
               <CourseCard course={c} />
             </Link>
           ))}
@@ -171,10 +217,21 @@ function InstructorProfile() {
   );
 }
 
-function Stat({ icon, value, label }: { icon: React.ReactNode; value: number | string; label: string }) {
+function Stat({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  value: number | string;
+  label: string;
+}) {
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
-      <div className="flex items-center gap-1.5 text-muted-foreground text-xs">{icon}{label}</div>
+      <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+        {icon}
+        {label}
+      </div>
       <div className="mt-1 text-2xl font-bold text-foreground">{value}</div>
     </div>
   );

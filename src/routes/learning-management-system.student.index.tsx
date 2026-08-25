@@ -56,7 +56,9 @@ function StudentHome() {
       ]);
       const list = (enrolls as { id: string; progress: number; course_id: string }[] | null) ?? [];
       const certList = (cs as Cert[] | null) ?? [];
-      const ids = Array.from(new Set([...list.map((r) => r.course_id), ...certList.map((c) => c.course_id)]));
+      const ids = Array.from(
+        new Set([...list.map((r) => r.course_id), ...certList.map((c) => c.course_id)]),
+      );
       let courses: CourseRow[] = [];
       if (ids.length) {
         const { data: csR } = await supabase
@@ -65,19 +67,29 @@ function StudentHome() {
           .in("id", ids);
         courses = (csR as CourseRow[] | null) ?? [];
       }
-      setRows(list.map((r) => ({ id: r.id, progress: r.progress, course: courses.find((c) => c.id === r.course_id) ?? null })));
-      setCerts(certList.map((c) => ({
-        ...c,
-        title: (() => {
-          const co = courses.find((x) => x.id === c.course_id);
-          return co ? (lang === "ar" ? co.title_ar : co.title_en || co.title_ar) : "";
-        })(),
-      })));
+      setRows(
+        list.map((r) => ({
+          id: r.id,
+          progress: r.progress,
+          course: courses.find((c) => c.id === r.course_id) ?? null,
+        })),
+      );
+      setCerts(
+        certList.map((c) => ({
+          ...c,
+          title: (() => {
+            const co = courses.find((x) => x.id === c.course_id);
+            return co ? (lang === "ar" ? co.title_ar : co.title_en || co.title_ar) : "";
+          })(),
+        })),
+      );
       setLoading(false);
     })();
   }, [user, lang]);
 
-  const avg = rows.length ? Math.round(rows.reduce((s, r) => s + Number(r.progress), 0) / rows.length) : 0;
+  const avg = rows.length
+    ? Math.round(rows.reduce((s, r) => s + Number(r.progress), 0) / rows.length)
+    : 0;
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
@@ -87,7 +99,9 @@ function StudentHome() {
           <p className="mt-2 text-muted-foreground">{tr.continueLesson}</p>
         </div>
         <Link to="/learning-management-system/student/requests">
-          <Button variant="outline" size="sm">📋 {lang === "ar" ? "طلبات التسجيل" : "My requests"}</Button>
+          <Button variant="outline" size="sm">
+            📋 {lang === "ar" ? "طلبات التسجيل" : "My requests"}
+          </Button>
         </Link>
       </div>
 
@@ -110,32 +124,52 @@ function StudentHome() {
         </div>
       ) : (
         <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {rows.map((r) => r.course && (
-            <Link
-              key={r.id}
-              {...courseDestination(r.course.id, r.course.delivery_mode)}
-              className={cn(
-                "group rounded-2xl border border-border bg-card overflow-hidden hover:border-primary transition-colors",
-                isCourseEnded(r.course) && "course-card-ended",
-              )}
-            >
-              <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                {isCourseEnded(r.course) && <CourseEndedStamp short />}
-                {r.course.cover_url ? <img src={r.course.cover_url} alt="" className={cn("w-full h-full object-cover", isCourseEnded(r.course) && "course-card-ended-media")} /> : <PlayCircle className="h-12 w-12 text-primary/50" />}
-              </div>
-              <div className="p-4">
-                <h3 className="font-bold text-foreground line-clamp-1">{lang === "ar" ? r.course.title_ar : r.course.title_en || r.course.title_ar}</h3>
-                <div className="mt-3">
-                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>{tr.progress}</span><span>{Math.round(Number(r.progress))}%</span>
+          {rows.map(
+            (r) =>
+              r.course && (
+                <Link
+                  key={r.id}
+                  {...courseDestination(r.course.id, r.course.delivery_mode)}
+                  className={cn(
+                    "group rounded-2xl border border-border bg-card overflow-hidden hover:border-primary transition-colors",
+                    isCourseEnded(r.course) && "course-card-ended",
+                  )}
+                >
+                  <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    {isCourseEnded(r.course) && <CourseEndedStamp short />}
+                    {r.course.cover_url ? (
+                      <img
+                        src={r.course.cover_url}
+                        alt=""
+                        className={cn(
+                          "w-full h-full object-cover",
+                          isCourseEnded(r.course) && "course-card-ended-media",
+                        )}
+                      />
+                    ) : (
+                      <PlayCircle className="h-12 w-12 text-primary/50" />
+                    )}
                   </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full bg-primary transition-all" style={{ width: `${Number(r.progress)}%` }} />
+                  <div className="p-4">
+                    <h3 className="font-bold text-foreground line-clamp-1">
+                      {lang === "ar" ? r.course.title_ar : r.course.title_en || r.course.title_ar}
+                    </h3>
+                    <div className="mt-3">
+                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                        <span>{tr.progress}</span>
+                        <span>{Math.round(Number(r.progress))}%</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full bg-primary transition-all"
+                          style={{ width: `${Number(r.progress)}%` }}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </Link>
-          ))}
+                </Link>
+              ),
+          )}
         </div>
       )}
 
