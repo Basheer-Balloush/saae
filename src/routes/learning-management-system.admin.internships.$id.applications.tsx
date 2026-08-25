@@ -107,6 +107,7 @@ function ApplicationsList() {
   const [assigned, setAssigned] = useState<string | "all" | "unassigned">("all");
   const [admins, setAdmins] = useState<Array<{ user_id: string; email: string | null }>>([]);
   const [opportunityTitle, setOpportunityTitle] = useState<string>("");
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(q), 350);
@@ -155,6 +156,7 @@ function ApplicationsList() {
 
   const load = useCallback(async () => {
     setBusy(true);
+    setLoadError(null);
     try {
       const res = await listFn({
         data: { ...filterParams, page, page_size: PAGE_SIZE },
@@ -164,7 +166,9 @@ function ApplicationsList() {
       setRows(list);
       setTotal(res.total);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.errorLoad);
+      setRows([]);
+      setTotal(0);
+      setLoadError(err instanceof Error ? err.message : t.errorLoad);
     } finally {
       setBusy(false);
     }
@@ -278,7 +282,7 @@ function ApplicationsList() {
               <SelectItem value="unassigned">{lang === "ar" ? "غير مُسند" : "Unassigned"}</SelectItem>
               {admins.map((a) => (
                 <SelectItem key={a.user_id} value={a.user_id}>
-                  {a.email ?? a.user_id.slice(0, 8)}
+                  {a.email ?? (lang === "ar" ? "مشرف بدون بريد" : "Admin (no email)")}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -315,7 +319,23 @@ function ApplicationsList() {
                 </TableCell>
               </TableRow>
             )}
-            {!busy && rows.length === 0 && (
+            {!busy && loadError && (
+              <TableRow>
+                <TableCell colSpan={9} className="py-10">
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <p className="text-sm font-medium text-destructive">{t.errorLoad}</p>
+                    <p className="text-xs text-muted-foreground max-w-md break-words">
+                      {loadError}
+                    </p>
+                    <Button variant="outline" size="sm" onClick={() => void load()}>
+                      <RotateCcw className="h-4 w-4 mx-1" />
+                      {lang === "ar" ? "إعادة المحاولة" : "Retry"}
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+            {!busy && !loadError && rows.length === 0 && (
               <TableRow>
                 <TableCell colSpan={9} className="text-center py-10 text-muted-foreground">
                   {lang === "ar" ? "لا توجد طلبات" : "No applications"}

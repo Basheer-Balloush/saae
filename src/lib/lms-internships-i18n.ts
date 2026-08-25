@@ -91,6 +91,9 @@ export const lmsInternshipsT: Record<Lang, Record<string, string>> = {
     adminInternshipsHide: "إخفاء",
     adminInternshipsClose: "إغلاق",
     adminInternshipsArchive: "أرشفة",
+    adminInternshipsRestore: "استعادة من الأرشيف",
+    adminInternshipsRestoreConfirm:
+      "سيتم إرجاع الفرصة من الأرشيف إلى حالة المسودة، ويمكنك بعدها نشرها أو إخفاؤها أو إغلاقها.",
     adminInternshipsDelete: "حذف",
     adminInternshipsPreview: "معاينة",
     adminInternshipsCoverImage: "صورة الغلاف",
@@ -199,6 +202,9 @@ export const lmsInternshipsT: Record<Lang, Record<string, string>> = {
     adminInternshipsHide: "Hide",
     adminInternshipsClose: "Close",
     adminInternshipsArchive: "Archive",
+    adminInternshipsRestore: "Restore from archive",
+    adminInternshipsRestoreConfirm:
+      "This moves the opportunity out of the archive back to Draft. You can then publish, hide, or close it.",
     adminInternshipsDelete: "Delete",
     adminInternshipsPreview: "Preview",
     adminInternshipsCoverImage: "Cover image",

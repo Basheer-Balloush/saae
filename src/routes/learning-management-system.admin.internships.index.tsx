@@ -13,6 +13,7 @@ import {
   Users,
   Lock,
   Archive,
+  ArchiveRestore,
 } from "lucide-react";
 
 import { useLang } from "@/lib/i18n";
@@ -25,6 +26,7 @@ import {
 } from "@/lib/lms-internships-admin.functions";
 import { LIFECYCLE, type Lifecycle } from "@/lib/lms-internships-admin";
 import { Button } from "@/components/ui/button";
+import { IconActionButton } from "@/components/admin/IconActionButton";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -83,6 +85,7 @@ function AdminInternshipsList() {
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<string | null>(null);
   const [toDelete, setToDelete] = useState<AdminInternshipRow | null>(null);
+  const [toRestore, setToRestore] = useState<AdminInternshipRow | null>(null);
 
   const load = useCallback(async () => {
     setBusy(true);
@@ -120,6 +123,13 @@ function AdminInternshipsList() {
     } finally {
       setPending(null);
     }
+  };
+
+  const confirmRestore = async () => {
+    if (!toRestore) return;
+    const row = toRestore;
+    setToRestore(null);
+    await onStatusChange(row, "draft");
   };
 
   const confirmDelete = async () => {
@@ -283,7 +293,14 @@ function AdminInternshipsList() {
                         pending={pending === row.id}
                       />
                     )}
-                    {row.status !== "archived" && (
+                    {row.status === "archived" ? (
+                      <ActionBtn
+                        icon={ArchiveRestore}
+                        label={t.adminInternshipsRestore}
+                        onClick={() => setToRestore(row)}
+                        pending={pending === row.id}
+                      />
+                    ) : (
                       <ActionBtn
                         icon={Archive}
                         label={t.adminInternshipsArchive}
@@ -291,23 +308,22 @@ function AdminInternshipsList() {
                         pending={pending === row.id}
                       />
                     )}
-                    <Link
-                      to="/learning-management-system/admin/internships/$id/edit"
-                      params={{ id: row.id }}
-                    >
-                      <Button variant="ghost" size="icon" title={lang === "ar" ? "تحرير" : "Edit"}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      size="icon"
+                    <IconActionButton
+                      icon={Edit}
+                      label={lang === "ar" ? "تحرير" : "Edit"}
+                      onClick={() =>
+                        navigate({
+                          to: "/learning-management-system/admin/internships/$id/edit",
+                          params: { id: row.id },
+                        })
+                      }
+                    />
+                    <IconActionButton
+                      icon={Trash2}
+                      label={t.adminInternshipsDelete}
                       className="text-destructive"
                       onClick={() => setToDelete(row)}
-                      title={t.adminInternshipsDelete}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    />
                   </div>
                 </TableCell>
               </TableRow>
@@ -341,6 +357,23 @@ function AdminInternshipsList() {
           </div>
         </div>
       )}
+
+      <AlertDialog open={!!toRestore} onOpenChange={(o) => !o && setToRestore(null)}>
+        <AlertDialogContent dir={dir}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.adminInternshipsRestore}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t.adminInternshipsRestoreConfirm}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{lang === "ar" ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRestore}>
+              {t.adminInternshipsRestore}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
         <AlertDialogContent dir={dir}>
@@ -378,11 +411,7 @@ function ActionBtn({
   onClick: () => void;
   pending: boolean;
 }) {
-  return (
-    <Button variant="ghost" size="icon" onClick={onClick} disabled={pending} title={label}>
-      {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
-    </Button>
-  );
+  return <IconActionButton icon={Icon} label={label} onClick={onClick} pending={pending} />;
 }
 
 export function StatusBadge({ status, lang }: { status: Lifecycle; lang: "ar" | "en" }) {

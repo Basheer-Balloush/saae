@@ -111,7 +111,9 @@ export const LIFECYCLE_TRANSITIONS: Record<Lifecycle, Lifecycle[]> = {
   published: ["hidden", "closed", "archived"],
   hidden: ["published", "closed", "archived"],
   closed: ["archived", "published"],
-  archived: [],
+  // Archiving is reversible: restore back to draft, then use the normal
+  // publish / hide / close paths from there.
+  archived: ["draft"],
 };
 
 export function canTransition(from: Lifecycle, to: Lifecycle): boolean {
