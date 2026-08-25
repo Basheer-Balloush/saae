@@ -41,6 +41,7 @@ import { Route as LearningManagementSystemInstructorRouteImport } from './routes
 import { Route as LearningManagementSystemForgotPasswordRouteImport } from './routes/learning-management-system.forgot-password'
 import { Route as LearningManagementSystemCatalogRouteImport } from './routes/learning-management-system.catalog'
 import { Route as LearningManagementSystemAdminRouteImport } from './routes/learning-management-system.admin'
+import { Route as JoinTokenRouteImport } from './routes/join.$token'
 import { Route as InitiativeClaimRouteImport } from './routes/initiative.claim'
 import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
 import { Route as EventSignupTokenRouteImport } from './routes/event-signup.$token'
@@ -285,6 +286,11 @@ const LearningManagementSystemAdminRoute =
     path: '/admin',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
+const JoinTokenRoute = JoinTokenRouteImport.update({
+  id: '/join/$token',
+  path: '/join/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InitiativeClaimRoute = InitiativeClaimRouteImport.update({
   id: '/initiative/claim',
   path: '/initiative/claim',
@@ -681,6 +687,7 @@ export interface FileRoutesByFullPath {
   '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
+  '/join/$token': typeof JoinTokenRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
@@ -775,6 +782,7 @@ export interface FileRoutesByTo {
   '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
+  '/join/$token': typeof JoinTokenRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
@@ -871,6 +879,7 @@ export interface FileRoutesById {
   '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
+  '/join/$token': typeof JoinTokenRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
@@ -972,6 +981,7 @@ export interface FileRouteTypes {
     | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
+    | '/join/$token'
     | '/learning-management-system/admin'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
@@ -1066,6 +1076,7 @@ export interface FileRouteTypes {
     | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
+    | '/join/$token'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
     | '/learning-management-system/login'
@@ -1161,6 +1172,7 @@ export interface FileRouteTypes {
     | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
+    | '/join/$token'
     | '/learning-management-system/admin'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
@@ -1250,6 +1262,7 @@ export interface RootRouteChildren {
   EventSignupTokenRoute: typeof EventSignupTokenRoute
   FormsSlugRoute: typeof FormsSlugRoute
   InitiativeClaimRoute: typeof InitiativeClaimRoute
+  JoinTokenRoute: typeof JoinTokenRoute
   NewsIdRoute: typeof NewsIdRoute
   ResourcesAiToolsRoute: typeof ResourcesAiToolsRoute
   NewsIndexRoute: typeof NewsIndexRoute
@@ -1484,6 +1497,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/learning-management-system/admin'
       preLoaderRoute: typeof LearningManagementSystemAdminRouteImport
       parentRoute: typeof LearningManagementSystemRoute
+    }
+    '/join/$token': {
+      id: '/join/$token'
+      path: '/join/$token'
+      fullPath: '/join/$token'
+      preLoaderRoute: typeof JoinTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/initiative/claim': {
       id: '/initiative/claim'
@@ -2292,6 +2312,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventSignupTokenRoute: EventSignupTokenRoute,
   FormsSlugRoute: FormsSlugRoute,
   InitiativeClaimRoute: InitiativeClaimRoute,
+  JoinTokenRoute: JoinTokenRoute,
   NewsIdRoute: NewsIdRoute,
   ResourcesAiToolsRoute: ResourcesAiToolsRoute,
   NewsIndexRoute: NewsIndexRoute,
