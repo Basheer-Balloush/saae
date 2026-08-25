@@ -100,6 +100,7 @@ import { Route as AdminCrmLeadsIndividualsRouteImport } from './routes/admin.crm
 import { Route as AdminCrmLeadsCompaniesRouteImport } from './routes/admin.crm.leads.companies'
 import { Route as AdminCrmFormsFormSlugRouteImport } from './routes/admin.crm.forms.$formSlug'
 import { Route as AdminCrmContactsContactIdRouteImport } from './routes/admin.crm.contacts.$contactId'
+import { Route as LearningManagementSystemAdminInternshipsIdSignupsRouteImport } from './routes/learning-management-system.admin.internships.$id.signups'
 import { Route as LearningManagementSystemAdminInternshipsIdEditRouteImport } from './routes/learning-management-system.admin.internships.$id.edit'
 import { Route as LearningManagementSystemAdminInternshipsIdApplicationsRouteImport } from './routes/learning-management-system.admin.internships.$id.applications'
 import { Route as AdminCrmLeadsIndividualsLeadIdRouteImport } from './routes/admin.crm.leads.individuals.$leadId'
@@ -608,6 +609,12 @@ const AdminCrmContactsContactIdRoute =
     path: '/$contactId',
     getParentRoute: () => AdminCrmContactsRoute,
   } as any)
+const LearningManagementSystemAdminInternshipsIdSignupsRoute =
+  LearningManagementSystemAdminInternshipsIdSignupsRouteImport.update({
+    id: '/internships/$id/signups',
+    path: '/internships/$id/signups',
+    getParentRoute: () => LearningManagementSystemAdminRoute,
+  } as any)
 const LearningManagementSystemAdminInternshipsIdEditRoute =
   LearningManagementSystemAdminInternshipsIdEditRouteImport.update({
     id: '/internships/$id/edit',
@@ -738,6 +745,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm/leads/individuals/$leadId': typeof AdminCrmLeadsIndividualsLeadIdRoute
   '/learning-management-system/admin/internships/$id/applications': typeof LearningManagementSystemAdminInternshipsIdApplicationsRouteWithChildren
   '/learning-management-system/admin/internships/$id/edit': typeof LearningManagementSystemAdminInternshipsIdEditRoute
+  '/learning-management-system/admin/internships/$id/signups': typeof LearningManagementSystemAdminInternshipsIdSignupsRoute
   '/learning-management-system/admin/internships/$id/applications/$appId': typeof LearningManagementSystemAdminInternshipsIdApplicationsAppIdRoute
 }
 export interface FileRoutesByTo {
@@ -827,6 +835,7 @@ export interface FileRoutesByTo {
   '/admin/crm/leads/individuals/$leadId': typeof AdminCrmLeadsIndividualsLeadIdRoute
   '/learning-management-system/admin/internships/$id/applications': typeof LearningManagementSystemAdminInternshipsIdApplicationsRouteWithChildren
   '/learning-management-system/admin/internships/$id/edit': typeof LearningManagementSystemAdminInternshipsIdEditRoute
+  '/learning-management-system/admin/internships/$id/signups': typeof LearningManagementSystemAdminInternshipsIdSignupsRoute
   '/learning-management-system/admin/internships/$id/applications/$appId': typeof LearningManagementSystemAdminInternshipsIdApplicationsAppIdRoute
 }
 export interface FileRoutesById {
@@ -926,6 +935,7 @@ export interface FileRoutesById {
   '/admin/crm/leads/individuals/$leadId': typeof AdminCrmLeadsIndividualsLeadIdRoute
   '/learning-management-system/admin/internships/$id/applications': typeof LearningManagementSystemAdminInternshipsIdApplicationsRouteWithChildren
   '/learning-management-system/admin/internships/$id/edit': typeof LearningManagementSystemAdminInternshipsIdEditRoute
+  '/learning-management-system/admin/internships/$id/signups': typeof LearningManagementSystemAdminInternshipsIdSignupsRoute
   '/learning-management-system/admin/internships/$id/applications/$appId': typeof LearningManagementSystemAdminInternshipsIdApplicationsAppIdRoute
 }
 export interface FileRouteTypes {
@@ -1026,6 +1036,7 @@ export interface FileRouteTypes {
     | '/admin/crm/leads/individuals/$leadId'
     | '/learning-management-system/admin/internships/$id/applications'
     | '/learning-management-system/admin/internships/$id/edit'
+    | '/learning-management-system/admin/internships/$id/signups'
     | '/learning-management-system/admin/internships/$id/applications/$appId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1115,6 +1126,7 @@ export interface FileRouteTypes {
     | '/admin/crm/leads/individuals/$leadId'
     | '/learning-management-system/admin/internships/$id/applications'
     | '/learning-management-system/admin/internships/$id/edit'
+    | '/learning-management-system/admin/internships/$id/signups'
     | '/learning-management-system/admin/internships/$id/applications/$appId'
   id:
     | '__root__'
@@ -1213,6 +1225,7 @@ export interface FileRouteTypes {
     | '/admin/crm/leads/individuals/$leadId'
     | '/learning-management-system/admin/internships/$id/applications'
     | '/learning-management-system/admin/internships/$id/edit'
+    | '/learning-management-system/admin/internships/$id/signups'
     | '/learning-management-system/admin/internships/$id/applications/$appId'
   fileRoutesById: FileRoutesById
 }
@@ -1885,6 +1898,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCrmContactsContactIdRouteImport
       parentRoute: typeof AdminCrmContactsRoute
     }
+    '/learning-management-system/admin/internships/$id/signups': {
+      id: '/learning-management-system/admin/internships/$id/signups'
+      path: '/internships/$id/signups'
+      fullPath: '/learning-management-system/admin/internships/$id/signups'
+      preLoaderRoute: typeof LearningManagementSystemAdminInternshipsIdSignupsRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRoute
+    }
     '/learning-management-system/admin/internships/$id/edit': {
       id: '/learning-management-system/admin/internships/$id/edit'
       path: '/internships/$id/edit'
@@ -2102,6 +2122,7 @@ interface LearningManagementSystemAdminRouteChildren {
   LearningManagementSystemAdminInternshipsIndexRoute: typeof LearningManagementSystemAdminInternshipsIndexRoute
   LearningManagementSystemAdminInternshipsIdApplicationsRoute: typeof LearningManagementSystemAdminInternshipsIdApplicationsRouteWithChildren
   LearningManagementSystemAdminInternshipsIdEditRoute: typeof LearningManagementSystemAdminInternshipsIdEditRoute
+  LearningManagementSystemAdminInternshipsIdSignupsRoute: typeof LearningManagementSystemAdminInternshipsIdSignupsRoute
 }
 
 const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminRouteChildren =
@@ -2130,6 +2151,8 @@ const LearningManagementSystemAdminRouteChildren: LearningManagementSystemAdminR
       LearningManagementSystemAdminInternshipsIdApplicationsRouteWithChildren,
     LearningManagementSystemAdminInternshipsIdEditRoute:
       LearningManagementSystemAdminInternshipsIdEditRoute,
+    LearningManagementSystemAdminInternshipsIdSignupsRoute:
+      LearningManagementSystemAdminInternshipsIdSignupsRoute,
   }
 
 const LearningManagementSystemAdminRouteWithChildren =

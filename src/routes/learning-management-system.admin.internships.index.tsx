@@ -309,6 +309,16 @@ function AdminInternshipsList() {
                       />
                     )}
                     <IconActionButton
+                      icon={Link2}
+                      label={lang === "ar" ? "رابط التسجيل الخارجي" : "External sign-up link"}
+                      onClick={() =>
+                        navigate({
+                          to: "/learning-management-system/admin/internships/$id/signups",
+                          params: { id: row.id },
+                        })
+                      }
+                    />
+                    <IconActionButton
                       icon={Edit}
                       label={lang === "ar" ? "تحرير" : "Edit"}
                       onClick={() =>
