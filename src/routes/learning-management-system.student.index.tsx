@@ -7,6 +7,9 @@ import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
 import { courseDestination } from "@/lib/lms-course-destination";
+import { isCourseEnded } from "@/lib/lms-course-ended";
+import { CourseEndedStamp } from "@/components/lms/CourseCard";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/learning-management-system/student/")({
   head: () => ({ meta: [{ title: "LMS · My Courses" }] }),
