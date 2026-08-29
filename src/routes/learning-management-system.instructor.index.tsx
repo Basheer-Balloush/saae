@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useRef, useState } from "react";
-import { Plus, Edit3, Users, Loader2 } from "lucide-react";
+import { Plus, Edit3, Users, Loader2, ClipboardCheck } from "lucide-react";
 import { CoursePrice } from "@/components/lms/CoursePrice";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
