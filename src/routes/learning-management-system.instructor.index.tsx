@@ -51,12 +51,13 @@ function InstructorHome() {
   const load = async () => {
     if (!user) return;
     setLoading(true);
+    const cols = "id,title_ar,title_en,status,students_count,is_free,price,sale_price,instructor_id,delivery_mode,ams_courses!ams_courses_lms_course_id_fkey(id)";
     const ownedP = supabase.from("lms_courses")
-      .select("id,title_ar,title_en,status,students_count,is_free,price,sale_price,instructor_id")
+      .select(cols)
       .eq("instructor_id", user.id)
       .order("created_at", { ascending: false });
     const coP = supabase.from("lms_course_instructors")
-      .select("course:lms_courses(id,title_ar,title_en,status,students_count,is_free,price,sale_price,instructor_id)")
+      .select(`course:lms_courses(${cols})`)
       .eq("instructor_user_id", user.id);
     const [{ data: owned }, { data: co }] = await Promise.all([ownedP, coP]);
     const map = new Map<string, Course>();
