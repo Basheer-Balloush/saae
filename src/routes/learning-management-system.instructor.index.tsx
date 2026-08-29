@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useRef, useState } from "react";
-import { Plus, Edit3, Users, Loader2 } from "lucide-react";
+import { Plus, Edit3, Users, Loader2, ClipboardCheck } from "lucide-react";
 import { CoursePrice } from "@/components/lms/CoursePrice";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
@@ -27,7 +27,14 @@ export const Route = createFileRoute("/learning-management-system/instructor/")(
   component: InstructorHome,
 });
 
-type Course = { id: string; title_ar: string; title_en: string | null; status: string; students_count: number; is_free: boolean; price: number; sale_price: number | null; instructor_id: string };
+type AmsLink = { id: string } | { id: string }[] | null;
+type Course = { id: string; title_ar: string; title_en: string | null; status: string; students_count: number; is_free: boolean; price: number; sale_price: number | null; instructor_id: string; delivery_mode: string | null; ams_courses?: AmsLink };
+
+function amsCourseId(c: Course): string | null {
+  const a = c.ams_courses;
+  if (!a) return null;
+  return Array.isArray(a) ? (a[0]?.id ?? null) : a.id;
+}
 
 function InstructorHome() {
   const { user } = useLmsAuth();
@@ -44,12 +51,13 @@ function InstructorHome() {
   const load = async () => {
     if (!user) return;
     setLoading(true);
+    const cols = "id,title_ar,title_en,status,students_count,is_free,price,sale_price,instructor_id,delivery_mode,ams_courses!ams_courses_lms_course_id_fkey(id)";
     const ownedP = supabase.from("lms_courses")
-      .select("id,title_ar,title_en,status,students_count,is_free,price,sale_price,instructor_id")
+      .select(cols)
       .eq("instructor_id", user.id)
       .order("created_at", { ascending: false });
     const coP = supabase.from("lms_course_instructors")
-      .select("course:lms_courses(id,title_ar,title_en,status,students_count,is_free,price,sale_price,instructor_id)")
+      .select(`course:lms_courses(${cols})`)
       .eq("instructor_user_id", user.id);
     const [{ data: owned }, { data: co }] = await Promise.all([ownedP, coP]);
     const map = new Map<string, Course>();
@@ -170,8 +178,9 @@ function InstructorHome() {
       ) : (
         <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map((c) => (
-            <Link key={c.id} to="/learning-management-system/instructor/courses/$id" params={{ id: c.id }}
-              className="rounded-2xl border border-border bg-card p-5 hover:border-primary transition-colors">
+            <div key={c.id} className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary">
+            <Link to="/learning-management-system/instructor/courses/$id" params={{ id: c.id }}
+              className="block">
               <div className="flex items-start justify-between gap-2">
                 <h3 className="font-bold text-foreground line-clamp-2">{lang === "ar" ? c.title_ar : c.title_en || c.title_ar}</h3>
                 <div className="flex flex-col items-end gap-1">
@@ -196,6 +205,27 @@ function InstructorHome() {
                 <span className="inline-flex items-center gap-1 text-primary"><Edit3 className="h-3.5 w-3.5" />{lang === "ar" ? "تعديل" : "Edit"}</span>
               </div>
             </Link>
+            {c.delivery_mode !== "online" && (
+              <div className="mt-4 border-t border-border pt-3">
+                {amsCourseId(c) ? (
+                  <Link
+                    to="/attendance-management-system"
+                    search={{ course: amsCourseId(c)! }}
+                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-primary/40 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10"
+                  >
+                    <ClipboardCheck className="h-3.5 w-3.5" />
+                    {lang === "ar" ? "تسجيل الحضور" : "Take attendance"}
+                  </Link>
+                ) : (
+                  <p className="text-center text-[11px] text-muted-foreground">
+                    {lang === "ar"
+                      ? "الحضور غير مُفعّل لهذه الدورة — اطلب من الإدارة ربطها بنظام الحضور."
+                      : "Attendance not enabled — ask an admin to link this course to the attendance system."}
+                  </p>
+                )}
+              </div>
+            )}
+            </div>
           ))}
         </div>
       )}
