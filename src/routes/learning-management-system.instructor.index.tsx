@@ -27,7 +27,14 @@ export const Route = createFileRoute("/learning-management-system/instructor/")(
   component: InstructorHome,
 });
 
-type Course = { id: string; title_ar: string; title_en: string | null; status: string; students_count: number; is_free: boolean; price: number; sale_price: number | null; instructor_id: string };
+type AmsLink = { id: string } | { id: string }[] | null;
+type Course = { id: string; title_ar: string; title_en: string | null; status: string; students_count: number; is_free: boolean; price: number; sale_price: number | null; instructor_id: string; delivery_mode: string | null; ams_courses?: AmsLink };
+
+function amsCourseId(c: Course): string | null {
+  const a = c.ams_courses;
+  if (!a) return null;
+  return Array.isArray(a) ? (a[0]?.id ?? null) : a.id;
+}
 
 function InstructorHome() {
   const { user } = useLmsAuth();
