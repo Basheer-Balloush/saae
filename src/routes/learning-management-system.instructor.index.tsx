@@ -205,6 +205,27 @@ function InstructorHome() {
                 <span className="inline-flex items-center gap-1 text-primary"><Edit3 className="h-3.5 w-3.5" />{lang === "ar" ? "تعديل" : "Edit"}</span>
               </div>
             </Link>
+            {c.delivery_mode !== "online" && (
+              <div className="mt-4 border-t border-border pt-3">
+                {amsCourseId(c) ? (
+                  <Link
+                    to="/attendance-management-system"
+                    search={{ course: amsCourseId(c)! }}
+                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-primary/40 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10"
+                  >
+                    <ClipboardCheck className="h-3.5 w-3.5" />
+                    {lang === "ar" ? "تسجيل الحضور" : "Take attendance"}
+                  </Link>
+                ) : (
+                  <p className="text-center text-[11px] text-muted-foreground">
+                    {lang === "ar"
+                      ? "الحضور غير مُفعّل لهذه الدورة — اطلب من الإدارة ربطها بنظام الحضور."
+                      : "Attendance not enabled — ask an admin to link this course to the attendance system."}
+                  </p>
+                )}
+              </div>
+            )}
+            </div>
           ))}
         </div>
       )}
