@@ -178,8 +178,9 @@ function InstructorHome() {
       ) : (
         <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map((c) => (
-            <Link key={c.id} to="/learning-management-system/instructor/courses/$id" params={{ id: c.id }}
-              className="rounded-2xl border border-border bg-card p-5 hover:border-primary transition-colors">
+            <div key={c.id} className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary">
+            <Link to="/learning-management-system/instructor/courses/$id" params={{ id: c.id }}
+              className="block">
               <div className="flex items-start justify-between gap-2">
                 <h3 className="font-bold text-foreground line-clamp-2">{lang === "ar" ? c.title_ar : c.title_en || c.title_ar}</h3>
                 <div className="flex flex-col items-end gap-1">
