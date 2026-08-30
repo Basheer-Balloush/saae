@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1788089335295,
+      "tag": "0000_guard_review_and_trainer_privileged_fields",
+      "breakpoints": true
+    }
+  ]
+}
