@@ -213,12 +213,20 @@ function AdminEnrollmentRequests() {
         ansMap: new Map((respByReq.get(r.id) ?? []).map((a) => [a.field_id, a.value])),
       }));
 
+      const ansText = (ansMap: Map<string, unknown>, id: string): string => {
+        const v = ansMap.get(id);
+        if (v === null || v === undefined) return "";
+        if (Array.isArray(v)) return v.join(", ");
+        if (typeof v === "boolean") return v ? (ar ? "نعم" : "Yes") : (ar ? "لا" : "No");
+        if (typeof v === "object") { try { return JSON.stringify(v); } catch { return ""; } }
+        return String(v);
+      };
+
+      // Export the course enrollment-form answers (not the account profile data).
       const baseColumns: XlsxColumn<ExportRow>[] = [
-        { header: ar ? "الاسم الكامل" : "Full name", type: "text", width: 26, get: ({ req }) => profileMap[req.user_id]?.full_name ?? "" },
-        { header: ar ? "البريد الإلكتروني" : "Email", type: "text", width: 32, get: ({ req }) => profileMap[req.user_id]?.email ?? "" },
-        { header: ar ? "رقم الهاتف" : "Phone", type: "text", width: 20, get: ({ req }) => profileMap[req.user_id]?.phone ?? "" },
-        { header: ar ? "الجهة / المنظمة" : "Organization", type: "text", width: 26, get: ({ req }) => profileMap[req.user_id]?.organization ?? "" },
-        { header: ar ? "نبذة" : "Biography", type: "text", width: 40, get: ({ req }) => profileMap[req.user_id]?.biography ?? "" },
+        { header: ar ? "الاسم الكامل" : "Full name", type: "text", width: 26, get: ({ ansMap }) => ansText(ansMap, BASE_FIELD_IDS.fullName) },
+        { header: ar ? "البريد الإلكتروني" : "Email", type: "text", width: 32, get: ({ ansMap }) => ansText(ansMap, BASE_FIELD_IDS.email) },
+        { header: ar ? "رقم الهاتف" : "Phone", type: "text", width: 20, get: ({ ansMap }) => ansText(ansMap, BASE_FIELD_IDS.phone) },
         { header: ar ? "تاريخ الطلب" : "Created at", type: "date", width: 20, get: ({ req }) => req.created_at },
         { header: ar ? "الحالة" : "Status", type: "text", width: 14, get: ({ req }) => req.status },
         { header: ar ? "طريقة الدفع" : "Payment method", type: "text", width: 18, get: ({ req }) => req.payment_method },
@@ -226,6 +234,7 @@ function AdminEnrollmentRequests() {
         { header: ar ? "ملاحظات الإدارة" : "Admin notes", type: "text", width: 32, get: ({ req }) => req.admin_notes ?? "" },
         { header: ar ? "تاريخ القرار" : "Decided at", type: "date", width: 20, get: ({ req }) => req.decided_at },
       ];
+
       const fieldColumns: XlsxColumn<ExportRow>[] = fields.map((f) => ({
         header: ar ? f.label_ar : (f.label_en || f.label_ar),
         type: "text",
