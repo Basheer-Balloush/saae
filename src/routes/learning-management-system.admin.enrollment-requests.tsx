@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import { sendEnrollmentApprovedEmail } from "@/lib/lms-enrollment-email.functions";
+import { getEmailsForUsers } from "@/lib/lms-admin-users.functions";
 import { BASE_FIELD_IDS } from "@/components/lms/EnrollmentFormDialog";
 import { enrollmentErrorMessage } from "@/lib/lms-enrollment-errors";
 
@@ -47,6 +48,14 @@ type Req = {
   course?: { title_ar: string; title_en: string | null; price: number; students_count: number; enrollment_deadline: string | null; max_students: number | null };
 };
 
+type UserProfile = {
+  full_name: string | null;
+  phone: string | null;
+  organization: string | null;
+  biography: string | null;
+  email: string | null;
+};
+
 type CourseSummary = {
   id: string;
   title_ar: string;
@@ -62,6 +71,7 @@ function AdminEnrollmentRequests() {
   const { lang } = useLang();
   const ar = lang === "ar";
   const sendApprovedEmail = useServerFn(sendEnrollmentApprovedEmail);
+  const fetchEmails = useServerFn(getEmailsForUsers);
   const [courses, setCourses] = useState<CourseSummary[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
@@ -72,6 +82,43 @@ function AdminEnrollmentRequests() {
   const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
   const [viewing, setViewing] = useState<{ requestId: string; courseId: string } | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [profiles, setProfiles] = useState<Record<string, UserProfile>>({});
+
+  // Fetch profile details + emails for a set of user ids (admin-only, RLS-protected).
+  const loadProfiles = async (userIds: string[]): Promise<Record<string, UserProfile>> => {
+    const unique = [...new Set(userIds)].filter(Boolean);
+    if (!unique.length) return {};
+    const [{ data: profs }, emailsRes] = await Promise.all([
+      supabase
+        .from("lms_user_profiles")
+        .select("user_id,full_name,phone,organization,biography")
+        .in("user_id", unique),
+      fetchEmails({ data: { userIds: unique } }).catch(() => ({ emails: {} as Record<string, string> })),
+    ]);
+    const emailMap = (emailsRes?.emails ?? {}) as Record<string, string>;
+    const map: Record<string, UserProfile> = {};
+    for (const p of (profs ?? []) as { user_id: string; full_name: string | null; phone: string | null; organization: string | null; biography: string | null }[]) {
+      map[p.user_id] = {
+        full_name: p.full_name,
+        phone: p.phone,
+        organization: p.organization,
+        biography: p.biography,
+        email: emailMap[p.user_id] ?? null,
+      };
+    }
+    // Users without a profile row still get their email
+    for (const id of unique) {
+      if (!map[id]) {
+        map[id] = { full_name: null, phone: null, organization: null, biography: null, email: emailMap[id] ?? null };
+      }
+    }
+    return map;
+  };
+
+  const userDisplayName = (userId: string): string => {
+    const p = profiles[userId];
+    return p?.full_name || p?.email || (ar ? "مستخدم غير معروف" : "Unknown user");
+  };
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailSaving, setEmailSaving] = useState(false);
@@ -133,6 +180,7 @@ function AdminEnrollmentRequests() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       const list = (allReqs as Req[]) ?? [];
+      const profileMap = await loadProfiles(list.map((r) => r.user_id));
 
       const { data: formRow } = await supabase
         .from("lms_course_forms").select("id").eq("course_id", selectedCourseId).maybeSingle();
@@ -166,9 +214,13 @@ function AdminEnrollmentRequests() {
       }));
 
       const baseColumns: XlsxColumn<ExportRow>[] = [
+        { header: ar ? "الاسم الكامل" : "Full name", type: "text", width: 26, get: ({ req }) => profileMap[req.user_id]?.full_name ?? "" },
+        { header: ar ? "البريد الإلكتروني" : "Email", type: "text", width: 32, get: ({ req }) => profileMap[req.user_id]?.email ?? "" },
+        { header: ar ? "رقم الهاتف" : "Phone", type: "text", width: 20, get: ({ req }) => profileMap[req.user_id]?.phone ?? "" },
+        { header: ar ? "الجهة / المنظمة" : "Organization", type: "text", width: 26, get: ({ req }) => profileMap[req.user_id]?.organization ?? "" },
+        { header: ar ? "نبذة" : "Biography", type: "text", width: 40, get: ({ req }) => profileMap[req.user_id]?.biography ?? "" },
         { header: ar ? "تاريخ الطلب" : "Created at", type: "date", width: 20, get: ({ req }) => req.created_at },
         { header: ar ? "الحالة" : "Status", type: "text", width: 14, get: ({ req }) => req.status },
-        { header: ar ? "معرّف المستخدم" : "User ID", type: "text", width: 38, get: ({ req }) => req.user_id },
         { header: ar ? "طريقة الدفع" : "Payment method", type: "text", width: 18, get: ({ req }) => req.payment_method },
         { header: ar ? "ملاحظات الطالب" : "Student notes", type: "text", width: 32, get: ({ req }) => req.notes ?? "" },
         { header: ar ? "ملاحظات الإدارة" : "Admin notes", type: "text", width: 32, get: ({ req }) => req.admin_notes ?? "" },
@@ -260,6 +312,7 @@ function AdminEnrollmentRequests() {
     const { data } = await q;
     const list = (data as Req[]) ?? [];
     if (list.length) {
+      setProfiles(await loadProfiles(list.map((r) => r.user_id)));
       const { data: c } = await supabase
         .from("lms_courses")
         .select("id,title_ar,title_en,price,students_count,enrollment_deadline,max_students,created_at")
@@ -469,7 +522,10 @@ function AdminEnrollmentRequests() {
               <div key={r.id} className="rounded-xl border border-border bg-card p-4 space-y-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <div className="text-xs text-muted-foreground font-mono">{r.user_id}</div>
+                    <div className="text-sm font-semibold text-foreground">{userDisplayName(r.user_id)}</div>
+                    {profiles[r.user_id]?.email && (
+                      <div className="text-xs text-muted-foreground">{profiles[r.user_id]?.email}{profiles[r.user_id]?.phone ? ` · ${profiles[r.user_id]?.phone}` : ""}</div>
+                    )}
                     <div className="text-xs text-muted-foreground mt-1">
                       {ar ? "السعر" : "Price"}: {r.course ? `${r.course.price.toLocaleString()} ${ar ? "ل.س" : "SYP"}` : "—"}
                       {" · "}{ar ? "العدد" : "Enrolled"}: {r.course?.students_count ?? "—"}{r.course?.max_students != null ? ` / ${r.course.max_students}` : ""}{r.course?.enrollment_deadline ? ` · ${ar ? "آخر موعد" : "Deadline"}: ${new Date(r.course.enrollment_deadline).toLocaleDateString(ar ? "ar" : "en")}` : ""}

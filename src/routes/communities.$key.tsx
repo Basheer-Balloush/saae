@@ -19,7 +19,7 @@ const OLIVE = "#698F3F";
 const OFFWHITE = "#F9F9F9";
 
 // Hero imagery — natural-light human collaboration, no robots
-const HERO_IMG: Record<CommunityKey, string> = {
+export const HERO_IMG: Record<CommunityKey, string> = {
   data: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80",
   architecture: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80",
   medical: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1600&q=80",
