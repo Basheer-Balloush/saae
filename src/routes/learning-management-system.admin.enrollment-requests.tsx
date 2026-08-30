@@ -180,7 +180,7 @@ function AdminEnrollmentRequests() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       const list = (allReqs as Req[]) ?? [];
-      const profileMap = await loadProfiles(list.map((r) => r.user_id));
+
 
       const { data: formRow } = await supabase
         .from("lms_course_forms").select("id").eq("course_id", selectedCourseId).maybeSingle();
