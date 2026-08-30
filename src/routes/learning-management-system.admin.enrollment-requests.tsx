@@ -93,23 +93,24 @@ function AdminEnrollmentRequests() {
         .from("lms_user_profiles")
         .select("user_id,full_name,phone,organization,biography")
         .in("user_id", unique),
-      fetchEmails({ data: { userIds: unique } }).catch(() => ({ emails: {} as Record<string, string> })),
+      fetchEmails({ data: { userIds: unique } }).catch(() => ({ emails: {} as Record<string, string>, names: {} as Record<string, string> })),
     ]);
     const emailMap = (emailsRes?.emails ?? {}) as Record<string, string>;
+    const nameMap = (emailsRes?.names ?? {}) as Record<string, string>;
     const map: Record<string, UserProfile> = {};
     for (const p of (profs ?? []) as { user_id: string; full_name: string | null; phone: string | null; organization: string | null; biography: string | null }[]) {
       map[p.user_id] = {
-        full_name: p.full_name,
+        full_name: p.full_name || nameMap[p.user_id] || null,
         phone: p.phone,
         organization: p.organization,
         biography: p.biography,
         email: emailMap[p.user_id] ?? null,
       };
     }
-    // Users without a profile row still get their email
+    // Users without a profile row still get their account name and email
     for (const id of unique) {
       if (!map[id]) {
-        map[id] = { full_name: null, phone: null, organization: null, biography: null, email: emailMap[id] ?? null };
+        map[id] = { full_name: nameMap[id] ?? null, phone: null, organization: null, biography: null, email: emailMap[id] ?? null };
       }
     }
     return map;
