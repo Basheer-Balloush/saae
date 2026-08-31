@@ -218,6 +218,7 @@ function CourseDetails() {
   const [manualOpen, setManualOpen] = useState(false);
   const [manualNotes, setManualNotes] = useState("");
   const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [hasQuiz, setHasQuiz] = useState(false);
 
   useEffect(() => {
     if (!course || !user) {
@@ -234,6 +235,16 @@ function CourseDetails() {
       if (cancelled) return;
       setEnrolled(!!e);
       setPendingRequest(!!req);
+      if (e) {
+        const { data: q } = await supabase
+          .from("lms_quizzes")
+          .select("id")
+          .eq("course_id", course.id)
+          .maybeSingle();
+        if (!cancelled) setHasQuiz(!!q);
+      } else {
+        setHasQuiz(false);
+      }
     })();
     return () => { cancelled = true; };
   }, [course, user]);
@@ -409,10 +420,17 @@ function CourseDetails() {
             if (enrolled) {
               if (course.delivery_mode === "onsite") {
                 return (
-                  <div className="mt-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 p-4 text-center text-sm text-emerald-700 dark:text-emerald-300 font-semibold">
-                    <CheckCircle className="h-5 w-5 mx-auto mb-1" />
-                    {ar ? "أنت مسجّل — يتم تتبّع تقدّمك عبر الحضور" : "You're enrolled — progress is tracked via attendance"}
-                  </div>
+                  <>
+                    <div className="mt-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 p-4 text-center text-sm text-emerald-700 dark:text-emerald-300 font-semibold">
+                      <CheckCircle className="h-5 w-5 mx-auto mb-1" />
+                      {ar ? "أنت مسجّل — يتم تتبّع تقدّمك عبر الحضور" : "You're enrolled — progress is tracked via attendance"}
+                    </div>
+                    {hasQuiz && (
+                      <Link to="/learning-management-system/student/quiz/$courseId" params={{ courseId: course.id }}>
+                        <Button className="w-full mt-3" size="lg" variant="outline">{tr.finalTest}</Button>
+                      </Link>
+                    )}
+                  </>
                 );
               }
               return (
