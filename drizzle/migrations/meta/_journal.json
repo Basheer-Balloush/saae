@@ -43,6 +43,13 @@
       "when": 1788186305372,
       "tag": "0005_quiz_pass_lock_and_list_attempts",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788186796156,
+      "tag": "0006_quiz_review_and_attempt_state",
+      "breakpoints": true
     }
   ]
 }
