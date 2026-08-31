@@ -231,7 +231,17 @@ function QuizPage() {
       return;
     }
     setResult(data as Result);
-    setReloadKey((k) => k + 1); // refresh list + review data with the saved attempt
+    // Refresh list statuses and the saved-attempt review data WITHOUT remounting
+    // the attempt loader (that would wipe the freshly shown result).
+    setListKey((k) => k + 1);
+    void (async () => {
+      const [attemptRes, reviewRes] = await Promise.all([
+        supabase.rpc("lms_get_quiz_for_attempt" as never, { _quiz_id: state.quiz.id } as never),
+        supabase.rpc("lms_get_quiz_review" as never, { _quiz_id: state.quiz.id } as never),
+      ]);
+      if (!attemptRes.error) setState(attemptRes.data as unknown as LoadedState);
+      if (!reviewRes.error) setReview(reviewRes.data as unknown as ReviewData);
+    })();
     if ((data as Result | null)?.certificate_id) {
       sendCertEmail({ data: { courseId, lang } }).catch((e) => console.error("cert email failed", e));
     }
