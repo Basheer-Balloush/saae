@@ -427,8 +427,8 @@ function CourseDetails() {
                       {ar ? "أنت مسجّل — يتم تتبّع تقدّمك عبر الحضور" : "You're enrolled — progress is tracked via attendance"}
                     </div>
                     {hasQuiz && (
-                      <Link to="/learning-management-system/student/quiz/$courseId" params={{ courseId: course.id }}>
-                        <Button className="w-full mt-3" size="lg" variant="outline">{tr.finalTest}</Button>
+                      <Link to="/learning-management-system/student/quiz/$courseId" params={{ courseId: course.id }} search={{ quiz: undefined }}>
+                        <Button className="w-full mt-3" size="lg" variant="outline">{tr.quizzes}</Button>
                       </Link>
                     )}
                   </>
