@@ -107,6 +107,7 @@ function QuizPage() {
   const [now, setNow] = useState(Date.now());
   const [loadError, setLoadError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [listKey, setListKey] = useState(0);
 
   const sendCertEmail = useServerFn(sendCertificateEmail);
 
