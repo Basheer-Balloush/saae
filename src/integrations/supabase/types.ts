@@ -3147,6 +3147,7 @@ export type Database = {
           course_id: string
           created_at: string
           id: string
+          lms_section_id: string | null
           max_attempts: number
           pass_score: number
           title: string
@@ -3158,6 +3159,7 @@ export type Database = {
           course_id: string
           created_at?: string
           id?: string
+          lms_section_id?: string | null
           max_attempts?: number
           pass_score?: number
           title: string
@@ -3169,6 +3171,7 @@ export type Database = {
           course_id?: string
           created_at?: string
           id?: string
+          lms_section_id?: string | null
           max_attempts?: number
           pass_score?: number
           title?: string
@@ -3180,6 +3183,13 @@ export type Database = {
             columns: ["ams_session_id"]
             isOneToOne: false
             referencedRelation: "ams_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_quizzes_lms_section_id_fkey"
+            columns: ["lms_section_id"]
+            isOneToOne: false
+            referencedRelation: "lms_sections"
             referencedColumns: ["id"]
           },
         ]
