@@ -3142,6 +3142,7 @@ export type Database = {
       }
       lms_quizzes: {
         Row: {
+          ams_session_id: string | null
           cooldown_minutes: number
           course_id: string
           created_at: string
@@ -3152,6 +3153,7 @@ export type Database = {
           version: number
         }
         Insert: {
+          ams_session_id?: string | null
           cooldown_minutes?: number
           course_id: string
           created_at?: string
@@ -3162,6 +3164,7 @@ export type Database = {
           version?: number
         }
         Update: {
+          ams_session_id?: string | null
           cooldown_minutes?: number
           course_id?: string
           created_at?: string
@@ -3171,7 +3174,15 @@ export type Database = {
           title?: string
           version?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lms_quizzes_ams_session_id_fkey"
+            columns: ["ams_session_id"]
+            isOneToOne: false
+            referencedRelation: "ams_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lms_reviews: {
         Row: {
