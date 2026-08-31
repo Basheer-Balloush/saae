@@ -97,6 +97,14 @@ export const lmsT: Record<Lang, {
   comingSoon: string;
   // quizzes & certificates
   finalTest: string;
+  quizzes: string;
+  quizStatusNotTaken: string;
+  quizStatusPassed: string;
+  quizStatusFailed: string;
+  openQuiz: string;
+  backToCourse: string;
+  score: string;
+  quizSuffix: string;
   startTest: string;
   submitTest: string;
   passScore: string;
@@ -238,6 +246,14 @@ export const lmsT: Record<Lang, {
     enrollmentSuccess: "تمّ التسجيل في الدورة بنجاح",
     comingSoon: "قريباً",
     finalTest: "الاختبار النهائيّ",
+    quizzes: "الاختبارات",
+    quizStatusNotTaken: "لم يُؤدَّ بعد",
+    quizStatusPassed: "ناجح",
+    quizStatusFailed: "راسب",
+    openQuiz: "فتح الاختبار",
+    backToCourse: "العودة إلى الدورة",
+    score: "الدرجة",
+    quizSuffix: "اختبار",
     startTest: "ابدأ الاختبار",
     submitTest: "إرسال الإجابات",
     passScore: "درجة النجاح",
@@ -379,6 +395,14 @@ export const lmsT: Record<Lang, {
     enrollmentSuccess: "Enrolled successfully",
     comingSoon: "Coming soon",
     finalTest: "Final test",
+    quizzes: "Quizzes",
+    quizStatusNotTaken: "Not Taken",
+    quizStatusPassed: "Passed",
+    quizStatusFailed: "Failed",
+    openQuiz: "Open quiz",
+    backToCourse: "Back to course",
+    score: "Score",
+    quizSuffix: "Quiz",
     startTest: "Start test",
     submitTest: "Submit answers",
     passScore: "Pass score",
