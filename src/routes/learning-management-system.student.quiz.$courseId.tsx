@@ -133,7 +133,7 @@ function QuizPage() {
       setList((data as unknown as QuizListItem[]) ?? []);
     })();
     return () => { cancelled = true; };
-  }, [courseId, user, reloadKey]);
+  }, [courseId, user, reloadKey, listKey]);
 
   // Load the selected quiz: attempt state + saved attempt (for review)
   useEffect(() => {
