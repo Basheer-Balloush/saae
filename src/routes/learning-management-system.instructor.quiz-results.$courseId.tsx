@@ -29,7 +29,7 @@ function QuizResultsPage() {
   const { user, loading: authLoading } = useLmsAuth();
   const { lang } = useLang();
   const [loading, setLoading] = useState(true);
-  const [course, setCourse] = useState<{ title_ar: string; title_en: string | null } | null>(null);
+  const [course, setCourse] = useState<{ title_ar: string; title_en: string | null; delivery_mode: string | null } | null>(null);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
@@ -39,8 +39,8 @@ function QuizResultsPage() {
     if (authLoading || !user) return;
     (async () => {
       setLoading(true);
-      const { data: c } = await supabase.from("lms_courses").select("title_ar,title_en").eq("id", courseId).maybeSingle();
-      setCourse(c as { title_ar: string; title_en: string | null } | null);
+      const { data: c } = await supabase.from("lms_courses").select("title_ar,title_en,delivery_mode").eq("id", courseId).maybeSingle();
+      setCourse(c as { title_ar: string; title_en: string | null; delivery_mode: string | null } | null);
 
       const { data: qs } = await supabase.from("lms_quizzes")
         .select("id,title,pass_score").eq("course_id", courseId).order("created_at");
@@ -88,7 +88,20 @@ function QuizResultsPage() {
           <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-foreground">
             {lang === "ar" ? "نتائج الاختبارات" : "Quiz results"}
           </h1>
-          <p className="text-sm text-muted-foreground">{title}</p>
+          <div className="mt-1 flex items-center gap-2 flex-wrap">
+            <p className="text-sm text-muted-foreground">{title}</p>
+            {course && (
+              course.delivery_mode === "online" ? (
+                <span className="rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 px-2 py-0.5 text-xs font-semibold">
+                  {lang === "ar" ? "أونلاين" : "Online"}
+                </span>
+              ) : (
+                <span className="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-xs font-semibold">
+                  {lang === "ar" ? "حضوري" : "In-person"}
+                </span>
+              )
+            )}
+          </div>
         </div>
         {quizzes.length > 1 && (
           <Select value={selectedQuiz} onValueChange={setSelectedQuiz}>
