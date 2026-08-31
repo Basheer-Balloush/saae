@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { sendCertificateEmail } from "@/lib/certificate-email.functions";
-import { isOnsite } from "@/lib/lms-course-destination";
 
 export const Route = createFileRoute("/learning-management-system/student/quiz/$courseId")({
   head: () => ({ meta: [{ title: "LMS · Final test" }] }),
