@@ -15,6 +15,13 @@
       "when": 1788184369166,
       "tag": "0001_allow_quizzes_on_onsite_courses",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788184610722,
+      "tag": "0002_lms_quizzes_multi_per_course_session_link",
+      "breakpoints": true
     }
   ]
 }

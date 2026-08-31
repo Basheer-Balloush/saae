@@ -240,8 +240,9 @@ function CourseDetails() {
           .from("lms_quizzes")
           .select("id")
           .eq("course_id", course.id)
-          .maybeSingle();
-        if (!cancelled) setHasQuiz(!!q);
+          .limit(1);
+        if (!cancelled) setHasQuiz(!!(q && q.length > 0));
+
       } else {
         setHasQuiz(false);
       }

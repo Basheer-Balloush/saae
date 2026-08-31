@@ -60,6 +60,8 @@ function QuizPage() {
   const [noQuiz, setNoQuiz] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [quizList, setQuizList] = useState<{ id: string; title: string }[]>([]);
+  const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
 
   const sendCertEmail = useServerFn(sendCertificateEmail);
 
@@ -70,18 +72,25 @@ function QuizPage() {
       setLoading(true);
       setLoadError(false);
       setNoQuiz(false);
-      // Quizzes are available for every delivery mode (online and on-site alike).
-      const { data: q, error: qErr } = await supabase
+      setResult(null);
+      setAnswers({});
+      // Quizzes are available for every delivery mode (online and on-site alike),
+      // and a course may hold several quizzes (one per session).
+      const { data: qs, error: qErr } = await supabase
         .from("lms_quizzes")
-        .select("id")
+        .select("id,title,created_at")
         .eq("course_id", courseId)
-        .maybeSingle();
+        .order("created_at");
       if (cancelled) return;
       if (qErr) { setLoadError(true); setLoading(false); return; }
-      if (!q) { setNoQuiz(true); setLoading(false); return; }
+      const list = (qs as { id: string; title: string }[]) ?? [];
+      setQuizList(list);
+      if (list.length === 0) { setNoQuiz(true); setLoading(false); return; }
+      const current = list.find((q) => q.id === selectedQuizId) ?? list[0];
+      setSelectedQuizId(current.id);
       const { data, error } = await supabase.rpc(
         "lms_get_quiz_for_attempt" as never,
-        { _quiz_id: (q as { id: string }).id } as never,
+        { _quiz_id: current.id } as never,
       );
       if (cancelled) return;
       if (error) { setLoadError(true); setLoading(false); return; }
@@ -89,7 +98,9 @@ function QuizPage() {
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [courseId, user, reloadKey, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseId, user, reloadKey, selectedQuizId]);
+
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -225,7 +236,26 @@ function QuizPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+      {quizList.length > 1 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {quizList.map((q) => (
+            <button
+              key={q.id}
+              type="button"
+              onClick={() => setSelectedQuizId(q.id)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                q.id === selectedQuizId
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-muted/30 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {q.title || tr.finalTest}
+            </button>
+          ))}
+        </div>
+      )}
       <h1 className="text-2xl font-bold text-foreground">{state.quiz.title || tr.finalTest}</h1>
+
       <p className="mt-1 text-sm text-muted-foreground">
         {tr.passScore}: {state.quiz.pass_score}% ·{" "}
         {lang === "ar"
