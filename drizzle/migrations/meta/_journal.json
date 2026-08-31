@@ -8,6 +8,13 @@
       "when": 1788089335295,
       "tag": "0000_guard_review_and_trainer_privileged_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788184369166,
+      "tag": "0001_allow_quizzes_on_onsite_courses",
+      "breakpoints": true
     }
   ]
 }
