@@ -105,6 +105,12 @@ export const lmsT: Record<Lang, {
   backToCourse: string;
   score: string;
   quizSuffix: string;
+  attemptsLabel: string;
+  startQuiz: string;
+  retakeQuiz: string;
+  viewResult: string;
+  quizLockedPassed: string;
+  quizLockedAttempts: string;
   startTest: string;
   submitTest: string;
   passScore: string;
