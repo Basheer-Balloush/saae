@@ -111,6 +111,16 @@ export const lmsT: Record<Lang, {
   viewResult: string;
   quizLockedPassed: string;
   quizLockedAttempts: string;
+  reviewQuiz: string;
+  reviewAnswers: string;
+  backToQuizzes: string;
+  yourAnswer: string;
+  answerCorrect: string;
+  answerIncorrect: string;
+  notAnswered: string;
+  noAttemptToReview: string;
+  quizNotEnrolled: string;
+  quizCooldown: string;
   startTest: string;
   submitTest: string;
   passScore: string;
@@ -265,6 +275,16 @@ export const lmsT: Record<Lang, {
     retakeQuiz: "إعادة الاختبار",
     viewResult: "عرض النتيجة",
     quizLockedPassed: "لقد اجتزت هذا الاختبار، ولا يمكن إعادته.",
+    reviewQuiz: "مراجعة الاختبار",
+    reviewAnswers: "مراجعة الإجابات",
+    backToQuizzes: "العودة إلى الاختبارات",
+    yourAnswer: "إجابتك",
+    answerCorrect: "صحيحة",
+    answerIncorrect: "خاطئة",
+    notAnswered: "لم تتم الإجابة",
+    noAttemptToReview: "لا توجد محاولة سابقة لمراجعتها.",
+    quizNotEnrolled: "يجب أن تكون مسجلاً في الدورة لتقديم هذا الاختبار.",
+    quizCooldown: "لم تنتهِ فترة الانتظار بعد.",
     quizLockedAttempts: "استنفدت كل المحاولات المتاحة لهذا الاختبار.",
     startTest: "ابدأ الاختبار",
     submitTest: "إرسال الإجابات",
@@ -420,6 +440,16 @@ export const lmsT: Record<Lang, {
     retakeQuiz: "Retake quiz",
     viewResult: "View result",
     quizLockedPassed: "You already passed this quiz. No further attempts allowed.",
+    reviewQuiz: "Review quiz",
+    reviewAnswers: "Review answers",
+    backToQuizzes: "Back to quizzes",
+    yourAnswer: "Your answer",
+    answerCorrect: "Correct",
+    answerIncorrect: "Incorrect",
+    notAnswered: "Not answered",
+    noAttemptToReview: "No previous attempt to review yet.",
+    quizNotEnrolled: "You must be enrolled in the course to take this quiz.",
+    quizCooldown: "Cooldown is still active.",
     quizLockedAttempts: "You have used all available attempts for this quiz.",
     startTest: "Start test",
     submitTest: "Submit answers",

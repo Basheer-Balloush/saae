@@ -4379,6 +4379,7 @@ export type Database = {
           quiz_id: string
         }[]
       }
+      lms_get_quiz_review: { Args: { _quiz_id: string }; Returns: Json }
       lms_instructors_generate_slug: {
         Args: { _base: string }
         Returns: string
