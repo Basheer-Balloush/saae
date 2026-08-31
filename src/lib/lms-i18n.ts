@@ -115,7 +115,6 @@ export const lmsT: Record<Lang, {
   reviewAnswers: string;
   backToQuizzes: string;
   yourAnswer: string;
-  correctAnswer: string;
   answerCorrect: string;
   answerIncorrect: string;
   notAnswered: string;
@@ -280,7 +279,6 @@ export const lmsT: Record<Lang, {
     reviewAnswers: "مراجعة الإجابات",
     backToQuizzes: "العودة إلى الاختبارات",
     yourAnswer: "إجابتك",
-    correctAnswer: "الإجابة الصحيحة",
     answerCorrect: "صحيحة",
     answerIncorrect: "خاطئة",
     notAnswered: "لم تتم الإجابة",
@@ -446,7 +444,6 @@ export const lmsT: Record<Lang, {
     reviewAnswers: "Review answers",
     backToQuizzes: "Back to quizzes",
     yourAnswer: "Your answer",
-    correctAnswer: "Correct answer",
     answerCorrect: "Correct",
     answerIncorrect: "Incorrect",
     notAnswered: "Not answered",
