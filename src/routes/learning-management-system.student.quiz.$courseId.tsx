@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Award, Loader2, CheckCircle2, XCircle, TimerReset, ArrowRight } from "lucide-react";
+import { Award, Loader2, CheckCircle2, XCircle, TimerReset, ArrowRight, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -51,13 +51,17 @@ type QuizListItem = {
   id: string;
   title: string;
   pass_score: number;
+  max_attempts: number;
   created_at: string;
   session_title: string | null;
   section_title: string | null;
   question_count: number;
   last_score: number | null;
   last_passed: boolean | null;
+  last_correct: number | null;
+  last_total: number | null;
   attempts_used: number;
+  has_passed: boolean;
 };
 
 function QuizPage() {
@@ -82,16 +86,14 @@ function QuizPage() {
 
   const sendCertEmail = useServerFn(sendCertificateEmail);
 
+  // Quiz title always comes from the linked session (or section) — never a generic name.
   const quizName = useCallback(
-    (q: { session_title?: string | null; section_title?: string | null; title: string }) => {
-      const base = q.session_title || q.section_title;
-      if (!base) return q.title || tr.finalTest;
-      return ar ? `${tr.quizSuffix} ${base}` : `${base} ${tr.quizSuffix}`;
-    },
-    [ar, tr.quizSuffix, tr.finalTest],
+    (q: { session_title?: string | null; section_title?: string | null; title: string }) =>
+      q.session_title || q.section_title || q.title,
+    [],
   );
 
-  // Load the course quiz list (always, so the list is fresh after submissions)
+  // Load the course quiz list (always, so statuses stay fresh after submissions)
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -144,12 +146,11 @@ function QuizPage() {
   const cooldownActive = cooldownRemainingMs > 0;
   const attemptsExhausted = !!state && state.attempts_remaining <= 0;
 
+  const goToCourse = () =>
+    navigate({ to: "/learning-management-system/courses/$id", params: { id: courseId } });
+
   const backToCourse = (
-    <Button
-      variant="outline"
-      className="mt-4"
-      onClick={() => navigate({ to: "/learning-management-system/courses/$id", params: { id: courseId } })}
-    >
+    <Button variant="outline" className="mt-4" onClick={goToCourse}>
       <ArrowRight className="h-4 w-4 mx-1 rtl:rotate-180" />
       {tr.backToCourse}
     </Button>
@@ -165,8 +166,12 @@ function QuizPage() {
     setSubmitting(false);
     if (error) {
       const msg = String((error as { message?: string }).message ?? "");
-      if (msg.includes("attempts_exhausted")) {
-        toast.error(ar ? "استنفدت كل المحاولات" : "You have used all attempts");
+      if (msg.includes("already_passed")) {
+        toast.error(tr.quizLockedPassed);
+        setReloadKey((k) => k + 1);
+      } else if (msg.includes("attempts_exhausted")) {
+        toast.error(tr.quizLockedAttempts);
+        setReloadKey((k) => k + 1);
       } else if (msg.includes("cooldown_active")) {
         toast.error(ar ? "لم تنتهِ فترة الانتظار بعد" : "Cooldown is still active");
       } else {
@@ -179,6 +184,16 @@ function QuizPage() {
     if ((data as Result | null)?.certificate_id) {
       sendCertEmail({ data: { courseId, lang } }).catch((e) => console.error("cert email failed", e));
     }
+  };
+
+  const scoreText = (q: QuizListItem) => {
+    if (q.attempts_used === 0 || q.last_score === null) return "--";
+    const total = q.last_total ?? q.question_count;
+    if (total > 0) {
+      const correct = q.last_correct ?? Math.round(((q.last_score ?? 0) / 100) * total);
+      return `${correct} / ${total}`;
+    }
+    return `${Math.round(q.last_score ?? 0)}%`;
   };
 
   // ---------- Quiz list view ----------
@@ -198,24 +213,19 @@ function QuizPage() {
         {!listError && list.length === 0 && (
           <p className="mt-4 text-sm text-muted-foreground">{tr.noTestYet}</p>
         )}
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 grid gap-4">
           {list.map((q) => {
             const taken = q.attempts_used > 0 && q.last_score !== null;
-            const passed = !!q.last_passed;
-            const correct =
-              taken && q.question_count > 0
-                ? Math.round(((q.last_score ?? 0) / 100) * q.question_count)
-                : null;
+            const passed = !!q.has_passed;
+            const exhausted = !passed && q.attempts_used >= q.max_attempts;
+            const locked = passed || exhausted;
             return (
-              <div
-                key={q.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
-              >
-                <div className="min-w-0">
-                  <div className="font-semibold text-foreground">{quizName(q)}</div>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+              <div key={q.id} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="font-semibold text-foreground">{quizName(q)}</h2>
                     <span
-                      className={`rounded-full px-2 py-0.5 font-semibold ${
+                      className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                         !taken
                           ? "bg-muted text-muted-foreground"
                           : passed
@@ -225,23 +235,37 @@ function QuizPage() {
                     >
                       {!taken ? tr.quizStatusNotTaken : passed ? tr.quizStatusPassed : tr.quizStatusFailed}
                     </span>
-                    <span className="text-muted-foreground">
-                      {tr.score}:{" "}
-                      {taken
-                        ? correct !== null
-                          ? `${correct} / ${q.question_count}`
-                          : `${Math.round(q.last_score ?? 0)}%`
-                        : "--"}
-                    </span>
                   </div>
+                  {passed ? (
+                    <Link
+                      to="/learning-management-system/student/quiz/$courseId"
+                      params={{ courseId }}
+                      search={{ quiz: q.id }}
+                    >
+                      <Button size="sm" variant="outline">{tr.viewResult}</Button>
+                    </Link>
+                  ) : exhausted ? (
+                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                      <Lock className="h-3.5 w-3.5" />
+                      {tr.quizLockedAttempts}
+                    </span>
+                  ) : (
+                    <Link
+                      to="/learning-management-system/student/quiz/$courseId"
+                      params={{ courseId }}
+                      search={{ quiz: q.id }}
+                    >
+                      <Button size="sm">{taken ? tr.retakeQuiz : tr.startQuiz}</Button>
+                    </Link>
+                  )}
                 </div>
-                <Link
-                  to="/learning-management-system/student/quiz/$courseId"
-                  params={{ courseId }}
-                  search={{ quiz: q.id }}
-                >
-                  <Button size="sm" variant="outline">{tr.openQuiz}</Button>
-                </Link>
+                <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
+                  <span>{tr.score}: {scoreText(q)}</span>
+                  <span>{tr.attemptsLabel}: {q.attempts_used} / {q.max_attempts}</span>
+                </div>
+                {locked && passed && (
+                  <p className="mt-2 text-xs text-muted-foreground">{tr.quizLockedPassed}</p>
+                )}
               </div>
             );
           })}
@@ -253,7 +277,13 @@ function QuizPage() {
 
   // ---------- Selected quiz views ----------
   const selectedMeta = list?.find((q) => q.id === selectedQuizId);
-  const title = selectedMeta ? quizName(selectedMeta) : state?.quiz.title || tr.finalTest;
+  const title = selectedMeta ? quizName(selectedMeta) : state?.quiz.title || tr.quizzes;
+
+  const quizzesLink = (
+    <Link to="/learning-management-system/student/quiz/$courseId" params={{ courseId }} search={{ quiz: undefined }}>
+      <Button variant="outline">{tr.quizzes}</Button>
+    </Link>
+  );
 
   if (loading) {
     return (
@@ -270,9 +300,46 @@ function QuizPage() {
         <p className="text-muted-foreground">{tr.quizLoadError}</p>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
           <Button onClick={() => setReloadKey((k) => k + 1)}>{tr.retry}</Button>
-          <Link to="/learning-management-system/student/quiz/$courseId" params={{ courseId }} search={{ quiz: undefined }}>
-            <Button variant="outline">{tr.quizzes}</Button>
-          </Link>
+          {quizzesLink}
+        </div>
+      </div>
+    );
+  }
+
+  // Locked: already passed, or attempts used up — show the saved result, never the questions.
+  const alreadyPassed = state.last_passed || !!selectedMeta?.has_passed;
+  if (!result && (alreadyPassed || attemptsExhausted)) {
+    return (
+      <div className="mx-auto max-w-xl px-6 py-12">
+        <div className="rounded-2xl border border-border bg-card p-8 text-center">
+          {alreadyPassed ? (
+            <>
+              <CheckCircle2 className="mx-auto h-14 w-14 text-emerald-500" />
+              <h2 className="mt-3 text-2xl font-bold text-foreground">{tr.quizStatusPassed}</h2>
+            </>
+          ) : (
+            <>
+              <XCircle className="mx-auto h-14 w-14 text-destructive" />
+              <h2 className="mt-3 text-2xl font-bold text-foreground">{tr.quizStatusFailed}</h2>
+            </>
+          )}
+          <p className="mt-1 text-sm text-muted-foreground">{title}</p>
+          {selectedMeta && (
+            <p className="mt-3 text-lg">
+              {tr.score}: <b>{scoreText(selectedMeta)}</b>
+              {selectedMeta.last_score !== null && ` (${Math.round(selectedMeta.last_score)}%)`}
+            </p>
+          )}
+          <p className="mt-1 text-xs text-muted-foreground">
+            {tr.attemptsLabel}: {state.attempts_used} / {state.quiz.max_attempts}
+          </p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {alreadyPassed ? tr.quizLockedPassed : tr.quizLockedAttempts}
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            {quizzesLink}
+            <Button onClick={goToCourse}>{tr.backToCourse}</Button>
+          </div>
         </div>
       </div>
     );
@@ -285,9 +352,7 @@ function QuizPage() {
         <p className="mt-2 text-sm text-muted-foreground">{tr.quizNotReadyHint}</p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Button variant="outline" onClick={() => setReloadKey((k) => k + 1)}>{tr.retry}</Button>
-          <Link to="/learning-management-system/student/quiz/$courseId" params={{ courseId }} search={{ quiz: undefined }}>
-            <Button>{tr.quizzes}</Button>
-          </Link>
+          {quizzesLink}
         </div>
       </div>
     );
@@ -309,11 +374,9 @@ function QuizPage() {
             </>
           )}
           <p className="mt-1 text-sm text-muted-foreground">{title}</p>
-          <p className="mt-3 text-lg">{tr.yourScore}: <b>{Math.round(result.score)}%</b> ({result.correct}/{result.total})</p>
+          <p className="mt-3 text-lg">{tr.yourScore}: <b>{result.correct} / {result.total}</b> ({Math.round(result.score)}%)</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            {ar
-              ? `المحاولة ${result.attempt_number} · المتبقّي ${result.attempts_remaining}`
-              : `Attempt ${result.attempt_number} · ${result.attempts_remaining} left`}
+            {tr.attemptsLabel}: {result.attempt_number} / {state.quiz.max_attempts}
           </p>
           {result.certificate_id && (
             <Link to="/learning-management-system/certificate/$id" params={{ id: result.certificate_id }}>
@@ -324,29 +387,8 @@ function QuizPage() {
             <p className="mt-4 text-sm text-muted-foreground">{tr.mustCompleteFirst}</p>
           )}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            {!result.passed && result.attempts_remaining > 0 && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setResult(null); setAnswers({});
-                  setLoading(true);
-                  supabase.rpc("lms_get_quiz_for_attempt" as never, { _quiz_id: state.quiz.id } as never).then(({ data }) => {
-                    if (data) setState(data as unknown as LoadedState);
-                    setLoading(false);
-                  });
-                }}
-              >
-                {tr.retakeTest}
-              </Button>
-            )}
-            <Link to="/learning-management-system/student/quiz/$courseId" params={{ courseId }} search={{ quiz: undefined }}>
-              <Button variant="outline">{tr.quizzes}</Button>
-            </Link>
-            <Button
-              onClick={() => navigate({ to: "/learning-management-system/courses/$id", params: { id: courseId } })}
-            >
-              {tr.backToCourse}
-            </Button>
+            {quizzesLink}
+            <Button onClick={goToCourse}>{tr.backToCourse}</Button>
           </div>
         </div>
       </div>
@@ -366,18 +408,10 @@ function QuizPage() {
       <h1 className="text-2xl font-bold text-foreground">{title}</h1>
 
       <p className="mt-1 text-sm text-muted-foreground">
-        {tr.passScore}: {state.quiz.pass_score}% ·{" "}
-        {ar
-          ? `المتبقّي ${state.attempts_remaining} من ${state.quiz.max_attempts}`
-          : `${state.attempts_remaining} of ${state.quiz.max_attempts} attempts left`}
+        {tr.passScore}: {state.quiz.pass_score}% · {tr.attemptsLabel}: {state.attempts_used} / {state.quiz.max_attempts}
       </p>
 
-      {attemptsExhausted && (
-        <div className="mt-4 rounded-xl border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
-          {ar ? "استنفدت كل المحاولات المتاحة." : "You have used all available attempts."}
-        </div>
-      )}
-      {!attemptsExhausted && cooldownActive && (
+      {cooldownActive && (
         <div className="mt-4 flex items-center gap-2 rounded-xl border border-border bg-muted/30 p-3 text-sm">
           <TimerReset className="h-4 w-4" />
           {ar
@@ -400,7 +434,7 @@ function QuizPage() {
                       name={`q-${q.question_key}`}
                       checked={answers[q.question_key] === idx}
                       onChange={() => setAnswers({ ...answers, [q.question_key]: idx })}
-                      disabled={attemptsExhausted || cooldownActive}
+                      disabled={cooldownActive}
                     />
                     <span className="text-sm">{c}</span>
                   </label>
@@ -415,7 +449,7 @@ function QuizPage() {
         className="mt-6 w-full"
         size="lg"
         onClick={onSubmit}
-        disabled={submitting || state.questions.length === 0 || attemptsExhausted || cooldownActive}
+        disabled={submitting || state.questions.length === 0 || cooldownActive}
       >
         {submitting && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
         {tr.submitTest}

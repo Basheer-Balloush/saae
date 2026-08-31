@@ -36,6 +36,13 @@
       "when": 1788185626481,
       "tag": "0004_lms_list_course_quizzes",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788186305372,
+      "tag": "0005_quiz_pass_lock_and_list_attempts",
+      "breakpoints": true
     }
   ]
 }

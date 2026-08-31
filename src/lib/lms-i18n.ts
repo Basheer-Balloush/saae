@@ -105,6 +105,12 @@ export const lmsT: Record<Lang, {
   backToCourse: string;
   score: string;
   quizSuffix: string;
+  attemptsLabel: string;
+  startQuiz: string;
+  retakeQuiz: string;
+  viewResult: string;
+  quizLockedPassed: string;
+  quizLockedAttempts: string;
   startTest: string;
   submitTest: string;
   passScore: string;
@@ -254,6 +260,12 @@ export const lmsT: Record<Lang, {
     backToCourse: "العودة إلى الدورة",
     score: "الدرجة",
     quizSuffix: "اختبار",
+    attemptsLabel: "المحاولات",
+    startQuiz: "بدء الاختبار",
+    retakeQuiz: "إعادة الاختبار",
+    viewResult: "عرض النتيجة",
+    quizLockedPassed: "لقد اجتزت هذا الاختبار، ولا يمكن إعادته.",
+    quizLockedAttempts: "استنفدت كل المحاولات المتاحة لهذا الاختبار.",
     startTest: "ابدأ الاختبار",
     submitTest: "إرسال الإجابات",
     passScore: "درجة النجاح",
@@ -403,6 +415,12 @@ export const lmsT: Record<Lang, {
     backToCourse: "Back to course",
     score: "Score",
     quizSuffix: "Quiz",
+    attemptsLabel: "Attempts",
+    startQuiz: "Start quiz",
+    retakeQuiz: "Retake quiz",
+    viewResult: "View result",
+    quizLockedPassed: "You already passed this quiz. No further attempts allowed.",
+    quizLockedAttempts: "You have used all available attempts for this quiz.",
     startTest: "Start test",
     submitTest: "Submit answers",
     passScore: "Pass score",
