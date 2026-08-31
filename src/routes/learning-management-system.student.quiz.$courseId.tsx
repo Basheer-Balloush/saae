@@ -236,7 +236,26 @@ function QuizPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+      {quizList.length > 1 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {quizList.map((q) => (
+            <button
+              key={q.id}
+              type="button"
+              onClick={() => setSelectedQuizId(q.id)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                q.id === selectedQuizId
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-muted/30 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {q.title || tr.finalTest}
+            </button>
+          ))}
+        </div>
+      )}
       <h1 className="text-2xl font-bold text-foreground">{state.quiz.title || tr.finalTest}</h1>
+
       <p className="mt-1 text-sm text-muted-foreground">
         {tr.passScore}: {state.quiz.pass_score}% ·{" "}
         {lang === "ar"
