@@ -20,11 +20,14 @@ type Quiz = {
   max_attempts: number;
   cooldown_minutes: number;
   ams_session_id: string | null;
+  lms_section_id: string | null;
 };
 type Question = { id: string; question: string; choices: unknown; correct_index: number; display_order: number };
 type Session = { id: string; title: string; session_date: string };
+type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
 
 const NO_SESSION = "__none__";
+const NO_SECTION = "__none__";
 
 export function QuizBuilder({ courseId }: { courseId: string }) {
   const { lang } = useLang();
@@ -34,6 +37,7 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
 
@@ -54,7 +58,7 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
       setLoading(true);
       const { data } = await supabase
         .from("lms_quizzes")
-        .select("id,title,pass_score,version,max_attempts,cooldown_minutes,ams_session_id")
+        .select("id,title,pass_score,version,max_attempts,cooldown_minutes,ams_session_id,lms_section_id")
         .eq("course_id", courseId)
         .order("created_at");
       if (cancelled) return;
@@ -78,6 +82,12 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
           .order("session_date");
         if (!cancelled) setSessions((sess as Session[]) ?? []);
       }
+      const { data: secs } = await supabase
+        .from("lms_sections")
+        .select("id,title,title_ar,title_en,display_order")
+        .eq("course_id", courseId)
+        .order("display_order");
+      if (!cancelled) setSections((secs as Section[]) ?? []);
       if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -95,12 +105,10 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
     const { data, error } = await supabase.from("lms_quizzes")
       .insert({
         course_id: courseId,
-        title: quizzes.length === 0
-          ? (ar ? "الاختبار النهائي" : "Final test")
-          : (ar ? `اختبار ${index}` : `Quiz ${index}`),
+        title: ar ? `اختبار ${index}` : `Quiz ${index}`,
         pass_score: 60,
       })
-      .select("id,title,pass_score,version,max_attempts,cooldown_minutes,ams_session_id").maybeSingle();
+      .select("id,title,pass_score,version,max_attempts,cooldown_minutes,ams_session_id,lms_section_id").maybeSingle();
     setCreating(false);
     if (error) { toast.error(toUserMessage(error)); return; }
     const created = data as Quiz;
@@ -160,6 +168,15 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
     setQuestions(questions.filter((q) => q.id !== qid));
   };
 
+  const sectionName = (s: Section) =>
+    (ar ? (s.title_ar || s.title) : (s.title_en || s.title)) || s.title;
+
+  const sectionLabel = (id: string | null) => {
+    if (!id) return ar ? "غير مرتبط بقسم" : "No section";
+    const s = sections.find((x) => x.id === id);
+    return s ? sectionName(s) : (ar ? "قسم محذوف" : "Deleted section");
+  };
+
   const sessionLabel = (id: string | null) => {
     if (!id) return ar ? "غير مرتبط بجلسة" : "Not linked to a session";
     const s = sessions.find((x) => x.id === id);
@@ -172,11 +189,11 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
     <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="font-bold text-foreground">{tr.finalTest}</h2>
+          <h2 className="font-bold text-foreground">{ar ? "الاختبارات" : "Quizzes"}</h2>
           <p className="text-xs text-muted-foreground mt-1">
             {ar
-              ? "يمكنك إنشاء أكثر من اختبار وربط كل اختبار بجلسة الحضور الخاصة به."
-              : "You can create multiple quizzes and link each one to its attendance session."}
+              ? "أنشئ أي عدد من الاختبارات، وسمِّ كل اختبار كما تشاء، واربطه بالقسم أو جلسة الحضور الخاصة به."
+              : "Create as many quizzes as you need, name each one freely, and link it to its section or attendance session."}
           </p>
         </div>
         <Button size="sm" variant="outline" onClick={createQuiz} disabled={creating}>
@@ -200,8 +217,10 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
                   : "border-border bg-muted/30 text-muted-foreground hover:text-foreground"
               }`}
             >
-              {q.title || tr.finalTest}
-              <span className="opacity-70"> · {sessionLabel(q.ams_session_id)}</span>
+              {q.title || (ar ? "اختبار" : "Quiz")}
+              <span className="opacity-70">
+                {" · "}{q.lms_section_id ? sectionLabel(q.lms_section_id) : sessionLabel(q.ams_session_id)}
+              </span>
             </button>
           ))}
         </div>
@@ -215,8 +234,8 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
             </p>
             <div className="flex gap-2">
               <Button size="sm" onClick={addQuestion}><Plus className="h-4 w-4 mx-1" />{tr.addQuestion}</Button>
-              <Button size="sm" variant="ghost" onClick={deleteQuiz}>
-                <Trash2 className="h-4 w-4 text-destructive" />
+              <Button size="sm" variant="outline" onClick={deleteQuiz} className="text-destructive border-destructive/40">
+                <Trash2 className="h-4 w-4 mx-1" />{ar ? "حذف الاختبار" : "Delete quiz"}
               </Button>
             </div>
           </div>
@@ -245,7 +264,29 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
                 onBlur={() => saveQuiz({ cooldown_minutes: quiz.cooldown_minutes })} /></div>
           </div>
 
-          <div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div>
+              <Label>{ar ? "القسم المرتبط" : "Linked section"}</Label>
+              {sections.length === 0 ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {ar ? "لا توجد أقسام في هذه الدورة بعد." : "This course has no sections yet."}
+                </p>
+              ) : (
+                <Select
+                  value={quiz.lms_section_id ?? NO_SECTION}
+                  onValueChange={(v) => saveQuiz({ lms_section_id: v === NO_SECTION ? null : v })}
+                >
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_SECTION}>{ar ? "غير مرتبط بقسم" : "No section"}</SelectItem>
+                    {sections.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>{sectionName(s)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+            <div>
             <Label>{ar ? "الجلسة المرتبطة" : "Linked session"}</Label>
             {sessions.length === 0 ? (
               <p className="mt-1 text-xs text-muted-foreground">
@@ -267,6 +308,7 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
                 </SelectContent>
               </Select>
             )}
+            </div>
           </div>
 
           <div className="space-y-3">
