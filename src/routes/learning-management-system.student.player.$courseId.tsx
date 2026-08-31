@@ -261,7 +261,7 @@ function Player() {
               <h1 className="text-xl sm:text-2xl font-bold text-foreground">{currentTitle}</h1>
               <div className="flex gap-2">
                 <Link to="/learning-management-system/student/quiz/$courseId" params={{ courseId }} search={{ quiz: undefined }}>
-                  <Button variant="outline" size="sm"><Award className="h-4 w-4 mx-1" />{tr.finalTest}</Button>
+                  <Button variant="outline" size="sm"><Award className="h-4 w-4 mx-1" />{tr.quizzes}</Button>
                 </Link>
                 <Button onClick={markComplete} disabled={isDone(current.id)} size="sm">
                   <CheckCircle2 className="h-4 w-4 mx-1" />
