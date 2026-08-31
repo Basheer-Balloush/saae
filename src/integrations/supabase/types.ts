@@ -4417,6 +4417,7 @@ export type Database = {
           total_count: number
         }[]
       }
+      lms_list_course_quizzes: { Args: { _course_id: string }; Returns: Json }
       lms_list_course_reviews_public: {
         Args: { _course_id: string; _limit?: number; _offset?: number }
         Returns: {

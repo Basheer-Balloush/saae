@@ -29,6 +29,13 @@
       "when": 1788185013334,
       "tag": "0003_lms_quizzes_section_link",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788185626481,
+      "tag": "0004_lms_list_course_quizzes",
+      "breakpoints": true
     }
   ]
 }
