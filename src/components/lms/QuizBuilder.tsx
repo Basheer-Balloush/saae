@@ -340,6 +340,9 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
                 </div>
               );
             })}
+            <Button size="sm" variant="outline" onClick={addQuestion} className="w-full sm:w-auto">
+              <Plus className="h-4 w-4 mx-1" />{tr.addQuestion}
+            </Button>
           </div>
         </>
       )}
