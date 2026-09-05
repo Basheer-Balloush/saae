@@ -91,21 +91,23 @@ function PartnersPage() {
               {partners.map((partner, i) => {
                 const light = partner.logo_light_url || partner.logo_url;
                 return (
-                  <Reveal key={partner.id} as="li" className="v2-partner-plate" delay={i * 0.03}>
-                    <span className="v2-plate-face">
-                      {light ? (
-                        <img
-                          src={light}
-                          alt=""
-                          width={320}
-                          height={320}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : null}
-                    </span>
-                    <span className="v2-plate-name">{partner.name}</span>
-                  </Reveal>
+                  <li key={partner.id}>
+                    <Reveal className="v2-partner-plate" delay={Math.min(i, 9) * 0.03}>
+                      <span className="v2-plate-face">
+                        {light ? (
+                          <img
+                            src={light}
+                            alt=""
+                            width={320}
+                            height={320}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : null}
+                      </span>
+                      <span className="v2-plate-name">{partner.name}</span>
+                    </Reveal>
+                  </li>
                 );
               })}
             </ul>
