@@ -1,24 +1,74 @@
 export type Lang = "en" | "ar";
 
 type Dict = {
-  nav: { home: string; news: string; communities: string; achievements: string; partners: string; about: string; contact: string; cta: string; langToggle: string };
+  nav: {
+    home: string;
+    news: string;
+    communities: string;
+    achievements: string;
+    partners: string;
+    about: string;
+    contact: string;
+    cta: string;
+    langToggle: string;
+  };
   news: {
-    eyebrow: string; title: string; subtitle: string; readMore: string; viewAll: string;
-    categories: { workshop: string; partnership: string; research: string; education: string; community: string; event: string };
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    readMore: string;
+    viewAll: string;
+    categories: {
+      workshop: string;
+      partnership: string;
+      research: string;
+      education: string;
+      community: string;
+      event: string;
+    };
     items: {
       featured: { title: string; excerpt: string; date: string };
-      a: { title: string; date: string }; b: { title: string; date: string }; c: { title: string; date: string };
-      d: { title: string; date: string }; e: { title: string; date: string }; f: { title: string; date: string }; g: { title: string; date: string };
+      a: { title: string; date: string };
+      b: { title: string; date: string };
+      c: { title: string; date: string };
+      d: { title: string; date: string };
+      e: { title: string; date: string };
+      f: { title: string; date: string };
+      g: { title: string; date: string };
     };
   };
   communities: {
-    eyebrow: string; title: string; subtitle: string; cta: string; discover: string;
-    cards: Record<"data" | "architecture" | "medical" | "research" | "software" | "economy" | "trainers" | "media" | "quality", { title: string; desc: string }>;
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    cta: string;
+    discover: string;
+    cards: Record<
+      | "data"
+      | "architecture"
+      | "medical"
+      | "research"
+      | "software"
+      | "economy"
+      | "trainers"
+      | "media"
+      | "quality",
+      { title: string; desc: string }
+    >;
   };
-  achievements: { eyebrow: string; title: string; body: string; stats: { value: string; label: string }[] };
+  achievements: {
+    eyebrow: string;
+    title: string;
+    body: string;
+    stats: { value: string; label: string }[];
+  };
   partners: { eyebrow: string; title: string };
   assistant: {
-    eyebrow: string; title: string; subtitle: string; cta: string; soon: string;
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    cta: string;
+    soon: string;
     features: {
       inquiries: { title: string; desc: string };
       lead: { title: string; desc: string };
@@ -28,9 +78,57 @@ type Dict = {
     greeting: string;
   };
   footer: {
-    mission: string; quickLinks: string; contact: string;
+    mission: string;
+    quickLinks: string;
+    contact: string;
     form: { name: string; email: string; message: string; send: string; sent: string };
-    hq: string; address: string; visit: string; rights: string; madeIn: string;
+    hq: string;
+    address: string;
+    visit: string;
+    rights: string;
+    madeIn: string;
+  };
+  /** New chrome for the v2 design layer (radial nav, journey ribbon, footer). */
+  v2: {
+    skipToContent: string;
+    nav: { ariaLabel: string; open: string; close: string };
+    ribbon: {
+      ariaLabel: string;
+      sectionsLabel: string;
+      pagesLabel: string;
+      explore: string;
+      opening: string;
+    };
+    footer: {
+      ctaEyebrow: string;
+      ctaLine: string;
+      ctaButton: string;
+      claim: string;
+      socialLabel: string;
+      exploreTitle: string;
+      officialTitle: string;
+      links: {
+        home: string;
+        about: string;
+        news: string;
+        partners: string;
+        initiative: string;
+        contact: string;
+        communities: string;
+        achievements: string;
+        learning: string;
+        aiTools: string;
+        million: string;
+        registration: string;
+      };
+      mapAria: string;
+      mapAlt: string;
+      address: string;
+      visit: string;
+      osmContributors: string;
+      orgName: string;
+      rights: string;
+    };
   };
 };
 
@@ -195,12 +293,60 @@ export const translations: Record<Lang, Dict> = {
         "The first official organization in Syria dedicated to artificial intelligence, innovation, and entrepreneurial thinking — empowering Syrian talent to rebuild and uplift our country.",
       quickLinks: "Quick links",
       contact: "Get in touch",
-      form: { name: "Your name", email: "Email", message: "Message", send: "Send message", sent: "Message sent — thank you." },
+      form: {
+        name: "Your name",
+        email: "Email",
+        message: "Message",
+        send: "Send message",
+        sent: "Message sent — thank you.",
+      },
       hq: "Damascus headquarters",
       address: "Damascus — near the Ministry of Higher Education & Scientific Research",
       visit: "Visit us",
       rights: "All rights reserved.",
       madeIn: "Made in Damascus",
+    },
+    v2: {
+      skipToContent: "Skip to main content",
+      nav: { ariaLabel: "Main navigation", open: "Open navigation", close: "Close navigation" },
+      ribbon: {
+        ariaLabel: "Journey navigation",
+        sectionsLabel: "Page sections",
+        pagesLabel: "Site pages",
+        explore: "Explore",
+        opening: "Opening",
+      },
+      footer: {
+        ctaEyebrow: "The next step starts here",
+        ctaLine: "Help shape what Syria can do with AI.",
+        ctaButton: "Explore the initiative",
+        claim:
+          "Syria's first official AI organisation — empowering Syrian talent to rebuild and uplift our country.",
+        socialLabel: "SAAE on social platforms",
+        exploreTitle: "Explore",
+        officialTitle: "Official site",
+        links: {
+          home: "Home",
+          about: "About SAAE",
+          news: "News",
+          partners: "Partners",
+          initiative: "Initiative",
+          contact: "Contact",
+          communities: "Communities",
+          achievements: "Achievements",
+          learning: "Learning platform",
+          aiTools: "AI tools",
+          million: "The million-user initiative",
+          registration: "Registration",
+        },
+        mapAria: "Open SAAE location in Maps",
+        mapAlt: "Map showing the SAAE headquarters in Damascus",
+        address: "Damascus, beside the Ministry of Higher Education and Scientific Research",
+        visit: "Visit us",
+        osmContributors: "contributors",
+        orgName: "Syrian Association for AI & Entrepreneurship",
+        rights: "All rights reserved.",
+      },
     },
   },
   ar: {
@@ -218,8 +364,7 @@ export const translations: Record<Lang, Dict> = {
     news: {
       eyebrow: "غرفة الأخبار",
       title: "الأخبار البارزة والنشاطات الأخيرة",
-      subtitle:
-        "قصص وأبحاث ومحطات مهمة من الجمعية السورية للذكاء الاصطناعي وريادة الأعمال.",
+      subtitle: "قصص وأبحاث ومحطات مهمة من الجمعية السورية للذكاء الاصطناعي وريادة الأعمال.",
       readMore: "اقرأ المقال كاملاً",
       viewAll: "عرض جميع الأخبار والنشاطات",
       categories: {
@@ -363,12 +508,60 @@ export const translations: Record<Lang, Dict> = {
         "أول منظمة رسمية في سورية مكرّسة للذكاء الاصطناعي والابتكار والتفكير الريادي — تمكّن المواهب السورية لإعادة بناء بلدنا والارتقاء به.",
       quickLinks: "روابط سريعة",
       contact: "تواصل معنا",
-      form: { name: "الاسم", email: "البريد الإلكتروني", message: "رسالتك", send: "إرسال الرسالة", sent: "تم إرسال رسالتك، شكراً لك." },
+      form: {
+        name: "الاسم",
+        email: "البريد الإلكتروني",
+        message: "رسالتك",
+        send: "إرسال الرسالة",
+        sent: "تم إرسال رسالتك، شكراً لك.",
+      },
       hq: "المقر الرئيسي - دمشق",
       address: "دمشق - بجانب وزارة التعليم العالي والبحث العلمي",
       visit: "زورونا",
       rights: "جميع الحقوق محفوظة.",
       madeIn: "صُنع في دمشق",
+    },
+    v2: {
+      skipToContent: "انتقل إلى المحتوى الرئيسي",
+      nav: { ariaLabel: "التنقل الرئيسي", open: "فتح القائمة", close: "إغلاق القائمة" },
+      ribbon: {
+        ariaLabel: "التنقل بين أقسام الصفحة",
+        sectionsLabel: "أقسام الصفحة",
+        pagesLabel: "صفحات الموقع",
+        explore: "استكشف",
+        opening: "البداية",
+      },
+      footer: {
+        ctaEyebrow: "الخطوة التالية تبدأ من هنا",
+        ctaLine: "ساهم في صياغة ما يمكن لسورية تحقيقه بالذكاء الاصطناعي.",
+        ctaButton: "استكشف المبادرة",
+        claim:
+          "أول منظمة رسمية في سورية للذكاء الاصطناعي — تمكّن المواهب السورية لإعادة بناء بلدنا والارتقاء به.",
+        socialLabel: "الجمعية على منصات التواصل",
+        exploreTitle: "استكشف",
+        officialTitle: "الموقع الرسمي",
+        links: {
+          home: "الرئيسية",
+          about: "عن الجمعية",
+          news: "الأخبار",
+          partners: "الشركاء",
+          initiative: "المبادرة",
+          contact: "تواصل معنا",
+          communities: "المجتمعات",
+          achievements: "الإنجازات",
+          learning: "منصة التعلّم",
+          aiTools: "أدوات الذكاء الاصطناعي",
+          million: "مبادرة المليون مستخدم",
+          registration: "التسجيل",
+        },
+        mapAria: "افتح موقع الجمعية على الخرائط",
+        mapAlt: "خريطة تُظهر مقر الجمعية في دمشق",
+        address: "دمشق، بجانب وزارة التعليم العالي والبحث العلمي",
+        visit: "زورونا",
+        osmContributors: "المساهمون",
+        orgName: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",
+        rights: "جميع الحقوق محفوظة.",
+      },
     },
   },
 };
