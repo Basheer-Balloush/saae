@@ -1429,14 +1429,6 @@
   color: var(--v2-paper);
 }
 
-.saae-v2 .v2-carousel-btn.is-prev {
-  inset-inline-start: 10px;
-}
-
-.saae-v2 .v2-carousel-btn.is-next {
-  inset-inline-end: 10px;
-}
-
 .saae-v2 .v2-article-body {
   max-width: 72ch;
   margin: clamp(36px, 5vw, 58px) auto 0;

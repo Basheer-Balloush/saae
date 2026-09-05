@@ -310,8 +310,8 @@ function NewsDetailPage() {
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                <CarouselPrevious className="v2-carousel-btn is-prev" />
-                <CarouselNext className="v2-carousel-btn is-next" />
+                <CarouselPrevious className="v2-carousel-btn !left-3 !right-auto" />
+                <CarouselNext className="v2-carousel-btn !right-3 !left-auto" />
               </Carousel>
             )}
           </Reveal>
