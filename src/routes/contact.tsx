@@ -352,8 +352,8 @@ function ContactPage() {
                 <p className="v2-section-sub">{c.formIntro}</p>
 
                 <form onSubmit={onSubmit} className="v2-form">
-                  <div className="v2-field-pair">
-                    <div className="v2-field">
+                  <div className="v2-fld-pair">
+                    <div className="v2-fld">
                       <Label htmlFor="full_name">{c.fullName}</Label>
                       <Input
                         id="full_name"
@@ -364,7 +364,7 @@ function ContactPage() {
                         onChange={(e) => setForm({ ...form, full_name: e.target.value })}
                       />
                     </div>
-                    <div className="v2-field">
+                    <div className="v2-fld">
                       <Label htmlFor="email">{c.emailField}</Label>
                       <Input
                         id="email"
@@ -377,7 +377,7 @@ function ContactPage() {
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                       />
                     </div>
-                    <div className="v2-field">
+                    <div className="v2-fld">
                       <Label htmlFor="phone">{c.phoneField}</Label>
                       <Input
                         id="phone"
@@ -389,7 +389,7 @@ function ContactPage() {
                         onChange={(e) => setForm({ ...form, phone: e.target.value })}
                       />
                     </div>
-                    <div className="v2-field">
+                    <div className="v2-fld">
                       <Label htmlFor="organization">{c.organization}</Label>
                       <Input
                         id="organization"
@@ -400,7 +400,7 @@ function ContactPage() {
                     </div>
                   </div>
 
-                  <div className="v2-field">
+                  <div className="v2-fld">
                     <Label htmlFor="inquiry_type">{c.inquiryType}</Label>
                     <Select
                       value={form.inquiry_type}
@@ -421,7 +421,7 @@ function ContactPage() {
                     </Select>
                   </div>
 
-                  <div className="v2-field">
+                  <div className="v2-fld">
                     <Label htmlFor="subject">{c.subject}</Label>
                     <Input
                       id="subject"
@@ -432,7 +432,7 @@ function ContactPage() {
                     />
                   </div>
 
-                  <div className="v2-field">
+                  <div className="v2-fld">
                     <Label htmlFor="message">{c.messageField}</Label>
                     <Textarea
                       id="message"
