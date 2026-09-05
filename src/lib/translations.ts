@@ -141,6 +141,61 @@ type Dict = {
       futureTitle: string;
       futureCta: string;
     };
+    initiative: {
+      heroEyebrow: string;
+      oneMillion: string;
+      heroTitleRest: string;
+      heroLede: string;
+      payOneStart: string;
+      joinWaitlist: string;
+      progressEyebrow: string;
+      progressTitle: string;
+      progressCopy: string;
+      seatsMotion: string;
+      trained: string;
+      waitlist: string;
+      sponsoredSeats: string;
+      goalRemaining: string;
+      shareOfDial: string;
+      shareOfGoal: string;
+      goalLabel: string;
+      blueprintEyebrow: string;
+      blueprintTitle: string;
+      blueprintIntro: string;
+      about: string;
+      aboutShort: string;
+      mission: string;
+      missionShort: string;
+      values: string;
+      valuesShort: string;
+      loading: string;
+      sponsorsEyebrow: string;
+      sponsorsTitle: string;
+      seatsCovered: string;
+      companies: string;
+      individuals: string;
+      rank: string;
+      sponsor: string;
+      seatsOpened: string;
+      amount: string;
+      viewAllSponsors: string;
+      emptyCompanies: string;
+      emptyIndividuals: string;
+      participateEyebrow: string;
+      participateTitle: string;
+      payStart: string;
+      payStartCopy: string;
+      startNow: string;
+      joinWaitlistCopy: string;
+      reservePlace: string;
+      sponsorSeats: string;
+      sponsorSeatsCopy: string;
+      openSeats: string;
+      closingEyebrow: string;
+      beginsOne: string;
+      closingCopy: string;
+      joinInitiative: string;
+    };
     contact: {
       pill: string;
       eyebrow: string;
@@ -453,6 +508,61 @@ export const translations: Record<Lang, Dict> = {
         futureTitle: "Syrian talent can rebuild, elevate and imagine what comes next.",
         futureCta: "Grow with SAAE",
       },
+      initiative: {
+        heroEyebrow: "A national AI-literacy initiative",
+        oneMillion: "One million",
+        heroTitleRest: "Syrian AI users.",
+        heroLede: "Practical AI skills for careers, classrooms and daily life — open to every Syrian ready to begin.",
+        payOneStart: "Pay $1 & start",
+        joinWaitlist: "Join the waitlist",
+        progressEyebrow: "The dial has started moving",
+        progressTitle: "A million begins with the next person.",
+        progressCopy: "Choose the path that fits you: start for one dollar, wait for a funded seat, or open the door for someone else.",
+        seatsMotion: "seats in motion",
+        trained: "Learners started",
+        waitlist: "Waitlist",
+        sponsoredSeats: "Funded seats waiting",
+        goalRemaining: "Goal remaining",
+        shareOfDial: "of the dial",
+        shareOfGoal: "of the goal",
+        goalLabel: "National goal",
+        blueprintEyebrow: "Initiative blueprint",
+        blueprintTitle: "Built to turn access into agency.",
+        blueprintIntro: "This is more than a course. It is a practical path from first contact with AI to confident, responsible use.",
+        about: "About",
+        aboutShort: "A national starting point",
+        mission: "Mission",
+        missionShort: "Bridge the digital divide",
+        values: "Values",
+        valuesShort: "How one million grow together",
+        loading: "Loading…",
+        sponsorsEyebrow: "Who opens the doors",
+        sponsorsTitle: "Every sponsored seat is a start.",
+        seatsCovered: "seats funded",
+        companies: "Top sponsoring companies",
+        individuals: "Top individual sponsors",
+        rank: "Rank",
+        sponsor: "Sponsor",
+        seatsOpened: "Seats opened",
+        amount: "Contribution",
+        viewAllSponsors: "View all sponsors",
+        emptyCompanies: "No sponsoring companies yet — your organisation could be the first.",
+        emptyIndividuals: "No individual sponsors yet — you could be the first.",
+        participateEyebrow: "Choose how you move the dial",
+        participateTitle: "Learn. Wait. Or open a seat.",
+        payStart: "Pay & start",
+        payStartCopy: "Begin the course immediately for one US dollar.",
+        startNow: "Start now",
+        joinWaitlistCopy: "Reserve your place and wait for a sponsor to cover it.",
+        reservePlace: "Reserve a place",
+        sponsorSeats: "Sponsor seats",
+        sponsorSeatsCopy: "Turn corporate or personal support into immediate access for waitlisted learners.",
+        openSeats: "Open seats",
+        closingEyebrow: "The next person can be you",
+        beginsOne: "begins with one.",
+        closingCopy: "Take one practical step into AI — or make that step possible for someone else.",
+        joinInitiative: "Join the initiative",
+      },
       contact: {
         pill: "Reply within 48 hours",
         eyebrow: "Contact SAAE",
@@ -761,6 +871,61 @@ export const translations: Record<Lang, Dict> = {
         teamEyebrow: "من يقود العمل",
         futureTitle: "المواهب السورية قادرة على إعادة البناء والارتقاء وتخيّل ما يأتي.",
         futureCta: "انمُ مع الجمعية",
+      },
+      initiative: {
+        heroEyebrow: "مبادرة وطنية لمحو الأمية في الذكاء الاصطناعي",
+        oneMillion: "مليون",
+        heroTitleRest: "مستخدم ذكاء اصطناعي سوري.",
+        heroLede: "مهارات عملية في الذكاء الاصطناعي للعمل والتعليم والحياة اليومية — متاحة لكل سوري مستعد للبدء.",
+        payOneStart: "ادفع دولاراً وابدأ",
+        joinWaitlist: "انضم إلى قائمة الانتظار",
+        progressEyebrow: "بدأ المؤشر بالتحرك",
+        progressTitle: "المليون يبدأ بالشخص التالي.",
+        progressCopy: "اختر المسار المناسب لك: ابدأ بدولار واحد، انتظر مقعداً ممولاً، أو افتح الباب لشخص آخر.",
+        seatsMotion: "مقعداً قيد التفعيل",
+        trained: "متعلّمون بدؤوا",
+        waitlist: "قائمة الانتظار",
+        sponsoredSeats: "مقاعد ممولة بانتظار التخصيص",
+        goalRemaining: "المتبقي إلى الهدف",
+        shareOfDial: "من الدائرة",
+        shareOfGoal: "من الهدف",
+        goalLabel: "الهدف الوطني",
+        blueprintEyebrow: "مخطط المبادرة",
+        blueprintTitle: "صُممت لتحوّل الوصول إلى قدرة.",
+        blueprintIntro: "هذه أكثر من دورة. إنها مسار عملي من أول لقاء مع الذكاء الاصطناعي إلى استخدامه بثقة ومسؤولية.",
+        about: "عن المبادرة",
+        aboutShort: "نقطة انطلاق وطنية",
+        mission: "رسالتنا",
+        missionShort: "ردم الفجوة الرقمية",
+        values: "قيمنا",
+        valuesShort: "كيف ينمو المليون معاً",
+        loading: "جارٍ التحميل…",
+        sponsorsEyebrow: "من يفتحون الأبواب",
+        sponsorsTitle: "كل مقعد ممول هو بداية.",
+        seatsCovered: "مقعداً تمت تغطيته",
+        companies: "أبرز الشركات الراعية",
+        individuals: "أبرز الأفراد الداعمين",
+        rank: "الترتيب",
+        sponsor: "الداعم",
+        seatsOpened: "المقاعد المفتوحة",
+        amount: "المساهمة",
+        viewAllSponsors: "شاهد جميع الداعمين",
+        emptyCompanies: "لا توجد شركات راعية بعد — يمكن أن تكون شركتك الأولى.",
+        emptyIndividuals: "لا يوجد أفراد داعمون بعد — يمكن أن تكون أنت الأول.",
+        participateEyebrow: "اختر كيف تحرّك المؤشر",
+        participateTitle: "تعلّم. انتظر. أو افتح مقعداً.",
+        payStart: "ادفع وابدأ",
+        payStartCopy: "ابدأ الدورة فوراً مقابل دولار أمريكي واحد.",
+        startNow: "ابدأ الآن",
+        joinWaitlistCopy: "احجز مكانك وانتظر داعماً يغطي تكلفته.",
+        reservePlace: "احجز مكاناً",
+        sponsorSeats: "موّل مقاعد",
+        sponsorSeatsCopy: "حوّل الدعم المؤسسي أو الفردي إلى وصول فوري للمتعلمين على قائمة الانتظار.",
+        openSeats: "افتح مقاعد",
+        closingEyebrow: "قد تكون أنت الشخص التالي",
+        beginsOne: "يبدأ بواحد.",
+        closingCopy: "اتخذ خطوة عملية نحو الذكاء الاصطناعي — أو اجعل هذه الخطوة ممكنة لشخص آخر.",
+        joinInitiative: "انضم إلى المبادرة",
       },
       contact: {
         pill: "رد خلال ٤٨ ساعة",
