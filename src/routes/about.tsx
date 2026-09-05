@@ -148,7 +148,15 @@ function Hero() {
         </div>
 
         <figure className="v2-opening-mark" ref={markRef}>
-          <span className="v2-mark-glyph" aria-hidden="true" />
+          <img
+            className="v2-mark-glyph"
+            src="/saae/initiative-tree.svg"
+            alt=""
+            aria-hidden="true"
+            width={302}
+            height={340}
+            decoding="async"
+          />
           <figcaption className="v2-mark-hint">{a.markHint}</figcaption>
         </figure>
       </div>

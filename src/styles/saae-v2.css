@@ -1801,11 +1801,9 @@
   aspect-ratio: 302 / 339;
   transform: translate3d(var(--lean-x, 0px), var(--lean-y, 0px), 0) rotate(var(--lean-r, 0deg));
   transition: transform 900ms var(--v2-ease-out);
-  /* saae-tree.svg paints with currentColor, which resolves to black inside an
-     <img>. Mask it instead so the mark carries the brand gradient. */
-  background: linear-gradient(160deg, var(--v2-turquoise-lift), var(--v2-olive-lift));
-  -webkit-mask: url("/saae/saae-tree.svg") center / contain no-repeat;
-  mask: url("/saae/saae-tree.svg") center / contain no-repeat;
+  /* initiative-tree.svg ships with the brand petrol fill, unlike
+     saae-tree.svg which paints with currentColor (black inside an <img>). */
+  height: auto;
   filter: drop-shadow(0 24px 60px rgba(4, 128, 144, 0.28));
 }
 
