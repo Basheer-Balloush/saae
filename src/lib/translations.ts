@@ -336,6 +336,19 @@ export const translations: Record<Lang, Dict> = {
         note: "Marks and names are published by SAAE and fitted to a common size. Nothing here has been redrawn.",
         empty: "Partners will be listed here.",
       },
+      news: {
+        eyebrow: "Latest news",
+        title: "The work, as it happens.",
+        intro:
+          "Training rooms, national broadcasts and public launches — the running record of what SAAE is building, newest first.",
+        readStory: "Read the story",
+        related: "Related news",
+        videos: "Videos",
+        empty: "News will be published here.",
+        noContent: "No content available yet.",
+        notFound: "Article not found",
+        back: "Back to news",
+      },
       ribbon: {
         ariaLabel: "Journey navigation",
         sectionsLabel: "Page sections",
