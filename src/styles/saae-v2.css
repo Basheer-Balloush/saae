@@ -2858,3 +2858,614 @@
     justify-content: center;
   }
 }
+
+/* ============================================================
+   INITIATIVE (Phase 5)
+   ============================================================ */
+
+.saae-v2 .v2-init-hero {
+  position: relative;
+  overflow: hidden;
+  padding-block: clamp(90px, 13vw, 160px) clamp(40px, 6vw, 76px);
+}
+
+.saae-v2 .v2-ghost-million {
+  position: absolute;
+  inset-inline-start: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  font-size: clamp(5rem, 22vw, 17rem);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  color: rgba(184, 232, 240, 0.045);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.saae-v2 .v2-init-hero-inner {
+  position: relative;
+}
+
+.saae-v2 .v2-init-title {
+  margin: 12px 0 0;
+  font-size: clamp(2.2rem, 6vw, 4.4rem);
+  font-weight: 900;
+  line-height: 1.06;
+  letter-spacing: -0.04em;
+  color: var(--v2-paper);
+  max-width: 18ch;
+}
+
+.saae-v2[dir="rtl"] .v2-init-title,
+.saae-v2[dir="rtl"] .v2-metric span,
+.saae-v2[dir="rtl"] .v2-board-head span {
+  letter-spacing: normal;
+}
+
+.saae-v2[dir="rtl"] .v2-init-title {
+  line-height: 1.35;
+}
+
+.saae-v2 .v2-init-title-rest {
+  background: linear-gradient(100deg, var(--v2-turquoise-lift), var(--v2-olive-lift));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.saae-v2 .v2-init-lede {
+  margin: 20px 0 0;
+  max-width: 58ch;
+  font-size: clamp(0.98rem, 1.4vw, 1.14rem);
+  line-height: 1.8;
+  color: var(--v2-type);
+}
+
+.saae-v2[dir="rtl"] .v2-init-lede {
+  line-height: 2.05;
+}
+
+.saae-v2 .v2-init-hero .v2-solid-button,
+.saae-v2 .v2-init-closing .v2-solid-button {
+  border: 0;
+  cursor: pointer;
+  font-size: 0.98rem;
+}
+
+.saae-v2 .v2-init-hero .v2-ghost-link {
+  cursor: pointer;
+  background: none;
+}
+
+/* dial */
+
+.saae-v2 .v2-dial-grid {
+  margin-top: clamp(26px, 4vw, 48px);
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(24px, 4vw, 52px);
+  align-items: center;
+}
+
+.saae-v2 .v2-dial {
+  position: relative;
+  width: min(100%, 340px);
+  margin-inline: auto;
+  aspect-ratio: 1;
+}
+
+.saae-v2 .v2-dial-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.saae-v2 .v2-dial-track {
+  fill: none;
+  stroke: rgba(184, 232, 240, 0.12);
+  stroke-width: 16;
+}
+
+.saae-v2 .v2-dial-arc {
+  fill: none;
+  stroke-width: 16;
+  stroke-linecap: butt;
+  transition: stroke-dasharray 900ms var(--v2-ease-out);
+}
+
+.saae-v2 .v2-dial-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 4px;
+  text-align: center;
+  padding-inline: 22%;
+}
+
+.saae-v2 .v2-dial-center strong {
+  font-size: clamp(1.9rem, 7vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--v2-paper);
+  font-variant-numeric: tabular-nums;
+}
+
+.saae-v2 .v2-dial-center span {
+  font-size: 0.8rem;
+  color: var(--v2-muted);
+}
+
+.saae-v2 .v2-dial-center small {
+  font-size: 0.72rem;
+  color: var(--v2-muted);
+  opacity: 0.8;
+}
+
+.saae-v2 .v2-metric-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(12px, 1.8vw, 18px);
+}
+
+.saae-v2 .v2-metric {
+  display: grid;
+  gap: 6px;
+  height: 100%;
+  padding: clamp(16px, 2.2vw, 22px);
+  border-radius: 22px;
+  border: 1px solid var(--v2-line);
+  background: var(--v2-panel);
+}
+
+.saae-v2 .v2-metric span {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--v2-muted);
+}
+
+.saae-v2 .v2-metric strong {
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  font-weight: 900;
+  color: var(--v2-paper);
+  font-variant-numeric: tabular-nums;
+}
+
+.saae-v2 .v2-metric em {
+  font-style: normal;
+  font-size: 0.8rem;
+  color: var(--v2-muted);
+}
+
+.saae-v2 .v2-metric em b {
+  color: var(--v2-turquoise-lift);
+}
+
+.saae-v2 .v2-goal-line {
+  grid-column: 1 / -1;
+  position: relative;
+  height: 8px;
+  margin: 4px 0 0;
+  border-radius: 999px;
+  background: rgba(184, 232, 240, 0.12);
+  overflow: hidden;
+}
+
+.saae-v2 .v2-goal-fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--v2-turquoise-lift), var(--v2-olive-lift));
+}
+
+/* blueprint */
+
+.saae-v2 .v2-blueprint {
+  margin-top: clamp(24px, 3.4vw, 40px);
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(16px, 2.4vw, 26px);
+  align-items: start;
+}
+
+.saae-v2 .v2-blueprint-tabs {
+  display: grid;
+  gap: 12px;
+}
+
+.saae-v2 .v2-blueprint-tabs button {
+  display: grid;
+  gap: 4px;
+  padding: clamp(16px, 2.2vw, 22px);
+  border-radius: 22px;
+  border: 1px solid var(--v2-line);
+  background: var(--v2-panel);
+  text-align: start;
+  cursor: pointer;
+  color: inherit;
+  transition:
+    border-color 420ms var(--v2-ease-out),
+    transform 420ms var(--v2-ease-out);
+}
+
+.saae-v2 .v2-blueprint-tabs button svg {
+  width: 22px;
+  height: 22px;
+  color: var(--v2-turquoise-lift);
+}
+
+.saae-v2 .v2-blueprint-tabs button strong {
+  font-size: 1.05rem;
+  color: var(--v2-paper);
+}
+
+.saae-v2 .v2-blueprint-tabs button small {
+  font-size: 0.85rem;
+  color: var(--v2-muted);
+}
+
+.saae-v2 .v2-blueprint-tabs button:hover,
+.saae-v2 .v2-blueprint-tabs button.is-active {
+  border-color: var(--v2-turquoise-lift);
+  transform: translateY(-2px);
+}
+
+.saae-v2 .v2-blueprint-panel {
+  padding: clamp(22px, 3.2vw, 36px);
+  border-radius: 28px;
+  border: 1px solid var(--v2-line);
+  background: var(--v2-panel);
+}
+
+.saae-v2 .v2-blueprint-panel h3 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+  color: var(--v2-paper);
+}
+
+.saae-v2 .v2-blueprint-panel p {
+  margin: 14px 0 0;
+  font-size: 1rem;
+  line-height: 1.85;
+  color: var(--v2-type);
+  white-space: pre-line;
+}
+
+.saae-v2[dir="rtl"] .v2-blueprint-panel p {
+  line-height: 2.05;
+}
+
+/* sponsors */
+
+.saae-v2 .v2-sponsor-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: clamp(18px, 2.6vw, 28px);
+}
+
+.saae-v2 .v2-sponsor-summary strong {
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-weight: 900;
+  color: var(--v2-turquoise-lift);
+  font-variant-numeric: tabular-nums;
+}
+
+.saae-v2 .v2-sponsor-summary span {
+  font-size: 0.98rem;
+  color: var(--v2-muted);
+}
+
+.saae-v2 .v2-boards {
+  margin-top: clamp(20px, 3vw, 32px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(16px, 2.4vw, 24px);
+}
+
+.saae-v2 .v2-board {
+  padding: clamp(18px, 2.6vw, 26px);
+  border-radius: 28px;
+  border: 1px solid var(--v2-line);
+  background: var(--v2-panel);
+  min-width: 0;
+}
+
+.saae-v2 .v2-board h3 {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  color: var(--v2-paper);
+}
+
+.saae-v2 .v2-board-empty {
+  margin: 0;
+  padding: 26px 4px;
+  font-size: 0.94rem;
+  line-height: 1.7;
+  color: var(--v2-muted);
+  text-align: center;
+  border: 1px dashed var(--v2-line-firm);
+  border-radius: 20px;
+}
+
+.saae-v2 .v2-board-head,
+.saae-v2 .v2-board-list li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 74px 84px;
+  gap: 10px;
+  align-items: center;
+}
+
+.saae-v2 .v2-board-head {
+  padding: 0 6px 10px;
+  border-bottom: 1px solid var(--v2-line);
+}
+
+.saae-v2 .v2-board-head span {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--v2-muted);
+}
+
+.saae-v2 .v2-board-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.saae-v2 .v2-board-list li {
+  padding: 12px 6px;
+  border-bottom: 1px solid var(--v2-line);
+}
+
+.saae-v2 .v2-board-list li:last-child {
+  border-bottom: 0;
+}
+
+.saae-v2 .v2-board-rank {
+  font-weight: 900;
+  color: var(--v2-turquoise-lift);
+  font-variant-numeric: tabular-nums;
+}
+
+.saae-v2 .v2-board-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.saae-v2 .v2-board-name img,
+.saae-v2 .v2-board-name i {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(184, 232, 240, 0.09);
+  border: 1px solid var(--v2-line-firm);
+}
+
+.saae-v2 .v2-board-name strong {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--v2-paper);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saae-v2 .v2-board-impact {
+  display: grid;
+  gap: 4px;
+}
+
+.saae-v2 .v2-board-impact b {
+  display: block;
+  height: 5px;
+  width: var(--impact, 0%);
+  min-width: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--v2-turquoise-lift), var(--v2-olive-lift));
+}
+
+.saae-v2 .v2-board-impact strong,
+.saae-v2 .v2-board-amount {
+  font-size: 0.88rem;
+  color: var(--v2-type);
+  font-variant-numeric: tabular-nums;
+}
+
+.saae-v2 .v2-board-amount {
+  text-align: end;
+}
+
+.saae-v2 .v2-boards-link {
+  margin-top: clamp(18px, 2.4vw, 26px);
+}
+
+/* participation paths */
+
+.saae-v2 .v2-paths {
+  margin-top: clamp(24px, 3.4vw, 42px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2.4vw, 24px);
+}
+
+.saae-v2 .v2-path-card {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  padding: clamp(22px, 3vw, 30px);
+  border-radius: 28px;
+  border: 1px solid var(--v2-line);
+  background: var(--v2-panel);
+  text-align: start;
+  cursor: pointer;
+  color: inherit;
+  transition:
+    transform 520ms var(--v2-ease-out),
+    border-color 520ms var(--v2-ease-out);
+}
+
+.saae-v2 .v2-path-card:focus-visible {
+  outline: 2px solid var(--v2-turquoise-lift);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .saae-v2 .v2-path-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--v2-turquoise-lift);
+  }
+}
+
+.saae-v2 .v2-path-visual {
+  position: relative;
+  display: block;
+  height: 62px;
+}
+
+.saae-v2 .v2-path-halo {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 1px solid var(--v2-line-firm);
+  background: radial-gradient(circle at 30% 30%, rgba(0, 139, 157, 0.45), transparent 70%);
+}
+
+.saae-v2 .v2-path-chip {
+  position: absolute;
+  inset-inline-start: 40px;
+  top: 34px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--v2-turquoise-lift);
+  color: #04222a;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.saae-v2 .v2-path-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--v2-paper);
+}
+
+.saae-v2 .v2-path-copy {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--v2-muted);
+}
+
+.saae-v2 .v2-path-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--v2-turquoise-lift);
+}
+
+.saae-v2 .v2-init-closing {
+  text-align: center;
+}
+
+.saae-v2 .v2-init-closing .v2-section-sub {
+  margin-inline: auto;
+}
+
+/* dialogs rendered in a portal: the wrapper class travels with the content */
+
+.saae-v2.v2-dialog {
+  background: var(--v2-panel);
+  border: 1px solid var(--v2-line-firm);
+  border-radius: 26px;
+  color: var(--v2-type);
+}
+
+.saae-v2.v2-dialog h2,
+.saae-v2.v2-dialog label {
+  color: var(--v2-paper);
+}
+
+.saae-v2.v2-dialog p {
+  color: var(--v2-muted);
+}
+
+.saae-v2.v2-dialog input,
+.saae-v2.v2-dialog textarea,
+.saae-v2.v2-dialog select,
+.saae-v2.v2-dialog button[role="combobox"] {
+  min-height: 46px;
+  border-radius: 14px;
+  border: 1px solid var(--v2-line-firm);
+  background: rgba(3, 23, 30, 0.55);
+  color: var(--v2-paper);
+  font-size: 16px;
+}
+
+.saae-v2.v2-dialog button[type="submit"] {
+  min-height: 48px;
+  border-radius: 999px;
+  background: var(--v2-turquoise-lift);
+  color: #04222a;
+  font-weight: 800;
+}
+
+@media (max-width: 1000px) {
+  .saae-v2 .v2-dial-grid,
+  .saae-v2 .v2-blueprint,
+  .saae-v2 .v2-boards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .saae-v2 .v2-paths {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .saae-v2 .v2-blueprint-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .saae-v2 .v2-paths,
+  .saae-v2 .v2-blueprint-tabs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .saae-v2 .v2-metric-strip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .saae-v2 .v2-board-head,
+  .saae-v2 .v2-board-list li {
+    grid-template-columns: 26px minmax(0, 1fr) 58px 68px;
+    gap: 8px;
+  }
+
+  .saae-v2 .v2-init-hero .v2-solid-button,
+  .saae-v2 .v2-init-hero .v2-ghost-link {
+    width: 100%;
+    justify-content: center;
+  }
+}
