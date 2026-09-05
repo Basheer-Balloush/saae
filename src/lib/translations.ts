@@ -99,6 +99,18 @@ type Dict = {
       note: string;
       empty: string;
     };
+    news: {
+      eyebrow: string;
+      title: string;
+      intro: string;
+      readStory: string;
+      related: string;
+      videos: string;
+      empty: string;
+      noContent: string;
+      notFound: string;
+      back: string;
+    };
     ribbon: {
       ariaLabel: string;
       sectionsLabel: string;
