@@ -178,8 +178,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: React.ReactNode }) {
   const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');var l=localStorage.getItem('saae-lang')||'ar';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
   return (
-    {/* lang/dir are set by the bootstrap script below before hydration. */}
+    // lang/dir are set by the bootstrap script below before hydration.
     <html lang="en" suppressHydrationWarning>
+
 
       <head>
 
