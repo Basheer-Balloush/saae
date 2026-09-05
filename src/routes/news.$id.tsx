@@ -43,22 +43,30 @@ type RelatedItemLoader = {
 };
 
 export const Route = createFileRoute("/news/$id")({
-  loader: async ({ params }): Promise<{
-    meta: null | { title: string; description: string; image: string | null; publishedAt: string | null };
+  loader: async ({
+    params,
+  }): Promise<{
+    meta: null | {
+      title: string;
+      description: string;
+      image: string | null;
+      publishedAt: string | null;
+    };
     article: NewsArticleLoader | null;
     related: RelatedItemLoader[];
   }> => {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      params.id,
+    );
     if (!isUuid) return { meta: null, article: null, related: [] };
     try {
-      const { data } = await supabase
-        .from("news")
-        .select("*")
-        .eq("id", params.id)
-        .maybeSingle();
+      const { data } = await supabase.from("news").select("*").eq("id", params.id).maybeSingle();
       if (!data) return { meta: null, article: null, related: [] };
       const article = data as unknown as NewsArticleLoader;
-      const cats: string[] = (article.categories && article.categories.length > 0) ? article.categories : [article.category];
+      const cats: string[] =
+        article.categories && article.categories.length > 0
+          ? article.categories
+          : [article.category];
       const { data: rel } = await supabase
         .from("news")
         .select("id,title,title_ar,title_en,image_url,published_at,category,categories")
@@ -69,9 +77,10 @@ export const Route = createFileRoute("/news/$id")({
 
       const title = (article.title_en ?? article.title_ar ?? article.title ?? "News") as string;
       const rawDesc = (article.excerpt_en ?? article.excerpt_ar ?? article.excerpt ?? "") as string;
-      const fullDesc = rawDesc && rawDesc.length >= 50
-        ? rawDesc
-        : `${title} — ${rawDesc || "خبر من الجمعية السورية للذكاء الصنعي وريادة الأعمال (SAAE)."}`;
+      const fullDesc =
+        rawDesc && rawDesc.length >= 50
+          ? rawDesc
+          : `${title} — ${rawDesc || "خبر من الجمعية السورية للذكاء الصنعي وريادة الأعمال (SAAE)."}`;
       const description = fullDesc.length > 160 ? `${fullDesc.slice(0, 157).trimEnd()}…` : fullDesc;
       return {
         meta: {
@@ -91,8 +100,12 @@ export const Route = createFileRoute("/news/$id")({
     const m = loaderData?.meta;
     const url = `https://aisyria.org/news/${params.id}`;
     const title = m?.title ? `${m.title} — SAAE` : "News — SAAE";
-    const description = m?.description ?? "News article from the Syrian Association for AI & Entrepreneurship (SAAE) — read the latest activities and updates.";
-    const image = m?.image ?? "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
+    const description =
+      m?.description ??
+      "News article from the Syrian Association for AI & Entrepreneurship (SAAE) — read the latest activities and updates.";
+    const image =
+      m?.image ??
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
     return {
       meta: [
         { title },
@@ -104,9 +117,7 @@ export const Route = createFileRoute("/news/$id")({
         { property: "og:image", content: image },
         { name: "twitter:image", content: image },
       ],
-      links: [
-        { rel: "canonical", href: url },
-      ],
+      links: [{ rel: "canonical", href: url }],
       scripts: m
         ? [
             {
@@ -180,7 +191,12 @@ const STATIC_ARTICLE: NewsArticle = {
   published_at: new Date().toISOString(),
 };
 
-function pickLang<T>(ar: T | null | undefined, en: T | null | undefined, fallback: T | null | undefined, lang: "ar" | "en"): T | null {
+function pickLang<T>(
+  ar: T | null | undefined,
+  en: T | null | undefined,
+  fallback: T | null | undefined,
+  lang: "ar" | "en",
+): T | null {
   if (lang === "ar") return (ar ?? en ?? fallback ?? null) as T | null;
   return (en ?? ar ?? fallback ?? null) as T | null;
 }
@@ -253,13 +269,20 @@ function NewsDetailPage() {
 
   const title = pickLang(article.title_ar, article.title_en, article.title, lang) || article.title;
   const lead = pickLang(article.excerpt_ar, article.excerpt_en, article.excerpt, lang) || "";
-  const bodyText = pickLang(article.content_ar, article.content_en, article.content, lang) || lead || "";
+  const bodyText =
+    pickLang(article.content_ar, article.content_en, article.content, lang) || lead || "";
   const dateStr = formatDate(article.published_at, lang);
-  const tags = ((article.categories && article.categories.length > 0 ? article.categories : [article.category]) ?? []).filter(Boolean);
+  const tags = (
+    (article.categories && article.categories.length > 0
+      ? article.categories
+      : [article.category]) ?? []
+  ).filter(Boolean);
 
   const gallery = (article.images ?? []).filter(Boolean);
   // Build full carousel: cover + gallery (dedup)
-  const carouselImages = Array.from(new Set([article.image_url, ...gallery].filter(Boolean) as string[]));
+  const carouselImages = Array.from(
+    new Set([article.image_url, ...gallery].filter(Boolean) as string[]),
+  );
   const videos = (article.videos ?? []).filter(Boolean);
 
   return (
@@ -293,7 +316,10 @@ function NewsDetailPage() {
                 />
               </figure>
             ) : (
-              <Carousel opts={{ loop: true, direction: isRtl ? "rtl" : "ltr" }} className="v2-article-carousel">
+              <Carousel
+                opts={{ loop: true, direction: isRtl ? "rtl" : "ltr" }}
+                className="v2-article-carousel"
+              >
                 <CarouselContent>
                   {carouselImages.map((url, i) => (
                     <CarouselItem key={url + i}>

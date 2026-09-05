@@ -11,7 +11,9 @@ export const Route = createFileRoute("/news/")({
   loader: async () => {
     const { data } = await supabase
       .from("news")
-      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,categories,published_at")
+      .select(
+        "id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,categories,published_at",
+      )
       .order("published_at", { ascending: false })
       .order("created_at", { ascending: false });
     return { items: (data ?? []) as NewsRow[] };
@@ -21,22 +23,21 @@ export const Route = createFileRoute("/news/")({
       { title: "الأخبار والنشاطات — SAAE" },
       {
         name: "description",
-        content: "آخر الأخبار والنشاطات والفعاليات للجمعية السورية للذكاء الصنعي وريادة الأعمال ومجتمعاتها المتخصصة.",
+        content:
+          "آخر الأخبار والنشاطات والفعاليات للجمعية السورية للذكاء الصنعي وريادة الأعمال ومجتمعاتها المتخصصة.",
       },
       { property: "og:title", content: "أخبار الجمعية السورية للذكاء الصنعي وريادة الأعمال" },
       {
         property: "og:description",
-        content: "تابع أحدث الفعاليات والأنشطة والمبادرات التي تنظمها SAAE ومجتمعاتها المتخصصة في الذكاء الصنعي وريادة الأعمال.",
+        content:
+          "تابع أحدث الفعاليات والأنشطة والمبادرات التي تنظمها SAAE ومجتمعاتها المتخصصة في الذكاء الصنعي وريادة الأعمال.",
       },
       { property: "og:url", content: "https://aisyria.org/news" },
     ],
-    links: [
-      { rel: "canonical", href: "https://aisyria.org/news" },
-    ],
+    links: [{ rel: "canonical", href: "https://aisyria.org/news" }],
   }),
   component: NewsPage,
 });
-
 
 type NewsRow = {
   id: string;
@@ -52,7 +53,12 @@ type NewsRow = {
   published_at: string;
 };
 
-function pick(ar: string | null, en: string | null, fallback: string | null, lang: "ar" | "en"): string {
+function pick(
+  ar: string | null,
+  en: string | null,
+  fallback: string | null,
+  lang: "ar" | "en",
+): string {
   if (lang === "ar") return ar || en || fallback || "";
   return en || ar || fallback || "";
 }
@@ -70,7 +76,9 @@ function formatDate(iso: string, lang: "ar" | "en"): string {
 }
 
 function tagsOf(row: { categories: string[] | null; category: string }): string[] {
-  return ((row.categories && row.categories.length > 0 ? row.categories : [row.category]) ?? []).filter(Boolean);
+  return (
+    (row.categories && row.categories.length > 0 ? row.categories : [row.category]) ?? []
+  ).filter(Boolean);
 }
 
 /** Small inline arrow, matching the prototype's CTA glyph. */
@@ -162,12 +170,16 @@ function NewsPage() {
                   </div>
                   <div className="v2-featured-copy">
                     <p className="v2-news-meta">
-                      {tagsOf(featured).slice(0, 2).map((c) => (
-                        <span key={c} className="v2-news-tag">
-                          {communityLabel(c, lang)}
-                        </span>
-                      ))}
-                      <time dateTime={featured.published_at}>{formatDate(featured.published_at, lang)}</time>
+                      {tagsOf(featured)
+                        .slice(0, 2)
+                        .map((c) => (
+                          <span key={c} className="v2-news-tag">
+                            {communityLabel(c, lang)}
+                          </span>
+                        ))}
+                      <time dateTime={featured.published_at}>
+                        {formatDate(featured.published_at, lang)}
+                      </time>
                     </p>
                     <h2 className="v2-featured-headline">
                       {pick(featured.title_ar, featured.title_en, featured.title, lang)}
@@ -216,12 +228,16 @@ function NewsPage() {
                           </span>
                           <span className="v2-story-copy">
                             <span className="v2-news-meta">
-                              {tagsOf(n).slice(0, 1).map((c) => (
-                                <span key={c} className="v2-news-tag">
-                                  {communityLabel(c, lang)}
-                                </span>
-                              ))}
-                              <time dateTime={n.published_at}>{formatDate(n.published_at, lang)}</time>
+                              {tagsOf(n)
+                                .slice(0, 1)
+                                .map((c) => (
+                                  <span key={c} className="v2-news-tag">
+                                    {communityLabel(c, lang)}
+                                  </span>
+                                ))}
+                              <time dateTime={n.published_at}>
+                                {formatDate(n.published_at, lang)}
+                              </time>
                             </span>
                             <span className="v2-story-headline">{title}</span>
                             {excerpt ? <span className="v2-news-excerpt">{excerpt}</span> : null}

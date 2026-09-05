@@ -21,7 +21,9 @@
   font-weight: 400;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
@@ -30,7 +32,9 @@
   font-weight: 600;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
@@ -39,7 +43,9 @@
   font-weight: 700;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
@@ -48,7 +54,9 @@
   font-weight: 900;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
@@ -229,7 +237,10 @@
   box-shadow: 0 9px 26px rgba(0, 8, 12, 0.3);
   backdrop-filter: blur(13px) saturate(125%);
   -webkit-backdrop-filter: blur(13px) saturate(125%);
-  font: 800 0.72rem/1 "Cairo", Arial, sans-serif;
+  font:
+    800 0.72rem/1 "Cairo",
+    Arial,
+    sans-serif;
   cursor: pointer;
 }
 
@@ -255,7 +266,9 @@
   inset: 0;
   z-index: 101;
   pointer-events: none;
-  transition: background-color 0.32s ease, backdrop-filter 0.32s ease;
+  transition:
+    background-color 0.32s ease,
+    backdrop-filter 0.32s ease;
 }
 
 .v2-radial-nav.is-open {
@@ -279,12 +292,22 @@
   pointer-events: auto;
   border: 1px solid rgba(144, 239, 231, 0.72);
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 25%, rgba(19, 111, 119, 0.95), rgba(3, 35, 43, 0.97) 70%);
-  box-shadow: 0 0 0 7px rgba(115, 225, 219, 0.13), 0 16px 40px rgba(0, 8, 12, 0.42);
+  background: radial-gradient(
+    circle at 35% 25%,
+    rgba(19, 111, 119, 0.95),
+    rgba(3, 35, 43, 0.97) 70%
+  );
+  box-shadow:
+    0 0 0 7px rgba(115, 225, 219, 0.13),
+    0 16px 40px rgba(0, 8, 12, 0.42);
   cursor: pointer;
-  transition: width 0.42s var(--v2-ease-out), height 0.42s var(--v2-ease-out),
-    inset-block-start 0.42s var(--v2-ease-out), inset-inline-end 0.42s var(--v2-ease-out),
-    box-shadow 0.25s ease, transform 0.25s ease;
+  transition:
+    width 0.42s var(--v2-ease-out),
+    height 0.42s var(--v2-ease-out),
+    inset-block-start 0.42s var(--v2-ease-out),
+    inset-inline-end 0.42s var(--v2-ease-out),
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
 }
 
 .v2-radial-toggle::after {
@@ -298,7 +321,9 @@
 .v2-radial-toggle:hover,
 .v2-radial-toggle:focus-visible {
   transform: scale(1.07);
-  box-shadow: 0 0 0 9px rgba(115, 225, 219, 0.22), 0 18px 45px rgba(0, 8, 12, 0.48);
+  box-shadow:
+    0 0 0 9px rgba(115, 225, 219, 0.22),
+    0 18px 45px rgba(0, 8, 12, 0.48);
 }
 
 .v2-radial-nav.is-open .v2-radial-toggle {
@@ -308,7 +333,9 @@
   width: var(--v2-orbit-center-size);
   height: var(--v2-orbit-center-size);
   transform: none;
-  box-shadow: 0 0 0 10px rgba(128, 229, 225, 0.2), 0 18px 55px rgba(0, 8, 12, 0.45);
+  box-shadow:
+    0 0 0 10px rgba(128, 229, 225, 0.2),
+    0 18px 55px rgba(0, 8, 12, 0.45);
 }
 
 .v2-radial-tree {
@@ -354,8 +381,12 @@
   text-decoration: none;
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.35);
-  transition: opacity 0.22s ease, transform 0.32s var(--v2-ease-out), background-color 0.2s ease,
-    color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    opacity 0.22s ease,
+    transform 0.32s var(--v2-ease-out),
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
   transition-delay: var(--v2-delay, 0ms);
 }
 
@@ -396,12 +427,17 @@
   border-radius: 999px;
   background: rgba(1, 28, 35, 0.88);
   box-shadow: 0 5px 16px rgba(0, 7, 10, 0.25);
-  font: 800 0.68rem/1 "Cairo", Arial, sans-serif;
+  font:
+    800 0.68rem/1 "Cairo",
+    Arial,
+    sans-serif;
   white-space: nowrap;
   opacity: 0;
   transform: translateX(-50%) translateY(-3px);
   pointer-events: none;
-  transition: opacity 0.18s ease, transform 0.2s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.2s ease;
 }
 
 .v2-radial-item:hover .v2-radial-label,
@@ -469,7 +505,9 @@
   align-items: stretch;
   transform: translate3d(0, -50%, 0);
   filter: drop-shadow(0 18px 32px rgba(5, 28, 31, 0.2));
-  transition: transform 620ms var(--v2-ease-out), opacity 360ms ease;
+  transition:
+    transform 620ms var(--v2-ease-out),
+    opacity 360ms ease;
 }
 
 .v2-ribbon:not(.is-open) {
@@ -491,7 +529,9 @@
   color: var(--v2-ink);
   opacity: 0;
   transform: translateX(18px);
-  transition: opacity 240ms ease, transform 460ms var(--v2-ease-out);
+  transition:
+    opacity 240ms ease,
+    transform 460ms var(--v2-ease-out);
 }
 
 .v2-ribbon[dir] .v2-ribbon-panel[hidden] {
@@ -517,7 +557,9 @@
   color: var(--v2-deep);
   font-weight: 700;
   text-decoration: none;
-  transition: color 180ms ease, padding-inline-start 260ms var(--v2-ease-out);
+  transition:
+    color 180ms ease,
+    padding-inline-start 260ms var(--v2-ease-out);
 }
 
 .v2-ribbon-nav a span {
@@ -548,7 +590,9 @@
   text-transform: uppercase;
   text-decoration: none;
   border-bottom: 1px solid transparent;
-  transition: color 180ms ease, border-color 180ms ease;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease;
 }
 
 .v2-ribbon-pages a:hover,
@@ -693,7 +737,9 @@
   color: var(--v2-ink);
   font-weight: 800;
   text-decoration: none;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .v2-button-link:hover,
@@ -750,7 +796,9 @@
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.45);
   border-radius: 50%;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
 }
 
 .v2-footer-social svg {
@@ -980,8 +1028,12 @@
   overflow: hidden;
   border-radius: 16px;
   background: #f4f2ee;
-  box-shadow: 0 0 0 1px rgba(254, 253, 252, 0.1), 0 14px 34px rgba(0, 0, 0, 0.44);
-  transition: box-shadow 420ms ease, transform 620ms var(--v2-ease-out);
+  box-shadow:
+    0 0 0 1px rgba(254, 253, 252, 0.1),
+    0 14px 34px rgba(0, 0, 0, 0.44);
+  transition:
+    box-shadow 420ms ease,
+    transform 620ms var(--v2-ease-out);
 }
 
 .saae-v2 .v2-plate-face img {
@@ -992,7 +1044,9 @@
 }
 
 .saae-v2 .v2-partner-plate:hover .v2-plate-face {
-  box-shadow: 0 0 0 1px rgba(184, 232, 240, 0.55), 0 26px 56px rgba(0, 0, 0, 0.62);
+  box-shadow:
+    0 0 0 1px rgba(184, 232, 240, 0.55),
+    0 26px 56px rgba(0, 0, 0, 0.62);
   transform: translate3d(0, -5px, 0);
 }
 
@@ -1139,7 +1193,10 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-decoration: none;
-  transition: transform 260ms var(--v2-ease-out), box-shadow 260ms ease, border-color 260ms ease;
+  transition:
+    transform 260ms var(--v2-ease-out),
+    box-shadow 260ms ease,
+    border-color 260ms ease;
 }
 
 .saae-v2[dir="rtl"] .v2-news-cta {
@@ -1181,7 +1238,9 @@
   border-radius: 22px;
   background: var(--v2-panel);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
-  transition: border-color 820ms ease, box-shadow 820ms ease;
+  transition:
+    border-color 820ms ease,
+    box-shadow 820ms ease;
 }
 
 .saae-v2 .v2-featured:hover,
@@ -1213,7 +1272,13 @@
 .saae-v2 .v2-featured-veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(4, 23, 28, 0.34) 0%, rgba(4, 23, 28, 0) 26%, rgba(4, 23, 28, 0) 74%, rgba(4, 23, 28, 0.4) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(4, 23, 28, 0.34) 0%,
+    rgba(4, 23, 28, 0) 26%,
+    rgba(4, 23, 28, 0) 74%,
+    rgba(4, 23, 28, 0.4) 100%
+  );
 }
 
 .saae-v2 .v2-featured-copy {
@@ -1256,7 +1321,10 @@
   border-radius: 20px;
   background: var(--v2-panel);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
-  transition: border-color 420ms ease, box-shadow 420ms ease, transform 620ms var(--v2-ease-out);
+  transition:
+    border-color 420ms ease,
+    box-shadow 420ms ease,
+    transform 620ms var(--v2-ease-out);
 }
 
 .saae-v2 .v2-story:hover,
@@ -1298,7 +1366,13 @@
   position: absolute;
   inset: 0;
   z-index: 10;
-  background: linear-gradient(180deg, rgba(4, 23, 28, 0.34) 0%, rgba(4, 23, 28, 0.04) 18%, rgba(4, 23, 28, 0.74) 40%, rgba(4, 23, 28, 0.97) 66%);
+  background: linear-gradient(
+    180deg,
+    rgba(4, 23, 28, 0.34) 0%,
+    rgba(4, 23, 28, 0.04) 18%,
+    rgba(4, 23, 28, 0.74) 40%,
+    rgba(4, 23, 28, 0.97) 66%
+  );
 }
 
 .saae-v2 .v2-story-copy {
@@ -1504,7 +1578,10 @@
   background: var(--v2-panel);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
   text-decoration: none;
-  transition: border-color 420ms ease, box-shadow 420ms ease, transform 620ms var(--v2-ease-out);
+  transition:
+    border-color 420ms ease,
+    box-shadow 420ms ease,
+    transform 620ms var(--v2-ease-out);
 }
 
 .saae-v2 .v2-related-card:hover {
@@ -1537,7 +1614,12 @@
 .saae-v2 .v2-related-veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(4, 23, 28, 0.18) 0%, rgba(4, 23, 28, 0) 34%, rgba(4, 23, 28, 0.82) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(4, 23, 28, 0.18) 0%,
+    rgba(4, 23, 28, 0) 34%,
+    rgba(4, 23, 28, 0.82) 100%
+  );
 }
 
 .saae-v2 .v2-related-copy {
