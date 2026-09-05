@@ -126,12 +126,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "dns-prefetch", href: "https://bcfctxfulwyrslingscm.supabase.co" },
       { rel: "dns-prefetch", href: "https://video.bunnycdn.com" },
       { rel: "dns-prefetch", href: "https://images.unsplash.com" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap",
-      },
+      // Cairo is self-hosted from /public/fonts (see src/styles/saae-v2.css),
+      // so no Google Fonts stylesheet or preconnects are needed.
+
       {
         rel: "stylesheet",
         href: appCss,
@@ -179,7 +176,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
-  const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');var l=localStorage.getItem('saae-lang')||'en';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
+  const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');var l=localStorage.getItem('saae-lang')||'ar';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
   return (
     <html lang="en">
       <head>
