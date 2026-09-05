@@ -1,26 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
+import { useEffect, useRef, useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { aboutContent } from "@/lib/about-content";
-import {
-  Target,
-  Compass,
-  Brain,
-  Code2,
-  Briefcase,
-  Lightbulb,
-  GraduationCap,
-  Users,
-  HeartHandshake,
-  TrendingUp,
-  Share2,
-  ArrowLeft,
-  ArrowRight,
-  UserCircle2,
-} from "lucide-react";
+import { PageV2, type RibbonSection } from "@/components/site-v2/PageV2";
+import { Reveal } from "@/components/site-v2/Reveal";
+import { COMMUNITY_KEYS } from "@/lib/communityCategories";
 
 type Member = {
   id: string;
@@ -62,31 +47,355 @@ export const Route = createFileRoute("/about")({
   component: AboutPage,
 });
 
-function AboutPage() {
-  const { dir } = useLang();
-  const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
-
+function ChapterLabel({ n, children }: { n: string; children: string }) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Navbar />
-      <main className="pt-20">
-        <Hero Arrow={Arrow} />
-        <VisionMission />
-        <Goals />
-        <Fields />
-        <Values />
-        <MembersSection category="board" />
-        <MembersSection category="executive" />
-      </main>
-      <Footer />
-    </div>
+    <p className="v2-chapter-label">
+      <b>{n}</b>
+      <span>{children}</span>
+    </p>
   );
 }
 
-/* ---------- MEMBERS ---------- */
+function AboutPage() {
+  const { t } = useLang();
+  const a = t.v2.about;
+
+  const ribbon: RibbonSection[] = [
+    { id: "story", label: a.chapters.story },
+    { id: "direction", label: a.chapters.direction },
+    { id: "goals", label: a.chapters.goals },
+    { id: "fields", label: a.chapters.fields },
+    { id: "values", label: a.chapters.values },
+    { id: "communities", label: a.chapters.communities },
+    { id: "team", label: a.chapters.team },
+    { id: "future", label: a.chapters.future },
+  ];
+
+  return (
+    <PageV2 ribbonSections={ribbon}>
+      <Hero />
+      <Story />
+      <Direction />
+      <Goals />
+      <Fields />
+      <Values />
+      <Communities />
+      <section id="team" className="v2-chapter">
+        <MembersSection category="board" />
+        <MembersSection category="executive" />
+      </section>
+      <Future />
+    </PageV2>
+  );
+}
+
+/* ---------- 00 HERO ---------- */
+function Hero() {
+  const { lang, t } = useLang();
+  const c = aboutContent[lang];
+  const a = t.v2.about;
+  const markRef = useRef<HTMLDivElement | null>(null);
+
+  // Cursor-reactive lean, mounted client-side only. Pointer-coarse devices and
+  // reduced-motion users keep the static mark.
+  useEffect(() => {
+    const node = markRef.current;
+    if (!node) return;
+    if (window.matchMedia("(hover: none), (prefers-reduced-motion: reduce)").matches) return;
+
+    let frame = 0;
+    const onMove = (event: PointerEvent) => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        const rect = node.getBoundingClientRect();
+        const dx = (event.clientX - (rect.left + rect.width / 2)) / rect.width;
+        const dy = (event.clientY - (rect.top + rect.height / 2)) / rect.height;
+        node.style.setProperty("--lean-x", `${Math.max(-1, Math.min(1, dx)) * 10}px`);
+        node.style.setProperty("--lean-y", `${Math.max(-1, Math.min(1, dy)) * 8}px`);
+        node.style.setProperty("--lean-r", `${Math.max(-1, Math.min(1, dx)) * 2.4}deg`);
+      });
+    };
+
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return (
+    <section className="v2-about-opening" id="top">
+      <div className="v2-shell v2-opening-grid">
+        <div className="v2-opening-copy">
+          <p className="v2-eyebrow">{a.eyebrow}</p>
+          <h1 className="v2-about-title">{c.hero.title}</h1>
+          <p className="v2-about-lede">{a.lede}</p>
+          <div className="v2-opening-actions">
+            <a className="v2-scroll-cue" href="#story">
+              <span>{a.scrollCue}</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 4v16M5 13l7 7 7-7" />
+              </svg>
+            </a>
+            <Link to="/" className="v2-ghost-link">
+              {c.hero.backHome}
+            </Link>
+          </div>
+        </div>
+
+        <figure className="v2-opening-mark" ref={markRef}>
+          <img
+            src="/saae/saae-tree.svg"
+            alt=""
+            aria-hidden="true"
+            width={302}
+            height={339}
+            decoding="async"
+          />
+          <figcaption className="v2-mark-hint">{a.markHint}</figcaption>
+        </figure>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- 01 STORY ---------- */
+function Story() {
+  const { lang, t } = useLang();
+  const c = aboutContent[lang];
+  const a = t.v2.about;
+
+  return (
+    <section className="v2-chapter" id="story">
+      <div className="v2-shell">
+        <ChapterLabel n="01">{a.chapters.story}</ChapterLabel>
+        <div className="v2-story-split">
+          <Reveal>
+            <h2 className="v2-display">{a.storyTitle}</h2>
+          </Reveal>
+          <div className="v2-prose">
+            <Reveal>
+              <p className="v2-prose-lead">{c.hero.p1}</p>
+            </Reveal>
+            <Reveal delay={0.08}>
+              <p>{c.hero.p2}</p>
+            </Reveal>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- 02 DIRECTION (vision + mission) ---------- */
+function Direction() {
+  const { lang, t } = useLang();
+  const c = aboutContent[lang];
+  const a = t.v2.about;
+  const branches = [c.vision, c.mission];
+
+  return (
+    <section className="v2-chapter is-dark" id="direction">
+      <div className="v2-shell">
+        <ChapterLabel n="02">{a.chapters.direction}</ChapterLabel>
+        <Reveal>
+          <h2 className="v2-display">{a.directionTitle}</h2>
+        </Reveal>
+        <div className="v2-fork">
+          {branches.map((branch, i) => (
+            <Reveal key={branch.eyebrow} delay={i * 0.08}>
+              <article className="v2-branch">
+                <p className="v2-branch-eyebrow">{branch.eyebrow}</p>
+                <p className="v2-branch-body">{branch.body}</p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- 03 GOALS ---------- */
+function Goals() {
+  const { lang, t } = useLang();
+  const c = aboutContent[lang];
+  const a = t.v2.about;
+  const items = c.goals.items;
+  const [active, setActive] = useState(0);
+  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const index = Math.min(active, items.length - 1);
+
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    const forward = event.key === "ArrowRight" || event.key === "ArrowDown";
+    const back = event.key === "ArrowLeft" || event.key === "ArrowUp";
+    if (!forward && !back) return;
+    event.preventDefault();
+    const step = forward ? 1 : -1;
+    const next = (index + step + items.length) % items.length;
+    setActive(next);
+    tabsRef.current[next]?.focus();
+  };
+
+  return (
+    <section className="v2-chapter" id="goals">
+      <div className="v2-shell">
+        <ChapterLabel n="03">{a.chapters.goals}</ChapterLabel>
+        <Reveal>
+          <h2 className="v2-display">{a.goalsTitle}</h2>
+        </Reveal>
+        <Reveal>
+          <p className="v2-section-sub">{c.goals.intro}</p>
+        </Reveal>
+
+        <div className="v2-seeds">
+          <div className="v2-seed-row" role="tablist" aria-label={c.goals.heading} onKeyDown={onKeyDown}>
+            {items.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                role="tab"
+                id={`v2-seed-${i}`}
+                ref={(el) => {
+                  tabsRef.current[i] = el;
+                }}
+                aria-controls="v2-seed-panel"
+                aria-selected={i === index}
+                tabIndex={i === index ? 0 : -1}
+                className={i === index ? "is-active" : undefined}
+                onClick={() => setActive(i)}
+              >
+                <span className="v2-seed-dot" aria-hidden="true" />
+                <span>{String(i + 1).padStart(2, "0")}</span>
+              </button>
+            ))}
+          </div>
+
+          <div
+            className="v2-seed-panel"
+            role="tabpanel"
+            id="v2-seed-panel"
+            aria-labelledby={`v2-seed-${index}`}
+            tabIndex={0}
+          >
+            <p className="v2-seed-index" aria-hidden="true">
+              <b>{String(index + 1).padStart(2, "0")}</b>
+              <span>/ {String(items.length).padStart(2, "0")}</span>
+            </p>
+            <p className="v2-seed-action">{items[index]}</p>
+            <p className="v2-seed-hint">{a.goalsHint}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- 04 FIELDS ---------- */
+function Fields() {
+  const { lang, t } = useLang();
+  const c = aboutContent[lang];
+  const a = t.v2.about;
+
+  return (
+    <section className="v2-chapter is-tint" id="fields">
+      <div className="v2-shell">
+        <ChapterLabel n="04">{a.chapters.fields}</ChapterLabel>
+        <Reveal>
+          <h2 className="v2-display">{a.fieldsTitle}</h2>
+        </Reveal>
+        <Reveal>
+          <p className="v2-section-sub">{c.fields.intro}</p>
+        </Reveal>
+        <ol className="v2-fields">
+          {c.fields.items.map((item, i) => (
+            <Reveal key={item} delay={i * 0.05}>
+              <li className="v2-field">
+                <b>{String(i + 1).padStart(2, "0")}</b>
+                <span>{item}</span>
+              </li>
+            </Reveal>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- 05 VALUES ---------- */
+function Values() {
+  const { lang, t } = useLang();
+  const c = aboutContent[lang];
+  const a = t.v2.about;
+
+  return (
+    <section className="v2-chapter" id="values">
+      <div className="v2-shell">
+        <ChapterLabel n="05">{a.chapters.values}</ChapterLabel>
+        <Reveal>
+          <h2 className="v2-display">{a.valuesTitle}</h2>
+        </Reveal>
+        <Reveal>
+          <p className="v2-section-sub">{c.values.intro}</p>
+        </Reveal>
+        <Reveal>
+          <ul className="v2-canopy">
+            {c.values.items.map((value) => (
+              <li key={value}>{value}</li>
+            ))}
+          </ul>
+        </Reveal>
+        <Reveal>
+          <p className="v2-canopy-note">{a.valuesNote}</p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- 06 COMMUNITIES ---------- */
+function Communities() {
+  const { t } = useLang();
+  const a = t.v2.about;
+
+  return (
+    <section className="v2-chapter is-dark" id="communities">
+      <div className="v2-shell">
+        <ChapterLabel n="06">{a.chapters.communities}</ChapterLabel>
+        <Reveal>
+          <h2 className="v2-display">{a.communitiesTitle}</h2>
+        </Reveal>
+        <Reveal>
+          <p className="v2-section-sub">{a.communitiesIntro}</p>
+        </Reveal>
+        <ul className="v2-community-grid">
+          {COMMUNITY_KEYS.map((key, i) => {
+            const card = t.communities.cards[key];
+            return (
+              <Reveal key={key} delay={(i % 3) * 0.05}>
+                <li className="v2-community">
+                  <Link to="/communities/$key" params={{ key }} className="v2-community-link">
+                    <span className="v2-community-n">{String(i + 1).padStart(2, "0")}</span>
+                    <h3>{card.title}</h3>
+                    <p className="v2-community-line">{card.desc}</p>
+                    <span className="v2-community-cta">{t.communities.discover}</span>
+                  </Link>
+                </li>
+              </Reveal>
+            );
+          })}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- 07 MEMBERS ---------- */
 function MembersSection({ category }: { category: "board" | "executive" }) {
-  const { lang } = useLang();
-  const t = aboutContent[lang];
+  const { lang, t } = useLang();
+  const c = aboutContent[lang];
   const [members, setMembers] = useState<Member[]>([]);
 
   useEffect(() => {
@@ -98,8 +407,8 @@ function MembersSection({ category }: { category: "board" | "executive" }) {
       .then(({ data }) => setMembers((data ?? []) as Member[]));
   }, [category]);
 
-  const title = category === "board" ? t.members.boardTitle : t.members.executiveTitle;
-  const subtitle = category === "board" ? t.members.boardSubtitle : t.members.executiveSubtitle;
+  const title = category === "board" ? c.members.boardTitle : c.members.executiveTitle;
+  const subtitle = category === "board" ? c.members.boardSubtitle : c.members.executiveSubtitle;
 
   if (members.length === 0) return null;
 
@@ -107,227 +416,61 @@ function MembersSection({ category }: { category: "board" | "executive" }) {
     lang === "ar" ? (arVal ?? enVal ?? "") : (enVal ?? arVal ?? "");
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
-      <div className="mx-auto max-w-3xl text-center">
-        <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
-        <p className="mt-5 text-base leading-loose text-muted-foreground">{subtitle}</p>
-      </div>
+    <div className="v2-shell v2-team">
+      <ChapterLabel n={category === "board" ? "07" : "08"}>{t.v2.about.teamEyebrow}</ChapterLabel>
+      <Reveal>
+        <h2 className="v2-display">{title}</h2>
+      </Reveal>
+      <Reveal>
+        <p className="v2-section-sub">{subtitle}</p>
+      </Reveal>
 
-      <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {members.map((m) => (
-          <article
-            key={m.id}
-            className="group flex flex-col items-center rounded-3xl border border-border bg-card p-7 text-center transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-soft"
-          >
-            <div className="relative h-28 w-28 overflow-hidden rounded-full ring-4 ring-primary/10">
-              {m.photo_url ? (
-                <img src={m.photo_url} alt={pick(m.full_name_ar, m.full_name_en)} className="h-full w-full object-cover" loading="lazy" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
-                  <UserCircle2 className="h-14 w-14" />
-                </div>
-              )}
-            </div>
-            <h3 className="mt-5 text-lg font-bold text-foreground">
-              {pick(m.full_name_ar, m.full_name_en)}
-            </h3>
-            <p className="mt-1 text-sm font-semibold text-primary">
-              {pick(m.position_ar, m.position_en)}
-            </p>
-            {(m.bio_ar || m.bio_en) && (
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                {pick(m.bio_ar, m.bio_en)}
-              </p>
-            )}
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ---------- HERO ---------- */
-function Hero({ Arrow: _Arrow }: { Arrow: typeof ArrowRight }) {
-  const { lang } = useLang();
-  const t = aboutContent[lang];
-  return (
-    <section className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-32 start-1/4 h-[28rem] w-[28rem] rounded-full bg-primary/15 blur-3xl" />
-        <div className="absolute bottom-0 end-1/4 h-[24rem] w-[24rem] rounded-full bg-secondary/15 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,hsl(var(--background))_80%)]" />
-      </div>
-
-      <div className="relative mx-auto max-w-5xl px-6 pb-16 pt-12 text-center lg:px-10 lg:pb-24 lg:pt-20">
-        <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-          {t.hero.title}
-        </h1>
-        <p className="mx-auto mt-6 max-w-3xl text-base leading-loose text-muted-foreground sm:text-lg">
-          {t.hero.p1}
-        </p>
-        <p className="mx-auto mt-5 max-w-3xl text-base leading-loose text-muted-foreground sm:text-lg">
-          {t.hero.p2}
-        </p>
-
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-6 py-3 text-sm font-semibold text-foreground/80 backdrop-blur transition-colors hover:border-primary hover:text-primary"
-          >
-            {t.hero.backHome}
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- VISION & MISSION ---------- */
-function VisionMission() {
-  const { lang } = useLang();
-  const t = aboutContent[lang];
-  const cards = [
-    { Icon: Compass, eyebrow: t.vision.eyebrow, body: t.vision.body },
-    { Icon: Target, eyebrow: t.mission.eyebrow, body: t.mission.body },
-  ];
-
-  return (
-    <section className="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-24">
-      <div className="grid gap-6 md:grid-cols-2">
-        {cards.map(({ Icon, eyebrow, body }) => (
-          <article
-            key={eyebrow}
-            className="group relative overflow-hidden rounded-3xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-soft sm:p-10"
-          >
-            <div className="absolute -end-10 -top-10 h-40 w-40 rounded-full bg-primary/5 transition-transform duration-700 group-hover:scale-150" />
-            <div className="relative">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Icon className="h-6 w-6" />
-              </div>
-              <h2 className="mt-6 text-2xl font-bold tracking-tight sm:text-3xl">
-                {eyebrow}
-              </h2>
-              <p className="mt-4 text-base leading-loose text-muted-foreground">
-                {body}
-              </p>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ---------- GOALS ---------- */
-function Goals() {
-  const { lang } = useLang();
-  const t = aboutContent[lang];
-
-  return (
-    <section className="relative border-y border-border bg-muted/40">
-      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
-        <div className="grid gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-4">
-            <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-              {t.goals.heading}
-            </h2>
-            <p className="mt-5 text-base leading-loose text-muted-foreground">
-              {t.goals.intro}
-            </p>
-          </div>
-
-          <ol className="lg:col-span-8 space-y-4">
-            {t.goals.items.map((g, i) => (
-              <li
-                key={i}
-                className="group flex items-start gap-5 rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/50 hover:shadow-soft sm:p-6"
-              >
-                <span className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-primary/10 text-lg font-bold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <p className="pt-2 text-base leading-relaxed text-foreground/90 sm:text-lg">
-                  {g}
-                </p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- FIELDS ---------- */
-function Fields() {
-  const { lang } = useLang();
-  const t = aboutContent[lang];
-  const icons = [Brain, Code2, Briefcase, Lightbulb, GraduationCap];
-
-  return (
-    <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
-      <div className="mx-auto max-w-3xl text-center">
-        <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-          {t.fields.heading}
-        </h2>
-        <p className="mt-5 text-base leading-loose text-muted-foreground">
-          {t.fields.intro}
-        </p>
-      </div>
-
-      <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {t.fields.items.map((title, i) => {
-          const Icon = icons[i] ?? Brain;
+      <div className="v2-member-grid">
+        {members.map((m, i) => {
+          const name = pick(m.full_name_ar, m.full_name_en);
+          const bio = pick(m.bio_ar, m.bio_en);
           return (
-            <div
-              key={title}
-              className="group flex flex-col items-start gap-5 rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-soft"
-            >
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-secondary/15 text-primary transition-colors group-hover:from-primary group-hover:to-secondary group-hover:text-primary-foreground">
-                <Icon className="h-6 w-6" />
-              </div>
-              <h3 className="text-base font-bold leading-snug text-foreground sm:text-lg">
-                {title}
-              </h3>
-            </div>
+            <Reveal key={m.id} delay={(i % 4) * 0.05}>
+              <article className="v2-member">
+                <div className="v2-member-photo">
+                  {m.photo_url ? (
+                    <img src={m.photo_url} alt={name} loading="lazy" decoding="async" />
+                  ) : (
+                    <span aria-hidden="true">{name.trim().charAt(0) || "•"}</span>
+                  )}
+                </div>
+                <h3>{name}</h3>
+                <p className="v2-member-role">{pick(m.position_ar, m.position_en)}</p>
+                {bio ? <p className="v2-member-bio">{bio}</p> : null}
+              </article>
+            </Reveal>
           );
         })}
       </div>
-    </section>
+    </div>
   );
 }
 
-/* ---------- VALUES ---------- */
-function Values() {
-  const { lang } = useLang();
-  const t = aboutContent[lang];
-  const icons = [Lightbulb, Users, Share2, TrendingUp, HeartHandshake];
+/* ---------- 09 FUTURE ---------- */
+function Future() {
+  const { t } = useLang();
+  const a = t.v2.about;
 
   return (
-    <section className="relative overflow-hidden border-y border-border bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-            {t.values.heading}
-          </h2>
-          <p className="mt-5 text-base leading-loose text-muted-foreground">
-            {t.values.intro}
-          </p>
-        </div>
-
-        <div className="mt-14 flex flex-wrap items-center justify-center gap-3">
-          {t.values.items.map((title, i) => {
-            const Icon = icons[i] ?? Lightbulb;
-            return (
-              <div
-                key={title}
-                className="inline-flex items-center gap-3 rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground/90 shadow-sm transition-all hover:border-primary hover:text-primary"
-              >
-                <Icon className="h-4 w-4 text-primary" />
-                {title}
-              </div>
-            );
-          })}
-        </div>
+    <section className="v2-chapter is-dark is-close" id="future">
+      <div className="v2-shell">
+        <ChapterLabel n="09">{a.chapters.future}</ChapterLabel>
+        <Reveal>
+          <h2 className="v2-display v2-display-xl">{a.futureTitle}</h2>
+        </Reveal>
+        <Reveal>
+          <Link to="/contact" className="v2-solid-button">
+            <span>{a.futureCta}</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 19 19 5M9 5h10v10" />
+            </svg>
+          </Link>
+        </Reveal>
       </div>
     </section>
   );
