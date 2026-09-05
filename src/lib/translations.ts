@@ -111,6 +111,36 @@ type Dict = {
       notFound: string;
       back: string;
     };
+    about: {
+      eyebrow: string;
+      lede: string;
+      scrollCue: string;
+      markHint: string;
+      chapters: {
+        story: string;
+        direction: string;
+        goals: string;
+        fields: string;
+        values: string;
+        communities: string;
+        team: string;
+        future: string;
+      };
+      storyTitle: string;
+      directionTitle: string;
+      goalsTitle: string;
+      goalsHint: string;
+      fieldsTitle: string;
+      fieldsSub: string;
+      valuesTitle: string;
+      valuesNote: string;
+      communitiesEyebrow: string;
+      communitiesTitle: string;
+      communitiesIntro: string;
+      teamEyebrow: string;
+      futureTitle: string;
+      futureCta: string;
+    };
     ribbon: {
       ariaLabel: string;
       sectionsLabel: string;
@@ -349,6 +379,38 @@ export const translations: Record<Lang, Dict> = {
         notFound: "Article not found",
         back: "Back to news",
       },
+      about: {
+        eyebrow: "About the association",
+        lede: "SAAE is a youth-led community turning artificial intelligence and entrepreneurship into practical capability for people across Syria.",
+        scrollCue: "Follow the story",
+        markHint: "Move your cursor — grow a branch",
+        chapters: {
+          story: "Who we are",
+          direction: "Our direction",
+          goals: "Our goals",
+          fields: "Fields of work",
+          values: "Our values",
+          communities: "Communities",
+          team: "The team",
+          future: "The next growth",
+        },
+        storyTitle: "A community built around possibility.",
+        directionTitle: "One root. Two branches.",
+        goalsTitle: "Five ways the work takes root.",
+        goalsHint: "Choose a seed to see the action behind it.",
+        fieldsTitle: "A living system of skills.",
+        fieldsSub: "Each field is a branch. Together, they form the capability to build.",
+        valuesTitle: "The canopy above everything we do.",
+        valuesNote:
+          "From a training room to a national partnership, these values guide every choice.",
+        communitiesEyebrow: "SAAE communities",
+        communitiesTitle: "Nine fields, one shared method.",
+        communitiesIntro:
+          "Each community brings its own questions and its own practitioners. Shared methods let the answers travel between them.",
+        teamEyebrow: "Who leads the work",
+        futureTitle: "Syrian talent can rebuild, elevate and imagine what comes next.",
+        futureCta: "Grow with SAAE",
+      },
       ribbon: {
         ariaLabel: "Journey navigation",
         sectionsLabel: "Page sections",
@@ -583,6 +645,36 @@ export const translations: Record<Lang, Dict> = {
         noContent: "لا يوجد محتوى بعد.",
         notFound: "المقال غير موجود",
         back: "العودة إلى الأخبار",
+      },
+      about: {
+        eyebrow: "عن الجمعية",
+        lede: "الجمعية مجتمع شبابي يحوّل الذكاء الصنعي وريادة الأعمال إلى قدرات عملية للناس في مختلف أنحاء سورية.",
+        scrollCue: "تابع القصة",
+        markHint: "حرّك المؤشر — أنمِ غصناً",
+        chapters: {
+          story: "من نحن",
+          direction: "وجهتنا",
+          goals: "أهدافنا",
+          fields: "مجالات عملنا",
+          values: "قيمنا",
+          communities: "المجتمعات",
+          team: "الفريق",
+          future: "النمو القادم",
+        },
+        storyTitle: "مجتمع يُبنى حول الإمكانات.",
+        directionTitle: "جذر واحد. غصنان.",
+        goalsTitle: "خمس طرق يترسّخ بها عملنا.",
+        goalsHint: "اختر بذرة لتكتشف العمل الذي ينمو منها.",
+        fieldsTitle: "منظومة حيّة من المهارات.",
+        fieldsSub: "كل مجال هو غصن. ومعاً تشكّل هذه المجالات القدرة على البناء.",
+        valuesTitle: "المظلّة التي تحمي كل ما نفعله.",
+        valuesNote: "من قاعة التدريب إلى الشراكة الوطنية، تقود هذه القيم كل اختيار.",
+        communitiesEyebrow: "مجتمعات الجمعية",
+        communitiesTitle: "تسعة مجالات، ومنهج واحد مشترك.",
+        communitiesIntro: "لكل مجتمع أسئلته وممارسوه. والمنهج المشترك يجعل الأجوبة تنتقل بينها.",
+        teamEyebrow: "من يقود العمل",
+        futureTitle: "المواهب السورية قادرة على إعادة البناء والارتقاء وتخيّل ما يأتي.",
+        futureCta: "انمُ مع الجمعية",
       },
       ribbon: {
         ariaLabel: "التنقل بين أقسام الصفحة",
