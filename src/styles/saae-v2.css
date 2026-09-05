@@ -1795,9 +1795,10 @@
   gap: 16px;
 }
 
-.saae-v2 .v2-opening-mark img {
+.saae-v2 .v2-opening-mark .v2-mark-glyph {
+  display: block;
   width: min(100%, 320px);
-  height: auto;
+  aspect-ratio: 302 / 339;
   transform: translate3d(var(--lean-x, 0px), var(--lean-y, 0px), 0) rotate(var(--lean-r, 0deg));
   transition: transform 900ms var(--v2-ease-out);
   /* saae-tree.svg paints with currentColor, which resolves to black inside an
