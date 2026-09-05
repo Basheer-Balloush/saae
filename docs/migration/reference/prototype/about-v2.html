@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About SAAE | Knowledge grows when we grow it together</title>
+  <meta name="description" content="The story, vision, mission, goals and values of the Syrian Association for AI and Entrepreneurship.">
+  <meta name="theme-color" content="#f2f1e6">
+  <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/cairo-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/cairo-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/cairo-900.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/about-v2.css">
+</head>
+<body>
+  <a class="skip-link" href="#main" data-en="Skip to content" data-ar="انتقل إلى المحتوى">Skip to content</a>
+
+  <header class="masthead" id="masthead">
+    <a class="brand" href="index.html" aria-label="SAAE home">
+      <img src="assets/saae-tree.svg" alt="" width="302" height="339" aria-hidden="true">
+      <span>SAAE</span>
+    </a>
+
+    <nav class="mast-nav" aria-label="About page sections">
+      <a href="#story" data-en="Our story" data-ar="قصتنا">Our story</a>
+      <a href="#direction" data-en="Our direction" data-ar="وجهتنا">Our direction</a>
+      <a href="#goals" data-en="Our goals" data-ar="أهدافنا">Our goals</a>
+      <a href="#fields" data-en="Our work" data-ar="عملنا">Our work</a>
+    </nav>
+
+    <div class="mast-actions">
+      <a class="icon-button" href="index.html" aria-label="Home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </a>
+      <button class="lang-button" id="lang-button" type="button" aria-label="التبديل إلى العربية" aria-pressed="false">
+        <span id="lang-label">العربية</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- The spine.
+       The mark is a tree and the page is its growth: root, branches, seeds,
+       canopy. So the chapter index is drawn as a trunk that fills as the reader
+       descends, rather than as a row of dots that could belong to any site.
+       Desktop only; below that it becomes the hairline under the masthead. -->
+  <aside class="spine" id="spine" aria-hidden="true">
+    <span class="spine-rail"><i class="spine-fill" id="spine-fill"></i></span>
+    <ol class="spine-nodes" id="spine-nodes">
+      <li data-target="story"><b>01</b></li>
+      <li data-target="direction"><b>02</b></li>
+      <li data-target="goals"><b>03</b></li>
+      <li data-target="fields"><b>04</b></li>
+      <li data-target="values"><b>05</b></li>
+      <li data-target="future"><b>06</b></li>
+    </ol>
+  </aside>
+  <span class="progress-line" id="progress-line" aria-hidden="true"></span>
+
+  <main id="main">
+
+    <!-- =========================== OPENING =========================== -->
+    <section class="opening" id="top" aria-labelledby="about-title">
+      <div class="shell opening-grid">
+        <div class="opening-copy">
+          <p class="eyebrow" data-en="ABOUT THE ASSOCIATION" data-ar="عن الجمعية">ABOUT THE ASSOCIATION</p>
+          <h1 id="about-title" data-en="Knowledge grows when we grow it together." data-ar="تنمو المعرفة حين ننمّيها معاً.">Knowledge grows when we grow it together.</h1>
+          <p class="lede" data-en="SAAE is a youth-led community turning artificial intelligence and entrepreneurship into practical capability for people across Syria." data-ar="الجمعية مجتمع شبابي يحوّل الذكاء الصنعي وريادة الأعمال إلى قدرات عملية للناس في مختلف أنحاء سورية.">SAAE is a youth-led community turning artificial intelligence and entrepreneurship into practical capability for people across Syria.</p>
+          <a class="scroll-cue" href="#story">
+            <span data-en="Follow the story" data-ar="تابع القصة">Follow the story</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M5 13l7 7 7-7"/></svg>
+          </a>
+        </div>
+
+        <!-- Grown, not placed. The mark draws itself on load and leans toward
+             the pointer, so the first thing the page does is the thing the
+             sentence beside it claims. -->
+        <figure class="opening-mark">
+          <canvas id="tree-canvas" width="720" height="820" role="img" aria-label="The SAAE tree, drawn branch by branch"></canvas>
+          <figcaption class="mark-hint" data-en="MOVE YOUR CURSOR — GROW A BRANCH" data-ar="حرّك المؤشر — أنمِ غصناً">MOVE YOUR CURSOR — GROW A BRANCH</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- =========================== 01 STORY =========================== -->
+    <section class="chapter" id="story" aria-labelledby="story-title">
+      <div class="shell">
+        <p class="chapter-label"><b>01</b><span data-en="WHO WE ARE" data-ar="من نحن">WHO WE ARE</span></p>
+        <div class="story-grid">
+          <h2 id="story-title" class="display" data-reveal data-en="A community built around possibility." data-ar="مجتمع يُبنى حول الإمكانات.">A community built around possibility.</h2>
+          <div class="prose">
+            <p class="prose-lead" data-reveal data-en="We spread a practical culture of artificial intelligence and entrepreneurship throughout Syrian society." data-ar="ننشر ثقافة عملية للذكاء الصنعي وريادة الأعمال في المجتمع السوري.">We spread a practical culture of artificial intelligence and entrepreneurship throughout Syrian society.</p>
+            <p data-reveal data-en="Young people, students and founders gain the technical and entrepreneurial skills to innovate and take part in shaping the future—not simply watch it arrive." data-ar="يكتسب الشباب والطلاب ورواد الأعمال المهارات التقنية والريادية للابتكار والمشاركة في صناعة المستقبل، لا الاكتفاء بانتظاره.">Young people, students and founders gain the technical and entrepreneurial skills to innovate and take part in shaping the future—not simply watch it arrive.</p>
+            <p data-reveal data-en="Training, workshops, scientific events and applied projects connect modern technology with the spirit of initiative, strengthening people while helping promising ideas grow." data-ar="تربط الدورات وورشات العمل والفعاليات العلمية والمشاريع التطبيقية التكنولوجيا الحديثة بروح المبادرة، فتطوّر قدرات الأفراد وتساعد الأفكار الواعدة على النمو.">Training, workshops, scientific events and applied projects connect modern technology with the spirit of initiative, strengthening people while helping promising ideas grow.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= 02 DIRECTION ========================= -->
+    <!-- Dark, and one of only two. The heading is "One root. Two branches.",
+         so this chapter is the fork: the ground goes dark and the page splits
+         in two for exactly as long as that sentence is true. -->
+    <section class="chapter is-dark" id="direction" aria-labelledby="direction-title">
+      <div class="shell">
+        <p class="chapter-label"><b>02</b><span data-en="OUR DIRECTION" data-ar="وجهتنا">OUR DIRECTION</span></p>
+        <h2 id="direction-title" class="display" data-reveal data-en="One root. Two branches." data-ar="جذر واحد. وغصنان.">One root. Two branches.</h2>
+
+        <div class="fork" aria-hidden="true">
+          <svg viewBox="0 0 240 90" preserveAspectRatio="none"><path d="M120 0 V32 M120 32 C120 64 40 56 40 90 M120 32 C120 64 200 56 200 90"/></svg>
+        </div>
+
+        <div class="branches">
+          <article class="branch" data-reveal>
+            <p class="branch-label" data-en="VISION" data-ar="الرؤية">VISION</p>
+            <h3 data-en="A leading platform for Syrian youth." data-ar="منصة رائدة للشباب السوري.">A leading platform for Syrian youth.</h3>
+            <p data-en="We aim to empower young Syrians in AI, modern technology and entrepreneurship—and help build a knowledge society able to compete and innovate." data-ar="نهدف إلى تمكين الشباب السوري في الذكاء الصنعي والتقنيات الحديثة وريادة الأعمال، والمساهمة في بناء مجتمع معرفي قادر على المنافسة والابتكار.">We aim to empower young Syrians in AI, modern technology and entrepreneurship—and help build a knowledge society able to compete and innovate.</p>
+          </article>
+          <article class="branch branch-alt" data-reveal>
+            <p class="branch-label" data-en="MISSION" data-ar="الرسالة">MISSION</p>
+            <h3 data-en="Learning that reaches real life." data-ar="تعليم يصل إلى الحياة العملية.">Learning that reaches real life.</h3>
+            <p data-en="We provide high-quality education and training that develops technical and entrepreneurial skills, links academic knowledge to practice and creates lasting positive impact." data-ar="نوفّر تعليماً وتدريباً نوعياً يطوّر المهارات التقنية والريادية، ويربط المعرفة الأكاديمية بالتطبيق، ويصنع أثراً إيجابياً مستداماً.">We provide high-quality education and training that develops technical and entrepreneurial skills, links academic knowledge to practice and creates lasting positive impact.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================== 03 GOALS =========================== -->
+    <section class="chapter" id="goals" aria-labelledby="goals-title">
+      <div class="shell">
+        <p class="chapter-label"><b>03</b><span data-en="OUR GOALS" data-ar="أهدافنا">OUR GOALS</span></p>
+        <h2 id="goals-title" class="display" data-reveal data-en="Five ways the work takes root." data-ar="خمس طرق يترسّخ بها عملنا.">Five ways the work takes root.</h2>
+        <p class="section-sub" data-reveal data-en="Choose a seed to see the action behind it." data-ar="اختر بذرة لتكتشف العمل الذي ينمو منها.">Choose a seed to see the action behind it.</p>
+
+        <!-- A real control, not a reveal. Arrow keys move between seeds, the
+             panel answers, and the choice survives a language switch. -->
+        <div class="seeds">
+          <div class="seed-row" role="tablist" aria-label="Goals" id="seed-row">
+            <button role="tab" type="button" id="seed-0" aria-controls="seed-panel" aria-selected="true" tabindex="0">
+              <span class="seed-dot" aria-hidden="true"></span>
+              <span data-en="Awareness" data-ar="الوعي">Awareness</span>
+            </button>
+            <button role="tab" type="button" id="seed-1" aria-controls="seed-panel" aria-selected="false" tabindex="-1">
+              <span class="seed-dot" aria-hidden="true"></span>
+              <span data-en="Enterprise" data-ar="الريادة">Enterprise</span>
+            </button>
+            <button role="tab" type="button" id="seed-2" aria-controls="seed-panel" aria-selected="false" tabindex="-1">
+              <span class="seed-dot" aria-hidden="true"></span>
+              <span data-en="Training" data-ar="التدريب">Training</span>
+            </button>
+            <button role="tab" type="button" id="seed-3" aria-controls="seed-panel" aria-selected="false" tabindex="-1">
+              <span class="seed-dot" aria-hidden="true"></span>
+              <span data-en="Community" data-ar="المجتمع">Community</span>
+            </button>
+            <button role="tab" type="button" id="seed-4" aria-controls="seed-panel" aria-selected="false" tabindex="-1">
+              <span class="seed-dot" aria-hidden="true"></span>
+              <span data-en="Research" data-ar="البحث">Research</span>
+            </button>
+          </div>
+
+          <div class="seed-panel" role="tabpanel" id="seed-panel" aria-labelledby="seed-0" tabindex="0">
+            <p class="seed-index" aria-hidden="true"><b id="seed-num">01</b><span>/ 05</span></p>
+            <p class="seed-action" id="seed-action">Spread awareness of artificial intelligence and digital transformation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================== 04 FIELDS ========================== -->
+    <section class="chapter is-tint" id="fields" aria-labelledby="fields-title">
+      <div class="shell">
+        <p class="chapter-label"><b>04</b><span data-en="FIELDS OF WORK" data-ar="مجالات عملنا">FIELDS OF WORK</span></p>
+        <h2 id="fields-title" class="display" data-reveal data-en="A living system of skills." data-ar="منظومة حيّة من المهارات.">A living system of skills.</h2>
+        <p class="section-sub" data-reveal data-en="Each field is a branch. Together, they form the capability to build." data-ar="كل مجال هو غصن. ومعاً تشكّل هذه المجالات القدرة على البناء.">Each field is a branch. Together, they form the capability to build.</p>
+
+        <!-- Five branches off one stem. Numbered because this is the
+             organisation's own published order, and the stem thickens beside
+             whichever branch the reader is on. -->
+        <ol class="fields" id="fields-list">
+          <li data-reveal><b>01</b><span data-en="Artificial intelligence &amp; machine learning" data-ar="الذكاء الصنعي وتعلم الآلة">Artificial intelligence &amp; machine learning</span></li>
+          <li data-reveal><b>02</b><span data-en="Programming &amp; modern technology" data-ar="البرمجة والتقنيات الحديثة">Programming &amp; modern technology</span></li>
+          <li data-reveal><b>03</b><span data-en="Entrepreneurship &amp; project management" data-ar="ريادة الأعمال وإدارة المشاريع">Entrepreneurship &amp; project management</span></li>
+          <li data-reveal><b>04</b><span data-en="Digital transformation &amp; innovation" data-ar="التحول الرقمي والابتكار">Digital transformation &amp; innovation</span></li>
+          <li data-reveal><b>05</b><span data-en="Training &amp; professional development" data-ar="التدريب والتطوير المهني">Training &amp; professional development</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- =========================== 05 VALUES ========================== -->
+    <section class="chapter" id="values" aria-labelledby="values-title">
+      <div class="shell">
+        <p class="chapter-label"><b>05</b><span data-en="OUR VALUES" data-ar="قيمنا">OUR VALUES</span></p>
+        <h2 id="values-title" class="display" data-reveal data-en="The canopy above everything we do." data-ar="المظلّة التي تحمي كل ما نفعله.">The canopy above everything we do.</h2>
+
+        <ul class="canopy" data-reveal>
+          <li data-en="Innovation &amp; creativity" data-ar="الابتكار والإبداع">Innovation &amp; creativity</li>
+          <li data-en="Teamwork" data-ar="العمل الجماعي">Teamwork</li>
+          <li data-en="Knowledge sharing" data-ar="مشاركة المعرفة">Knowledge sharing</li>
+          <li data-en="Continuous development" data-ar="التطوير المستمر">Continuous development</li>
+          <li data-en="Social responsibility" data-ar="المسؤولية المجتمعية">Social responsibility</li>
+        </ul>
+        <p class="canopy-note" data-reveal data-en="From a training room to a national partnership, these values guide every choice." data-ar="من قاعة التدريب إلى الشراكة الوطنية، تقود هذه القيم كل اختيار.">From a training room to a national partnership, these values guide every choice.</p>
+      </div>
+    </section>
+
+    <!-- =========================== 06 FUTURE ========================== -->
+    <section class="chapter is-dark is-close" id="future" aria-labelledby="future-title">
+      <div class="shell">
+        <p class="chapter-label"><b>06</b><span data-en="THE NEXT GROWTH" data-ar="النمو القادم">THE NEXT GROWTH</span></p>
+        <h2 id="future-title" class="display display-xl" data-reveal data-en="Syrian talent can rebuild, elevate and imagine what comes next." data-ar="المواهب السورية قادرة على إعادة البناء والارتقاء وتخيّل ما يأتي.">Syrian talent can rebuild, elevate and imagine what comes next.</h2>
+        <a class="button-solid" href="contact.html#write" data-reveal>
+          <span data-en="Grow with SAAE" data-ar="انمُ مع الجمعية">Grow with SAAE</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M9 5h10v10"/></svg>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="page-shell footer-main">
+      <div class="footer-identity">
+        <img class="footer-logo footer-logo-en" src="assets/images/saae-logo-en.png" alt="Syrian Association for AI & Entrepreneurship" width="1882" height="647" decoding="async">
+        <img class="footer-logo footer-logo-ar" src="assets/images/saae-logo-ar.png" alt="الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" width="1899" height="642" decoding="async">
+        <p class="footer-claim" data-en="Syria's first official AI organisation — empowering Syrian talent to rebuild and uplift our country." data-ar="أول منظمة رسمية في سورية مكرّسة للذكاء الاصطناعي والابتكار والتفكير الريادي — تمكّن المواهب السورية لإعادة بناء بلدنا والارتقاء به.">Syria's first official AI organisation — empowering Syrian talent to rebuild and uplift our country.</p>
+        <ul class="footer-social" aria-label="SAAE on social platforms">
+          <li><a href="https://www.instagram.com/saae_sy/" target="_blank" rel="noopener noreferrer" aria-label="SAAE on Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.25" fill="currentColor"/></svg></a></li>
+          <li><a href="https://www.facebook.com/share/18SQ11hcct/" target="_blank" rel="noopener noreferrer" aria-label="SAAE on Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5h1.65V3.6c-.3-.04-1.3-.13-2.46-.13-2.44 0-4.11 1.49-4.11 4.22V9.9H7.4V13h2.73v8z"/></svg></a></li>
+          <li><a href="https://www.linkedin.com/company/syrian-association-for-ai-entrepreneurship/" target="_blank" rel="noopener noreferrer" aria-label="SAAE on LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.5 9H3.6v12h2.9zM5.05 3.6a1.68 1.68 0 1 0 0 3.36 1.68 1.68 0 0 0 0-3.36M20.4 21h-2.9v-5.83c0-1.39-.03-3.18-1.94-3.18-1.94 0-2.24 1.51-2.24 3.08V21h-2.9V9h2.78v1.64h.04a3.05 3.05 0 0 1 2.74-1.5c2.94 0 3.48 1.93 3.48 4.44z"/></svg></a></li>
+        </ul>
+      </div>
+
+      <nav class="footer-col" aria-labelledby="footer-explore">
+        <h2 class="footer-col-title" id="footer-explore" data-en="Explore" data-ar="استكشف">Explore</h2>
+        <ul>
+          <li><a href="index.html" data-en="Home" data-ar="الرئيسية">Home</a></li>
+          <li><a href="about.html" data-en="About SAAE" data-ar="عن الجمعية">About SAAE</a></li>
+          <li><a href="news.html" data-en="News" data-ar="الأخبار">News</a></li>
+          <li><a href="partners.html" data-en="Partners" data-ar="الشركاء">Partners</a></li>
+          <li><a href="initiative.html" data-en="Initiative" data-ar="المبادرة">Initiative</a></li>
+          <li><a href="contact.html" data-en="Contact" data-ar="تواصل معنا">Contact</a></li>
+        </ul>
+      </nav>
+
+      <nav class="footer-col" aria-labelledby="footer-official">
+        <h2 class="footer-col-title" id="footer-official" data-en="Official site" data-ar="الموقع الرسمي">Official site</h2>
+        <ul>
+          <li><a href="https://aisyria.org/#communities" target="_blank" rel="noopener noreferrer"><span data-en="Communities" data-ar="المجتمعات">Communities</span><span class="sr-only" data-en=", opens in a new tab" data-ar="، يفتح في تبويب جديد">, opens in a new tab</span></a></li>
+          <li><a href="https://aisyria.org/#achievements" target="_blank" rel="noopener noreferrer"><span data-en="Achievements" data-ar="الإنجازات">Achievements</span><span class="sr-only" data-en=", opens in a new tab" data-ar="، يفتح في تبويب جديد">, opens in a new tab</span></a></li>
+          <li><a href="https://aisyria.org/learning-management-system" target="_blank" rel="noopener noreferrer"><span data-en="Learning platform" data-ar="منصة التعلّم">Learning platform</span><span class="sr-only" data-en=", opens in a new tab" data-ar="، يفتح في تبويب جديد">, opens in a new tab</span></a></li>
+          <li><a href="https://aisyria.org/resources/ai-tools" target="_blank" rel="noopener noreferrer"><span data-en="AI tools" data-ar="أدوات الذكاء الاصطناعي">AI tools</span><span class="sr-only" data-en=", opens in a new tab" data-ar="، يفتح في تبويب جديد">, opens in a new tab</span></a></li>
+          <li><a href="https://aisyria.org/one-million-initiative-home" target="_blank" rel="noopener noreferrer"><span data-en="The million-user initiative" data-ar="مبادرة المليون مستخدم">The million-user initiative</span><span class="sr-only" data-en=", opens in a new tab" data-ar="، يفتح في تبويب جديد">, opens in a new tab</span></a></li>
+          <li><a href="https://aisyria.org/registration" target="_blank" rel="noopener noreferrer"><span data-en="Registration" data-ar="التسجيل">Registration</span><span class="sr-only" data-en=", opens in a new tab" data-ar="، يفتح في تبويب جديد">, opens in a new tab</span></a></li>
+        </ul>
+      </nav>
+
+      <div class="footer-map">
+        <a class="map-shot" href="https://maps.app.goo.gl/bKMSHXkmkr5U3tZh6" target="_blank" rel="noopener noreferrer" aria-label="Open SAAE location in Maps"><img src="assets/images/saae-map.png" alt="Map showing the SAAE headquarters in Damascus" width="696" height="339" decoding="async"></a>
+        <ul class="map-lines">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg><a href="https://maps.app.goo.gl/bKMSHXkmkr5U3tZh6" target="_blank" rel="noopener noreferrer" data-en="Damascus, beside the Ministry of Higher Education and Scientific Research" data-ar="دمشق - بجانب وزارة التعليم العالي والبحث العلمي">Damascus, beside the Ministry of Higher Education and Scientific Research</a></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><a href="mailto:info@aisyria.org">info@aisyria.org</a></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h3l2 5-2 1.5a15 15 0 0 0 4.5 4.5L16 12l5 2v3c0 1.1-.9 2-2 2C10.2 19 5 13.8 5 5a2 2 0 0 1 2-2Z"/></svg><a href="tel:+963930763547" dir="ltr">+963 930 763 547</a></li>
+        </ul>
+        <a class="map-visit" href="https://maps.app.goo.gl/bKMSHXkmkr5U3tZh6" target="_blank" rel="noopener noreferrer"><span data-en="Visit us" data-ar="زورونا">Visit us</span> <span class="visit-arrow" aria-hidden="true">→</span></a>
+        <p class="map-attr">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors</p>
+      </div>
+    </div>
+
+    <div class="page-shell footer-bottom">
+      <span data-en="© 2026 Syrian Association for AI &amp; Entrepreneurship. All rights reserved." data-ar="جميع الحقوق محفوظة للجمعية السورية للذكاء الاصطناعي وريادة الأعمال 2026 ©">© 2026 Syrian Association for AI &amp; Entrepreneurship. All rights reserved.</span>
+    </div>
+  </footer>
+
+  <script src="assets/js/about-v2.js" defer></script>
+</body>
+</html>
