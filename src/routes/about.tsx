@@ -29,7 +29,10 @@ export const Route = createFileRoute("/about")({
         content:
           "الجمعية السورية للذكاء الصنعي وريادة الأعمال — منظمة شبابية تنشر ثقافة الذكاء الصنعي وريادة الأعمال وتمكّن الشباب السوري من صناعة المستقبل. Syrian Association for AI & Entrepreneurship (SAAE) — a youth-led organization empowering Syrian youth through AI and entrepreneurship.",
       },
-      { property: "og:title", content: "About SAAE — Syrian Association for AI & Entrepreneurship" },
+      {
+        property: "og:title",
+        content: "About SAAE — Syrian Association for AI & Entrepreneurship",
+      },
       {
         property: "og:description",
         content:
@@ -251,7 +254,12 @@ function Goals() {
         </Reveal>
 
         <div className="v2-seeds">
-          <div className="v2-seed-row" role="tablist" aria-label={c.goals.heading} onKeyDown={onKeyDown}>
+          <div
+            className="v2-seed-row"
+            role="tablist"
+            aria-label={c.goals.heading}
+            onKeyDown={onKeyDown}
+          >
             {items.map((_, i) => (
               <button
                 key={i}

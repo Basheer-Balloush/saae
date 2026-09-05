@@ -401,7 +401,8 @@ export const translations: Record<Lang, Dict> = {
         fieldsTitle: "A living system of skills.",
         fieldsSub: "Each field is a branch. Together, they form the capability to build.",
         valuesTitle: "The canopy above everything we do.",
-        valuesNote: "From a training room to a national partnership, these values guide every choice.",
+        valuesNote:
+          "From a training room to a national partnership, these values guide every choice.",
         communitiesEyebrow: "SAAE communities",
         communitiesTitle: "Nine fields, one shared method.",
         communitiesIntro:
