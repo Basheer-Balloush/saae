@@ -92,6 +92,13 @@ type Dict = {
   v2: {
     skipToContent: string;
     nav: { ariaLabel: string; open: string; close: string };
+    partners: {
+      eyebrow: string;
+      title: string;
+      intro: string;
+      note: string;
+      empty: string;
+    };
     ribbon: {
       ariaLabel: string;
       sectionsLabel: string;
@@ -309,6 +316,14 @@ export const translations: Record<Lang, Dict> = {
     v2: {
       skipToContent: "Skip to main content",
       nav: { ariaLabel: "Main navigation", open: "Open navigation", close: "Close navigation" },
+      partners: {
+        eyebrow: "Shared work",
+        title: "The partner register.",
+        intro:
+          "The organisations SAAE lists publicly as partners: universities, ministries, companies and community bodies working with the association on training and applied projects.",
+        note: "Marks and names are published by SAAE and fitted to a common size. Nothing here has been redrawn.",
+        empty: "Partners will be listed here.",
+      },
       ribbon: {
         ariaLabel: "Journey navigation",
         sectionsLabel: "Page sections",
@@ -524,6 +539,14 @@ export const translations: Record<Lang, Dict> = {
     v2: {
       skipToContent: "انتقل إلى المحتوى الرئيسي",
       nav: { ariaLabel: "التنقل الرئيسي", open: "فتح القائمة", close: "إغلاق القائمة" },
+      partners: {
+        eyebrow: "عمل مشترك",
+        title: "سجل الشركاء.",
+        intro:
+          "الجهات التي تدرجها الجمعية علناً كشركاء: جامعات ووزارات وشركات وهيئات مجتمعية تعمل معها في التدريب والمشاريع التطبيقية.",
+        note: "تنشر الجمعية الشعارات والأسماء، وقد ضُبطت على قياس موحّد. لم يُعَد رسم أي منها.",
+        empty: "سيتم إدراج الشركاء هنا قريباً.",
+      },
       ribbon: {
         ariaLabel: "التنقل بين أقسام الصفحة",
         sectionsLabel: "أقسام الصفحة",
