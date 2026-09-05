@@ -99,6 +99,18 @@ type Dict = {
       note: string;
       empty: string;
     };
+    news: {
+      eyebrow: string;
+      title: string;
+      intro: string;
+      readStory: string;
+      related: string;
+      videos: string;
+      empty: string;
+      noContent: string;
+      notFound: string;
+      back: string;
+    };
     ribbon: {
       ariaLabel: string;
       sectionsLabel: string;
@@ -324,6 +336,19 @@ export const translations: Record<Lang, Dict> = {
         note: "Marks and names are published by SAAE and fitted to a common size. Nothing here has been redrawn.",
         empty: "Partners will be listed here.",
       },
+      news: {
+        eyebrow: "Latest news",
+        title: "The work, as it happens.",
+        intro:
+          "Training rooms, national broadcasts and public launches — the running record of what SAAE is building, newest first.",
+        readStory: "Read the story",
+        related: "Related news",
+        videos: "Videos",
+        empty: "News will be published here.",
+        noContent: "No content available yet.",
+        notFound: "Article not found",
+        back: "Back to news",
+      },
       ribbon: {
         ariaLabel: "Journey navigation",
         sectionsLabel: "Page sections",
@@ -546,6 +571,18 @@ export const translations: Record<Lang, Dict> = {
           "الجهات التي تدرجها الجمعية علناً كشركاء: جامعات ووزارات وشركات وهيئات مجتمعية تعمل معها في التدريب والمشاريع التطبيقية.",
         note: "تنشر الجمعية الشعارات والأسماء، وقد ضُبطت على قياس موحّد. لم يُعَد رسم أي منها.",
         empty: "سيتم إدراج الشركاء هنا قريباً.",
+      },
+      news: {
+        eyebrow: "آخر الأخبار",
+        title: "العمل كما يحدث.",
+        intro: "قاعات تدريب وبث وطني وإطلاقات عامة — سجل متجدد لما تبنيه الجمعية، الأحدث أولاً.",
+        readStory: "اقرأ الخبر",
+        related: "أخبار ذات صلة",
+        videos: "فيديوهات",
+        empty: "ستُنشر الأخبار هنا.",
+        noContent: "لا يوجد محتوى بعد.",
+        notFound: "المقال غير موجود",
+        back: "العودة إلى الأخبار",
       },
       ribbon: {
         ariaLabel: "التنقل بين أقسام الصفحة",

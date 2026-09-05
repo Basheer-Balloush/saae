@@ -1,9 +1,8 @@
-import { useEffect } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Calendar } from "lucide-react";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
+import { ArrowLeft, ArrowRight, Calendar } from "lucide-react";
+
+import { PageV2 } from "@/components/site-v2/PageV2";
+import { Reveal } from "@/components/site-v2/Reveal";
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { communityLabel } from "@/lib/communityCategories";
@@ -44,22 +43,30 @@ type RelatedItemLoader = {
 };
 
 export const Route = createFileRoute("/news/$id")({
-  loader: async ({ params }): Promise<{
-    meta: null | { title: string; description: string; image: string | null; publishedAt: string | null };
+  loader: async ({
+    params,
+  }): Promise<{
+    meta: null | {
+      title: string;
+      description: string;
+      image: string | null;
+      publishedAt: string | null;
+    };
     article: NewsArticleLoader | null;
     related: RelatedItemLoader[];
   }> => {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      params.id,
+    );
     if (!isUuid) return { meta: null, article: null, related: [] };
     try {
-      const { data } = await supabase
-        .from("news")
-        .select("*")
-        .eq("id", params.id)
-        .maybeSingle();
+      const { data } = await supabase.from("news").select("*").eq("id", params.id).maybeSingle();
       if (!data) return { meta: null, article: null, related: [] };
       const article = data as unknown as NewsArticleLoader;
-      const cats: string[] = (article.categories && article.categories.length > 0) ? article.categories : [article.category];
+      const cats: string[] =
+        article.categories && article.categories.length > 0
+          ? article.categories
+          : [article.category];
       const { data: rel } = await supabase
         .from("news")
         .select("id,title,title_ar,title_en,image_url,published_at,category,categories")
@@ -70,9 +77,10 @@ export const Route = createFileRoute("/news/$id")({
 
       const title = (article.title_en ?? article.title_ar ?? article.title ?? "News") as string;
       const rawDesc = (article.excerpt_en ?? article.excerpt_ar ?? article.excerpt ?? "") as string;
-      const fullDesc = rawDesc && rawDesc.length >= 50
-        ? rawDesc
-        : `${title} — ${rawDesc || "خبر من الجمعية السورية للذكاء الصنعي وريادة الأعمال (SAAE)."}`;
+      const fullDesc =
+        rawDesc && rawDesc.length >= 50
+          ? rawDesc
+          : `${title} — ${rawDesc || "خبر من الجمعية السورية للذكاء الصنعي وريادة الأعمال (SAAE)."}`;
       const description = fullDesc.length > 160 ? `${fullDesc.slice(0, 157).trimEnd()}…` : fullDesc;
       return {
         meta: {
@@ -92,8 +100,12 @@ export const Route = createFileRoute("/news/$id")({
     const m = loaderData?.meta;
     const url = `https://aisyria.org/news/${params.id}`;
     const title = m?.title ? `${m.title} — SAAE` : "News — SAAE";
-    const description = m?.description ?? "News article from the Syrian Association for AI & Entrepreneurship (SAAE) — read the latest activities and updates.";
-    const image = m?.image ?? "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
+    const description =
+      m?.description ??
+      "News article from the Syrian Association for AI & Entrepreneurship (SAAE) — read the latest activities and updates.";
+    const image =
+      m?.image ??
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
     return {
       meta: [
         { title },
@@ -105,9 +117,7 @@ export const Route = createFileRoute("/news/$id")({
         { property: "og:image", content: image },
         { name: "twitter:image", content: image },
       ],
-      links: [
-        { rel: "canonical", href: url },
-      ],
+      links: [{ rel: "canonical", href: url }],
       scripts: m
         ? [
             {
@@ -128,9 +138,6 @@ export const Route = createFileRoute("/news/$id")({
   },
   component: NewsDetailPage,
 });
-
-const TEAL = "#048090";
-const GREEN = "#698F3F";
 
 type NewsArticle = {
   id: string;
@@ -184,21 +191,19 @@ const STATIC_ARTICLE: NewsArticle = {
   published_at: new Date().toISOString(),
 };
 
-const fade = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true } as const,
-  transition: { duration: 0.6 },
-};
-
-function pickLang<T>(ar: T | null | undefined, en: T | null | undefined, fallback: T | null | undefined, lang: "ar" | "en"): T | null {
+function pickLang<T>(
+  ar: T | null | undefined,
+  en: T | null | undefined,
+  fallback: T | null | undefined,
+  lang: "ar" | "en",
+): T | null {
   if (lang === "ar") return (ar ?? en ?? fallback ?? null) as T | null;
   return (en ?? ar ?? fallback ?? null) as T | null;
 }
 
 function formatDate(iso: string, lang: string): string {
   try {
-    return new Date(iso).toLocaleDateString(lang === "ar" ? "ar-SY" : "en-US", {
+    return new Date(iso).toLocaleDateString(lang === "ar" ? "ar-SY" : "en-GB", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -208,9 +213,10 @@ function formatDate(iso: string, lang: string): string {
   }
 }
 
+/** Plain-text body → paragraphs. Never HTML: the column is not sanitised. */
 function renderContent(text: string) {
   return text.split(/\n{2,}/).map((para, i) => (
-    <p key={i} className="mb-6 last:mb-0">
+    <p key={i}>
       {para.split("\n").map((line, j, arr) => (
         <span key={j}>
           {line}
@@ -223,8 +229,9 @@ function renderContent(text: string) {
 
 function NewsDetailPage() {
   const { id } = Route.useParams();
-  const { lang, dir } = useLang();
+  const { lang, dir, t } = useLang();
   const isRtl = dir === "rtl";
+  const v = t.v2.news;
   const router = useRouter();
   const canGoBack = typeof window !== "undefined" && window.history.length > 1;
   const handleBack = (e: React.MouseEvent) => {
@@ -244,239 +251,161 @@ function NewsDetailPage() {
     : STATIC_ARTICLE;
   const related: RelatedItem[] = (loaderData.related as unknown as RelatedItem[]) ?? [];
 
-
+  const BackArrow = isRtl ? ArrowRight : ArrowLeft;
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="flex min-h-[60vh] items-center justify-center pt-24">
-          <div className="text-center">
-            <h1 className="text-3xl font-black" style={{ fontFamily: '"Cairo", system-ui, sans-serif' }}>
-              {lang === "ar" ? "المقال غير موجود" : "Article not found"}
-            </h1>
-            <Link to="/news" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold" style={{ color: TEAL }}>
-              {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
-              {lang === "ar" ? "العودة للأخبار" : "Back to news"}
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <PageV2>
+        <div className="v2-shell v2-article-missing">
+          <h1>{v.notFound}</h1>
+          <Link to="/news" className="v2-back-link">
+            <BackArrow className="v2-back-icon" aria-hidden="true" />
+            {v.back}
+          </Link>
+        </div>
+      </PageV2>
     );
   }
 
   const title = pickLang(article.title_ar, article.title_en, article.title, lang) || article.title;
-  const bodyText = pickLang(article.content_ar, article.content_en, article.content, lang) || pickLang(article.excerpt_ar, article.excerpt_en, article.excerpt, lang) || "";
+  const lead = pickLang(article.excerpt_ar, article.excerpt_en, article.excerpt, lang) || "";
+  const bodyText =
+    pickLang(article.content_ar, article.content_en, article.content, lang) || lead || "";
   const dateStr = formatDate(article.published_at, lang);
+  const tags = (
+    (article.categories && article.categories.length > 0
+      ? article.categories
+      : [article.category]) ?? []
+  ).filter(Boolean);
 
   const gallery = (article.images ?? []).filter(Boolean);
   // Build full carousel: cover + gallery (dedup)
-  const carouselImages = Array.from(new Set([article.image_url, ...gallery].filter(Boolean) as string[]));
+  const carouselImages = Array.from(
+    new Set([article.image_url, ...gallery].filter(Boolean) as string[]),
+  );
   const videos = (article.videos ?? []).filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-
-      <main className="pt-28 pb-24 lg:pt-32 lg:pb-32">
-        <motion.header {...fade} className="mx-auto max-w-[850px] px-6 text-center">
-          <div className="flex flex-wrap justify-center gap-2">
-            {((article.categories && article.categories.length > 0 ? article.categories : [article.category]).filter(Boolean)).map((c) => (
-              <span
-                key={c}
-                className="inline-block rounded-full px-5 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white"
-                style={{ backgroundColor: GREEN }}
-              >
+    <PageV2>
+      <div className="v2-shell">
+        <header className="v2-article-head">
+          <div className="v2-article-chips">
+            {tags.map((c) => (
+              <span key={c} className="v2-article-chip">
                 {communityLabel(c, lang)}
               </span>
             ))}
           </div>
+          <h1 className="v2-article-title">{title}</h1>
+          <p className="v2-article-meta">
+            <Calendar className="v2-article-meta-icon" aria-hidden="true" />
+            <time dateTime={article.published_at}>{dateStr}</time>
+          </p>
+        </header>
 
-          <h1
-            className="mx-auto mt-7 max-w-3xl leading-[1.35]"
-            style={{
-              fontFamily: '"Cairo", system-ui, sans-serif',
-              fontWeight: 900,
-              fontSize: "clamp(1.75rem, 3.4vw, 2.75rem)",
-              color: "var(--foreground)",
-            }}
-          >
-            {title}
-          </h1>
-
-          <div className="mt-5 flex items-center justify-center gap-6 text-sm" style={{ color: "var(--muted-foreground)" }}>
-            <span className="inline-flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5" strokeWidth={1.75} />
-              {dateStr}
-            </span>
-          </div>
-        </motion.header>
-
-        {/* ── Image Carousel ── */}
-        {carouselImages.length > 0 && (
-          <motion.div
-            {...fade}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            className="mx-auto mt-12 max-w-5xl px-6"
-          >
+        {carouselImages.length > 0 ? (
+          <Reveal className="v2-article-media">
             {carouselImages.length === 1 ? (
-              <div className="overflow-hidden rounded-lg" style={{ border: "1px solid #e0e0e0" }}>
+              <figure className="v2-article-cover">
                 <img
                   src={carouselImages[0]}
                   alt={title}
-                  className="h-auto w-full object-cover"
-                  style={{ maxHeight: 520 }}
+                  width={1600}
+                  height={900}
+                  decoding="async"
                 />
-              </div>
+              </figure>
             ) : (
-              <Carousel opts={{ loop: true, direction: isRtl ? "rtl" : "ltr" }} className="w-full">
+              <Carousel
+                opts={{ loop: true, direction: isRtl ? "rtl" : "ltr" }}
+                className="v2-article-carousel"
+              >
                 <CarouselContent>
                   {carouselImages.map((url, i) => (
                     <CarouselItem key={url + i}>
-                      <div className="overflow-hidden rounded-lg" style={{ border: "1px solid #e0e0e0" }}>
+                      <figure className="v2-article-cover">
                         <img
                           src={url}
                           alt={`${title} — ${i + 1}`}
-                          className="h-auto w-full object-cover"
-                          style={{ maxHeight: 520 }}
+                          width={1600}
+                          height={900}
+                          loading={i === 0 ? undefined : "lazy"}
+                          decoding="async"
                         />
-                      </div>
+                      </figure>
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                <CarouselPrevious className="h-7 w-7 lg:h-8 lg:w-8 left-1 lg:-left-12 [&_svg]:h-3.5 [&_svg]:w-3.5" />
-                <CarouselNext className="h-7 w-7 lg:h-8 lg:w-8 right-1 lg:-right-12 [&_svg]:h-3.5 [&_svg]:w-3.5" />
+                <CarouselPrevious className="v2-carousel-btn !left-3 !right-auto" />
+                <CarouselNext className="v2-carousel-btn !right-3 !left-auto" />
               </Carousel>
             )}
-          </motion.div>
-        )}
+          </Reveal>
+        ) : null}
 
-        {/* ── Body ── */}
-        <motion.article
-          {...fade}
-          transition={{ duration: 0.6, delay: 0.25 }}
-          className="mx-auto mt-14 max-w-[850px] px-6"
-          style={{
-            fontFamily: '"Cairo", system-ui, sans-serif',
-            fontWeight: 400,
-            fontSize: 18,
-            lineHeight: 1.8,
-            color: "var(--foreground)",
-          }}
-        >
-          {bodyText ? (
-            renderContent(bodyText)
-          ) : (
-            <p style={{ color: "var(--muted-foreground)" }}>
-              {lang === "ar" ? "لا يوجد محتوى بعد." : "No content available yet."}
-            </p>
-          )}
-        </motion.article>
+        <article className="v2-article-body">
+          {lead && bodyText !== lead ? <p className="v2-article-lead">{lead}</p> : null}
+          {bodyText ? renderContent(bodyText) : <p className="v2-article-muted">{v.noContent}</p>}
+        </article>
 
-        {/* ── Videos ── */}
-        {videos.length > 0 && (
-          <motion.section
-            {...fade}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mx-auto mt-16 max-w-[850px] px-6"
-          >
-            <div className="mb-6 flex items-center gap-4" style={{ borderBottom: `1px solid ${TEAL}`, paddingBottom: 12 }}>
-              <h2 style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 800, fontSize: "1.25rem" }}>
-                {lang === "ar" ? "فيديوهات" : "Videos"}
-              </h2>
-            </div>
-            <div className="space-y-6">
+        {videos.length > 0 ? (
+          <section className="v2-article-videos">
+            <h2 className="v2-article-subhead">{v.videos}</h2>
+            <div className="v2-article-video-stack">
               {videos.map((url) => (
-                <video
-                  key={url}
-                  src={url}
-                  controls
-                  preload="metadata"
-                  className="w-full rounded-lg"
-                  style={{ border: "1px solid #e0e0e0", maxHeight: 560 }}
-                />
+                <video key={url} src={url} controls preload="metadata" />
               ))}
             </div>
-          </motion.section>
-        )}
+          </section>
+        ) : null}
 
-        {/* ── Related News ── */}
-        {related.length > 0 && (
-          <motion.section
-            {...fade}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mx-auto mt-24 max-w-[850px] px-6"
-            style={{ borderTop: `2px solid ${TEAL}`, paddingTop: 32 }}
-          >
-            <div className="mb-8 flex items-center gap-4">
-              <h2 style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 800, fontSize: "1.25rem", color: "var(--foreground)" }}>
-                {lang === "ar" ? "أخبار ذات صلة" : "Related News"}
-              </h2>
-            </div>
-
-            <div className="space-y-0">
-              {related.map((r) => {
+        {related.length > 0 ? (
+          <section className="v2-related">
+            <h2 className="v2-related-heading">{v.related}</h2>
+            <ul className="v2-related-grid">
+              {related.map((r, i) => {
                 const rTitle = pickLang(r.title_ar, r.title_en, r.title, lang) || r.title;
                 return (
-                  <Link
-                    key={r.id}
-                    to="/news/$id"
-                    params={{ id: r.id }}
-                    className="group flex items-start gap-5 border-b border-border/40 py-5 transition-colors hover:bg-muted/20"
-                  >
-                    <div className="w-[30%] flex-none">
-                      <div className="aspect-[16/10] overflow-hidden rounded-md">
-                        <img
-                          src={r.image_url || FALLBACK_IMG}
-                          alt={rTitle}
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                          loading="lazy"
-                        />
-                      </div>
-                      <p className="mt-2 text-xs" style={{ color: "var(--muted-foreground)" }}>
-                        {formatDate(r.published_at, lang)}
-                      </p>
-                    </div>
-                    <div className="flex flex-1 flex-col justify-center pt-1">
-                      <h3
-                        className="line-clamp-2 transition-colors group-hover:text-primary"
-                        style={{
-                          fontFamily: '"Cairo", system-ui, sans-serif',
-                          fontWeight: 700,
-                          fontSize: "1.05rem",
-                          lineHeight: 1.5,
-                          color: "var(--foreground)",
-                        }}
-                      >
-                        {rTitle}
-                      </h3>
-                      <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold" style={{ color: TEAL }}>
-                        {lang === "ar" ? "اقرأ المقال كاملاً" : "Read full article"}
-                        <ArrowUpRight className={`h-3.5 w-3.5 ${isRtl ? "-scale-x-100" : ""}`} />
-                      </span>
-                    </div>
-                  </Link>
+                  <li key={r.id}>
+                    <Reveal delay={Math.min(i, 3) * 0.05}>
+                      <Link to="/news/$id" params={{ id: r.id }} className="v2-related-card">
+                        <span className="v2-related-media">
+                          {r.image_url ? (
+                            <img
+                              src={r.image_url}
+                              alt=""
+                              width={800}
+                              height={550}
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          ) : (
+                            <span className="v2-news-placeholder" aria-hidden="true" />
+                          )}
+                          <span className="v2-related-veil" aria-hidden="true" />
+                        </span>
+                        <span className="v2-related-copy">
+                          <time className="v2-related-time" dateTime={r.published_at}>
+                            {formatDate(r.published_at, lang)}
+                          </time>
+                          <span className="v2-related-title">{rTitle}</span>
+                        </span>
+                      </Link>
+                    </Reveal>
+                  </li>
                 );
               })}
-            </div>
-          </motion.section>
-        )}
+            </ul>
+          </section>
+        ) : null}
 
-        <div className="mx-auto mt-16 max-w-[850px] px-6 text-center">
-          <Link
-            to="/news"
-            onClick={handleBack}
-            className="inline-flex items-center gap-2 rounded-full border px-7 py-3 text-sm font-semibold transition-colors hover:bg-primary hover:text-primary-foreground"
-            style={{ borderColor: TEAL, color: TEAL }}
-          >
-            {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
-            {lang === "ar" ? "رجوع" : "Back"}
+        <div className="v2-article-foot">
+          <Link to="/news" onClick={handleBack} className="v2-back-link">
+            <BackArrow className="v2-back-icon" aria-hidden="true" />
+            {v.back}
           </Link>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </PageV2>
   );
 }
