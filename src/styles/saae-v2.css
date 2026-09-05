@@ -3391,44 +3391,6 @@
   margin-inline: auto;
 }
 
-/* dialogs rendered in a portal: the wrapper class travels with the content */
-
-.saae-v2.v2-dialog {
-  background: var(--v2-panel);
-  border: 1px solid var(--v2-line-firm);
-  border-radius: 26px;
-  color: var(--v2-type);
-}
-
-.saae-v2.v2-dialog h2,
-.saae-v2.v2-dialog label {
-  color: var(--v2-paper);
-}
-
-.saae-v2.v2-dialog p {
-  color: var(--v2-muted);
-}
-
-.saae-v2.v2-dialog input,
-.saae-v2.v2-dialog textarea,
-.saae-v2.v2-dialog select,
-.saae-v2.v2-dialog button[role="combobox"] {
-  min-height: 46px;
-  border-radius: 14px;
-  border: 1px solid var(--v2-line-firm);
-  background: rgba(3, 23, 30, 0.55);
-  color: var(--v2-paper);
-  font-size: 16px;
-}
-
-.saae-v2.v2-dialog button[type="submit"] {
-  min-height: 48px;
-  border-radius: 999px;
-  background: var(--v2-turquoise-lift);
-  color: #04222a;
-  font-weight: 800;
-}
-
 @media (max-width: 1000px) {
   .saae-v2 .v2-dial-grid,
   .saae-v2 .v2-blueprint,
