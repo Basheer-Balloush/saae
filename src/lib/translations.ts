@@ -92,6 +92,13 @@ type Dict = {
   v2: {
     skipToContent: string;
     nav: { ariaLabel: string; open: string; close: string };
+    partners: {
+      eyebrow: string;
+      title: string;
+      intro: string;
+      note: string;
+      empty: string;
+    };
     ribbon: {
       ariaLabel: string;
       sectionsLabel: string;
