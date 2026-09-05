@@ -2871,7 +2871,7 @@
 
 .saae-v2 .v2-ghost-million {
   position: absolute;
-  inset-inline-start: 50%;
+  left: 50%;
   top: 40%;
   transform: translate(-50%, -50%);
   margin: 0;
