@@ -141,6 +141,48 @@ type Dict = {
       futureTitle: string;
       futureCta: string;
     };
+    contact: {
+      pill: string;
+      eyebrow: string;
+      titleA: string;
+      titleB: string;
+      intro: string;
+      writeCta: string;
+      callCta: string;
+      city: string;
+      signalKicker: string;
+      signalTitle: string;
+      signalBody: string;
+      linesEyebrow: string;
+      linesTitle: string;
+      email: string;
+      phone: string;
+      visit: string;
+      responseTime: string;
+      responseValue: string;
+      formTitle: string;
+      formIntro: string;
+      fullName: string;
+      emailField: string;
+      phoneField: string;
+      organization: string;
+      inquiryType: string;
+      subject: string;
+      messageField: string;
+      send: string;
+      sending: string;
+      hqTitle: string;
+      hqBody: string;
+      openMaps: string;
+      assistantTitle: string;
+      assistantBody: string;
+      assistantCta: string;
+      followTitle: string;
+      sentTitle: string;
+      sentBody: string;
+      sendAnother: string;
+      backHome: string;
+    };
     ribbon: {
       ariaLabel: string;
       sectionsLabel: string;
@@ -411,6 +453,50 @@ export const translations: Record<Lang, Dict> = {
         futureTitle: "Syrian talent can rebuild, elevate and imagine what comes next.",
         futureCta: "Grow with SAAE",
       },
+      contact: {
+        pill: "Reply within 48 hours",
+        eyebrow: "Contact SAAE",
+        titleA: "Start a conversation",
+        titleB: "that goes somewhere.",
+        intro:
+          "Learners, institutions and journalists all reach the same place — a person on the SAAE team who answers. Choose your route and we take it from there.",
+        writeCta: "Write to us",
+        callCta: "Call the office",
+        city: "Damascus, Syria",
+        signalKicker: "An open line to SAAE",
+        signalTitle: "Your message starts here.",
+        signalBody: "Every message reaches a real person on our team.",
+        linesEyebrow: "Direct lines",
+        linesTitle: "Reach us the way you prefer.",
+        email: "Email",
+        phone: "Phone",
+        visit: "Visit",
+        responseTime: "Response time",
+        responseValue: "Within 48 hours",
+        formTitle: "Tell us what's on your mind",
+        formIntro: "Fill in the form and the right person on our team will reply.",
+        fullName: "Full name *",
+        emailField: "Email address *",
+        phoneField: "Phone number",
+        organization: "Organisation / company",
+        inquiryType: "Type of enquiry *",
+        subject: "Subject *",
+        messageField: "Your message *",
+        send: "Send message",
+        sending: "Sending…",
+        hqTitle: "Headquarters",
+        hqBody: "Damascus — beside the Ministry of Higher Education and Scientific Research",
+        openMaps: "Open in Google Maps",
+        assistantTitle: "Need an immediate answer?",
+        assistantBody: "Chat with Abu Al-Joud — our AI assistant, available around the clock.",
+        assistantCta: "Chat with Abu Al-Joud",
+        followTitle: "Follow SAAE",
+        sentTitle: "Your message reached us.",
+        sentBody:
+          "Thank you for writing. Our team will review your message and reply within 48 hours by email.",
+        sendAnother: "Send another message",
+        backHome: "Back to home",
+      },
       ribbon: {
         ariaLabel: "Journey navigation",
         sectionsLabel: "Page sections",
@@ -675,6 +761,49 @@ export const translations: Record<Lang, Dict> = {
         teamEyebrow: "من يقود العمل",
         futureTitle: "المواهب السورية قادرة على إعادة البناء والارتقاء وتخيّل ما يأتي.",
         futureCta: "انمُ مع الجمعية",
+      },
+      contact: {
+        pill: "رد خلال ٤٨ ساعة",
+        eyebrow: "تواصل مع الجمعية",
+        titleA: "ابدأ محادثة",
+        titleB: "تؤدي إلى نتيجة.",
+        intro:
+          "المتعلمون والمؤسسات والصحفيون يصلون إلى المكان نفسه — شخص في فريق الجمعية يجيبك. اختر مسارك وسنكمل الطريق.",
+        writeCta: "اكتب لنا",
+        callCta: "اتصل بالمكتب",
+        city: "دمشق، سورية",
+        signalKicker: "خط مفتوح مع الجمعية",
+        signalTitle: "رسالتك تبدأ من هنا.",
+        signalBody: "كل رسالة تصل إلى شخص حقيقي في فريقنا.",
+        linesEyebrow: "خطوط مباشرة",
+        linesTitle: "تواصل معنا بالطريقة التي تناسبك.",
+        email: "البريد الإلكتروني",
+        phone: "الهاتف",
+        visit: "زورونا",
+        responseTime: "وقت الاستجابة",
+        responseValue: "خلال 48 ساعة",
+        formTitle: "أخبرنا بما يدور في ذهنك",
+        formIntro: "املأ النموذج وسيردّ عليك الشخص المناسب في فريقنا.",
+        fullName: "الاسم الكامل *",
+        emailField: "البريد الإلكتروني *",
+        phoneField: "رقم الهاتف",
+        organization: "الجهة / الشركة",
+        inquiryType: "نوع الاستفسار *",
+        subject: "الموضوع *",
+        messageField: "رسالتك *",
+        send: "أرسل الرسالة",
+        sending: "جارٍ الإرسال…",
+        hqTitle: "المقر الرئيسي",
+        hqBody: "دمشق — بجانب وزارة التعليم العالي والبحث العلمي",
+        openMaps: "افتح في خرائط جوجل",
+        assistantTitle: "بحاجة لإجابة فورية؟",
+        assistantBody: "تحدث مع «أبو الجود» — مساعدنا الذكي على مدار الساعة.",
+        assistantCta: "تحدث مع أبو الجود",
+        followTitle: "تابع الجمعية",
+        sentTitle: "وصلتنا رسالتك.",
+        sentBody: "شكراً لتواصلك معنا. سيراجع فريقنا رسالتك ويرد عليك خلال 48 ساعة على بريدك الإلكتروني.",
+        sendAnother: "إرسال رسالة أخرى",
+        backHome: "العودة إلى الرئيسية",
       },
       ribbon: {
         ariaLabel: "التنقل بين أقسام الصفحة",
