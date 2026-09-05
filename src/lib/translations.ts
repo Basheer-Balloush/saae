@@ -111,6 +111,36 @@ type Dict = {
       notFound: string;
       back: string;
     };
+    about: {
+      eyebrow: string;
+      lede: string;
+      scrollCue: string;
+      markHint: string;
+      chapters: {
+        story: string;
+        direction: string;
+        goals: string;
+        fields: string;
+        values: string;
+        communities: string;
+        team: string;
+        future: string;
+      };
+      storyTitle: string;
+      directionTitle: string;
+      goalsTitle: string;
+      goalsHint: string;
+      fieldsTitle: string;
+      fieldsSub: string;
+      valuesTitle: string;
+      valuesNote: string;
+      communitiesEyebrow: string;
+      communitiesTitle: string;
+      communitiesIntro: string;
+      teamEyebrow: string;
+      futureTitle: string;
+      futureCta: string;
+    };
     ribbon: {
       ariaLabel: string;
       sectionsLabel: string;
