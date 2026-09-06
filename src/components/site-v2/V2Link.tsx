@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ComponentProps } from "react";
 
-type LinkProps = Omit<ComponentProps<typeof Link>, "to" | "hash">;
+type LinkProps = Omit<ComponentProps<typeof Link>, "to" | "hash" | "params">;
 
 export type V2LinkProps = LinkProps & {
   /**
@@ -11,12 +11,14 @@ export type V2LinkProps = LinkProps & {
    */
   to: string;
   hash?: string;
+  /** Route params for dynamic segments; loosely typed for the same reason. */
+  params?: Record<string, string>;
 };
 
 /** Internal navigation for the v2 chrome. Always a router Link, never an <a>. */
-export function V2Link({ to, hash, ...rest }: V2LinkProps) {
+export function V2Link({ to, hash, params, ...rest }: V2LinkProps) {
   const Any = Link as unknown as React.ComponentType<Record<string, unknown>>;
-  return <Any to={to} hash={hash} {...rest} />;
+  return <Any to={to} hash={hash} params={params} {...rest} />;
 }
 
 export default V2Link;
