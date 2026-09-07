@@ -1101,12 +1101,46 @@ const staticGateStrings = [
       const preventSiteLoaderKeyScroll = event => {
         if (siteLoaderScrollKeys.has(event.key)) event.preventDefault();
       };
+      /* The raw milestones jump (4 → 66 → 97). The displayed value is eased
+         toward the target on every frame so the two rails glide instead of
+         snapping, and creeps forward slightly while a long download runs. */
+      /* Matches where the CSS warm-up has reached, so handover never rewinds. */
+      let siteLoaderShownValue = Math.min(22, 2 + (performance.now() / 4000) * 20);
+      let siteLoaderEaseRequest = 0;
+      let siteLoaderLastTick = 0;
+      const paintSiteLoaderProgress = () => {
+        if (!siteLoader || !siteLoaderProgress) return;
+        // Hands the rails over from the CSS warm-up to real progress.
+        siteLoader.dataset.progressLive = "true";
+        siteLoader.style.setProperty("--site-loader-progress", siteLoaderShownValue.toFixed(2));
+        siteLoaderProgress.setAttribute("aria-valuenow", String(Math.round(siteLoaderShownValue)));
+      };
+      const stepSiteLoaderProgress = now => {
+        siteLoaderEaseRequest = 0;
+        if (siteLoaderDismissed) return;
+        const delta = Math.min(now - (siteLoaderLastTick || now), 64);
+        siteLoaderLastTick = now;
+        /* A slow trickle below the current milestone keeps the bar alive while
+           the video streams, but never overtakes real progress. */
+        const creepCeiling = Math.min(siteLoaderProgressValue + 6, 96);
+        const target = Math.max(siteLoaderProgressValue, Math.min(creepCeiling, siteLoaderShownValue + delta * 0.004));
+        const ease = 1 - Math.pow(0.006, delta / 1000);
+        siteLoaderShownValue += (target - siteLoaderShownValue) * ease;
+        if (target - siteLoaderShownValue < 0.05) siteLoaderShownValue = target;
+        paintSiteLoaderProgress();
+        if (siteLoaderShownValue < 100) {
+          siteLoaderEaseRequest = window.requestAnimationFrame(stepSiteLoaderProgress);
+        }
+      };
       const setSiteLoaderProgress = value => {
         if (!siteLoader || !siteLoaderProgress || siteLoaderDismissed) return;
         siteLoaderProgressValue = Math.max(siteLoaderProgressValue, clamp(value, 0, 100));
-        siteLoader.style.setProperty("--site-loader-progress", siteLoaderProgressValue.toFixed(2));
-        siteLoaderProgress.setAttribute("aria-valuenow", String(Math.round(siteLoaderProgressValue)));
+        if (!siteLoaderEaseRequest) {
+          siteLoaderLastTick = 0;
+          siteLoaderEaseRequest = window.requestAnimationFrame(stepSiteLoaderProgress);
+        }
       };
+
       const updateSiteLoaderBufferedProgress = () => {
         if (!Number.isFinite(video.duration) || video.duration <= 0 || video.buffered.length === 0) return;
         setSiteLoaderProgress(25 + clamp(video.buffered.end(video.buffered.length - 1) / video.duration, 0, 1) * 45);
@@ -1128,6 +1162,8 @@ const staticGateStrings = [
         window.clearTimeout(siteLoaderCompletionTimer);
         window.clearTimeout(siteLoaderSafetyTimer);
         window.clearTimeout(siteLoaderFrameTimer);
+        if (siteLoaderEaseRequest) window.cancelAnimationFrame(siteLoaderEaseRequest);
+        siteLoaderEaseRequest = 0;
         video.removeEventListener("loadstart", onSiteLoaderLoadStart);
         video.removeEventListener("loadedmetadata", onSiteLoaderMetadata);
         video.removeEventListener("progress", onSiteLoaderProgress);
@@ -1153,7 +1189,7 @@ const staticGateStrings = [
         // motion when the page first becomes visible, rather than waiting.
         document.documentElement.classList.add("hero-opening-ready");
         siteLoader.classList.add("is-done");
-        const fadeDuration = reducedMotion.matches ? 260 : 480;
+        const fadeDuration = reducedMotion.matches ? 260 : 640;
         __setTimeout(() => {
           siteLoader.classList.add("is-hidden");
           document.documentElement.classList.remove("site-loading");
@@ -1165,8 +1201,11 @@ const staticGateStrings = [
         if (!siteLoader || siteLoaderDismissed || siteLoaderCompleting || !siteLoaderMinimumComplete || !siteLoaderVideoReady) return;
         siteLoaderCompleting = true;
         setSiteLoaderProgress(100);
+        // Land exactly on full rather than easing asymptotically toward it.
+        siteLoaderShownValue = 100;
+        paintSiteLoaderProgress();
         siteLoader.classList.add("is-complete");
-        siteLoaderCompletionTimer = __setTimeout(dismissSiteLoader, reducedMotion.matches ? 90 : 210);
+        siteLoaderCompletionTimer = __setTimeout(dismissSiteLoader, reducedMotion.matches ? 120 : 320);
       };
       const markSiteLoaderVideoReady = () => {
         siteLoaderVideoReady = true;
@@ -1209,7 +1248,7 @@ const staticGateStrings = [
         }, siteLoaderMinimumMs);
         siteLoaderSafetyTimer = __setTimeout(() => {
           if (!siteLoaderVideoReady) failVideo("Still scene active");
-        }, 22000);
+        }, 12000);
       }
 
       /* A refresh part-way down the page used to restore that offset, which put

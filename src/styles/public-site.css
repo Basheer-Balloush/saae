@@ -3515,3 +3515,20 @@ html[dir="rtl"] .radial-nav-toggle { inset:36px auto auto 22px; }
   .radial-nav.is-open .radial-nav-item:nth-child(6) { transform:translate(-50%,-50%) translate(56px,-97px); }
 }
 @media (prefers-reduced-motion:reduce) { .radial-nav *,.radial-language { transition-duration:.01ms !important; } }
+
+/* ---- Project overrides on top of the design package ---- */
+
+/* The faint vertical seam behind the loader tree read as a stray line. */
+.site-loader::after { display: none; }
+
+/* Softer, continuously eased progress rails. */
+.site-loader-progress-fill { transition: filter 180ms ease, box-shadow 180ms ease; }
+.site-loader { transition: opacity 620ms var(--ease-out), visibility 0s linear 620ms; }
+
+/* Before the hero script boots, the rails warm up on their own so the first
+   moments never look frozen; the script takes over on its first update. */
+@keyframes site-loader-warm { from { transform: scaleX(0.02); } to { transform: scaleX(0.22); } }
+.site-loader:not([data-progress-live]) .site-loader-progress-fill { animation: site-loader-warm 4s var(--ease-out) forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .site-loader:not([data-progress-live]) .site-loader-progress-fill { animation: none; transform: scaleX(0.12); }
+}
