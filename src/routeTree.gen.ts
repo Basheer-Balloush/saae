@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegistrationRouteImport } from './routes/registration'
-import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as OneMillionInitiativeHomeRouteImport } from './routes/one-million-initiative-home'
 import { Route as OneMillionInitiativeDonorsRouteImport } from './routes/one-million-initiative-donors'
 import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-initiative'
@@ -125,11 +124,6 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const RegistrationRoute = RegistrationRouteImport.update({
   id: '/registration',
   path: '/registration',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PartnersRoute = PartnersRouteImport.update({
-  id: '/partners',
-  path: '/partners',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OneMillionInitiativeHomeRoute =
@@ -698,7 +692,6 @@ export interface FileRoutesByFullPath {
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
-  '/partners': typeof PartnersRoute
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
@@ -799,7 +792,6 @@ export interface FileRoutesByTo {
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
-  '/partners': typeof PartnersRoute
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
@@ -897,7 +889,6 @@ export interface FileRoutesById {
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
-  '/partners': typeof PartnersRoute
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
@@ -1003,7 +994,6 @@ export interface FileRouteTypes {
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
-    | '/partners'
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
@@ -1104,7 +1094,6 @@ export interface FileRouteTypes {
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
-    | '/partners'
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
@@ -1201,7 +1190,6 @@ export interface FileRouteTypes {
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
-    | '/partners'
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
@@ -1306,7 +1294,6 @@ export interface RootRouteChildren {
   OneMillionInitiativeRoute: typeof OneMillionInitiativeRoute
   OneMillionInitiativeDonorsRoute: typeof OneMillionInitiativeDonorsRoute
   OneMillionInitiativeHomeRoute: typeof OneMillionInitiativeHomeRoute
-  PartnersRoute: typeof PartnersRoute
   RegistrationRoute: typeof RegistrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
@@ -1346,13 +1333,6 @@ declare module '@tanstack/react-router' {
       path: '/registration'
       fullPath: '/registration'
       preLoaderRoute: typeof RegistrationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/partners': {
-      id: '/partners'
-      path: '/partners'
-      fullPath: '/partners'
-      preLoaderRoute: typeof PartnersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/one-million-initiative-home': {
@@ -2392,7 +2372,6 @@ const rootRouteChildren: RootRouteChildren = {
   OneMillionInitiativeRoute: OneMillionInitiativeRoute,
   OneMillionInitiativeDonorsRoute: OneMillionInitiativeDonorsRoute,
   OneMillionInitiativeHomeRoute: OneMillionInitiativeHomeRoute,
-  PartnersRoute: PartnersRoute,
   RegistrationRoute: RegistrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,

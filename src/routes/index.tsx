@@ -1,14 +1,13 @@
 import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-
-import { PageV2 } from "@/components/site-v2/PageV2";
-import { HeroStage } from "@/components/site-v2/HeroStage";
-import { HomeNewsReel } from "@/components/site-v2/HomeNewsReel";
-import { HomePartners } from "@/components/site-v2/HomePartners";
-import { MissionReel } from "@/components/site-v2/MissionReel";
-import { HomeFaq } from "@/components/site-v2/HomeFaq";
-import type { HomeNewsRow } from "@/components/site/FeaturedNews";
-import { useLang } from "@/lib/i18n";
+import { Navbar } from "@/components/site/Navbar";
+import { FeaturedNews, type HomeNewsRow } from "@/components/site/FeaturedNews";
+import { Communities } from "@/components/site/Communities";
+import { LmsCta } from "@/components/site/LmsCta";
+import { InitiativeCta } from "@/components/site/InitiativeCta";
+import { Achievements } from "@/components/site/Achievements";
+import { Partners } from "@/components/site/Partners";
+import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
@@ -47,8 +46,6 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { news } = Route.useLoaderData();
-  const { t } = useLang();
-  const h = t.v2.home;
 
   // Prevent the browser's scroll restoration from flashing a previous
   // position (e.g. Partners section) before TanStack Router scrolls to top.
@@ -65,19 +62,17 @@ function Index() {
   }, []);
 
   return (
-    <PageV2
-      ribbonSections={[
-        { id: "news", label: h.newsEyebrow },
-        { id: "partners", label: h.partnersEyebrow },
-        { id: "mission", label: h.missionEyebrow },
-        { id: "faq", label: h.faqEyebrow },
-      ]}
-    >
-      <HeroStage />
-      <HomeNewsReel news={news} />
-      <HomePartners />
-      <MissionReel />
-      <HomeFaq />
-    </PageV2>
+    <div id="home" className="min-h-screen scroll-mt-24 bg-background text-foreground">
+      <Navbar />
+      <main>
+        <FeaturedNews initialNews={news} />
+        <LmsCta />
+        <InitiativeCta />
+        <Partners />
+        <Achievements />
+        <Communities />
+      </main>
+      <Footer />
+    </div>
   );
 }

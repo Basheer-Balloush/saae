@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
-
-import { PageV2 } from "@/components/site-v2/PageV2";
-import { Reveal } from "@/components/site-v2/Reveal";
+import { motion } from "framer-motion";
+import { ArrowUpRight, ArrowLeft, ArrowRight } from "lucide-react";
+import { Navbar } from "@/components/site/Navbar";
+import { Footer } from "@/components/site/Footer";
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { communityLabel } from "@/lib/communityCategories";
@@ -11,9 +12,7 @@ export const Route = createFileRoute("/news/")({
   loader: async () => {
     const { data } = await supabase
       .from("news")
-      .select(
-        "id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,categories,published_at",
-      )
+      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,categories,published_at")
       .order("published_at", { ascending: false })
       .order("created_at", { ascending: false });
     return { items: (data ?? []) as NewsRow[] };
@@ -23,21 +22,22 @@ export const Route = createFileRoute("/news/")({
       { title: "الأخبار والنشاطات — SAAE" },
       {
         name: "description",
-        content:
-          "آخر الأخبار والنشاطات والفعاليات للجمعية السورية للذكاء الصنعي وريادة الأعمال ومجتمعاتها المتخصصة.",
+        content: "آخر الأخبار والنشاطات والفعاليات للجمعية السورية للذكاء الصنعي وريادة الأعمال ومجتمعاتها المتخصصة.",
       },
       { property: "og:title", content: "أخبار الجمعية السورية للذكاء الصنعي وريادة الأعمال" },
       {
         property: "og:description",
-        content:
-          "تابع أحدث الفعاليات والأنشطة والمبادرات التي تنظمها SAAE ومجتمعاتها المتخصصة في الذكاء الصنعي وريادة الأعمال.",
+        content: "تابع أحدث الفعاليات والأنشطة والمبادرات التي تنظمها SAAE ومجتمعاتها المتخصصة في الذكاء الصنعي وريادة الأعمال.",
       },
       { property: "og:url", content: "https://aisyria.org/news" },
     ],
-    links: [{ rel: "canonical", href: "https://aisyria.org/news" }],
+    links: [
+      { rel: "canonical", href: "https://aisyria.org/news" },
+    ],
   }),
   component: NewsPage,
 });
+
 
 type NewsRow = {
   id: string;
@@ -53,58 +53,23 @@ type NewsRow = {
   published_at: string;
 };
 
-function pick(
-  ar: string | null,
-  en: string | null,
-  fallback: string | null,
-  lang: "ar" | "en",
-): string {
+const FALLBACK_IMG =
+  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
+
+function pick(ar: string | null, en: string | null, fallback: string | null, lang: "ar" | "en"): string {
   if (lang === "ar") return ar || en || fallback || "";
   return en || ar || fallback || "";
 }
 
-function formatDate(iso: string, lang: "ar" | "en"): string {
-  try {
-    return new Date(iso).toLocaleDateString(lang === "ar" ? "ar-SY" : "en-GB", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  } catch {
-    return iso;
-  }
-}
-
-function tagsOf(row: { categories: string[] | null; category: string }): string[] {
-  return (
-    (row.categories && row.categories.length > 0 ? row.categories : [row.category]) ?? []
-  ).filter(Boolean);
-}
-
-/** Small inline arrow, matching the prototype's CTA glyph. */
-function CtaArrow() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true">
-      <path
-        d="M5 15 15 5M7 5h8v8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 function NewsPage() {
-  const { lang } = useLang();
+  const { t, dir, lang } = useLang();
+  const isRtl = dir === "rtl";
   const items = Route.useLoaderData().items as NewsRow[];
   const location = useLocation();
   const [highlightId, setHighlightId] = useState<string | null>(null);
-  const v = useLang().t.v2.news;
 
   useEffect(() => {
+
     const hash = location.hash?.replace(/^#/, "");
     if (!hash || !items || items.length === 0) return;
     let cancelled = false;
@@ -128,134 +93,101 @@ function NewsPage() {
     };
   }, [location.hash, items]);
 
-  const [featured, ...rest] = items;
-
   return (
-    <PageV2>
-      <div className="v2-shell v2-news-head">
-        <Reveal>
-          <p className="v2-eyebrow">{v.eyebrow}</p>
-          <h1 className="v2-news-title">{v.title}</h1>
-          <p className="v2-news-intro">{v.intro}</p>
-          <div className="v2-rule" aria-hidden="true" />
-        </Reveal>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main className="pt-24 pb-24 lg:pt-28 lg:pb-32">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mb-14 max-w-2xl"
+          >
+            <h1 className="mt-4 text-display-2 leading-[2.1] text-foreground">
+              {lang === "ar" ? "جميع الأخبار والنشاطات" : "All news & activities"}
+            </h1>
+            <p className="mt-5 text-body text-muted-foreground">
+              {lang === "ar"
+                ? "أرشيف كامل لأخبار ونشاطات الجمعية السورية للذكاء الاصطناعي وريادة الأعمال."
+                : "The full archive of news and activities from the Syrian Association for AI & Entrepreneurship."}
+            </p>
+          </motion.div>
 
-      <div className="v2-shell v2-news-body">
-        {items.length === 0 ? (
-          <p className="v2-news-empty">{v.empty}</p>
-        ) : (
-          <>
-            {featured ? (
-              <Reveal>
-                <article
-                  id={`news-card-${featured.id}`}
-                  className={`v2-featured${highlightId === featured.id ? " is-highlight" : ""}`}
-                >
-                  <div className="v2-featured-media">
-                    {featured.image_url ? (
+          {items.length === 0 ? (
+
+            <div className="rounded-2xl border border-border bg-card p-12 text-center">
+              <p className="text-body text-muted-foreground">
+                {lang === "ar" ? "لا توجد أخبار حالياً." : "No news yet."}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((n) => {
+                const title = pick(n.title_ar, n.title_en, n.title, lang);
+                const excerpt = pick(n.excerpt_ar, n.excerpt_en, n.excerpt, lang);
+                const isHighlight = highlightId === n.id;
+                return (
+                  <Link
+                    key={n.id}
+                    id={`news-card-${n.id}`}
+                    to="/news/$id"
+                    params={{ id: n.id }}
+                    className={`group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-soft transition-all duration-300 hover:shadow-lift ${
+                      isHighlight
+                        ? "border-primary ring-2 ring-primary/60 shadow-lift scale-[1.01]"
+                        : "border-border"
+                    }`}
+                  >
+                    <div className="aspect-[16/10] overflow-hidden bg-muted">
                       <img
-                        src={featured.image_url}
-                        alt=""
-                        width={1200}
-                        height={900}
+                        src={n.image_url || FALLBACK_IMG}
+                        alt={title}
+                        className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
                         loading="lazy"
-                        decoding="async"
-                        draggable={false}
                       />
-                    ) : (
-                      <span className="v2-news-placeholder" aria-hidden="true" />
-                    )}
-                    <span className="v2-featured-veil" aria-hidden="true" />
-                  </div>
-                  <div className="v2-featured-copy">
-                    <p className="v2-news-meta">
-                      {tagsOf(featured)
-                        .slice(0, 2)
-                        .map((c) => (
-                          <span key={c} className="v2-news-tag">
+                    </div>
+                    <div className="flex flex-1 flex-col p-6">
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        {((n.categories && n.categories.length > 0 ? n.categories : [n.category]).filter(Boolean)).map((c) => (
+                          <span key={c} className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
                             {communityLabel(c, lang)}
                           </span>
                         ))}
-                      <time dateTime={featured.published_at}>
-                        {formatDate(featured.published_at, lang)}
-                      </time>
-                    </p>
-                    <h2 className="v2-featured-headline">
-                      {pick(featured.title_ar, featured.title_en, featured.title, lang)}
-                    </h2>
-                    {pick(featured.excerpt_ar, featured.excerpt_en, featured.excerpt, lang) ? (
-                      <p className="v2-news-excerpt is-lead">
-                        {pick(featured.excerpt_ar, featured.excerpt_en, featured.excerpt, lang)}
-                      </p>
-                    ) : null}
-                    <Link className="v2-news-cta" to="/news/$id" params={{ id: featured.id }}>
-                      <span>{v.readStory}</span>
-                      <CtaArrow />
-                    </Link>
-                  </div>
-                </article>
-              </Reveal>
-            ) : null}
+                        <span className="text-muted-foreground">{n.published_at}</span>
+                      </div>
+                      <h2 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
+                        {title}
+                      </h2>
+                      {excerpt ? (
+                        <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
+                          {excerpt}
+                        </p>
+                      ) : null}
+                      <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                        {t.news.readMore}
+                        <ArrowUpRight className={isRtl ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
 
-            {rest.length > 0 ? (
-              <ul className="v2-story-grid">
-                {rest.map((n, i) => {
-                  const title = pick(n.title_ar, n.title_en, n.title, lang);
-                  const excerpt = pick(n.excerpt_ar, n.excerpt_en, n.excerpt, lang);
-                  return (
-                    <li key={n.id} id={`news-card-${n.id}`}>
-                      <Reveal
-                        className={`v2-story${highlightId === n.id ? " is-highlight" : ""}`}
-                        delay={Math.min(i, 8) * 0.04}
-                      >
-                        <Link to="/news/$id" params={{ id: n.id }} className="v2-story-link">
-                          <span className="v2-story-media">
-                            {n.image_url ? (
-                              <img
-                                src={n.image_url}
-                                alt=""
-                                width={800}
-                                height={1000}
-                                loading="lazy"
-                                decoding="async"
-                                draggable={false}
-                              />
-                            ) : (
-                              <span className="v2-news-placeholder" aria-hidden="true" />
-                            )}
-                            <span className="v2-story-veil" aria-hidden="true" />
-                          </span>
-                          <span className="v2-story-copy">
-                            <span className="v2-news-meta">
-                              {tagsOf(n)
-                                .slice(0, 1)
-                                .map((c) => (
-                                  <span key={c} className="v2-news-tag">
-                                    {communityLabel(c, lang)}
-                                  </span>
-                                ))}
-                              <time dateTime={n.published_at}>
-                                {formatDate(n.published_at, lang)}
-                              </time>
-                            </span>
-                            <span className="v2-story-headline">{title}</span>
-                            {excerpt ? <span className="v2-news-excerpt">{excerpt}</span> : null}
-                            <span className="v2-news-cta as-static">
-                              <span>{v.readStory}</span>
-                              <CtaArrow />
-                            </span>
-                          </span>
-                        </Link>
-                      </Reveal>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : null}
-          </>
-        )}
-      </div>
-    </PageV2>
+          <div className="mt-16 flex justify-center">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 rounded-full border border-primary px-7 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+            >
+              {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
+              {lang === "ar" ? "العودة إلى الرئيسية" : "Back to home"}
+            </Link>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
   );
 }
