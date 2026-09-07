@@ -467,13 +467,15 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
     const wash = document.getElementById("language-wash");
     const transitionCopy = document.getElementById("language-transition-copy");
     const apply = () => {
-      setMeta(lang);
+      /* Titles, <html lang/dir> and the stored preference belong to the app's
+         own i18n layer; this only swaps the ported public-site copy. */
+      void setMeta;
       window.dispatchEvent(new CustomEvent("saae:languagechange", { detail: { lang } }));
       translateText(lang);
       updateHeroOpeningTitle(lang);
       updateButton(lang);
       updateNavToggle(lang);
-      try { localStorage.setItem("saae-language", lang); } catch (_) { /* Storage is optional. */ }
+
     };
 
     if (!animate || matchMedia("(prefers-reduced-motion: reduce)").matches || !wash) {
