@@ -3,6 +3,8 @@
 /* Ported from the SAAE cinematic design package. Behaviour preserved; wrapped
    so the app can start it on mount and tear it down on unmount. */
 
+import heroScrubAsset from "@/assets/hero-scrub-v3.mp4.asset.json";
+
 export function initHeroCinema(): () => void {
   const __cleanups: Array<() => void> = [];
   const __on = (target: any, type: string, handler: any, opts?: any) => {
