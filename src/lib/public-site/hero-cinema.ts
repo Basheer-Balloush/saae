@@ -138,6 +138,10 @@ const staticGateStrings = [
       const RIBBON_REVEAL_AT = .2;
 
       let blobUrl = "";
+      /* A blob source can be rejected where the plain file plays fine (large
+         object URLs, strict memory pressure, some mobile browsers). One direct
+         retry before the poster fallback latches. */
+      let directSourceTried = false;
       let fetchController = null;
       let watchdog = 0;
       let heroFrame = 0;
