@@ -6,6 +6,7 @@ import { initRadialNav } from "@/lib/public-site/navigation";
 import { initTextEffect } from "@/lib/public-site/text-effect";
 import { initSections } from "@/lib/public-site/sections";
 import { initMotion } from "@/lib/public-site/motion";
+import { applyPublicLanguage, initPublicScrollDock } from "@/lib/public-site/language";
 import "@/styles/public-site.css";
 
 type Props = {
@@ -18,7 +19,7 @@ export function PublicSiteLayout({ children, enhancers = [] }: Props) {
   const { lang, dir } = useLang();
 
   useEffect(() => {
-    const inits = [initRadialNav, initTextEffect, initSections, ...enhancers];
+    const inits = [initRadialNav, initTextEffect, initSections, initPublicScrollDock, ...enhancers];
     const cleanups: Array<() => void> = [];
     for (const init of inits) {
       try {
@@ -43,7 +44,18 @@ export function PublicSiteLayout({ children, enhancers = [] }: Props) {
       }
     };
     // Re-run when the language flips so measured layouts rebuild in the new direction.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang, dir]);
+
+  // Swap the ported public-site copy whenever the app language changes.
+  useEffect(() => {
+    try {
+      applyPublicLanguage(lang);
+    } catch (error) {
+      console.error("[public-site] language apply failed", error);
+    }
+  });
+
 
   return (
     <div className="public-site" data-lang={lang} dir={dir}>
