@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+
 export function PartnersStream() {
   return (
     <>
@@ -44,10 +46,10 @@ export function PartnersStream() {
               </div>
 
               <div className="partner-outro" id="partner-outro">
-                <a className="button-link partner-outro-cta" href="partners.html">
+                <Link className="button-link partner-outro-cta" to="/partners">
                   See all 23 partners
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </a>
+                </Link>
               </div>
             </div>
           </div>

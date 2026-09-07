@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+
 export function CinematicHero() {
   return (
     <>
@@ -23,15 +25,15 @@ export function CinematicHero() {
         <a href="#faq"><span>04</span>Answers</a>
       </nav>
       <nav className="ribbon-pages" aria-label="Site pages">
-        <a href="about.html">About</a>
-        <a href="partners.html">Partners</a>
-        <a href="initiative.html">Initiative</a>
-        <a href="contact.html">Contact</a>
+        <Link to="/about">About</Link>
+        <Link to="/partners">Partners</Link>
+        <Link to="/one-million-initiative-home">Initiative</Link>
+        <Link to="/contact">Contact</Link>
       </nav>
-      <a className="ribbon-cta" href="initiative.html">
+      <Link className="ribbon-cta" to="/one-million-initiative-home">
         Explore the initiative
         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-      </a>
+      </Link>
     </div>
     <button className="ribbon-toggle" id="ribbon-toggle" type="button" aria-controls="ribbon-panel" aria-expanded="false">
       <span className="ribbon-rosette" aria-hidden="true">
@@ -78,10 +80,10 @@ export function CinematicHero() {
                 <p className="eyebrow">The learning platform</p>
                 <h2>Structured pathways, not scattered tutorials.</h2>
                 <p>Certified training tracks that build professional and technical skill, open to anyone in Syria.</p>
-                <a className="button-link" href="contact.html#write">
+                <Link className="button-link" to="/contact" hash="write">
                   Ask about learning
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </a>
+                </Link>
               </div>
             </article>
             <article className="hero-band" data-band="2" aria-hidden="true">
@@ -89,10 +91,10 @@ export function CinematicHero() {
                 <p className="eyebrow">The Million Syrian AI Users initiative</p>
                 <h2>One million people. One national step forward.</h2>
                 <p>A national effort to make AI knowledge practical, trusted and reachable.</p>
-                <a className="button-link" href="initiative.html">
+                <Link className="button-link" to="/one-million-initiative-home">
                   Explore the initiative
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </a>
+                </Link>
               </div>
             </article>
             <article className="hero-band" data-band="3" aria-hidden="true">
@@ -157,14 +159,14 @@ export function CinematicHero() {
           <h2 className="photo-head">Build Syria's AI future.</h2>
           <p>Practical AI learning, research and entrepreneurship, connected for people across Syria.</p>
           <div className="static-actions">
-            <a className="button-link" href="initiative.html">
+            <Link className="button-link" to="/one-million-initiative-home">
               Explore the initiative
               <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </a>
-            <a className="button-link button-quiet" href="contact.html#write">
+            </Link>
+            <Link className="button-link button-quiet" to="/contact" hash="write">
               Ask about learning
               <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </a>
+            </Link>
           </div>
           <p className="static-note">A shared future starts with shared knowledge.</p>
         </div>
