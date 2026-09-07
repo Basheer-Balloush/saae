@@ -3,6 +3,8 @@
 /* Ported from the SAAE cinematic design package. Behaviour preserved; wrapped
    so the app can start it on mount and tear it down on unmount. */
 
+import heroScrubAsset from "@/assets/hero-scrub-v3.mp4.asset.json";
+
 export function initHeroCinema(): () => void {
   const __cleanups: Array<() => void> = [];
   const __on = (target: any, type: string, handler: any, opts?: any) => {
@@ -125,13 +127,17 @@ const staticGateStrings = [
          decoded fine in a clean tab. Test video decode in a fresh tab or the result
          will mislead you. */
       const heroPosterUrl = "/site/images/hero-start.png";
-      /* Scrub encode notes (v2): every frame is a keyframe (all-intra) at 1280x720.
-         Scrubbing seeks constantly, and with a GOP the decoder had to walk back to
-         the previous keyframe on each backwards seek -- that walk is what made the
-         scroll stutter. All-intra makes every seek a single-frame decode. The colour
-         grade is baked into the pixels too, so the compositor no longer runs a
-         full-screen CSS filter pass on every painted frame. */
-      const heroVideoUrl = "/site/hero-scrub-v2.mp4";
+      /* Scrub encode notes (v3): every frame is a keyframe (all-intra) at the
+         source 1600x900, CRF 25 -- v2 was downscaled to 720p at CRF 31 and read
+         soft on large screens. Scrubbing seeks constantly, and with a GOP the
+         decoder had to walk back to the previous keyframe on each backwards
+         seek -- that walk is what made the scroll stutter. All-intra makes every
+         seek a single-frame decode. The colour grade is baked into the pixels
+         too, so the compositor no longer runs a full-screen CSS filter pass on
+         every painted frame. The file is served as an external asset because it
+         exceeds the repo file-size limit. */
+      const heroVideoUrl = heroScrubAsset.url;
+
       const heroStaticUrl = "/site/images/hero-static.jpg";
       let journeyLabels = ["Rise", "Learn", "Initiative", "Reach", "Communities"];
       const heroBeatThresholds = [.2, .4, .6, .8];
