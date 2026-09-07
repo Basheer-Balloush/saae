@@ -1186,7 +1186,7 @@ const staticGateStrings = [
         // motion when the page first becomes visible, rather than waiting.
         document.documentElement.classList.add("hero-opening-ready");
         siteLoader.classList.add("is-done");
-        const fadeDuration = reducedMotion.matches ? 260 : 480;
+        const fadeDuration = reducedMotion.matches ? 260 : 640;
         __setTimeout(() => {
           siteLoader.classList.add("is-hidden");
           document.documentElement.classList.remove("site-loading");
