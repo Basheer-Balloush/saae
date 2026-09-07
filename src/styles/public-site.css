@@ -374,13 +374,22 @@
       object-position: center center;
     }
 
-    .hero-video,
     .hero-poster,
     .static-frame {
       filter: grayscale(1) sepia(.58) saturate(2.45) hue-rotate(166deg) brightness(.96) contrast(1.02);
       image-rendering: auto;
       -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
+    }
+
+    /* The video carries the same grade baked in, so it needs no per-frame filter. */
+    .hero-video {
+      image-rendering: auto;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+      will-change: transform;
+      contain: paint;
     }
 
     /* In the Arabic layout, mirror the moving hero scene so its focal tree

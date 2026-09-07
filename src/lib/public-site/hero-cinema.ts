@@ -125,7 +125,13 @@ const staticGateStrings = [
          decoded fine in a clean tab. Test video decode in a fresh tab or the result
          will mislead you. */
       const heroPosterUrl = "/site/images/hero-start.png";
-      const heroVideoUrl = "/site/hero-scrub.mp4";
+      /* Scrub encode notes (v2): every frame is a keyframe (all-intra) at 1280x720.
+         Scrubbing seeks constantly, and with a GOP the decoder had to walk back to
+         the previous keyframe on each backwards seek -- that walk is what made the
+         scroll stutter. All-intra makes every seek a single-frame decode. The colour
+         grade is baked into the pixels too, so the compositor no longer runs a
+         full-screen CSS filter pass on every painted frame. */
+      const heroVideoUrl = "/site/hero-scrub-v2.mp4";
       const heroStaticUrl = "/site/images/hero-static.jpg";
       let journeyLabels = ["Rise", "Learn", "Initiative", "Reach", "Communities"];
       const heroBeatThresholds = [.2, .4, .6, .8];
