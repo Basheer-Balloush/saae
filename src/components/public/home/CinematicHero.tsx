@@ -1,10 +1,11 @@
+import type { CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 
 export function CinematicHero() {
   return (
     <>
   <div className="site-loader" id="site-loader" role="status" aria-label="Opening the SAAE website">
-    <div className="site-loader-inner" id="site-loader-progress" role="progressbar" aria-label="Hero video loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div className="site-loader-inner" id="site-loader-progress" role="progressbar" aria-label="Hero video loading progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0}>
       <span className="site-loader-halo" aria-hidden="true"></span>
       <span className="site-loader-rail site-loader-rail-start" aria-hidden="true"><span className="site-loader-progress-fill"></span></span>
       <span className="site-loader-tree" aria-hidden="true"><img className="site-loader-logo" src="/site/images/saae-tree-loader.png" alt="" width="576" height="642" decoding="sync" fetchPriority="high" /><span className="site-loader-energy"></span></span>
@@ -55,7 +56,7 @@ export function CinematicHero() {
       <h1 className="sr-only" id="page-title">Grow Syria's AI future with SAAE</h1>
       <div className="cinematic-scroll" id="stage">
         <div className="hero-media" id="hero" aria-hidden="true">
-          <video className="hero-video" id="hero-video" muted={true} playsinline preload="none"></video>
+          <video className="hero-video" id="hero-video" muted={true} playsInline preload="none"></video>
           <div className="hero-wash"></div>
           <div className="hero-vignette"></div>
           <div className="hero-grain"></div>
@@ -103,10 +104,10 @@ export function CinematicHero() {
                 <h2>5,000+ people learning with SAAE.</h2>
               </div>
               <dl className="hero-stats">
-                <div style={{ "--i": '0' }}><dt>trainees</dt><dd data-count="5000">5,000+</dd></div>
-                <div style={{ "--i": '1' }}><dt>courses</dt><dd data-count="120">120+</dd></div>
-                <div style={{ "--i": '2' }}><dt>strategic partners</dt><dd data-count="30">30+</dd></div>
-                <div style={{ "--i": '3' }}><dt>communities</dt><dd data-count="7">7+</dd></div>
+                <div style={{ "--i": '0' } as CSSProperties}><dt>trainees</dt><dd data-count="5000">5,000+</dd></div>
+                <div style={{ "--i": '1' } as CSSProperties}><dt>courses</dt><dd data-count="120">120+</dd></div>
+                <div style={{ "--i": '2' } as CSSProperties}><dt>strategic partners</dt><dd data-count="30">30+</dd></div>
+                <div style={{ "--i": '3' } as CSSProperties}><dt>communities</dt><dd data-count="7">7+</dd></div>
               </dl>
             </article>
             <article className="hero-band" data-band="4" aria-hidden="true">
@@ -145,11 +146,11 @@ export function CinematicHero() {
         </div>
       </div>
       <div className="hero-snap-points" aria-hidden="true">
-        <span className="hero-snap-point" style={{ "--snap-position": '0%' }}></span>
-        <span className="hero-snap-point" style={{ "--snap-position": '20%' }}></span>
-        <span className="hero-snap-point" style={{ "--snap-position": '40%' }}></span>
-        <span className="hero-snap-point" style={{ "--snap-position": '60%' }}></span>
-        <span className="hero-snap-point" style={{ "--snap-position": '80%' }}></span>
+        <span className="hero-snap-point" style={{ "--snap-position": '0%' } as CSSProperties}></span>
+        <span className="hero-snap-point" style={{ "--snap-position": '20%' } as CSSProperties}></span>
+        <span className="hero-snap-point" style={{ "--snap-position": '40%' } as CSSProperties}></span>
+        <span className="hero-snap-point" style={{ "--snap-position": '60%' } as CSSProperties}></span>
+        <span className="hero-snap-point" style={{ "--snap-position": '80%' } as CSSProperties}></span>
       </div>
 
       <div className="hero-static">

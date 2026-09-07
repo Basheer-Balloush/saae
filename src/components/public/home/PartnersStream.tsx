@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 
 export function PartnersStream() {
@@ -18,29 +19,29 @@ export function PartnersStream() {
               <div className="partner-stream" id="partner-stream">
                 <div className="partner-stream-field" aria-hidden="true">
                   <div className="partner-stream-rails">
-                    <span className="partner-mark is-high" style={{ "--i": '0', "--mark": 'url("/site/images/partners/partner-damascus-ink.webp")' }}></span>
-                    <span className="partner-mark is-left is-high" style={{ "--i": '1', "--mark": 'url("/site/images/partners/partner-yarmouk-ink.webp")' }}></span>
-                    <span className="partner-mark is-low" style={{ "--i": '2', "--mark": 'url("/site/images/partners/partner-social-affairs.webp")' }}></span>
-                    <span className="partner-mark is-left is-low" style={{ "--i": '3', "--mark": 'url("/site/images/partners/partner-aleppo.webp")' }}></span>
-                    <span className="partner-mark is-high" style={{ "--i": '4', "--mark": 'url("/site/images/partners/partner-engineers-ink.webp")' }}></span>
-                    <span className="partner-mark is-left is-high" style={{ "--i": '5', "--mark": 'url("/site/images/partners/partner-syrian-telecom.webp")' }}></span>
-                    <span className="partner-mark is-low" style={{ "--i": '6', "--mark": 'url("/site/images/partners/partner-sdo.webp")' }}></span>
-                    <span className="partner-mark is-left is-low" style={{ "--i": '7', "--mark": 'url("/site/images/partners/partner-al-ihsan.webp")' }}></span>
-                    <span className="partner-mark is-high" style={{ "--i": '8', "--mark": 'url("/site/images/partners/partner-med-axis.webp")' }}></span>
-                    <span className="partner-mark is-left is-high" style={{ "--i": '9', "--mark": 'url("/site/images/partners/partner-sharafai.webp")' }}></span>
-                    <span className="partner-mark is-low" style={{ "--i": '10', "--mark": 'url("/site/images/partners/partner-sarrdeh.webp")' }}></span>
-                    <span className="partner-mark is-left is-low" style={{ "--i": '11', "--mark": 'url("/site/images/partners/partner-devista.webp")' }}></span>
-                    <span className="partner-mark is-high" style={{ "--i": '12', "--mark": 'url("/site/images/partners/partner-ilmhub.webp")' }}></span>
-                    <span className="partner-mark is-left is-high" style={{ "--i": '13', "--mark": 'url("/site/images/partners/partner-stepup.webp")' }}></span>
-                    <span className="partner-mark is-low" style={{ "--i": '14', "--mark": 'url("/site/images/partners/partner-abqar.webp")' }}></span>
-                    <span className="partner-mark is-left is-low" style={{ "--i": '15', "--mark": 'url("/site/images/partners/partner-lmip.webp")' }}></span>
-                    <span className="partner-mark is-high" style={{ "--i": '16', "--mark": 'url("/site/images/partners/partner-joblink.webp")' }}></span>
-                    <span className="partner-mark is-left is-high" style={{ "--i": '17', "--mark": 'url("/site/images/partners/partner-azbooks.webp")' }}></span>
-                    <span className="partner-mark is-low" style={{ "--i": '18', "--mark": 'url("/site/images/partners/partner-circles.webp")' }}></span>
-                    <span className="partner-mark is-left is-low" style={{ "--i": '19', "--mark": 'url("/site/images/partners/partner-cubes.webp")' }}></span>
-                    <span className="partner-mark is-high" style={{ "--i": '20', "--mark": 'url("/site/images/partners/partner-baukant.webp")' }}></span>
-                    <span className="partner-mark is-left is-high" style={{ "--i": '21', "--mark": 'url("/site/images/partners/partner-bacca.webp")' }}></span>
-                    <span className="partner-mark is-low" style={{ "--i": '22', "--mark": 'url("/site/images/partners/partner-people.webp")' }}></span>
+                    <span className="partner-mark is-high" style={{ "--i": '0', "--mark": 'url("/site/images/partners/partner-damascus-ink.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-left is-high" style={{ "--i": '1', "--mark": 'url("/site/images/partners/partner-yarmouk-ink.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-low" style={{ "--i": '2', "--mark": 'url("/site/images/partners/partner-social-affairs.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-left is-low" style={{ "--i": '3', "--mark": 'url("/site/images/partners/partner-aleppo.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-high" style={{ "--i": '4', "--mark": 'url("/site/images/partners/partner-engineers-ink.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-left is-high" style={{ "--i": '5', "--mark": 'url("/site/images/partners/partner-syrian-telecom.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-low" style={{ "--i": '6', "--mark": 'url("/site/images/partners/partner-sdo.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-left is-low" style={{ "--i": '7', "--mark": 'url("/site/images/partners/partner-al-ihsan.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-high" style={{ "--i": '8', "--mark": 'url("/site/images/partners/partner-med-axis.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-left is-high" style={{ "--i": '9', "--mark": 'url("/site/images/partners/partner-sharafai.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-low" style={{ "--i": '10', "--mark": 'url("/site/images/partners/partner-sarrdeh.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-left is-low" style={{ "--i": '11', "--mark": 'url("/site/images/partners/partner-devista.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-high" style={{ "--i": '12', "--mark": 'url("/site/images/partners/partner-ilmhub.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-left is-high" style={{ "--i": '13', "--mark": 'url("/site/images/partners/partner-stepup.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-low" style={{ "--i": '14', "--mark": 'url("/site/images/partners/partner-abqar.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-left is-low" style={{ "--i": '15', "--mark": 'url("/site/images/partners/partner-lmip.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-high" style={{ "--i": '16', "--mark": 'url("/site/images/partners/partner-joblink.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-left is-high" style={{ "--i": '17', "--mark": 'url("/site/images/partners/partner-azbooks.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-low" style={{ "--i": '18', "--mark": 'url("/site/images/partners/partner-circles.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-left is-low" style={{ "--i": '19', "--mark": 'url("/site/images/partners/partner-cubes.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-high" style={{ "--i": '20', "--mark": 'url("/site/images/partners/partner-baukant.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-left is-high" style={{ "--i": '21', "--mark": 'url("/site/images/partners/partner-bacca.webp")' } as CSSProperties}></span>
+                    <span className="partner-mark is-low" style={{ "--i": '22', "--mark": 'url("/site/images/partners/partner-people.webp")' } as CSSProperties}></span>
                   </div>
                 </div>
               </div>
