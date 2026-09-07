@@ -138,6 +138,10 @@ const staticGateStrings = [
       const RIBBON_REVEAL_AT = .2;
 
       let blobUrl = "";
+      /* A blob source can be rejected where the plain file plays fine (large
+         object URLs, strict memory pressure, some mobile browsers). One direct
+         retry before the poster fallback latches. */
+      let directSourceTried = false;
       let fetchController = null;
       let watchdog = 0;
       let heroFrame = 0;
@@ -787,7 +791,21 @@ const staticGateStrings = [
         if (Number.isFinite(video.duration) && video.duration > 0) videoDuration = video.duration;
       });
       __on(video, "canplay", showVideoReady);
-      __on(video, "error", () => failVideo("Still scene active"));
+      __on(video, "error", () => {
+        /* Retry the plain file once before the poster fallback latches: the
+           object URL is the more fragile of the two sources, and the bytes are
+           already in the HTTP cache, so this costs no second download. */
+        if (!directSourceTried && !isStaticExperience()) {
+          directSourceTried = true;
+          if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = ""; }
+          try {
+            video.src = heroVideoUrl;
+            video.load();
+            return;
+          } catch (_) { /* fall through to the poster */ }
+        }
+        failVideo("Still scene active");
+      });
 
       function stopDesktopHero() {
         heroActive = false;
