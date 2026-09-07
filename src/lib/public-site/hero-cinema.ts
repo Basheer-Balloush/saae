@@ -1101,12 +1101,43 @@ const staticGateStrings = [
       const preventSiteLoaderKeyScroll = event => {
         if (siteLoaderScrollKeys.has(event.key)) event.preventDefault();
       };
+      /* The raw milestones jump (4 → 66 → 97). The displayed value is eased
+         toward the target on every frame so the two rails glide instead of
+         snapping, and creeps forward slightly while a long download runs. */
+      let siteLoaderShownValue = 0;
+      let siteLoaderEaseRequest = 0;
+      let siteLoaderLastTick = 0;
+      const paintSiteLoaderProgress = () => {
+        if (!siteLoader || !siteLoaderProgress) return;
+        siteLoader.style.setProperty("--site-loader-progress", siteLoaderShownValue.toFixed(2));
+        siteLoaderProgress.setAttribute("aria-valuenow", String(Math.round(siteLoaderShownValue)));
+      };
+      const stepSiteLoaderProgress = now => {
+        siteLoaderEaseRequest = 0;
+        if (siteLoaderDismissed) return;
+        const delta = Math.min(now - (siteLoaderLastTick || now), 64);
+        siteLoaderLastTick = now;
+        /* A slow trickle below the current milestone keeps the bar alive while
+           the video streams, but never overtakes real progress. */
+        const creepCeiling = Math.min(siteLoaderProgressValue + 6, 96);
+        const target = Math.max(siteLoaderProgressValue, Math.min(creepCeiling, siteLoaderShownValue + delta * 0.004));
+        const ease = 1 - Math.pow(0.006, delta / 1000);
+        siteLoaderShownValue += (target - siteLoaderShownValue) * ease;
+        if (target - siteLoaderShownValue < 0.05) siteLoaderShownValue = target;
+        paintSiteLoaderProgress();
+        if (siteLoaderShownValue < 100) {
+          siteLoaderEaseRequest = window.requestAnimationFrame(stepSiteLoaderProgress);
+        }
+      };
       const setSiteLoaderProgress = value => {
         if (!siteLoader || !siteLoaderProgress || siteLoaderDismissed) return;
         siteLoaderProgressValue = Math.max(siteLoaderProgressValue, clamp(value, 0, 100));
-        siteLoader.style.setProperty("--site-loader-progress", siteLoaderProgressValue.toFixed(2));
-        siteLoaderProgress.setAttribute("aria-valuenow", String(Math.round(siteLoaderProgressValue)));
+        if (!siteLoaderEaseRequest) {
+          siteLoaderLastTick = 0;
+          siteLoaderEaseRequest = window.requestAnimationFrame(stepSiteLoaderProgress);
+        }
       };
+
       const updateSiteLoaderBufferedProgress = () => {
         if (!Number.isFinite(video.duration) || video.duration <= 0 || video.buffered.length === 0) return;
         setSiteLoaderProgress(25 + clamp(video.buffered.end(video.buffered.length - 1) / video.duration, 0, 1) * 45);
