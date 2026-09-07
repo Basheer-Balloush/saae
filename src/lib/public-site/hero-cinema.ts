@@ -1104,7 +1104,8 @@ const staticGateStrings = [
       /* The raw milestones jump (4 → 66 → 97). The displayed value is eased
          toward the target on every frame so the two rails glide instead of
          snapping, and creeps forward slightly while a long download runs. */
-      let siteLoaderShownValue = 0;
+      /* Matches where the CSS warm-up has reached, so handover never rewinds. */
+      let siteLoaderShownValue = Math.min(22, 2 + (performance.now() / 4000) * 20);
       let siteLoaderEaseRequest = 0;
       let siteLoaderLastTick = 0;
       const paintSiteLoaderProgress = () => {
