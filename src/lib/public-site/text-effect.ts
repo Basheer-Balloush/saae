@@ -64,8 +64,6 @@ export function initTextEffect(): () => void {
   *      inherit RTL and shed its trailing punctuation to the front
   *      (",announcement"); auto lets the word's own script decide.
   */
-(() => {
-  "use strict";
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const ARABIC = /[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/;

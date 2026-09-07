@@ -57,8 +57,6 @@ export function initSections(): () => void {
  * seeks a video every frame through 750vh of hero, and a loop running for a
  * carousel a screen and a half below is competition the scrub cannot afford.
  */
-(() => {
-  "use strict";
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 

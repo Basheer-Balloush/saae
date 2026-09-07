@@ -45,8 +45,6 @@ export function initMotion(): () => void {
  * the frame-rate-independent easing and the coalesced seeking for no visible
  * gain. This adds motion where there was none.
  */
-(() => {
-  "use strict";
 
   if (typeof window.gsap === "undefined") return;
 
