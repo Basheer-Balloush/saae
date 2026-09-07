@@ -1109,6 +1109,8 @@ const staticGateStrings = [
       let siteLoaderLastTick = 0;
       const paintSiteLoaderProgress = () => {
         if (!siteLoader || !siteLoaderProgress) return;
+        // Hands the rails over from the CSS warm-up to real progress.
+        siteLoader.dataset.progressLive = "true";
         siteLoader.style.setProperty("--site-loader-progress", siteLoaderShownValue.toFixed(2));
         siteLoaderProgress.setAttribute("aria-valuenow", String(Math.round(siteLoaderShownValue)));
       };
