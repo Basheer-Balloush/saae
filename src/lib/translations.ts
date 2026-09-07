@@ -238,6 +238,46 @@ type Dict = {
       sendAnother: string;
       backHome: string;
     };
+    home: {
+      heroEyebrow: string;
+      heroTitle: string;
+      heroLede: string;
+      scroll: string;
+      summary: string;
+      learnEyebrow: string;
+      learnTitle: string;
+      learnCopy: string;
+      learnCta: string;
+      initiativeEyebrow: string;
+      initiativeTitle: string;
+      initiativeCopy: string;
+      initiativeCta: string;
+      statsEyebrow: string;
+      statsTitle: string;
+      communitiesEyebrow: string;
+      communitiesTitle: string;
+      communitiesCopy: string;
+      communityPrev: string;
+      communityNext: string;
+      newsEyebrow: string;
+      newsTitle: string;
+      newsCopy: string;
+      newsAllTitle: string;
+      newsAllCopy: string;
+      newsAllCta: string;
+      partnersEyebrow: string;
+      partnersTitle: string;
+      partnersCopy: string;
+      partnersCta: string;
+      missionEyebrow: string;
+      missionTitle: string;
+      missionCopy: string;
+      missionSteps: { index: string; title: string; copy: string }[];
+      faqEyebrow: string;
+      faqTitle: string;
+      faqCopy: string;
+      faqItems: { q: string; a: string }[];
+    };
     ribbon: {
       ariaLabel: string;
       sectionsLabel: string;
@@ -607,6 +647,88 @@ export const translations: Record<Lang, Dict> = {
         sendAnother: "Send another message",
         backHome: "Back to home",
       },
+      home: {
+        heroEyebrow: "Syrian Association for Artificial Intelligence",
+        heroTitle: "Building Syria's next generation in AI",
+        heroLede:
+          "Structured training, active communities and national initiatives that open AI to every Syrian.",
+        scroll: "Keep scrolling",
+        summary:
+          "This page covers the learning platform, the Million Syrian AI Users initiative, SAAE in numbers, and the nine SAAE communities.",
+        learnEyebrow: "The learning platform",
+        learnTitle: "Structured pathways, not scattered tutorials",
+        learnCopy:
+          "Sequenced courses led by accredited trainers, with exercises and certificates, from the basics to real practice.",
+        learnCta: "Enter the learning platform",
+        initiativeEyebrow: "A national initiative",
+        initiativeTitle: "One million Syrian AI users",
+        initiativeCopy:
+          "Our goal is to enable a million Syrians to use AI tools in their work, study and daily life.",
+        initiativeCta: "Explore the initiative",
+        statsEyebrow: "Impact",
+        statsTitle: "SAAE in numbers",
+        communitiesEyebrow: "Communities",
+        communitiesTitle: "The SAAE communities",
+        communitiesCopy: "Focused spaces where people working in each field of AI meet.",
+        communityPrev: "Previous community",
+        communityNext: "Next community",
+        newsEyebrow: "News",
+        newsTitle: "The work, as it happens",
+        newsCopy: "The latest events, announcements and partnerships published by SAAE.",
+        newsAllTitle: "Everything SAAE has published",
+        newsAllCopy: "Browse the full news archive.",
+        newsAllCta: "All news",
+        partnersEyebrow: "Partners",
+        partnersTitle: "Institutions carry it further",
+        partnersCopy:
+          "We work with government, academic and private organisations to widen the reach of our programmes.",
+        partnersCta: "View all partners",
+        missionEyebrow: "How we work",
+        missionTitle: "How SAAE works: train, apply, build",
+        missionCopy: "Three steps that move a trainee from learning to producing.",
+        missionSteps: [
+          {
+            index: "01",
+            title: "Train",
+            copy: "Accredited learning pathways that build the knowledge and the skills.",
+          },
+          {
+            index: "02",
+            title: "Apply",
+            copy: "Projects and practical exercises that turn knowledge into real experience.",
+          },
+          {
+            index: "03",
+            title: "Build",
+            copy: "Communities and initiatives that create lasting impact nationwide.",
+          },
+        ],
+        faqEyebrow: "Answers",
+        faqTitle: "A clear way in",
+        faqCopy: "The questions we are asked most about SAAE and its programmes.",
+        faqItems: [
+          {
+            q: "Who can join SAAE programmes?",
+            a: "They are open to anyone interested in AI, from complete beginners to professionals.",
+          },
+          {
+            q: "Are the courses free?",
+            a: "Several courses are free alongside paid programmes; each course page shows its price.",
+          },
+          {
+            q: "Do I get a certificate?",
+            a: "Yes — a certificate is issued once you complete the course requirements.",
+          },
+          {
+            q: "How do I join a community?",
+            a: "Pick the community that fits you on the communities page and follow the joining steps.",
+          },
+          {
+            q: "How can organisations work with you?",
+            a: "Write to us on the contact page; the partnerships team replies within 48 hours.",
+          },
+        ],
+      },
       ribbon: {
         ariaLabel: "Journey navigation",
         sectionsLabel: "Page sections",
@@ -970,6 +1092,87 @@ export const translations: Record<Lang, Dict> = {
           "شكراً لتواصلك معنا. سيراجع فريقنا رسالتك ويرد عليك خلال 48 ساعة على بريدك الإلكتروني.",
         sendAnother: "إرسال رسالة أخرى",
         backHome: "العودة إلى الرئيسية",
+      },
+      home: {
+        heroEyebrow: "الجمعية السورية للذكاء الاصطناعي",
+        heroTitle: "نبني الجيل السوري القادم في الذكاء الاصطناعي",
+        heroLede:
+          "تدريب منظّم، ومجتمعات فاعلة، ومبادرات وطنية تفتح الباب أمام كل سوري ليتعلم الذكاء الاصطناعي ويستخدمه.",
+        scroll: "تابع التمرير",
+        summary:
+          "تعرض هذه الصفحة منصة التعلّم، ومبادرة المليون مستخدم سوري للذكاء الاصطناعي، وأرقام الجمعية، ومجتمعاتها التسعة.",
+        learnEyebrow: "منصة التعلّم",
+        learnTitle: "مسارات منظّمة، لا دروس متفرقة",
+        learnCopy:
+          "دورات متسلسلة يقودها مدربون معتمدون، مع تمارين وشهادات، تبدأ من الأساسيات وتصل إلى التطبيق العملي.",
+        learnCta: "ادخل إلى منصة التعلّم",
+        initiativeEyebrow: "مبادرة وطنية",
+        initiativeTitle: "مليون مستخدم سوري للذكاء الاصطناعي",
+        initiativeCopy:
+          "هدفنا تمكين مليون سوري من استخدام أدوات الذكاء الاصطناعي في عملهم ودراستهم وحياتهم اليومية.",
+        initiativeCta: "تعرّف على المبادرة",
+        statsEyebrow: "الأثر",
+        statsTitle: "الجمعية بالأرقام",
+        communitiesEyebrow: "المجتمعات",
+        communitiesTitle: "مجتمعات الجمعية",
+        communitiesCopy: "مساحات متخصصة يلتقي فيها المهتمون بكل مجال من مجالات الذكاء الاصطناعي.",
+        communityPrev: "المجتمع السابق",
+        communityNext: "المجتمع التالي",
+        newsEyebrow: "الأخبار",
+        newsTitle: "العمل كما يحدث",
+        newsCopy: "آخر ما نشرته الجمعية من فعاليات وإعلانات وشراكات.",
+        newsAllTitle: "كل ما نشرته الجمعية",
+        newsAllCopy: "تصفّح أرشيف الأخبار كاملاً.",
+        newsAllCta: "كل الأخبار",
+        partnersEyebrow: "الشركاء",
+        partnersTitle: "مؤسسات تمضي بالعمل أبعد",
+        partnersCopy: "نعمل مع جهات حكومية وأكاديمية وخاصة لتوسيع أثر البرامج.",
+        partnersCta: "عرض كل الشركاء",
+        missionEyebrow: "طريقة العمل",
+        missionTitle: "كيف تعمل الجمعية: ندرّب، نطبّق، نبني",
+        missionCopy: "ثلاث خطوات متتابعة تنقل المتدرب من التعلّم إلى الإنتاج.",
+        missionSteps: [
+          {
+            index: "01",
+            title: "ندرّب",
+            copy: "مسارات تدريبية معتمدة تبني الأساس المعرفي والمهاري.",
+          },
+          {
+            index: "02",
+            title: "نطبّق",
+            copy: "مشاريع وتمارين عملية تحوّل المعرفة إلى خبرة حقيقية.",
+          },
+          {
+            index: "03",
+            title: "نبني",
+            copy: "مجتمعات ومبادرات تصنع أثراً مستداماً على مستوى البلد.",
+          },
+        ],
+        faqEyebrow: "أسئلة",
+        faqTitle: "طريق واضح للبداية",
+        faqCopy: "أكثر ما يُسأل عن الجمعية وبرامجها.",
+        faqItems: [
+          {
+            q: "من يستطيع الانضمام إلى برامج الجمعية؟",
+            a: "البرامج مفتوحة لكل مهتم بالذكاء الاصطناعي، من المبتدئين إلى المحترفين.",
+          },
+          {
+            q: "هل الدورات مجانية؟",
+            a: "يتوفر عدد من الدورات المجانية إلى جانب برامج مدفوعة، ويظهر السعر على صفحة كل دورة.",
+          },
+          {
+            q: "هل أحصل على شهادة؟",
+            a: "نعم، تُمنح شهادة عند إتمام متطلبات الدورة بنجاح.",
+          },
+          {
+            q: "كيف أنضم إلى إحدى المجتمعات؟",
+            a: "اختر المجتمع المناسب من صفحة المجتمعات واتبع خطوات الانضمام.",
+          },
+          {
+            q: "كيف يمكن للمؤسسات التعاون معكم؟",
+            a: "تواصل معنا عبر صفحة الاتصال وسيرد فريق الشراكات خلال 48 ساعة.",
+          },
+        ],
       },
       ribbon: {
         ariaLabel: "التنقل بين أقسام الصفحة",
