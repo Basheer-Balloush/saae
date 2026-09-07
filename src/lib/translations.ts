@@ -607,6 +607,88 @@ export const translations: Record<Lang, Dict> = {
         sendAnother: "Send another message",
         backHome: "Back to home",
       },
+      home: {
+        heroEyebrow: "Syrian Association for Artificial Intelligence",
+        heroTitle: "Building Syria's next generation in AI",
+        heroLede:
+          "Structured training, active communities and national initiatives that open AI to every Syrian.",
+        scroll: "Keep scrolling",
+        summary:
+          "This page covers the learning platform, the Million Syrian AI Users initiative, SAAE in numbers, and the nine SAAE communities.",
+        learnEyebrow: "The learning platform",
+        learnTitle: "Structured pathways, not scattered tutorials",
+        learnCopy:
+          "Sequenced courses led by accredited trainers, with exercises and certificates, from the basics to real practice.",
+        learnCta: "Enter the learning platform",
+        initiativeEyebrow: "A national initiative",
+        initiativeTitle: "One million Syrian AI users",
+        initiativeCopy:
+          "Our goal is to enable a million Syrians to use AI tools in their work, study and daily life.",
+        initiativeCta: "Explore the initiative",
+        statsEyebrow: "Impact",
+        statsTitle: "SAAE in numbers",
+        communitiesEyebrow: "Communities",
+        communitiesTitle: "The SAAE communities",
+        communitiesCopy: "Focused spaces where people working in each field of AI meet.",
+        communityPrev: "Previous community",
+        communityNext: "Next community",
+        newsEyebrow: "News",
+        newsTitle: "The work, as it happens",
+        newsCopy: "The latest events, announcements and partnerships published by SAAE.",
+        newsAllTitle: "Everything SAAE has published",
+        newsAllCopy: "Browse the full news archive.",
+        newsAllCta: "All news",
+        partnersEyebrow: "Partners",
+        partnersTitle: "Institutions carry it further",
+        partnersCopy:
+          "We work with government, academic and private organisations to widen the reach of our programmes.",
+        partnersCta: "View all partners",
+        missionEyebrow: "How we work",
+        missionTitle: "How SAAE works: train, apply, build",
+        missionCopy: "Three steps that move a trainee from learning to producing.",
+        missionSteps: [
+          {
+            index: "01",
+            title: "Train",
+            copy: "Accredited learning pathways that build the knowledge and the skills.",
+          },
+          {
+            index: "02",
+            title: "Apply",
+            copy: "Projects and practical exercises that turn knowledge into real experience.",
+          },
+          {
+            index: "03",
+            title: "Build",
+            copy: "Communities and initiatives that create lasting impact nationwide.",
+          },
+        ],
+        faqEyebrow: "Answers",
+        faqTitle: "A clear way in",
+        faqCopy: "The questions we are asked most about SAAE and its programmes.",
+        faqItems: [
+          {
+            q: "Who can join SAAE programmes?",
+            a: "They are open to anyone interested in AI, from complete beginners to professionals.",
+          },
+          {
+            q: "Are the courses free?",
+            a: "Several courses are free alongside paid programmes; each course page shows its price.",
+          },
+          {
+            q: "Do I get a certificate?",
+            a: "Yes — a certificate is issued once you complete the course requirements.",
+          },
+          {
+            q: "How do I join a community?",
+            a: "Pick the community that fits you on the communities page and follow the joining steps.",
+          },
+          {
+            q: "How can organisations work with you?",
+            a: "Write to us on the contact page; the partnerships team replies within 48 hours.",
+          },
+        ],
+      },
       ribbon: {
         ariaLabel: "Journey navigation",
         sectionsLabel: "Page sections",
