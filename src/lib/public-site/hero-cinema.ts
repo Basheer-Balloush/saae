@@ -1229,12 +1229,6 @@ const staticGateStrings = [
         setFilmLocked(heroActive && !filmCompleted && !isStaticExperience());
         if (isStaticExperience()) completeSiteLoader();
       }));
-    })();
-  </script>
-
-  <!-- Self-hosted, so the page still makes no third-party request and the
-       privacy note in the README stays true. Deferred, so the inline script
-       above has already started the hero download before any of this parses:
   };
   try { __run(); } catch (error) { console.error("initHeroCinema failed", error); }
   return __teardown;
