@@ -127,8 +127,6 @@ const staticGateStrings = [
          decoded fine in a clean tab. Test video decode in a fresh tab or the result
          will mislead you. */
       const heroPosterUrl = "/site/images/hero-start.png";
-      /* Scrub encode notes (v2): every frame is a keyframe (all-intra) at 1280x720.
-         Scrubbing seeks constantly, and with a GOP the decoder had to walk back to
       /* Scrub encode notes (v3): every frame is a keyframe (all-intra) at the
          source 1600x900, CRF 25 -- v2 was downscaled to 720p at CRF 31 and read
          soft on large screens. Scrubbing seeks constantly, and with a GOP the
