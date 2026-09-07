@@ -1159,6 +1159,8 @@ const staticGateStrings = [
         window.clearTimeout(siteLoaderCompletionTimer);
         window.clearTimeout(siteLoaderSafetyTimer);
         window.clearTimeout(siteLoaderFrameTimer);
+        if (siteLoaderEaseRequest) window.cancelAnimationFrame(siteLoaderEaseRequest);
+        siteLoaderEaseRequest = 0;
         video.removeEventListener("loadstart", onSiteLoaderLoadStart);
         video.removeEventListener("loadedmetadata", onSiteLoaderMetadata);
         video.removeEventListener("progress", onSiteLoaderProgress);
@@ -1196,8 +1198,11 @@ const staticGateStrings = [
         if (!siteLoader || siteLoaderDismissed || siteLoaderCompleting || !siteLoaderMinimumComplete || !siteLoaderVideoReady) return;
         siteLoaderCompleting = true;
         setSiteLoaderProgress(100);
+        // Land exactly on full rather than easing asymptotically toward it.
+        siteLoaderShownValue = 100;
+        paintSiteLoaderProgress();
         siteLoader.classList.add("is-complete");
-        siteLoaderCompletionTimer = __setTimeout(dismissSiteLoader, reducedMotion.matches ? 90 : 210);
+        siteLoaderCompletionTimer = __setTimeout(dismissSiteLoader, reducedMotion.matches ? 120 : 320);
       };
       const markSiteLoaderVideoReady = () => {
         siteLoaderVideoReady = true;
@@ -1240,7 +1245,7 @@ const staticGateStrings = [
         }, siteLoaderMinimumMs);
         siteLoaderSafetyTimer = __setTimeout(() => {
           if (!siteLoaderVideoReady) failVideo("Still scene active");
-        }, 22000);
+        }, 12000);
       }
 
       /* A refresh part-way down the page used to restore that offset, which put
