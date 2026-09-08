@@ -218,9 +218,9 @@ const staticGateStrings = [
       let reverseScrollTimer = 0;
       /* Reverse checkpoint cinematic crossfade state. */
       let reverseFadeState = 'idle'; // 'idle' | 'fading-out' | 'seeking' | 'fading-in'
-      const REVERSE_FADE_OUT_MS = 220;
-      const REVERSE_FADE_IN_MS = 420;
-      const REVERSE_SEEK_AT_MS = 170; // seek while the frame is heavily blurred
+      const REVERSE_FADE_OUT_MS = 180;
+      const REVERSE_FADE_IN_MS = 320;
+      const REVERSE_SEEK_AT_MS = 130; // seek once, while the frame is blurred
       let reverseFadeTimer = 0;
       let reverseFadeLiftTimer = 0;
 
@@ -591,16 +591,14 @@ const staticGateStrings = [
       function beginReverseFade() {
         if (isStaticExperience() || reducedMotion.matches) return;
         if (!video.classList.contains("is-ready")) return;
-        if (reverseFadeState === 'fading-out') {
-          // Already fading out; reset the seek timer to the latest gesture.
-          clearTimeout(reverseFadeTimer);
-          reverseFadeTimer = __setTimeout(performReverseSeek, REVERSE_SEEK_AT_MS);
-          return;
-        }
-        if (reverseFadeState !== 'idle') return;
+        /* Scroll events arrive continuously during a wheel or trackpad gesture.
+           Restarting this timer for every event deferred the seek until scrolling
+           stopped, which felt like input lag. Start the fade once and let the
+           eventual seek use the latest targetProgress instead. */
+        if (reverseFadeState === 'fading-out' || reverseFadeState === 'seeking') return;
+        clearTimeout(reverseFadeTimer);
         reverseFadeState = 'fading-out';
         document.documentElement.classList.add("hero-reverse-fade");
-        clearTimeout(reverseFadeTimer);
         reverseFadeTimer = __setTimeout(performReverseSeek, REVERSE_SEEK_AT_MS);
       }
 
@@ -615,7 +613,7 @@ const staticGateStrings = [
         video.addEventListener("seeked", liftReverseFade, { once: true });
         /* The decoder may already be sitting on that frame, in which case no
            seeked event arrives. Never leave the hero dipped out. */
-        reverseFadeLiftTimer = __setTimeout(liftReverseFade, 340);
+        reverseFadeLiftTimer = __setTimeout(liftReverseFade, 240);
       }
 
       function liftReverseFade() {
