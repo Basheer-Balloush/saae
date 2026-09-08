@@ -33,7 +33,6 @@ export function initHeroCinema(): () => void {
     document.documentElement.classList.remove("hero-reverse-fade");
 
     __dead = true;
-    reverseFadeState = 'idle';
     __frames.forEach((f) => window.cancelAnimationFrame(f));
     __frames.clear();
     __observers.forEach((o) => { try { o.disconnect(); } catch {} });
