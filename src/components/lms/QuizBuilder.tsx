@@ -345,10 +345,24 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
                 </div>
               );
             })}
-            <Button size="sm" variant="outline" onClick={addQuestion} className="w-full sm:w-auto">
-              <Plus className="h-4 w-4 mx-1" />{tr.addQuestion}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={addQuestion}>
+                <Plus className="h-4 w-4 mx-1" />{tr.addQuestion}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
+                <FileUp className="h-4 w-4 mx-1" />{ar ? "استيراد من ملف" : "Import from file"}
+              </Button>
+            </div>
           </div>
+
+          <QuizBulkImportDialog
+            open={importOpen}
+            onOpenChange={setImportOpen}
+            quizId={quiz.id}
+            startOrder={questions.length}
+            ar={ar}
+            onImported={() => loadQuestions(quiz.id)}
+          />
         </>
       )}
     </section>
