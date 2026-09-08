@@ -41,6 +41,7 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const quiz = quizzes.find((q) => q.id === activeId) ?? null;
 
