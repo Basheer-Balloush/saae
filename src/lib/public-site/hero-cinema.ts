@@ -29,6 +29,7 @@ export function initHeroCinema(): () => void {
   const __teardown = () => {
     __cleanups.forEach((fn) => { try { fn(); } catch {} });
     __timers.forEach((t) => { typeof t === "function" ? t() : window.clearTimeout(t); });
+    document.documentElement.classList.remove("hero-scrolling-up");
     __dead = true;
     __frames.forEach((f) => window.cancelAnimationFrame(f));
     __frames.clear();
