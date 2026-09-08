@@ -21,6 +21,7 @@ import { Route as InitiativeSurveyRouteImport } from './routes/initiative-survey
 import { Route as EventSurveyRouteImport } from './routes/event-survey'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
+import { Route as AnimeTestRouteImport } from './routes/anime-test'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -176,6 +177,11 @@ const AttendanceManagementSystemRoute =
     path: '/attendance-management-system',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AnimeTestRoute = AnimeTestRouteImport.update({
+  id: '/anime-test',
+  path: '/anime-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -683,6 +689,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/anime-test': typeof AnimeTestRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
@@ -785,6 +792,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/anime-test': typeof AnimeTestRoute
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
@@ -880,6 +888,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/anime-test': typeof AnimeTestRoute
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
@@ -985,6 +994,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/anime-test'
     | '/attendance-management-system'
     | '/contact'
     | '/event-survey'
@@ -1087,6 +1097,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/anime-test'
     | '/contact'
     | '/event-survey'
     | '/initiative-survey'
@@ -1181,6 +1192,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/anime-test'
     | '/attendance-management-system'
     | '/contact'
     | '/event-survey'
@@ -1285,6 +1297,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AnimeTestRoute: typeof AnimeTestRoute
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
   EventSurveyRoute: typeof EventSurveyRoute
@@ -1396,6 +1409,13 @@ declare module '@tanstack/react-router' {
       path: '/attendance-management-system'
       fullPath: '/attendance-management-system'
       preLoaderRoute: typeof AttendanceManagementSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/anime-test': {
+      id: '/anime-test'
+      path: '/anime-test'
+      fullPath: '/anime-test'
+      preLoaderRoute: typeof AnimeTestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -2363,6 +2383,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
+  AnimeTestRoute: AnimeTestRoute,
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
   EventSurveyRoute: EventSurveyRoute,
