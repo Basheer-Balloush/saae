@@ -4,6 +4,7 @@ import { animate, stagger, createTimeline } from "animejs";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { useLang } from "@/lib/i18n";
+import { AnimeSvgHero } from "@/components/site/AnimeSvgHero";
 
 export const Route = createFileRoute("/anime-test")({
   head: () => ({
