@@ -649,7 +649,7 @@ const staticGateStrings = [
             document.documentElement.classList.remove("hero-scrolling-up");
           }, 180);
           beginReverseFade();
-        } else if (nextProgress > targetProgress + .0005 && reverseFadeActive) {
+        } else if (nextProgress > targetProgress + .0005 && reverseFadeState !== 'idle') {
           cancelReverseFade();
         }
         targetProgress = nextProgress;
