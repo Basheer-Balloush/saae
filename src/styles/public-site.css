@@ -121,24 +121,52 @@
     html { color-scheme: light; }
     html.hero-snap-active { scroll-snap-type: y mandatory; }
     html.hero-snap-active.hero-scrolling-up { scroll-snap-type: none; }
-    /* Reverse travel is a checkpoint crossfade, not a backwards scrub: the
-       frame and the copy dip out while the film jumps back, then lift in on
-       the previous beat. Reverse seeking can never keep pace with an upward
-       gesture, so the dip hides the work instead of showing it stutter. */
+    /* Reverse travel is a cinematic blur crossfade, not a backwards scrub:
+       the outgoing frame and copy blur and dim, the film jumps to the previous
+       checkpoint while everything is soft, then the new frame and copy lift
+       back into focus slowly. */
     .hero-media,
     .hero-copy-stage {
-      transition: opacity 260ms var(--ease-out);
+      transition:
+        opacity 420ms cubic-bezier(.45, 0, .15, 1),
+        filter 420ms cubic-bezier(.45, 0, .15, 1),
+        transform 420ms cubic-bezier(.45, 0, .15, 1);
+      will-change: opacity, filter, transform;
     }
     html.hero-reverse-fade .hero-media,
     html.hero-reverse-fade .hero-copy-stage {
+      transition-duration: 220ms;
+    }
+    html.hero-reverse-fade .hero-media {
+      opacity: 0.08;
+      filter: blur(18px) brightness(0.65);
+      transform: scale(1.05);
+    }
+    html.hero-reverse-fade .hero-copy-stage {
       opacity: 0;
-      transition-duration: 170ms;
+      filter: blur(10px);
+      transform: translate3d(0, -22px, 0);
+    }
+    /* A temporary darkening wash masks the video seek at peak blur. */
+    .cinematic-scroll::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background: rgba(3, 10, 25, 0);
+      pointer-events: none;
+      transition: background 320ms cubic-bezier(.45, 0, .15, 1);
+    }
+    html.hero-reverse-fade .cinematic-scroll::after {
+      background: rgba(3, 10, 25, 0.52);
     }
     @media (prefers-reduced-motion: reduce) {
       .hero-media,
       .hero-copy-stage { transition: none; }
       html.hero-reverse-fade .hero-media,
-      html.hero-reverse-fade .hero-copy-stage { opacity: 1; }
+      html.hero-reverse-fade .hero-copy-stage { opacity: 1; filter: none; transform: none; }
+      .cinematic-scroll::after { transition: none; }
+      html.hero-reverse-fade .cinematic-scroll::after { background: transparent; }
     }
 
     /* Hard gate: while the film is uncompleted, everything below the hero
