@@ -32,6 +32,7 @@ function AnimeTest() {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const orbRef = useRef<HTMLDivElement>(null);
   const [count, setCount] = useState(0);
+  const [svgMode, setSvgMode] = useState<"lines" | "circles">("lines");
 
   // Headline letters + grid intro
   useEffect(() => {
