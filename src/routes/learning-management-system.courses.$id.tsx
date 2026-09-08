@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate, useRouter, notFound } from "@tansta
 import { useEffect, useState } from "react";
 import { BookOpen, Users, Star, PlayCircle, Loader2, Lock, Clock, Calendar, MapPin, Hourglass, CheckCircle, AlertTriangle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCourseTeachingStatus } from "@/hooks/useCourseTeachingStatus";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
@@ -207,11 +208,12 @@ function CourseLoadError({ reset }: { reset: () => void }) {
 function CourseDetails() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { user } = useLmsAuth();
+  const { user, loading: authLoading } = useLmsAuth();
   const { lang } = useLang();
   const tr = lmsT[lang];
   const ar = lang === "ar";
   const { course, instructor, coInstructors, sections, lessons, hasForm } = Route.useLoaderData() as CourseLoaderData;
+  const teaching = useCourseTeachingStatus(course.id, user?.id, authLoading);
   const [enrolled, setEnrolled] = useState(false);
   const [pendingRequest, setPendingRequest] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -250,7 +252,10 @@ function CourseDetails() {
     return () => { cancelled = true; };
   }, [course, user]);
 
+  useEffect(() => { setFormDialogOpen(false); }, [user?.id, course.id, teaching.status]);
+
   const requireAuth = () => {
+    if (authLoading || (user && teaching.status !== "no")) return false;
     if (!user) {
       // Anonymous visitors are sent to sign-up with a safe internal return URL.
       navigate({
@@ -418,6 +423,9 @@ function CourseDetails() {
             const deadlinePassed = !!course.enrollment_deadline && new Date(course.enrollment_deadline) < new Date();
             const isFull = course.max_students != null && course.students_count >= course.max_students;
             const closed = !course.enrollment_open;
+            if (teaching.status === "loading") return <Button className="w-full mt-4" disabled><Loader2 className="h-4 w-4 animate-spin" /></Button>;
+            if (teaching.status === "error") return <div className="mt-4 text-sm"><p>{ar ? "تعذّر التحقق من صلاحية التسجيل." : "Could not check enrollment eligibility."}</p><Button variant="outline" onClick={teaching.retry}>{ar ? "إعادة المحاولة" : "Retry"}</Button></div>;
+            if (teaching.status === "yes") return <div className="mt-4 space-y-3 text-sm"><p>{ar ? "أنت أحد مدرّسي هذه الدورة، لذلك لا يمكنك التسجيل فيها كطالب." : "You teach this course. You cannot enroll in it as a student."}</p><Link to="/learning-management-system/instructor/courses/$id" params={{ id: course.id }}><Button className="w-full">{ar ? "إدارة الدورة" : "Manage course"}</Button></Link></div>;
             if (enrolled) {
               if (course.delivery_mode === "onsite") {
                 return (
@@ -555,7 +563,7 @@ function CourseDetails() {
         </aside>
       </div>
       <EnrollmentFormDialog
-        open={formDialogOpen}
+        open={formDialogOpen && teaching.status === "no" && !!user}
         onOpenChange={setFormDialogOpen}
         courseId={course?.id ?? id}
         notes={manualNotes || null}

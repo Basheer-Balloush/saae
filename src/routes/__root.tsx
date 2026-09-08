@@ -122,8 +122,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       // so the browser opens the TCP/TLS connection in parallel with the
       // initial HTML parse. Cuts first-image / first-query latency by
       // 100-300ms on cold loads — critical at high concurrency.
-      { rel: "preconnect", href: "https://bcfctxfulwyrslingscm.supabase.co", crossOrigin: "anonymous" },
-      { rel: "dns-prefetch", href: "https://bcfctxfulwyrslingscm.supabase.co" },
+      { rel: "preconnect", href: import.meta.env.VITE_SUPABASE_URL, crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: import.meta.env.VITE_SUPABASE_URL },
       { rel: "dns-prefetch", href: "https://video.bunnycdn.com" },
       { rel: "dns-prefetch", href: "https://images.unsplash.com" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

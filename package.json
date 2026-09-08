@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
+    "prebuild": "node --env-file-if-exists=.env scripts/check-build-env.mjs",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
@@ -14,8 +15,13 @@
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
     "test:e2e": "playwright test tests/e2e",
-    "typecheck": "tsgo --noEmit || tsc --noEmit",
-    "check": "bun run typecheck && bun run lint && bun run test:unit"
+    "typecheck": "tsc --noEmit",
+    "check": "bun run typecheck && bun run lint && bun run test:unit",
+    "preflight": "node --env-file-if-exists=.env --env-file-if-exists=.dev.vars scripts/preflight.mjs",
+    "check:bundle": "node --env-file-if-exists=.env --env-file-if-exists=.dev.vars scripts/check-browser-bundle.mjs",
+    "build:staging": "npm run typecheck && npm run test:unit && npm run test:plans && npm run build && npm run check:bundle",
+    "smoke:local": "node scripts/smoke-local.mjs",
+    "test:plans": "node --test tests/offline/*.test.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.47",

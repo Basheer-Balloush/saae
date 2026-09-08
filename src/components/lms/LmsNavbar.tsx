@@ -57,10 +57,10 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
   if (isAuthed) {
     links.push({ to: "/learning-management-system/student", label: tr.navMyCourses });
   }
-  if (role === "lms_instructor" || role === "lms_admin") {
+  if (role === "lms_instructor" || role === "admin") {
     links.push({ to: "/learning-management-system/instructor", label: tr.navInstructor });
   }
-  if (role === "lms_admin") {
+  if (role === "admin") {
     links.push({ to: "/learning-management-system/admin", label: tr.navAdmin, icon: <LayoutDashboard className="h-3.5 w-3.5" /> });
   }
 

@@ -1,4 +1,4 @@
-import ExcelJS from "exceljs";
+import type ExcelJS from "exceljs";
 
 export type XlsxColumn<T> = {
   header: string;
@@ -103,7 +103,8 @@ function toCellValue<T>(col: XlsxColumn<T>, row: T): ExcelJS.CellValue {
 export async function exportRowsToXlsx<T>(opts: ExportOpts<T>): Promise<void> {
   const { filenameBase, sheetName, rtl = false, columns, rows, boolLabels } = opts;
 
-  const wb = new ExcelJS.Workbook();
+  const ExcelJS = (await import("exceljs")).default;
+    const wb = new ExcelJS.Workbook();
   wb.created = new Date();
   const ws = wb.addWorksheet(sanitizeSheetName(sheetName), {
     views: [{ rightToLeft: rtl }],

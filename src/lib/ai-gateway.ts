@@ -1,9 +1,10 @@
-import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-
-export function createLovableAiGatewayProvider(apiKey: string) {
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+export function createChatModel() {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  const model = process.env.CHAT_MODEL;
+  if (!apiKey || !model) throw new Error('CHAT_CONFIGURATION_MISSING');
   return createOpenAICompatible({
-    name: "lovable-ai-gateway",
-    baseURL: "https://ai.gateway.lovable.dev/v1",
-    headers: { "Lovable-API-Key": apiKey },
-  });
+    name: 'openrouter', baseURL: 'https://openrouter.ai/api/v1',
+    headers: { Authorization: `Bearer ${apiKey}` },
+  })(model);
 }

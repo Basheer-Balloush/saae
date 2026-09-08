@@ -60,13 +60,8 @@ function AmsLogin() {
       const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
       if (error) throw error;
 
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", data.user!.id)
-        .in("role", ["attendance_user", "attendance_admin"]);
-
-      if (!roles || roles.length === 0) {
+      const { data: allowed, error: accessError } = await supabase.rpc("has_ams_portal_access");
+      if (accessError || !allowed) {
         await supabase.auth.signOut();
         toast.error(tr.noAccess);
         return;

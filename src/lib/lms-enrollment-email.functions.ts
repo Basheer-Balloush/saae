@@ -1,3 +1,4 @@
+import { getSiteUrl, sendTransactionalEmail } from '@/lib/email-delivery.server'
 import * as React from 'react'
 import { render } from '@react-email/components'
 import { createServerFn } from '@tanstack/react-start'
@@ -6,46 +7,17 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { EnrollmentApprovedEmail } from '@/lib/email-templates/enrollment-approved'
 
-const SITE_URL = 'https://www.aisyria.org'
 const SITE_NAMES = {
   ar: 'الجمعية السورية للذكاء الاصطناعي وريادة الأعمال',
   en: 'Syrian Association for AI & Entrepreneurship',
 } as const
-const FROM_ADDRESS = 'SAAE <noreply@aisyria.org>'
-const RESEND_GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
 
 const InputSchema = z.object({
   requestId: z.string().uuid(),
   lang: z.enum(['ar', 'en']).default('ar'),
 })
 
-async function sendViaResend(input: { to: string; subject: string; html: string; text: string }) {
-  const lovableApiKey = process.env.LOVABLE_API_KEY
-  const resendApiKey = process.env.RESEND_API_KEY
-  if (!lovableApiKey) throw new Error('LOVABLE_API_KEY is not configured')
-  if (!resendApiKey) throw new Error('RESEND_API_KEY is not configured')
-
-  const response = await fetch(`${RESEND_GATEWAY_URL}/emails`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${lovableApiKey}`,
-      'X-Connection-Api-Key': resendApiKey,
-    },
-    body: JSON.stringify({
-      from: FROM_ADDRESS,
-      to: [input.to],
-      subject: input.subject,
-      html: input.html,
-      text: input.text,
-    }),
-  })
-
-  if (!response.ok) {
-    const body = await response.text()
-    throw new Error(`Resend send failed [${response.status}]: ${body}`)
-  }
-}
+const sendViaResend = sendTransactionalEmail
 
 export const sendEnrollmentApprovedEmail = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
@@ -81,7 +53,7 @@ export const sendEnrollmentApprovedEmail = createServerFn({ method: 'POST' })
     const ar = data.lang === 'ar'
     const courseTitle = ar ? course.title_ar : (course.title_en || course.title_ar)
     const siteName = SITE_NAMES[data.lang]
-    const courseUrl = `${SITE_URL}/learning-management-system/courses/${course.id}`
+    const courseUrl = `${getSiteUrl()}/learning-management-system/courses/${course.id}`
 
     const customBody = ar
       ? (course.approval_email_body_ar ?? null)

@@ -29,11 +29,11 @@ function InstructorLayout() {
         .select("approved,full_name_ar,full_name_en,bio_ar,bio_en,specialty_ar,specialty_en,full_name,bio,specialty")
         .eq("user_id", user.id)
         .maybeSingle();
-      const isApproved = data?.approved ?? (role === "lms_instructor" || role === "lms_admin");
+      const isApproved = role === "admin" || (role === "lms_instructor" && !!data?.approved);
       setApproved(isApproved);
       const d = (data ?? {}) as Record<string, string | null>;
       const hasName = !!(d.full_name_ar || d.full_name_en || d.full_name);
-      setProfileComplete(role === "lms_admin" ? true : hasName);
+      setProfileComplete(role === "admin" ? true : hasName);
     })();
   }, [loading, user, role, navigate, location.pathname]);
 
@@ -46,7 +46,7 @@ function InstructorLayout() {
   if (loading || !user || approved === null || profileComplete === null) {
     return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
   }
-  if (role !== "lms_admin" && !approved) {
+  if (role !== "admin" && !approved) {
     return (
       <div className="mx-auto max-w-xl px-6 py-20 text-center">
         <h1 className="text-xl font-bold text-foreground">

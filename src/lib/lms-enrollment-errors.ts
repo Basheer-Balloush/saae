@@ -4,6 +4,7 @@
  * localized, user-friendly messages. Raw database errors are never surfaced.
  */
 export type EnrollmentErrorCode =
+  | "course_instructor_cannot_enroll"
   | "unauthenticated"
   | "forbidden"
   | "course_not_found"
@@ -22,6 +23,7 @@ export type EnrollmentErrorCode =
   | "invalid_channel";
 
 const MESSAGES: Record<EnrollmentErrorCode, { ar: string; en: string }> = {
+  course_instructor_cannot_enroll: { ar: "أنت أحد مدرّسي هذه الدورة، لذلك لا يمكنك التسجيل فيها كطالب.", en: "You teach this course. You cannot enroll in it as a student." },
   unauthenticated: { ar: "يجب تسجيل الدخول أولاً", en: "Please sign in first" },
   forbidden: { ar: "لا تملك صلاحية تنفيذ هذا الإجراء", en: "You are not allowed to perform this action" },
   course_not_found: { ar: "الدورة غير موجودة", en: "Course not found" },

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList, ArrowRight, FileText } from "lucide-react";
 import { CoursePrice } from "@/components/lms/CoursePrice";
 import { supabase } from "@/integrations/supabase/client";
+import { useCourseParticipantNames } from "@/hooks/useCourseParticipantNames";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
@@ -66,10 +67,12 @@ type Category = { id: string; name_ar: string; name_en: string | null };
 function CourseBuilder() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { user, role } = useLmsAuth();
-  const isAdmin = role === "lms_admin";
+  const { user, role, loading: authLoading } = useLmsAuth();
+  const participants = useCourseParticipantNames(id, user?.id, authLoading);
+  const isAdmin = role === "admin";
   const { lang } = useLang();
   const tr = lmsT[lang];
+  const participantName = (uid: string) => participants.names[uid]?.trim() || (participants.loading ? (lang === "ar" ? "جارٍ تحميل الاسم…" : "Loading name…") : (lang === "ar" ? "الاسم غير متوفر" : "Name unavailable"));
   const [course, setCourse] = useState<Course | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
@@ -557,6 +560,7 @@ function CourseBuilder() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-8">
+      {participants.error && <div role="alert" className="rounded-xl border border-border p-3 text-sm">{lang === "ar" ? "تعذّر تحميل أسماء المشاركين." : "Could not load participant names."} <Button variant="outline" size="sm" onClick={participants.retry}>{lang === "ar" ? "إعادة المحاولة" : "Retry"}</Button></div>}
       {/* Header bar */}
       <div className="rounded-2xl border border-border bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm px-4 sm:px-5 py-4">
         <button
@@ -974,7 +978,7 @@ function CourseBuilder() {
             {enrollReqs.map((r) => (
               <li key={r.id} className="py-3 flex flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <div className="text-xs font-mono text-muted-foreground truncate max-w-[260px]">{r.user_id}</div>
+                  <div className="text-sm font-medium text-foreground truncate max-w-[260px]">{participantName(r.user_id)}</div>
                   <div className="text-xs text-muted-foreground mt-0.5">
                     <span className={`inline-block rounded-full px-2 py-0.5 me-1 ${
                       r.status === "pending" ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200" :
@@ -1013,7 +1017,7 @@ function CourseBuilder() {
               {enrolledStudents.slice(0, 5).map((s) => (
                 <li key={s.id} className="py-3 flex flex-wrap items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="text-xs font-mono text-muted-foreground truncate max-w-[260px]">{s.student_id}</div>
+                    <div className="text-sm font-medium text-foreground truncate max-w-[260px]">{participantName(s.student_id)}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">
                       {new Date(s.enrolled_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}
                       <span className="inline-block rounded-full px-2 py-0.5 ms-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
@@ -1045,7 +1049,7 @@ function CourseBuilder() {
             {enrolledStudents.map((s) => (
               <li key={s.id} className="py-3 flex flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <div className="text-xs font-mono text-muted-foreground truncate max-w-[320px]">{s.student_id}</div>
+                  <div className="text-sm font-medium text-foreground truncate max-w-[320px]">{participantName(s.student_id)}</div>
                   <div className="text-xs text-muted-foreground mt-0.5">
                     {new Date(s.enrolled_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}
                     <span className="inline-block rounded-full px-2 py-0.5 ms-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">

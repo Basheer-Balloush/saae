@@ -17,10 +17,10 @@ function AdminLayout() {
   useEffect(() => {
     if (loading) return;
     if (!user) navigate({ to: "/learning-management-system/login" });
-    else if (role !== "lms_admin") navigate({ to: "/learning-management-system" });
+    else if (role !== "admin") navigate({ to: "/learning-management-system" });
   }, [loading, user, role, navigate]);
 
-  if (loading || !user || role !== "lms_admin") {
+  if (loading || !user || role !== "admin") {
     return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
   }
   return <Outlet />;

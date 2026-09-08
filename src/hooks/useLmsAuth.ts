@@ -1,68 +1,37 @@
 import { useEffect, useState } from "react";
-import type { Session, User } from "@supabase/supabase-js";
+import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-
-export type LmsRole = "lms_student" | "lms_instructor" | "lms_admin" | null;
-
-// In-memory cache of resolved roles per user id, scoped to the tab.
-// Avoids hammering the DB with the same SELECT on every TOKEN_REFRESHED
-// (which fires hourly + on tab focus) and on every component remount.
-const roleCache = new Map<string, LmsRole>();
-
-function resolveRole(roles: string[]): LmsRole {
-  if (roles.includes("lms_admin") || roles.includes("admin")) return "lms_admin";
-  if (roles.includes("lms_instructor")) return "lms_instructor";
-  if (roles.includes("lms_student")) return "lms_student";
-  return null;
-}
+import { resolveLmsRole, type LmsRole } from "@/lib/lms-roles";
+export type { LmsRole } from "@/lib/lms-roles";
 
 export function useLmsAuth() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<LmsRole>(null);
-  const [loading, setLoading] = useState(true);
-
+  const [state, setState] = useState<{ session: Session | null; role: LmsRole; loading: boolean }>({ session: null, role: null, loading: true });
   useEffect(() => {
-    const fetchRole = async (uid: string) => {
-      if (roleCache.has(uid)) {
-        setRole(roleCache.get(uid) ?? null);
-        return;
+    let disposed = false;
+    let revision = 0;
+    const resolve = async (session: Session | null) => {
+      const current = ++revision;
+      if (disposed) return;
+      setState({ session, role: null, loading: !!session });
+      if (!session) return;
+      try {
+        const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
+        if (!disposed && current === revision) setState({ session, role: error ? null : resolveLmsRole((data ?? []).map(r => r.role)), loading: false });
+      } catch {
+        if (!disposed && current === revision) setState({ session, role: null, loading: false });
       }
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", uid);
-      const resolved = resolveRole((data ?? []).map((r) => r.role as string));
-      roleCache.set(uid, resolved);
-      setRole(resolved);
     };
-
-    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
-      // Ignore noisy events (TOKEN_REFRESHED, INITIAL_SESSION) — only react
-      // to actual identity transitions.
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (event === "SIGNED_OUT") {
-        roleCache.clear();
-        setRole(null);
-      } else if (s?.user) {
-        setTimeout(() => fetchRole(s.user.id), 0);
-      }
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Supabase auth callbacks must finish before making further authenticated queries.
+      const ticket = ++revision;
+      if (!disposed) setState({ session, role: null, loading: !!session });
+      setTimeout(() => { if (!disposed && ticket === revision) void resolve(session); }, 0);
     });
-
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) {
-        fetchRole(s.user.id).finally(() => setLoading(false));
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => sub.subscription.unsubscribe();
+    const initialRevision = revision;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!disposed && revision === initialRevision) void resolve(data.session);
+    }, () => { if (!disposed && revision === initialRevision) setState({ session: null, role: null, loading: false }); });
+    return () => { disposed = true; ++revision; sub.subscription.unsubscribe(); };
   }, []);
-
-  return { session, user, role, loading };
+  return { ...state, user: state.session?.user ?? null };
 }

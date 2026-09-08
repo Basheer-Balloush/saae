@@ -1,27 +1,19 @@
-// Server-only helpers for Lovable AI Gateway embeddings + simple chunking.
-const EMBED_URL = "https://ai.gateway.lovable.dev/v1/embeddings";
-const EMBED_MODEL = "openai/text-embedding-3-small"; // 1536 dims
-
+// Preserve the model, 1536 dimensions and chunking used by restored knowledge vectors.
 export async function embedTexts(inputs: string[]): Promise<number[][]> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-  if (inputs.length === 0) return [];
-
-  const res = await fetch(EMBED_URL, {
-    method: "POST",
-    headers: {
-      "Lovable-API-Key": key,
-      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ model: EMBED_MODEL, input: inputs }),
+  if (!inputs.length) return [];
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) throw new Error('EMBEDDING_CONFIGURATION_MISSING');
+  const response = await fetch('https://api.openai.com/v1/embeddings', {
+    method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'text-embedding-3-small', dimensions: 1536, input: inputs }),
+    signal: AbortSignal.timeout(30_000),
   });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Embedding error ${res.status}: ${body}`);
-  }
-  const json = (await res.json()) as { data: Array<{ embedding: number[] }> };
-  return json.data.map((d) => d.embedding);
+  if (!response.ok) throw new Error(`Embedding provider error (${response.status})`);
+  const json = await response.json() as { data?: { index: number; embedding: number[] }[] };
+  if (!Array.isArray(json.data) || json.data.length !== inputs.length) throw new Error('Invalid embedding response');
+  const rows = [...json.data].sort((a, b) => a.index - b.index);
+  if (rows.some((row, index) => row.index !== index || !Array.isArray(row.embedding) || row.embedding.length !== 1536 || row.embedding.some(value => typeof value !== 'number' || !Number.isFinite(value)))) throw new Error('Invalid embedding dimensions or ordering');
+  return rows.map(row => row.embedding);
 }
 
 export async function embedOne(input: string): Promise<number[]> {

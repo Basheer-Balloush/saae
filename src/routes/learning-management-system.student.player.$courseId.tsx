@@ -297,7 +297,7 @@ function Player() {
               lessonId={current.id}
               user={user}
               isInstructor={
-                role === "lms_admin" || (!!user && !!courseInstructorId && user.id === courseInstructorId)
+                role === "admin" || (!!user && !!courseInstructorId && user.id === courseInstructorId)
               }
               lang={lang}
             />

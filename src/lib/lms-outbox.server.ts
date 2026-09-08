@@ -1,3 +1,6 @@
+import { supabaseAdmin } from '@/integrations/supabase/client.server'
+import { logAuditEvent } from './audit-log.server'
+import { assertEmailRecipientAllowed } from './email-delivery.server'
 /**
  * Phase 2 (CF-02) — durable outbox worker.
  *
@@ -14,6 +17,7 @@ type Job = {
   payload: Record<string, unknown>
   attempts: number
   correlation_id: string | null
+  next_attempt_at: string
 }
 
 function backoffMinutes(attempts: number) {
@@ -27,14 +31,14 @@ async function runJob(job: Job) {
       const { sendTrainerApprovedEmail } = await import('./trainer-approved-email.server')
       const to = String(payload.email ?? '')
       if (!to) throw new Error('missing_email')
-      await sendTrainerApprovedEmail({ to, fullName: (payload.full_name as string) ?? null })
+      await sendTrainerApprovedEmail({ idempotencyKey: `outbox-${job.id}`, to, fullName: (payload.full_name as string) ?? null })
       return
     }
     case 'trainer_reapply_email': {
       const { sendReinstructorEmail } = await import('./reinstructor-email.server')
       const to = String(payload.email ?? '')
       if (!to) throw new Error('missing_email')
-      await sendReinstructorEmail({ to, fullName: (payload.full_name as string) ?? '' })
+      await sendReinstructorEmail({ idempotencyKey: `outbox-${job.id}`, to, fullName: (payload.full_name as string) ?? '' })
       return
     }
     default:
@@ -42,13 +46,13 @@ async function runJob(job: Job) {
   }
 }
 
-export async function processOutbox(limit = 25) {
-  const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-  const { logAuditEvent } = await import('./audit-log.server')
+export async function processOutbox(limit = 10) {
+  if (process.env.ENABLE_TRAINER_OUTBOX !== 'true') return { picked: 0, done: 0, failed: 0 };
+  limit = Math.max(1, Math.min(10, limit));
 
   const { data, error } = await supabaseAdmin
     .from('lms_outbox_jobs')
-    .select('id, job_type, payload, attempts, correlation_id')
+    .select('id, job_type, payload, attempts, correlation_id, next_attempt_at')
     .eq('status', 'pending')
     .lte('next_attempt_at', new Date().toISOString())
     .order('created_at', { ascending: true })
@@ -60,17 +64,27 @@ export async function processOutbox(limit = 25) {
   let failed = 0
 
   for (const job of jobs) {
+    try { assertEmailRecipientAllowed(String(job.payload?.email ?? '')) } catch { continue }
+    const leaseUntil = new Date(Date.now() + 10 * 60_000).toISOString();
+    const { data: claimed, error: claimError } = await supabaseAdmin.from('lms_outbox_jobs')
+      .update({ next_attempt_at: leaseUntil })
+      .eq('id', job.id).eq('status', 'pending').eq('attempts', job.attempts)
+      .eq('next_attempt_at', job.next_attempt_at).select('id').maybeSingle();
+    if (claimError) throw claimError;
+    if (!claimed) continue;
     try {
       await runJob(job)
-      await supabaseAdmin
+      const { data: completed, error: completionError } = await supabaseAdmin
         .from('lms_outbox_jobs')
         .update({ status: 'done', attempts: job.attempts + 1, last_error: null })
-        .eq('id', job.id)
+        .eq('id', job.id).eq('next_attempt_at', leaseUntil).select('id').maybeSingle()
+      if (completionError) throw completionError
+      if (!completed) continue
       done++
     } catch (err) {
       const attempts = job.attempts + 1
       const terminal = attempts >= MAX_ATTEMPTS
-      await supabaseAdmin
+      const { data: retried, error: retryError } = await supabaseAdmin
         .from('lms_outbox_jobs')
         .update({
           status: terminal ? 'failed' : 'pending',
@@ -78,7 +92,9 @@ export async function processOutbox(limit = 25) {
           last_error: err instanceof Error ? err.message.slice(0, 500) : String(err).slice(0, 500),
           next_attempt_at: new Date(Date.now() + backoffMinutes(attempts) * 60_000).toISOString(),
         })
-        .eq('id', job.id)
+        .eq('id', job.id).eq('next_attempt_at', leaseUntil).select('id').maybeSingle()
+      if (retryError) throw retryError
+      if (!retried) continue
       if (terminal) {
         failed++
         await logAuditEvent({

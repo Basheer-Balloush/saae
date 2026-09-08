@@ -4,7 +4,7 @@ import { toUserMessage } from "@/lib/safe-error";
 import { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
 import { ArrowLeft, ArrowRight, Plus, Trash2, Users, CalendarDays, Loader2, Eye, FileSpreadsheet, Link2 } from "lucide-react";
-import ExcelJS from "exceljs";
+import type ExcelJS from "exceljs";
 import { supabase } from "@/integrations/supabase/client";
 import { addAmsRegistrantWithLms } from "@/lib/ams-registrant.functions";
 import { sendCertificateEmail } from "@/lib/certificate-email.functions";
@@ -426,6 +426,7 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
   };
 
   const exportRegistrants = async () => {
+    const ExcelJS = (await import("exceljs")).default;
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet(sanitizeSheetName(tr.registrants, "Sheet1"));
     ws.addRow([tr.fullName, tr.emailField, tr.phone, tr.paymentStatus, tr.attendanceCount]);
@@ -444,7 +445,8 @@ function CourseDetail({ course, onBack }: { course: Course; onBack: () => void }
 
   const exportSessions = async (selectedIds: string[]) => {
     try {
-      const wb = new ExcelJS.Workbook();
+      const ExcelJS = (await import("exceljs")).default;
+    const wb = new ExcelJS.Workbook();
       const chosen = sessions.filter((s) => selectedIds.includes(s.id));
       if (chosen.length === 0) return;
       const used = new Set<string>();

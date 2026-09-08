@@ -38,25 +38,20 @@ export function useCourseAccess(courseId: string | null | undefined): {
         { data: course },
         { data: coRow },
       ] = await Promise.all([
-        supabase.rpc("has_role", { _user_id: uid, _role: "lms_admin" }),
+        supabase.rpc("is_lms_admin", { _user_id: uid }),
         supabase
           .from("lms_courses")
           .select("instructor_id")
           .eq("id", courseId)
           .maybeSingle(),
-        supabase
-          .from("lms_course_instructors")
-          .select("can_edit, can_grade, can_manage_enrollments")
-          .eq("course_id", courseId)
-          .eq("instructor_user_id", uid)
-          .maybeSingle(),
+        supabase.rpc("lms_get_course_assignments", { _course_id: courseId }),
       ]);
 
       if (cancelled) return;
 
       const admin = !!isAdmin;
       const primary = course?.instructor_id === uid;
-      const co = coRow ?? null;
+      const co = coRow?.find(r => r.instructor_user_id === uid) ?? null;
       const canView = admin || primary || !!co;
       setAccess({
         canView,

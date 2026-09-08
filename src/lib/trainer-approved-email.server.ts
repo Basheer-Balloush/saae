@@ -1,13 +1,8 @@
-const SITE_URL = 'https://www.aisyria.org'
-const LOGIN_URL = `${SITE_URL}/learning-management-system/login`
-const FROM_ADDRESS = 'SAAE <noreply@aisyria.org>'
-const RESEND_GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
+import { getSiteUrl, sendTransactionalEmail, assertEmailRecipientAllowed } from '@/lib/email-delivery.server'
 
 /** Phase 2 (CF-02): sent from the outbox after a trainer is activated. */
-export async function sendTrainerApprovedEmail(input: { to: string; fullName?: string | null }) {
-  const lovableApiKey = process.env.LOVABLE_API_KEY
-  const resendApiKey = process.env.RESEND_API_KEY
-  if (!lovableApiKey || !resendApiKey) throw new Error('email keys not configured')
+export async function sendTrainerApprovedEmail(input: { idempotencyKey?: string; to: string; fullName?: string | null }) {
+  assertEmailRecipientAllowed(input.to)
 
   const name = (input.fullName || '').trim() || 'الأستاذ/ة'
   const subject = 'تم اعتمادك كمدرّب — الجمعية السورية للذكاء الاصطناعي وريادة الأعمال'
@@ -24,7 +19,7 @@ export async function sendTrainerApprovedEmail(input: { to: string; fullName?: s
       يمكنك الآن تسجيل الدخول إلى حسابك والوصول إلى لوحة المدرّب لإنشاء دوراتك ومتابعة المتدربين.
     </p>
     <p style="text-align:center;margin:28px 0;">
-      <a href="${LOGIN_URL}" style="display:inline-block;background:#0f766e;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:bold;">
+      <a href="${getSiteUrl()}/learning-management-system/login" style="display:inline-block;background:#0f766e;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:bold;">
         الدخول إلى لوحة المدرّب
       </a>
     </p>
@@ -37,22 +32,10 @@ export async function sendTrainerApprovedEmail(input: { to: string; fullName?: s
   const text = `مبروك ${name},
 
 تم اعتماد طلبك كمدرّب على منصة التدريب والتعلّم. سجّل الدخول عبر:
-${LOGIN_URL}
+${getSiteUrl()}/learning-management-system/login
 
 — الجمعية السورية للذكاء الاصطناعي وريادة الأعمال`
 
-  const res = await fetch(`${RESEND_GATEWAY_URL}/emails`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${lovableApiKey}`,
-      'X-Connection-Api-Key': resendApiKey,
-    },
-    body: JSON.stringify({ from: FROM_ADDRESS, to: [input.to], subject, html, text }),
-  })
-
-  if (!res.ok) {
-    throw new Error(`resend_failed_${res.status}: ${(await res.text()).slice(0, 300)}`)
-  }
+  await sendTransactionalEmail({ to: input.to, subject: subject, html, text, idempotencyKey: input.idempotencyKey })
   return true
 }

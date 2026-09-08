@@ -26,7 +26,7 @@ const ROOT_DOMAIN = "aisyria.org"
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
 // can always find-and-replace it with the actual recipient when sending test emails,
 // even if the project's domain has changed since the template was scaffolded.
-const SAMPLE_PROJECT_URL = "https://saae.lovable.app"
+const SAMPLE_PROJECT_URL = "https://example.test"
 const SAMPLE_EMAIL = "user@example.test"
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
@@ -64,16 +64,16 @@ export const Route = createFileRoute("/lovable/email/auth/preview")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env.LOVABLE_API_KEY
+        const apiKey = process.env.EMAIL_PREVIEW_SECRET
 
         if (!apiKey) {
           return Response.json(
             { error: 'Server configuration error' },
-            { status: 500 }
+            { status: 503 }
           )
         }
 
-        // Verify the caller is authorized with LOVABLE_API_KEY
+        // Verify the caller is authorized with EMAIL_PREVIEW_SECRET
         const authHeader = request.headers.get('Authorization')
         if (!authHeader || authHeader !== `Bearer ${apiKey}`) {
           return Response.json({ error: 'Unauthorized' }, { status: 401 })

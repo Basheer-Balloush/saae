@@ -23,11 +23,7 @@ async function assertLmsAdmin(userId: string) {
   if (!data || data.length === 0) throw new Error("Forbidden: admin role required");
 }
 
-// Roles any lms_admin (or admin) can grant.
-const MANAGEABLE_BY_LMS_ADMIN = ["lms_instructor", "attendance_user", "attendance_admin"] as const;
-// Privileged roles only a super-admin can grant.
-const MANAGEABLE_BY_ADMIN_ONLY = ["lms_admin"] as const;
-const MANAGEABLE = [...MANAGEABLE_BY_LMS_ADMIN, ...MANAGEABLE_BY_ADMIN_ONLY] as const;
+const MANAGEABLE = ["admin", "lms_instructor", "lms_student"] as const;
 
 export const grantRoleByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -40,14 +36,7 @@ export const grantRoleByEmail = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    // Privileged role grants (e.g. lms_admin) require the super-admin "admin" role.
-    // All other grants only require lms_admin or admin.
-    const isPrivileged = (MANAGEABLE_BY_ADMIN_ONLY as readonly string[]).includes(data.role);
-    if (isPrivileged) {
-      await assertAdmin(context.userId);
-    } else {
-      await assertLmsAdmin(context.userId);
-    }
+    await assertAdmin(context.userId);
 
     // Find user by email via auth admin API (paginated)
     let foundId: string | null = null;
@@ -64,13 +53,8 @@ export const grantRoleByEmail = createServerFn({ method: "POST" })
     }
     if (!foundId) throw new Error("لم يتم العثور على مستخدم بهذا الإيميل / User not found");
 
-    const { error: insErr } = await supabaseAdmin
-      .from("user_roles")
-      .insert({ user_id: foundId, role: data.role as never });
-    if (insErr) {
-      if (insErr.code === "23505") throw new Error("الدور ممنوح مسبقاً / Role already granted");
-      throw new Error(insErr.message);
-    }
+    const { error: roleError } = await context.supabase.rpc("lms_set_user_role", { _user_id: foundId, _role: data.role });
+    if (roleError) throw new Error(roleError.message);
     return { ok: true, userId: foundId };
   });
 

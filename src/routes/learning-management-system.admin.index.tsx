@@ -168,16 +168,18 @@ function AdminHome() {
       return;
     }
     if (approve) {
-      await supabase.from("user_roles").insert({ user_id: uid, role: "lms_instructor" as never });
+      const { error: grantError } = await supabase.from("user_roles").insert({ user_id: uid, role: "lms_instructor" });
+      if (grantError) { toast.error(toUserMessage(grantError)); return; }
       toast.success(
         ar ? "تمت الموافقة وتفعيل صلاحيات التدريس" : "Approved and instructor role granted",
       );
     } else {
-      await supabase
+      const { error: revokeError } = await supabase
         .from("user_roles")
         .delete()
         .eq("user_id", uid)
         .eq("role", "lms_instructor" as never);
+      if (revokeError) { toast.error(toUserMessage(revokeError)); return; }
       toast.success(ar ? "تم إلغاء الموافقة" : "Approval revoked");
     }
     load();

@@ -1,6 +1,6 @@
 // AMS Service Worker — scoped to /attendance-management-system/
 // Strategy: NetworkFirst for HTML, cache-first for static assets, only within AMS.
-const VERSION = "ams-v1";
+const VERSION = "ams-org-phase2-v2";
 const HTML_CACHE = `ams-html-${VERSION}`;
 const ASSET_CACHE = `ams-assets-${VERSION}`;
 const AMS_PREFIX = "/attendance-management-system";

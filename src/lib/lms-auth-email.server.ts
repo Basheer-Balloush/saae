@@ -1,3 +1,4 @@
+import { getSiteUrl, sendTransactionalEmail, assertEmailRecipientAllowed } from '@/lib/email-delivery.server'
 import * as React from 'react'
 import { createHash } from 'crypto'
 import { render } from '@react-email/components'
@@ -20,13 +21,10 @@ type ResetInput = {
   lang: Lang
 }
 
-const SITE_URL = 'https://www.aisyria.org'
 const SITE_NAMES: Record<Lang, string> = {
   ar: 'الجمعية السورية للذكاء الاصطناعي وريادة الأعمال',
   en: 'Syrian Association for AI & Entrepreneurship',
 }
-const FROM_ADDRESS = 'SAAE <noreply@aisyria.org>'
-const RESEND_GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
 
 // Phase 7A — privacy-safe identifier hashing for the rate-limit table.
 // We never store raw emails; a peppered SHA-256 keeps the identifier stable
@@ -55,34 +53,7 @@ async function enforceRateLimit(kind: 'signup' | 'reset' | 'resend', email: stri
   }
 }
 
-async function sendViaResend(input: { to: string; subject: string; html: string; text: string }) {
-  const lovableApiKey = process.env.LOVABLE_API_KEY
-  const resendApiKey = process.env.RESEND_API_KEY
-
-  if (!lovableApiKey) throw new Error('LOVABLE_API_KEY is not configured')
-  if (!resendApiKey) throw new Error('RESEND_API_KEY is not configured')
-
-  const response = await fetch(`${RESEND_GATEWAY_URL}/emails`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${lovableApiKey}`,
-      'X-Connection-Api-Key': resendApiKey,
-    },
-    body: JSON.stringify({
-      from: FROM_ADDRESS,
-      to: [input.to],
-      subject: input.subject,
-      html: input.html,
-      text: input.text,
-    }),
-  })
-
-  if (!response.ok) {
-    const body = await response.text()
-    throw new Error(`Resend send failed [${response.status}]: ${body}`)
-  }
-}
+const sendViaResend = sendTransactionalEmail
 
 async function renderEmail(element: React.ReactElement) {
   return {
@@ -158,7 +129,7 @@ export type CreateAccountResult = { sentTo: string; email: string; confirmationR
  */
 export async function createLmsAccount(input: SignupInput): Promise<CreateAccountResult> {
   const email = input.email.trim().toLowerCase()
-  const redirectTo = `${SITE_URL}/learning-management-system/student`
+  const redirectTo = `${getSiteUrl()}/learning-management-system/student`
 
   // Phase 7A — bound signup abuse per normalized email. Six attempts per 15 min.
   await enforceRateLimit('signup', email, 6, 900)
@@ -181,6 +152,7 @@ export async function createLmsAccount(input: SignupInput): Promise<CreateAccoun
     return { sentTo: email, email, confirmationRequired: false }
   }
 
+  assertEmailRecipientAllowed(email)
   const { data, error } = await supabaseAdmin.auth.admin.generateLink({
     type: 'signup',
     email,
@@ -201,7 +173,7 @@ export async function createLmsAccount(input: SignupInput): Promise<CreateAccoun
   const rendered = await renderEmail(
     React.createElement(SignupEmail, {
       siteName,
-      siteUrl: SITE_URL,
+      siteUrl: getSiteUrl(),
       recipient: email,
       confirmationUrl,
       lang: input.lang,
@@ -225,8 +197,8 @@ export const signUpWithResendConfirmation = createLmsAccount
  * Enumeration-safe: always returns the same shape, whatever the account state.
  * No-ops when the server-side switch has confirmation disabled (accounts are
  * already active in that mode). Delegates the send to Supabase Auth so the
- * user's password is never touched; the auth email hook renders the same
- * localized SignupEmail template through Resend.
+ * user's password is never touched; native Supabase SMTP delivers the dashboard template. Configure SMTP and
+ * templates separately; the old Lovable hook is not used.
  */
 export async function resendLmsConfirmation(input: ResetInput) {
   const email = input.email.trim().toLowerCase()
@@ -239,10 +211,12 @@ export async function resendLmsConfirmation(input: ResetInput) {
     return { sent: true }
   }
 
+  // Native Supabase SMTP sends this message; enforce the staging guard first.
+  try { assertEmailRecipientAllowed(email) } catch { return { sent: true } }
   const { error } = await supabaseAdmin.auth.resend({
     type: 'signup',
     email,
-    options: { emailRedirectTo: `${SITE_URL}/learning-management-system/student` },
+    options: { emailRedirectTo: `${getSiteUrl()}/learning-management-system/student` },
   })
 
   if (error) {
@@ -259,7 +233,7 @@ export async function resendLmsConfirmation(input: ResetInput) {
 
 export async function sendPasswordResetWithResend(input: ResetInput) {
   const email = input.email.trim().toLowerCase()
-  const redirectTo = `${SITE_URL}/learning-management-system/reset-password`
+  const redirectTo = `${getSiteUrl()}/learning-management-system/reset-password`
 
   // Phase 7A — enumeration-safe: every code path returns the same shape.
   // Rate-limit failures also collapse to the generic success response so
@@ -270,6 +244,7 @@ export async function sendPasswordResetWithResend(input: ResetInput) {
     return { sent: true }
   }
 
+  try { assertEmailRecipientAllowed(email) } catch { return { sent: true } }
   const { data, error } = await supabaseAdmin.auth.admin.generateLink({
     type: 'recovery',
     email,

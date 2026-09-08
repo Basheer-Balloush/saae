@@ -37,7 +37,7 @@ function amsCourseId(c: Course): string | null {
 }
 
 function InstructorHome() {
-  const { user } = useLmsAuth();
+  const { user, role } = useLmsAuth();
   const { lang } = useLang();
   const tr = lmsT[lang];
   const [courses, setCourses] = useState<Course[]>([]);
@@ -52,20 +52,11 @@ function InstructorHome() {
     if (!user) return;
     setLoading(true);
     const cols = "id,title_ar,title_en,status,students_count,is_free,price,sale_price,instructor_id,delivery_mode,ams_courses!ams_courses_lms_course_id_fkey(id)";
-    const ownedP = supabase.from("lms_courses")
-      .select(cols)
-      .eq("instructor_id", user.id)
-      .order("created_at", { ascending: false });
-    const coP = supabase.from("lms_course_instructors")
-      .select(`course:lms_courses(${cols})`)
-      .eq("instructor_user_id", user.id);
-    const [{ data: owned }, { data: co }] = await Promise.all([ownedP, coP]);
-    const map = new Map<string, Course>();
-    for (const c of (owned as Course[]) ?? []) map.set(c.id, c);
-    for (const row of ((co as unknown) as Array<{ course: Course | null }>) ?? []) {
-      if (row.course && !map.has(row.course.id)) map.set(row.course.id, row.course);
-    }
-    setCourses(Array.from(map.values()));
+    const { data: ids, error: idError } = await supabase.rpc("lms_my_teaching_course_ids");
+    if (idError) { toast.error(toUserMessage(idError)); setLoading(false); return; }
+    const { data, error } = ids?.length ? await supabase.from("lms_courses").select(cols).in("id", ids).order("created_at", { ascending: false }) : { data: [], error: null };
+    if (error) toast.error(toUserMessage(error));
+    setCourses((data as Course[]) ?? []);
     setLoading(false);
   };
 
@@ -80,6 +71,18 @@ function InstructorHome() {
     if (firstBad) { fieldRefs.current[firstBad]?.focus(); return; }
     const values = trimCourseI18n(form);
     setCreating(true);
+    if (role === "admin") {
+      // Course ownership references an instructor profile, even for an admin.
+      const { data: profile, error: profileError } = await supabase.from("lms_instructors").select("user_id").eq("user_id", user.id).maybeSingle();
+      if (profileError) { setCreating(false); toast.error(toUserMessage(profileError)); return; }
+      if (!profile) {
+        const { data: ownProfile } = await supabase.from("lms_user_profiles").select("full_name").eq("user_id", user.id).maybeSingle();
+        const fullName = ownProfile?.full_name?.trim() || String(user.user_metadata?.full_name || user.user_metadata?.name || "").trim();
+        if (!fullName) { setCreating(false); toast.error(lang === "ar" ? "أضف اسمك في ملفك الشخصي قبل إنشاء الدورة." : "Add your name to your profile before creating a course."); return; }
+        const { error: insertError } = await supabase.from("lms_instructors").insert({ user_id: user.id, full_name: fullName, approved: false });
+        if (insertError && insertError.code !== "23505") { setCreating(false); toast.error(toUserMessage(insertError)); return; }
+      }
+    }
     const { data, error } = await supabase.from("lms_courses").insert({
       instructor_id: user.id,
       ...values,

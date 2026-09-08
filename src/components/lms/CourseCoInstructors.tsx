@@ -40,10 +40,7 @@ export function CourseCoInstructors({
         .select("user_id,full_name,full_name_ar,full_name_en,specialty,specialty_ar,specialty_en,avatar_url")
         .eq("approved", true)
         .order("full_name"),
-      supabase
-        .from("lms_course_instructors")
-        .select("instructor_user_id")
-        .eq("course_id", courseId),
+      supabase.rpc("lms_get_course_assignments", { _course_id: courseId }),
     ]);
     setApproved((ins as Instructor[]) ?? []);
     setCoIds(((links as { instructor_user_id: string }[]) ?? []).map((l) => l.instructor_user_id));
@@ -76,11 +73,7 @@ export function CourseCoInstructors({
 
   const onRemove = async (uid: string) => {
     setBusy(true);
-    const { error } = await supabase
-      .from("lms_course_instructors")
-      .delete()
-      .eq("course_id", courseId)
-      .eq("instructor_user_id", uid);
+    const { error } = await supabase.rpc("lms_remove_course_instructor", { _course_id: courseId, _instructor_id: uid });
     setBusy(false);
     if (error) { toast.error(toUserMessage(error)); return; }
     setCoIds((p) => p.filter((x) => x !== uid));

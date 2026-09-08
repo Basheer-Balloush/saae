@@ -19,10 +19,11 @@ export const Route = createFileRoute("/learning-management-system/admin/users")(
 type RoleRow = { id: string; user_id: string; role: string; created_at: string };
 type InstructorRow = { user_id: string; full_name: string };
 
-const MANAGEABLE = ["lms_instructor", "lms_admin", "attendance_user", "attendance_admin"] as const;
+const MANAGEABLE = ["admin", "lms_instructor", "lms_student"] as const;
 
 const ROLE_LABELS: Record<string, { ar: string; en: string }> = {
-  admin: { ar: "مدير عام", en: "Super Admin" },
+  admin: { ar: "مدير عام", en: "Admin" },
+  lms_student: { ar: "طالب", en: "Student" },
   lms_admin: { ar: "مدير منصّة التدريب والتعلّم", en: "Training & Learning Platform Admin" },
   lms_instructor: { ar: "مدرّب", en: "Instructor" },
   attendance_admin: { ar: "مدير نظام الحضور", en: "Attendance Admin" },
@@ -58,7 +59,7 @@ function UsersPage() {
     if (uids.length) {
       const [insRes, emailRes] = await Promise.all([
         supabase.from("lms_instructors").select("user_id,full_name").in("user_id", uids),
-        emailsFn({ data: { userIds: uids } }).catch(() => ({ emails: {} as Record<string, string> })),
+        Promise.all(Array.from({ length: Math.ceil(uids.length / 500) }, (_, i) => emailsFn({ data: { userIds: uids.slice(i * 500, (i + 1) * 500) } }))).then(results => ({ emails: Object.assign({}, ...results.map(r => r.emails)) as Record<string, string> })).catch(() => ({ emails: {} as Record<string, string> })),
       ]);
       const nMap: Record<string, string> = {};
       (insRes.data as InstructorRow[] ?? []).forEach((i) => { nMap[i.user_id] = i.full_name; });
@@ -75,7 +76,7 @@ function UsersPage() {
     try {
       await grantFn({ data: { email: grantEmail.trim(), role: grantRole } });
       setGrantEmail("");
-      toast.success(ar ? "تم منح الدور" : "Role granted");
+      toast.success(ar ? "تم تحديث الدور" : "Role updated");
       load();
     } catch (err) {
       toast.error(toUserMessage(err));
@@ -85,8 +86,10 @@ function UsersPage() {
   };
 
   const revoke = async (id: string) => {
-    if (!(await confirmDialog({ title: ar ? "إزالة الدور؟" : "Revoke role?", destructive: true }))) return;
-    const { error } = await supabase.from("user_roles").delete().eq("id", id);
+    if (!(await confirmDialog({ title: ar ? "تغيير الدور إلى طالب؟" : "Change role to student?", destructive: true }))) return;
+    const target = roles.find(r => r.id === id);
+    if (!target) return;
+    const { error } = await supabase.rpc("lms_set_user_role", { _user_id: target.user_id, _role: "lms_student" });
     if (error) { toast.error(toUserMessage(error)); return; }
     load();
   };
@@ -122,7 +125,7 @@ function UsersPage() {
           {MANAGEABLE.map((r) => <option key={r} value={r}>{roleLabel(r, ar)}</option>)}
         </select>
         <Button type="submit" disabled={granting}>
-          {granting ? (ar ? "..." : "...") : (ar ? "منح" : "Grant")}
+          {granting ? (ar ? "..." : "...") : (ar ? "تحديث" : "Set role")}
         </Button>
       </form>
 
@@ -141,7 +144,7 @@ function UsersPage() {
                 {emails[r.user_id] ?? r.user_id} · <span className="text-primary">{roleLabel(r.role, ar)}</span>
               </div>
             </div>
-            {r.role !== "admin" && (
+            {r.role === "lms_instructor" && (
               <Button size="sm" variant="ghost" onClick={() => revoke(r.id)}>
                 <X className="h-4 w-4 text-destructive" />
               </Button>

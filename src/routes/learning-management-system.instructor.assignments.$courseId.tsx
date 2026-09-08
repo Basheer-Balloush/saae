@@ -78,7 +78,7 @@ function InstructorAssignments() {
     (async () => {
       const { data } = await supabase.from("lms_courses").select("instructor_id").eq("id", courseId).maybeSingle();
       const ownsCourse = data && (data as { instructor_id: string }).instructor_id === user.id;
-      setAuthorized(role === "lms_admin" || !!ownsCourse);
+      setAuthorized(role === "admin" || !!ownsCourse);
     })();
   }, [authLoading, user, role, courseId]);
 

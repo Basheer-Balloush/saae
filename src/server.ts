@@ -67,6 +67,10 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 }
 
 export default {
+  async scheduled() {
+    const { runScheduledJobs } = await import('./lib/scheduled-jobs.server');
+    await runScheduledJobs();
+  },
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();

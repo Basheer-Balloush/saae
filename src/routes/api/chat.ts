@@ -2,7 +2,7 @@ import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
+import { createChatModel } from "@/lib/ai-gateway";
 
 
 // --- In-memory sliding-window rate limiter (per-instance) ---
@@ -227,6 +227,11 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
+        // Fail before persisting user messages if the provider is not configured.
+        let model: ReturnType<typeof createChatModel>;
+        try { model = createChatModel(); } catch {
+          return new Response("Chat is temporarily unavailable", { status: 503 });
+        }
         // Rate limit by IP + session (or just IP if no session)
         const clientIp =
           request.headers.get("cf-connecting-ip") ||
@@ -303,11 +308,6 @@ export const Route = createFileRoute("/api/chat")({
           extraContext = await retrieveKnowledge(lastUserText);
         }
 
-        const key = process.env.LOVABLE_API_KEY;
-        if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
-
-        const gateway = createLovableAiGatewayProvider(key);
-        const model = gateway("google/gemini-3-flash-preview");
 
         // Ensure a conversation exists so leads can be linked even if sessionId was missing
         if (!conversationId) {
@@ -448,4 +448,3 @@ export const Route = createFileRoute("/api/chat")({
     },
   },
 });
-
