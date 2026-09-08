@@ -236,6 +236,9 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
             </p>
             <div className="flex gap-2">
               <Button size="sm" onClick={addQuestion}><Plus className="h-4 w-4 mx-1" />{tr.addQuestion}</Button>
+              <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
+                <FileUp className="h-4 w-4 mx-1" />{ar ? "استيراد من ملف" : "Import from file"}
+              </Button>
               <Button size="sm" variant="outline" onClick={deleteQuiz} className="text-destructive border-destructive/40">
                 <Trash2 className="h-4 w-4 mx-1" />{ar ? "حذف الاختبار" : "Delete quiz"}
               </Button>
