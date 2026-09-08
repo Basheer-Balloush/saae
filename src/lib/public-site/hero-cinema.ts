@@ -542,7 +542,7 @@ const staticGateStrings = [
       }
 
       function queueSeek() {
-        if (seekQueued || video.seeking || !Number.isFinite(pendingSeekTime)) return;
+        if (seekQueued || !Number.isFinite(pendingSeekTime)) return;
         /* The source is 24 fps. Asking the decoder for sub-frame positions on
            every animation frame creates a growing seek queue, most noticeably
            while scrolling backwards. Only request a new decoded frame when the
@@ -560,6 +560,10 @@ const staticGateStrings = [
           );
           if (Math.abs(nextSeekTime - lastRequestedSeekTime) < 1 / heroVideoFrameRate) return;
           lastRequestedSeekTime = nextSeekTime;
+          /* Assigning a newer target while a seek is in flight lets the media
+             element coalesce stale reverse-scroll work. Waiting for `seeked`
+             serialized every intermediate frame and made upward scrolling lag
+             behind fast wheel and trackpad gestures. */
           try { video.currentTime = nextSeekTime; }
           catch (_) { /* The poster remains a complete fallback. */ }
         });
