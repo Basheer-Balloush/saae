@@ -725,7 +725,16 @@ const staticGateStrings = [
         if (!heroActive) return;
         const delta = Math.min(80, Math.max(1, now - lastTime));
         lastTime = now;
+        /* Dipped out for a reverse checkpoint: no scrubbing while hidden, the
+           single jump happens once the upward gesture settles. */
+        if (reverseFadeActive) {
+          pauseVideoPlayback();
+          syncStatsToVideo();
+          heroFrame = __raf(heroLoop);
+          return;
+        }
         const isPlayingForward = advanceForwardVideo();
+
         if (isPlayingForward) {
           paintHero(easedProgress, false);
         } else {
