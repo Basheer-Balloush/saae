@@ -741,9 +741,9 @@ const staticGateStrings = [
         if (!heroActive) return;
         const delta = Math.min(80, Math.max(1, now - lastTime));
         lastTime = now;
-        /* Dipped out for a reverse checkpoint: no scrubbing while hidden, the
-           single jump happens once the upward gesture settles. */
-        if (reverseFadeActive) {
+        /* During a reverse cinematic crossfade the media is blurred and the
+           seek is in flight; do not scrub or play until the fade lifts. */
+        if (reverseFadeState !== 'idle') {
           pauseVideoPlayback();
           syncStatsToVideo();
           heroFrame = __raf(heroLoop);
