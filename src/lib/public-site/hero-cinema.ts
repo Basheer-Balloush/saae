@@ -216,6 +216,11 @@ const staticGateStrings = [
       let lastRequestedSeekTime = -1;
       let reverseScrollActiveUntil = 0;
       let reverseScrollTimer = 0;
+      /* Reverse checkpoint crossfade state. */
+      let reverseFadeActive = false;
+      let reverseFadeTimer = 0;
+      let reverseFadeLiftTimer = 0;
+
       let pageFrame = 0;
       let ribbonOpen = false;
       let ribbonCloseTimer = 0;
