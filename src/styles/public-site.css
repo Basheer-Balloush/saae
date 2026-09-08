@@ -120,6 +120,7 @@
 
     html { color-scheme: light; }
     html.hero-snap-active { scroll-snap-type: y mandatory; }
+    html.hero-snap-active.hero-scrolling-up { scroll-snap-type: none; }
     /* Hard gate: while the film is uncompleted, everything below the hero
        is unpainted (layout is kept, so snap points and measurements hold).
        Fast drags and smooth-scroll inertia can otherwise flash deep content
