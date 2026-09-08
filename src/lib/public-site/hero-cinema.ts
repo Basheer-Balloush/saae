@@ -216,8 +216,11 @@ const staticGateStrings = [
       let lastRequestedSeekTime = -1;
       let reverseScrollActiveUntil = 0;
       let reverseScrollTimer = 0;
-      /* Reverse checkpoint crossfade state. */
-      let reverseFadeActive = false;
+      /* Reverse checkpoint cinematic crossfade state. */
+      let reverseFadeState = 'idle'; // 'idle' | 'fading-out' | 'seeking' | 'fading-in'
+      const REVERSE_FADE_OUT_MS = 220;
+      const REVERSE_FADE_IN_MS = 420;
+      const REVERSE_SEEK_AT_MS = 170; // seek while the frame is heavily blurred
       let reverseFadeTimer = 0;
       let reverseFadeLiftTimer = 0;
 
