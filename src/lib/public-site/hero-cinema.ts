@@ -29,6 +29,7 @@ export function initHeroCinema(): () => void {
   const __teardown = () => {
     __cleanups.forEach((fn) => { try { fn(); } catch {} });
     __timers.forEach((t) => { typeof t === "function" ? t() : window.clearTimeout(t); });
+    document.documentElement.classList.remove("hero-scrolling-up");
     __dead = true;
     __frames.forEach((f) => window.cancelAnimationFrame(f));
     __frames.clear();
@@ -212,6 +213,7 @@ const staticGateStrings = [
       let pendingSeekTime = 0;
       let lastRequestedSeekTime = -1;
       let reverseScrollActiveUntil = 0;
+      let reverseScrollTimer = 0;
       let pageFrame = 0;
       let ribbonOpen = false;
       let ribbonCloseTimer = 0;
@@ -575,7 +577,14 @@ const staticGateStrings = [
         const rect = heroSection.getBoundingClientRect();
         const distance = Math.max(1, heroSection.offsetHeight - window.innerHeight);
         const nextProgress = clamp(-rect.top / distance, 0, 1);
-        if (nextProgress < targetProgress - .0005) reverseScrollActiveUntil = performance.now() + 140;
+        if (nextProgress < targetProgress - .0005) {
+          reverseScrollActiveUntil = performance.now() + 140;
+          document.documentElement.classList.add("hero-scrolling-up");
+          clearTimeout(reverseScrollTimer);
+          reverseScrollTimer = __setTimeout(() => {
+            document.documentElement.classList.remove("hero-scrolling-up");
+          }, 180);
+        }
         targetProgress = nextProgress;
         ribbon.classList.toggle("is-visible", targetProgress >= .2 || rect.bottom < window.innerHeight * .8);
         syncHeroSnap(rect);
@@ -671,13 +680,15 @@ const staticGateStrings = [
           pauseVideoPlayback();
           const requestedProgress = requestedVideoProgress();
           const visualTargetProgress = settledVideoProgress(requestedProgress);
-          /* Reverse playback has to seek rather than play. Catch up much more
-             quickly while an upward gesture is active, then return to the soft
-             settling used at snap points. This prevents the picture trailing
-             several frames behind the page and removes the perceived lag. */
-          const easingStrength = now < reverseScrollActiveUntil ? .24 : .075;
-          const alpha = 1 - Math.pow(1 - easingStrength, delta / (1000 / 60));
-          easedProgress += (visualTargetProgress - easedProgress) * alpha;
+          /* Reverse playback has to seek rather than play. During an upward
+             gesture, jump to its newest target so stale intermediate frames do
+             not keep decoding after the page has already moved past them. */
+          if (now < reverseScrollActiveUntil) {
+            easedProgress = visualTargetProgress;
+          } else {
+            const alpha = 1 - Math.pow(1 - .075, delta / (1000 / 60));
+            easedProgress += (visualTargetProgress - easedProgress) * alpha;
+          }
           if (Math.abs(visualTargetProgress - easedProgress) < .00015) easedProgress = visualTargetProgress;
           paintHero(easedProgress, true);
         }
