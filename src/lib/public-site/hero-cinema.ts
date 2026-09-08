@@ -30,6 +30,8 @@ export function initHeroCinema(): () => void {
     __cleanups.forEach((fn) => { try { fn(); } catch {} });
     __timers.forEach((t) => { typeof t === "function" ? t() : window.clearTimeout(t); });
     document.documentElement.classList.remove("hero-scrolling-up");
+    document.documentElement.classList.remove("hero-reverse-fade");
+
     __dead = true;
     __frames.forEach((f) => window.cancelAnimationFrame(f));
     __frames.clear();
