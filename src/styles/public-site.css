@@ -121,6 +121,26 @@
     html { color-scheme: light; }
     html.hero-snap-active { scroll-snap-type: y mandatory; }
     html.hero-snap-active.hero-scrolling-up { scroll-snap-type: none; }
+    /* Reverse travel is a checkpoint crossfade, not a backwards scrub: the
+       frame and the copy dip out while the film jumps back, then lift in on
+       the previous beat. Reverse seeking can never keep pace with an upward
+       gesture, so the dip hides the work instead of showing it stutter. */
+    .hero-media,
+    .hero-copy-stage {
+      transition: opacity 260ms var(--ease-out);
+    }
+    html.hero-reverse-fade .hero-media,
+    html.hero-reverse-fade .hero-copy-stage {
+      opacity: 0;
+      transition-duration: 170ms;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-media,
+      .hero-copy-stage { transition: none; }
+      html.hero-reverse-fade .hero-media,
+      html.hero-reverse-fade .hero-copy-stage { opacity: 1; }
+    }
+
     /* Hard gate: while the film is uncompleted, everything below the hero
        is unpainted (layout is kept, so snap points and measurements hold).
        Fast drags and smooth-scroll inertia can otherwise flash deep content

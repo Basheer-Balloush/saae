@@ -30,6 +30,8 @@ export function initHeroCinema(): () => void {
     __cleanups.forEach((fn) => { try { fn(); } catch {} });
     __timers.forEach((t) => { typeof t === "function" ? t() : window.clearTimeout(t); });
     document.documentElement.classList.remove("hero-scrolling-up");
+    document.documentElement.classList.remove("hero-reverse-fade");
+
     __dead = true;
     __frames.forEach((f) => window.cancelAnimationFrame(f));
     __frames.clear();
@@ -214,6 +216,11 @@ const staticGateStrings = [
       let lastRequestedSeekTime = -1;
       let reverseScrollActiveUntil = 0;
       let reverseScrollTimer = 0;
+      /* Reverse checkpoint crossfade state. */
+      let reverseFadeActive = false;
+      let reverseFadeTimer = 0;
+      let reverseFadeLiftTimer = 0;
+
       let pageFrame = 0;
       let ribbonOpen = false;
       let ribbonCloseTimer = 0;
@@ -573,6 +580,47 @@ const staticGateStrings = [
 
       __on(video, "seeked", queueSeek);
 
+      /* ---- Reverse checkpoint crossfade --------------------------------
+         Playing forward is free; seeking backwards is not. So upward travel
+         dips the frame and the copy out, lets the film jump straight to the
+         previous checkpoint behind the dip, and lifts them back in on that
+         beat. The visitor sees a deliberate cut, never a stutter. */
+      function beginReverseFade() {
+        if (isStaticExperience() || reducedMotion.matches) return;
+        if (!video.classList.contains("is-ready")) return;
+        if (!reverseFadeActive) {
+          reverseFadeActive = true;
+          document.documentElement.classList.add("hero-reverse-fade");
+        }
+        clearTimeout(reverseFadeTimer);
+        reverseFadeTimer = __setTimeout(settleReverseFade, 190);
+      }
+
+      function liftReverseFade() {
+        clearTimeout(reverseFadeLiftTimer);
+        if (!reverseFadeActive) return;
+        reverseFadeActive = false;
+        document.documentElement.classList.remove("hero-reverse-fade");
+      }
+
+      function settleReverseFade() {
+        if (!reverseFadeActive) return;
+        const checkpoint = settledVideoProgress(requestedVideoProgress());
+        easedProgress = checkpoint;
+        lastPaintedProgress = -1;
+        lastBandProgress = -1;
+        paintHero(checkpoint, true);
+        video.addEventListener("seeked", liftReverseFade, { once: true });
+        /* The decoder may already be sitting on that frame, in which case no
+           seeked event arrives. Never leave the hero dipped out. */
+        reverseFadeLiftTimer = __setTimeout(liftReverseFade, 300);
+      }
+
+      function cancelReverseFade() {
+        clearTimeout(reverseFadeTimer);
+        liftReverseFade();
+      }
+
       function readHeroProgress() {
         const rect = heroSection.getBoundingClientRect();
         const distance = Math.max(1, heroSection.offsetHeight - window.innerHeight);
@@ -584,11 +632,15 @@ const staticGateStrings = [
           reverseScrollTimer = __setTimeout(() => {
             document.documentElement.classList.remove("hero-scrolling-up");
           }, 180);
+          beginReverseFade();
+        } else if (nextProgress > targetProgress + .0005 && reverseFadeActive) {
+          cancelReverseFade();
         }
         targetProgress = nextProgress;
         ribbon.classList.toggle("is-visible", targetProgress >= .2 || rect.bottom < window.innerHeight * .8);
         syncHeroSnap(rect);
       }
+
 
       function pauseVideoPlayback() {
         if (!video.paused) video.pause();
@@ -673,7 +725,16 @@ const staticGateStrings = [
         if (!heroActive) return;
         const delta = Math.min(80, Math.max(1, now - lastTime));
         lastTime = now;
+        /* Dipped out for a reverse checkpoint: no scrubbing while hidden, the
+           single jump happens once the upward gesture settles. */
+        if (reverseFadeActive) {
+          pauseVideoPlayback();
+          syncStatsToVideo();
+          heroFrame = __raf(heroLoop);
+          return;
+        }
         const isPlayingForward = advanceForwardVideo();
+
         if (isPlayingForward) {
           paintHero(easedProgress, false);
         } else {
