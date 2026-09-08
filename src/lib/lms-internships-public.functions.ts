@@ -84,12 +84,15 @@ function publicClient() {
 }
 
 async function signCover(
-  supabase: ReturnType<typeof publicClient>,
   bucket: string | null,
   path: string | null,
 ): Promise<string | null> {
-  if (!bucket || !path) return null;
-  const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60);
+  // Only called with rows returned by the anonymous published/closed queries
+  // below. Never accept an arbitrary client-supplied bucket or object path.
+  if (bucket !== "internship-covers" || !path) return null;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin.storage.from(bucket).createSignedUrl(path, 60 * 60);
+  if (error) console.error("Internship cover signing failed", { status: error.statusCode });
   return data?.signedUrl ?? null;
 }
 
@@ -135,7 +138,7 @@ export const listPublicInternships = createServerFn({ method: "POST" })
         deadline_at: r.deadline_at,
         starts_at: r.starts_at,
         ends_at: r.ends_at,
-        cover_url: await signCover(supabase, r.cover_image_bucket, r.cover_image_path),
+        cover_url: await signCover(r.cover_image_bucket, r.cover_image_path),
       })),
     );
 
@@ -179,7 +182,7 @@ export const getPublicInternshipBySlug = createServerFn({ method: "POST" })
       deadline_at: row.deadline_at,
       starts_at: row.starts_at,
       ends_at: row.ends_at,
-      cover_url: await signCover(supabase, row.cover_image_bucket, row.cover_image_path),
+      cover_url: await signCover(row.cover_image_bucket, row.cover_image_path),
       description_ar: row.description_ar,
       description_en: row.description_en,
       requirements_ar: row.requirements_ar,
