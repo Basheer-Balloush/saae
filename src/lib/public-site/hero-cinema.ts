@@ -210,6 +210,8 @@ const staticGateStrings = [
          document.documentElement.classList.toggle("film-locked", locked);
        }
       let pendingSeekTime = 0;
+      let lastRequestedSeekTime = -1;
+      let reverseScrollActiveUntil = 0;
       let pageFrame = 0;
       let ribbonOpen = false;
       let ribbonCloseTimer = 0;
@@ -540,14 +542,29 @@ const staticGateStrings = [
       }
 
       function queueSeek() {
-        if (seekQueued || video.seeking || !Number.isFinite(pendingSeekTime)) return;
-        const threshold = Math.max(1 / 30, videoDuration / 600);
+        if (seekQueued || !Number.isFinite(pendingSeekTime)) return;
+        /* The source is 24 fps. Asking the decoder for sub-frame positions on
+           every animation frame creates a growing seek queue, most noticeably
+           while scrolling backwards. Only request a new decoded frame when the
+           target has crossed a real source-frame boundary. */
+        const threshold = Math.max(1 / heroVideoFrameRate, videoDuration / 600);
         if (Math.abs(video.currentTime - pendingSeekTime) < threshold) return;
         seekQueued = true;
         __raf(() => {
           seekQueued = false;
           if (!video.classList.contains("is-ready")) return;
-          try { video.currentTime = clamp(pendingSeekTime, 0, Math.max(0, videoDuration - .001)); }
+          const nextSeekTime = clamp(
+            Math.round(pendingSeekTime * heroVideoFrameRate) / heroVideoFrameRate,
+            0,
+            Math.max(0, videoDuration - .001),
+          );
+          if (Math.abs(nextSeekTime - lastRequestedSeekTime) < 1 / heroVideoFrameRate) return;
+          lastRequestedSeekTime = nextSeekTime;
+          /* Assigning a newer target while a seek is in flight lets the media
+             element coalesce stale reverse-scroll work. Waiting for `seeked`
+             serialized every intermediate frame and made upward scrolling lag
+             behind fast wheel and trackpad gestures. */
+          try { video.currentTime = nextSeekTime; }
           catch (_) { /* The poster remains a complete fallback. */ }
         });
       }
@@ -557,7 +574,9 @@ const staticGateStrings = [
       function readHeroProgress() {
         const rect = heroSection.getBoundingClientRect();
         const distance = Math.max(1, heroSection.offsetHeight - window.innerHeight);
-        targetProgress = clamp(-rect.top / distance, 0, 1);
+        const nextProgress = clamp(-rect.top / distance, 0, 1);
+        if (nextProgress < targetProgress - .0005) reverseScrollActiveUntil = performance.now() + 140;
+        targetProgress = nextProgress;
         ribbon.classList.toggle("is-visible", targetProgress >= .2 || rect.bottom < window.innerHeight * .8);
         syncHeroSnap(rect);
       }
@@ -652,7 +671,12 @@ const staticGateStrings = [
           pauseVideoPlayback();
           const requestedProgress = requestedVideoProgress();
           const visualTargetProgress = settledVideoProgress(requestedProgress);
-          const alpha = 1 - Math.pow(1 - .055, delta / (1000 / 60));
+          /* Reverse playback has to seek rather than play. Catch up much more
+             quickly while an upward gesture is active, then return to the soft
+             settling used at snap points. This prevents the picture trailing
+             several frames behind the page and removes the perceived lag. */
+          const easingStrength = now < reverseScrollActiveUntil ? .24 : .075;
+          const alpha = 1 - Math.pow(1 - easingStrength, delta / (1000 / 60));
           easedProgress += (visualTargetProgress - easedProgress) * alpha;
           if (Math.abs(visualTargetProgress - easedProgress) < .00015) easedProgress = visualTargetProgress;
           paintHero(easedProgress, true);
