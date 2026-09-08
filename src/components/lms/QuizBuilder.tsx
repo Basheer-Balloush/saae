@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toUserMessage } from "@/lib/safe-error";
-import { Plus, Trash2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2, FileUp } from "lucide-react";
+import { QuizBulkImportDialog } from "@/components/lms/QuizBulkImportDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
