@@ -58,7 +58,7 @@ function AnimeTest() {
         "-=400",
       );
     }
-    return () => tl.pause();
+    return () => { tl.pause(); };
   }, []);
 
   // Floating orb loop
@@ -71,7 +71,7 @@ function AnimeTest() {
       loop: true,
       ease: "inOutSine",
     });
-    return () => a.pause();
+    return () => { a.pause(); };
   }, []);
 
   // Animated counter
@@ -83,7 +83,7 @@ function AnimeTest() {
       ease: "outQuart",
       onUpdate: () => setCount(Math.round(obj.v)),
     });
-    return () => a.pause();
+    return () => { a.pause(); };
   }, []);
 
   const replayGrid = () => {
