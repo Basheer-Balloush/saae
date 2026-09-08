@@ -124,6 +124,31 @@ function AnimeTest() {
           </div>
         </div>
 
+        <section className="mt-20 border-t border-border pt-16">
+          <div className="mb-8 flex flex-wrap items-center gap-3">
+            <h2 className="text-display-2 font-black">
+              {isRtl ? "رسم SVG المتحرك" : "SVG line drawing"}
+            </h2>
+            <div className="flex gap-2">
+              {(["lines", "circles"] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setSvgMode(m)}
+                  className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+                    svgMode === m
+                      ? "bg-secondary text-secondary-foreground"
+                      : "border border-border text-muted-foreground hover:bg-accent"
+                  }`}
+                >
+                  {m === "lines" ? (isRtl ? "خطوط" : "Lines") : isRtl ? "دوائر" : "Circles"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <AnimeSvgHero mode={svgMode} />
+        </section>
+
+
         <div ref={gridRef} className="mt-16 grid grid-cols-4 gap-4">
           {Array.from({ length: 12 }).map((_, i) => (
             <div
