@@ -583,31 +583,30 @@ const staticGateStrings = [
 
       __on(video, "seeked", queueSeek);
 
-      /* ---- Reverse checkpoint crossfade --------------------------------
-         Playing forward is free; seeking backwards is not. So upward travel
-         dips the frame and the copy out, lets the film jump straight to the
-         previous checkpoint behind the dip, and lifts them back in on that
-         beat. The visitor sees a deliberate cut, never a stutter. */
+      /* ---- Reverse checkpoint cinematic crossfade ------------------------
+         Playing forward is free; seeking backwards is not. Upward travel becomes
+         a deliberate cinematic cut: the outgoing frame and copy blur and dim,
+         the film jumps to the previous checkpoint while everything is soft, then
+         the new frame and copy lift back into focus slowly. */
       function beginReverseFade() {
         if (isStaticExperience() || reducedMotion.matches) return;
         if (!video.classList.contains("is-ready")) return;
-        if (!reverseFadeActive) {
-          reverseFadeActive = true;
-          document.documentElement.classList.add("hero-reverse-fade");
+        if (reverseFadeState === 'fading-out') {
+          // Already fading out; reset the seek timer to the latest gesture.
+          clearTimeout(reverseFadeTimer);
+          reverseFadeTimer = __setTimeout(performReverseSeek, REVERSE_SEEK_AT_MS);
+          return;
         }
+        if (reverseFadeState !== 'idle') return;
+        reverseFadeState = 'fading-out';
+        document.documentElement.classList.add("hero-reverse-fade");
         clearTimeout(reverseFadeTimer);
-        reverseFadeTimer = __setTimeout(settleReverseFade, 190);
+        reverseFadeTimer = __setTimeout(performReverseSeek, REVERSE_SEEK_AT_MS);
       }
 
-      function liftReverseFade() {
-        clearTimeout(reverseFadeLiftTimer);
-        if (!reverseFadeActive) return;
-        reverseFadeActive = false;
-        document.documentElement.classList.remove("hero-reverse-fade");
-      }
-
-      function settleReverseFade() {
-        if (!reverseFadeActive) return;
+      function performReverseSeek() {
+        if (reverseFadeState !== 'fading-out') return;
+        reverseFadeState = 'seeking';
         const checkpoint = settledVideoProgress(requestedVideoProgress());
         easedProgress = checkpoint;
         lastPaintedProgress = -1;
@@ -616,12 +615,26 @@ const staticGateStrings = [
         video.addEventListener("seeked", liftReverseFade, { once: true });
         /* The decoder may already be sitting on that frame, in which case no
            seeked event arrives. Never leave the hero dipped out. */
-        reverseFadeLiftTimer = __setTimeout(liftReverseFade, 300);
+        reverseFadeLiftTimer = __setTimeout(liftReverseFade, 340);
+      }
+
+      function liftReverseFade() {
+        clearTimeout(reverseFadeLiftTimer);
+        if (reverseFadeState !== 'seeking') return;
+        reverseFadeState = 'fading-in';
+        document.documentElement.classList.remove("hero-reverse-fade");
+        clearTimeout(reverseFadeTimer);
+        reverseFadeTimer = __setTimeout(() => {
+          reverseFadeState = 'idle';
+        }, REVERSE_FADE_IN_MS + 40);
       }
 
       function cancelReverseFade() {
         clearTimeout(reverseFadeTimer);
-        liftReverseFade();
+        clearTimeout(reverseFadeLiftTimer);
+        if (reverseFadeState === 'idle') return;
+        reverseFadeState = 'idle';
+        document.documentElement.classList.remove("hero-reverse-fade");
       }
 
       function readHeroProgress() {
