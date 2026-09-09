@@ -254,27 +254,38 @@ function CourseDetails() {
 
   useEffect(() => { setFormDialogOpen(false); }, [user?.id, course.id, teaching.status]);
 
-  const requireAuth = () => {
-    if (authLoading || (user && teaching.status !== "no")) return false;
-    if (!user) {
-      // Anonymous visitors are sent to sign-up with a safe internal return URL.
-      navigate({
-        to: "/learning-management-system/signup",
-        search: { redirect: `/learning-management-system/courses/${encodeURIComponent(course.slug ?? id)}` },
-      });
-      return false;
-    }
-    return true;
+  const requireAuth = async () => {
+    // The public page can render before the persisted session has finished
+    // hydrating. Verify auth before redirecting so signed-in users do not get
+    // bounced to sign-up and immediately redirected back to this page.
+    if (user) return true;
+
+    const { data } = await supabase.auth.getUser();
+    if (data.user) return true;
+
+    navigate({
+      to: "/learning-management-system/signup",
+      search: { redirect: `/learning-management-system/courses/${encodeURIComponent(course.slug ?? id)}` },
+    });
+    return false;
   };
 
   const onFreeEnroll = async () => {
-    if (!requireAuth()) return;
-    setFormDialogOpen(true);
+    setBusy(true);
+    try {
+      if (await requireAuth()) setFormDialogOpen(true);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const onManualSubmit = async () => {
-    if (!requireAuth() || !user) return;
-    setFormDialogOpen(true);
+    setBusy(true);
+    try {
+      if (await requireAuth()) setFormDialogOpen(true);
+    } finally {
+      setBusy(false);
+    }
   };
 
 
@@ -479,8 +490,8 @@ function CourseDetails() {
             }
             if (course.is_free) {
               return (
-                <Button className="w-full mt-4" size="lg" onClick={onFreeEnroll} disabled={busy}>
-                  {busy && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
+                <Button className="w-full mt-4" size="lg" onClick={onFreeEnroll} disabled={busy || authLoading}>
+                  {(busy || authLoading) && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
                   {tr.enroll}
                 </Button>
               );
@@ -490,9 +501,10 @@ function CourseDetails() {
                 <Button
                   className="w-full"
                   size="lg"
-                  onClick={() => { if (requireAuth()) { setFormDialogOpen(true); } }}
-                  disabled={busy}
+                  onClick={onFreeEnroll}
+                  disabled={busy || authLoading}
                 >
+                  {(busy || authLoading) && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
                   {tr.enroll}
                 </Button>
                 <p className="text-xs text-muted-foreground text-center leading-relaxed">
@@ -509,7 +521,7 @@ function CourseDetails() {
                       rows={3}
                     />
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={onManualSubmit} disabled={busy} className="flex-1">
+                      <Button size="sm" onClick={onManualSubmit} disabled={busy || authLoading} className="flex-1">
                         {busy && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
                         {ar ? "إرسال" : "Submit"}
                       </Button>
