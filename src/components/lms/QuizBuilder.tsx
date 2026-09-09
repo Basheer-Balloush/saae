@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toUserMessage } from "@/lib/safe-error";
-import { Plus, Trash2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2, FileUp } from "lucide-react";
+import { QuizBulkImportDialog } from "@/components/lms/QuizBulkImportDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
@@ -40,6 +41,7 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const quiz = quizzes.find((q) => q.id === activeId) ?? null;
 
@@ -234,6 +236,9 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
             </p>
             <div className="flex gap-2">
               <Button size="sm" onClick={addQuestion}><Plus className="h-4 w-4 mx-1" />{tr.addQuestion}</Button>
+              <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
+                <FileUp className="h-4 w-4 mx-1" />{ar ? "استيراد من ملف" : "Import from file"}
+              </Button>
               <Button size="sm" variant="outline" onClick={deleteQuiz} className="text-destructive border-destructive/40">
                 <Trash2 className="h-4 w-4 mx-1" />{ar ? "حذف الاختبار" : "Delete quiz"}
               </Button>
@@ -340,10 +345,24 @@ export function QuizBuilder({ courseId }: { courseId: string }) {
                 </div>
               );
             })}
-            <Button size="sm" variant="outline" onClick={addQuestion} className="w-full sm:w-auto">
-              <Plus className="h-4 w-4 mx-1" />{tr.addQuestion}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={addQuestion}>
+                <Plus className="h-4 w-4 mx-1" />{tr.addQuestion}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
+                <FileUp className="h-4 w-4 mx-1" />{ar ? "استيراد من ملف" : "Import from file"}
+              </Button>
+            </div>
           </div>
+
+          <QuizBulkImportDialog
+            open={importOpen}
+            onOpenChange={setImportOpen}
+            quizId={quiz.id}
+            startOrder={questions.length}
+            ar={ar}
+            onImported={() => loadQuestions(quiz.id)}
+          />
         </>
       )}
     </section>
