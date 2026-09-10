@@ -44,22 +44,30 @@ type RelatedItemLoader = {
 };
 
 export const Route = createFileRoute("/news/$id")({
-  loader: async ({ params }): Promise<{
-    meta: null | { title: string; description: string; image: string | null; publishedAt: string | null };
+  loader: async ({
+    params,
+  }): Promise<{
+    meta: null | {
+      title: string;
+      description: string;
+      image: string | null;
+      publishedAt: string | null;
+    };
     article: NewsArticleLoader | null;
     related: RelatedItemLoader[];
   }> => {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      params.id,
+    );
     if (!isUuid) return { meta: null, article: null, related: [] };
     try {
-      const { data } = await supabase
-        .from("news")
-        .select("*")
-        .eq("id", params.id)
-        .maybeSingle();
+      const { data } = await supabase.from("news").select("*").eq("id", params.id).maybeSingle();
       if (!data) return { meta: null, article: null, related: [] };
       const article = data as unknown as NewsArticleLoader;
-      const cats: string[] = (article.categories && article.categories.length > 0) ? article.categories : [article.category];
+      const cats: string[] =
+        article.categories && article.categories.length > 0
+          ? article.categories
+          : [article.category];
       const { data: rel } = await supabase
         .from("news")
         .select("id,title,title_ar,title_en,image_url,published_at,category,categories")
@@ -70,9 +78,10 @@ export const Route = createFileRoute("/news/$id")({
 
       const title = (article.title_en ?? article.title_ar ?? article.title ?? "News") as string;
       const rawDesc = (article.excerpt_en ?? article.excerpt_ar ?? article.excerpt ?? "") as string;
-      const fullDesc = rawDesc && rawDesc.length >= 50
-        ? rawDesc
-        : `${title} — ${rawDesc || "خبر من الجمعية السورية للذكاء الصنعي وريادة الأعمال (SAAE)."}`;
+      const fullDesc =
+        rawDesc && rawDesc.length >= 50
+          ? rawDesc
+          : `${title} — ${rawDesc || "خبر من الجمعية السورية للذكاء الصنعي وريادة الأعمال (SAAE)."}`;
       const description = fullDesc.length > 160 ? `${fullDesc.slice(0, 157).trimEnd()}…` : fullDesc;
       return {
         meta: {
@@ -92,8 +101,12 @@ export const Route = createFileRoute("/news/$id")({
     const m = loaderData?.meta;
     const url = `https://aisyria.org/news/${params.id}`;
     const title = m?.title ? `${m.title} — SAAE` : "News — SAAE";
-    const description = m?.description ?? "News article from the Syrian Association for AI & Entrepreneurship (SAAE) — read the latest activities and updates.";
-    const image = m?.image ?? "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
+    const description =
+      m?.description ??
+      "News article from the Syrian Association for AI & Entrepreneurship (SAAE) — read the latest activities and updates.";
+    const image =
+      m?.image ??
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
     return {
       meta: [
         { title },
@@ -105,9 +118,7 @@ export const Route = createFileRoute("/news/$id")({
         { property: "og:image", content: image },
         { name: "twitter:image", content: image },
       ],
-      links: [
-        { rel: "canonical", href: url },
-      ],
+      links: [{ rel: "canonical", href: url }],
       scripts: m
         ? [
             {
@@ -191,7 +202,12 @@ const fade = {
   transition: { duration: 0.6 },
 };
 
-function pickLang<T>(ar: T | null | undefined, en: T | null | undefined, fallback: T | null | undefined, lang: "ar" | "en"): T | null {
+function pickLang<T>(
+  ar: T | null | undefined,
+  en: T | null | undefined,
+  fallback: T | null | undefined,
+  lang: "ar" | "en",
+): T | null {
   if (lang === "ar") return (ar ?? en ?? fallback ?? null) as T | null;
   return (en ?? ar ?? fallback ?? null) as T | null;
 }
@@ -244,18 +260,23 @@ function NewsDetailPage() {
     : STATIC_ARTICLE;
   const related: RelatedItem[] = (loaderData.related as unknown as RelatedItem[]) ?? [];
 
-
-
   if (!article) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="flex min-h-[60vh] items-center justify-center pt-24">
           <div className="text-center">
-            <h1 className="text-3xl font-black" style={{ fontFamily: '"Cairo", system-ui, sans-serif' }}>
+            <h1
+              className="text-3xl font-black"
+              style={{ fontFamily: '"Cairo", system-ui, sans-serif' }}
+            >
               {lang === "ar" ? "المقال غير موجود" : "Article not found"}
             </h1>
-            <Link to="/news" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold" style={{ color: TEAL }}>
+            <Link
+              to="/news"
+              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold"
+              style={{ color: TEAL }}
+            >
               {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
               {lang === "ar" ? "العودة للأخبار" : "Back to news"}
             </Link>
@@ -267,12 +288,17 @@ function NewsDetailPage() {
   }
 
   const title = pickLang(article.title_ar, article.title_en, article.title, lang) || article.title;
-  const bodyText = pickLang(article.content_ar, article.content_en, article.content, lang) || pickLang(article.excerpt_ar, article.excerpt_en, article.excerpt, lang) || "";
+  const bodyText =
+    pickLang(article.content_ar, article.content_en, article.content, lang) ||
+    pickLang(article.excerpt_ar, article.excerpt_en, article.excerpt, lang) ||
+    "";
   const dateStr = formatDate(article.published_at, lang);
 
   const gallery = (article.images ?? []).filter(Boolean);
   // Build full carousel: cover + gallery (dedup)
-  const carouselImages = Array.from(new Set([article.image_url, ...gallery].filter(Boolean) as string[]));
+  const carouselImages = Array.from(
+    new Set([article.image_url, ...gallery].filter(Boolean) as string[]),
+  );
   const videos = (article.videos ?? []).filter(Boolean);
 
   return (
@@ -282,15 +308,20 @@ function NewsDetailPage() {
       <main className="pt-28 pb-24 lg:pt-32 lg:pb-32">
         <motion.header {...fade} className="mx-auto max-w-[850px] px-6 text-center">
           <div className="flex flex-wrap justify-center gap-2">
-            {((article.categories && article.categories.length > 0 ? article.categories : [article.category]).filter(Boolean)).map((c) => (
-              <span
-                key={c}
-                className="inline-block rounded-full px-5 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white"
-                style={{ backgroundColor: GREEN }}
-              >
-                {communityLabel(c, lang)}
-              </span>
-            ))}
+            {(article.categories && article.categories.length > 0
+              ? article.categories
+              : [article.category]
+            )
+              .filter(Boolean)
+              .map((c) => (
+                <span
+                  key={c}
+                  className="inline-block rounded-full px-5 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white"
+                  style={{ backgroundColor: GREEN }}
+                >
+                  {communityLabel(c, lang)}
+                </span>
+              ))}
           </div>
 
           <h1
@@ -305,7 +336,10 @@ function NewsDetailPage() {
             {title}
           </h1>
 
-          <div className="mt-5 flex items-center justify-center gap-6 text-sm" style={{ color: "var(--muted-foreground)" }}>
+          <div
+            className="mt-5 flex items-center justify-center gap-6 text-sm"
+            style={{ color: "var(--muted-foreground)" }}
+          >
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" strokeWidth={1.75} />
               {dateStr}
@@ -334,7 +368,10 @@ function NewsDetailPage() {
                 <CarouselContent>
                   {carouselImages.map((url, i) => (
                     <CarouselItem key={url + i}>
-                      <div className="overflow-hidden rounded-lg" style={{ border: "1px solid #e0e0e0" }}>
+                      <div
+                        className="overflow-hidden rounded-lg"
+                        style={{ border: "1px solid #e0e0e0" }}
+                      >
                         <img
                           src={url}
                           alt={`${title} — ${i + 1}`}
@@ -381,8 +418,17 @@ function NewsDetailPage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mx-auto mt-16 max-w-[850px] px-6"
           >
-            <div className="mb-6 flex items-center gap-4" style={{ borderBottom: `1px solid ${TEAL}`, paddingBottom: 12 }}>
-              <h2 style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 800, fontSize: "1.25rem" }}>
+            <div
+              className="mb-6 flex items-center gap-4"
+              style={{ borderBottom: `1px solid ${TEAL}`, paddingBottom: 12 }}
+            >
+              <h2
+                style={{
+                  fontFamily: '"Cairo", system-ui, sans-serif',
+                  fontWeight: 800,
+                  fontSize: "1.25rem",
+                }}
+              >
                 {lang === "ar" ? "فيديوهات" : "Videos"}
               </h2>
             </div>
@@ -410,7 +456,14 @@ function NewsDetailPage() {
             style={{ borderTop: `2px solid ${TEAL}`, paddingTop: 32 }}
           >
             <div className="mb-8 flex items-center gap-4">
-              <h2 style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 800, fontSize: "1.25rem", color: "var(--foreground)" }}>
+              <h2
+                style={{
+                  fontFamily: '"Cairo", system-ui, sans-serif',
+                  fontWeight: 800,
+                  fontSize: "1.25rem",
+                  color: "var(--foreground)",
+                }}
+              >
                 {lang === "ar" ? "أخبار ذات صلة" : "Related News"}
               </h2>
             </div>
@@ -451,7 +504,10 @@ function NewsDetailPage() {
                       >
                         {rTitle}
                       </h3>
-                      <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold" style={{ color: TEAL }}>
+                      <span
+                        className="mt-2 inline-flex items-center gap-1 text-xs font-semibold"
+                        style={{ color: TEAL }}
+                      >
                         {lang === "ar" ? "اقرأ المقال كاملاً" : "Read full article"}
                         <ArrowUpRight className={`h-3.5 w-3.5 ${isRtl ? "-scale-x-100" : ""}`} />
                       </span>

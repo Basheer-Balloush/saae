@@ -1,193 +1,27 @@
-import { useEffect, useState } from "react";
-import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { ArrowUpRight, ArrowLeft, ArrowRight } from "lucide-react";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { useLang } from "@/lib/i18n";
-import { supabase } from "@/integrations/supabase/client";
-import { communityLabel } from "@/lib/communityCategories";
+import { createFileRoute } from "@tanstack/react-router";
+import pageHtml from "@/components/cinematic/html/news.html?raw";
+import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
+
+const SCRIPTS: CinematicScript[] = [
+  { src: "/cinematic/js/news-inline.js" },
+  { src: "/cinematic/js/language.js" },
+  { src: "/cinematic/js/navigation.js" },
+  { src: "/cinematic/js/text-effect.js" },
+  { src: "/cinematic/js/anime.umd.min.js" },
+  { src: "/cinematic/js/motion-anime.js" },
+];
 
 export const Route = createFileRoute("/news/")({
-  loader: async () => {
-    const { data } = await supabase
-      .from("news")
-      .select("id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,image_url,category,categories,published_at")
-      .order("published_at", { ascending: false })
-      .order("created_at", { ascending: false });
-    return { items: (data ?? []) as NewsRow[] };
-  },
   head: () => ({
-    meta: [
-      { title: "الأخبار والنشاطات — SAAE" },
-      {
-        name: "description",
-        content: "آخر الأخبار والنشاطات والفعاليات للجمعية السورية للذكاء الصنعي وريادة الأعمال ومجتمعاتها المتخصصة.",
-      },
-      { property: "og:title", content: "أخبار الجمعية السورية للذكاء الصنعي وريادة الأعمال" },
-      {
-        property: "og:description",
-        content: "تابع أحدث الفعاليات والأنشطة والمبادرات التي تنظمها SAAE ومجتمعاتها المتخصصة في الذكاء الصنعي وريادة الأعمال.",
-      },
-      { property: "og:url", content: "https://aisyria.org/news" },
-    ],
+    meta: [{ title: "News | SAAE" }, { name: "theme-color", content: "#144248" }],
     links: [
-      { rel: "canonical", href: "https://aisyria.org/news" },
+      { rel: "stylesheet", href: "/cinematic/css/news-inline.css" },
+      { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
     ],
   }),
-  component: NewsPage,
+  component: Page,
 });
 
-
-type NewsRow = {
-  id: string;
-  title: string;
-  title_ar: string | null;
-  title_en: string | null;
-  excerpt: string | null;
-  excerpt_ar: string | null;
-  excerpt_en: string | null;
-  image_url: string | null;
-  category: string;
-  categories: string[] | null;
-  published_at: string;
-};
-
-const FALLBACK_IMG =
-  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
-
-function pick(ar: string | null, en: string | null, fallback: string | null, lang: "ar" | "en"): string {
-  if (lang === "ar") return ar || en || fallback || "";
-  return en || ar || fallback || "";
-}
-
-function NewsPage() {
-  const { t, dir, lang } = useLang();
-  const isRtl = dir === "rtl";
-  const items = Route.useLoaderData().items as NewsRow[];
-  const location = useLocation();
-  const [highlightId, setHighlightId] = useState<string | null>(null);
-
-  useEffect(() => {
-
-    const hash = location.hash?.replace(/^#/, "");
-    if (!hash || !items || items.length === 0) return;
-    let cancelled = false;
-    let attempts = 0;
-    const tryRun = () => {
-      if (cancelled) return;
-      const el = document.getElementById(`news-card-${hash}`);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        setHighlightId(hash);
-        window.setTimeout(() => {
-          if (!cancelled) setHighlightId(null);
-        }, 1600);
-        return;
-      }
-      if (attempts++ < 40) window.setTimeout(tryRun, 50);
-    };
-    tryRun();
-    return () => {
-      cancelled = true;
-    };
-  }, [location.hash, items]);
-
-  return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="pt-24 pb-24 lg:pt-28 lg:pb-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="mb-14 max-w-2xl"
-          >
-            <h1 className="mt-4 text-display-2 leading-[2.1] text-foreground">
-              {lang === "ar" ? "جميع الأخبار والنشاطات" : "All news & activities"}
-            </h1>
-            <p className="mt-5 text-body text-muted-foreground">
-              {lang === "ar"
-                ? "أرشيف كامل لأخبار ونشاطات الجمعية السورية للذكاء الاصطناعي وريادة الأعمال."
-                : "The full archive of news and activities from the Syrian Association for AI & Entrepreneurship."}
-            </p>
-          </motion.div>
-
-          {items.length === 0 ? (
-
-            <div className="rounded-2xl border border-border bg-card p-12 text-center">
-              <p className="text-body text-muted-foreground">
-                {lang === "ar" ? "لا توجد أخبار حالياً." : "No news yet."}
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((n) => {
-                const title = pick(n.title_ar, n.title_en, n.title, lang);
-                const excerpt = pick(n.excerpt_ar, n.excerpt_en, n.excerpt, lang);
-                const isHighlight = highlightId === n.id;
-                return (
-                  <Link
-                    key={n.id}
-                    id={`news-card-${n.id}`}
-                    to="/news/$id"
-                    params={{ id: n.id }}
-                    className={`group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-soft transition-all duration-300 hover:shadow-lift ${
-                      isHighlight
-                        ? "border-primary ring-2 ring-primary/60 shadow-lift scale-[1.01]"
-                        : "border-border"
-                    }`}
-                  >
-                    <div className="aspect-[16/10] overflow-hidden bg-muted">
-                      <img
-                        src={n.image_url || FALLBACK_IMG}
-                        alt={title}
-                        className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.04]"
-                        loading="lazy"
-                      />
-                    </div>
-                    <div className="flex flex-1 flex-col p-6">
-                      <div className="flex flex-wrap items-center gap-2 text-xs">
-                        {((n.categories && n.categories.length > 0 ? n.categories : [n.category]).filter(Boolean)).map((c) => (
-                          <span key={c} className="rounded-full bg-accent px-3 py-1 font-semibold uppercase tracking-wider text-accent-foreground">
-                            {communityLabel(c, lang)}
-                          </span>
-                        ))}
-                        <span className="text-muted-foreground">{n.published_at}</span>
-                      </div>
-                      <h2 className="mt-4 line-clamp-3 text-h3 text-foreground group-hover:text-primary">
-                        {title}
-                      </h2>
-                      {excerpt ? (
-                        <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
-                          {excerpt}
-                        </p>
-                      ) : null}
-                      <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                        {t.news.readMore}
-                        <ArrowUpRight className={isRtl ? "h-4 w-4 -scale-x-100" : "h-4 w-4"} />
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-
-          <div className="mt-16 flex justify-center">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 rounded-full border border-primary px-7 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-            >
-              {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
-              {lang === "ar" ? "العودة إلى الرئيسية" : "Back to home"}
-            </Link>
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
+function Page() {
+  return <CinematicPage html={pageHtml} scripts={SCRIPTS} />;
 }

@@ -1,5 +1,5 @@
 import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, ArrowRight } from "lucide-react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { useRouterState } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import logo from "@/assets/footer-logo.png";
 import locationMap from "@/assets/location-map.png";
@@ -43,8 +43,8 @@ export function Footer() {
         <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Col 1 — Identity */}
           <div className="lg:col-span-5">
-            <Link
-              to="/"
+            <a
+              href="/"
               onClick={handleLogoClick}
               aria-label={`${t.footer.mission ? "SAAE" : "SAAE"} — ${t.nav.home}`}
               className="inline-block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
@@ -58,7 +58,7 @@ export function Footer() {
                 decoding="async"
                 className="h-12 w-auto brightness-0 invert"
               />
-            </Link>
+            </a>
             <p
               className="mt-6 max-w-xs text-sm leading-relaxed"
               style={{ fontFamily: '"Cairo", system-ui, sans-serif', fontWeight: 400, color: INK }}
@@ -67,9 +67,21 @@ export function Footer() {
             </p>
             <div className="mt-8 flex items-center gap-7">
               {[
-                { Icon: Instagram, href: "https://www.instagram.com/saae_sy?igsh=ZjE0eXN0Y3hlODNz", label: "Instagram" },
-                { Icon: Facebook, href: "https://www.facebook.com/share/18SQ11hcct/", label: "Facebook" },
-                { Icon: Linkedin, href: "https://www.linkedin.com/company/syrian-association-for-ai-entrepreneurship/", label: "LinkedIn" },
+                {
+                  Icon: Instagram,
+                  href: "https://www.instagram.com/saae_sy?igsh=ZjE0eXN0Y3hlODNz",
+                  label: "Instagram",
+                },
+                {
+                  Icon: Facebook,
+                  href: "https://www.facebook.com/share/18SQ11hcct/",
+                  label: "Facebook",
+                },
+                {
+                  Icon: Linkedin,
+                  href: "https://www.linkedin.com/company/syrian-association-for-ai-entrepreneurship/",
+                  label: "LinkedIn",
+                },
               ].map(({ Icon, href, label }) => (
                 <a
                   key={label}
@@ -95,35 +107,35 @@ export function Footer() {
               {t.footer.quickLinks}
             </h4>
             <ul className={`mt-6 space-y-5 text-sm ${isRtl ? "text-right" : "text-left"}`}>
-              {(["communities", "achievements", "partners", "contact", "news", "about"] as const).map((k) => {
+              {(
+                ["communities", "achievements", "partners", "contact", "news", "about"] as const
+              ).map((k) => {
                 const isRoute = k === "contact" || k === "news" || k === "about";
                 const to = k === "contact" ? "/contact" : k === "news" ? "/news" : "/about";
                 return (
                   <li key={k} className="leading-relaxed">
                     {isRoute ? (
-                      <Link
-                        to={to}
+                      <a
+                        href={to}
                         className="transition-colors hover:text-white/80"
                         style={{ color: INK }}
                       >
                         {t.nav[k]}
-                      </Link>
+                      </a>
                     ) : (
-                      <Link
-                        to="/"
-                        hash={k}
+                      <a
+                        href={`/#${k}`}
                         className="transition-colors hover:text-white/80"
                         style={{ color: INK }}
                       >
                         {t.nav[k]}
-                      </Link>
+                      </a>
                     )}
                   </li>
                 );
               })}
             </ul>
           </div>
-
 
           {/* Col 3 — HQ Intelligence */}
           <div className="lg:col-span-4">
@@ -154,12 +166,21 @@ export function Footer() {
                   className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
                   aria-hidden
                 >
-                  <MapPin className="h-5 w-5" style={{ color: TEAL }} strokeWidth={2.25} fill={TEAL} />
+                  <MapPin
+                    className="h-5 w-5"
+                    style={{ color: TEAL }}
+                    strokeWidth={2.25}
+                    fill={TEAL}
+                  />
                 </span>
               </a>
               <div className="mt-4 space-y-2.5 text-sm">
                 <div className="flex items-start gap-2.5">
-                  <MapPin className="mt-0.5 h-4 w-4 flex-none" style={{ color: TEAL }} strokeWidth={1.75} />
+                  <MapPin
+                    className="mt-0.5 h-4 w-4 flex-none"
+                    style={{ color: TEAL }}
+                    strokeWidth={1.75}
+                  />
                   <span style={{ color: "#1a1a1a" }}>{t.footer.address}</span>
                 </div>
                 <a
@@ -207,10 +228,14 @@ export function Footer() {
         >
           {isRtl ? (
             <span dir="rtl">
-              جميع الحقوق محفوظة للجمعية السورية للذكاء الاصطناعي وريادة الأعمال <bdi dir="ltr">{new Date().getFullYear()} ©</bdi>
+              جميع الحقوق محفوظة للجمعية السورية للذكاء الاصطناعي وريادة الأعمال{" "}
+              <bdi dir="ltr">{new Date().getFullYear()} ©</bdi>
             </span>
           ) : (
-            <span>All rights reserved for Syrian Association for AI & Entrepreneurship {new Date().getFullYear()}©</span>
+            <span>
+              All rights reserved for Syrian Association for AI & Entrepreneurship{" "}
+              {new Date().getFullYear()}©
+            </span>
           )}
         </div>
       </div>

@@ -70,18 +70,42 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
       )}
     >
       <div className="flex w-full items-center justify-between gap-6 px-6 py-3 lg:px-10">
-        <Link to="/" hash="home" className="relative flex items-center" aria-label="SAAIE — Syrian Association for AI & Entrepreneurship">
+        <a
+          href="/#home"
+          className="relative flex items-center"
+          aria-label="SAAIE — Syrian Association for AI & Entrepreneurship"
+        >
           {(() => {
             const isEnLight = lang === "en" && theme === "light";
             const isEnDark = lang === "en" && theme === "dark";
             const isArDark = lang === "ar" && theme === "dark";
             const isArLight = lang === "ar" && theme === "light";
             const variants = [
-              { src: logoEnLight, show: isEnLight, alt: "SAAIE — Syrian Association for AI & Entrepreneurship" },
-              { src: logoEnDark, show: isEnDark, alt: "SAAIE — Syrian Association for AI & Entrepreneurship" },
-              { src: logoArDark, show: isArDark, alt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
-              { src: logoArLight, show: isArLight, alt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" },
-              { src: logo, show: !(isEnLight || isEnDark || isArDark || isArLight), alt: "Syrian Association for AI & Entrepreneurship logo" },
+              {
+                src: logoEnLight,
+                show: isEnLight,
+                alt: "SAAIE — Syrian Association for AI & Entrepreneurship",
+              },
+              {
+                src: logoEnDark,
+                show: isEnDark,
+                alt: "SAAIE — Syrian Association for AI & Entrepreneurship",
+              },
+              {
+                src: logoArDark,
+                show: isArDark,
+                alt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",
+              },
+              {
+                src: logoArLight,
+                show: isArLight,
+                alt: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",
+              },
+              {
+                src: logo,
+                show: !(isEnLight || isEnDark || isArDark || isArLight),
+                alt: "Syrian Association for AI & Entrepreneurship logo",
+              },
             ];
             return variants.map((v, i) => (
               <img
@@ -99,7 +123,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
               />
             ));
           })()}
-        </Link>
+        </a>
 
         {!minimal && (
           <nav className="hidden items-center gap-7 lg:flex">
@@ -109,10 +133,10 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                 s === "contact"
                   ? isContactRoute
                   : s === "news"
-                  ? isNewsRoute
-                  : s === "about"
-                  ? isAbout
-                  : isHome && !isAbout && !isNewsRoute && !isContactRoute && active === s;
+                    ? isNewsRoute
+                    : s === "about"
+                      ? isAbout
+                      : isHome && !isAbout && !isNewsRoute && !isContactRoute && active === s;
               const linkClass = cn(
                 "relative text-sm font-medium transition-colors",
                 isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
@@ -127,33 +151,33 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
               );
               if (s === "about") {
                 return (
-                  <Link key={s} to="/about" className={linkClass}>
+                  <a key={s} href="/about" className={linkClass}>
                     {t.nav[s]}
                     {underline}
-                  </Link>
+                  </a>
                 );
               }
               if (s === "news") {
                 return (
-                  <Link key={s} to="/news" className={linkClass}>
+                  <a key={s} href="/news" className={linkClass}>
                     {t.nav[s]}
                     {underline}
-                  </Link>
+                  </a>
                 );
               }
               if (s === "contact") {
                 return (
-                  <Link key={s} to="/contact" className={linkClass}>
+                  <a key={s} href="/contact" className={linkClass}>
                     {t.nav[s]}
                     {underline}
-                  </Link>
+                  </a>
                 );
               }
               return (
-                <Link key={s} to="/" hash={s} className={linkClass}>
+                <a key={s} href={`/#${s}`} className={linkClass}>
                   {t.nav[s]}
                   {underline}
-                </Link>
+                </a>
               );
             })}
             {(() => {
@@ -214,50 +238,49 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
               sections.map((s) => {
                 if (s === "about") {
                   return (
-                    <Link
+                    <a
                       key={s}
-                      to="/about"
+                      href="/about"
                       onClick={() => setOpen(false)}
                       className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                     >
                       {t.nav[s]}
-                    </Link>
+                    </a>
                   );
                 }
                 if (s === "news") {
                   return (
-                    <Link
+                    <a
                       key={s}
-                      to="/news"
+                      href="/news"
                       onClick={() => setOpen(false)}
                       className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                     >
                       {t.nav[s]}
-                    </Link>
+                    </a>
                   );
                 }
                 if (s === "contact") {
                   return (
-                    <Link
+                    <a
                       key={s}
-                      to="/contact"
+                      href="/contact"
                       onClick={() => setOpen(false)}
                       className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                     >
                       {t.nav[s]}
-                    </Link>
+                    </a>
                   );
                 }
                 return (
-                  <Link
+                  <a
                     key={s}
-                    to="/"
-                    hash={s}
+                    href={`/#${s}`}
                     onClick={() => setOpen(false)}
                     className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                   >
                     {t.nav[s]}
-                  </Link>
+                  </a>
                 );
               })}
             <Link

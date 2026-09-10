@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
-  Link,
   createRootRouteWithContext,
   redirect,
   useRouter,
@@ -23,9 +22,8 @@ import { RouteProgress } from "@/components/site/RouteProgress";
 import { ScrollToHash } from "@/components/site/ScrollToHash";
 import { ConfirmProvider } from "@/hooks/useConfirm";
 
-
 function NotFoundComponent() {
-  const isAr = (typeof document !== "undefined" && document.documentElement.lang === "ar");
+  const isAr = typeof document !== "undefined" && document.documentElement.lang === "ar";
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -34,15 +32,17 @@ function NotFoundComponent() {
           {isAr ? "الصفحة غير موجودة" : "Page not found"}
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          {isAr ? "الصفحة التي تبحث عنها غير موجودة أو تم نقلها." : "The page you're looking for doesn't exist or has been moved."}
+          {isAr
+            ? "الصفحة التي تبحث عنها غير موجودة أو تم نقلها."
+            : "The page you're looking for doesn't exist or has been moved."}
         </p>
         <div className="mt-6">
-          <Link
-            to="/"
+          <a
+            href="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             {isAr ? "العودة للرئيسية" : "Go home"}
-          </Link>
+          </a>
         </div>
       </div>
     </div>
@@ -89,7 +89,8 @@ const getHostname = createIsomorphicFn()
   .server(() => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { getRequestHost } = require("@tanstack/react-start/server") as typeof import("@tanstack/react-start/server");
+      const { getRequestHost } =
+        require("@tanstack/react-start/server") as typeof import("@tanstack/react-start/server");
       const host = getRequestHost({ xForwardedHost: true });
       return host ? String(host).split(":")[0] : null;
     } catch {
@@ -105,7 +106,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     }
   },
   head: () => ({
-
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -149,7 +149,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           logo: "https://aisyria.org/favicon.png",
           email: "info@aisyria.org",
           telephone: "+963-930-763-547",
-          description: "The first official Syrian organization dedicated to artificial intelligence, innovation, and entrepreneurship.",
+          description:
+            "The first official Syrian organization dedicated to artificial intelligence, innovation, and entrepreneurship.",
           address: {
             "@type": "PostalAddress",
             addressLocality: "Damascus",
@@ -183,7 +184,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
-
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM4Y7E9Y96" />
         <script
           dangerouslySetInnerHTML={{
@@ -211,7 +211,8 @@ function FormValidationHandler() {
         const lbl = document.querySelector(`label[for="${CSS.escape(id)}"]`);
         if (lbl?.textContent) return lbl.textContent.replace(/[*]/g, "").trim();
       }
-      const aria = el.getAttribute("aria-label") || el.getAttribute("placeholder") || el.getAttribute("name");
+      const aria =
+        el.getAttribute("aria-label") || el.getAttribute("placeholder") || el.getAttribute("name");
       return aria || (isAr ? "هذا الحقل" : "this field");
     };
     const handler = (e: Event) => {
@@ -222,11 +223,14 @@ function FormValidationHandler() {
       const name = labelFor(t);
       let msg = "";
       if (v.valueMissing) msg = isAr ? `يرجى ملء "${name}"` : `Please fill in "${name}"`;
-      else if (v.typeMismatch && t.type === "email") msg = isAr ? "يرجى إدخال بريد إلكتروني صالح" : "Please enter a valid email";
-      else if (v.typeMismatch && t.type === "url") msg = isAr ? "يرجى إدخال رابط صالح" : "Please enter a valid URL";
+      else if (v.typeMismatch && t.type === "email")
+        msg = isAr ? "يرجى إدخال بريد إلكتروني صالح" : "Please enter a valid email";
+      else if (v.typeMismatch && t.type === "url")
+        msg = isAr ? "يرجى إدخال رابط صالح" : "Please enter a valid URL";
       else if (v.tooShort) msg = isAr ? `"${name}" قصير جداً` : `"${name}" is too short`;
       else if (v.tooLong) msg = isAr ? `"${name}" طويل جداً` : `"${name}" is too long`;
-      else if (v.patternMismatch) msg = isAr ? `صيغة "${name}" غير صحيحة` : `"${name}" format is invalid`;
+      else if (v.patternMismatch)
+        msg = isAr ? `صيغة "${name}" غير صحيحة` : `"${name}" format is invalid`;
       else msg = isAr ? `يرجى التحقق من "${name}"` : `Please check "${name}"`;
       toast.error(msg);
       (t as HTMLElement).focus({ preventScroll: false });
@@ -245,10 +249,16 @@ function ScrollRestoration() {
     }
     const key = "saae-scroll-positions";
     const read = (): Record<string, number> => {
-      try { return JSON.parse(sessionStorage.getItem(key) || "{}"); } catch { return {}; }
+      try {
+        return JSON.parse(sessionStorage.getItem(key) || "{}");
+      } catch {
+        return {};
+      }
     };
     const write = (m: Record<string, number>) => {
-      try { sessionStorage.setItem(key, JSON.stringify(m)); } catch {}
+      try {
+        sessionStorage.setItem(key, JSON.stringify(m));
+      } catch {}
     };
     let ticking = false;
     const onScroll = () => {
@@ -286,7 +296,10 @@ function RootComponent() {
   const location = useLocation();
   const isAms = location.pathname.startsWith("/attendance-management-system");
   const isLms = location.pathname.startsWith("/learning-management-system");
-  const isAdmin = location.pathname.startsWith("/admin") || location.pathname.startsWith("/super-admin") || location.pathname.startsWith("/learning-management-system/admin");
+  const isAdmin =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/super-admin") ||
+    location.pathname.startsWith("/learning-management-system/admin");
 
   return (
     <QueryClientProvider client={queryClient}>
