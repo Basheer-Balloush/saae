@@ -202,13 +202,21 @@ export function QuizBulkImportDialog({
   const save = async () => {
     if (valid.length === 0) return;
     setSaving(true);
-    const payload = valid.map((d, i) => ({
-      quiz_id: quizId,
-      question: d.question.trim(),
-      choices: d.choices.map((c) => c.trim()).filter((c) => c !== ""),
-      correct_index: d.correct_index,
-      display_order: startOrder + i,
-    }));
+    const payload = valid.map((d, i) => {
+      const trimmed = d.choices.map((c) => c.trim());
+      // Empty choices are dropped, so the stored index must be renumbered
+      // against the kept choices or it points at the wrong answer.
+      const keptBeforeCorrect = trimmed
+        .slice(0, d.correct_index)
+        .filter((c) => c !== "").length;
+      return {
+        quiz_id: quizId,
+        question: d.question.trim(),
+        choices: trimmed.filter((c) => c !== ""),
+        correct_index: keptBeforeCorrect,
+        display_order: startOrder + i,
+      };
+    });
     const { error } = await supabase.from("lms_quiz_questions").insert(payload);
     setSaving(false);
     if (error) {
