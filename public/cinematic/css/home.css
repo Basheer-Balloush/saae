@@ -3461,14 +3461,28 @@
       font-size: clamp(5.6rem, 19vw, 15rem);
       letter-spacing: 0;
       line-height: 1.18;
-      /* Joined-script guard (pics 1-2): background-clip:text pours the
-         gradient through the glyphs on a separate layer, and under the
-         per-frame translate/scale the Arabic dots and diacritics detach
-         and drift. In Arabic the display words keep their scale, weight,
-         stroke and scroll-written opacity, but take solid ink. */
-      background: none;
-      color: var(--teal-lift);
-      -webkit-text-fill-color: var(--teal-lift);
+      /* The gradient is back on the Arabic words, mirrored so the light end
+         starts where the word starts: 163deg reflected about the vertical is
+         197deg, which hangs the teal lift at the top right and runs the olive
+         out to the bottom left — the same read as the Latin word, in the
+         direction this script is read.
+
+         What broke it the first time was not background-clip:text, it was the
+         layer it was painted on. translate3d plus will-change:transform promote
+         the word to a composited layer; the text mask is rasterised once and
+         re-scaled every frame after that, and the Arabic dots and diacritics —
+         marks that sit clear of the letter body — drift against the fill they
+         are meant to be cut from. Held on the main thread with a 2D transform
+         and no transform hint, the word is repainted at its true scale each
+         frame and the marks stay on their letters. Three spans, and only while
+         the reel is on screen: the repaint is affordable, the drift was not. */
+      background: linear-gradient(197deg, var(--teal-lift) 0%, var(--petrol) 40%, var(--olive) 92%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      transform: translate(0, calc(var(--word-y, 0) * 1px)) scale(calc(.93 + var(--word-t, 0) * .07));
+      will-change: opacity;
     }
     html[dir="rtl"] .mission-words span::before { right: auto; left: clamp(10px, 5vw, 72px); letter-spacing: 0; }
     html[dir="rtl"] .mission-words span::after { right: .18em; left: auto; letter-spacing: 0; text-align: right; text-transform: none; }
