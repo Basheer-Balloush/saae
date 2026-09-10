@@ -46,8 +46,15 @@
     incomplete: ["Please complete the required fields.", "يرجى إكمال الحقول المطلوبة."],
     badEmail:   ["That email address does not look right.", "يبدو أن البريد الإلكتروني غير صحيح."],
     opening:    ["Opening your email app — send the message to finish.",
-                 "يتم فتح تطبيق البريد لديك — أرسل الرسالة لإتمام العملية."]
+                 "يتم فتح تطبيق البريد لديك — أرسل الرسالة لإتمام العملية."],
+    sending:    ["Sending your message…", "جارٍ إرسال رسالتك…"],
+    sent:       ["Thank you. Your message has been received and we will reply soon.",
+                 "شكراً لك. وصلتنا رسالتك وسنرد عليك قريباً."],
+    failed:     ["Your message could not be sent. Please try again.",
+                 "تعذّر إرسال رسالتك. يرجى المحاولة مرة أخرى."]
   };
+  /* Same order as ROUTES, mapped to the contact_messages inquiry_type enum. */
+  const INQUIRY_TYPES = ["training", "partnership", "media", "general"];
 
   const $ = id => document.getElementById(id);
   const routeButtons = [...document.querySelectorAll("#routes [role='tab']")];
@@ -180,6 +187,28 @@
       return;
     }
 
+    /* The page saves to the database when the application provides a handler.
+       The prefilled mail below stays as the fallback for the static preview. */
+    if (typeof window.saaeContactSubmit === "function") {
+      say(COPY.sending[ar() ? 1 : 0], false);
+      window
+        .saaeContactSubmit({
+          full_name: data.name,
+          email: data.email,
+          phone: data.phone || null,
+          organization: data.context || null,
+          inquiry_type: INQUIRY_TYPES[route] || "general",
+          subject: data.subject,
+          message: data.message,
+        })
+        .then(() => {
+          say(COPY.sent[ar() ? 1 : 0], false);
+          form.reset();
+          if (count) count.textContent = "0";
+        })
+        .catch(() => say(COPY.failed[ar() ? 1 : 0], true));
+      return;
+    }
     say(COPY.opening[ar() ? 1 : 0], false);
     submitEnquiry(data);
   });
