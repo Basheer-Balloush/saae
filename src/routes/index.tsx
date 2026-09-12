@@ -1,7 +1,9 @@
-import { useMemo } from "react";
+import React, { Suspense, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import homeHtml from "@/components/cinematic/html/home.html?raw";
-import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
+import type { CinematicScript } from "@/components/cinematic/CinematicPage";
+import { MobileHero } from "@/components/home/MobileHero";
+import { useHeroCapability } from "@/hooks/useHeroCapability";
 import { supabase } from "@/integrations/supabase/client";
 import {
   NEWS_CARD_COLUMNS,
@@ -10,7 +12,16 @@ import {
   type NewsCardRow,
 } from "@/lib/cinematic-db-content";
 
-const SCRIPTS: CinematicScript[] = [
+// Desktop-only cinematic shell. Lazy so the phone import graph stays light.
+const CinematicPageLazy = React.lazy(() =>
+  import("@/components/cinematic/CinematicPage").then((m) => ({ default: m.CinematicPage })),
+);
+
+/* Desktop only: the phone page loads none of these. The hero's two scripts
+   come first and the rest run after them in order. They stay one list so the
+   page-ready events the later scripts wait for are replayed once, after all
+   of them have run. */
+const DESKTOP_SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/home-inline.js" },
   { src: "/cinematic/js/hero-instrument.js", module: true },
   { src: "/cinematic/js/sections.js" },
@@ -66,19 +77,25 @@ export const Route = createFileRoute("/")({
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
       { rel: "stylesheet", href: "/cinematic/css/db-content.css" },
       { rel: "stylesheet", href: "/cinematic/css/home-mobile.css" },
-      {
-        rel: "preload",
-        as: "image",
-        href: "/cinematic/images/hero-static.jpg",
-        fetchPriority: "high",
-      },
     ],
   }),
   component: Home,
 });
 
+function DesktopHome({ html }: { html: string }) {
+  return (
+    <Suspense fallback={null}>
+      <CinematicPageLazy html={html} scripts={DESKTOP_SCRIPTS} htmlClass="site-loading" />
+    </Suspense>
+  );
+}
+
 function Home() {
   const { news } = Route.useLoaderData();
   const html = useMemo(() => applyHomeNews(homeHtml, news), [news]);
-  return <CinematicPage html={html} scripts={SCRIPTS} htmlClass="site-loading" />;
+  const capability = useHeroCapability();
+  // Mobile-first: SSR, first paint, phones and reduced motion get the phone
+  // page; only a confirmed desktop mounts the cinematic enhancement.
+  if (capability === "desktop") return <DesktopHome html={html} />;
+  return <MobileHero />;
 }
