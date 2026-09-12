@@ -33,7 +33,7 @@
   --text-h2: clamp(1.75rem, 2.8vw, 2.875rem);
   --text-h3: clamp(1.25rem, 1.6vw, 1.75rem);
   --text-body: 1.0625rem;
-  --text-small: 1.125rem;
+  --text-small: 0.875rem; /* PR2-1 fix: 14px, must stay smaller than body */
   --text-caption: 0.8125rem;
 
   --color-background: var(--background);
@@ -354,13 +354,14 @@ html {
   }
 
   /* Arabic needs a little more vertical air on big display sizes */
+  /* Arabic: no negative tracking (Cairo shaping breaks with negative letter-spacing) */
   [dir="rtl"] .text-display-1 {
     line-height: 1.18;
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
   }
   [dir="rtl"] .text-display-2 {
     line-height: 1.2;
-    letter-spacing: -0.005em;
+    letter-spacing: 0;
   }
   [dir="rtl"] .text-h1 {
     line-height: 1.3;
@@ -563,4 +564,47 @@ html {
 @media (max-width: 768px) {
   .text-display-1, .display-1 { font-size: clamp(2rem, 9vw, 2.75rem); }
   h1 { font-size: clamp(1.5rem, 7vw, 2rem); }
+}
+
+/* Breakpoint contract (PR2-1): Base 0-479, sm 480-767, md 768-1023, lg 1024-1279, xl 1280+. */
+@layer tokens {
+  :root {
+    /* Semantic surfaces — reuse existing palette only (petrol/olive/orange/jet/limestone/white) */
+    --surface-canvas: #2e2e2e;
+    --surface-deep: #2e2e2e;
+    --surface-raised-dark: #2e2e2e;
+    --surface-paper: #ffffff;
+    --surface-limestone: var(--surface);
+    /* Semantic text roles */
+    --text-on-dark: #ffffff;
+    --text-muted-on-dark: #a8e6e6;
+    --text-on-light: #2e2e2e;
+    --text-muted-on-light: var(--muted-foreground);
+    /* Semantic brand roles — existing hex only */
+    --brand-primary: #048090;
+    --brand-strong: #048090;
+    --brand-secondary: #698f3f;
+    --brand-accent: #f99c00;
+    /* Semantic borders + focus */
+    --border-on-dark: var(--footer-border);
+    --border-light: var(--border);
+    --focus-ring: var(--ring);
+    /* Spacing + container */
+    --header-height: 68px;
+    --gutter: 16px;
+  }
+  @media (min-width: 480px) {
+    :root { --gutter: 20px; }
+  }
+  @media (min-width: 768px) {
+    :root { --gutter: 24px; }
+  }
+  @media (min-width: 1024px) {
+    :root { --gutter: 32px; }
+  }
+  .page-container {
+    padding-inline: var(--gutter);
+    max-width: 1280px;
+    margin-inline: auto;
+  }
 }

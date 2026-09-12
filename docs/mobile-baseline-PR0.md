@@ -48,3 +48,14 @@ Build output note: no `dist/` — TanStack Start + nitro emits `.output/`:
 - `lint` timed out (>120 s) — result unknown, recorded as-is, not fixed.
 - No secrets or `.env` values recorded (only noted that bun reads `.env`, unnamed).
 - Post-baseline `git status --short` must show only `?? docs/mobile-baseline-PR0.md`.
+
+## PR2-1 tokens
+- Files: `src/styles.css` + this note only.
+- Added: surface/text/brand/border/focus/header/gutter tokens.
+- Brand maps: primary/strong #048090, secondary #698F3F, accent #F99C00.
+- Surfaces: canvas/deep/raised-dark #2E2E2E, paper #FFF, limestone var(--surface).
+- Type fix: --text-small 1.125rem -> 0.875rem (14px); body 1.65 kept.
+- Arabic: removed negative tracking in RTL display-1/2 (now 0).
+- Container: .page-container logical props, max 1280px, gutter var.
+- Breakpoints: Base 0-479, sm 480-767, md 768-1023, lg 1024-1279, xl 1280+.
+- Verify: `cd SAAE_React && bunx tsc --noEmit` -> PASS, no existing values changed.
