@@ -817,3 +817,10 @@
     max-width: 100%;
   }
 }
+
+/* PR4-1: hide journey ribbon on phone (<=768px). Visual unmount only;
+ * JS toggle in home-inline.js left intact. */
+@media (max-width: 768px) {
+  body .journey-ribbon { display: none; }
+  body #ribbon-panel { display: none; }
+}
