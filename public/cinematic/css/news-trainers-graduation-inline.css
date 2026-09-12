@@ -532,3 +532,14 @@
   @media (max-width: 620px) {
     .site-footer .footer-main { grid-template-columns: minmax(0, 1fr); }
   }
+  /* Gallery: 48px desktop arrows, 10px dots (matches tv pattern). */
+  .gallery-arrow{position:absolute;top:50%;z-index:5;display:grid;place-items:center;width:48px;height:48px;padding:0;border:1px solid rgba(184,232,240,.3);border-radius:50%;background:rgba(6,35,42,.72);color:var(--type);cursor:pointer;transform:translate3d(0,-50%,0);}
+  .gallery-arrow svg{width:18px;height:18px;}
+  .gallery-prev{right:16px;}
+  .gallery-next{left:16px;}
+  .gallery-dots{display:flex;justify-content:center;gap:9px;margin-top:18px;}
+  .gallery-dot{width:10px;height:10px;padding:0;border:1px solid rgba(184,232,240,.5);border-radius:50%;background:transparent;cursor:pointer;}
+  .gallery-dot.is-active{background:var(--petrol-lift);border-color:var(--petrol-lift);}
+  .gallery-dot::after{content:"";width:10px;height:10px;display:block;}
+  /* Gallery touch targets: 48px desktop, 44px wrappers on phones. */
+  @media (max-width:768px){.gallery-arrow{min-width:44px;min-height:44px;} .gallery-dot{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;} .gallery-dot::after{width:10px;height:10px;}}

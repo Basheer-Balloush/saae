@@ -222,6 +222,7 @@
   }
   .gallery-dot.is-active { background: var(--petrol-lift); border-color: var(--petrol-lift); transform: scale(1.2); }
   .gallery-dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  @media (max-width: 768px) { .gallery-arrow { min-width: 44px; min-height: 44px; } .gallery-dot { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; } .gallery-dot::after { content: ""; width: 10px; height: 10px; } }
   @media (prefers-reduced-motion: reduce) { .gallery-arrow, .gallery-dot { transition: none; } }
 
   /* The article body, set at the reading width the official site uses. */
