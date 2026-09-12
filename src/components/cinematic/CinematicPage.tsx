@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { withSiteChrome } from "./radial-nav";
+import type { CinematicRuntime, CinematicRuntimeContext } from "./runtime";
 
 export type CinematicScript = { src: string; module?: boolean };
 
@@ -12,8 +13,6 @@ type Props = {
   htmlAttrs?: Record<string, string>;
 };
 
-type AddListener = typeof document.addEventListener;
-
 /**
  * The prototype scripts wait for DOMContentLoaded / load, which have already
  * fired by the time we inject them. Registrations for those two events are
@@ -21,7 +20,6 @@ type AddListener = typeof document.addEventListener;
  * executed, matching the prototype where deferred scripts all run before
  * DOMContentLoaded.
  */
-const injected = new Set<string>();
 function installReadyShim() {
   const docAdd = document.addEventListener;
   const winAdd = window.addEventListener;
@@ -71,8 +69,52 @@ function installReadyShim() {
   return { flush, restore };
 }
 
+/**
+ * Appends prototype scripts in order, skipping any already on the page, and
+ * replays the ready events they wait for once all of them have run. The
+ * caller removes `added` when its page goes away, so a later visit runs the
+ * scripts afresh against the new markup; `cancel` puts the real listeners
+ * back if that happens before the scripts finish loading.
+ */
+export function appendCinematicScripts(scripts: CinematicScript[], onEachSettled?: () => void) {
+  const added: HTMLScriptElement[] = [];
+  const pending = scripts.filter(
+    (s) => !document.querySelector(`script[data-cinematic][src="${s.src}"]`),
+  );
+  if (pending.length === 0) return { added, cancel: () => {} };
+  const shim = installReadyShim();
+  let remaining = pending.length;
+  let finished = false;
+  const settle = () => {
+    onEachSettled?.();
+    remaining -= 1;
+    if (remaining <= 0 && !finished) {
+      finished = true;
+      shim.flush();
+    }
+  };
+  for (const s of pending) {
+    const el = document.createElement("script");
+    el.src = s.src;
+    el.async = false;
+    el.dataset.cinematic = "true";
+    if (s.module) el.type = "module";
+    el.addEventListener("load", settle, { once: true });
+    el.addEventListener("error", settle, { once: true });
+    added.push(el);
+    document.body.appendChild(el);
+  }
+  const cancel = () => {
+    if (finished) return;
+    finished = true;
+    shim.restore();
+  };
+  return { added, cancel };
+}
+
 /** Renders a prototype page's static markup and boots its vanilla scripts in order. */
 export function CinematicPage({ html, scripts, htmlClass, bodyClass, htmlAttrs }: Props) {
+  const mountRef = useRef<HTMLDivElement>(null);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const page = useMemo(() => withSiteChrome(html, pathname), [html, pathname]);
 
@@ -81,32 +123,45 @@ export function CinematicPage({ html, scripts, htmlClass, bodyClass, htmlAttrs }
     if (htmlClass) root.classList.add(htmlClass);
     if (bodyClass) document.body.classList.add(bodyClass);
     if (htmlAttrs) for (const [k, v] of Object.entries(htmlAttrs)) root.setAttribute(k, v);
-    const pendingScripts = scripts.filter((s) => !injected.has(s.src));
-    if (pendingScripts.length > 0) {
-      const shim = installReadyShim();
-      let pending = pendingScripts.length;
-      const settle = () => {
-        pending -= 1;
-        if (pending <= 0) shim.flush();
-      };
-      for (const s of pendingScripts) {
-        injected.add(s.src);
-        const el = document.createElement("script");
-        el.src = s.src;
-        el.async = false;
-        el.dataset.cinematic = "true";
-        if (s.module) el.type = "module";
-        el.addEventListener("load", settle);
-        el.addEventListener("error", settle);
-        document.body.appendChild(el);
+    const disposers: Array<() => void> = [];
+    const ctx: CinematicRuntimeContext = {
+      locale: root.lang === "en" ? "en" : "ar",
+      direction: root.getAttribute("dir") === "ltr" ? "ltr" : "rtl",
+      reducedMotion:
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    };
+    /* A script may expose window.__cinematic.init to scope itself to this
+       page and hand back its own cleanup. */
+    const tryInitFromGlobals = () => {
+      const scope: HTMLElement = mountRef.current ?? document.body;
+      const exposed = (window as unknown as { __cinematic?: CinematicRuntime }).__cinematic;
+      if (exposed && typeof exposed.init === "function") {
+        try {
+          const cleanup = exposed.init(scope, ctx);
+          if (typeof cleanup === "function") disposers.push(cleanup);
+        } catch (error) {
+          console.error(error);
+        }
       }
-    }
+    };
+    const { added, cancel } = appendCinematicScripts(scripts, tryInitFromGlobals);
     return () => {
+      cancel();
+      for (const dispose of disposers) {
+        try {
+          dispose();
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      disposers.length = 0;
+      for (const el of added) el.remove();
       if (htmlClass) root.classList.remove(htmlClass);
       if (bodyClass) document.body.classList.remove(bodyClass);
       if (htmlAttrs) for (const k of Object.keys(htmlAttrs)) root.removeAttribute(k);
     };
   }, [html, scripts, htmlClass, bodyClass, htmlAttrs]);
 
-  return <div className="cinematic" dangerouslySetInnerHTML={{ __html: page }} />;
+  return <div ref={mountRef} className="cinematic" dangerouslySetInnerHTML={{ __html: page }} />;
 }
