@@ -462,3 +462,4 @@ html[dir="rtl"] .footer-col-title { letter-spacing: 0; word-spacing: .12em; }
     -webkit-text-fill-color: transparent;
   }
 }
+@media (max-width:768px){.initiative-hero{min-height:auto; padding:48px 16px 32px;} .initiative-hero h1{font-size:clamp(1.75rem,8vw,2.5rem);} .initiative-hero .action{min-height:44px;}}

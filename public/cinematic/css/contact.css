@@ -512,3 +512,13 @@ html[dir="rtl"] .footer-logo-ar { display: block; }
     width: min(1180px, calc(100vw - 48px));
     margin-inline: auto;
   }
+
+/* Sec 13.2: contain hero glow + fix 320px overflow (no body overflow-x) */
+.hero, .contact-hero { overflow: clip; contain: paint; }
+.hero-glow { max-width: 100%; inset-inline: 0; }
+.markstage { overflow: clip; max-width: 100%; }
+.ghost-contact { max-width: 100%; }
+@media (max-width: 768px) {
+  .hero, .contact-hero { min-height: auto; padding: 48px 16px 32px; }
+  .hero h1, .contact-hero h1 { font-size: clamp(1.75rem, 8vw, 2.5rem); }
+}

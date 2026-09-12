@@ -418,3 +418,4 @@
   @media (max-width: 620px) {
     .site-footer .footer-main { grid-template-columns: minmax(0, 1fr); }
   }
+@media (max-width:768px){.partner-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;} .partner-plate{min-height:96px;min-width:0;}}

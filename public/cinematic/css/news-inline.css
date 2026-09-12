@@ -519,3 +519,4 @@
   @media (max-width: 620px) {
     .site-footer .footer-main { grid-template-columns: minmax(0, 1fr); }
   }
+@media (max-width:768px){.story-grid{grid-template-columns:1fr;} .story{overflow:hidden;}}
