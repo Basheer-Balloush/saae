@@ -824,3 +824,18 @@
   body .journey-ribbon { display: none; }
   body #ribbon-panel { display: none; }
 }
+
+/* plan.md Sec 12.3-12.4: accessible news cards + static partners grid. */
+@media (max-width: 768px) {
+  body .flow-reel-news .news-card { flex: 0 0 90%; }
+  body .flow-arrow { width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
+  body .carousel-dot-btn { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+  body .news-reel,
+  body #news-reel,
+  body .flow-track { animation: none; }
+  body .partner-stream { animation: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; height: auto; overflow: visible; }
+  body .partner-stream-field,
+  body .partner-stream-rails { position: static; display: contents; }
+  body .partner-mark { animation: none; position: static; width: 100%; height: auto; min-width: 0; min-height: 64px; margin: 0; -webkit-mask-size: contain; mask-size: contain; }
+  body .partner-mark img { max-width: 100%; height: auto; object-fit: contain; }
+}

@@ -4013,3 +4013,18 @@
         scroll-behavior: auto !important;
       }
     }
+
+    /* plan.md Sec 12.4: partners marquee runs on desktop only. Mobile gets a
+       static grid from home-mobile.css; this guard keeps the desktop marquee. */
+    @media (min-width: 769px) {
+      body .partner-stream-rails {
+        will-change: transform;
+        touch-action: pan-y;
+      }
+      body .partner-mark {
+        animation: partner-stream-right var(--travel) linear 1 both paused;
+      }
+      body .partner-mark.is-left {
+        animation-name: partner-stream-left;
+      }
+    }

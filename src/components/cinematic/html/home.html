@@ -212,7 +212,7 @@
           </div>
         </div>
 
-        <div class="flow-reel flow-reel-news" id="news-reel">
+        <div class="flow-reel flow-reel-news" id="news-reel" role="region" aria-roledescription="carousel" aria-label="Latest news carousel, five items">
           <div class="flow-screen" id="news-screen">
         <div class="flow flow-news reveal" id="news-flow" data-flow="news" role="region" aria-roledescription="carousel" aria-label="Latest news, five items" tabindex="0">
           <span class="flow-glow" aria-hidden="true"></span>
@@ -296,13 +296,14 @@
 
           <div class="flow-dots">
 <!-- db:home-news-dots:start -->
-            <button class="flow-dot" type="button" data-go="0" aria-label="Show item 1 of 5" aria-current="true"></button>
-            <button class="flow-dot" type="button" data-go="1" aria-label="Show item 2 of 5"></button>
-            <button class="flow-dot" type="button" data-go="2" aria-label="Show item 3 of 5"></button>
-            <button class="flow-dot" type="button" data-go="3" aria-label="Show item 4 of 5"></button>
-            <button class="flow-dot" type="button" data-go="4" aria-label="Show item 5 of 5"></button>
+            <button class="flow-dot carousel-dot-btn" type="button" data-go="0" aria-label="Show item 1 of 5" aria-current="true"></button>
+            <button class="flow-dot carousel-dot-btn" type="button" data-go="1" aria-label="Show item 2 of 5"></button>
+            <button class="flow-dot carousel-dot-btn" type="button" data-go="2" aria-label="Show item 3 of 5"></button>
+            <button class="flow-dot carousel-dot-btn" type="button" data-go="3" aria-label="Show item 4 of 5"></button>
+            <button class="flow-dot carousel-dot-btn" type="button" data-go="4" aria-label="Show item 5 of 5"></button>
 <!-- db:home-news-dots:end -->
           </div>
+          <p class="carousel-status" aria-live="polite"></p>
         </div>
           </div>
         </div>

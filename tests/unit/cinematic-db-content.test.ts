@@ -101,7 +101,7 @@ describe("homepage news", () => {
     expect(html).toContain("No news yet");
     expect(html).toContain("لا توجد أخبار حالياً");
     expect(html).not.toContain('href="/news/tv-interview"');
-    expect(count(html, 'class="flow-dot"')).toBe(2);
+    expect(count(html, 'class="flow-dot carousel-dot-btn"')).toBe(2);
     expect(applyHomeNews(home, null)).toBe(html);
   });
 
@@ -117,7 +117,7 @@ describe("homepage news", () => {
     const html = applyHomeNews(home, renderHomeNews(ROWS));
     expect(count(html, 'class="flow-slide news-slide"')).toBe(4);
     expect(count(html, "news-slide-more")).toBe(1);
-    expect(count(html, 'class="flow-dot"')).toBe(5);
+    expect(count(html, 'class="flow-dot carousel-dot-btn"')).toBe(5);
     expect(html).toContain('aria-label="Latest news, 5 items"');
     expect(html).toContain(`href="/news/${ROWS[0].id}"`);
     expect(html).not.toContain(`href="/news/${ROWS[4].id}"`);
@@ -126,7 +126,7 @@ describe("homepage news", () => {
 
   it("sizes the dots to the stories there are", () => {
     const html = applyHomeNews(home, renderHomeNews(ROWS.slice(0, 2)));
-    expect(count(html, 'class="flow-dot"')).toBe(3);
+    expect(count(html, 'class="flow-dot carousel-dot-btn"')).toBe(3);
     expect(html).toContain('aria-label="Show item 3 of 3"');
   });
 

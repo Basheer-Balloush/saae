@@ -189,7 +189,7 @@ function newsStatusHtml(failed: boolean): string {
 export function renderHomeNews(rows: NewsCardRow[], failed = false): HomeNewsFragments {
   if (failed || rows.length === 0) return {
     slidesHtml: `<li class="flow-slide news-slide" data-tint="4, 128, 144"><article class="news-card news-card-more"><div class="news-copy">${newsStatusHtml(failed)}</div></article></li>`,
-    dotsHtml: [0, 1].map(i => `<button class="flow-dot" type="button" data-go="${i}" aria-label="Show item ${i + 1} of 2"${i === 0 ? ' aria-current="true"' : ""}></button>`).join("\n"),
+    dotsHtml: [0, 1].map(i => `<button class="flow-dot carousel-dot-btn" type="button" data-go="${i}" aria-label="Show item ${i + 1} of 2"${i === 0 ? ' aria-current="true"' : ""}></button>`).join("\n"),
     total: 2,
   };
   const items = rows.slice(0, HOME_NEWS_LIMIT);
@@ -215,7 +215,7 @@ export function renderHomeNews(rows: NewsCardRow[], failed = false): HomeNewsFra
   const dotsHtml = Array.from(
     { length: total },
     (_, i) =>
-      `<button class="flow-dot" type="button" data-go="${i}" aria-label="Show item ${i + 1} of ${total}"${i === 0 ? ' aria-current="true"' : ""}></button>`,
+      `<button class="flow-dot carousel-dot-btn" type="button" data-go="${i}" aria-label="Show item ${i + 1} of ${total}"${i === 0 ? ' aria-current="true"' : ""}></button>`,
   ).join("\n");
   return { slidesHtml, dotsHtml, total };
 }
