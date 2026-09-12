@@ -128,3 +128,36 @@ body .masthead .radial-language:focus-visible {
   border-color: var(--type, #1d2b23) !important;
   transform: none !important;
 }
+
+/* The hub and the language button float over whatever happens to be under
+   them. Over the film that is a photograph and it reads fine; on a phone,
+   where the page is a column of cards, they were landing on a card border and
+   looking like a mistake. A scrim gives them their own ground at the top of
+   the viewport without boxing them into a header bar -- they keep floating,
+   they just stop colliding. Phone only: on a wide screen there is nothing to
+   collide with. */
+@media (orientation: portrait) and (pointer: coarse) {
+  /* 128px was measured against the tree toggle alone (y 15-95 including its
+     beacon ring). The language switch sits lower -- top: calc(16vh - 5px),
+     which is 131px on a 852px screen -- so its bottom edge cleared the scrim
+     entirely and body copy ran straight under a floating circle. 176px covers
+     both, and the blur is what stops text reading THROUGH the chrome rather
+     than merely behind a wash: the mask fades the blur out with the gradient
+     so there is no hard edge where it ends. */
+  .radial-nav::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: 176px;
+    pointer-events: none;
+    background: linear-gradient(180deg,
+      rgba(4, 23, 28, .96) 0%,
+      rgba(4, 23, 28, .88) 34%,
+      rgba(4, 23, 28, .58) 66%,
+      rgba(4, 23, 28, 0) 100%);
+    -webkit-backdrop-filter: blur(7px);
+    backdrop-filter: blur(7px);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 52%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 52%, transparent 100%);
+  }
+}

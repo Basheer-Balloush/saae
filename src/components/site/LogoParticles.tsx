@@ -295,23 +295,29 @@ function LogoParticlesImpl({ size = 200, colors = DEFAULT_COLORS, className }: P
 
   if (reducedMotion) {
     return (
-      <img
-        src={logoTree}
-        alt=""
-        aria-hidden
-        style={{ width: size, height: size }}
-        className={className}
-      />
+      <>
+        <img
+          src={logoTree}
+          alt=""
+          aria-hidden="true"
+          style={{ width: size, height: size }}
+          className={className}
+        />
+        <span className="sr-only">SAAE logo</span>
+      </>
     );
   }
 
   return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden
-      style={{ width: size, height: size }}
-      className={className}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        style={{ width: size, height: size }}
+        className={className}
+      />
+      <span className="sr-only">SAAE logo</span>
+    </>
   );
 }
 

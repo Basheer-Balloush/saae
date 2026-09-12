@@ -18,12 +18,14 @@ const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/ScrollTrigger.min.js" },
   { src: "/cinematic/js/lenis.min.js" },
   { src: "/cinematic/js/scroll-engine.js" },
+  { src: "/cinematic/js/checkpoints.js" },
   { src: "/cinematic/js/motion.js" },
   { src: "/cinematic/js/language.js" },
   { src: "/cinematic/js/navigation.js" },
   { src: "/cinematic/js/text-effect.js" },
   { src: "/cinematic/js/anime.umd.min.js" },
   { src: "/cinematic/js/motion-anime.js" },
+  { src: "/cinematic/js/home-mobile.js" },
 ];
 
 export const Route = createFileRoute("/")({
@@ -63,6 +65,7 @@ export const Route = createFileRoute("/")({
       { rel: "stylesheet", href: "/cinematic/css/home.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
       { rel: "stylesheet", href: "/cinematic/css/db-content.css" },
+      { rel: "stylesheet", href: "/cinematic/css/home-mobile.css" },
       {
         rel: "preload",
         as: "image",

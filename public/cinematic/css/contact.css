@@ -440,8 +440,8 @@ html[dir="rtl"] .footer-logo-ar { display: block; }
   .site-footer .footer-col a:focus-visible { color: #fff; text-decoration: underline; text-underline-offset: 4px; transform: none; }
   .site-footer .footer-col a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 4px; }
   .site-footer .footer-map {
-    background: #fff;
-    color: #0b2b33;
+    background: linear-gradient(180deg, #0c303a, #061d24);
+    color: rgba(216, 237, 237, .92);
     border-radius: 18px;
     padding: 14px 14px 18px;
     box-shadow: 0 24px 60px rgba(3, 20, 25, .25);
@@ -461,9 +461,9 @@ html[dir="rtl"] .footer-logo-ar { display: block; }
     stroke-linecap: round;
     stroke-linejoin: round;
   }
-  .site-footer .map-lines a { color: #0b2b33; text-decoration: none; font-weight: 600; min-height: 0; }
+  .site-footer .map-lines a { color: rgba(216, 237, 237, .92); text-decoration: none; font-weight: 600; min-height: 0; }
   .site-footer .map-lines a:hover,
-  .site-footer .map-lines a:focus-visible { color: #048090; text-decoration: underline; }
+  .site-footer .map-lines a:focus-visible { color: var(--saae-turquoise-lift); text-decoration: underline; }
   .site-footer .map-visit {
     display: inline-flex;
     align-items: center;
@@ -478,7 +478,7 @@ html[dir="rtl"] .footer-logo-ar { display: block; }
   .site-footer .map-visit:focus-visible { text-decoration: underline; }
   .site-footer .visit-arrow { display: inline-block; }
   html[dir="rtl"] .site-footer .visit-arrow { transform: scaleX(-1); }
-  .site-footer .map-attr { margin: 10px 4px 0; font-size: .68rem; color: rgba(11, 43, 51, .6); }
+  .site-footer .map-attr { margin: 10px 4px 0; font-size: .68rem; color: rgba(216, 237, 237, .58); }
   .site-footer .map-attr a { color: inherit; }
   .site-footer .footer-bottom {
     display: block;

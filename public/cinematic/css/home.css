@@ -100,8 +100,14 @@
       --saae-turquoise-lift: #77e0e8;
       --green: #688c3e;
       --green-lift: #81a657;
-      --accent: #f99c00;
-      --accent-hover: #e58c00;
+      /* Was #f99c00/#e58c00. The orange was the one colour on the page that
+         belonged to no part of the mark, and on the phone hero it was the
+         loudest thing on the screen. The accent role now sits on the
+         turquoise lift, which is the mark's own bright step: it still reads
+         as the one colour that means "act here", and dark ink on it clears
+         11:1 where dark ink on the orange cleared 8:1. */
+      --accent: var(--saae-turquoise-lift);
+      --accent-hover: var(--teal-lift);
       /* --ink stays dark: it is the type colour for the light chips that survive
          on a dark page (the ribbon panel, the skip link, the accent buttons).
          Body copy uses --type, which sits on --canvas. */
@@ -1349,6 +1355,14 @@
 
     .reveal.is-visible { opacity: 1; transform: translateY(0); }
 
+    /* Settled, not revealed. A checkpoint that cuts past a stretch of the page
+       marks everything behind the reader as seen, and it has to arrive already
+       seen: eight blocks starting a 700ms entrance at the moment you land is a
+       page catching up with itself in front of you. The class is worn for two
+       frames while the state is written, and never longer -- anything the
+       reader scrolls to themselves still gets its entrance. */
+    .reveal.is-settled { transition: none; }
+
     @media (max-width: 1020px) {
       :root { --page: min(100% - 36px, 900px); }
       .hero-grid { grid-template-columns: 1fr; }
@@ -1398,6 +1412,248 @@
       .hero-section { height: auto; min-height: 0; }
       .cinematic-scroll { display: none; }
       .hero-static { display: grid; }
+    }
+
+
+    /* ---- The film, unpacked for a phone --------------------------------
+       Every one of these rules exists because of one line elsewhere in this
+       file: `.cinematic-scroll { display: none }` on portrait and coarse
+       pointers. That line switches off the fourteen-screen film, which is
+       right -- a phone cannot scrub a video and should not try. What was not
+       right is what went with it, because all six caption bands live INSIDE
+       the stage, and so a phone silently lost:
+
+         the opening statement, all nine communities and their card, the
+         learning platform and its link, the whole counter block (5,000
+         trainees, 120 courses, 30 partners, 9 communities), the million-user
+         initiative and its button, and the closing map of Syria.
+
+       That is most of what the page has to say. A phone visitor was getting a
+       photograph, the news reel, the partners, how-we-work, the questions and
+       the footer -- and no reason to care about any of it.
+
+       So the stage stays, and becomes a column. The film's apparatus goes: the
+       canvas, the dot grid, the washes and the poster are all scrubbing
+       machinery with nothing to scrub. What is left is the content, stacked in
+       reading order, each band arriving on scroll. Nothing is duplicated into
+       a second mobile-only block -- there is one copy of this content in the
+       page and one set of translations for it, and both keep working. */
+    @media (orientation: portrait) and (pointer: coarse) {
+      .cinematic-scroll {
+        display: block;
+        position: static;
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+        padding: 0;
+        background: none;
+      }
+
+      /* The machinery. */
+      .hero-media,
+      .anime-grid,
+      .hero-wash,
+      .hero-vignette,
+      .hero-grain,
+      .hero-poster,
+      .hero-canvas,
+      .cinematic-scroll .scroll-cue { display: none; }
+
+      .hero-grid,
+      .hero-copy-stage {
+        position: static;
+        display: block;
+        height: auto;
+        min-height: 0;
+        padding: 0;
+        transform: none;
+      }
+
+      /* Each caption becomes a section. In the film they are stacked on top of
+         each other in one frame and faded between; here they are simply one
+         after another, which is what a column is for. */
+      .hero-copy-stage .hero-band {
+        position: static;
+        width: auto;
+        max-width: none;
+        margin: 0 0 clamp(38px, 9vw, 58px);
+        padding: 0;
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+        filter: none;
+      }
+
+      .hero-copy-stage .hero-band:last-child { margin-bottom: 8px; }
+
+      /* The same lifted rule the section heads and the phone hero use, so the
+         six of them read as a series rather than six loose blocks. */
+      .hero-copy-stage .hero-card-copy {
+        padding-inline-start: 16px;
+        border-inline-start: 2px solid rgba(119, 224, 232, .38);
+      }
+
+      .hero-copy-stage .hero-band .eyebrow {
+        margin-bottom: 9px;
+        color: var(--saae-turquoise-lift);
+        font-size: .66rem;
+        letter-spacing: .16em;
+      }
+
+      .hero-copy-stage .hero-band h2 {
+        margin: 0 0 12px;
+        color: var(--paper);
+        font-size: clamp(1.85rem, 8.4vw, 2.6rem);
+        font-weight: 900;
+        letter-spacing: -.035em;
+        line-height: 1.12;
+      }
+
+      .hero-copy-stage .hero-band p:not(.eyebrow) {
+        margin: 0;
+        max-width: 46ch;
+        color: #d3e9ea;
+        font-size: 1rem;
+        line-height: 1.62;
+      }
+
+      .hero-copy-stage .hero-band .button-link {
+        margin-top: 18px;
+        min-height: 50px;
+      }
+
+      /* The counters. Two by two is the only honest layout for four figures on
+         a 390px screen: in one column they stop reading as a set, and in four
+         the numbers shrink until they are no longer the point. */
+      .hero-copy-stage .hero-stats {
+        margin: 18px 0 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .hero-copy-stage .hero-stats > div {
+        margin: 0;
+        padding: 15px 14px;
+        border: 1px solid rgba(119, 224, 232, .16);
+        border-radius: 14px;
+        background: linear-gradient(168deg, rgba(12, 48, 58, .9), rgba(7, 31, 38, .9));
+      }
+
+      .hero-copy-stage .hero-stats dt {
+        margin: 0 0 4px;
+        color: var(--teal-lift);
+        font-size: .68rem;
+        font-weight: 800;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+
+      .hero-copy-stage .hero-stats dd {
+        margin: 0;
+        color: var(--paper);
+        font-size: 1.7rem;
+        font-weight: 900;
+        letter-spacing: -.03em;
+        line-height: 1;
+      }
+
+      /* The community card centres itself on the desktop frame with a
+         translateY(-50%), which is meaningless in a column and puts the card
+         half its own height up the page. Released here, and given the room it
+         needs to sit in flow. */
+      .hero-copy-stage .community-flip {
+        position: static;
+        width: auto;
+        max-width: none;
+        margin: 16px 0 0;
+        transform: none;
+      }
+
+      /* The track and the pip row are both sized by
+           clamp(min(320px, 25vw), 22vw, 400px)
+         which is a sensible measure of a wide frame and a nonsense one here: at
+         393px it resolves to 98px, so the card rendered as a narrow slab jammed
+         against the edge with the pips and the arrows spilling out of it and over
+         the band below. On a phone the card is simply as wide as the column. */
+      .hero-copy-stage .community-flip-track {
+        width: 100%;
+        min-height: 224px;
+      }
+
+      .hero-copy-stage .community-card-face {
+        min-height: 224px;
+        grid-template-rows: 44px minmax(78px, 1fr) auto;
+        gap: 10px;
+        padding: 18px 18px 15px;
+      }
+
+      .hero-copy-stage .community-card-name { max-width: none; font-size: 1.5rem; }
+
+      .hero-copy-stage .community-pips {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 12px;
+      }
+
+      .hero-copy-stage .community-flip-heading { margin-bottom: 14px; }
+
+      .hero-copy-stage .community-card-face {
+        padding: 18px 16px;
+        border-radius: 16px;
+      }
+
+      /* ---- Arrival ------------------------------------------------------
+         The film earned its motion from the scroll position, frame by frame.
+         A column cannot do that and should not fake it: what it can do is let
+         each section arrive as the reader reaches it. One transition, the same
+         one the sections below the hero already use, so the phone page has a
+         single idea about how things appear rather than a second one invented
+         for the top of it. Off entirely under reduced motion, where the base
+         reveal rule already resolves everything to its resting state. */
+      .hero-copy-stage .hero-band.band-in {
+        opacity: 0;
+        transform: translate3d(0, 26px, 0);
+        transition: opacity 620ms var(--ease-out), transform 760ms var(--ease-out);
+        will-change: opacity, transform;
+      }
+
+      .hero-copy-stage .hero-band.band-in.is-here {
+        opacity: 1;
+        transform: none;
+        will-change: auto;
+      }
+
+      /* The pieces inside arrive just behind their own heading, which is the
+         difference between a section appearing and a section being assembled
+         in front of you. */
+      .hero-copy-stage .hero-band.band-in .hero-stats > div,
+      .hero-copy-stage .hero-band.band-in .button-link,
+      .hero-copy-stage .hero-band.band-in .community-flip {
+        opacity: 0;
+        transform: translate3d(0, 14px, 0);
+        transition: opacity 520ms var(--ease-out) calc(var(--i, 0) * 70ms + 140ms),
+                    transform 620ms var(--ease-out) calc(var(--i, 0) * 70ms + 140ms);
+      }
+
+      .hero-copy-stage .hero-band.band-in.is-here .hero-stats > div,
+      .hero-copy-stage .hero-band.band-in.is-here .button-link,
+      .hero-copy-stage .hero-band.band-in.is-here .community-flip {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    @media (orientation: portrait) and (pointer: coarse) and (prefers-reduced-motion: reduce) {
+      .hero-copy-stage .hero-band.band-in,
+      .hero-copy-stage .hero-band.band-in .hero-stats > div,
+      .hero-copy-stage .hero-band.band-in .button-link,
+      .hero-copy-stage .hero-band.band-in .community-flip {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1535,10 +1791,10 @@
       display: flex;
       flex-direction: column;
       padding: 20px;
-      border: 1px solid rgba(30, 30, 30, .18);
+      border: 1px solid rgba(119, 224, 232, .22);
       border-right: 0;
-      background: var(--limestone-light);
-      color: var(--ink);
+      background: linear-gradient(180deg, #0c303a, #071f26);
+      color: var(--paper);
       opacity: 0;
       transform: translateX(18px);
       transition: opacity 240ms ease, transform 460ms var(--ease-out);
@@ -1554,8 +1810,8 @@
       border-bottom: 1px solid rgba(30, 30, 30, .16);
     }
 
-    .ribbon-wordmark { color: var(--green); font-size: 2.15rem; font-weight: 900; letter-spacing: .18em; line-height: 1; }
-    .ribbon-org { max-width: 210px; color: #4a6165; font-size: .72rem; font-weight: 700; line-height: 1.45; }
+    .ribbon-wordmark { color: var(--green-lift); font-size: 2.15rem; font-weight: 900; letter-spacing: .18em; line-height: 1; }
+    .ribbon-org { max-width: 210px; color: rgba(216, 237, 237, .72); font-size: .72rem; font-weight: 700; line-height: 1.45; }
 
     .ribbon-nav { display: grid; padding: 16px 0 14px; }
     .ribbon-nav a {
@@ -1570,8 +1826,15 @@
       transition: color 180ms ease, padding-left 260ms var(--ease-out);
     }
 
-    .ribbon-nav a span { color: var(--teal); font-size: .7rem; letter-spacing: .1em; }
+    .ribbon-nav a span { color: var(--saae-turquoise-lift); font-size: .7rem; letter-spacing: .1em; }
     .ribbon-nav a:hover, .ribbon-nav a:focus-visible { padding-left: 8px; color: var(--green); }
+
+    /* The chapter the reader is standing in. Weight as well as colour, because
+       colour alone is one channel and this list is read at a glance. Both are
+       direction-neutral, which the hover rule above is not -- it moves the link
+       sideways and needs mirroring in the RTL block for that reason. */
+    .ribbon-nav a.is-current { color: var(--teal-lift); font-weight: 800; }
+    .ribbon-nav a.is-current span { color: var(--teal-lift); }
 
     /* Pages, kept apart from the numbered list above it. That list is the
        landing page's own chapters and its numbering means position within this
@@ -1742,7 +2005,7 @@
       }
 
       .journey-ribbon.is-open { transform: translate3d(0, 0, 0); }
-      .ribbon-panel { order: 1; width: 100%; max-height: min(70vh, 520px); overflow: auto; border: 1px solid rgba(30, 30, 30, .18); border-bottom: 0; transform: translateY(16px); }
+      .ribbon-panel { order: 1; width: 100%; max-height: min(70vh, 520px); overflow: auto; border: 1px solid rgba(119, 224, 232, .22); border-bottom: 0; transform: translateY(16px); }
       .journey-ribbon.is-open .ribbon-panel { transform: translateY(0); }
       .ribbon-toggle { order: 2; width: 100%; min-width: 0; min-height: 58px; grid-template-columns: auto 1fr auto; grid-template-rows: 1fr; justify-items: start; padding: 8px 17px; }
       .ribbon-toggle::before { inset: 6px; }
@@ -2072,8 +2335,11 @@
         inset: auto;
         min-height: 260px;
         padding: 32px 26px;
-        border: 0;
-        background: var(--limestone-light);
+        border: 1px solid rgba(119, 224, 232, .16);
+        /* Was --limestone-light. On a phone these three stack as cards, and a
+           cream panel in the middle of a dark petrol page read as a hole cut
+           in it. Dark panel, lifted rule, same layout. */
+        background: linear-gradient(168deg, rgba(12, 48, 58, .92), rgba(7, 31, 38, .92));
         opacity: 1;
         visibility: visible;
         transform: none;
@@ -2213,7 +2479,17 @@
 
     /* The dot is 9px because that is the right size to look at. The target it
        answers to is 37px tall, which is the right size to hit. */
-    .flow-dot::after { content: ""; position: absolute; inset: -14px -8px; }
+    /* The dot is 9px because that is the right size for a dot. This is the
+       target it is tapped by, and the two are not the same measurement.
+       Hit-tested on a 393px phone: -14px gave 38px of vertical reach, and -18
+       gives 45, which clears the 44px guideline. The horizontal figure cannot
+       be bought the same way -- the dots sit ~18px apart, so widening this
+       only makes neighbours fight over the same pixels, and the measured
+       width stays 18px whatever is written here. A genuinely 44px-wide target
+       needs the row spaced further apart, which is a visible change to the
+       design rather than an invisible one to the hit area, so it is left
+       alone deliberately. */
+    .flow-dot::after { content: ""; position: absolute; inset: -18px -8px; }
     .flow-dot:hover { background: rgba(184, 232, 240, .5); }
     .flow-dot[aria-current="true"] { width: 32px; background: var(--saae-turquoise); }
     .flow-dot:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: 5px; }
@@ -3183,7 +3459,47 @@
     @media (max-width: 620px) {
       .footer-main { grid-template-columns: minmax(0, 1fr); }
       .footer-cta-inner { align-items: flex-start; }
+
+      /* ---- The phone landing ------------------------------------------
+         The static hero had no width breakpoint at all -- only two for short
+         screens -- so on an ordinary tall phone the headline was still taking
+         its 15vw step: 59px on a 393px screen, which spent two thirds of the
+         first view on four words and pushed the copy, both actions and the
+         scroll cue under the fold. The film gets to open like that because it
+         has twenty-one screens to recover in. The phone has one.
+
+         So the phone gets its own composition rather than a squeezed copy of
+         the desktop one: headline down to a size that leaves room for the
+         sentence under it, the eyebrow hung off the same lifted rule the
+         section heads use elsewhere on the site, and the two actions stacked
+         full width at a thumb-sized height instead of wrapping awkwardly out
+         of a row that was never going to fit. */
+      .hero-static { padding-block: calc(var(--header-height) + 22px) 30px; }
+
+      .static-copy {
+        padding-inline-start: 16px;
+        border-inline-start: 2px solid rgba(119, 224, 232, .42);
+      }
+
+      .static-copy .eyebrow { margin-bottom: 10px; font-size: .68rem; letter-spacing: .16em; }
+
+      .static-copy h2 {
+        margin-bottom: 14px;
+        font-size: clamp(2.2rem, 10.4vw, 3.3rem);
+        letter-spacing: -.04em;
+        line-height: 1.04;
+      }
+
+      .static-copy > p:not(.eyebrow):not(.static-note) { font-size: 1rem; line-height: 1.6; }
+
+      /* One column, because two never fitted: the 210px basis wrapped every
+         phone into a stack anyway, just an unintended one with a stray gap. */
+      .static-actions { margin-top: 22px; gap: 12px; }
+      .static-actions .button-link { flex: 1 1 100%; min-height: 52px; font-size: .98rem; }
+
+      .static-note { margin-top: 20px; font-size: .78rem; }
     }
+
 
 
     @media (prefers-reduced-motion: reduce) {
@@ -3591,8 +3907,8 @@
   .site-footer .footer-col a:focus-visible { color: #fff; text-decoration: underline; text-underline-offset: 4px; transform: none; }
   .site-footer .footer-col a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 4px; }
   .site-footer .footer-map {
-    background: #fff;
-    color: #0b2b33;
+    background: linear-gradient(180deg, #0c303a, #061d24);
+    color: rgba(216, 237, 237, .92);
     border-radius: 18px;
     padding: 14px 14px 18px;
     box-shadow: 0 24px 60px rgba(3, 20, 25, .25);
@@ -3612,9 +3928,9 @@
     stroke-linecap: round;
     stroke-linejoin: round;
   }
-  .site-footer .map-lines a { color: #0b2b33; text-decoration: none; font-weight: 600; min-height: 0; }
+  .site-footer .map-lines a { color: rgba(216, 237, 237, .92); text-decoration: none; font-weight: 600; min-height: 0; }
   .site-footer .map-lines a:hover,
-  .site-footer .map-lines a:focus-visible { color: #048090; text-decoration: underline; }
+  .site-footer .map-lines a:focus-visible { color: var(--saae-turquoise-lift); text-decoration: underline; }
   .site-footer .map-visit {
     display: inline-flex;
     align-items: center;
@@ -3633,7 +3949,7 @@
   /* Same rule, same reason: an address, an email and a phone number, each on
      its own line and each its own target. */
   .site-footer .map-lines a { display: inline-flex; align-items: center; min-height: 24px; }
-  .site-footer .map-attr { margin: 10px 4px 0; font-size: .68rem; color: rgba(11, 43, 51, .6); }
+  .site-footer .map-attr { margin: 10px 4px 0; font-size: .68rem; color: rgba(216, 237, 237, .58); }
   .site-footer .map-attr a { color: inherit; }
   .site-footer .footer-bottom {
     display: block;
@@ -3654,3 +3970,31 @@
     .hero-band[data-band="5"] { inset-block-start: 16%; inset-block-end: auto; }
     .hero-band[data-band="5"] h2 { font-size: clamp(2rem, 3.3vw, 3.8rem); }
     .community-flip-heading h2 { font-size: clamp(1.8rem, 2.8vw, 3.1rem); }
+
+    /* ---- Perf hygiene: marquee tracks ------------------------------------
+       Hint the compositor and keep vertical touch scrolling native. */
+    .flow-track,
+    .partner-stream-rails {
+      will-change: transform;
+      touch-action: pan-y;
+    }
+
+    /* Marquee pause on hover / focus / active. */
+    .flow:hover .flow-track,
+    .flow:focus-within .flow-track,
+    .flow-track:hover,
+    .flow-track:focus-within,
+    .partner-stream:hover .partner-mark,
+    .partner-stream:focus-within .partner-mark,
+    .partner-stream:active .partner-mark {
+      animation-play-state: paused !important;
+    }
+
+    /* Reduced motion kills all animation. */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }

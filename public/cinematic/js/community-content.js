@@ -2,7 +2,7 @@
  * tree and the fruit content.
  *
  * These carry no words. The card beside them names the community and says what
- * it does; asking a dot lattice to render "Entrepreneurial Quality" as well
+ * it does; asking a dot lattice to render "Quality Entrepreneurship" as well
  * would only produce the smeared type the fruit masks had to be rebuilt to
  * escape. One large, unambiguous mark is what this medium is good at.
  *
@@ -50,7 +50,7 @@ export function communityMask(index) {
       break;
     }
 
-    /* 02 Smart Urban Development -- a skyline that is clearly built, not drawn. */
+    /* 02 Smart Urban -- a skyline that is clearly built, not drawn. */
     case "city": {
       const base = cy + 150;
       const towers = [[-230, 150], [-110, 250], [10, 190], [130, 300], [250, 170]];
@@ -182,7 +182,7 @@ export function communityMask(index) {
       break;
     }
 
-    /* 09 Entrepreneurial Quality -- a standard met, and marked. */
+    /* 09 Quality Entrepreneurship -- a standard met, and marked. */
     case "quality": {
       const r = 150;
       c.beginPath();

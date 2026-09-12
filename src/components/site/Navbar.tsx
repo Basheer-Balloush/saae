@@ -69,10 +69,10 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
           : "bg-transparent",
       )}
     >
-      <div className="flex w-full items-center justify-between gap-6 px-6 py-3 lg:px-10">
+      <div className="flex w-full items-center justify-between gap-3 px-4 py-3 sm:gap-6 sm:px-6 lg:px-10">
         <a
           href="/#home"
-          className="relative flex items-center"
+          className="relative flex min-w-0 shrink-0 items-center"
           aria-label="SAAIE — Syrian Association for AI & Entrepreneurship"
         >
           {(() => {
@@ -115,7 +115,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                 width={180}
                 height={44}
                 className={cn(
-                  "h-10 w-auto sm:h-11 transition-opacity duration-150",
+                  "h-8 w-auto transition-opacity duration-150 sm:h-10 lg:h-11",
                   v.show ? "opacity-100" : "opacity-0 absolute inset-0 pointer-events-none",
                 )}
                 fetchPriority="high"
@@ -126,7 +126,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
         </a>
 
         {!minimal && (
-          <nav className="hidden items-center gap-7 lg:flex">
+          <nav className="hidden min-w-0 flex-1 items-center gap-7 lg:flex">
             {sections.map((s) => {
               const isContactRoute = location.pathname.startsWith("/contact");
               const isActive =
@@ -138,7 +138,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                       ? isAbout
                       : isHome && !isAbout && !isNewsRoute && !isContactRoute && active === s;
               const linkClass = cn(
-                "relative text-sm font-medium transition-colors",
+                "relative inline-flex min-h-[44px] items-center px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive ? "text-secondary" : "text-foreground/75 hover:text-primary",
               );
               const underline = (
@@ -186,7 +186,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                 <Link
                   to="/one-million-initiative-home"
                   className={cn(
-                    "relative text-sm font-semibold transition-colors",
+                    "relative inline-flex min-h-[44px] items-center px-3 py-2.5 text-sm font-semibold transition-colors",
                     isInitiative
                       ? "text-secondary"
                       : "text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300",
@@ -205,10 +205,10 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
           </nav>
         )}
 
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 shrink-0 items-center gap-2">
           <button
             onClick={toggleLang}
-            className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary md:inline-flex"
+            className="hidden min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-full border border-border px-3 py-2.5 text-sm font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary md:inline-flex"
             aria-label="Toggle language"
           >
             <Globe className="h-3.5 w-3.5" />
@@ -216,17 +216,17 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
           </button>
           <button
             onClick={toggleTheme}
-            className="hidden h-9 w-9 items-center justify-center rounded-full border border-border text-foreground/70 transition-colors hover:border-primary hover:text-primary md:inline-flex"
+            className="hidden h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-border text-foreground/70 transition-colors hover:border-primary hover:text-primary md:inline-flex"
             aria-label="Toggle theme"
           >
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </button>
           <button
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border lg:hidden"
+            className="inline-flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-border lg:hidden"
             aria-label="Menu"
           >
-            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
@@ -242,7 +242,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                       key={s}
                       href="/about"
                       onClick={() => setOpen(false)}
-                      className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                      className="flex min-h-[44px] items-center rounded-md px-4 py-3 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                     >
                       {t.nav[s]}
                     </a>
@@ -254,7 +254,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                       key={s}
                       href="/news"
                       onClick={() => setOpen(false)}
-                      className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                      className="flex min-h-[44px] items-center rounded-md px-4 py-3 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                     >
                       {t.nav[s]}
                     </a>
@@ -266,7 +266,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                       key={s}
                       href="/contact"
                       onClick={() => setOpen(false)}
-                      className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                      className="flex min-h-[44px] items-center rounded-md px-4 py-3 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                     >
                       {t.nav[s]}
                     </a>
@@ -277,7 +277,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                     key={s}
                     href={`/#${s}`}
                     onClick={() => setOpen(false)}
-                    className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                    className="flex min-h-[44px] items-center rounded-md px-4 py-3 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                   >
                     {t.nav[s]}
                   </a>
@@ -286,22 +286,23 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
             <Link
               to="/one-million-initiative-home"
               onClick={() => setOpen(false)}
-              className="rounded-md px-3 py-2 text-sm font-semibold text-amber-600 dark:text-amber-400 hover:bg-muted"
+              className="flex min-h-[44px] items-center rounded-md px-4 py-3 text-sm font-semibold text-amber-600 dark:text-amber-400 hover:bg-muted"
             >
               {lang === "ar" ? "المبادرة" : "Initiative"}
             </Link>
             <div className="mt-3 flex items-center gap-2">
               <button
                 onClick={toggleLang}
-                className="flex-1 rounded-full border border-border px-3 py-2 text-xs font-semibold"
+                className="flex-1 rounded-full border border-border px-3 py-3 min-h-[44px] text-sm font-semibold"
               >
                 {t.nav.langToggle}
               </button>
               <button
                 onClick={toggleTheme}
-                className="rounded-full border border-border px-3 py-2 text-xs font-semibold"
+                aria-label="Toggle theme"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-border px-3 py-3 text-sm font-semibold"
               >
-                {theme === "light" ? "Dark" : "Light"}
+                {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
               </button>
             </div>
           </div>

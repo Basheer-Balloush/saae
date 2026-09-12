@@ -265,26 +265,26 @@
 
       const communityFlipItems = [
         { number: "01", name: "Data", copy: "Turn information into insight.", icon: "data" },
-        { number: "02", name: "Smart Urban Development", copy: "Design smarter, more responsive cities.", icon: "city" },
+        { number: "02", name: "Smart Urban", copy: "Design smarter, more responsive cities.", icon: "city" },
         { number: "03", name: "Healthcare", copy: "Apply AI where care matters.", icon: "healthcare" },
         { number: "04", name: "Smart Research", copy: "Move ideas from questions to evidence.", icon: "research" },
         { number: "05", name: "Software", copy: "Build useful digital systems.", icon: "software" },
         { number: "06", name: "Smart Economy", copy: "Turn innovation into opportunity.", icon: "economy" },
         { number: "07", name: "Trainers", copy: "Equip the people who teach others.", icon: "trainers" },
         { number: "08", name: "Media", copy: "Make knowledge clear and accessible.", icon: "media" },
-        { number: "09", name: "Entrepreneurial Quality", copy: "Raise the standard for new ventures.", icon: "quality" }
+        { number: "09", name: "Quality Entrepreneurship", copy: "Raise the standard for new ventures.", icon: "quality" }
       ];
 
       const arabicCommunityFlipItems = [
         { number: "01", name: "البيانات", copy: "حوّل المعلومات إلى رؤى.", icon: "data" },
-        { number: "02", name: "التنمية الحضرية الذكية", copy: "صمّم مدناً أذكى وأكثر استجابة.", icon: "city" },
+        { number: "02", name: "العمراني الذكي", copy: "صمّم مدناً أذكى وأكثر استجابة.", icon: "city" },
         { number: "03", name: "الرعاية الصحية", copy: "طبّق الذكاء الاصطناعي حيث تكون الرعاية مهمة.", icon: "healthcare" },
         { number: "04", name: "البحث الذكي", copy: "انقل الأفكار من الأسئلة إلى الأدلة.", icon: "research" },
         { number: "05", name: "البرمجيات", copy: "ابنِ أنظمة رقمية مفيدة.", icon: "software" },
         { number: "06", name: "الاقتصاد الذكي", copy: "حوّل الابتكار إلى فرص.", icon: "economy" },
         { number: "07", name: "المدربون", copy: "تجهيز من يعلّمون غيرهم.", icon: "trainers" },
         { number: "08", name: "الإعلام", copy: "جعل المعرفة واضحة ومتاحة.", icon: "media" },
-        { number: "09", name: "جودة ريادة الأعمال", copy: "رفع معيار المشاريع الناشئة.", icon: "quality" }
+        { number: "09", name: "الجودة الريادية", copy: "رفع معيار المشاريع الناشئة.", icon: "quality" }
       ];
 
       function paintCommunityFace(side, item) {
@@ -353,14 +353,14 @@
         } else {
           communityFlipItems.splice(0, communityFlipItems.length,
             { number: "01", name: "Data", copy: "Turn information into insight.", icon: "data" },
-            { number: "02", name: "Smart Urban Development", copy: "Design smarter, more responsive cities.", icon: "city" },
+            { number: "02", name: "Smart Urban", copy: "Design smarter, more responsive cities.", icon: "city" },
             { number: "03", name: "Healthcare", copy: "Apply AI where care matters.", icon: "healthcare" },
             { number: "04", name: "Smart Research", copy: "Move ideas from questions to evidence.", icon: "research" },
             { number: "05", name: "Software", copy: "Build useful digital systems.", icon: "software" },
             { number: "06", name: "Smart Economy", copy: "Turn innovation into opportunity.", icon: "economy" },
             { number: "07", name: "Trainers", copy: "Equip the people who teach others.", icon: "trainers" },
             { number: "08", name: "Media", copy: "Make knowledge clear and accessible.", icon: "media" },
-            { number: "09", name: "Entrepreneurial Quality", copy: "Raise the standard for new ventures.", icon: "quality" }
+            { number: "09", name: "Quality Entrepreneurship", copy: "Raise the standard for new ventures.", icon: "quality" }
           );
         }
         const captions = missionWordCaptions[arabicMode ? "ar" : "en"];
@@ -578,6 +578,17 @@
       function buildFilm() {
         const A = window.anime;
         if (!A || !A.createTimeline || !bands.length) return;
+        /* On a phone there is no film to caption. The six bands are the page
+           there -- stacked sections a reader scrolls through -- and a timeline
+           that writes opacity and y to them inline would hold five of the six
+           at zero for ever, because nothing is ever going to move the playhead.
+           Reverted rather than merely skipped, so a desktop visitor who rotates
+           into portrait does not keep the inline styles the film left behind. */
+        if (isStaticExperience()) {
+          if (film && film.revert) film.revert();
+          film = null;
+          return;
+        }
 
         /* Rebuilt on a language change, because the translation pass replaces
            the text nodes the word spans live in. Killing the old timeline first
@@ -665,15 +676,21 @@
       }
 
       function seekFilm(progress) {
-        if (!film) return;
+        if (!film || isStaticExperience()) return;
         film.seek(clamp(progress, 0, 1) * FILM_UNITS);
       }
 
       function setActiveBand(index) {
         if (index === activeBand && bands[index].classList.contains("is-active")) return;
         activeBand = index;
+        /* One band at a time is a rule about the film, not about the content.
+           On a phone all six are on the page at once, so inerting five of them
+           would leave the communities card, both learning links and the
+           initiative button unreachable -- present on screen and dead to touch
+           and to a screen reader alike. */
+        const single = !isStaticExperience();
         bands.forEach((band, bandIndex) => {
-          const active = bandIndex === index;
+          const active = !single || bandIndex === index;
           band.classList.toggle("is-active", active);
           band.setAttribute("aria-hidden", String(!active));
           band.inert = !active;
@@ -1056,12 +1073,14 @@
       function syncHeroMode() {
         if (isStaticExperience()) {
           stopDesktopHero();
+          buildFilm();
           if (!staticFrame.getAttribute("src")) staticFrame.src = heroStaticUrl;
         } else {
           startDesktopHero();
           readHeroProgress();
         }
         syncMotionMode();
+        syncBandArrival();
       }
 
       function schedulePagePaint() {
@@ -1286,6 +1305,99 @@
           if (!item.classList.contains("is-visible")) revealObserver.observe(item);
         });
         schedulePagePaint();
+      }
+
+      /* ---- Arrival from a checkpoint --------------------------------------
+         checkpoints.js moves the document and nothing else, which it can do
+         because everything below the hero is a pure function of scroll and
+         repaints itself from the scroll event. Two things on this page are not
+         pure, and they are the two this handles.
+
+         The spring is one. easedProgress chases targetProgress at a rate set by
+         the gap between them, so a cut of twenty screens would be followed by
+         the film scrubbing the whole way at speed: twenty screens of footage
+         nobody asked to see, and queueSeek trying to land every keyframe in
+         between while it happens. Parked on arrival, exactly as
+         startDesktopHero parks it when the hero starts.
+
+         The reveals are the other. They are one-shot and unobserved once fired,
+         so a block that was cut past is not broken -- it simply never fired,
+         and it still will if the reader scrolls back to it. What is wrong is
+         landing beside eight of them and watching eight entrances begin at
+         once. Everything above the landing point is marked seen with its
+         transition suppressed for a frame, so the page behind the reader looks
+         read rather than mid-fade. Two frames, because one is not enough: the
+         class has to survive the frame the style change is computed in. */
+      window.addEventListener("saae:jump", () => {
+        readHeroProgress();
+        easedProgress = targetProgress;
+        progressVelocity = 0;
+        if (revealObserver) {
+          const landed = window.scrollY + window.innerHeight;
+          revealItems.forEach(item => {
+            if (item.classList.contains("is-visible")) return;
+            if (item.getBoundingClientRect().top + window.scrollY > landed) return;
+            revealObserver.unobserve(item);
+            item.classList.add("is-settled", "is-visible");
+          });
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            revealItems.forEach(item => item.classList.remove("is-settled"));
+          }));
+        }
+        schedulePagePaint();
+      });
+
+      /* ---- The bands arriving, on a phone ---------------------------------
+         The film gave each caption its entrance from the scroll position. With
+         the film off, the same six bands are a column of sections, and this is
+         what makes them arrive instead of simply being there when you get to
+         them. Deliberately the same shape as the reveal observer above: fire
+         once, unobserve, never run again -- a section that has been read does
+         not need to animate a second time if the reader scrolls back up.
+
+         Only ever armed in the static experience, and torn down if the visitor
+         rotates back to a landscape where the film itself takes over again. */
+      let bandObserver = null;
+
+      function syncBandArrival() {
+        if (bandObserver) { bandObserver.disconnect(); bandObserver = null; }
+        if (!isStaticExperience()) {
+          bands.forEach(band => band.classList.remove("band-in", "is-here"));
+          return;
+        }
+        /* The markup ships bands 1-5 as aria-hidden="true", which is correct for
+           the film -- five of the six captions are not on screen. Nothing was
+           clearing it here, and setActiveBand cannot: it early-returns on the
+           first call because band 0 already carries is-active from the HTML. So
+           the bands rendered, and a screen reader was still told to skip five of
+           them. Cleared explicitly, along with inert, since on a phone all six
+           are genuinely present.
+
+           The stagger index is written here too, rather than hard-coded per band
+           in the stylesheet: the pieces inside a band differ from band to band,
+           and CSS cannot count them. */
+        bands.forEach(band => {
+          band.removeAttribute("aria-hidden");
+          band.inert = false;
+          band.classList.add("is-active", "band-in");
+          band.querySelectorAll(".hero-stats > div, .button-link, .community-flip")
+            .forEach((piece, index) => piece.style.setProperty("--i", index));
+        });
+        if (reducedMotion.matches || !("IntersectionObserver" in window)) {
+          bands.forEach(band => band.classList.add("is-here"));
+          return;
+        }
+        bandObserver = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-here");
+            bandObserver.unobserve(entry.target);
+          });
+        }, { threshold: .18, rootMargin: "0px 0px -8%" });
+        bands.forEach(band => {
+          if (band.classList.contains("is-here")) return;
+          bandObserver.observe(band);
+        });
       }
 
       const networkField = document.getElementById("hold");

@@ -118,6 +118,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "icon", type: "image/png", href: "/favicon.png" },
       { rel: "apple-touch-icon", href: "/favicon.png" },
+      { rel: "preload", as: "image", href: "/cinematic/images/saae-tree-loader.png" },
+      { rel: "preload", as: "image", href: "/cinematic/images/saae-logo-en.png" },
       // Preconnect to the data + asset origins used on almost every page
       // so the browser opens the TCP/TLS connection in parallel with the
       // initial HTML parse. Cuts first-image / first-query latency by

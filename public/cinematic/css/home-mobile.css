@@ -1,0 +1,819 @@
+/* home-mobile.css — the phone-portrait redesign of the home page.
+ * SAAE / Syrian Association for AI & Entrepreneurship. Bilingual (EN LTR / AR RTL).
+ *
+ * WHY THIS FILE EXISTS: on a phone the cinematic scroll film is switched off
+ * (pointer: coarse + portrait) and the six hero bands become a vertical column.
+ * The column worked but read as one flat ribbon of text on one flat ground.
+ * This sheet gives that column — and the landing above it — real sectioning,
+ * a real type scale, CSS-only backgrounds, and motion that rests correctly.
+ *
+ * SCOPE RULES (from the brief, kept as invariants):
+ * - Every rule in this file lives inside the phone gate below. That gate is
+ *   the same one that switches the film off, so desktop cannot be affected.
+ *   Width refinements and the reduced-motion escape repeat the full gate.
+ * - Only existing design tokens are used. No orange/amber hue, no white or
+ *   near-white surfaces anywhere: --paper is a type colour, never a ground.
+ * - Only the Cairo family (inherited). No external resources: backgrounds are
+ *   gradients + one inline-SVG grain data URI (the same recipe home.css uses).
+ * - Logical properties throughout (padding-inline-start, inset-inline-end …).
+ *   Physical left/right never appear. Asymmetric decoration gets an RTL mirror
+ *   next to the main reduced-motion block at the end of each gate section.
+ * - No !important anywhere: this sheet loads last, so matching the existing
+ *   selector specificity is enough to win. No display:none on anything that
+ *   carries content or a link — only film machinery already hidden by home.css
+ *   stays hidden.
+ * - Nothing here sets opacity: 0 as a resting state. Entrances are one-shot
+ *   animations that END visible; the scroll arrivals reuse the existing
+ *   .band-in/.is-here and .reveal/.is-visible hooks owned by home-inline.js.
+ */
+@media (max-width: 768px), (orientation: portrait) and (pointer: coarse) {
+
+  /* ---- 1. Phone tokens & page rhythm ------------------------------------
+   * Scoped to :root inside the gate so desktop custom-property values are
+   * untouched. One side gutter for the whole phone page, one card radius,
+   * and deliberately UNEVEN vertical spacing: the landing breathes, chapters
+   * sit close together (they are one story), sections stand apart. */
+  :root {
+    --header-height: 72px;
+    --m-gutter: clamp(16px, 4.6vw, 24px);
+    --m-card-radius: 20px;
+    --m-chapter-gap: clamp(18px, 5vw, 28px);
+    --m-separator: rgba(184, 232, 240, .14);
+  }
+
+  /* The journey ground is painted per-frame by home-inline.js (an inline
+   * background-color), so sections differentiate with hairlines and local
+   * glows rather than fighting that inline colour. The hairline is a border —
+   * full-bleed by construction, zero overflow risk — and it tells the reader
+   * they have moved from one part of the page to another. */
+  .journey-content > .section {
+    padding-block: clamp(60px, 15vw, 92px);
+    border-block-start: 1px solid var(--m-separator);
+  }
+
+  /* ---- 2. The landing ----------------------------------------------------
+   * First viewport, first impression, twice-complained-about. Composition:
+   * photograph low (object-position keeps the canopy high), a deep scrim so
+   * copy always sits on darkness, eyebrow as a pill, one display line, one
+   * sentence, two full-width thumb-sized actions, one quiet sign-off line.
+   * Everything stacks in reading order — no row that wraps by accident. */
+  .hero-static {
+    min-height: 100svh;
+    align-items: end;
+    padding-block: calc(var(--header-height) + 26px) 92px;
+    border-block-end: 1px solid rgba(119, 224, 232, .18);
+  }
+
+  /* The base ::after scrim stays (it guarantees contrast over the photo);
+   * this deepens its foot so the actions and the sign-off never sit on open
+   * photograph, whatever the picture's lightest point is. Paint only. */
+  .hero-static::after {
+    background:
+      linear-gradient(180deg, rgba(3, 22, 24, .12) 4%, rgba(3, 22, 24, .5) 38%, rgba(3, 22, 24, .9) 64%, rgba(2, 15, 19, .98) 100%),
+      linear-gradient(90deg, rgba(3, 22, 24, .66), transparent 80%),
+      radial-gradient(90% 42% at 50% 108%, rgba(0, 139, 157, .34), transparent 70%);
+  }
+
+  /* Grain over the scrim, under the copy (copy is z-index 2). The same
+   * feTurbulence recipe home.css uses for .ambient::after: it breaks up
+   * gradient banding on 8-bit phone displays. Opacity kept tiny so type
+   * stays crisp. position:absolute + inset:0 inside the (relative, clipped)
+   * hero — it cannot reach past the viewport. */
+  .hero-static::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: .055;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+  }
+
+  .static-copy {
+    border-inline-start: 2px solid rgba(119, 224, 232, .5);
+    padding-inline-start: var(--m-gutter);
+  }
+
+  /* Pill, not bare caps: over a photograph a bare eyebrow has nothing to
+   * hold its letterspacing against. 0.75rem is the floor — no text on this
+   * page may sit below 12px. Inline-flex so the pill shrink-wraps. */
+  .static-copy .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    margin-bottom: 14px;
+    padding: 6px 14px;
+    border: 1px solid rgba(119, 224, 232, .42);
+    border-radius: 999px;
+    background: rgba(4, 40, 48, .6);
+    color: var(--saae-turquoise-lift);
+    font-size: .75rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+
+  /* Display, not squeezed desktop: large enough to own the first screen,
+   * small enough to leave room for the sentence and both actions. Balance
+   * keeps a four-word headline from stranding one word. */
+  .static-copy h2 {
+    max-width: 20ch;
+    margin-bottom: 16px;
+    font-size: clamp(1.75rem, 8vw, 2.5rem);
+    font-weight: 900;
+    letter-spacing: -.03em;
+    line-height: 1.06;
+    text-wrap: balance;
+  }
+
+  .static-copy > p:not(.eyebrow):not(.static-note) {
+    max-width: 38ch;
+    color: #dceeee;
+    font-size: 1.05rem;
+    line-height: 1.66;
+  }
+
+  /* One column, full width, thumb height: the 210px flex basis wrapped every
+   * phone into an accidental stack with a stray gap. This stack is the design. */
+  .static-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .static-actions .button-link {
+    flex: none;
+    width: 100%;
+    min-height: 54px;
+    font-size: 1rem;
+  }
+
+  /* A colophon line, not a caption: hairline above, quiet lifted type. */
+  .static-note {
+    margin-top: 22px;
+    padding-block-start: 14px;
+    border-block-start: 1px solid rgba(184, 232, 240, .18);
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+
+  /* The cue label shipped at 0.6rem (9.6px) — below the 12px floor. The stem
+   * keeps its existing grow animation; only the type is repaired here. */
+  .hero-static .scroll-cue-label {
+    font-size: .75rem;
+    letter-spacing: .28em;
+  }
+
+  /* One-shot entrance, load-time only: copy rises 14px and fades in, staggered
+   * down the column. `both` fill starts each piece hidden but the RESTING
+   * state is the visible end-frame, so no-JS, no-animation and reduced-motion
+   * all resolve to readable copy. Transform + opacity only (compositor). */
+  .hero-static .static-copy > * {
+    animation: m-landing-rise 720ms var(--ease-out) both;
+  }
+
+  .hero-static .static-copy > *:nth-child(2) { animation-delay: 90ms; }
+  .hero-static .static-copy > *:nth-child(3) { animation-delay: 170ms; }
+  .hero-static .static-copy > *:nth-child(4) { animation-delay: 260ms; }
+  .hero-static .static-copy > *:nth-child(5) { animation-delay: 340ms; }
+
+  @keyframes m-landing-rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- 3. The six chapters ------------------------------------------------
+   * The core fix: alternating grounds. The hero section carries a deep petrol
+   * grade with a turquoise glow up top and an olive glow mid-page, over a
+   * faint dot field that fades out at the edges (mask, so no hard cut).
+   * Chapters 1–4 sit as inset cards against it; the opening statement and the
+   * closing chapter sit directly on the ground, larger and quieter — full
+   * bleed against inset cards, which is what breaks the "one ribbon" read. */
+  .hero-section {
+    background:
+      radial-gradient(120% 34% at 50% -6%, rgba(0, 139, 157, .28), transparent 62%),
+      radial-gradient(110% 30% at 88% 52%, rgba(105, 143, 63, .16), transparent 64%),
+      radial-gradient(120% 30% at 8% 82%, rgba(0, 139, 157, .14), transparent 62%),
+      linear-gradient(180deg, #082a32 0%, #06232a 34%, #051d24 68%, #04171c 100%);
+  }
+
+  .cinematic-scroll {
+    padding-block: clamp(30px, 8vw, 46px) clamp(56px, 14vw, 84px);
+    padding-inline: var(--m-gutter);
+    background-image: radial-gradient(rgba(184, 232, 240, .09) 1px, transparent 1.5px);
+    background-size: 22px 22px;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 48px, #000 calc(100% - 64px), transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 48px, #000 calc(100% - 64px), transparent 100%);
+  }
+
+  /* Chapter cards: deep panel gradient (never near-white), hairline border,
+   * a turquoise keyline across the top edge, generous radius. Positioned for
+   * the watermark numeral and the accent tick; overflow stays visible so the
+   * community flip-card's preserve-3d is never flattened by an ancestor. */
+  .hero-copy-stage .hero-band {
+    position: relative;
+    margin-block-end: var(--m-chapter-gap);
+    padding: clamp(22px, 6vw, 30px) clamp(18px, 5vw, 26px);
+    border: 1px solid rgba(184, 232, 240, .16);
+    border-radius: var(--m-card-radius);
+    background:
+      radial-gradient(120% 90% at 100% 0%, rgba(0, 139, 157, .16), transparent 55%),
+      linear-gradient(168deg, rgba(13, 52, 62, .96), rgba(6, 28, 34, .96));
+    box-shadow: 0 22px 50px rgba(1, 12, 16, .45), inset 0 1px 0 rgba(184, 232, 240, .1);
+  }
+
+  .hero-copy-stage .hero-band:last-child { margin-block-end: 0; }
+
+  /* Chapter watermark numerals 01–06. Numerals are language-neutral (the
+   * Arabic interface already numbers sections 01/02/03), so content: here
+   * carries no translatable string. Ghosted, top corner, never behind type. */
+  .hero-copy-stage .hero-band::before {
+    position: absolute;
+    inset-block-start: 10px;
+    inset-inline-end: 16px;
+    color: rgba(184, 232, 240, .13);
+    font-size: clamp(2.4rem, 13vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: -.02em;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .hero-copy-stage .hero-band[data-band="0"]::before { content: "01"; }
+  .hero-copy-stage .hero-band[data-band="1"]::before { content: "02"; }
+  .hero-copy-stage .hero-band[data-band="2"]::before { content: "03"; }
+  .hero-copy-stage .hero-band[data-band="3"]::before { content: "04"; }
+  .hero-copy-stage .hero-band[data-band="4"]::before { content: "05"; }
+  .hero-copy-stage .hero-band[data-band="5"]::before { content: "06"; }
+
+  /* Accent tick: a short turquoise keyline that gives each card the same top
+   * edge. Directional, so the RTL mirror sits with the other mirrors below. */
+  .hero-copy-stage .hero-band::after {
+    content: "";
+    position: absolute;
+    inset-block-start: -1px;
+    inset-inline-start: 24px;
+    width: clamp(40px, 15vw, 64px);
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: linear-gradient(90deg, var(--saae-turquoise-lift), rgba(119, 224, 232, 0));
+    pointer-events: none;
+  }
+
+  /* The opening statement is not a card: no border, transparent ground, the
+   * biggest chapter type. It reads as the headline of the whole column. */
+  .hero-copy-stage .hero-band[data-band="0"] {
+    border: 0;
+    background: none;
+    box-shadow: none;
+    padding-inline: 2px;
+  }
+
+  .hero-copy-stage .hero-band[data-band="0"]::after { inset-inline-start: 2px; }
+
+  /* The closing chapter: centred, calm, the olive end of the palette so the
+   * column lands somewhere different from where it started. */
+  .hero-copy-stage .hero-band[data-band="5"] {
+    text-align: center;
+    background:
+      radial-gradient(130% 100% at 50% 0%, rgba(105, 143, 63, .22), transparent 60%),
+      linear-gradient(180deg, rgba(13, 52, 62, .96), rgba(5, 24, 29, .96));
+  }
+
+  .hero-copy-stage .hero-band[data-band="5"] .hero-card-copy {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+  }
+
+  .hero-copy-stage .hero-band[data-band="5"]::after {
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, transparent, var(--olive-lift), transparent);
+  }
+
+  /* The lifted rail from home.css is kept inside cards — continuity with the
+   * landing and the desktop film — but the eyebrow becomes the same pill as
+   * the landing so all seven openers match. Floor: 12px. */
+  .hero-copy-stage .hero-band .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    margin-bottom: 14px;
+    padding: 5px 13px;
+    border: 1px solid rgba(119, 224, 232, .38);
+    border-radius: 999px;
+    background: rgba(4, 40, 48, .55);
+    font-size: .75rem;
+    letter-spacing: .14em;
+  }
+
+  /* A real scale at last: chapters 2.0rem-ish, the opening 2.5rem-ish, body
+   * at a 16px floor with a 40–50 character measure. Headings and body can no
+   * longer be mistaken for each other. */
+  .hero-copy-stage .hero-band h2 {
+    max-width: 18ch;
+    margin-block-end: 14px;
+    font-size: clamp(1.95rem, 8.8vw, 2.75rem);
+    font-weight: 900;
+    letter-spacing: -.025em;
+    line-height: 1.12;
+  }
+
+  .hero-copy-stage .hero-band[data-band="0"] h2 {
+    max-width: 16ch;
+    font-size: clamp(2.3rem, 10.6vw, 3.3rem);
+    line-height: 1.08;
+  }
+
+  .hero-copy-stage .hero-band[data-band="5"] h2 { margin-inline: auto; }
+
+  .hero-copy-stage .hero-band p:not(.eyebrow) {
+    max-width: 46ch;
+    color: #d9ecec;
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .hero-copy-stage .hero-band[data-band="5"] p:not(.eyebrow) { margin-inline: auto; }
+
+  /* Chapter actions are full-width and 54px tall: one clear target per card,
+   * never a half-wrapped row. */
+  .hero-copy-stage .hero-band .button-link {
+    width: 100%;
+    min-height: 54px;
+    margin-block-start: 22px;
+    font-size: .98rem;
+  }
+
+  .hero-copy-stage .hero-band[data-band="5"] .button-link {
+    width: auto;
+    min-width: min(100%, 320px);
+  }
+
+  /* ---- 4. The counters ----------------------------------------------------
+   * Two-by-two (kept from home.css — the only honest set layout at 390px),
+   * but now the figures have presence: large tabular numerals that cannot
+   * shift as home-mobile.js counts them up, a hairline keyline per tile so
+   * each reads as its own instrument, labels at the 12px floor. */
+  .hero-copy-stage .hero-stats {
+    gap: 12px;
+    margin-block-start: 22px;
+  }
+
+  .hero-copy-stage .hero-stats > div {
+    padding: 18px 16px 16px;
+    box-shadow: inset 0 2px 0 rgba(119, 224, 232, .45), 0 14px 30px rgba(1, 12, 16, .4);
+  }
+
+  .hero-copy-stage .hero-stats dt {
+    margin-block-end: 8px;
+    font-size: .75rem;
+    letter-spacing: .1em;
+  }
+
+  .hero-copy-stage .hero-stats dd {
+    color: var(--paper);
+    font-size: clamp(1.9rem, 8.8vw, 2.5rem);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- 5. The community flip-card ------------------------------------------
+   * Same flip mechanics (untouched), new dressing: deeper face, glowing icon
+   * ring, 16px copy, and — the functional fix — 44px targets everywhere. The
+   * pips shipped at 28px squares; nine 28px dots are unusable thumbs. At 44px
+   * they wrap to two centred rows, which is why the row stays wrapped. */
+  .hero-copy-stage .community-flip { margin-block-start: 20px; }
+
+  /* Faces are absolutely positioned (the flip needs the overlap), so the
+   * track's min-height IS the card height: it must clear the taller face
+   * rule below, including 25%-longer Arabic copy. The 1fr middle row absorbs
+   * the slack on shorter cards. */
+  .hero-copy-stage .community-flip-track {
+    min-height: clamp(200px, 70vw, 280px);
+  }
+
+  .hero-copy-stage .community-card-face {
+    grid-template-rows: clamp(40px, 12vw, 52px) minmax(clamp(56px, 20vw, 84px), 1fr) auto;
+    min-height: min(248px, 70vw);
+    padding: 20px 18px 12px;
+    border-color: rgba(119, 224, 232, .34);
+    border-radius: 18px;
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(0, 139, 157, .28), transparent 55%),
+      linear-gradient(165deg, rgba(16, 62, 72, .98), rgba(6, 28, 34, .98));
+    box-shadow: inset 0 1px 0 rgba(184, 232, 240, .14), 0 18px 40px rgba(1, 12, 16, .5);
+  }
+
+  .hero-copy-stage .community-card-icon {
+    width: clamp(40px, 12vw, 52px);
+    height: clamp(40px, 12vw, 52px);
+    border-color: rgba(119, 224, 232, .5);
+    background: rgba(0, 139, 157, .18);
+    box-shadow: 0 0 18px rgba(119, 224, 232, .25);
+  }
+
+  .hero-copy-stage .community-card-name { font-size: 1.55rem; }
+
+  .hero-copy-stage .community-card-copy {
+    max-width: 34ch;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .hero-copy-stage .community-card-progress {
+    gap: 12px;
+    padding-block-start: 12px;
+  }
+
+  /* 40px shipped; 44px is the floor for anything interactive. */
+  .hero-copy-stage .community-card-nav {
+    width: 44px;
+    height: 44px;
+    flex: none;
+  }
+
+  .hero-copy-stage .community-card-count {
+    font-size: .78rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hero-copy-stage .community-pips {
+    justify-content: center;
+    gap: 2px 4px;
+    margin-block-start: 14px;
+  }
+
+  /* The visible dot stays 8px (22px when current); the 44px square around it
+   * is the tap target. Touch neighbours cannot overlap at this spacing. */
+  .hero-copy-stage .community-pip {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* ---- 6. Section headings --------------------------------------------------
+   * One editorial pattern for news / partners / mission-intro / faq-intro:
+   * pill eyebrow, display head capped for phones (the 12vw desktop step made
+   * four-word headings fill a screen), lede at 16px+ on a 40ch measure. */
+  .section-heading { margin-block-end: 34px; }
+
+  .section-heading .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    margin-bottom: 14px;
+    padding: 5px 13px;
+    border: 1px solid rgba(119, 224, 232, .38);
+    border-radius: 999px;
+    background: rgba(4, 40, 48, .55);
+    font-size: .75rem;
+    letter-spacing: .14em;
+  }
+
+  .section-heading h2 {
+    font-size: clamp(2.05rem, 9.8vw, 3rem);
+    letter-spacing: -.03em;
+    line-height: 1.08;
+  }
+
+  .section-heading > p:not(.eyebrow) {
+    max-width: 40ch;
+    font-size: 1.02rem;
+    line-height: 1.66;
+  }
+
+  /* ---- 7. News --------------------------------------------------------------
+   * The coverflow mechanism is untouched; this is legibility and touch.
+   * Cards widen slightly so 16px excerpts fit a comfortable line, copy sizes
+   * step up, arrows reach 44px, and the dot row gains breathing room so five
+   * 9px dots stop sharing one thumbprint. */
+  .flow-news { --card-w: min(78vw, 300px); }
+
+  .news-copy { gap: 10px; }
+
+  .news-meta { font-size: .75rem; }
+
+  .news-headline {
+    font-size: clamp(1.12rem, 5vw, 1.32rem);
+    line-height: 1.24;
+  }
+
+  .news-excerpt {
+    font-size: 1rem;
+    line-height: 1.56;
+  }
+
+  .news-cta {
+    min-height: 52px;
+    padding-inline: 24px;
+    font-size: .82rem;
+  }
+
+  .flow-arrow {
+    width: 44px;
+    height: 44px;
+  }
+
+  .flow-dots {
+    gap: 14px;
+    padding-block: 12px;
+  }
+
+  /* ---- 8. Partners ------------------------------------------------------------
+   * The corridor is scroll-driven and left alone. The section gets rhythm:
+   * tighter heading-to-corridor distance on a narrow screen, and the register
+   * button as one full-width 54px target instead of a centred afterthought. */
+  .partners .section-heading { margin-block-end: clamp(14px, 4vw, 26px); }
+
+  .partner-stage { margin-block-start: 6px; }
+
+  .partner-outro { padding-block-start: clamp(22px, 6vw, 34px); }
+
+  .partner-outro-cta {
+    width: 100%;
+    max-width: 420px;
+    min-height: 54px;
+    font-size: .98rem;
+  }
+
+  /* ---- 9. Mission --------------------------------------------------------------
+   * The stacked cards from home.css are kept (dark panels — the cream version
+   * read as a hole in the page) and given air: real gaps instead of hairline
+   * segmentation, larger index markers alternating the turquoise and olive
+   * lifts so the three steps feel like a sequence, display heads at phone
+   * scale, body at 16px. */
+  .mission-grid { gap: 12px; }
+
+  .mission-grid .mission-item {
+    min-height: 0;
+    padding: 28px 24px 30px;
+    border-radius: 18px;
+    border-block-start: 2px solid rgba(119, 224, 232, .4);
+    box-shadow: 0 18px 40px rgba(1, 12, 16, .4);
+  }
+
+  .mission-grid .mission-item:nth-child(2) { border-block-start-color: rgba(168, 207, 126, .5); }
+
+  .mission-index {
+    margin-block-end: 18px;
+    font-size: .78rem;
+  }
+
+  .mission-item h3 {
+    max-width: 16ch;
+    margin-block-end: 12px;
+    font-size: clamp(1.5rem, 6.6vw, 1.9rem);
+    letter-spacing: -.025em;
+    line-height: 1.14;
+  }
+
+  .mission-item p {
+    max-width: 44ch;
+    color: var(--type);
+    font-size: 1rem;
+    line-height: 1.68;
+  }
+
+  /* ---- 10. FAQ ------------------------------------------------------------------
+   * Mechanism untouched (grid-rows animation, real buttons). Phone needs only
+   * scale and separation: questions that wrap without crowding, answers at a
+   * 16px floor, and items divided by hairlines that light the open row. */
+  .faq-layout { gap: clamp(26px, 7vw, 40px); }
+
+  .faq-intro h2 {
+    font-size: clamp(2.05rem, 9.8vw, 3rem);
+    letter-spacing: -.03em;
+    line-height: 1.08;
+  }
+
+  .faq-intro > p:not(.eyebrow) {
+    max-width: 38ch;
+    font-size: 1.02rem;
+    line-height: 1.66;
+  }
+
+  .faq-trigger {
+    align-items: center;
+    padding-block: clamp(20px, 5.4vw, 26px);
+  }
+
+  .faq-num { font-size: .75rem; }
+
+  .faq-question { font-size: clamp(1.08rem, 4.6vw, 1.25rem); }
+
+  .faq-sign {
+    width: 40px;
+    height: 40px;
+  }
+
+  .faq-answer p {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  /* ---- 11. Footer ------------------------------------------------------------------
+   * The footer stacks to one column at 620px already; what failed phone rules
+   * was touch and small type. Every link row becomes a 44px target, social
+   * icons reach 44px, the map card keeps its teal-on-dark recipe but the chips
+   * and the visit link use the lifted turquoise (the base #048090 sits near
+   * 3:1 on this ground — fine for an icon stroke, not for 14px type), and the
+   * attribution line rises to the 12px floor. */
+  .site-footer .footer-main {
+    gap: clamp(30px, 8vw, 44px);
+  }
+
+  .footer-cta-inner { gap: 22px; }
+
+  .footer-cta-inner .button-link {
+    width: 100%;
+    min-height: 54px;
+  }
+
+  .site-footer .footer-col a {
+    min-height: 44px;
+    font-size: .98rem;
+  }
+
+  .site-footer .footer-social a {
+    width: 44px;
+    height: 44px;
+  }
+
+  .site-footer .footer-map {
+    padding: 16px 16px 14px;
+    border: 1px solid rgba(184, 232, 240, .14);
+  }
+
+  .site-footer .map-lines { gap: 4px; font-size: .9rem; }
+
+  .site-footer .map-lines a { min-height: 44px; }
+
+  .site-footer .map-lines svg { stroke: var(--saae-turquoise); }
+
+  .site-footer .map-visit {
+    min-height: 44px;
+    color: var(--saae-turquoise-lift);
+    font-size: .95rem;
+  }
+
+  .site-footer .map-attr { font-size: .75rem; }
+
+  .site-footer .footer-bottom { font-size: .88rem; }
+
+  /* ---- 12. RTL mirrors ---------------------------------------------------------------
+   * Logical properties already mirror the layout. Only directional gradients
+   * and the centred closing tick need explicit mirrors; joined Arabic also
+   * gets its letterspacing back (spaced Arabic disconnects letterforms). */
+  html[dir="rtl"] .static-copy h2,
+  html[dir="rtl"] .hero-copy-stage .hero-band h2,
+  html[dir="rtl"] .section-heading h2,
+  html[dir="rtl"] .mission-item h3,
+  html[dir="rtl"] .faq-intro h2 {
+    letter-spacing: 0;
+    line-height: 1.32;
+  }
+
+  html[dir="rtl"] .static-copy .eyebrow,
+  html[dir="rtl"] .hero-copy-stage .hero-band .eyebrow,
+  html[dir="rtl"] .section-heading .eyebrow {
+    letter-spacing: .02em;
+  }
+
+  html[dir="rtl"] .hero-copy-stage .hero-band::after {
+    background: linear-gradient(270deg, var(--saae-turquoise-lift), rgba(119, 224, 232, 0));
+  }
+
+  html[dir="rtl"] .hero-section {
+    background:
+      radial-gradient(120% 34% at 50% -6%, rgba(0, 139, 157, .28), transparent 62%),
+      radial-gradient(110% 30% at 12% 52%, rgba(105, 143, 63, .16), transparent 64%),
+      radial-gradient(120% 30% at 92% 82%, rgba(0, 139, 157, .14), transparent 62%),
+      linear-gradient(180deg, #082a32 0%, #06232a 34%, #051d24 68%, #04171c 100%);
+  }
+
+  html[dir="rtl"] .hero-copy-stage .hero-band[data-band="5"]::after {
+    transform: translateX(50%);
+  }
+}
+
+/* ---- 13. Narrow phones ---------------------------------------------------------
+ * At 360px and below the chapter padding, watermark and stats tighten so the
+ * 2×2 counters and the nine 44px pips still fit without overflow. Same gate,
+ * plus width — never width alone, which would also catch narrow desktop. */
+@media (max-width: 768px) and (max-width: 360px), (orientation: portrait) and (pointer: coarse) and (max-width: 360px) {
+  .hero-copy-stage .hero-band {
+    padding: 20px 16px 22px;
+  }
+
+  .hero-copy-stage .hero-band::before {
+    font-size: 2.2rem;
+  }
+
+  .hero-copy-stage .hero-stats > div {
+    padding: 15px 13px 14px;
+  }
+
+  .hero-copy-stage .hero-stats dd {
+    font-size: 1.7rem;
+  }
+
+  .static-copy h2 {
+    font-size: clamp(1.75rem, 8vw, 2.5rem);
+  }
+}
+
+/* ---- 14. Reduced motion ----------------------------------------------------------
+ * Every animation this sheet owns resolves to its resting state. The scroll
+ * arrivals (.band-in, .reveal) already resolve in home.css / home-inline.js;
+ * this repeats the guarantee for the landing entrance so no override order
+ * can leave copy parked at opacity 0. */
+@media (max-width: 768px) and (prefers-reduced-motion: reduce), (orientation: portrait) and (pointer: coarse) and (prefers-reduced-motion: reduce) {
+  .hero-static .static-copy > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- 15. Integration fixes ---------------------------------------------------
+ * Found by measuring the rendered phone page, which is the only way any of
+ * these could have been found: every one of them reads correctly in the source.
+ *
+ * 15a is a structural bug in the previous mobile pass. 15b-15d are one
+ * pre-existing bug with three symptoms: home.css closes with a large
+ * html[dir="rtl"] block that carries DESKTOP GEOMETRY AND NO MEDIA QUERY. Those
+ * rules sit later in the file and out-specify the phone rules, so on a phone in
+ * Arabic they win -- silently, and only in Arabic. English was never affected,
+ * which is exactly why this survived the earlier passes.
+ *
+ * Fixed here rather than in home.css because home.css's RTL block is correct
+ * for the desktop film; what it lacks is a phone gate, and re-asserting the
+ * phone value under the phone gate is the change that cannot regress desktop.
+ */
+@media (max-width: 768px), (orientation: portrait) and (pointer: coarse) {
+
+  /* 15a. THE LANDING WAS BELOW THE CHAPTERS.
+   * In the markup .cinematic-scroll (the film stage) precedes .hero-static,
+   * because on desktop the stage is the pinned film and the static hero is
+   * display:none. When the previous pass unpacked the film into a column it
+   * set .cinematic-scroll { display: block } and inherited that DOM order --
+   * so a phone opened on chapter 01 and met the landing photograph 3,078px
+   * later, after all six chapters. Measured: .hero-static at top 3078.
+   *
+   * A column flex container reorders without touching the markup, so desktop
+   * (where this gate never matches) keeps the document order the film needs.
+   * Children are block-level and stretch, so no width changes. */
+  #hero-sec {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hero-static { order: -1; }
+
+  /* 15b. The opening statement was 122px wide in Arabic.
+   * html[dir="rtl"] .hero-band[data-band="0"] sets width: min(460px, 31vw) with
+   * no media query -- 31vw of a 393px phone is 121.8px. The headline was
+   * clipped mid-word and the eyebrow pill, shrink-wrapping to 89px, wrapped to
+   * six lines and rendered as a circle at border-radius 999px. One width, three
+   * visible symptoms. */
+  html[dir="rtl"] .hero-copy-stage .hero-band[data-band="0"],
+  html[dir="rtl"] .hero-copy-stage .hero-band {
+    width: auto;
+    max-width: none;
+  }
+
+  /* 15c. ...and its heading kept the desktop type ramp.
+   * clamp(2.35rem, 3.5vw, 3.8rem) floors at 2.35rem on a phone because 3.5vw is
+   * only 13.8px, so the Arabic opening ignored the phone scale. Re-assert it,
+   * and keep the Arabic line-height that joined script needs. */
+  html[dir="rtl"] .hero-copy-stage .hero-band[data-band="0"] h2 {
+    max-width: 16ch;
+    font-size: clamp(2.1rem, 9.4vw, 3rem);
+    line-height: 1.34;
+  }
+
+  /* 15d. The scroll cue label stayed at 10.88px in Arabic.
+   * html[dir="rtl"] .scroll-cue-label { font-size: .68rem } out-specifies the
+   * phone rule. 12px is the floor for every piece of type on this page. */
+  html[dir="rtl"] .hero-static .scroll-cue-label {
+    font-size: .75rem;
+    letter-spacing: 0;
+    word-spacing: .3em;
+  }
+
+  /* 15e. The eyebrow pill must survive wrapping.
+   * A 999px radius on a box that wraps to three lines is a lozenge, not a pill.
+   * 15b stops the squeeze that caused it here, but a long association name on a
+   * 320px screen can still take two lines, so the radius is capped in relative
+   * terms: still fully round at one line (height/2 < 999px), still a rounded
+   * chip at two. */
+  .static-copy .eyebrow,
+  .hero-copy-stage .hero-band .eyebrow,
+  .section-heading .eyebrow {
+    border-radius: 18px;
+    max-width: 100%;
+  }
+}
