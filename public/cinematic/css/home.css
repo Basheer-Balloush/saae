@@ -4014,6 +4014,16 @@
       }
     }
 
+    /* PR4-3 Sec 12.8: closing CTA keeps one primary action; any decorative
+       blob stays desktop-only and stills under reduced-motion. */
+    @media (max-width: 768px) {
+      .footer-cta .blob { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .footer-cta .blob,
+      .footer-cta .button-link::after { animation: none; transition: none; }
+    }
+
     /* plan.md Sec 12.4: partners marquee runs on desktop only. Mobile gets a
        static grid from home-mobile.css; this guard keeps the desktop marquee. */
     @media (min-width: 769px) {
