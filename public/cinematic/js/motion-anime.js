@@ -243,11 +243,16 @@
   function hover(els, lift) {
     if (!A.createAnimatable || !els.length) return;
     els.forEach(el => {
-      const a = A.createAnimatable(el, { y: 460, scale: 480, ease: "out(2.5)" });
+      /* Made on first hover, not up front. A rise() or grid() on the same
+         element starts it offset, and an animatable created then keeps that
+         offset as its resting place and writes it back, leaving the element
+         stuck below its neighbours. By the first hover the entrance is done. */
+      let a = null;
+      const get = () => a || (a = A.createAnimatable(el, { y: 460, scale: 480, ease: "out(2.5)" }));
       mark([el]);
-      keep(() => { try { a.revert(); } catch (e) {} });
-      const on = () => { a.y(lift == null ? -6 : lift); a.scale(1.02); };
-      const off = () => { a.y(0); a.scale(1); };
+      keep(() => { try { if (a) a.revert(); } catch (e) {} });
+      const on = () => { const x = get(); x.y(lift == null ? -6 : lift); x.scale(1.02); };
+      const off = () => { if (!a) return; a.y(0); a.scale(1); };
       el.addEventListener("pointerenter", on);
       el.addEventListener("pointerleave", off);
       /* Keyboard users get the same affordance, the way motion.js does it. */

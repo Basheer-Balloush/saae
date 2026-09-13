@@ -328,6 +328,7 @@ a.line-card:hover { border-color: rgba(94,216,230,.6); transform: translateY(-7p
   transition: color .2s, border-color .2s, transform .3s;
 }
 .socials a:hover { color: var(--cyan); border-color: var(--cyan); transform: translateY(-3px); }
+.socials svg { width: 18px; height: 18px; }
 
 /* ---- footer ------------------------------------------------------------- */
 .site-footer { background: var(--footer); border-block-start: 1px solid rgba(94,216,230,.14); color: var(--type); padding: 62px var(--shell) 24px; }

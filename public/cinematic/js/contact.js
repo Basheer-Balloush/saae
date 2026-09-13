@@ -51,7 +51,9 @@
     sent:       ["Thank you. Your message has been received and we will reply soon.",
                  "شكراً لك. وصلتنا رسالتك وسنرد عليك قريباً."],
     failed:     ["Your message could not be sent. Please try again.",
-                 "تعذّر إرسال رسالتك. يرجى المحاولة مرة أخرى."]
+                 "تعذّر إرسال رسالتك. يرجى المحاولة مرة أخرى."],
+    tooShort:   ["Please add a little more: the name and subject need at least 2 characters, the message at least 5.",
+                 "يرجى إضافة المزيد: يحتاج الاسم والموضوع إلى حرفين على الأقل، والرسالة إلى 5 أحرف على الأقل."]
   };
   /* Same order as ROUTES, mapped to the contact_messages inquiry_type enum. */
   const INQUIRY_TYPES = ["training", "partnership", "media", "general"];
@@ -186,6 +188,13 @@
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       say(COPY.badEmail[ar() ? 1 : 0], true);
       $("f-email").focus();
+      return;
+    }
+    /* The same minimums the database enforces, so a short entry gets a clear
+       message instead of the generic send failure. */
+    if (data.name.length < 2 || data.subject.length < 2 || data.message.length < 5) {
+      say(COPY.tooShort[ar() ? 1 : 0], true);
+      (data.name.length < 2 ? $("f-name") : data.subject.length < 2 ? $("f-subject") : message).focus();
       return;
     }
 
