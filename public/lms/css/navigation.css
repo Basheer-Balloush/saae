@@ -1,0 +1,200 @@
+/* Tubelight navigation — vanilla re-implementation of the supplied React
+   template, restyled to the SAAE cinematic identity: deep-petrol glass pill,
+   turquoise "lamp" tick with glow for the active item, Cairo type.
+   The circle toggle stays fixed in its corner; pressing it expands the pill
+   (scale + fade, origin on the toggle side) instead of the old orbit menu.
+   No frameworks, no dependencies. */
+
+.lms-skin .radial-language {
+  position: fixed !important; inset: 48px 124px auto auto !important; z-index: 102 !important; box-sizing: border-box !important;
+  width: auto !important; min-width: 44px !important; max-width: max-content !important; height: 44px !important; min-height: 44px !important;
+  display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 7px !important;
+  margin: 0 !important; padding: 0 13px !important; color: #edfbf9 !important; border: 1px solid rgba(177,238,237,.46) !important;
+  border-radius: 999px !important; background: rgba(2,29,36,.82) !important; box-shadow: 0 9px 26px rgba(0,8,12,.3) !important;
+  backdrop-filter: blur(13px) saturate(125%); -webkit-backdrop-filter: blur(13px) saturate(125%);
+  font: 800 .72rem/1 "Cairo",Arial,sans-serif !important; letter-spacing: 0 !important; opacity: 1 !important; transform: none !important; animation: none !important;
+}
+.lms-skin .radial-language::before,.lms-skin .radial-language::after { content: none !important; }
+.lms-skin .radial-language:hover,.lms-skin .radial-language:focus-visible { color:#fff !important; border-color:#c9fff8 !important; background:rgba(4,58,66,.94) !important; transform:translateY(-2px) !important; }
+.lms-skin .radial-language .language-switch-icon,.lms-skin .radial-language svg { width:17px !important; height:17px !important; flex:0 0 auto; animation:none !important; }
+
+.lms-skin .radial-nav { position:fixed; inset:0; z-index:101; pointer-events:none; }
+.lms-skin .radial-nav-toggle {
+  position:fixed; inset:36px 22px auto auto; z-index:3; width:68px; height:68px; display:grid; place-items:center; padding:0; overflow:hidden;
+  pointer-events:auto;
+  border:1px solid rgba(144,239,231,.72); border-radius:50%; background:radial-gradient(circle at 35% 25%,rgba(19,111,119,.95),rgba(3,35,43,.97) 70%); box-shadow:0 0 0 7px rgba(115,225,219,.13),0 16px 40px rgba(0,8,12,.42);
+  cursor:pointer; transition:box-shadow .25s ease,transform .25s ease;
+}
+.lms-skin .radial-nav-toggle::before { content:""; position:absolute; inset:-10px; border:1px solid rgba(118,242,230,.6); border-radius:inherit; opacity:0; animation:radial-nav-beacon 3.2s ease-out infinite; }
+.lms-skin .radial-nav-toggle::after { content:""; position:absolute; inset:7px; border:1px solid rgba(159,249,240,.42); border-radius:inherit; }
+.lms-skin .radial-nav-toggle:hover,.lms-skin .radial-nav-toggle:focus-visible { transform:scale(1.07); box-shadow:0 0 0 9px rgba(115,225,219,.22),0 18px 45px rgba(0,8,12,.48); }
+.lms-skin .radial-nav.is-open .radial-nav-toggle { transform:scale(1.05); box-shadow:0 0 0 9px rgba(115,225,219,.22),0 18px 45px rgba(0,8,12,.48); }
+.lms-skin .radial-nav-tree { position:relative; z-index:1; width:48px; height:51px; object-fit:contain; }
+
+/* The tubelight pill — hidden by default, expands from the toggle side. */
+.lms-skin .radial-nav-items {
+  position:fixed; top:40px; left:calc(50% - 92px); z-index:2;
+  display:flex; align-items:stretch; gap:2px;
+  margin:0; padding:6px;
+  border:1px solid rgba(177,238,237,.26); border-radius:999px;
+  background:rgba(2,29,36,.86);
+  box-shadow:0 18px 50px rgba(0,8,12,.5),inset 0 1px 0 rgba(184,232,240,.14);
+  backdrop-filter:blur(16px) saturate(130%); -webkit-backdrop-filter:blur(16px) saturate(130%);
+  pointer-events:auto;
+  opacity:0; visibility:hidden;
+  transform:translate(-50%,-10px) scale(.8);
+  transform-origin:top right;
+  transition:opacity .3s ease,transform .48s cubic-bezier(.22,1.28,.36,1),visibility 0s linear .45s;
+  will-change:transform,opacity;
+}
+html[dir="rtl"] .lms-skin .radial-nav-items { transform-origin:top left; left:calc(50% + 92px); }
+.lms-skin .radial-nav.is-open .radial-nav-items {
+  opacity:1; visibility:visible;
+  transform:translate(-50%,0) scale(1);
+  transition:opacity .26s ease,transform .48s cubic-bezier(.22,1.28,.36,1),visibility 0s;
+}
+
+/* Pill links — icon + label on desktop, icon only on small screens. */
+.lms-skin .radial-nav-item {
+  position:relative; z-index:1;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:10px 15px; border-radius:999px;
+  color:rgba(237,251,249,.72); text-decoration:none;
+  font:800 .84rem/1 "Cairo",Arial,sans-serif; white-space:nowrap;
+  opacity:0; transform:translateY(8px);
+  transition:opacity .24s ease,transform .34s cubic-bezier(.22,1,.36,1),color .2s ease,background-color .2s ease;
+}
+.lms-skin .radial-nav.is-open .radial-nav-item { opacity:1; transform:none; }
+.lms-skin .radial-nav.is-open .radial-nav-item:nth-child(2) { transition-delay:.05s; }
+.lms-skin .radial-nav.is-open .radial-nav-item:nth-child(3) { transition-delay:.09s; }
+.lms-skin .radial-nav.is-open .radial-nav-item:nth-child(4) { transition-delay:.13s; }
+.lms-skin .radial-nav.is-open .radial-nav-item:nth-child(5) { transition-delay:.17s; }
+.lms-skin .radial-nav.is-open .radial-nav-item:nth-child(6) { transition-delay:.21s; }
+.lms-skin .radial-nav.is-open .radial-nav-item:nth-child(7) { transition-delay:.25s; }
+.lms-skin .radial-nav:not(.is-open) .radial-nav-item { transition-delay:0s; }
+.lms-skin .radial-nav-item:hover,.lms-skin .radial-nav-item:focus-visible { color:#fff; }
+.lms-skin .radial-nav-item svg { width:17px; height:17px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+/* Reset the old orbit tooltip look — labels now sit inline in the pill. */
+.lms-skin .radial-nav-label {
+  position:static; inset:auto; padding:0; margin:0;
+  color:inherit; border:0; border-radius:0; background:none; box-shadow:none;
+  font:inherit; white-space:nowrap; opacity:1; transform:none; pointer-events:none;
+  transition:none;
+}
+.lms-skin .radial-nav-item:hover .radial-nav-label,.lms-skin .radial-nav-item:focus-visible .radial-nav-label,.lms-skin .radial-nav-item[aria-current="page"] .radial-nav-label { opacity:1; transform:none; }
+.lms-skin .radial-nav-item[aria-current="page"] { color:#8ff0f5; }
+
+/* Auth cluster — joined to the pill but clearly not page sections:
+   a hairline divider, a quiet ghost login, and a glowing signup. */
+.lms-skin .tube-divider {
+  align-self:stretch; width:1px; flex:none; margin:8px 10px; border:0;
+  background:linear-gradient(180deg,transparent,rgba(119,224,232,.45),transparent);
+  opacity:0; transition:opacity .24s ease;
+}
+.lms-skin .radial-nav.is-open .tube-divider { opacity:1; transition-delay:.27s; }
+.lms-skin .radial-nav:not(.is-open) .tube-divider { transition-delay:0s; }
+.lms-skin .tube-auth {
+  position:relative; z-index:1;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:10px 15px; border-radius:999px; text-decoration:none;
+  font:800 .84rem/1 "Cairo",Arial,sans-serif; white-space:nowrap;
+  opacity:0; transform:translateY(8px);
+  transition:opacity .24s ease,transform .34s cubic-bezier(.22,1,.36,1),color .2s ease,background-color .2s ease,border-color .2s ease,box-shadow .25s ease;
+}
+.lms-skin .radial-nav.is-open .tube-auth { opacity:1; transform:none; }
+.lms-skin .radial-nav.is-open .tube-login { transition-delay:.3s; }
+.lms-skin .radial-nav.is-open .tube-signup { transition-delay:.34s; }
+.lms-skin .radial-nav:not(.is-open) .tube-auth { transition-delay:0s; }
+.lms-skin .tube-auth svg { width:17px; height:17px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.lms-skin .tube-login { color:#eafffb; border:1px solid rgba(177,238,237,.42); background:rgba(184,232,240,.06); }
+.lms-skin .tube-login:hover,.lms-skin .tube-login:focus-visible { color:#fff; border-color:#c9fff8; background:rgba(184,232,240,.13); }
+.lms-skin .tube-signup {
+  overflow:hidden; color:#06232a; border:1px solid rgba(202,255,250,.65);
+  background:linear-gradient(135deg,#3fd4de 0%,#008b9d 60%,#047383 100%);
+  font-weight:900;
+  animation:tube-glow 2.6s ease-in-out infinite;
+}
+.lms-skin .radial-nav.is-open .tube-signup:hover,.lms-skin .radial-nav.is-open .tube-signup:focus-visible { transform:translateY(-2px); color:#02131a; }
+.lms-skin .tube-signup::after {
+  content:""; position:absolute; top:-20%; bottom:-20%; left:-70%; width:45%;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.6),transparent);
+  transform:skewX(-20deg); pointer-events:none;
+  animation:tube-shine 3.4s ease-in-out infinite;
+}
+@keyframes tube-glow {
+  0%,100% { box-shadow:0 0 0 0 rgba(119,224,232,0),0 6px 20px rgba(0,139,157,.35); }
+  50% { box-shadow:0 0 20px 4px rgba(119,224,232,.55),0 6px 28px rgba(0,139,157,.6); }
+}
+@keyframes tube-shine {
+  0% { left:-70%; }
+  55%,100% { left:135%; }
+}
+
+/* The travelling "lamp" — a soft active well with a glowing tick on top,
+   moved with transform only (GPU, no layout thrash). Injected by navigation.js. */
+.lms-skin .tube-lamp {
+  position:absolute; top:6px; bottom:6px; left:0; z-index:0; width:0;
+  border-radius:999px; border:1px solid rgba(119,224,232,.32);
+  background:rgba(0,139,157,.3);
+  box-shadow:inset 0 1px 0 rgba(184,232,240,.28),0 4px 18px rgba(0,60,70,.5);
+  opacity:0; pointer-events:none;
+  transform:translateX(0);
+  transition:transform .44s cubic-bezier(.32,1.25,.4,1),width .44s cubic-bezier(.32,1.25,.4,1),opacity .25s ease;
+  will-change:transform,width;
+}
+.lms-skin .tube-lamp.is-on { opacity:1; }
+.lms-skin .tube-lamp::before {
+  content:""; position:absolute; top:-8px; left:50%; transform:translateX(-50%);
+  width:32px; height:4px; border-radius:6px;
+  background:linear-gradient(90deg,#047383,#77e0e8,#047383);
+  box-shadow:0 0 10px 2px rgba(119,224,232,.8),0 0 26px 7px rgba(0,139,157,.4);
+}
+.lms-skin .tube-lamp::after {
+  content:""; position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+  width:56px; height:20px; border-radius:50%;
+  background:radial-gradient(closest-side,rgba(119,224,232,.32),transparent);
+  filter:blur(2px);
+}
+
+.lms-skin .radial-nav :focus-visible { outline:2px solid #d2fff8; outline-offset:3px; }
+.lms-skin .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+html[dir="rtl"] .lms-skin .radial-language { inset:48px auto auto 124px !important; }
+html[dir="rtl"] .lms-skin .radial-nav-toggle { inset:36px auto auto 22px; }
+
+@keyframes radial-nav-beacon {
+  0%, 58%, 100% { opacity:0; transform:scale(.86); }
+  16% { opacity:.72; }
+  42% { opacity:0; transform:scale(1.34); }
+}
+
+@media (max-width:1350px) {
+  .lms-skin .radial-nav-item,.lms-skin .tube-auth { padding:9px 12px; gap:6px; font-size:.78rem; }
+  .lms-skin .tube-divider { margin:8px 6px; }
+}
+
+@media (max-width:860px) {
+  .lms-skin .radial-nav-label,.lms-skin .tube-auth-label { display:none; }
+  .lms-skin .radial-nav-item,.lms-skin .tube-auth { padding:12px 14px; }
+  .lms-skin .radial-nav-item svg,.lms-skin .tube-auth svg { width:19px; height:19px; }
+  .lms-skin .tube-divider { margin:10px 6px; }
+}
+
+@media (max-width:680px) {
+  .lms-skin .radial-language { inset:34px 96px auto auto !important; width:40px !important; min-width:40px !important; padding:0 !important; }
+  .lms-skin .radial-language .language-switch-label,.lms-skin .radial-language #lang-label { display:none; }
+  html[dir="rtl"] .lms-skin .radial-language { inset:34px auto auto 96px !important; }
+  html[dir="rtl"] .lms-skin .radial-nav-toggle { inset:25px auto auto 15px; }
+  .lms-skin .radial-nav-toggle { inset:25px 15px auto auto; width:60px; height:60px; }
+  .lms-skin .radial-nav-tree { width:42px; height:45px; }
+  .lms-skin .radial-nav-items {
+    top:98px; left:10px; right:10px;
+    justify-content:space-evenly;
+    transform:translateY(-10px) scale(.96);
+  }
+  html[dir="rtl"] .lms-skin .radial-nav-items { left:10px; }
+  .lms-skin .radial-nav.is-open .radial-nav-items { transform:none; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .lms-skin .radial-nav-items,.lms-skin .radial-nav-item,.lms-skin .tube-lamp,.lms-skin .tube-auth,.lms-skin .tube-divider,.lms-skin .radial-nav-toggle,.lms-skin .radial-language { transition-duration:.01ms !important; }
+  .lms-skin .radial-nav-toggle::before,.lms-skin .tube-signup,.lms-skin .tube-signup::after { animation:none !important; }
+}

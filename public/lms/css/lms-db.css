@@ -1,0 +1,32 @@
+/* Additions on top of Moaz's lms.css for the database-driven LMS pages:
+   course cover photos, level and price filters, paging, and the auth
+   button in the menu. All three LMS sheets are scoped to .lms-skin by
+   scripts/scope-lms-css.mjs; run it again after editing any of them. */
+
+.lms-skin { position: relative; min-height: 100vh; }
+
+/* Course covers from the database sit over the category gradient. */
+.lms-skin .course-card > a { color: inherit; }
+.lms-skin .course-thumb { aspect-ratio: 16 / 9; }
+.lms-skin .course-thumb img { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; }
+.lms-skin .course-thumb:has(img)::after { display: none; }
+.lms-skin .course-body h3 { overflow-wrap: anywhere; }
+
+/* Category, level and price chip rows. */
+.lms-skin .catalog-filters { display: grid; gap: 12px; margin-bottom: 22px; }
+.lms-skin .catalog-filters .course-filters { align-items: center; margin: 0; }
+.lms-skin .filter-label { min-width: 5.5em; margin-inline-end: 4px; color: var(--lms-muted); font-size: .76rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+
+.lms-skin .lms-count { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.lms-skin .lms-reset { padding: 0; border: 0; background: none; color: var(--lms-lift); font: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+
+.lms-skin .lms-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px; margin-top: 40px; color: var(--lms-muted); font-weight: 700; }
+.lms-skin .lms-pager .action { min-height: 46px; padding: 0 22px; font: inherit; font-size: .84rem; font-weight: 800; cursor: pointer; }
+.lms-skin .lms-pager .action:disabled { opacity: .4; cursor: default; transform: none; }
+
+.lms-skin .catalog-error { display: grid; justify-items: start; gap: 18px; }
+
+.lms-skin button.tube-auth { cursor: pointer; }
+
+/* CoursePrice brings its own pill; inside a course tag it is plain text. */
+.lms-skin .course-tags > span * { padding: 0; border-radius: 0; background: none; }
