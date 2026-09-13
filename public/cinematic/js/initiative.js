@@ -274,7 +274,7 @@
       runMorph(textPts, treePts);
     };
     img.onerror = giveUp;
-    img.src = "assets/images/initiative-tree.svg";
+    img.src = "/cinematic/images/initiative-tree.svg";
   };
   const runMorph = (textPts, treePts) => {
     const box = treeStage.getBoundingClientRect();
