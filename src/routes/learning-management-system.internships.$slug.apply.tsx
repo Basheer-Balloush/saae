@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { useLang } from "@/lib/i18n";
 import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
@@ -13,12 +13,8 @@ import {
   submitInternshipApplication,
   type ApplyContext,
 } from "@/lib/lms-internships-apply.functions";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { SubHero } from "@/components/lms-skin/SubHero";
+import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/internships/$slug/apply")({
   head: () => ({
@@ -26,6 +22,7 @@ export const Route = createFileRoute("/learning-management-system/internships/$s
       { title: "Apply — Internship" },
       { name: "robots", content: "noindex, nofollow" },
     ],
+    links: LMS_SKIN_LINKS,
   }),
   component: ApplyPage,
 });
@@ -34,7 +31,8 @@ type AnswerState = Record<string, { text?: string; selected?: string[] }>;
 
 function ApplyPage() {
   const { slug } = Route.useParams();
-  const { lang, dir } = useLang();
+  const { lang } = useLang();
+  const ar = lang === "ar";
   const t = lmsInternshipsT[lang];
   const navigate = useNavigate();
   const { user, loading: authLoading } = useLmsAuth();
@@ -76,7 +74,6 @@ function ApplyPage() {
     };
   }, [slug, authLoading, user, getCtx, lang, navigate]);
 
-  const Arrow = dir === "rtl" ? ArrowRight : ArrowLeft;
   const title = useMemo(() => {
     if (!ctx) return "";
     return lang === "ar"
@@ -86,23 +83,31 @@ function ApplyPage() {
 
   if (loadErr) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-16 text-center" dir={dir}>
-        <p className="text-destructive">{loadErr}</p>
-        <Link
-          to="/learning-management-system/internships"
-          className="mt-4 inline-block text-primary underline"
-        >
-          {t.internshipsTitle}
-        </Link>
-      </div>
+      <SubHero
+        id="apply-error-title"
+        eyebrow={t.internshipsTitle}
+        titleSpans={[loadErr]}
+        titleClassName="course-page-title"
+        copyChildren={
+          <p style={{ marginTop: 28 }}>
+            <Link to="/learning-management-system/internships" className="action action-primary">
+              {t.internshipsTitle}
+            </Link>
+          </p>
+        }
+      />
     );
   }
 
   if (!ctx) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
+      <section className="lms-hero lms-subhero">
+        <div className="page-shell">
+          <p className="state-box">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </p>
+        </div>
+      </section>
     );
   }
 
@@ -162,217 +167,174 @@ function ApplyPage() {
   const cannotApply = !ctx.can_apply;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12 space-y-6" dir={dir}>
-      <Link
-        to="/learning-management-system/internships/$slug"
-        params={{ slug }}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
-      >
-        <Arrow className="h-4 w-4" />
-        <span dir="auto">{title}</span>
-      </Link>
+    <>
+      <SubHero
+        id="apply-title"
+        eyebrow={t.internshipsTitle}
+        titleSpans={[t.applyReviewTitle]}
+        titleClassName="course-page-title"
+        lede={t.applyReviewNotice}
+        before={
+          <nav className="course-crumbs" aria-label={ar ? "أنت هنا" : "You are here"}>
+            <Link to="/learning-management-system/internships">{t.internshipsTitle}</Link>
+            <span aria-hidden="true">/</span>
+            <Link to="/learning-management-system/internships/$slug" params={{ slug }}>
+              <span dir="auto">{title}</span>
+            </Link>
+          </nav>
+        }
+      />
 
-      <header>
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t.applyReviewTitle}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t.applyReviewNotice}</p>
-      </header>
+      <section className="lms-section" aria-labelledby="apply-title">
+        <div className="page-shell narrow-stack">
+          {ctx.block_reason && <BlockNotice reason={ctx.block_reason} ctx={ctx} lang={lang} />}
 
-      {ctx.block_reason && (
-        <BlockNotice reason={ctx.block_reason} ctx={ctx} lang={lang} />
-      )}
+          <article className="pro-card">
+            <h2>{t.applyIdentitySection}</h2>
+            <dl className="apply-rows">
+              <ReviewRow label={ar ? "الاسم الكامل" : "Full name"} value={p.full_name} />
+              <ReviewRow label={ar ? "البريد" : "Email"} value={ctx.email} />
+              <ReviewRow label={ar ? "الهاتف" : "Phone"} value={p.phone} />
+              <ReviewRow label={ar ? "المؤسّسة" : "Organization"} value={p.organization} />
+              <ReviewRow label={ar ? "نبذة" : "Biography"} value={p.biography} />
+            </dl>
+          </article>
 
-      {/* Identity */}
-      <Card className="p-5 space-y-2">
-        <h2 className="text-base font-semibold text-foreground">{t.applyIdentitySection}</h2>
-        <ReviewRow label={lang === "ar" ? "الاسم الكامل" : "Full name"} value={p.full_name} />
-        <ReviewRow label={lang === "ar" ? "البريد" : "Email"} value={ctx.email} />
-        <ReviewRow label={lang === "ar" ? "الهاتف" : "Phone"} value={p.phone} />
-        <ReviewRow
-          label={lang === "ar" ? "المؤسّسة" : "Organization"}
-          value={p.organization}
-        />
-        <ReviewRow label={lang === "ar" ? "نبذة" : "Biography"} value={p.biography} multiline />
-      </Card>
-
-      {/* CV */}
-      {ctx.opportunity.require_cv && (
-        <Card className="p-5">
-          <h2 className="text-base font-semibold text-foreground mb-2">{t.applyCvSection}</h2>
-          {ctx.cv ? (
-            <p className="text-sm text-foreground" dir="auto">
-              {ctx.cv.original_filename}
-            </p>
-          ) : (
-            <p className="text-sm text-destructive">{t.applyProfileIncomplete}</p>
+          {ctx.opportunity.require_cv && (
+            <article className="pro-card">
+              <h2>{t.applyCvSection}</h2>
+              {ctx.cv ? (
+                <p dir="auto">{ctx.cv.original_filename}</p>
+              ) : (
+                <p className="enroll-note is-invalid">{t.applyProfileIncomplete}</p>
+              )}
+            </article>
           )}
-        </Card>
-      )}
 
-      {/* Courses */}
-      <Card className="p-5">
-        <h2 className="text-base font-semibold text-foreground mb-2">{t.applyCoursesSection}</h2>
-        {ctx.courses.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {lang === "ar" ? "لا توجد دورات" : "No courses"}
-          </p>
-        ) : (
-          <ul className="space-y-1 text-sm">
-            {ctx.courses.map((c) => (
-              <li key={c.id} className="flex items-center justify-between gap-2">
-                <span className="text-foreground" dir="auto">
-                  {lang === "ar" ? c.title_ar : c.title_en || c.title_ar}
-                </span>
-                <Badge variant={c.completed ? "default" : "outline"}>
-                  {Math.round(c.progress)}%
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+          <article className="pro-card">
+            <h2>{t.applyCoursesSection}</h2>
+            {ctx.courses.length === 0 ? (
+              <p>{ar ? "لا توجد دورات" : "No courses"}</p>
+            ) : (
+              <ul className="apply-list">
+                {ctx.courses.map((c) => (
+                  <li key={c.id}>
+                    <span dir="auto">{lang === "ar" ? c.title_ar : c.title_en || c.title_ar}</span>
+                    <b>{Math.round(c.progress)}%</b>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
 
-      {/* Certificates */}
-      <Card className="p-5">
-        <h2 className="text-base font-semibold text-foreground mb-2">
-          {t.applyCertificatesSection}
-        </h2>
-        {ctx.certificates.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {lang === "ar" ? "لا توجد شهادات" : "No certificates"}
-          </p>
-        ) : (
-          <ul className="space-y-1 text-sm">
-            {ctx.certificates.map((c) => (
-              <li key={c.id} className="flex items-center justify-between gap-2">
-                <span className="text-foreground" dir="auto">
-                  {lang === "ar" ? c.course_title_ar : c.course_title_en || c.course_title_ar}
-                </span>
-                <span className="font-mono text-xs text-muted-foreground">{c.serial}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+          <article className="pro-card">
+            <h2>{t.applyCertificatesSection}</h2>
+            {ctx.certificates.length === 0 ? (
+              <p>{ar ? "لا توجد شهادات" : "No certificates"}</p>
+            ) : (
+              <ul className="apply-list">
+                {ctx.certificates.map((c) => (
+                  <li key={c.id}>
+                    <span dir="auto">{lang === "ar" ? c.course_title_ar : c.course_title_en || c.course_title_ar}</span>
+                    <b dir="ltr">{c.serial}</b>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
 
-      {/* Additional questions */}
-      {ctx.opportunity.questions.length > 0 && (
-        <Card className="p-5 space-y-4">
-          <h2 className="text-base font-semibold text-foreground">
-            {t.applyQuestionsSection}
-          </h2>
-          {ctx.opportunity.questions.map((q) => {
-            const label = lang === "ar" ? q.label_ar : q.label_en || q.label_ar;
-            const help = lang === "ar" ? q.help_ar : q.help_en;
-            const a = answers[q.id] ?? {};
-            const setText = (v: string) =>
-              setAnswers((prev) => ({ ...prev, [q.id]: { ...prev[q.id], text: v } }));
-            const setSelected = (v: string[]) =>
-              setAnswers((prev) => ({ ...prev, [q.id]: { ...prev[q.id], selected: v } }));
-            return (
-              <div key={q.id} className="space-y-2">
-                <Label className="text-sm">
-                  <span dir="auto">{label}</span>
-                  {q.is_required && <span className="text-destructive"> *</span>}
-                </Label>
-                {help && (
-                  <p className="text-xs text-muted-foreground" dir="auto">
-                    {help}
-                  </p>
-                )}
-                {q.kind === "long_text" ? (
-                  <Textarea
-                    value={a.text ?? ""}
-                    onChange={(e) => setText(e.target.value)}
-                    rows={4}
-                    dir="auto"
-                  />
-                ) : q.kind === "single_choice" ? (
-                  <div className="space-y-1">
-                    {q.options.map((opt) => (
-                      <label key={opt} className="flex items-center gap-2 text-sm">
-                        <input
-                          type="radio"
-                          name={q.id}
-                          checked={a.selected?.[0] === opt}
-                          onChange={() => setSelected([opt])}
-                        />
-                        <span dir="auto">{opt}</span>
-                      </label>
-                    ))}
+          {ctx.opportunity.questions.length > 0 && (
+            <article className="pro-card">
+              <h2>{t.applyQuestionsSection}</h2>
+              {ctx.opportunity.questions.map((q) => {
+                const label = lang === "ar" ? q.label_ar : q.label_en || q.label_ar;
+                const help = lang === "ar" ? q.help_ar : q.help_en;
+                const a = answers[q.id] ?? {};
+                const inputId = `q-${q.id}`;
+                const setText = (v: string) =>
+                  setAnswers((prev) => ({ ...prev, [q.id]: { ...prev[q.id], text: v } }));
+                const setSelected = (v: string[]) =>
+                  setAnswers((prev) => ({ ...prev, [q.id]: { ...prev[q.id], selected: v } }));
+                return (
+                  <div key={q.id} className="field">
+                    <label htmlFor={inputId}>
+                      <span dir="auto">{label}</span>
+                      {q.is_required && <span className="req-mark"> *</span>}
+                    </label>
+                    {help && (
+                      <p className="hint" dir="auto">
+                        {help}
+                      </p>
+                    )}
+                    {q.kind === "long_text" ? (
+                      <textarea id={inputId} value={a.text ?? ""} onChange={(e) => setText(e.target.value)} rows={4} dir="auto" />
+                    ) : q.kind === "single_choice" ? (
+                      <div className="choice-list" id={inputId}>
+                        {q.options.map((opt) => (
+                          <label key={opt}>
+                            <input
+                              type="radio"
+                              name={q.id}
+                              checked={a.selected?.[0] === opt}
+                              onChange={() => setSelected([opt])}
+                            />
+                            <span dir="auto">{opt}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ) : q.kind === "multi_choice" ? (
+                      <div className="choice-list" id={inputId}>
+                        {q.options.map((opt) => {
+                          const checked = a.selected?.includes(opt) ?? false;
+                          return (
+                            <label key={opt}>
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={(e) => {
+                                  const cur = new Set(a.selected ?? []);
+                                  if (e.target.checked) cur.add(opt);
+                                  else cur.delete(opt);
+                                  setSelected(Array.from(cur));
+                                }}
+                              />
+                              <span dir="auto">{opt}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <input id={inputId} type="text" value={a.text ?? ""} onChange={(e) => setText(e.target.value)} dir="auto" />
+                    )}
                   </div>
-                ) : q.kind === "multi_choice" ? (
-                  <div className="space-y-1">
-                    {q.options.map((opt) => {
-                      const checked = a.selected?.includes(opt) ?? false;
-                      return (
-                        <label key={opt} className="flex items-center gap-2 text-sm">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={(e) => {
-                              const cur = new Set(a.selected ?? []);
-                              if (e.target.checked) cur.add(opt);
-                              else cur.delete(opt);
-                              setSelected(Array.from(cur));
-                            }}
-                          />
-                          <span dir="auto">{opt}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <Input
-                    value={a.text ?? ""}
-                    onChange={(e) => setText(e.target.value)}
-                    dir="auto"
-                  />
-                )}
-              </div>
-            );
-          })}
-        </Card>
-      )}
-
-      <div className="sticky bottom-4 flex justify-center">
-        <Button
-          size="lg"
-          className="shadow-lg"
-          disabled={cannotApply || submitting}
-          onClick={onSubmit}
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin me-2" />
-              {t.applySubmitting}
-            </>
-          ) : (
-            t.applySubmit
+                );
+              })}
+            </article>
           )}
-        </Button>
-      </div>
-    </div>
+
+          <div className="apply-bar">
+            <button type="button" className="auth-submit" disabled={cannotApply || submitting} onClick={onSubmit}>
+              {submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t.applySubmitting}
+                </>
+              ) : (
+                t.applySubmit
+              )}
+            </button>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
 
-function ReviewRow({
-  label,
-  value,
-  multiline,
-}: {
-  label: string;
-  value?: string | null;
-  multiline?: boolean;
-}) {
+function ReviewRow({ label, value }: { label: string; value?: string | null }) {
   return (
-    <div className="grid grid-cols-3 gap-2 text-sm">
-      <div className="text-muted-foreground">{label}</div>
-      <div
-        className={`col-span-2 text-foreground ${multiline ? "whitespace-pre-wrap" : ""}`}
-        dir="auto"
-      >
-        {value?.trim() ? value : <span className="text-muted-foreground">—</span>}
-      </div>
+    <div>
+      <dt>{label}</dt>
+      <dd dir="auto">{value?.trim() ? value : "—"}</dd>
     </div>
   );
 }
@@ -399,18 +361,15 @@ function BlockNotice({
   else if (reason === "profile_incomplete") msg = t.applyProfileIncomplete;
 
   return (
-    <Card className="p-4 border-destructive/40 bg-destructive/5">
-      <p className="text-sm text-foreground">{msg}</p>
+    <div className="enroll-note is-pending">
+      <span>{msg}</span>
       {(reason === "profile_incomplete" ||
         ctx.missing_required_profile_fields.length > 0 ||
         ctx.cv_missing) && (
-        <Link
-          to="/learning-management-system/profile"
-          className="mt-2 inline-block text-sm text-primary underline"
-        >
+        <Link to="/learning-management-system/profile" className="action action-secondary">
           {t.applyProfileIncompleteAction}
         </Link>
       )}
-    </Card>
+    </div>
   );
 }

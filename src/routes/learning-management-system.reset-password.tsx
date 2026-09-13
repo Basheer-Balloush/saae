@@ -4,16 +4,16 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, KeyRound } from "lucide-react";
 import { PASSWORD_MIN } from "@/lib/password-policy";
 import { localizeAuthError } from "@/lib/auth-error-i18n";
+import { AuthLayout } from "@/components/lms-skin/AuthLayout";
+import { PasswordInput } from "@/components/lms-skin/PasswordInput";
+import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/reset-password")({
-  head: () => ({ meta: [{ title: "LMS · Reset password" }] }),
+  head: () => ({ meta: [{ title: "LMS · Reset password" }], links: LMS_SKIN_LINKS }),
   component: ResetPage,
 });
 
@@ -45,26 +45,22 @@ function ResetPage() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center px-6 py-10">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-soft">
-        <div className="flex flex-col items-center text-center">
-          <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <KeyRound className="h-6 w-6" />
-          </span>
-        </div>
-        <h1 className="mt-3 text-xl font-bold text-foreground text-center">{tr.resetTitle}</h1>
+    <AuthLayout titleId="auth-title">
+      <span className="auth-icon" aria-hidden="true">
+        <KeyRound />
+      </span>
+      <h1 id="auth-title">{tr.resetTitle}</h1>
 
-        <form onSubmit={onSubmit} className="mt-5 space-y-3">
-          <div>
-            <Label htmlFor="password">{tr.newPassword}</Label>
-            <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} dir="ltr" />
-          </div>
-          <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-            {tr.updatePassword}
-          </Button>
-        </form>
-      </div>
-    </div>
+      <form onSubmit={onSubmit}>
+        <div className="field">
+          <label htmlFor="password">{tr.newPassword}</label>
+          <PasswordInput id="password" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+        </div>
+        <button type="submit" className="auth-submit" disabled={submitting}>
+          {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+          {tr.updatePassword}
+        </button>
+      </form>
+    </AuthLayout>
   );
 }

@@ -1,78 +1,34 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { toast } from "sonner";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import {
-  ArrowRight,
-  BookOpen,
-  Code2,
-  Brain,
-  Briefcase,
-  Palette,
-  LineChart,
-  Megaphone,
-  Camera,
-  Languages,
-  Music,
-  HeartPulse,
-  Cpu,
-  Database,
-  type LucideIcon,
-} from "lucide-react";
-import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
-import { Button } from "@/components/ui/button";
+import type { CourseCardData } from "@/components/lms/CourseCard";
+import { PAGE_SIZE } from "@/lib/lms-catalog-search";
+import { SkinCourseCard } from "@/components/lms-skin/SkinCourseCard";
+import { CategoriesCarousel } from "@/components/lms-skin/CategoriesCarousel";
+import { FaqAccordion } from "@/components/lms-skin/FaqAccordion";
+import { Counter, Reveal } from "@/components/lms-skin/Reveal";
+import { IconSearch } from "@/components/lms-skin/icons";
+import { LMS_SKIN_LINKS, categoryTone } from "@/components/lms-skin/skin";
 
-// Icon mapping for category slugs (fallback: BookOpen)
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  programming: Code2,
-  development: Code2,
-  "web-development": Code2,
-  ai: Brain,
-  "artificial-intelligence": Brain,
-  "machine-learning": Brain,
-  "data-science": Database,
-  data: Database,
-  business: Briefcase,
-  entrepreneurship: Briefcase,
-  design: Palette,
-  "ui-ux": Palette,
-  marketing: Megaphone,
-  finance: LineChart,
-  photography: Camera,
-  languages: Languages,
-  music: Music,
-  health: HeartPulse,
-  technology: Cpu,
-};
-
-// Category card surfaces — cycled by category index
-const CATEGORY_SURFACES = [
-  "var(--category-card-1)",
-  "var(--category-card-2)",
-  "var(--category-card-3)",
-  "var(--category-card-4)",
-  "var(--category-card-5)",
-  "var(--category-card-6)",
-];
+type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
+type HomeCourse = CourseCardData & { category_id?: string | null };
 
 export const Route = createFileRoute("/learning-management-system/")({
   loader: async () => {
-    const { data: cats } = await supabase
-      .from("lms_categories")
-      .select("id, name_ar, name_en, slug")
-      .order("display_order");
-    const [{ data: statsRows }, { data: courseRows }] = await Promise.all([
+    const [{ data: cats }, { data: statsRows }, { data: listRows }] = await Promise.all([
+      supabase.from("lms_categories").select("id, name_ar, name_en, slug").order("display_order"),
       supabase.rpc("lms_public_stats"),
-      supabase.from("lms_courses").select("category_id").eq("status", "published"),
+      supabase.rpc("lms_list_catalog_public", { _limit: PAGE_SIZE, _offset: 0 }),
     ]);
     const s = (
       statsRows as { courses: number; students: number; instructors: number }[] | null
     )?.[0];
+    // Visitors cannot read lms_courses directly (RLS), so count from the
+    // public catalog list, which carries each course's category.
     const counts: Record<string, number> = {};
-    ((courseRows as { category_id: string | null }[]) ?? []).forEach((r) => {
+    ((listRows as unknown as HomeCourse[]) ?? []).forEach((r) => {
       if (r.category_id) counts[r.category_id] = (counts[r.category_id] ?? 0) + 1;
     });
     return {
@@ -83,6 +39,7 @@ export const Route = createFileRoute("/learning-management-system/")({
         instructors: Number(s?.instructors ?? 0),
       },
       coursesByCategory: counts,
+      courses: ((listRows as unknown as HomeCourse[]) ?? []),
     };
   },
   head: () => ({
@@ -108,23 +65,27 @@ export const Route = createFileRoute("/learning-management-system/")({
           "Browse AI, programming, design and business courses on the SAAE Training and Learning Platform.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://aisyria.org/learning-management-system" }],
+    links: [{ rel: "canonical", href: "https://aisyria.org/learning-management-system" }, ...LMS_SKIN_LINKS],
   }),
   component: LmsHome,
 });
 
-type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
+/* Searches that match real course titles in both languages. */
+const POPULAR = [
+  { query: "الذكاء الاصطناعي التوليدي", en: "Generative AI", ar: "الذكاء الاصطناعي التوليدي" },
+  { query: "Vibe Coding", en: "Vibe Coding", ar: "Vibe Coding" },
+  { query: "تسويق", en: "Marketing 360", ar: "تسويق 360" },
+];
 
 function LmsHome() {
-  const { lang, dir } = useLang();
-  const isRtl = dir === "rtl";
-  const tr = lmsT[lang];
+  const { lang } = useLang();
+  const ar = lang === "ar";
   const navigate = useNavigate();
   const { user, loading } = useLmsAuth();
-  const loaderData = Route.useLoaderData();
-  const categories = loaderData.categories as Category[];
-  const stats = loaderData.stats as { courses: number; students: number; instructors: number };
-  const coursesByCategory = loaderData.coursesByCategory as Record<string, number>;
+  const { categories, stats, coursesByCategory, courses } = Route.useLoaderData();
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("all");
+  const coursesRef = useRef<HTMLElement>(null);
 
   // Redirect authenticated users to their profile (My Profile is their home).
   useEffect(() => {
@@ -133,233 +94,231 @@ function LmsHome() {
     }
   }, [loading, user, navigate]);
 
-  return (
-    <div className="flex flex-col">
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border bg-gradient-to-br from-primary/10 via-background to-accent/10 py-20 sm:py-28 lg:py-36 min-h-[60vh] flex items-center">
-        {/* Animated blurred background blobs */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-32 -left-24 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl animate-blob-1" />
-          <div className="absolute top-1/3 -right-32 h-[32rem] w-[32rem] rounded-full bg-accent/30 blur-3xl animate-blob-2" />
-          <div className="absolute -bottom-40 left-1/3 h-[26rem] w-[26rem] rounded-full bg-primary/20 blur-3xl animate-blob-3" />
-          <div className="absolute top-1/2 left-1/2 h-[18rem] w-[18rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/20 blur-2xl animate-blob-4" />
-        </div>
+  const catName = (c: Category) => (ar ? c.name_ar : c.name_en || c.name_ar);
+  const toneById = useMemo(() => new Map(categories.map((c, i) => [c.id, categoryTone(i)])), [categories]);
+  const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
 
-        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 text-center w-full">
-          <h1 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
-            {tr.heroTitle}
-          </h1>
-          <p className="mt-6 max-w-3xl mx-auto text-base sm:text-lg lg:text-xl text-muted-foreground">
-            {tr.heroSubtitle}
-          </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Link to="/learning-management-system/catalog">
-              <Button size="lg" className="gap-2 h-12 px-7 text-base">
-                {tr.heroBrowse} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
-              </Button>
-            </Link>
+  const shown = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return courses.filter((c) => {
+      if (filter !== "all" && c.category_id !== filter) return false;
+      if (!q) return true;
+      const cat = c.category_id ? categoryById.get(c.category_id) : undefined;
+      return `${c.title_ar} ${c.title_en ?? ""} ${cat?.name_ar ?? ""} ${cat?.name_en ?? ""}`.toLowerCase().includes(q);
+    });
+  }, [courses, filter, query, categoryById]);
+
+  const scrollToCourses = () => coursesRef.current?.scrollIntoView({ behavior: "smooth" });
+
+  const carousel = categories.map((c, i) => ({
+    id: c.id,
+    name: catName(c),
+    count: coursesByCategory[c.id] ?? 0,
+    tone: categoryTone(i),
+  }));
+
+  return (
+    <>
+      {/* HERO — headline + search. */}
+      <section className="lms-hero" aria-labelledby="lms-title">
+        <div className="hero-grid" aria-hidden="true" />
+        <div className="page-shell lms-hero-inner">
+          <div className="lms-hero-copy">
+            <h1 id="lms-title" className="sr-only">
+              {ar ? "تعلّم بلا حدود" : "Learn without limits"}
+            </h1>
+            <p className="lms-hero-title" aria-hidden="true">
+              {ar ? (
+                <>
+                  تعلّم <em>بلا حدود</em>
+                </>
+              ) : (
+                <>
+                  Learn <em>without limits</em>
+                </>
+              )}
+            </p>
+            <p className="lms-hero-lede">
+              {ar
+                ? "ذكاء اصطناعي وبرمجة وتصميم وأعمال — يدرّسها خبراء بالعربية، بشهادة معتمدة من الجمعية."
+                : "AI, programming, design and business — taught in Arabic by experts, certified by SAAE."}
+            </p>
+            <form
+              className="lms-search"
+              role="search"
+              aria-label={ar ? "ابحث في الدورات" : "Search courses"}
+              onSubmit={(e) => {
+                e.preventDefault();
+                scrollToCourses();
+              }}
+            >
+              <IconSearch />
+              <input
+                type="search"
+                name="q"
+                autoComplete="off"
+                aria-label={ar ? "ابحث في الدورات" : "Search courses"}
+                placeholder={ar ? "ابحث في الدورات والمهارات والمدرّبين…" : "Search courses, skills, instructors…"}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <button type="submit">{ar ? "ابحث" : "Search"}</button>
+            </form>
+            <p className="lms-popular">
+              <span>{ar ? "الرائج:" : "Popular:"}</span>
+              {POPULAR.map((p) => (
+                <button key={p.query} type="button" onClick={() => setQuery(p.query)}>
+                  <span>{ar ? p.ar : p.en}</span>
+                </button>
+              ))}
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Stats — Achievements-style */}
-      <section className="relative overflow-hidden bg-background py-14 sm:py-20 lg:py-32">
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
-          <div className="grid items-center gap-10 sm:gap-14 lg:grid-cols-12 lg:gap-16">
-            {/* Headline column */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.6 }}
-              className="lg:col-span-5"
-            >
-              <h2
-                className="mt-4 text-3xl sm:text-4xl lg:text-display-1 text-foreground"
-                style={{
-                  fontFamily: '"Cairo", system-ui, sans-serif',
-                  fontWeight: 900,
-                  lineHeight: isRtl ? 1.45 : 1.02,
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                {lang === "ar" ? "أرقامنا تحكي قصّتنا" : "Our numbers tell our story"}
-              </h2>
-              <p className="mt-4 sm:mt-6 max-w-lg text-sm sm:text-body text-muted-foreground">
-                {lang === "ar"
-                  ? "منصة تعليمية متنامية تجمع المتعلّمين والمدرّبين حول محتوى عربي عالي الجودة في الذكاء الاصطناعي وريادة الأعمال."
-                  : "A growing learning platform bringing learners and instructors together around high-quality Arabic content in AI and entrepreneurship."}
-              </p>
-              <div className="mt-6 sm:mt-8 h-[3px] w-20 bg-gradient-brand" />
-            </motion.div>
-
-            {/* Stat grid */}
-            <div className="lg:col-span-7">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-x-8 sm:gap-y-10">
-                <LmsStatCard
-                  value={`+${stats.courses.toLocaleString()}`}
-                  label={tr.statCourses}
-                  index={0}
-                  heightClass="min-h-[160px] sm:min-h-[220px] lg:min-h-[300px]"
-                  isRtl={isRtl}
-                />
-                <LmsStatCard
-                  value={`+${stats.students.toLocaleString()}`}
-                  label={tr.statStudents}
-                  index={1}
-                  heightClass="min-h-[140px] sm:min-h-[180px] lg:min-h-[200px]"
-                  isRtl={isRtl}
-                />
-                <LmsStatCard
-                  value={`+${stats.instructors.toLocaleString()}`}
-                  label={tr.statInstructors}
-                  index={2}
-                  heightClass="min-h-[140px] sm:min-h-[180px] lg:min-h-[200px] sm:col-span-2"
-                  isRtl={isRtl}
-                />
+      {/* STATS — the circuit-board numbers band. */}
+      <section className="lms-stats" aria-labelledby="stats-title">
+        <div className="page-shell">
+          <h2 id="stats-title" className="sr-only">
+            {ar ? "أرقامنا تحكي قصّتنا" : "Our numbers tell the story"}
+          </h2>
+          <Reveal className="stats-wrap">
+            <svg className="stats-circuit" viewBox="0 0 1160 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <g className="circuit-traces">
+                <path d="M-10 210 H240 V150 H420 V80 H640 V40 H880" />
+                <path d="M60 270 V190 H300 V120 H560 V170 H820 V230 H1040" />
+                <path d="M1170 50 H980 V110 H800 V60 H620" />
+                <path d="M1170 190 H1010 V240 H700 V200 H520 V150" />
+                <path d="M180 -10 V60 H360 V130 H180 V200" />
+                <path d="M480 -10 V70 H660 V140 H900 V90 H1100" />
+              </g>
+              <g className="circuit-nodes">
+                <circle cx="240" cy="150" r="4" />
+                <circle cx="640" cy="40" r="4" />
+                <circle cx="300" cy="120" r="4" />
+                <circle cx="820" cy="230" r="4" />
+                <circle cx="980" cy="110" r="4" />
+                <circle cx="620" cy="60" r="4" />
+                <circle cx="360" cy="130" r="4" />
+                <circle cx="900" cy="90" r="4" />
+                <circle cx="520" cy="150" r="4" />
+              </g>
+              <g className="circuit-pulses">
+                <path className="circuit-pulse p1" d="M-10 210 H240 V150 H420 V80 H640 V40 H880" />
+                <path className="circuit-pulse p2" d="M60 270 V190 H300 V120 H560 V170 H820 V230 H1040" />
+                <path className="circuit-pulse p3" d="M1170 50 H980 V110 H800 V60 H620" />
+              </g>
+            </svg>
+            <dl className="stats-band">
+              <div>
+                <dt>{ar ? "دورة" : "Courses"}</dt>
+                <dd>
+                  <Counter value={stats.courses} suffix="+" />
+                </dd>
               </div>
-            </div>
-          </div>
+              <div>
+                <dt>{ar ? "طالب" : "Students"}</dt>
+                <dd>
+                  <Counter value={stats.students} suffix="+" />
+                </dd>
+              </div>
+              <div>
+                <dt>{ar ? "مدرّب" : "Trainers"}</dt>
+                <dd>
+                  <Counter value={stats.instructors} suffix="+" />
+                </dd>
+              </div>
+            </dl>
+          </Reveal>
         </div>
       </section>
 
-      {/* Categories — large gradient cards */}
-      <section className="py-16 sm:py-24 bg-muted/20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-                {tr.categories}
-              </h2>
-              <p className="mt-2 text-sm sm:text-base text-muted-foreground">
-                {lang === "ar"
-                  ? "اختر مجالك وابدأ رحلتك التعليميّة"
-                  : "Pick your field and start your learning journey"}
-              </p>
-            </div>
-            <Link
-              to="/learning-management-system/catalog"
-              className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+      {/* CATEGORIES — 3D carousel; Browse filters the courses below. */}
+      <CategoriesCarousel
+        categories={carousel}
+        onBrowse={(id) => {
+          setFilter(id);
+          scrollToCourses();
+        }}
+      />
+
+      {/* COURSES — live search + category chips. */}
+      <section className="lms-section lms-courses" id="lms-courses" aria-labelledby="courses-title" ref={coursesRef}>
+        <div className="page-shell">
+          <div className="lms-head">
+            <h2 id="courses-title">{ar ? "جديد ورائج" : "New and popular"}</h2>
+            <p>
+              {ar
+                ? "دورات حقيقية من كتالوج الجمعية — بشهادة معتمدة عند الإتمام."
+                : "Real courses from the SAAE catalog — certified on completion."}
+            </p>
+          </div>
+          <div className="course-filters" role="group" aria-label={ar ? "تصفية الدورات" : "Filter courses"}>
+            {[{ id: "all", label: ar ? "الكل" : "All" }, ...categories.map((c) => ({ id: c.id, label: catName(c) }))].map((f) => (
+              <button key={f.id} type="button" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
+                <span>{f.label}</span>
+              </button>
+            ))}
+          </div>
+          <p className="course-count" role="status">
+            <b>{shown.length}</b> <span>{ar ? "دورة" : shown.length === 1 ? "course" : "courses"}</span>
+          </p>
+          <ul className="course-grid">
+            {shown.map((c) => (
+              <SkinCourseCard key={c.id} course={c} tone={toneById.get(c.category_id ?? "") ?? "ai"} />
+            ))}
+          </ul>
+          <p className="course-empty" hidden={shown.length > 0}>
+            {ar ? "لا توجد دورات مطابقة لبحثك بعد — جرّب كلمة أخرى." : "No courses match your search yet — try another word."}
+          </p>
+          <p className="courses-more">
+            <Link className="action action-secondary" to="/learning-management-system/catalog">
+              <span>{ar ? "عرض الكتالوج الكامل" : "View the full catalog"}</span> <span aria-hidden="true">{ar ? "←" : "→"}</span>
+            </Link>
+          </p>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="lms-section" aria-labelledby="faq-title">
+        <div className="page-shell lms-faq">
+          <div className="lms-head">
+            <h2 id="faq-title">{ar ? "الأسئلة الشائعة" : "Frequently asked questions"}</h2>
+          </div>
+          <FaqAccordion />
+        </div>
+      </section>
+
+      {/* CLOSING */}
+      <section className="lms-closing" aria-labelledby="closing-title">
+        <Reveal className="page-shell lms-closing-copy">
+          <h2 id="closing-title">
+            <span>{ar ? "مهارتك التالية" : "Your next skill"}</span>
+            <br />
+            <span>{ar ? "تبدأ بدورة واحدة" : "starts with one course"}</span>
+          </h2>
+          <p>
+            {ar
+              ? `انضم إلى أكثر من ${stats.students} متعلماً يدرسون بالعربية.`
+              : `Join ${stats.students}+ learners already studying in Arabic.`}
+          </p>
+          <div className="lms-closing-actions">
+            <a
+              className="action action-primary"
+              href="#lms-courses"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToCourses();
+              }}
             >
-              {tr.viewAll}
-              <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+              <span>{ar ? "تصفح الدورات" : "Browse courses"}</span> <span aria-hidden="true">↓</span>
+            </a>
+            <Link className="action action-secondary" to="/learning-management-system/signup">
+              <span>{ar ? "أنشئ حساباً" : "Create account"}</span> <span aria-hidden="true">{ar ? "←" : "→"}</span>
             </Link>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-            {categories.map((c, i) => {
-              const Icon = CATEGORY_ICONS[c.slug] ?? BookOpen;
-              const surface = CATEGORY_SURFACES[i % CATEGORY_SURFACES.length];
-              const count = coursesByCategory[c.id] ?? 0;
-              return (
-                <motion.div
-                  key={c.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.5, delay: (i % 6) * 0.06 }}
-                >
-                  <Link
-                    to="/learning-management-system/catalog"
-                    search={{ q: "", category: c.slug, level: "", price: "", page: 1 }}
-                    className="group relative block overflow-hidden rounded-3xl border border-white/20 min-h-[200px] sm:min-h-[220px] p-6 sm:p-7 shadow-lift transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                    style={{ background: surface }}
-                  >
-                    <div
-                      aria-hidden
-                      className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.24)_0%,rgba(255,255,255,0.05)_38%,rgba(0,0,0,0.16)_100%)]"
-                    />
-                    <div
-                      aria-hidden
-                      className={`absolute -top-10 ${isRtl ? "-left-10" : "-right-10"} h-40 w-40 rounded-full bg-white/18 blur-3xl transition-opacity group-hover:opacity-70`}
-                    />
-                    <div className="relative flex h-full flex-col justify-between">
-                      <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/25 backdrop-blur-sm text-white shadow-inner ring-1 ring-white/30">
-                        <Icon className="h-7 w-7" strokeWidth={1.75} />
-                      </div>
-                      <div className="mt-8">
-                        <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight drop-shadow-sm">
-                          {lang === "ar" ? c.name_ar : c.name_en || c.name_ar}
-                        </h3>
-                        <div className="mt-2 flex items-center justify-between">
-                          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-white/90">
-                            <BookOpen className="h-3.5 w-3.5" />
-                            {count} {lang === "ar" ? "دورة" : count === 1 ? "course" : "courses"}
-                          </span>
-                          <ArrowRight
-                            className={`h-5 w-5 text-white transition-transform duration-300 ${
-                              isRtl
-                                ? "-scale-x-100 group-hover:-translate-x-1"
-                                : "group-hover:translate-x-1"
-                            }`}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
+        </Reveal>
       </section>
-    </div>
-  );
-}
-
-function LmsStatCard({
-  value,
-  label,
-  index,
-  heightClass,
-  isRtl,
-}: {
-  value: string;
-  label: string;
-  index: number;
-  heightClass: string;
-  isRtl: boolean;
-}) {
-  const PADDING = 28;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.55, delay: index * 0.07 }}
-      className={`group relative flex flex-col justify-center overflow-hidden rounded-2xl bg-muted/40 dark:bg-muted/20 ${heightClass}`}
-      style={{ padding: `${PADDING}px` }}
-    >
-      <div className={`flex flex-col ${isRtl ? "items-end text-right" : "items-start text-left"}`}>
-        <span
-          className="block leading-none"
-          style={{
-            color: "#048090",
-            fontFamily: '"Cairo", system-ui, sans-serif',
-            fontWeight: 900,
-            letterSpacing: "-0.03em",
-            fontSize: "clamp(2.75rem, 5vw, 4rem)",
-          }}
-        >
-          {value}
-        </span>
-        <span
-          aria-hidden
-          className="mt-5 block h-[2px] w-full"
-          style={{ backgroundColor: "#048090" }}
-        />
-        <span
-          className="mt-5 block text-muted-foreground"
-          style={{
-            fontFamily: '"Cairo", system-ui, sans-serif',
-            fontWeight: 400,
-            fontSize: "14px",
-            letterSpacing: "0.01em",
-          }}
-        >
-          {label}
-        </span>
-      </div>
-    </motion.div>
+    </>
   );
 }

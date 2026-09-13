@@ -2,16 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarClock,
-  Clock3,
-  Loader2,
-  MapPin,
-  Users,
-  Wallet,
-} from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { useLang } from "@/lib/i18n";
 import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
@@ -21,8 +12,8 @@ import {
   isApplyOpen,
   type PublicInternshipDetail,
 } from "@/lib/lms-internships-public.functions";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { SubHero } from "@/components/lms-skin/SubHero";
+import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
 const detailQueryKey = (slug: string) => ["public-internship", slug] as const;
 
@@ -46,6 +37,7 @@ export const Route = createFileRoute("/learning-management-system/internships/$s
           { title: "Internship — SAAE" },
           { name: "robots", content: "noindex" },
         ],
+        links: LMS_SKIN_LINKS,
       };
     }
     const d = loaderData as PublicInternshipDetail;
@@ -74,7 +66,7 @@ export const Route = createFileRoute("/learning-management-system/internships/$s
             ]
           : [{ name: "twitter:card", content: "summary" }]),
       ],
-      links: [{ rel: "canonical", href: url }],
+      links: [{ rel: "canonical", href: url }, ...LMS_SKIN_LINKS],
       scripts: [
         {
           type: "application/ld+json",
@@ -113,15 +105,27 @@ export const Route = createFileRoute("/learning-management-system/internships/$s
 
 function CenteredSpinner() {
   return (
-    <div className="flex items-center justify-center py-24">
-      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-    </div>
+    <section className="lms-subhero lms-hero">
+      <div className="page-shell">
+        <p className="state-box">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </p>
+      </div>
+    </section>
   );
 }
 
+/* Requirements arrive as free text; each non-empty line becomes a step. */
+const toLines = (text: string) =>
+  text
+    .split(/\r?\n/)
+    .map((l) => l.replace(/^\s*(?:[-•*▪·]|\d+[.)-])\s*/, "").trim())
+    .filter(Boolean);
+
 function InternshipDetail() {
   const { slug } = Route.useParams();
-  const { lang, dir } = useLang();
+  const { lang } = useLang();
+  const ar = lang === "ar";
   const t = lmsInternshipsT[lang];
   const { user } = useLmsAuth();
   const getFn = useServerFn(getPublicInternshipBySlug);
@@ -138,6 +142,7 @@ function InternshipDetail() {
   const d = data as PublicInternshipDetail;
 
   const title = lang === "ar" ? d.title_ar : d.title_en || d.title_ar;
+  const summary = lang === "ar" ? d.summary_ar : d.summary_en;
   const description = lang === "ar" ? d.description_ar : d.description_en;
   const requirements = lang === "ar" ? d.requirements_ar : d.requirements_en;
   const location = lang === "ar" ? d.location_ar : d.location_en;
@@ -146,7 +151,6 @@ function InternshipDetail() {
 
   const open = isApplyOpen(d);
   const isClosed = d.status === "closed";
-  const Arrow = dir === "rtl" ? ArrowRight : ArrowLeft;
 
   const applyHref = user
     ? `/learning-management-system/internships/${d.slug}/apply`
@@ -154,144 +158,143 @@ function InternshipDetail() {
         `/learning-management-system/internships/${d.slug}/apply`,
       )}`;
 
+  const facts = [
+    location && { label: t.internshipLocation, value: location },
+    duration && { label: t.internshipDuration, value: duration },
+    stipend && { label: t.internshipStipend, value: stipend },
+    d.deadline_at && {
+      label: t.internshipDeadline,
+      value: new Date(d.deadline_at).toLocaleString(lang, { dateStyle: "long", timeStyle: "short" }),
+    },
+    typeof d.capacity === "number" && d.capacity > 0 && { label: ar ? "السّعة" : "Capacity", value: String(d.capacity) },
+  ].filter((f): f is { label: string; value: string } => !!f);
+  const reqLines = requirements ? toLines(requirements) : [];
+
   return (
-    <article className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12" dir={dir}>
-      <Link
-        to="/learning-management-system/internships"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-6"
+    <>
+      <SubHero
+        id="intern-detail-title"
+        eyebrow={t.internshipsTitle}
+        titleSpans={[title]}
+        titleClassName="course-page-title"
+        lede={summary ?? undefined}
+        before={
+          <nav className="course-crumbs" aria-label={ar ? "أنت هنا" : "You are here"}>
+            <Link to="/learning-management-system/internships">{t.internshipsTitle}</Link>
+            <span aria-hidden="true">/</span>
+            <span dir="auto">{title}</span>
+          </nav>
+        }
+        copyChildren={
+          isClosed ? (
+            <p className="course-tags course-hero-tags">
+              <span>{t.internshipClosed}</span>
+            </p>
+          ) : null
+        }
       >
-        <Arrow className="h-4 w-4" />
-        {t.internshipsTitle}
-      </Link>
+        {d.cover_url ? (
+          <div className="course-hero-cover">
+            <img src={d.cover_url} alt="" />
+          </div>
+        ) : null}
+      </SubHero>
 
-      {d.cover_url && (
-        <div className="mb-6 aspect-[21/9] w-full overflow-hidden rounded-2xl bg-muted">
-          <img src={d.cover_url} alt="" className="h-full w-full object-cover" />
+      {facts.length > 0 && (
+        <section className="lms-section" aria-label={ar ? "معلومات أساسية" : "Key facts"} style={{ paddingBlock: 0 }}>
+          <div className="page-shell intern-facts">
+            {facts.map((f) => (
+              <p key={f.label} className="pro-card">
+                <span className="side-label">{f.label}</span>
+                <b dir="auto">{f.value}</b>
+              </p>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="lms-section" aria-label={title}>
+        <div className="page-shell course-layout">
+          <div className="course-story">
+            {description ? (
+              <article className="pro-card">
+                <h2>{t.internshipDescription}</h2>
+                <p className="course-desc" dir="auto">
+                  {description}
+                </p>
+              </article>
+            ) : null}
+          </div>
+
+          <aside className="course-side">
+            {reqLines.length > 0 && (
+              <article className="pro-card">
+                <h2>{t.internshipRequirements}</h2>
+                <ol className="req-ladder">
+                  {reqLines.map((line, i) => (
+                    <li key={i} dir="auto">
+                      {line}
+                    </li>
+                  ))}
+                </ol>
+              </article>
+            )}
+            <article className="pro-card">
+              <p className="side-label">{ar ? "التقديم" : "Apply"}</p>
+              <div className="enroll-actions">
+                {open ? (
+                  <a className="action action-primary" href={applyHref}>
+                    {user ? t.internshipApply : t.internshipApplyLoginRequired}
+                  </a>
+                ) : (
+                  <div className="enroll-note is-closed">{isClosed ? t.internshipClosed : t.internshipHidden}</div>
+                )}
+              </div>
+            </article>
+          </aside>
         </div>
-      )}
-
-      <header>
-        <div className="flex flex-wrap items-center gap-2 mb-2">
-          {isClosed && (
-            <Badge variant="outline" className="bg-slate-500/10 text-slate-700 dark:text-slate-300">
-              {t.internshipClosed}
-            </Badge>
-          )}
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight" dir="auto">
-          {title}
-        </h1>
-        {(lang === "ar" ? d.summary_ar : d.summary_en) && (
-          <p className="mt-2 text-muted-foreground" dir="auto">
-            {lang === "ar" ? d.summary_ar : d.summary_en}
-          </p>
-        )}
-      </header>
-
-      <dl className="mt-6 grid gap-3 sm:grid-cols-2 text-sm">
-        {location && <Meta icon={MapPin} label={t.internshipLocation} value={location} />}
-        {duration && <Meta icon={Clock3} label={t.internshipDuration} value={duration} />}
-        {stipend && <Meta icon={Wallet} label={t.internshipStipend} value={stipend} />}
-        {d.deadline_at && (
-          <Meta
-            icon={CalendarClock}
-            label={t.internshipDeadline}
-            value={new Date(d.deadline_at).toLocaleString(lang, { dateStyle: "long", timeStyle: "short" })}
-            valueDir="ltr"
-          />
-        )}
-        {typeof d.capacity === "number" && d.capacity > 0 && (
-          <Meta
-            icon={Users}
-            label={lang === "ar" ? "السّعة" : "Capacity"}
-            value={String(d.capacity)}
-            valueDir="ltr"
-          />
-        )}
-      </dl>
-
-      {description && (
-        <Section title={t.internshipDescription} value={description} />
-      )}
-      {requirements && (
-        <Section title={t.internshipRequirements} value={requirements} />
-      )}
-
-      <div className="mt-10 sticky bottom-4 flex justify-center">
-        {open ? (
-          <a href={applyHref}>
-            <Button size="lg" className="shadow-lg">
-              {user ? t.internshipApply : t.internshipApplyLoginRequired}
-            </Button>
-          </a>
-        ) : (
-          <Button size="lg" disabled variant="outline">
-            {isClosed ? t.internshipClosed : t.internshipHidden}
-          </Button>
-        )}
-      </div>
-    </article>
-  );
-}
-
-function Meta({
-  icon: Icon,
-  label,
-  value,
-  valueDir,
-}: {
-  icon: typeof MapPin;
-  label: string;
-  value: string;
-  valueDir?: "ltr" | "rtl" | "auto";
-}) {
-  return (
-    <div className="flex items-start gap-2 rounded-lg border border-border bg-card px-3 py-2">
-      <Icon className="h-4 w-4 mt-0.5 text-primary" />
-      <div>
-        <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
-        <dd className="text-sm text-foreground" dir={valueDir ?? "auto"}>{value}</dd>
-      </div>
-    </div>
-  );
-}
-
-function Section({ title, value }: { title: string; value: string }) {
-  return (
-    <section className="mt-8">
-      <h2 className="text-lg font-semibold text-foreground mb-2">{title}</h2>
-      <div className="whitespace-pre-wrap text-foreground/90 leading-relaxed" dir="auto">
-        {value}
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
 
 function SlugNotFound() {
-  const { lang, dir } = useLang();
+  const { lang } = useLang();
   const t = lmsInternshipsT[lang];
   return (
-    <div className="mx-auto max-w-lg px-6 py-24 text-center" dir={dir}>
-      <h1 className="text-2xl font-bold text-foreground">
-        {lang === "ar" ? "الفرصة غير متاحة" : "Opportunity unavailable"}
-      </h1>
-      <p className="mt-2 text-muted-foreground">
-        {t.internshipsEmpty}
-      </p>
-      <Link to="/learning-management-system/internships" className="mt-6 inline-block text-primary hover:underline">
-        {t.internshipsTitle}
-      </Link>
-    </div>
+    <SubHero
+      id="intern-missing-title"
+      eyebrow={t.internshipsTitle}
+      titleSpans={[lang === "ar" ? "الفرصة غير متاحة" : "Opportunity unavailable"]}
+      titleClassName="course-page-title"
+      lede={t.internshipsEmpty}
+      copyChildren={
+        <p style={{ marginTop: 28 }}>
+          <Link to="/learning-management-system/internships" className="action action-primary">
+            {t.internshipsTitle}
+          </Link>
+        </p>
+      }
+    />
   );
 }
 
 function SlugError({ reset }: { error: Error; reset: () => void }) {
-  const { lang, dir } = useLang();
+  const { lang } = useLang();
   const t = lmsInternshipsT[lang];
   return (
-    <div className="mx-auto max-w-lg px-6 py-24 text-center" dir={dir}>
-      <p className="text-destructive mb-4">{t.errorLoad}</p>
-      <Button variant="outline" onClick={reset}>{t.errorRetry}</Button>
-    </div>
+    <SubHero
+      id="intern-error-title"
+      eyebrow={t.internshipsTitle}
+      titleSpans={[t.errorLoad]}
+      titleClassName="course-page-title"
+      copyChildren={
+        <p style={{ marginTop: 28 }}>
+          <button type="button" className="action action-primary" onClick={reset}>
+            {t.errorRetry}
+          </button>
+        </p>
+      }
+    />
   );
 }

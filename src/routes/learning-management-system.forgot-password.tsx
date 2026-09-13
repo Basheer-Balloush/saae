@@ -6,12 +6,10 @@ import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { localizeAuthError } from "@/lib/auth-error-i18n";
 import { sendLmsPasswordReset } from "@/lib/lms-auth.functions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import logo from "@/assets/saae-logo.png";
+import { AuthLayout } from "@/components/lms-skin/AuthLayout";
+import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/forgot-password")({
   head: () => ({
@@ -22,6 +20,7 @@ export const Route = createFileRoute("/learning-management-system/forgot-passwor
       { property: "og:title", content: "Forgot Password — SAAE Training and Learning Platform" },
       { property: "og:description", content: "Reset your SAAE Training and Learning Platform password." },
     ],
+    links: LMS_SKIN_LINKS,
   }),
   component: ForgotPage,
 });
@@ -54,42 +53,27 @@ function ForgotPage() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center px-6 py-24">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-soft">
-        <div className="flex flex-col items-center text-center">
-          <img
-            src={logo}
-            alt="SAAE"
-            width={80}
-            height={80}
-            className="h-16 w-auto"
-          />
-        </div>
-        <h1 className="mt-3 text-xl font-bold text-foreground text-center">{tr.forgotTitle}</h1>
-        <p className="mt-1 text-sm text-muted-foreground text-center">{tr.forgotSubtitle}</p>
+    <AuthLayout titleId="auth-title">
+      <h1 id="auth-title">{tr.forgotTitle}</h1>
+      <p className="auth-lede">{tr.forgotSubtitle}</p>
 
-        {sent ? (
-          <p className="mt-6 rounded-xl bg-primary/10 border border-primary/30 p-4 text-sm text-center text-foreground">
-            {tr.resetLinkSent}
-          </p>
-        ) : (
-          <form onSubmit={onSubmit} className="mt-5 space-y-3">
-            <div>
-              <Label htmlFor="email">{tr.email}</Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" />
-            </div>
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-              {tr.sendResetLink}
-            </Button>
-          </form>
-        )}
-        <p className="mt-4 text-center text-sm text-muted-foreground">
-          <Link to="/learning-management-system/login" className="text-primary hover:underline font-medium">
-            {tr.haveAccount}
-          </Link>
-        </p>
-      </div>
-    </div>
+      {sent ? (
+        <p className="auth-note">{tr.resetLinkSent}</p>
+      ) : (
+        <form onSubmit={onSubmit}>
+          <div className="field">
+            <label htmlFor="email">{tr.email}</label>
+            <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" placeholder="name@example.com" />
+          </div>
+          <button type="submit" className="auth-submit" disabled={submitting}>
+            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+            {tr.sendResetLink}
+          </button>
+        </form>
+      )}
+      <p className="auth-alt">
+        <Link to="/learning-management-system/login">{tr.haveAccount}</Link>
+      </p>
+    </AuthLayout>
   );
 }

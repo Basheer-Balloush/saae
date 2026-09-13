@@ -10,8 +10,12 @@ export const LMS_SKIN_LINKS = [
 
 /* Pages move here one at a time as they are redesigned. */
 const SKINNED_PATHS = [
-  /^\/learning-management-system\/catalog$/,
+  /^\/learning-management-system$/,
+  /^\/learning-management-system\/(catalog|verify)$/,
   /^\/learning-management-system\/courses\/[^/]+$/,
+  /^\/learning-management-system\/(login|signup|forgot-password|reset-password)$/,
+  /^\/learning-management-system\/internships(\/[^/]+(\/apply)?)?$/,
+  /^\/learning-management-system\/student(\/requests)?$/,
 ];
 
 export const isSkinnedLmsPath = (pathname: string) => {

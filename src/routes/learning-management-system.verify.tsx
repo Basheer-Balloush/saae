@@ -4,11 +4,12 @@ import { ShieldCheck, ShieldX, Loader2, AlertTriangle, RotateCcw } from "lucide-
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { SubHero } from "@/components/lms-skin/SubHero";
+import { IconCertificate } from "@/components/lms-skin/icons";
+import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/verify")({
-  head: () => ({ meta: [{ title: "LMS · Verify certificate" }] }),
+  head: () => ({ meta: [{ title: "LMS · Verify certificate" }], links: LMS_SKIN_LINKS }),
   component: VerifyPage,
 });
 
@@ -30,6 +31,7 @@ type VerifyState =
 
 function VerifyPage() {
   const { lang } = useLang();
+  const ar = lang === "ar";
   const tr = lmsT[lang];
   const [serial, setSerial] = useState("");
   const [state, setState] = useState<VerifyState>({ status: "idle" });
@@ -73,92 +75,95 @@ function VerifyPage() {
     lang === "ar" ? cert.course_title_ar : cert.course_title_en || cert.course_title_ar;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 sm:px-6 py-12 sm:py-20">
-      <div className="text-center">
-        <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <ShieldCheck className="h-7 w-7" />
-        </div>
-        <h1 className="mt-4 text-3xl font-bold text-foreground">{tr.verifyTitle}</h1>
-        <p className="mt-2 text-muted-foreground">{tr.verifySubtitle}</p>
-      </div>
-
-      <div className="mt-8 flex flex-col sm:flex-row gap-3">
-        <Input
-          placeholder={tr.enterSerial}
-          aria-label={tr.enterSerial}
-          value={serial}
-          maxLength={MAX_SERIAL_LENGTH}
-          disabled={loading}
-          onChange={(e) => setSerial(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              void run();
-            }
+    <>
+      <SubHero
+        id="verify-title"
+        eyebrow={ar ? "الشهادات" : "Certificates"}
+        titleSpans={ar ? ["تحقّق", "من أي شهادة"] : ["Verify", "any certificate"]}
+        lede={
+          ar
+            ? "أدخل الرقم التسلسليّ للتأكّد من صحّة الشهادة — كل شهادة صادرة عن الجمعية تحمل رمز تحقق فريداً يمكن لأصحاب العمل التأكد منه خلال ثوانٍ."
+            : "Enter the serial number to confirm a certificate — every SAAE certificate carries a unique code employers can check in seconds."
+        }
+      >
+        <form
+          className="verify-card"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void run();
           }}
-        />
-        <Button onClick={() => void run()} disabled={!canSubmit} size="lg">
-          {loading && <Loader2 className="h-4 w-4 animate-spin mx-2" aria-hidden="true" />}
-          {tr.verify}
-        </Button>
-      </div>
+        >
+          <label htmlFor="cert-serial">{ar ? "الرقم التسلسلي للشهادة" : "Certificate serial number"}</label>
+          <input
+            id="cert-serial"
+            type="text"
+            autoComplete="off"
+            dir="ltr"
+            placeholder={tr.enterSerial}
+            value={serial}
+            maxLength={MAX_SERIAL_LENGTH}
+            disabled={loading}
+            onChange={(e) => setSerial(e.target.value)}
+          />
+          <button type="submit" disabled={!canSubmit}>
+            {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+            {tr.verify}
+          </button>
+        </form>
+      </SubHero>
 
-      <div aria-live="polite">
-        {state.status === "valid" && (
-          <div className="mt-8 rounded-2xl border border-primary/30 bg-primary/5 p-6">
-            <div className="flex items-center gap-3 text-primary font-bold">
-              <ShieldCheck className="h-5 w-5" aria-hidden="true" />
-              {tr.verifyValid}
-            </div>
-            <dl className="mt-4 space-y-2 text-sm">
-              <div className="flex flex-wrap justify-between gap-4">
-                <dt className="text-muted-foreground">{tr.serial}</dt>
-                <dd className="font-mono text-foreground break-all">{state.cert.serial}</dd>
-              </div>
-              <div className="flex flex-wrap justify-between gap-4">
-                <dt className="text-muted-foreground">{tr.aboutCourse}</dt>
-                <dd className="font-semibold text-foreground break-words" dir="auto">
-                  {courseTitle(state.cert)}
-                </dd>
-              </div>
-              <div className="flex flex-wrap justify-between gap-4">
-                <dt className="text-muted-foreground">{tr.issuedOn}</dt>
-                <dd className="text-foreground">
-                  {new Date(state.cert.issued_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}
-                </dd>
-              </div>
-            </dl>
-          </div>
-        )}
+      <section className="lms-section verify-results" aria-label={tr.verifyTitle}>
+        <div className="page-shell" aria-live="polite">
+          {state.status === "valid" && (
+            <article className="cert-card verify-result">
+              <IconCertificate />
+              <p className="verify-status">
+                <ShieldCheck aria-hidden="true" />
+                {tr.verifyValid}
+              </p>
+              <h3 dir="auto">{courseTitle(state.cert)}</h3>
+              <dl className="course-facts">
+                <div>
+                  <dt>{tr.serial}</dt>
+                  <dd className="cert-code" dir="ltr">
+                    {state.cert.serial}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{tr.issuedOn}</dt>
+                  <dd>{new Date(state.cert.issued_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}</dd>
+                </div>
+              </dl>
+            </article>
+          )}
 
-        {state.status === "invalid" && (
-          <div className="mt-8 rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
-            <div className="flex items-center gap-3 text-destructive font-bold">
-              <ShieldX className="h-5 w-5" aria-hidden="true" />
+          {state.status === "invalid" && (
+            <div className="enroll-note is-invalid verify-result">
+              <ShieldX aria-hidden="true" />
               {tr.verifyInvalid}
             </div>
-          </div>
-        )}
+          )}
 
-        {state.status === "error" && (
-          <div className="mt-8 rounded-2xl border border-border bg-muted/40 p-6">
-            <div className="flex items-center gap-3 font-bold text-foreground">
-              <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+          {state.status === "error" && (
+            <div className="enroll-note is-closed verify-result">
+              <AlertTriangle aria-hidden="true" />
               {tr.verifyError}
+              <button type="button" className="action action-secondary" onClick={() => void run()} disabled={!canSubmit}>
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                {tr.verifyRetry}
+              </button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-4 gap-2"
-              onClick={() => void run()}
-              disabled={!canSubmit}
-            >
-              <RotateCcw className="h-4 w-4" aria-hidden="true" />
-              {tr.verifyRetry}
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
+          )}
+
+          {(state.status === "idle" || state.status === "loading") && (
+            <p className="verify-note">
+              {ar
+                ? "التحقق متاح لأصحاب العمل والجهات — أدخل الرقم كما يظهر على الشهادة."
+                : "Verification is open to employers and organisations — enter the number exactly as it appears on the certificate."}
+            </p>
+          )}
+        </div>
+      </section>
+    </>
   );
 }

@@ -7,30 +7,29 @@ import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { localizeAuthError } from "@/lib/auth-error-i18n";
 import { signUpLmsUser, resendLmsConfirmationEmail } from "@/lib/lms-auth.functions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, MailCheck, Eye, EyeOff } from "lucide-react";
-import logo from "@/assets/saae-logo.png";
+import { Loader2, MailCheck } from "lucide-react";
 import { PASSWORD_MIN, scorePasswordStrength } from "@/lib/password-policy";
 import { lmsRedirectSearchSchema } from "@/lib/lms-redirect";
+import { AuthLayout } from "@/components/lms-skin/AuthLayout";
+import { PasswordInput } from "@/components/lms-skin/PasswordInput";
+import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
 
 export const Route = createFileRoute("/learning-management-system/signup")({
-  head: () => ({ meta: [{ title: "LMS · Sign up" }] }),
+  head: () => ({ meta: [{ title: "LMS · Sign up" }], links: LMS_SKIN_LINKS }),
   validateSearch: (raw: Record<string, unknown>) => lmsRedirectSearchSchema(raw),
   component: LmsSignup,
 });
 
 
-const ARABIC_NAME_RE = /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]+$/;
+const ARABIC_NAME_RE = /^[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿\s]+$/;
 
 function getStrengthInfo(score: number, lang: "ar" | "en") {
   const t = lmsT[lang];
-  if (score <= 2) return { label: t.passwordWeak, color: "bg-red-500", width: `${(score / 6) * 100}%`, textColor: "text-red-500" };
-  if (score <= 4) return { label: t.passwordMedium, color: "bg-amber-500", width: `${(score / 6) * 100}%`, textColor: "text-amber-500" };
-  return { label: t.passwordStrong, color: "bg-green-600", width: `${(score / 6) * 100}%`, textColor: "text-green-600" };
+  if (score <= 2) return { label: t.passwordWeak, color: "bg-red-500", width: `${(score / 6) * 100}%`, textColor: "text-red-400" };
+  if (score <= 4) return { label: t.passwordMedium, color: "bg-amber-500", width: `${(score / 6) * 100}%`, textColor: "text-amber-400" };
+  return { label: t.passwordStrong, color: "bg-green-500", width: `${(score / 6) * 100}%`, textColor: "text-green-400" };
 }
 
 const schema = z.object({
@@ -54,6 +53,7 @@ function LmsSignup() {
   const navigate = useNavigate();
   const { user, loading } = useLmsAuth();
   const { lang } = useLang();
+  const ar = lang === "ar";
   const tr = lmsT[lang];
   const search = Route.useSearch();
   const returnTo = search.redirect;
@@ -61,8 +61,6 @@ function LmsSignup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [asInstructor, setAsInstructor] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ email: string; confirmationRequired: boolean } | null>(null);
@@ -123,167 +121,137 @@ function LmsSignup() {
     }
   };
 
+  const passChecks = [
+    { label: `${PASSWORD_MIN}+`, met: password.length >= PASSWORD_MIN },
+    { label: "abc", met: /[a-z]/.test(password) },
+    { label: "ABC", met: /[A-Z]/.test(password) },
+    { label: "123", met: /[0-9]/.test(password) },
+    { label: "!@#", met: /[^A-Za-z0-9]/.test(password) },
+  ];
+
   return (
-    <div className="flex-1 flex items-center justify-center px-6 py-24">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-soft">
-        <div className="flex flex-col items-center text-center">
-          <img
-            src={logo}
-            alt="SAAE"
-            width={80}
-            height={80}
-            className="h-16 w-auto"
-          />
-        </div>
-        <h1 className="mt-3 text-xl font-bold text-foreground text-center">{tr.signUpTitle}</h1>
-        <p className="mt-1 text-sm text-muted-foreground text-center">{tr.signUpSubtitle}</p>
+    <AuthLayout titleId="auth-title">
+      <h1 id="auth-title">{tr.signUpTitle}</h1>
+      <p className="auth-lede">{tr.signUpSubtitle}</p>
 
-        {result ? (
-          <div className="mt-6 flex flex-col items-center text-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-5">
-            <div className="rounded-full bg-primary/10 p-3">
-              <MailCheck className="h-7 w-7 text-primary" />
+      {result ? (
+        <div className="auth-result">
+          <MailCheck />
+          <h2>
+            {result.confirmationRequired
+              ? (ar ? "تحقّق من بريدك الإلكتروني" : "Check your email")
+              : (ar ? "تم إنشاء حسابك" : "Your account is ready")}
+          </h2>
+          <p>
+            {result.confirmationRequired ? (
+              <>
+                {ar ? "أرسلنا رابط تأكيد إلى" : "We sent a confirmation link to"}{" "}
+                <b dir="ltr">{result.email}</b>
+                {". "}
+                {ar
+                  ? "افتح الرابط لتأكيد بريدك قبل تسجيل الدخول."
+                  : "Open the link to confirm your email before signing in."}
+              </>
+            ) : (
+              <>
+                {ar ? "تم تفعيل الحساب" : "We activated the account for"}{" "}
+                <b dir="ltr">{result.email}</b>
+                {". "}
+                {ar ? "يمكنك تسجيل الدخول مباشرة." : "You can sign in right away."}
+              </>
+            )}
+          </p>
+
+          {result.confirmationRequired && (
+            <button type="button" className="auth-secondary" onClick={onResend} disabled={resending}>
+              {resending && <Loader2 className="h-4 w-4 animate-spin" />}
+              {ar ? "إعادة إرسال رابط التأكيد" : "Resend confirmation email"}
+            </button>
+          )}
+
+          {asInstructor && (
+            <div className="auth-next">
+              <b>{ar ? "⏳ الخطوة التالية: املأ نموذج اعتماد المدرّب" : "⏳ Next step: complete the trainer application"}</b>
+              <span>
+                {ar
+                  ? "سجّل الدخول ثم املأ نموذج طلب الاعتماد (٤ مراحل تقييم: نظري، عملي، تدريب، مقابلة) قبل نشر أي دورة."
+                  : "Sign in and complete the accreditation application (4 evaluation phases) before publishing any course."}
+              </span>
+              <Link to="/learning-management-system/trainer-apply">
+                {ar ? "فتح نموذج طلب الاعتماد ←" : "Open the accreditation form →"}
+              </Link>
             </div>
-            <h2 className="text-base font-semibold text-foreground">
-              {result.confirmationRequired
-                ? (lang === "ar" ? "تحقّق من بريدك الإلكتروني" : "Check your email")
-                : (lang === "ar" ? "تم إنشاء حسابك" : "Your account is ready")}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {result.confirmationRequired ? (
-                <>
-                  {lang === "ar" ? "أرسلنا رابط تأكيد إلى" : "We sent a confirmation link to"}{" "}
-                  <span className="font-semibold text-foreground" dir="ltr">{result.email}</span>
-                  {". "}
-                  {lang === "ar"
-                    ? "افتح الرابط لتأكيد بريدك قبل تسجيل الدخول."
-                    : "Open the link to confirm your email before signing in."}
-                </>
-              ) : (
-                <>
-                  {lang === "ar" ? "تم تفعيل الحساب" : "We activated the account for"}{" "}
-                  <span className="font-semibold text-foreground" dir="ltr">{result.email}</span>
-                  {". "}
-                  {lang === "ar" ? "يمكنك تسجيل الدخول مباشرة." : "You can sign in right away."}
-                </>
-              )}
-            </p>
-
-            {result.confirmationRequired && (
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={onResend}
-                disabled={resending}
-              >
-                {resending && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-                {lang === "ar" ? "إعادة إرسال رابط التأكيد" : "Resend confirmation email"}
-              </Button>
-            )}
-
-
-
-            {asInstructor && (
-              <div className="mt-2 w-full rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-900 dark:text-amber-200 space-y-2">
-                <p className="font-semibold">
-                  {lang === "ar" ? "⏳ الخطوة التالية: املأ نموذج اعتماد المدرّب" : "⏳ Next step: complete the trainer application"}
-                </p>
-                <p className="text-xs opacity-90">
-                  {lang === "ar"
-                    ? "سجّل الدخول ثم املأ نموذج طلب الاعتماد (٤ مراحل تقييم: نظري، عملي، تدريب، مقابلة) قبل نشر أي دورة."
-                    : "Sign in and complete the accreditation application (4 evaluation phases) before publishing any course."}
-
-                </p>
-                <Link
-                  to="/learning-management-system/trainer-apply"
-                  className="inline-block text-xs font-semibold text-primary hover:underline"
-                >
-                  {lang === "ar" ? "فتح نموذج طلب الاعتماد ←" : "Open the accreditation form →"}
-                </Link>
-              </div>
-            )}
-            <Link
-              to="/learning-management-system/login"
-              search={{ redirect: returnTo }}
-              className="mt-2 text-sm text-primary hover:underline font-medium"
-            >
-
+          )}
+          <p className="auth-alt">
+            <Link to="/learning-management-system/login" search={{ redirect: returnTo }}>
               {tr.haveAccount}
             </Link>
-          </div>
-        ) : (
-          <>
-            <form onSubmit={onSubmit} className="mt-5 space-y-3">
-              <div>
-                <Label htmlFor="name">{lang === "ar" ? "الاسم الثلاثي" : "Triple name"}</Label>
-                <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} dir="rtl" placeholder="مثال: محمد أحمد خالد" />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {lang === "ar" ? "ثلاث كلمات باللغة العربية فقط (الاسم، اسم الأب، الكنية)" : "Three Arabic words only (first, father, family)"}
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="email">{tr.email}</Label>
-                <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" />
-              </div>
-              <div>
-                <Label htmlFor="password">{tr.password}</Label>
-                <div className="relative mt-2">
-                  <Input id="password" type={showPassword ? "text" : "password"} autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} dir="ltr" className="pr-10" />
-                  <button type="button" tabIndex={-1} onClick={() => setShowPassword((v) => !v)} className="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground" aria-label={showPassword ? "Hide password" : "Show password"}>
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                {password.length > 0 && (
-                  <div className="mt-2 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">{tr.passwordStrength}</span>
-                      <span className={`text-xs font-semibold ${strengthInfo.textColor}`}>{strengthInfo.label}</span>
-                    </div>
-                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                      <div className={`h-full rounded-full transition-all duration-300 ${strengthInfo.color}`} style={{ width: strengthInfo.width }} />
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${password.length >= PASSWORD_MIN ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>{PASSWORD_MIN}+</span>
-                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[a-z]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>abc</span>
-                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[A-Z]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>ABC</span>
-                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[0-9]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>123</span>
-                      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${/[^A-Za-z0-9]/.test(password) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>!@#</span>
-                    </div>
+          </p>
+        </div>
+      ) : (
+        <>
+          <form onSubmit={onSubmit}>
+            <div className="field">
+              <label htmlFor="name">{ar ? "الاسم الثلاثي" : "Triple name"}</label>
+              <input id="name" type="text" autoComplete="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} dir="rtl" placeholder="مثال: محمد أحمد خالد" />
+              <p className="hint">
+                {ar ? "ثلاث كلمات باللغة العربية فقط (الاسم، اسم الأب، الكنية)" : "Three Arabic words only (first, father, family)"}
+              </p>
+            </div>
+            <div className="field">
+              <label htmlFor="email">{tr.email}</label>
+              <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" placeholder="name@example.com" />
+            </div>
+            <div className="field">
+              <label htmlFor="password">{tr.password}</label>
+              <PasswordInput id="password" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+              {password.length > 0 && (
+                <div className="pass-strength">
+                  <div className="pass-strength-row">
+                    <span>{tr.passwordStrength}</span>
+                    <span className={strengthInfo.textColor}>{strengthInfo.label}</span>
                   </div>
-                )}
-              </div>
-              <div>
-                <Label htmlFor="confirmPassword">{lang === "ar" ? "تأكيد كلمة المرور" : "Confirm password"}</Label>
-                <div className="relative mt-2">
-                  <Input id="confirmPassword" type={showConfirm ? "text" : "password"} autoComplete="new-password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} dir="ltr" className="pr-10" />
-                  <button type="button" tabIndex={-1} onClick={() => setShowConfirm((v) => !v)} className="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground" aria-label={showConfirm ? "Hide password" : "Show password"}>
-                    {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+                  <div className="pass-strength-bar">
+                    <i className={strengthInfo.color} style={{ width: strengthInfo.width }} />
+                  </div>
+                  <div className="pass-chips">
+                    {passChecks.map((c) => (
+                      <span key={c.label} className={c.met ? "is-met" : undefined}>{c.label}</span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col gap-2 rounded-xl border border-border p-3 bg-muted/30">
-                <label className="flex items-center gap-2 cursor-pointer text-sm">
+              )}
+            </div>
+            <div className="field">
+              <label htmlFor="confirmPassword">{ar ? "تأكيد كلمة المرور" : "Confirm password"}</label>
+              <PasswordInput id="confirmPassword" autoComplete="new-password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            </div>
+            <fieldset className="field role-field">
+              <legend>{ar ? "انضم بصفتك" : "Join as"}</legend>
+              <div className="role-seg">
+                <label className="role-opt">
                   <input type="radio" name="role" checked={!asInstructor} onChange={() => setAsInstructor(false)} />
-                  <span className="font-medium text-foreground">{tr.iAmStudent}</span>
+                  <span>{tr.iAmStudent}</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                <label className="role-opt">
                   <input type="radio" name="role" checked={asInstructor} onChange={() => setAsInstructor(true)} />
-                  <span className="font-medium text-foreground">{tr.iAmInstructor}</span>
+                  <span>{tr.iAmInstructor}</span>
+                  <small>{ar ? "يتطلب موافقة" : "Needs approval"}</small>
                 </label>
               </div>
-              <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-                {tr.signUp}
-              </Button>
-            </form>
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-              <Link to="/learning-management-system/login" search={{ redirect: returnTo }} className="text-primary hover:underline font-medium">
-                {tr.haveAccount}
-              </Link>
-            </p>
-          </>
-        )}
-      </div>
-    </div>
+            </fieldset>
+            <button type="submit" className="auth-submit" disabled={submitting}>
+              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {tr.signUp}
+            </button>
+          </form>
+          <p className="auth-alt">
+            <Link to="/learning-management-system/login" search={{ redirect: returnTo }}>
+              {tr.haveAccount}
+            </Link>
+          </p>
+        </>
+      )}
+    </AuthLayout>
   );
 }
