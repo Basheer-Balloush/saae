@@ -27,8 +27,10 @@ type Props = {
 /** Moaz's LMS chrome: ambient ground, language switch, tubelight menu and footer. */
 export function LmsSkinShell({ role, isAuthed, onSignOut, children }: Props) {
   const { lang } = useLang();
+  /* "dark" puts the shared components (buttons, fields, reviews) on the
+     site's dark palette; lms-db.css tints its tokens to the LMS petrol. */
   return (
-    <div className="lms-skin">
+    <div className="lms-skin dark">
       <a className="skip-link" href="#main-content">
         {lang === "ar" ? "تخطَّ إلى المحتوى" : "Skip to content"}
       </a>

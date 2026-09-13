@@ -5,6 +5,83 @@
 
 .lms-skin { position: relative; min-height: 100vh; }
 
+/* Shared components take the site's dark palette through the .dark class
+   on the wrapper; these tokens tint it to the LMS petrol and turquoise. */
+.lms-skin {
+  --background: #06232a;
+  --foreground: #e7f1f0;
+  --card: rgba(12, 48, 58, .7);
+  --card-foreground: #e7f1f0;
+  --muted: rgba(184, 232, 240, .08);
+  --muted-foreground: #9fbabe;
+  --border: rgba(184, 232, 240, .16);
+  --input: rgba(184, 232, 240, .22);
+  --primary: #008b9d;
+  --primary-foreground: #06232a;
+  --ring: #77e0e8;
+}
+
+/* Course page */
+.lms-skin .course-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 18px; color: rgba(231, 241, 240, .6); font-size: .82rem; font-weight: 700; }
+.lms-skin .course-crumbs a { color: var(--lms-cyan); text-decoration: none; }
+.lms-skin .course-crumbs a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.lms-skin .lms-hero-copy h1.course-page-title,
+html[dir] .lms-skin .lms-hero-copy h1.course-page-title { font-size: clamp(2rem, 4.2vw, 3.5rem); line-height: 1.18; overflow-wrap: anywhere; }
+.lms-skin .course-hero-tags { margin-top: 22px; }
+.lms-skin .course-hero-meta { margin-top: 14px; font-size: .9rem; }
+.lms-skin .course-hero-cover { position: relative; display: grid; place-items: center; overflow: hidden; aspect-ratio: 16 / 9; border: 1px solid var(--lms-border); border-radius: 22px; background: linear-gradient(140deg, #0e3a46 0%, #047383 55%, #08333d 100%); box-shadow: 0 30px 80px rgba(1, 12, 16, .5); }
+.lms-skin .course-hero-cover img { width: 100%; height: 100%; object-fit: cover; }
+.lms-skin .course-hero-cover svg { width: 72px; height: 72px; color: rgba(255, 255, 255, .9); }
+
+.lms-skin .course-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); align-items: start; }
+.lms-skin .course-story, .lms-skin .course-side { display: grid; gap: 22px; min-width: 0; }
+.lms-skin .course-side { position: sticky; top: 120px; }
+.lms-skin .course-desc { white-space: pre-line; line-height: 1.9; }
+.lms-skin .course-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 6px 0 0; }
+.lms-skin .course-facts dt, .lms-skin .side-label { color: rgba(184, 232, 240, .62); font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.lms-skin .course-facts dd { margin: 4px 0 0; color: var(--lms-paper); font-weight: 700; overflow-wrap: anywhere; }
+
+.lms-skin .syllabus { display: grid; gap: 12px; }
+.lms-skin .syllabus-section { overflow: hidden; border: 1px solid var(--lms-border); border-radius: 16px; background: rgba(2, 16, 20, .35); }
+.lms-skin .syllabus-section h3 { padding: 14px 18px; background: rgba(184, 232, 240, .06); font-size: 1rem; font-weight: 800; letter-spacing: 0; line-height: 1.5; }
+.lms-skin .syllabus-section ul { margin: 0; padding: 0; list-style: none; }
+.lms-skin .syllabus-section li { display: flex; align-items: center; gap: 12px; padding: 11px 18px; border-top: 1px solid rgba(184, 232, 240, .08); color: rgba(231, 241, 240, .85); font-size: .92rem; }
+.lms-skin .syllabus-section li svg { flex: none; width: 17px; height: 17px; color: var(--lms-muted); }
+.lms-skin .syllabus-section li.is-open svg { color: var(--lms-lift); }
+.lms-skin .lesson-title { flex: 1; min-width: 0; }
+.lms-skin .lesson-preview { color: var(--lms-lift); font-size: .74rem; font-weight: 800; }
+.lms-skin .syllabus-empty { padding: 18px 20px; border: 1px dashed var(--lms-border); border-radius: 16px; color: var(--lms-muted); text-align: center; }
+
+.lms-skin .course-price { color: var(--lms-paper); font-size: 2rem; font-weight: 900; line-height: 1.2; }
+.lms-skin .enroll-actions { display: grid; gap: 12px; }
+.lms-skin .enroll-actions .action { width: 100%; font: inherit; font-size: .9rem; font-weight: 800; cursor: pointer; }
+.lms-skin .enroll-actions .action:disabled { opacity: .6; cursor: default; transform: none; }
+.lms-skin .enroll-note { display: grid; justify-items: center; gap: 6px; padding: 16px; border-radius: 16px; font-size: .9rem; font-weight: 700; line-height: 1.7; text-align: center; }
+.lms-skin .enroll-note svg { width: 20px; height: 20px; }
+.lms-skin .enroll-note.is-open { border: 1px solid rgba(168, 207, 126, .3); background: rgba(168, 207, 126, .12); color: var(--lms-green); }
+.lms-skin .enroll-note.is-pending { border: 1px solid rgba(255, 205, 92, .3); background: rgba(255, 205, 92, .1); color: #ffd97a; }
+.lms-skin .enroll-note.is-closed { border: 1px solid var(--lms-border); background: rgba(184, 232, 240, .06); color: var(--lms-muted); }
+.lms-skin .enroll-hint { color: var(--lms-muted); font-size: .82rem; line-height: 1.7; text-align: center; }
+.lms-skin .enroll-notes { display: grid; gap: 8px; }
+
+.lms-skin .instructor-list { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.lms-skin .instructor-list a { display: flex; align-items: center; gap: 12px; min-width: 0; text-decoration: none; }
+.lms-skin .instructor-avatar { flex: none; display: grid; place-items: center; width: 46px; height: 46px; overflow: hidden; border-radius: 50%; background: linear-gradient(135deg, var(--lms-lift), var(--lms-turquoise)); color: #06232a; font-weight: 900; }
+.lms-skin .instructor-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.lms-skin .instructor-who { min-width: 0; }
+.lms-skin .instructor-who strong { display: block; overflow: hidden; color: var(--lms-paper); font-size: .95rem; text-overflow: ellipsis; white-space: nowrap; }
+.lms-skin .instructor-who span { display: block; color: var(--lms-muted); font-size: .8rem; line-height: 1.6; }
+.lms-skin .instructor-list a:hover strong { color: var(--lms-lift); }
+.lms-skin .skin-reviews > section { margin-top: 0; }
+
+@media (max-width: 1020px) {
+  .lms-skin .course-layout { grid-template-columns: minmax(0, 1fr); }
+  .lms-skin .course-side { position: static; }
+}
+@media (max-width: 680px) {
+  .lms-skin .course-facts { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* Course covers from the database sit over the category gradient. */
 .lms-skin .course-card > a { color: inherit; }
 .lms-skin .course-thumb { aspect-ratio: 16 / 9; }
