@@ -280,3 +280,18 @@ html[dir] .lms-skin .lms-hero-copy h1.course-page-title { font-size: clamp(2rem,
 
 /* CoursePrice brings its own pill; inside a course tag it is plain text. */
 .lms-skin .course-tags > span * { padding: 0; border-radius: 0; background: none; }
+
+/* Instructors and admins carry eight or more menu links, and with every label
+   showing the pill ran off both edges and under the language switch on wide
+   screens. With that many links it goes icon-only at every width, keeping the
+   label on the current page. Labels are hidden visually, not with display:none,
+   so each link keeps its name for screen readers. The first child is the lamp,
+   so a link in position nine means eight links or more. */
+.lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .radial-nav-item:not([aria-current="page"]) .radial-nav-label,
+.lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .tube-auth-label {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+.lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .radial-nav-item,
+.lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .tube-auth { padding: 12px 14px; }
+.lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .radial-nav-item svg,
+.lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .tube-auth svg { width: 19px; height: 19px; }
