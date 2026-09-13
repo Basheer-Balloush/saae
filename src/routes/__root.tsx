@@ -88,8 +88,9 @@ const getHostname = createIsomorphicFn()
   .client(() => window.location.hostname)
   .server(() => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { getRequestHost } =
+        // Server-only conditional import, stripped from the client branch.
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         require("@tanstack/react-start/server") as typeof import("@tanstack/react-start/server");
       const host = getRequestHost({ xForwardedHost: true });
       return host ? String(host).split(":")[0] : null;
@@ -182,9 +183,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
-  const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');var l=localStorage.getItem('saae-lang')||'en';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
+  const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');var l=localStorage.getItem('saae-lang')==='en'?'en':'ar';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM4Y7E9Y96" />
         <script
@@ -260,7 +261,9 @@ function ScrollRestoration() {
     const write = (m: Record<string, number>) => {
       try {
         sessionStorage.setItem(key, JSON.stringify(m));
-      } catch {}
+      } catch {
+        // Scroll restoration remains optional when session storage is blocked.
+      }
     };
     let ticking = false;
     const onScroll = () => {
@@ -284,7 +287,9 @@ function ScrollRestoration() {
     try {
       const m = JSON.parse(sessionStorage.getItem(key) || "{}");
       saved = typeof m[location.pathname] === "number" ? m[location.pathname] : 0;
-    } catch {}
+    } catch {
+      // Start at the top if the stored scroll position is unavailable.
+    }
     requestAnimationFrame(() => {
       window.scrollTo({ top: saved, left: 0, behavior: "auto" });
     });

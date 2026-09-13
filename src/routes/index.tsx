@@ -2,7 +2,7 @@ import React, { Suspense, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import homeHtml from "@/components/cinematic/html/home.html?raw";
 import type { CinematicScript } from "@/components/cinematic/CinematicPage";
-import { MobileHero } from "@/components/home/MobileHero";
+import { MobileHome } from "@/components/home/MobileHome";
 import { useHeroCapability } from "@/hooks/useHeroCapability";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -97,5 +97,5 @@ function Home() {
   // Mobile-first: SSR, first paint, phones and reduced motion get the phone
   // page; only a confirmed desktop mounts the cinematic enhancement.
   if (capability === "desktop") return <DesktopHome html={html} />;
-  return <MobileHero />;
+  return <MobileHome />;
 }

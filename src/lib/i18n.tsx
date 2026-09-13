@@ -12,17 +12,31 @@ type Ctx = {
 const LanguageContext = createContext<Ctx | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => {
-    if (typeof window === "undefined") return "ar";
-    return (localStorage.getItem("saae-lang") as Lang | null) ?? "ar";
-  });
+  // Match the server on the first client render; restore a saved preference
+  // after hydration so translated content cannot mismatch the SSR markup.
+  const [lang, setLangState] = useState<Lang>("ar");
+  const [preferenceLoaded, setPreferenceLoaded] = useState(false);
 
   useEffect(() => {
-    if (typeof document === "undefined") return;
+    try {
+      const saved = localStorage.getItem("saae-lang");
+      if (saved === "ar" || saved === "en") setLangState(saved);
+    } catch {
+      // Storage may be disabled; the language control still works in memory.
+    }
+    setPreferenceLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!preferenceLoaded) return;
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-    if (typeof window !== "undefined") localStorage.setItem("saae-lang", lang);
-  }, [lang]);
+    try {
+      localStorage.setItem("saae-lang", lang);
+    } catch {
+      // Persisting a preference is optional when browser storage is blocked.
+    }
+  }, [lang, preferenceLoaded]);
 
   const value = useMemo<Ctx>(
     () => ({

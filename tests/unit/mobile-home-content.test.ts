@@ -1,0 +1,298 @@
+/**
+ * v3 ("The living tree") mobile-homepage contracts, checked against real
+ * rendered output:
+ *
+ * - MobileHomeView is rendered to static markup directly per language (pure
+ *   props, no provider or global stubs) and anchors are parsed from that
+ *   markup — no hand-built href inventories.
+ * - Rendered anchors are compared with the actual desktop source
+ *   (src/components/cinematic/html/home.html): every non-fragment desktop
+ *   href must appear either verbatim or as its DESKTOP_HREF_EQUIVALENTS
+ *   value, and no rendered link may point at https://aisyria.org.
+ * - Local asset paths from rendered markup must exist under public/; SSR
+ *   markup assigns no video src (client-only) but carries both posters.
+ * - Local href targets must resolve to real route files / community keys /
+ *   in-page ids found in the same markup.
+ */
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
+import { renderToStaticMarkup } from "react-dom/server";
+import { createElement } from "react";
+import homeHtml from "@/components/cinematic/html/home.html?raw";
+import { COMMUNITY_KEYS } from "@/lib/communityCategories";
+import { MobileHomeView } from "@/components/home/MobileHome";
+import { DESKTOP_HOME_QUERY } from "@/hooks/useHeroCapability";
+import {
+  ACHIEVEMENTS,
+  CLOSING_COPY,
+  COMMUNITIES,
+  DESKTOP_HREF_EQUIVALENTS,
+  FAQS,
+  HERO_MEDIA,
+  MISSION_STEPS,
+  NEWS,
+  OPENING,
+  OPENING_HEADLINE,
+  PARTNERS,
+} from "@/components/home/mobile-home-content";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+
+/** renderToStaticMarkup escapes quotes/apostrophes; decode before text checks. */
+function decodeEntities(markup: string): string {
+  return markup
+    .replace(/&#x27;|&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&");
+}
+
+function renderHome(lang: "ar" | "en"): string {
+  return decodeEntities(
+    renderToStaticMarkup(createElement(MobileHomeView, { lang, onToggleLang: () => {} })),
+  );
+}
+
+function anchors(markup: string): string[] {
+  const out: string[] = [];
+  const re = /<a\b[^>]*href="([^"]*)"[^>]*>/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(markup)) !== null) out.push(m[1]);
+  return out;
+}
+
+function ids(markup: string): Set<string> {
+  const out = new Set<string>();
+  const re = /\sid="([^"]*)"/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(markup)) !== null) out.add(m[1]);
+  return out;
+}
+
+function localAssets(markup: string): string[] {
+  const out: string[] = [];
+  const img = /<img\b[^>]*src="([^"]*)"/g;
+  let m: RegExpExecArray | null;
+  while ((m = img.exec(markup)) !== null) out.push(m[1]);
+  const poster = /poster="([^"]*)"/g;
+  while ((m = poster.exec(markup)) !== null) out.push(m[1]);
+  return out;
+}
+
+const arMarkup = () => renderHome("ar");
+const enMarkup = () => renderHome("en");
+
+describe("mobile homepage rendered output", () => {
+  it("renders the exact approved opening headline with matching dir/lang", () => {
+    const ar = arMarkup();
+    expect(ar).toContain(OPENING_HEADLINE.ar);
+    expect(ar).toContain('dir="rtl"');
+    expect(ar).toContain('lang="ar"');
+    const en = enMarkup();
+    expect(en).toContain(OPENING_HEADLINE.en);
+    expect(en).toContain('dir="ltr"');
+    expect(en).toContain('lang="en"');
+  });
+
+  it("sends the primary CTA to learning (same tab) and the secondary action to the initiative", () => {
+    const hrefs = new Set(anchors(arMarkup()));
+    expect(OPENING.primary.href).toBe("/learning-management-system");
+    expect(hrefs.has(OPENING.primary.href)).toBe(true);
+    expect(hrefs.has(OPENING.secondary.href)).toBe(true);
+  });
+
+  it("exposes every desktop destination verbatim or via its equivalent", () => {
+    // Destinations from the real desktop source file — not a fixture list.
+    // Pure in-page anchors (#hero-sec, …) are excluded here; the id test
+    // below proves every rendered fragment resolves instead.
+    const desktopHrefs = new Set<string>();
+    const re = /href="([^"]*)"/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(homeHtml)) !== null) {
+      if (!m[1].startsWith("#")) desktopHrefs.add(m[1]);
+    }
+
+    const rendered = new Set([...anchors(arMarkup()), ...anchors(enMarkup())]);
+    const missing = [...desktopHrefs].filter(
+      (h) => !rendered.has(h) && !rendered.has(DESKTOP_HREF_EQUIVALENTS[h] ?? ""),
+    );
+    const detail = `missing mobile destinations: ${missing.join(", ")}`;
+    expect(missing, detail).toEqual([]);
+  });
+
+  it("maps exactly the six approved desktop equivalents to internal targets", () => {
+    expect(Object.keys(DESKTOP_HREF_EQUIVALENTS).sort()).toEqual(
+      [
+        "https://aisyria.org/#communities",
+        "https://aisyria.org/#achievements",
+        "https://aisyria.org/learning-management-system",
+        "https://aisyria.org/resources/ai-tools",
+        "https://aisyria.org/one-million-initiative-home",
+        "https://aisyria.org/registration",
+      ].sort(),
+    );
+    for (const value of Object.values(DESKTOP_HREF_EQUIVALENTS)) {
+      expect(value.startsWith("/") || value.startsWith("#")).toBe(true);
+      expect(value.startsWith("https://aisyria.org")).toBe(false);
+    }
+  });
+
+  it("never renders a link to https://aisyria.org", () => {
+    for (const markup of [arMarkup(), enMarkup()]) {
+      for (const href of anchors(markup)) {
+        expect(href.startsWith("https://aisyria.org"), `leaked desktop href: ${href}`).toBe(false);
+      }
+    }
+  });
+
+  it("keeps video sources client-assigned while SSR carries both posters", () => {
+    for (const markup of [arMarkup(), enMarkup()]) {
+      expect(markup).not.toContain("hero-scrub.mp4");
+      expect(markup).not.toContain("tv-interview-");
+      expect(markup).not.toMatch(/<video[^>]*\ssrc=/);
+      expect(markup).toContain(HERO_MEDIA.videoPoster);
+      expect(markup).toContain(CLOSING_COPY.videoPoster);
+    }
+  });
+
+  it("gates desktop visibility with the shared media query", () => {
+    for (const markup of [arMarkup(), enMarkup()]) {
+      expect(markup).toContain(DESKTOP_HOME_QUERY);
+      expect(markup).toContain(".mobile-home.mh-gate{visibility:hidden}");
+      expect(markup).toContain(".mobile-home.mh-gate{visibility:visible!important}");
+    }
+  });
+
+  it("resolves every in-page anchor to a rendered section id", () => {
+    const markup = arMarkup();
+    const have = ids(markup);
+    const fragments = new Set(
+      anchors(markup)
+        .filter((h) => h.startsWith("#"))
+        .map((h) => h.slice(1)),
+    );
+    expect(fragments.size).toBeGreaterThan(3);
+    for (const f of fragments) {
+      expect(have.has(f), `in-page target missing: #${f}`).toBe(true);
+    }
+    for (const required of [
+      "main-content",
+      "hero-sec",
+      "achievements",
+      "start",
+      "initiative",
+      "communities",
+      "news",
+      "mission",
+      "partners",
+      "faq",
+      "join",
+    ]) {
+      expect(have.has(required), `section id missing: #${required}`).toBe(true);
+    }
+  });
+
+  it("maps every local href to a real route file or community page", () => {
+    const rendered = new Set([...anchors(arMarkup()), ...anchors(enMarkup())]);
+    const local = [...rendered].filter((h) => h.startsWith("/") && !h.startsWith("//"));
+    expect(local.length).toBeGreaterThan(10);
+    for (const href of local) {
+      const [pathname] = href.split("#");
+      if (pathname.startsWith("/communities/")) {
+        const key = pathname.slice("/communities/".length);
+        const known = (COMMUNITY_KEYS as readonly string[]).includes(key);
+        expect(known, `unknown community: ${href}`).toBe(true);
+        expect(existsSync(path.join(ROOT, "src/routes/communities.$key.tsx"))).toBe(true);
+        continue;
+      }
+      if (pathname.startsWith("/news/")) {
+        const slug = pathname.slice("/news/".length);
+        const file = path.join(ROOT, `src/routes/news.${slug}.tsx`);
+        expect(existsSync(file), `missing news route file: ${file}`).toBe(true);
+        continue;
+      }
+      const table: Record<string, string> = {
+        "/": "src/routes/index.tsx",
+        "/about": "src/routes/about.tsx",
+        "/partners": "src/routes/partners.tsx",
+        "/initiative": "src/routes/initiative.index.tsx",
+        "/contact": "src/routes/contact.tsx",
+        "/news": "src/routes/news.index.tsx",
+        "/learning-management-system": "src/routes/learning-management-system.tsx",
+        "/resources/ai-tools": "src/routes/resources.ai-tools.tsx",
+        "/one-million-initiative-home": "src/routes/one-million-initiative-home.tsx",
+        "/registration": "src/routes/registration.tsx",
+      };
+      expect(table[pathname] !== undefined, `unexpected local route: ${href}`).toBe(true);
+      const routeFile = path.join(ROOT, table[pathname]);
+      expect(existsSync(routeFile), `missing route file for ${href}`).toBe(true);
+    }
+  });
+
+  it("references only local assets that exist in public/", () => {
+    const markup = arMarkup();
+    const files = localAssets(markup).filter((s) => s.startsWith("/"));
+    expect(files.length).toBeGreaterThan(20);
+    for (const src of files) {
+      const disk = path.join(ROOT, "public", src.split("?")[0]);
+      expect(existsSync(disk), `missing asset: ${src}`).toBe(true);
+    }
+  });
+
+  it("renders all communities, stories, partners, FAQs and mission steps", () => {
+    const ar = arMarkup();
+    const en = enMarkup();
+    const both = `${ar}\n${en}`;
+    for (const c of COMMUNITIES) {
+      expect(both).toContain(`/communities/${c.key}`);
+      expect(both).toContain(c.name.ar);
+      expect(both).toContain(c.name.en);
+    }
+    expect(COMMUNITIES).toHaveLength(9);
+    for (const n of NEWS) {
+      expect(both).toContain(`/news/${n.slug}`);
+      expect(both).toContain(n.headline.ar);
+      expect(both).toContain(n.headline.en);
+    }
+    expect(NEWS).toHaveLength(4);
+    for (const p of PARTNERS) {
+      expect(both).toContain(p.name.en);
+    }
+    expect(PARTNERS).toHaveLength(23);
+    for (const f of FAQS) {
+      expect(both).toContain(f.question.ar);
+      expect(both).toContain(f.question.en);
+    }
+    expect(FAQS).toHaveLength(5);
+    for (const s of MISSION_STEPS) {
+      expect(both).toContain(s.title.ar);
+      expect(both).toContain(s.title.en);
+    }
+    expect(MISSION_STEPS).toHaveLength(3);
+  });
+
+  it("renders final number values in SSR markup (count-up is enhancement only)", () => {
+    const ar = arMarkup();
+    for (const a of ACHIEVEMENTS.map((x) => x.value)) {
+      expect(ar).toContain(a);
+    }
+    expect(ar).toContain(">9<");
+  });
+});
+
+describe("mobile homepage source contracts", () => {
+  it("matches FAQ and mission counts with the desktop source file", () => {
+    const faqCount = (homeHtml.match(/class="faq-item/g) ?? []).length;
+    expect(FAQS).toHaveLength(faqCount);
+    const missionCount = (homeHtml.match(/class="mission-item/g) ?? []).length;
+    expect(MISSION_STEPS).toHaveLength(missionCount);
+  });
+
+  it("keeps mission copy free of invented metrics", () => {
+    const missionText = MISSION_STEPS.map((s) => `${s.title.en} ${s.body.en}`).join(" ");
+    for (const invented of ["5,000", "120+", "30+", "testimonial"]) {
+      expect(missionText).not.toContain(invented);
+    }
+  });
+});

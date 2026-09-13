@@ -2,36 +2,41 @@ import { useEffect, useState } from "react";
 
 export type HeroCapability = "mobile-static" | "reduced-motion" | "desktop";
 
+export const DESKTOP_HOME_QUERY =
+  "(min-width: 768px) and (pointer: fine) and (prefers-reduced-motion: no-preference)";
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
 /**
- * Picks the mobile hero rendering path without importing any 3D stack.
- * SSR-safe: defaults to "desktop" and decides client-side in an effect.
+ * Picks the homepage rendering path without importing any 3D stack.
+ *
+ * SSR-safe and phone-stable: the initial state is the complete mobile page,
+ * so SSR HTML and the first client paint already contain full content. The
+ * effect only *upgrades* to the cinematic desktop enhancement when the
+ * device has a fine pointer, a wide viewport, and no reduced-motion
+ * preference. Reduced motion never removes content — it only keeps the
+ * lightweight complete page instead of the heavy enhancement.
  */
 export function useHeroCapability(): HeroCapability {
-  const [capability, setCapability] = useState<HeroCapability>("desktop");
+  const [capability, setCapability] = useState<HeroCapability>("mobile-static");
 
   useEffect(() => {
+    const desktopList = window.matchMedia(DESKTOP_HOME_QUERY);
+    const reducedList = window.matchMedia(REDUCED_MOTION_QUERY);
     const decide = (): HeroCapability => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        return "reduced-motion";
-      }
-      if (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768) {
-        return "mobile-static";
-      }
-      return "desktop";
+      if (desktopList.matches) return "desktop";
+      if (reducedList.matches) return "reduced-motion";
+      return "mobile-static";
     };
 
     const update = () => setCapability(decide());
     update();
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const coarsePointer = window.matchMedia("(pointer: coarse)");
-    reducedMotion.addEventListener?.("change", update);
-    coarsePointer.addEventListener?.("change", update);
-    window.addEventListener("resize", update);
+    desktopList.addEventListener?.("change", update);
+    reducedList.addEventListener?.("change", update);
     return () => {
-      reducedMotion.removeEventListener?.("change", update);
-      coarsePointer.removeEventListener?.("change", update);
-      window.removeEventListener("resize", update);
+      desktopList.removeEventListener?.("change", update);
+      reducedList.removeEventListener?.("change", update);
     };
   }, []);
 
