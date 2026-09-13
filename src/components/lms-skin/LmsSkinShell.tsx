@@ -78,9 +78,10 @@ function TubeNav({ role, isAuthed, onSignOut }: Omit<Props, "children">) {
 
   const links: NavEntry[] = [
     { to: "/", label: ar ? "العودة للموقع" : "Back to site", icon: <IconHome />, exact: true },
-    isAuthed
-      ? { to: "/learning-management-system/profile", label: tr.navProfile, icon: <IconProfile /> }
-      : { to: "/learning-management-system", label: tr.navHome, icon: <GraduationCap />, exact: true },
+    { to: "/learning-management-system", label: tr.navHome, icon: <GraduationCap />, exact: true },
+    ...(isAuthed
+      ? [{ to: "/learning-management-system/profile", label: tr.navProfile, icon: <IconProfile /> }]
+      : []),
     { to: "/learning-management-system/catalog", label: tr.navCatalog, icon: <IconCourses /> },
     {
       to: "/learning-management-system/internships",

@@ -7,6 +7,7 @@ import { lmsT } from "@/lib/lms-i18n";
 import type { CourseCardData } from "@/components/lms/CourseCard";
 import { SkinCourseCard } from "@/components/lms-skin/SkinCourseCard";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { loadPublicInstructorCourses } from "@/lib/lms-public-catalog";
 
 export const Route = createFileRoute("/learning-management-system/instructors/$id")({
   head: () => ({ meta: [{ title: "LMS · Instructor" }], links: LMS_SKIN_LINKS }),
@@ -74,23 +75,16 @@ function InstructorProfile() {
         return;
       }
       setIns(row);
-      // Visitors cannot select from lms_courses (RLS), so start from the
-      // public catalog list.
-      const { data: cs } = await supabase.rpc("lms_list_catalog_public", { _limit: 100, _offset: 0 });
+      const filtered = await loadPublicInstructorCourses(row.slug, () => cancelled);
       if (cancelled) return;
-      // Keep the courses this instructor teaches, checked through the public
-      // course-instructors RPC (the instructor's user_id is never exposed).
-      const filtered: Course[] = [];
-      for (const c of ((cs ?? []) as unknown as Course[])) {
-        const { data: list } = await supabase.rpc("get_public_instructors_for_course", {
-          _course_id: c.id,
-        });
-        const hit = (list as { slug: string }[] | null)?.some((x) => x.slug === row.slug);
-        if (hit) filtered.push(c);
-      }
       setCourses(filtered);
       setLoading(false);
-    })();
+    })().catch(() => {
+      if (cancelled) return;
+      setCourses([]);
+      setErrored(true);
+      setLoading(false);
+    });
     return () => {
       cancelled = true;
     };
@@ -104,7 +98,11 @@ function InstructorProfile() {
             {loading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : errored ? (
-              ar ? "تعذّر تحميل الملف. حاول مجدداً." : "Could not load profile. Please try again."
+              ar ? (
+                "تعذّر تحميل الملف. حاول مجدداً."
+              ) : (
+                "Could not load profile. Please try again."
+              )
             ) : (
               "404"
             )}
@@ -122,7 +120,12 @@ function InstructorProfile() {
   const name = (lang === "ar" ? ins.full_name_ar : ins.full_name_en) || ins.full_name;
   const sp = (lang === "ar" ? ins.specialty_ar : ins.specialty_en) || ins.specialty;
   const bio = (lang === "ar" ? ins.bio_ar : ins.bio_en) || ins.bio;
-  const initials = name.trim().split(/\s+/).slice(0, 2).map((w) => w.charAt(0)).join("");
+  const initials = name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w.charAt(0))
+    .join("");
 
   return (
     <>
@@ -144,12 +147,22 @@ function InstructorProfile() {
             {(ins.linkedin_url || ins.github_url) && (
               <span className="profile-actions">
                 {ins.linkedin_url && (
-                  <a className="action action-secondary" href={ins.linkedin_url} target="_blank" rel="noreferrer">
+                  <a
+                    className="action action-secondary"
+                    href={ins.linkedin_url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     LinkedIn <span aria-hidden="true">↗</span>
                   </a>
                 )}
                 {ins.github_url && (
-                  <a className="action action-secondary" href={ins.github_url} target="_blank" rel="noreferrer">
+                  <a
+                    className="action action-secondary"
+                    href={ins.github_url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     GitHub <span aria-hidden="true">↗</span>
                   </a>
                 )}
@@ -159,15 +172,21 @@ function InstructorProfile() {
           <dl className="profile-stats profile-stats-3">
             <div>
               <dt>{tr.navCatalog}</dt>
-              <dd><b>{courses.length}</b></dd>
+              <dd>
+                <b>{courses.length}</b>
+              </dd>
             </div>
             <div>
               <dt>{tr.students}</dt>
-              <dd><b>{totalStudents}</b></dd>
+              <dd>
+                <b>{totalStudents}</b>
+              </dd>
             </div>
             <div>
               <dt>{tr.reviews}</dt>
-              <dd><b>★ {avgRating}</b></dd>
+              <dd>
+                <b>★ {avgRating}</b>
+              </dd>
             </div>
           </dl>
         </div>

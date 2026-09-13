@@ -52,3 +52,15 @@ html:not([lang="ar"]) [data-db-lang="ar"] {
   border-radius: 18px;
   background: #000;
 }
+
+.db-partners-status {
+  position: relative;
+  z-index: 3;
+  padding: 1rem;
+  text-align: center;
+}
+
+.plate-face.db-partner-face {
+  display: grid;
+  place-items: center;
+}

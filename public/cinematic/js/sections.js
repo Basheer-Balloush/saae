@@ -468,9 +468,23 @@
        transparent but hidden, because a link at opacity zero is still in the
        tab order. */
     const READY = .85;
+    const partnerMarks = Array.from(partnerScreen.querySelectorAll(".partner-mark"));
+    // CSS calc() cannot reliably multiply two custom properties (for example
+    // --i * --step) in Safari and Chromium. Compute the resulting time here,
+    // then give each paused mark an ordinary, browser-supported delay.
+    const partnerStep = Number.parseFloat(
+      getComputedStyle(partnerMarks[0] || partnerScreen).getPropertyValue("--step")
+    ) || .02364;
+
+    function paintPartnerMarks(progress) {
+      partnerMarks.forEach((mark, index) => {
+        mark.style.setProperty("--partner-delay", `${(index * partnerStep - progress).toFixed(4)}s`);
+      });
+    }
 
     const scrub = reelScrub(partnerReel, partnerScreen, progress => {
       partnerScreen.style.setProperty("--t", progress.toFixed(4));
+      paintPartnerMarks(progress);
       partnerOutro.classList.toggle("is-ready", progress >= READY);
     });
 
@@ -480,6 +494,7 @@
       // Handing --t back to the stylesheet is what restores the still.
       if (!scrubbed) {
         partnerScreen.style.removeProperty("--t");
+        paintPartnerMarks(.5);
         partnerOutro.classList.remove("is-ready");
       }
 

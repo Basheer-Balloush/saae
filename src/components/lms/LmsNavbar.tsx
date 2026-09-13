@@ -42,11 +42,11 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  const links: NavLink[] = [];
+  const links: NavLink[] = [
+    { to: "/learning-management-system", label: tr.navHome },
+  ];
   if (isAuthed) {
     links.push({ to: "/learning-management-system/profile", label: tr.navProfile });
-  } else {
-    links.push({ to: "/learning-management-system", label: tr.navHome });
   }
   links.push(
     { to: "/learning-management-system/catalog", label: tr.navCatalog },

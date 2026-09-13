@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import type { Partner } from "@/features/website/partners/data";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import {
   ArrowLeft,
@@ -59,7 +60,6 @@ import {
   NUMBERS_COPY,
   OPENING,
   OPENING_HEADLINE,
-  PARTNERS,
   PARTNERS_COPY,
   RAIL_COPY,
   SOCIAL_LINKS,
@@ -191,18 +191,44 @@ function MhCount({ count, value }: { count: number; value: string }) {
   );
 }
 
+function PartnerLogo({ partner, decorative = false }: { partner: Partner; decorative?: boolean }) {
+  const logo = partner.lightLogo ?? partner.logo;
+  return logo ? (
+    <img
+      src={logo}
+      alt={decorative ? "" : partner.name}
+      width={320}
+      height={160}
+      style={{ maxHeight: partner.height }}
+      loading="lazy"
+      decoding="async"
+    />
+  ) : (
+    <span>{partner.name}</span>
+  );
+}
+
 export function MobileHomeView({
   lang,
   onToggleLang,
   news,
   newsFailed = false,
+  partners,
+  partnersFailed = false,
 }: {
   lang: Locale;
   onToggleLang: () => void;
   /** The newest homepage stories from the database. */
   news: NewsEntry[];
   newsFailed?: boolean;
+  partners: Partner[];
+  partnersFailed?: boolean;
 }) {
+  const visiblePartners = partnersFailed ? [] : partners;
+  const partnerRows = [
+    visiblePartners.slice(0, Math.ceil(visiblePartners.length / 2)),
+    visiblePartners.slice(Math.ceil(visiblePartners.length / 2)),
+  ].filter((row) => row.length);
   const dir = lang === "ar" ? "rtl" : "ltr";
   const reducedMotion = usePrefersReducedMotion();
   const scrollBehavior = reducedMotion ? "auto" : "smooth";
@@ -966,86 +992,71 @@ export function MobileHomeView({
                 </h2>
                 <p className="mh-section-p">{pick(PARTNERS_COPY.body, lang)}</p>
               </div>
-              <button
-                type="button"
-                className="mh-round-btn mh-marquee-toggle"
-                aria-pressed={logosPaused}
-                aria-label={
-                  logosPaused ? pick(MICRO_COPY.playLogos, lang) : pick(MICRO_COPY.pauseLogos, lang)
-                }
-                onClick={() => setLogosPaused((v) => !v)}
-              >
-                {logosPaused ? (
-                  <Play size={20} aria-hidden="true" />
-                ) : (
-                  <Pause size={20} aria-hidden="true" />
-                )}
-              </button>
+              {visiblePartners.length > 0 && (
+                <button
+                  type="button"
+                  className="mh-round-btn mh-marquee-toggle"
+                  aria-pressed={logosPaused}
+                  aria-label={
+                    logosPaused
+                      ? pick(MICRO_COPY.playLogos, lang)
+                      : pick(MICRO_COPY.pauseLogos, lang)
+                  }
+                  onClick={() => setLogosPaused((v) => !v)}
+                >
+                  {logosPaused ? (
+                    <Play size={20} aria-hidden="true" />
+                  ) : (
+                    <Pause size={20} aria-hidden="true" />
+                  )}
+                </button>
+              )}
             </div>
-            <div className="mh-marquee" aria-label={pick(PARTNERS_COPY.title, lang)}>
-              <div className="mh-marquee-row">
-                <div className="mh-marquee-track">
-                  {[0, 1].map((copy) => (
-                    <ul
-                      key={copy}
-                      className="mh-logo-list"
-                      aria-hidden={copy === 1 ? "true" : undefined}
+            {visiblePartners.length ? (
+              <>
+                <div className="mh-marquee" aria-label={pick(PARTNERS_COPY.title, lang)}>
+                  {partnerRows.map((row, rowIndex) => (
+                    <div
+                      key={rowIndex}
+                      className={`mh-marquee-row${rowIndex ? " mh-row-reverse" : ""}`}
                     >
-                      {PARTNERS.slice(0, 12).map((p) => (
-                        <li key={p.name.en} className="mh-logo-chip">
-                          <img
-                            src={p.logo}
-                            alt={copy === 0 ? pick(p.name, lang) : ""}
-                            width={320}
-                            height={160}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </li>
-                      ))}
-                    </ul>
+                      <div className="mh-marquee-track">
+                        {[0, 1].map((copy) => (
+                          <ul
+                            key={copy}
+                            className="mh-logo-list"
+                            aria-hidden={copy === 1 ? "true" : undefined}
+                          >
+                            {row.map((p) => (
+                              <li key={p.id} className="mh-logo-chip">
+                                <PartnerLogo partner={p} decorative={copy === 1} />
+                              </li>
+                            ))}
+                          </ul>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </div>
-              <div className="mh-marquee-row mh-row-reverse">
-                <div className="mh-marquee-track">
-                  {[0, 1].map((copy) => (
-                    <ul
-                      key={copy}
-                      className="mh-logo-list"
-                      aria-hidden={copy === 1 ? "true" : undefined}
-                    >
-                      {PARTNERS.slice(12).map((p) => (
-                        <li key={p.name.en} className="mh-logo-chip">
-                          <img
-                            src={p.logo}
-                            alt={copy === 0 ? pick(p.name, lang) : ""}
-                            width={320}
-                            height={160}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </li>
-                      ))}
-                    </ul>
+                <ul className="mh-partner-static" aria-label={pick(PARTNERS_COPY.title, lang)}>
+                  {visiblePartners.map((p) => (
+                    <li key={p.id} className="mh-logo-chip">
+                      <PartnerLogo partner={p} />
+                    </li>
                   ))}
-                </div>
-              </div>
-            </div>
-            <ul className="mh-partner-static" aria-label={pick(PARTNERS_COPY.title, lang)}>
-              {PARTNERS.map((p) => (
-                <li key={p.name.en} className="mh-logo-chip">
-                  <img
-                    src={p.logo}
-                    alt={pick(p.name, lang)}
-                    width={320}
-                    height={160}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </li>
-              ))}
-            </ul>
+                </ul>
+              </>
+            ) : (
+              <p className="mh-wrap" role="status">
+                {partnersFailed
+                  ? lang === "ar"
+                    ? "تعذّر تحميل الشركاء. يرجى المحاولة مرة أخرى."
+                    : "Partners could not be loaded. Please try again."
+                  : lang === "ar"
+                    ? "لا يوجد شركاء لعرضهم حالياً."
+                    : "No partners to display yet."}
+              </p>
+            )}
             <div className="mh-wrap">
               <a className="mh-inline-link" href="/partners">
                 {pick(PARTNERS_COPY.allPartners, lang)}
@@ -1327,9 +1338,28 @@ function MhTrunkRow({ index, href, lang }: { index: number; href: string; lang: 
   );
 }
 
-export function MobileHome({ news, newsFailed }: { news: NewsEntry[]; newsFailed?: boolean }) {
+export function MobileHome({
+  news,
+  newsFailed,
+  partners,
+  partnersFailed,
+}: {
+  news: NewsEntry[];
+  newsFailed?: boolean;
+  partners: Partner[];
+  partnersFailed?: boolean;
+}) {
   const { lang, toggle } = useLang();
-  return <MobileHomeView lang={lang} onToggleLang={toggle} news={news} newsFailed={newsFailed} />;
+  return (
+    <MobileHomeView
+      lang={lang}
+      onToggleLang={toggle}
+      news={news}
+      newsFailed={newsFailed}
+      partners={partners}
+      partnersFailed={partnersFailed}
+    />
+  );
 }
 
 export default MobileHome;

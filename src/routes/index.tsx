@@ -5,6 +5,8 @@ import type { CinematicScript } from "@/components/cinematic/CinematicPage";
 import { MobileHome } from "@/components/home/MobileHome";
 import { useHeroCapability } from "@/hooks/useHeroCapability";
 import { supabase } from "@/integrations/supabase/client";
+import { loadPartners } from "@/features/website/partners/data";
+import { applyHomePartners } from "@/features/website/partners/render";
 import {
   NEWS_CARD_COLUMNS,
   applyHomeNews,
@@ -42,24 +44,30 @@ const DESKTOP_SCRIPTS: CinematicScript[] = [
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    try {
-      const { data, error } = await supabase
-        .from("news")
-        .select(NEWS_CARD_COLUMNS)
-        .eq("show_on_home", true)
-        .order("published_at", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(4);
-      const rows = (data ?? []) as NewsCardRow[];
-      const failed = Boolean(error);
-      return {
-        news: renderHomeNews(rows, failed),
-        mobileNews: mobileNewsEntries(rows),
-        newsFailed: failed,
-      };
-    } catch {
-      return { news: renderHomeNews([], true), mobileNews: [], newsFailed: true };
-    }
+    const [newsResult, partners] = await Promise.all([
+      (async () => {
+        try {
+          const { data, error } = await supabase
+            .from("news")
+            .select(NEWS_CARD_COLUMNS)
+            .eq("show_on_home", true)
+            .order("published_at", { ascending: false })
+            .order("created_at", { ascending: false })
+            .limit(4);
+          const rows = (data ?? []) as NewsCardRow[];
+          const failed = Boolean(error);
+          return {
+            news: renderHomeNews(rows, failed),
+            mobileNews: mobileNewsEntries(rows),
+            newsFailed: failed,
+          };
+        } catch {
+          return { news: renderHomeNews([], true), mobileNews: [], newsFailed: true };
+        }
+      })(),
+      loadPartners(true),
+    ]);
+    return { ...newsResult, partners };
   },
   head: () => ({
     meta: [
@@ -98,11 +106,21 @@ function DesktopHome({ html }: { html: string }) {
 }
 
 function Home() {
-  const { news, mobileNews, newsFailed } = Route.useLoaderData();
-  const html = useMemo(() => applyHomeNews(homeHtml, news), [news]);
+  const { news, mobileNews, newsFailed, partners } = Route.useLoaderData();
+  const html = useMemo(
+    () => applyHomePartners(applyHomeNews(homeHtml, news), partners),
+    [news, partners],
+  );
   const capability = useHeroCapability();
   // Mobile-first: SSR, first paint, phones and reduced motion get the phone
   // page; only a confirmed desktop mounts the cinematic enhancement.
   if (capability === "desktop") return <DesktopHome html={html} />;
-  return <MobileHome news={mobileNews} newsFailed={newsFailed} />;
+  return (
+    <MobileHome
+      news={mobileNews}
+      newsFailed={newsFailed}
+      partners={partners.partners}
+      partnersFailed={partners.failed}
+    />
+  );
 }

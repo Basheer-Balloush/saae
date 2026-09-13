@@ -1,4 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { loadPartners } from "@/features/website/partners/data";
+import { applyPartnerDirectory } from "@/features/website/partners/render";
 import pageHtml from "@/components/cinematic/html/partners.html?raw";
 import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
 
@@ -11,16 +14,20 @@ const SCRIPTS: CinematicScript[] = [
 ];
 
 export const Route = createFileRoute("/partners")({
+  loader: () => loadPartners(),
   head: () => ({
     meta: [{ title: "Partners | SAAE" }, { name: "theme-color", content: "#144248" }],
     links: [
       { rel: "stylesheet", href: "/cinematic/css/partners-inline.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
+      { rel: "stylesheet", href: "/cinematic/css/db-content.css" },
     ],
   }),
   component: Page,
 });
 
 function Page() {
-  return <CinematicPage html={pageHtml} scripts={SCRIPTS} />;
+  const partners = Route.useLoaderData();
+  const html = useMemo(() => applyPartnerDirectory(pageHtml, partners), [partners]);
+  return <CinematicPage html={html} scripts={SCRIPTS} />;
 }

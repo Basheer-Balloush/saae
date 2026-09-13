@@ -1,10 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import type { CourseCardData } from "@/components/lms/CourseCard";
-import { PAGE_SIZE } from "@/lib/lms-catalog-search";
+import { loadAllPublicCourses } from "@/lib/lms-public-catalog";
 import { SkinCourseCard } from "@/components/lms-skin/SkinCourseCard";
 import { CategoriesCarousel } from "@/components/lms-skin/CategoriesCarousel";
 import { FaqAccordion } from "@/components/lms-skin/FaqAccordion";
@@ -17,16 +16,18 @@ type HomeCourse = CourseCardData & { category_id?: string | null };
 
 export const Route = createFileRoute("/learning-management-system/")({
   loader: async () => {
-    const [{ data: cats }, { data: statsRows }, { data: listRows }] = await Promise.all([
-      supabase.from("lms_categories").select("id, name_ar, name_en, slug").order("display_order"),
-      supabase.rpc("lms_public_stats"),
-      supabase.rpc("lms_list_catalog_public", { _limit: PAGE_SIZE, _offset: 0 }),
-    ]);
+    const [{ data: cats, error: categoryError }, { data: statsRows, error: statsError }, listRows] =
+      await Promise.all([
+        supabase.from("lms_categories").select("id, name_ar, name_en, slug").order("display_order"),
+        supabase.rpc("lms_public_stats"),
+        loadAllPublicCourses(),
+      ]);
+    if (categoryError || statsError) throw new Error("lms_home_load_failed");
     const s = (
       statsRows as { courses: number; students: number; instructors: number }[] | null
     )?.[0];
     // Visitors cannot read lms_courses directly (RLS), so count from the
-    // public catalog list, which carries each course's category.
+    // complete public catalog list, which carries each course's category.
     const counts: Record<string, number> = {};
     ((listRows as unknown as HomeCourse[]) ?? []).forEach((r) => {
       if (r.category_id) counts[r.category_id] = (counts[r.category_id] ?? 0) + 1;
@@ -39,7 +40,7 @@ export const Route = createFileRoute("/learning-management-system/")({
         instructors: Number(s?.instructors ?? 0),
       },
       coursesByCategory: counts,
-      courses: ((listRows as unknown as HomeCourse[]) ?? []),
+      courses: (listRows as unknown as HomeCourse[]) ?? [],
     };
   },
   head: () => ({
@@ -65,7 +66,10 @@ export const Route = createFileRoute("/learning-management-system/")({
           "Browse AI, programming, design and business courses on the SAAE Training and Learning Platform.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://aisyria.org/learning-management-system" }, ...LMS_SKIN_LINKS],
+    links: [
+      { rel: "canonical", href: "https://aisyria.org/learning-management-system" },
+      ...LMS_SKIN_LINKS,
+    ],
   }),
   component: LmsHome,
 });
@@ -80,22 +84,18 @@ const POPULAR = [
 function LmsHome() {
   const { lang } = useLang();
   const ar = lang === "ar";
-  const navigate = useNavigate();
-  const { user, loading } = useLmsAuth();
   const { categories, stats, coursesByCategory, courses } = Route.useLoaderData();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const coursesRef = useRef<HTMLElement>(null);
 
-  // Redirect authenticated users to their profile (My Profile is their home).
-  useEffect(() => {
-    if (!loading && user) {
-      navigate({ to: "/learning-management-system/profile", replace: true });
-    }
-  }, [loading, user, navigate]);
+  // Home is public to visitors and signed-in members alike.
 
   const catName = (c: Category) => (ar ? c.name_ar : c.name_en || c.name_ar);
-  const toneById = useMemo(() => new Map(categories.map((c, i) => [c.id, categoryTone(i)])), [categories]);
+  const toneById = useMemo(
+    () => new Map(categories.map((c, i) => [c.id, categoryTone(i)])),
+    [categories],
+  );
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
 
   const shown = useMemo(() => {
@@ -104,7 +104,9 @@ function LmsHome() {
       if (filter !== "all" && c.category_id !== filter) return false;
       if (!q) return true;
       const cat = c.category_id ? categoryById.get(c.category_id) : undefined;
-      return `${c.title_ar} ${c.title_en ?? ""} ${cat?.name_ar ?? ""} ${cat?.name_en ?? ""}`.toLowerCase().includes(q);
+      return `${c.title_ar} ${c.title_en ?? ""} ${cat?.name_ar ?? ""} ${cat?.name_en ?? ""}`
+        .toLowerCase()
+        .includes(q);
     });
   }, [courses, filter, query, categoryById]);
 
@@ -158,7 +160,11 @@ function LmsHome() {
                 name="q"
                 autoComplete="off"
                 aria-label={ar ? "ابحث في الدورات" : "Search courses"}
-                placeholder={ar ? "ابحث في الدورات والمهارات والمدرّبين…" : "Search courses, skills, instructors…"}
+                placeholder={
+                  ar
+                    ? "ابحث في الدورات والمهارات والمدرّبين…"
+                    : "Search courses, skills, instructors…"
+                }
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
@@ -183,7 +189,12 @@ function LmsHome() {
             {ar ? "أرقامنا تحكي قصّتنا" : "Our numbers tell the story"}
           </h2>
           <Reveal className="stats-wrap">
-            <svg className="stats-circuit" viewBox="0 0 1160 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <svg
+              className="stats-circuit"
+              viewBox="0 0 1160 260"
+              preserveAspectRatio="xMidYMid slice"
+              aria-hidden="true"
+            >
               <g className="circuit-traces">
                 <path d="M-10 210 H240 V150 H420 V80 H640 V40 H880" />
                 <path d="M60 270 V190 H300 V120 H560 V170 H820 V230 H1040" />
@@ -205,7 +216,10 @@ function LmsHome() {
               </g>
               <g className="circuit-pulses">
                 <path className="circuit-pulse p1" d="M-10 210 H240 V150 H420 V80 H640 V40 H880" />
-                <path className="circuit-pulse p2" d="M60 270 V190 H300 V120 H560 V170 H820 V230 H1040" />
+                <path
+                  className="circuit-pulse p2"
+                  d="M60 270 V190 H300 V120 H560 V170 H820 V230 H1040"
+                />
                 <path className="circuit-pulse p3" d="M1170 50 H980 V110 H800 V60 H620" />
               </g>
             </svg>
@@ -243,7 +257,12 @@ function LmsHome() {
       />
 
       {/* COURSES — live search + category chips. */}
-      <section className="lms-section lms-courses" id="lms-courses" aria-labelledby="courses-title" ref={coursesRef}>
+      <section
+        className="lms-section lms-courses"
+        id="lms-courses"
+        aria-labelledby="courses-title"
+        ref={coursesRef}
+      >
         <div className="page-shell">
           <div className="lms-head">
             <h2 id="courses-title">{ar ? "جديد ورائج" : "New and popular"}</h2>
@@ -253,27 +272,47 @@ function LmsHome() {
                 : "Real courses from the SAAE catalog — certified on completion."}
             </p>
           </div>
-          <div className="course-filters" role="group" aria-label={ar ? "تصفية الدورات" : "Filter courses"}>
-            {[{ id: "all", label: ar ? "الكل" : "All" }, ...categories.map((c) => ({ id: c.id, label: catName(c) }))].map((f) => (
-              <button key={f.id} type="button" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
+          <div
+            className="course-filters"
+            role="group"
+            aria-label={ar ? "تصفية الدورات" : "Filter courses"}
+          >
+            {[
+              { id: "all", label: ar ? "الكل" : "All" },
+              ...categories.map((c) => ({ id: c.id, label: catName(c) })),
+            ].map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                aria-pressed={filter === f.id}
+                onClick={() => setFilter(f.id)}
+              >
                 <span>{f.label}</span>
               </button>
             ))}
           </div>
           <p className="course-count" role="status">
-            <b>{shown.length}</b> <span>{ar ? "دورة" : shown.length === 1 ? "course" : "courses"}</span>
+            <b>{shown.length}</b>{" "}
+            <span>{ar ? "دورة" : shown.length === 1 ? "course" : "courses"}</span>
           </p>
           <ul className="course-grid">
             {shown.map((c) => (
-              <SkinCourseCard key={c.id} course={c} tone={toneById.get(c.category_id ?? "") ?? "ai"} />
+              <SkinCourseCard
+                key={c.id}
+                course={c}
+                tone={toneById.get(c.category_id ?? "") ?? "ai"}
+              />
             ))}
           </ul>
           <p className="course-empty" hidden={shown.length > 0}>
-            {ar ? "لا توجد دورات مطابقة لبحثك بعد — جرّب كلمة أخرى." : "No courses match your search yet — try another word."}
+            {ar
+              ? "لا توجد دورات مطابقة لبحثك بعد — جرّب كلمة أخرى."
+              : "No courses match your search yet — try another word."}
           </p>
           <p className="courses-more">
             <Link className="action action-secondary" to="/learning-management-system/catalog">
-              <span>{ar ? "عرض الكتالوج الكامل" : "View the full catalog"}</span> <span aria-hidden="true">{ar ? "←" : "→"}</span>
+              <span>{ar ? "عرض الكتالوج الكامل" : "View the full catalog"}</span>{" "}
+              <span aria-hidden="true">{ar ? "←" : "→"}</span>
             </Link>
           </p>
         </div>
@@ -311,10 +350,12 @@ function LmsHome() {
                 scrollToCourses();
               }}
             >
-              <span>{ar ? "تصفح الدورات" : "Browse courses"}</span> <span aria-hidden="true">↓</span>
+              <span>{ar ? "تصفح الدورات" : "Browse courses"}</span>{" "}
+              <span aria-hidden="true">↓</span>
             </a>
             <Link className="action action-secondary" to="/learning-management-system/signup">
-              <span>{ar ? "أنشئ حساباً" : "Create account"}</span> <span aria-hidden="true">{ar ? "←" : "→"}</span>
+              <span>{ar ? "أنشئ حساباً" : "Create account"}</span>{" "}
+              <span aria-hidden="true">{ar ? "←" : "→"}</span>
             </Link>
           </div>
         </Reveal>

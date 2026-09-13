@@ -602,7 +602,7 @@ export const PARTNERS_COPY = {
     ar: "تعمل الجامعات والوزارات والشركات ومنظمات المجتمع مع الجمعية في التدريب والمشاريع التطبيقية.",
     en: "Universities, ministries, companies and community organisations already work with SAAE on training and applied projects.",
   } satisfies LocalText,
-  allPartners: { ar: "شاهد الشركاء الـ 23", en: "See all 23 partners" } satisfies LocalText,
+  allPartners: { ar: "شاهد جميع الشركاء", en: "See all partners" } satisfies LocalText,
 };
 
 export const FAQ_COPY = {

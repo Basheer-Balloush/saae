@@ -2905,7 +2905,7 @@
       /* Paused on purpose: --t is the clock. `both` is what holds a mark at
          opacity 0 before its turn and off-frame after it. */
       animation: partner-stream-right var(--travel) linear 1 both paused;
-      animation-delay: calc(var(--i) * var(--step) - var(--t) * 1s);
+      animation-delay: var(--partner-delay, 0s);
     }
 
     .partner-mark.is-left { animation-name: partner-stream-left; }
@@ -4031,10 +4031,10 @@
         will-change: transform;
         touch-action: pan-y;
       }
-      body .partner-mark {
-        animation: partner-stream-right var(--travel) linear 1 both paused;
-        animation-delay: calc(var(--i) * var(--step) - var(--t) * 1s);
-      }
+       body .partner-mark {
+         animation: partner-stream-right var(--travel) linear 1 both paused;
+         animation-delay: var(--partner-delay, 0s);
+       }
       body .partner-mark.is-left {
         animation-name: partner-stream-left;
       }

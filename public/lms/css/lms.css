@@ -604,18 +604,21 @@ html[dir="rtl"] .lms-skin .lms-search { padding: 8px 20px 8px 8px; }
 
 /* LMS heroes are single-column; the verify sub-hero keeps a side-by-side
    copy + form layout on wide screens. */
-.lms-skin .lms-hero-inner { display: block; }
-.lms-skin .lms-subhero .lms-hero-inner { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: clamp(28px, 4vw, 56px); align-items: center; }
-.lms-skin .lms-hero-copy { max-width: 640px; }
+.lms-skin .lms-hero-inner { display: block; text-align: center; }
+.lms-skin .lms-subhero .lms-hero-inner.has-aside { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: clamp(28px, 4vw, 56px); align-items: center; text-align: start; }
+.lms-skin .lms-hero-copy { max-width: 640px; margin-inline: auto; }
+.lms-skin .lms-subhero .lms-hero-inner.has-aside .lms-hero-copy { margin-inline: 0; }
 .lms-skin .lms-hero-eyebrow { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 8px 16px; border: 1px solid var(--lms-border); border-radius: 999px; background: rgba(184,232,240,.06); color: var(--lms-cyan); font-size: .78rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .lms-skin .eyebrow-dot { width: 8px; height: 8px; border-radius: 50%; background: #2df5c8; box-shadow: 0 0 12px #2df5c8; animation: eyebrow-blink 2.2s ease-in-out infinite; }
 @keyframes eyebrow-blink { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
 .lms-skin .lms-hero-title { margin: 0; color: var(--lms-paper); font-size: clamp(2.8rem, 6vw, 5.2rem); font-weight: 900; letter-spacing: -.04em; line-height: 1.02; text-wrap: balance; }
 .lms-skin .lms-hero-title em { font-style: normal; background: linear-gradient(120deg, #77e0e8, #2df5c8 60%, #a8cf7e); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .lms-skin .lms-hero-lede { max-width: 52ch; margin-top: 16px; color: rgba(231,241,240,.72); font-size: 1.02rem; line-height: 1.8; }
+.lms-skin .lms-hero-copy .lms-search { margin-inline: auto; }
+.lms-skin .lms-popular { justify-content: center; }
 
 @media (max-width: 1020px) {
-  .lms-skin .lms-subhero .lms-hero-inner { grid-template-columns: 1fr; }
+  .lms-skin .lms-subhero .lms-hero-inner.has-aside { grid-template-columns: 1fr; }
     }
 @media (prefers-reduced-motion: reduce) {
       .lms-skin .eyebrow-dot { animation: none; }

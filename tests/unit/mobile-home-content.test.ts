@@ -70,6 +70,13 @@ const NEWS_ROWS: NewsCardRow[] = [
   },
 ];
 const NEWS = mobileNewsEntries(NEWS_ROWS);
+const PARTNER_ROWS = PARTNERS.map((p, i) => ({
+  id: String(i),
+  name: p.name.en,
+  logo: p.logo,
+  lightLogo: null,
+  height: 96,
+}));
 
 /** renderToStaticMarkup escapes quotes/apostrophes; decode before text checks. */
 function decodeEntities(markup: string): string {
@@ -82,7 +89,12 @@ function decodeEntities(markup: string): string {
 function renderHome(lang: "ar" | "en"): string {
   return decodeEntities(
     renderToStaticMarkup(
-      createElement(MobileHomeView, { lang, onToggleLang: () => {}, news: NEWS }),
+      createElement(MobileHomeView, {
+        lang,
+        onToggleLang: () => {},
+        news: NEWS,
+        partners: PARTNER_ROWS,
+      }),
     ),
   );
 }
@@ -326,7 +338,13 @@ describe("mobile homepage rendered output", () => {
     const render = (lang: "ar" | "en", newsFailed: boolean) =>
       decodeEntities(
         renderToStaticMarkup(
-          createElement(MobileHomeView, { lang, onToggleLang: () => {}, news: [], newsFailed }),
+          createElement(MobileHomeView, {
+            lang,
+            onToggleLang: () => {},
+            news: [],
+            newsFailed,
+            partners: [],
+          }),
         ),
       );
     const empty = render("en", false);

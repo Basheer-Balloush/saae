@@ -20,7 +20,7 @@ export function SubHero({ id, eyebrow, titleSpans, titleClassName, lede, before,
   return (
     <section className="lms-hero lms-subhero" aria-labelledby={id}>
       <div className="hero-grid" aria-hidden="true" />
-      <div className="page-shell lms-hero-inner">
+      <div className={`page-shell lms-hero-inner${children ? " has-aside" : ""}`}>
         <div className="lms-hero-copy">
           {before}
           {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
