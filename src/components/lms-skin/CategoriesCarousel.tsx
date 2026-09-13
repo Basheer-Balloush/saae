@@ -161,14 +161,6 @@ export function CategoriesCarousel({
               >
                 <span>{ar ? "تصفح الدورات" : "Browse courses"}</span> <span aria-hidden="true">↓</span>
               </button>
-              <div className="cats-nav" role="group" aria-label={ar ? "الفئات" : "Categories"}>
-                <button type="button" aria-label={ar ? "الفئة السابقة" : "Previous category"} onClick={() => goTo(active - 1)}>
-                  <span aria-hidden="true">←</span>
-                </button>
-                <button type="button" aria-label={ar ? "الفئة التالية" : "Next category"} onClick={() => goTo(active + 1)}>
-                  <span aria-hidden="true">→</span>
-                </button>
-              </div>
             </div>
             <ul className="cats-dots" aria-label={ar ? "اختر الفئة" : "Choose category"}>
               {categories.map((c, i) => (
@@ -210,6 +202,14 @@ export function CategoriesCarousel({
                 );
               })}
             </ul>
+            <div className="cats-nav" role="group" aria-label={ar ? "الفئات" : "Categories"}>
+              <button type="button" aria-label={ar ? "الفئة السابقة" : "Previous category"} onClick={() => goTo(active - 1)}>
+                <span aria-hidden="true">←</span>
+              </button>
+              <button type="button" aria-label={ar ? "الفئة التالية" : "Next category"} onClick={() => goTo(active + 1)}>
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
