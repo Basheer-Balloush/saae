@@ -263,9 +263,9 @@ export function MobileHomeView({
   useEffect(() => {
     const v = heroVideoRef.current;
     if (!v) return;
-    const onLoaded = () => document.querySelector('.mobile-home')?.classList.add('mh-hero-ready');
-    v.addEventListener('loadeddata', onLoaded);
-    return () => v.removeEventListener('loadeddata', onLoaded);
+    const onLoaded = () => document.querySelector(".mobile-home")?.classList.add("mh-hero-ready");
+    v.addEventListener("loadeddata", onLoaded);
+    return () => v.removeEventListener("loadeddata", onLoaded);
   }, []);
 
   /* Hero video: src assigned only on eligible phones, pauses off-screen. */
@@ -701,3 +701,635 @@ export function MobileHomeView({
         </section>
 
         <div className="mh-chapters">
+          <nav
+            className="mh-rail"
+            id="mh-rail"
+            ref={railRef}
+            aria-label={pick(RAIL_COPY.label, lang)}
+          >
+            <ul className="mh-rail-list" ref={railListRef}>
+              {RAIL_COPY.items.map((item) => {
+                const id = item.href.slice(1);
+                const active = activeRail === id;
+                return (
+                  <li key={item.href}>
+                    <a
+                      href={item.href}
+                      data-rail={id}
+                      aria-current={active ? "true" : undefined}
+                      className={active ? "mh-pill mh-is-active" : "mh-pill"}
+                    >
+                      <span className="mh-roulette">
+                        <span className="mh-roulette-line">{pick(item.label, lang)}</span>
+                        <span className="mh-roulette-line" aria-hidden="true">
+                          {pick(item.label, lang)}
+                        </span>
+                      </span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          <section className="mh-section" id="achievements" aria-labelledby="mh-numbers-title">
+            <div className="mh-wrap">
+              <p className="mh-eyebrow">{pick(NUMBERS_COPY.eyebrow, lang)}</p>
+              <h2 className="mh-section-h" id="mh-numbers-title">
+                {pick(NUMBERS_COPY.title, lang)}
+              </h2>
+              <div className="mh-numbers">
+                {ACHIEVEMENTS.map((a) => (
+                  <div className="mh-number-tile" key={a.value}>
+                    <MhCount count={a.count} value={a.value} />
+                    <span className="mh-num-label">{pick(a.label, lang)}</span>
+                    <span className="mh-num-bar" aria-hidden="true" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="mh-section" id="start" aria-labelledby="mh-start-title">
+            <div className="mh-wrap">
+              <p className="mh-eyebrow">{pick(START_COPY.eyebrow, lang)}</p>
+              <h2 className="mh-section-h" id="mh-start-title">
+                {pick(START_COPY.title, lang)}
+              </h2>
+            </div>
+            <nav className="mh-wrap mh-ways" aria-label={pick(START_COPY.linksLabel, lang)}>
+              {WAYS.map((w) => (
+                <a key={pick(w.title, lang)} href={w.href} className="mh-way-card">
+                  <span className="mh-way-icon">
+                    <WayIcon kind={w.icon} />
+                  </span>
+                  <span className="mh-way-body">
+                    <span className="mh-way-title">{pick(w.title, lang)}</span>
+                    <span className="mh-way-text">{pick(w.body, lang)}</span>
+                    <span className="mh-way-cta">
+                      {pick(w.cta, lang)}
+                      <ArrowUpRight size={18} aria-hidden="true" className="mh-flip" />
+                    </span>
+                  </span>
+                </a>
+              ))}
+            </nav>
+          </section>
+
+          <section className="mh-initiative" id="initiative" aria-labelledby="mh-initiative-title">
+            <div className="mh-wrap mh-initiative-target">
+              <p className="mh-eyebrow">{pick(INITIATIVE_COPY.target, lang)}</p>
+              <p className="mh-giant-num" dir="ltr">
+                1,000,000
+              </p>
+              <p className="mh-initiative-reach">{pick(INITIATIVE_COPY.reach, lang)}</p>
+            </div>
+            <div className="mh-initiative-media" aria-hidden="true">
+              <img
+                src={INITIATIVE_COPY.image}
+                alt=""
+                width={600}
+                height={460}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div className="mh-wrap mh-initiative-copy">
+              <p className="mh-eyebrow">{pick(INITIATIVE_COPY.eyebrow, lang)}</p>
+              <h2 className="mh-section-h" id="mh-initiative-title">
+                {pick(INITIATIVE_COPY.title, lang)}
+              </h2>
+              <p className="mh-section-p">{pick(INITIATIVE_COPY.body, lang)}</p>
+              <div className="mh-feature-actions">
+                <a className="mh-btn-primary" href="/initiative">
+                  {pick(INITIATIVE_COPY.primary, lang)}
+                </a>
+                <a className="mh-btn-secondary" href="/one-million-initiative-home">
+                  {pick(INITIATIVE_COPY.official, lang)}
+                </a>
+              </div>
+            </div>
+          </section>
+
+          <section className="mh-section" id="communities" aria-labelledby="mh-comm-title">
+            <div className="mh-wrap">
+              <p className="mh-eyebrow">{pick(COMMUNITIES_COPY.eyebrow, lang)}</p>
+              <h2 className="mh-section-h" id="mh-comm-title">
+                {pick(COMMUNITIES_COPY.title, lang)}
+              </h2>
+              <p className="mh-section-p">{pick(COMMUNITIES_COPY.body, lang)}</p>
+              <ol className="mh-trunk">
+                {COMMUNITIES.map((c, i) => (
+                  <MhTrunkRow key={c.key} index={i} href={c.href} lang={lang} />
+                ))}
+              </ol>
+            </div>
+          </section>
+
+          <section className="mh-section" id="news" aria-labelledby="mh-news-title">
+            <div className="mh-wrap">
+              <p className="mh-eyebrow">{pick(NEWS_COPY.eyebrow, lang)}</p>
+              <h2 className="mh-section-h" id="mh-news-title">
+                {pick(NEWS_COPY.title, lang)}
+              </h2>
+              <p className="mh-section-p">{pick(NEWS_COPY.body, lang)}</p>
+            </div>
+            {news.length === 0 ? (
+              <div className="mh-wrap">
+                <p className="mh-section-p" role="status">
+                  {pick(newsFailed ? NEWS_COPY.failed : NEWS_COPY.empty, lang)}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div
+                  className="mh-snap mh-news-snap"
+                  ref={newsTrackRef}
+                  role="region"
+                  aria-roledescription="carousel"
+                  aria-label={pick(NEWS_COPY.carouselLabel, lang)}
+                  tabIndex={0}
+                >
+                  {news.map((n, i) => (
+                    <article
+                      key={n.id}
+                      className="mh-news-card"
+                      data-news-card={i}
+                      data-index={i}
+                      ref={(el) => {
+                        newsRefs.current[i] = el;
+                      }}
+                    >
+                      <a href={n.href} className="mh-news-link" aria-label={pick(n.headline, lang)}>
+                        <img
+                          src={n.image}
+                          alt={pick(n.imageAlt, lang)}
+                          width={800}
+                          height={600}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        <span className="mh-news-body">
+                          <span className="mh-news-meta">
+                            <span className="mh-news-tag">{pick(n.tag, lang)}</span>
+                            <time dateTime={n.dateTime}>{pick(n.date, lang)}</time>
+                          </span>
+                          <span className="mh-news-head">{pick(n.headline, lang)}</span>
+                          <span className="mh-news-ex">{pick(n.excerpt, lang)}</span>
+                          <span className="mh-news-cta">
+                            {pick(NEWS_COPY.readStory, lang)}
+                            <ArrowUpRight size={16} aria-hidden="true" className="mh-flip" />
+                          </span>
+                        </span>
+                      </a>
+                    </article>
+                  ))}
+                </div>
+                <div className="mh-wrap mh-news-controls">
+                  <div className="mh-carousel-btns">
+                    <button
+                      type="button"
+                      className="mh-round-btn"
+                      aria-label={pick(MICRO_COPY.prev, lang)}
+                      disabled={newsIndex === 0}
+                      onClick={() => stepNews(-1)}
+                    >
+                      <ArrowLeft size={20} aria-hidden="true" className="mh-flip" />
+                    </button>
+                    <button
+                      type="button"
+                      className="mh-round-btn"
+                      aria-label={pick(MICRO_COPY.next, lang)}
+                      disabled={newsIndex === news.length - 1}
+                      onClick={() => stepNews(1)}
+                    >
+                      <ArrowRight size={20} aria-hidden="true" className="mh-flip" />
+                    </button>
+                  </div>
+                  <p className="mh-counter" aria-live="polite">
+                    <span dir="ltr">
+                      {newsIndex + 1} / {news.length}
+                    </span>
+                  </p>
+                </div>
+              </>
+            )}
+            <div className="mh-wrap">
+              <a className="mh-inline-link" href="/news">
+                {pick(NEWS_COPY.allNews, lang)}
+                <ArrowUpRight size={16} aria-hidden="true" className="mh-flip" />
+              </a>
+            </div>
+          </section>
+
+          <section className="mh-section" id="mission" aria-labelledby="mh-mission-title">
+            <div className="mh-wrap">
+              <p className="mh-eyebrow">{pick(MISSION_COPY.eyebrow, lang)}</p>
+              <h2 className="mh-section-h" id="mh-mission-title">
+                {pick(MISSION_COPY.title, lang)}
+              </h2>
+              <ol className="mh-stack">
+                {MISSION_STEPS.map((s, i) => (
+                  <li
+                    key={pick(s.index, lang)}
+                    className={`mh-stack-card mh-accent-${i}`}
+                    style={{ "--i": i } as CSSProperties}
+                  >
+                    <span className="mh-stack-num" aria-hidden="true">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <p className="mh-step-index">{pick(s.index, lang)}</p>
+                    <h3 className="mh-stack-title">{pick(s.title, lang)}</h3>
+                    <p className="mh-stack-body">{pick(s.body, lang)}</p>
+                  </li>
+                ))}
+              </ol>
+              <p className="mh-below-stack">
+                <a className="mh-inline-link" href="/about">
+                  {pick(MISSION_COPY.aboutLink, lang)}
+                  <ArrowUpRight size={16} aria-hidden="true" className="mh-flip" />
+                </a>
+              </p>
+            </div>
+          </section>
+
+          <section
+            className={logosPaused ? "mh-section mh-is-paused" : "mh-section"}
+            id="partners"
+            aria-labelledby="mh-partners-title"
+          >
+            <div className="mh-wrap mh-partners-head">
+              <div>
+                <p className="mh-eyebrow">{pick(PARTNERS_COPY.eyebrow, lang)}</p>
+                <h2 className="mh-section-h" id="mh-partners-title">
+                  {pick(PARTNERS_COPY.title, lang)}
+                </h2>
+                <p className="mh-section-p">{pick(PARTNERS_COPY.body, lang)}</p>
+              </div>
+              <button
+                type="button"
+                className="mh-round-btn mh-marquee-toggle"
+                aria-pressed={logosPaused}
+                aria-label={
+                  logosPaused ? pick(MICRO_COPY.playLogos, lang) : pick(MICRO_COPY.pauseLogos, lang)
+                }
+                onClick={() => setLogosPaused((v) => !v)}
+              >
+                {logosPaused ? (
+                  <Play size={20} aria-hidden="true" />
+                ) : (
+                  <Pause size={20} aria-hidden="true" />
+                )}
+              </button>
+            </div>
+            <div className="mh-marquee" aria-label={pick(PARTNERS_COPY.title, lang)}>
+              <div className="mh-marquee-row">
+                <div className="mh-marquee-track">
+                  {[0, 1].map((copy) => (
+                    <ul
+                      key={copy}
+                      className="mh-logo-list"
+                      aria-hidden={copy === 1 ? "true" : undefined}
+                    >
+                      {PARTNERS.slice(0, 12).map((p) => (
+                        <li key={p.name.en} className="mh-logo-chip">
+                          <img
+                            src={p.logo}
+                            alt={copy === 0 ? pick(p.name, lang) : ""}
+                            width={320}
+                            height={160}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  ))}
+                </div>
+              </div>
+              <div className="mh-marquee-row mh-row-reverse">
+                <div className="mh-marquee-track">
+                  {[0, 1].map((copy) => (
+                    <ul
+                      key={copy}
+                      className="mh-logo-list"
+                      aria-hidden={copy === 1 ? "true" : undefined}
+                    >
+                      {PARTNERS.slice(12).map((p) => (
+                        <li key={p.name.en} className="mh-logo-chip">
+                          <img
+                            src={p.logo}
+                            alt={copy === 0 ? pick(p.name, lang) : ""}
+                            width={320}
+                            height={160}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <ul className="mh-partner-static" aria-label={pick(PARTNERS_COPY.title, lang)}>
+              {PARTNERS.map((p) => (
+                <li key={p.name.en} className="mh-logo-chip">
+                  <img
+                    src={p.logo}
+                    alt={pick(p.name, lang)}
+                    width={320}
+                    height={160}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </li>
+              ))}
+            </ul>
+            <div className="mh-wrap">
+              <a className="mh-inline-link" href="/partners">
+                {pick(PARTNERS_COPY.allPartners, lang)}
+                <ArrowUpRight size={16} aria-hidden="true" className="mh-flip" />
+              </a>
+            </div>
+          </section>
+
+          <section className="mh-section" id="faq" aria-labelledby="mh-faq-title">
+            <div className="mh-wrap">
+              <p className="mh-eyebrow">{pick(FAQ_COPY.eyebrow, lang)}</p>
+              <h2 className="mh-section-h" id="mh-faq-title">
+                {pick(FAQ_COPY.title, lang)}
+              </h2>
+              <p className="mh-section-p">{pick(FAQ_COPY.body, lang)}</p>
+              <ul className="mh-faq-list">
+                {FAQS.map((f, i) => {
+                  const open = openFaq === i;
+                  return (
+                    <li key={pick(f.question, lang)} className="mh-faq-item">
+                      <h3 className="mh-faq-h">
+                        <button
+                          type="button"
+                          className="mh-faq-q"
+                          aria-expanded={open}
+                          aria-controls={`mh-faq-a-${i}`}
+                          id={`mh-faq-q-${i}`}
+                          onClick={() => setOpenFaq(open ? null : i)}
+                        >
+                          <span>{pick(f.question, lang)}</span>
+                          <span className="mh-faq-icon" aria-hidden="true">
+                            {open ? <Minus size={20} /> : <Plus size={20} />}
+                          </span>
+                        </button>
+                      </h3>
+                      <div
+                        className={open ? "mh-faq-panel mh-is-open" : "mh-faq-panel"}
+                        id={`mh-faq-a-${i}`}
+                        role="region"
+                        aria-labelledby={`mh-faq-q-${i}`}
+                        inert={!open}
+                      >
+                        <p className="mh-faq-a">
+                          {pick(f.answer, lang)}
+                          {f.answerLink ? (
+                            <>
+                              {" "}
+                              <a href={f.answerLink.href}>{pick(f.answerLink.text, lang)}</a>.
+                            </>
+                          ) : null}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+              <a className="mh-btn-secondary mh-write-btn" href="/contact#write">
+                {pick(FAQ_COPY.writeToUs, lang)}
+              </a>
+            </div>
+          </section>
+        </div>
+
+        <section className="mh-join" id="join" aria-labelledby="mh-join-title" ref={rootsBandRef}>
+          <video
+            ref={rootsVideoRef}
+            className="mh-join-video"
+            muted
+            playsInline
+            loop
+            preload="none"
+            poster={CLOSING_COPY.videoPoster}
+            aria-hidden="true"
+            disablePictureInPicture
+            tabIndex={-1}
+          />
+          <div className="mh-join-scrim" aria-hidden="true" />
+          {rootsVideoActive ? (
+            <button
+              type="button"
+              className="mh-video-toggle"
+              aria-pressed={!rootsVideoPaused}
+              aria-label={pick(
+                rootsVideoPaused ? MICRO_COPY.playVideo : MICRO_COPY.pauseVideo,
+                lang,
+              )}
+              onClick={toggleRootsVideo}
+            >
+              {rootsVideoPaused ? (
+                <Play size={20} aria-hidden="true" />
+              ) : (
+                <Pause size={20} aria-hidden="true" />
+              )}
+            </button>
+          ) : null}
+          <div className="mh-wrap mh-join-copy">
+            <p className="mh-eyebrow">{pick(CLOSING_COPY.eyebrow, lang)}</p>
+            <h2
+              className={closingTitle.inView ? "mh-join-title mh-is-lit" : "mh-join-title"}
+              id="mh-join-title"
+              ref={closingTitle.ref}
+            >
+              <span className="mh-sr-only">{pick(CLOSING_COPY.title, lang)}</span>
+              <span aria-hidden="true">
+                {closingWords.map((w, i) => (
+                  <span key={i} className="mh-lit-word" style={{ "--i": i } as CSSProperties}>
+                    {w}
+                  </span>
+                ))}
+              </span>
+            </h2>
+            <p className="mh-join-body">{pick(CLOSING_COPY.body, lang)}</p>
+            <div className="mh-actions">
+              <a className="mh-btn-primary" href="/learning-management-system">
+                {pick(CLOSING_COPY.primary, lang)}
+              </a>
+              <a className="mh-btn-secondary" href="/registration">
+                {pick(CLOSING_COPY.secondary, lang)}
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="mh-footer">
+        <div className="mh-wrap">
+          <div className="mh-footer-top">
+            <img
+              src={wordmark}
+              alt={pick(OPENING.eyebrow, lang)}
+              width={wordmarkSize.width}
+              height={wordmarkSize.height}
+              loading="lazy"
+              decoding="async"
+              className="mh-footer-logo"
+            />
+            <p className="mh-footer-claim">{pick(FOOTER_CLAIM, lang)}</p>
+          </div>
+          <div className="mh-footer-cols">
+            <nav aria-labelledby="mh-foot-assoc">
+              <h2 id="mh-foot-assoc">{pick(MICRO_COPY.footerAssociation, lang)}</h2>
+              <ul>
+                {FOOTER_EXPLORE.map((l) => (
+                  <li key={l.href}>
+                    <a href={l.href}>{pick(l.label, lang)}</a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <nav aria-labelledby="mh-foot-part">
+              <h2 id="mh-foot-part">{pick(MICRO_COPY.footerTakePart, lang)}</h2>
+              <ul>
+                {FOOTER_OFFICIAL.map((l) => (
+                  <li key={l.href + pick(l.label, lang)}>
+                    <a href={l.href} {...extProps(l)}>
+                      {pick(l.label, lang)}
+                      {l.external ? (
+                        <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
+                      ) : null}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <nav aria-labelledby="mh-foot-explore" className="mh-footer-discover">
+              <h2 id="mh-foot-explore">{pick(MICRO_COPY.footerExplore, lang)}</h2>
+              <ul>
+                {FOOTER_DISCOVER.map((l) => (
+                  <li key={l.href + pick(l.label, lang)}>
+                    <a href={l.href}>{pick(l.label, lang)}</a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+          <div className="mh-contact-card">
+            <h2 className="mh-sr-only">{pick(MICRO_COPY.contactTitle, lang)}</h2>
+            <a
+              href={CONTACT.mapsHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={pick(MICRO_COPY.openMaps, lang)}
+              className="mh-map-link"
+            >
+              <img
+                src={CONTACT.mapImage}
+                alt={pick(CONTACT.mapAlt, lang)}
+                width={696}
+                height={339}
+                loading="lazy"
+                decoding="async"
+              />
+            </a>
+            <ul className="mh-contact-list">
+              <li>
+                <a href={CONTACT.mapsHref} target="_blank" rel="noopener noreferrer">
+                  <MapPin size={18} aria-hidden="true" />
+                  {pick(CONTACT.address, lang)}
+                  <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
+                </a>
+              </li>
+              <li>
+                <a href={CONTACT.email}>
+                  <Mail size={18} aria-hidden="true" />
+                  <span dir="ltr">info@aisyria.org</span>
+                </a>
+              </li>
+              <li>
+                <a href={CONTACT.phone}>
+                  <Phone size={18} aria-hidden="true" />
+                  <span dir="ltr">{CONTACT.phoneDisplay}</span>
+                </a>
+              </li>
+              <li>
+                <a href={CONTACT.mapsHref} target="_blank" rel="noopener noreferrer">
+                  {pick(MICRO_COPY.visitUs, lang)}
+                  <ArrowUpLeft size={16} aria-hidden="true" className="mh-flip" />
+                  <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
+                </a>
+              </li>
+            </ul>
+            <ul className="mh-social-list" aria-label={pick(MICRO_COPY.followUs, lang)}>
+              {SOCIAL_LINKS.map((s) => (
+                <li key={s.href}>
+                  <a
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={pick(s.label, lang)}
+                    className="mh-social-btn"
+                  >
+                    <SocialIcon name={s.labelEn} />
+                    <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <p className="mh-attr">
+              ©{" "}
+              <a href={CONTACT.attributionHref} target="_blank" rel="noopener noreferrer">
+                OpenStreetMap
+                <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
+              </a>
+            </p>
+          </div>
+          <div className="mh-rights-row">
+            <p className="mh-rights">{pick(FOOTER_RIGHTS, lang)}</p>
+            <a className="mh-to-top" href="#hero-sec" aria-label={pick(MICRO_COPY.backToTop, lang)}>
+              <ArrowUp size={20} aria-hidden="true" />
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function MhTrunkRow({ index, href, lang }: { index: number; href: string; lang: Locale }) {
+  const { ref, inView } = useInView<HTMLLIElement>(0.4);
+  const c = COMMUNITIES[index];
+  if (!c) return null;
+  return (
+    <li ref={ref} className={inView ? "mh-trunk-row mh-is-in" : "mh-trunk-row"}>
+      <a href={href}>
+        <span className="mh-node" aria-hidden="true" />
+        <span className="mh-trunk-index" aria-hidden="true">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <span className="mh-trunk-icon" aria-hidden="true">
+          <CommunityIcon index={index} />
+        </span>
+        <span className="mh-trunk-text">
+          <span className="mh-comm-name">{pick(c.name, lang)}</span>
+          <span className="mh-comm-tag">{pick(c.tagline, lang)}</span>
+        </span>
+        <ArrowUpRight size={18} aria-hidden="true" className="mh-flip mh-trunk-arrow" />
+      </a>
+    </li>
+  );
+}
+
+export function MobileHome({ news, newsFailed }: { news: NewsEntry[]; newsFailed?: boolean }) {
+  const { lang, toggle } = useLang();
+  return <MobileHomeView lang={lang} onToggleLang={toggle} news={news} newsFailed={newsFailed} />;
+}
+
+export default MobileHome;
