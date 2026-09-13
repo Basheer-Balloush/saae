@@ -324,3 +324,17 @@ html[dir] .lms-skin .lms-hero-copy h1.course-page-title { font-size: clamp(2rem,
     background: linear-gradient(90deg, transparent, rgba(119, 224, 232, .45), transparent);
   }
 }
+
+/* In the icon-only menu, hovering an icon or reaching it by keyboard shows its
+   name in a small label under it, so each icon says where it goes. */
+@media (min-width: 681px) {
+  .lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .radial-nav-item:not([aria-current="page"]):is(:hover, :focus-visible) .radial-nav-label,
+  .lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .tube-auth:is(:hover, :focus-visible) .tube-auth-label {
+    width: auto; height: auto; overflow: visible; clip-path: none;
+    top: calc(100% + 10px); left: 50%; z-index: 5;
+    transform: translateX(-50%);
+    padding: 7px 11px; border: 1px solid rgba(177, 238, 237, .26); border-radius: 9px;
+    background: rgba(2, 29, 36, .96); box-shadow: 0 10px 26px rgba(0, 8, 12, .45);
+    color: #edfbf9; font-size: .78rem; line-height: 1.2; opacity: 1; pointer-events: none;
+  }
+}
