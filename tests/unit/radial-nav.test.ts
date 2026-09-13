@@ -18,13 +18,14 @@ describe("shared radial menu", () => {
     ["/partners", "/partners"],
     ["/initiative", "/initiative"],
     ["/contact", "/contact"],
+    ["/learning-management-system", "/learning-management-system"],
   ])("marks exactly one item current on %s", (pathname, href) => {
     expect(current(radialNavHtml(pathname))).toEqual([href]);
   });
 
   it("links Home back to the homepage hero from other pages", () => {
     expect(radialNavHtml("/about")).toContain('href="/#hero-sec"');
-    expect(current(radialNavHtml("/learning-management-system"))).toEqual([]);
+    expect(current(radialNavHtml("/registration"))).toEqual([]);
   });
 
   it("keeps the hooks navigation.js and language.js look for", () => {
@@ -32,7 +33,7 @@ describe("shared radial menu", () => {
     for (const hook of ['id="language-switch"', "data-radial-nav", "data-radial-items", "data-radial-toggle", "data-radial-close"]) {
       expect(count(html, hook)).toBe(1);
     }
-    expect(count(html, 'class="radial-nav-item"')).toBe(6);
+    expect(count(html, 'class="radial-nav-item"')).toBe(7);
   });
 });
 
