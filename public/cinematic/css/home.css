@@ -4033,6 +4033,7 @@
       }
       body .partner-mark {
         animation: partner-stream-right var(--travel) linear 1 both paused;
+        animation-delay: calc(var(--i) * var(--step) - var(--t) * 1s);
       }
       body .partner-mark.is-left {
         animation-name: partner-stream-left;
