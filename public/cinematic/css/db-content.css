@@ -1,0 +1,45 @@
+/* Database content is rendered in both languages side by side. Show the one
+   matching the language language.js keeps on <html lang>. */
+html[lang="ar"] [data-db-lang="en"],
+html:not([lang="ar"]) [data-db-lang="ar"] {
+  display: none !important;
+}
+
+/* About: board and executive members, drawn on the community cards. */
+.community.member {
+  text-align: center;
+}
+
+.member-photo {
+  display: block;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.member-bio {
+  margin-top: .75rem;
+  font-size: .92rem;
+  line-height: 1.6;
+  opacity: .8;
+}
+
+/* Article: category chips side by side, and uploaded videos. */
+.article-chip + .article-chip {
+  margin-inline-start: 8px;
+}
+
+.article-videos {
+  display: grid;
+  gap: 18px;
+  margin-top: clamp(36px, 5vw, 58px);
+}
+
+.article-videos video {
+  width: 100%;
+  max-height: 560px;
+  border-radius: 18px;
+  background: #000;
+}

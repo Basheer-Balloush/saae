@@ -1,6 +1,14 @@
+import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import homeHtml from "@/components/cinematic/html/home.html?raw";
 import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  NEWS_CARD_COLUMNS,
+  applyHomeNews,
+  renderHomeNews,
+  type NewsCardRow,
+} from "@/lib/cinematic-db-content";
 
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/home-inline.js" },
@@ -19,6 +27,16 @@ const SCRIPTS: CinematicScript[] = [
 ];
 
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    const { data } = await supabase
+      .from("news")
+      .select(NEWS_CARD_COLUMNS)
+      .eq("show_on_home", true)
+      .order("published_at", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(4);
+    return { news: renderHomeNews((data ?? []) as NewsCardRow[]) };
+  },
   head: () => ({
     meta: [
       { title: "SAAE — Syrian Association for AI & Entrepreneurship" },
@@ -40,6 +58,7 @@ export const Route = createFileRoute("/")({
       { rel: "canonical", href: "https://aisyria.org/" },
       { rel: "stylesheet", href: "/cinematic/css/home.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
+      { rel: "stylesheet", href: "/cinematic/css/db-content.css" },
       {
         rel: "preload",
         as: "image",
@@ -52,5 +71,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  return <CinematicPage html={homeHtml} scripts={SCRIPTS} htmlClass="site-loading" />;
+  const { news } = Route.useLoaderData();
+  const html = useMemo(() => applyHomeNews(homeHtml, news), [news]);
+  return <CinematicPage html={html} scripts={SCRIPTS} htmlClass="site-loading" />;
 }
