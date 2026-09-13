@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { withSiteChrome } from "./radial-nav";
 import type { CinematicRuntime, CinematicRuntimeContext } from "./runtime";
@@ -113,10 +113,15 @@ export function appendCinematicScripts(scripts: CinematicScript[], onEachSettled
 }
 
 /** Renders a prototype page's static markup and boots its vanilla scripts in order. */
-export function CinematicPage({ html, scripts, htmlClass, bodyClass, htmlAttrs }: Props) {
+function CinematicPageImpl({ html, scripts, htmlClass, bodyClass, htmlAttrs }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const page = useMemo(() => withSiteChrome(html, pathname), [html, pathname]);
+  /* React writes dangerouslySetInnerHTML again whenever it receives a new
+     object, even one holding the same string. That rewrite throws away
+     everything the page scripts did to the markup (revealed sections, split
+     text, bound listeners), so the object is kept stable and only a real
+     change of markup reaches the DOM. */
+  const inner = useMemo(() => ({ __html: withSiteChrome(html, pathname) }), [html, pathname]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -163,5 +168,9 @@ export function CinematicPage({ html, scripts, htmlClass, bodyClass, htmlAttrs }
     };
   }, [html, scripts, htmlClass, bodyClass, htmlAttrs]);
 
-  return <div ref={mountRef} className="cinematic" dangerouslySetInnerHTML={{ __html: page }} />;
+  return <div ref={mountRef} className="cinematic" dangerouslySetInnerHTML={inner} />;
 }
+
+/* A page that re-renders for its own reasons (a dialog opening, say) must not
+   re-render the prototype markup underneath it. */
+export const CinematicPage = memo(CinematicPageImpl);
