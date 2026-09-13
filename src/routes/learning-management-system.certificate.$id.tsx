@@ -1,13 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Award, Printer } from "lucide-react";
+import { Award, Loader2, Printer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
-import { Button } from "@/components/ui/button";
+import { SubHero } from "@/components/lms-skin/SubHero";
+import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/certificate/$id")({
-  head: () => ({ meta: [{ title: "LMS · Certificate" }] }),
+  head: () => ({ meta: [{ title: "LMS · Certificate" }], links: LMS_SKIN_LINKS }),
   component: CertificatePage,
 });
 
@@ -20,6 +21,7 @@ type Cert = {
 function CertificatePage() {
   const { id } = Route.useParams();
   const { lang } = useLang();
+  const ar = lang === "ar";
   const tr = lmsT[lang];
   const [cert, setCert] = useState<Cert | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,31 +45,73 @@ function CertificatePage() {
     })();
   }, [id]);
 
-  if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
-  if (!cert) return <p className="text-center py-20 text-muted-foreground">Not found</p>;
+  const crumbs = (
+    <nav className="course-crumbs" aria-label={ar ? "أنت هنا" : "You are here"}>
+      <Link to="/learning-management-system/student">{tr.myCourses}</Link>
+      <span aria-hidden="true">/</span>
+      <span>{tr.certificate}</span>
+    </nav>
+  );
+
+  if (loading || !cert) {
+    return (
+      <SubHero
+        id="cert-title"
+        titleSpans={[tr.certificate]}
+        titleClassName="course-page-title"
+        before={crumbs}
+        copyChildren={
+          <p className="state-box" style={{ marginTop: 28 }}>
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : ar ? "الشهادة غير موجودة" : "Not found"}
+          </p>
+        }
+      />
+    );
+  }
 
   const courseTitle = cert.course ? (lang === "ar" ? cert.course.title_ar : cert.course.title_en || cert.course.title_ar) : "—";
   const date = new Date(cert.issued_at).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", { year: "numeric", month: "long", day: "numeric" });
 
   return (
-    <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
-      <div className="flex justify-end mb-4 print:hidden">
-        <Button onClick={() => window.print()} variant="outline"><Printer className="h-4 w-4 mx-1" />{tr.printCertificate}</Button>
-      </div>
+    <>
+      <SubHero
+        id="cert-title"
+        eyebrow={ar ? "الشهادات" : "Certificates"}
+        titleSpans={[courseTitle]}
+        titleClassName="course-page-title"
+        before={crumbs}
+        copyChildren={
+          <p className="cert-print" style={{ marginTop: 26 }}>
+            <button type="button" className="action action-secondary" onClick={() => window.print()}>
+              <Printer className="h-4 w-4" />
+              {tr.printCertificate}
+            </button>
+          </p>
+        }
+      />
 
-      <div className="relative rounded-3xl border-[3px] border-primary/30 bg-gradient-to-br from-card via-background to-card p-12 sm:p-16 text-center shadow-soft print:shadow-none print:border-primary">
-        <div className="absolute inset-4 border border-primary/20 rounded-2xl pointer-events-none" />
-        <Award className="mx-auto h-16 w-16 text-primary" />
-        <div className="mt-4 text-xs uppercase tracking-widest text-muted-foreground">{tr.brand}</div>
-        <h1 className="mt-6 text-3xl sm:text-5xl font-bold text-foreground">{tr.certificateOf}</h1>
-        <p className="mt-8 text-base text-muted-foreground">{tr.hasCompleted}:</p>
-        <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-primary">{courseTitle}</h2>
-        <p className="mt-8 text-lg text-foreground font-semibold">{cert.student_name}</p>
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground">
-          <div><div className="font-semibold text-foreground">{tr.serial}</div><div className="mt-1 font-mono">{cert.serial}</div></div>
-          <div><div className="font-semibold text-foreground">{tr.issuedOn}</div><div className="mt-1">{date}</div></div>
+      <section className="lms-section cert-section" aria-labelledby="cert-sheet-title">
+        <div className="page-shell">
+          <article className="cert-sheet">
+            <Award className="cert-sheet-icon" aria-hidden="true" />
+            <p className="cert-sheet-brand">{tr.brand}</p>
+            <h2 id="cert-sheet-title">{tr.certificateOf}</h2>
+            <p className="cert-sheet-lede">{tr.hasCompleted}:</p>
+            <p className="cert-sheet-course">{courseTitle}</p>
+            <p className="cert-sheet-name">{cert.student_name}</p>
+            <dl className="cert-sheet-meta">
+              <div>
+                <dt>{tr.serial}</dt>
+                <dd dir="ltr">{cert.serial}</dd>
+              </div>
+              <div>
+                <dt>{tr.issuedOn}</dt>
+                <dd>{date}</dd>
+              </div>
+            </dl>
+          </article>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }

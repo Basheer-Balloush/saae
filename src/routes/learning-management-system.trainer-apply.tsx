@@ -1,16 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { Loader2, Upload, X, CheckCircle2, FileText } from "lucide-react";
+import { Loader2, Upload, X, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { toUserMessage } from "@/lib/safe-error";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import {
@@ -25,6 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SubHero } from "@/components/lms-skin/SubHero";
+import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/trainer-apply")({
   ssr: false,
@@ -38,6 +36,7 @@ export const Route = createFileRoute("/learning-management-system/trainer-apply"
       },
       { name: "robots", content: "noindex, nofollow" },
     ],
+    links: LMS_SKIN_LINKS,
   }),
   component: TrainerApplyPage,
 });
@@ -240,222 +239,216 @@ function TrainerApplyPage() {
     }
   };
 
+  const eyebrow = ar ? "اعتماد المدرّبين" : "Trainer accreditation";
+
   if (loading || loadingExisting) {
-    return <p className="text-center py-20 text-muted-foreground">…</p>;
+    return (
+      <section className="lms-hero lms-subhero">
+        <div className="page-shell">
+          <p className="state-box">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </p>
+        </div>
+      </section>
+    );
   }
 
   if (existing) {
     return (
-      <div className="mx-auto max-w-2xl px-4 sm:px-6 py-16">
-        <div className="rounded-2xl border border-primary/30 bg-primary/5 p-8 text-center">
-          <CheckCircle2 className="mx-auto h-12 w-12 text-primary" />
-          <h1 className="mt-4 text-2xl font-bold text-foreground">
-            {ar ? "طلبك قيد المراجعة" : "Your application is under review"}
-          </h1>
-          <p className="mt-3 text-muted-foreground">
-            {ar
-              ? "استلمنا طلبك للاعتماد كمدرّب معتمد ضمن نظام معادلة المدربين. سيتواصل معك فريق اللجنة عبر البريد الإلكتروني خلال أيام قليلة لبدء مراحل التقييم."
-              : "We received your accreditation application. The committee will contact you by email within a few days to start the evaluation phases."}
-          </p>
-          <p className="mt-4 text-xs text-muted-foreground">
-            {ar ? "الحالة الحالية" : "Current status"}:{" "}
-            <span className="font-semibold text-foreground">{existing.status}</span>
-          </p>
-          <Link
-            to="/learning-management-system"
-            className="mt-6 inline-block text-sm text-primary hover:underline"
-          >
-            {ar ? "العودة إلى المنصة" : "Back to the platform"}
-          </Link>
-        </div>
-      </div>
+      <SubHero
+        id="trainer-title"
+        eyebrow={eyebrow}
+        titleSpans={[ar ? "طلبك قيد المراجعة" : "Your application is under review"]}
+        titleClassName="course-page-title"
+        lede={
+          ar
+            ? "استلمنا طلبك للاعتماد كمدرّب معتمد ضمن نظام معادلة المدربين. سيتواصل معك فريق اللجنة عبر البريد الإلكتروني خلال أيام قليلة لبدء مراحل التقييم."
+            : "We received your accreditation application. The committee will contact you by email within a few days to start the evaluation phases."
+        }
+        copyChildren={
+          <>
+            <p className="course-tags course-hero-tags">
+              <span>
+                {ar ? "الحالة الحالية" : "Current status"}: {existing.status}
+              </span>
+            </p>
+            <p style={{ marginTop: 26 }}>
+              <Link to="/learning-management-system" className="action action-primary">
+                {ar ? "العودة إلى المنصة" : "Back to the platform"}
+              </Link>
+            </p>
+          </>
+        }
+      />
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
-      <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-          {ar ? "طلب اعتماد كمدرّب" : "Trainer accreditation application"}
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {ar
+    <>
+      <SubHero
+        id="trainer-title"
+        eyebrow={eyebrow}
+        titleSpans={ar ? ["طلب اعتماد", "كمدرّب"] : ["Trainer", "accreditation"]}
+        lede={
+          ar
             ? "يمر كل طلب بأربع مراحل تقييم (نظري، عملي، تدريب، مقابلة) ثم إعادة تقييم دورية كل 6 أشهر. اقرأ الشروط جيداً قبل الإرسال."
-            : "Every application passes through four evaluation phases (theory, practical, training demo, interview) and a periodic re-evaluation every 6 months."}
-        </p>
-      </div>
+            : "Every application passes through four evaluation phases (theory, practical, training demo, interview) and a periodic re-evaluation every 6 months."
+        }
+      />
 
-      <form onSubmit={onSubmit} className="space-y-8">
-        {/* Personal */}
-        <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
-          <h2 className="font-bold text-foreground">
-            {ar ? "١. البيانات الشخصية" : "1. Personal information"}
-          </h2>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <div>
-              <Label>{ar ? "الاسم الكامل (عربي)" : "Full name (Arabic)"} *</Label>
-              <Input dir="rtl" required value={fullNameAr} onChange={(e) => setFullNameAr(e.target.value)} />
-            </div>
-            <div>
-              <Label>{ar ? "الاسم الكامل (إنجليزي)" : "Full name (English)"} *</Label>
-              <Input dir="ltr" required value={fullNameEn} onChange={(e) => setFullNameEn(e.target.value)} />
-            </div>
-            <div>
-              <Label>{ar ? "رقم الهاتف" : "Phone"} *</Label>
-              <Input dir="ltr" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+963…" />
-            </div>
-            <div>
-              <Label>{ar ? "تاريخ الميلاد" : "Date of birth"} *</Label>
-              <Input type="date" required value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
-            </div>
-            <div className="sm:col-span-2">
-              <Label>{ar ? "المدينة" : "City"} *</Label>
-              <Input required value={city} onChange={(e) => setCity(e.target.value)} />
-            </div>
-            <div className="sm:col-span-2">
-              <Label>{ar ? "صورة شخصية (اختياري في هذه المرحلة)" : "Profile photo (optional at this stage)"}</Label>
-              <Input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)} />
-            </div>
-          </div>
-        </section>
+      <section className="lms-section" aria-labelledby="trainer-title">
+        <div className="page-shell">
+          <form onSubmit={onSubmit} className="narrow-stack">
+            <article className="pro-card">
+              <h2>{ar ? "١. البيانات الشخصية" : "1. Personal information"}</h2>
+              <div className="form-grid">
+                <div className="field">
+                  <label htmlFor="ta-name-ar">{ar ? "الاسم الكامل (عربي)" : "Full name (Arabic)"} *</label>
+                  <input id="ta-name-ar" type="text" dir="rtl" required value={fullNameAr} onChange={(e) => setFullNameAr(e.target.value)} />
+                </div>
+                <div className="field">
+                  <label htmlFor="ta-name-en">{ar ? "الاسم الكامل (إنجليزي)" : "Full name (English)"} *</label>
+                  <input id="ta-name-en" type="text" dir="ltr" required value={fullNameEn} onChange={(e) => setFullNameEn(e.target.value)} />
+                </div>
+                <div className="field">
+                  <label htmlFor="ta-phone">{ar ? "رقم الهاتف" : "Phone"} *</label>
+                  <input id="ta-phone" type="tel" dir="ltr" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+963…" />
+                </div>
+                <div className="field">
+                  <label htmlFor="ta-dob">{ar ? "تاريخ الميلاد" : "Date of birth"} *</label>
+                  <input id="ta-dob" type="date" required value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
+                </div>
+                <div className="field span-2">
+                  <label htmlFor="ta-city">{ar ? "المدينة" : "City"} *</label>
+                  <input id="ta-city" type="text" required value={city} onChange={(e) => setCity(e.target.value)} />
+                </div>
+                <div className="field span-2">
+                  <label htmlFor="ta-avatar">{ar ? "صورة شخصية (اختياري في هذه المرحلة)" : "Profile photo (optional at this stage)"}</label>
+                  <input id="ta-avatar" type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)} />
+                </div>
+              </div>
+            </article>
 
-        {/* Eligibility */}
-        <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
-          <h2 className="font-bold text-foreground">
-            {ar ? "٢. بيانات الأهلية" : "2. Eligibility"}
-          </h2>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <div>
-              <Label>{ar ? "سنوات الخبرة بالذكاء الاصطناعي" : "AI experience"} *</Label>
-              <Select value={experienceLevel} onValueChange={setExperienceLevel}>
-                <SelectTrigger><SelectValue placeholder={ar ? "اختر…" : "Select…"} /></SelectTrigger>
-                <SelectContent>
-                  {EXPERIENCE_LEVELS.map((l) => (
-                    <SelectItem key={l.id} value={l.id}>{ar ? l.ar : l.en}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>{ar ? "رابط LinkedIn" : "LinkedIn URL"} *</Label>
-              <Input dir="ltr" required type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/…" />
-            </div>
-            <div className="sm:col-span-2">
-              <Label>{ar ? "المجالات التخصصية (اختر واحدة على الأقل)" : "Specializations (pick at least one)"} *</Label>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {SPECIALIZATIONS.map((s) => {
-                  const active = specializations.includes(s.id);
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => toggleSpec(s.id)}
-                      className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                        active
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border hover:border-primary"
-                      }`}
-                    >
-                      {ar ? s.ar : s.en}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="sm:col-span-2">
-              <Label>
-                {ar ? "نبذة عن الخبرة" : "Experience summary"} *
-              </Label>
-              <Textarea rows={5} required value={bio} onChange={(e) => setBio(e.target.value)} />
-            </div>
-            <div>
-              <Label>{ar ? "رابط GitHub / Portfolio" : "GitHub / Portfolio URL"}</Label>
-              <Input dir="ltr" type="url" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} />
-            </div>
-            <div className="flex items-end gap-2">
-              <Checkbox id="prev" checked={hasPrevTraining} onCheckedChange={(v) => setHasPrevTraining(!!v)} />
-              <Label htmlFor="prev" className="cursor-pointer">
-                {ar ? "لديّ خبرة تدريبية سابقة" : "I have previous training experience"}
-              </Label>
-            </div>
-            {hasPrevTraining && (
-              <div className="sm:col-span-2">
-                <Label>{ar ? "تفاصيل الخبرة التدريبية" : "Previous training details"}</Label>
-                <Textarea rows={3} value={prevTrainingDetails} onChange={(e) => setPrevTrainingDetails(e.target.value)} />
-              </div>
-            )}
-            <div className="sm:col-span-2">
-              <Label>{ar ? "السيرة الذاتية" : "CV"} *</Label>
-              <Input type="file" onChange={(e) => setCvFile(e.target.files?.[0] ?? null)} />
-              {cvFile && (
-                <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1">
-                  <FileText className="h-3 w-3" /> {cvFile.name}
-                </p>
-              )}
-            </div>
-            <div className="sm:col-span-2">
-              <Label>{ar ? "نماذج أعمال أو مشاريع (ملف واحد على الأقل)" : "Work samples (at least one)"} *</Label>
-              <Input
-                type="file"
-                multiple
-                onChange={(e) => setWorkSamples(Array.from(e.target.files ?? []))}
-              />
-              {workSamples.length > 0 && (
-                <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-                  {workSamples.map((f, i) => (
-                    <li key={i} className="flex items-center justify-between gap-2 rounded border border-border px-2 py-1">
-                      <span className="truncate">{f.name}</span>
-                      <button type="button" onClick={() => setWorkSamples((prev) => prev.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive">
-                        <X className="h-3 w-3" />
+            <article className="pro-card">
+              <h2>{ar ? "٢. بيانات الأهلية" : "2. Eligibility"}</h2>
+              <div className="form-grid">
+                <div className="field">
+                  <label htmlFor="ta-exp">{ar ? "سنوات الخبرة بالذكاء الاصطناعي" : "AI experience"} *</label>
+                  <Select value={experienceLevel} onValueChange={setExperienceLevel}>
+                    <SelectTrigger id="ta-exp"><SelectValue placeholder={ar ? "اختر…" : "Select…"} /></SelectTrigger>
+                    <SelectContent>
+                      {EXPERIENCE_LEVELS.map((l) => (
+                        <SelectItem key={l.id} value={l.id}>{ar ? l.ar : l.en}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="field">
+                  <label htmlFor="ta-linkedin">{ar ? "رابط LinkedIn" : "LinkedIn URL"} *</label>
+                  <input id="ta-linkedin" dir="ltr" required type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/…" />
+                </div>
+                <fieldset className="field span-2">
+                  <legend>{ar ? "المجالات التخصصية (اختر واحدة على الأقل)" : "Specializations (pick at least one)"} *</legend>
+                  <div className="course-filters" role="group">
+                    {SPECIALIZATIONS.map((s) => (
+                      <button key={s.id} type="button" aria-pressed={specializations.includes(s.id)} onClick={() => toggleSpec(s.id)}>
+                        <span>{ar ? s.ar : s.en}</span>
                       </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+                    ))}
+                  </div>
+                </fieldset>
+                <div className="field span-2">
+                  <label htmlFor="ta-bio">{ar ? "نبذة عن الخبرة" : "Experience summary"} *</label>
+                  <textarea id="ta-bio" rows={5} required value={bio} onChange={(e) => setBio(e.target.value)} />
+                </div>
+                <div className="field">
+                  <label htmlFor="ta-github">{ar ? "رابط GitHub / Portfolio" : "GitHub / Portfolio URL"}</label>
+                  <input id="ta-github" dir="ltr" type="url" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} />
+                </div>
+                <label className="check-row" htmlFor="prev">
+                  <Checkbox id="prev" checked={hasPrevTraining} onCheckedChange={(v) => setHasPrevTraining(!!v)} />
+                  <span>{ar ? "لديّ خبرة تدريبية سابقة" : "I have previous training experience"}</span>
+                </label>
+                {hasPrevTraining && (
+                  <div className="field span-2">
+                    <label htmlFor="ta-prev">{ar ? "تفاصيل الخبرة التدريبية" : "Previous training details"}</label>
+                    <textarea id="ta-prev" rows={3} value={prevTrainingDetails} onChange={(e) => setPrevTrainingDetails(e.target.value)} />
+                  </div>
+                )}
+                <div className="field span-2">
+                  <label htmlFor="ta-cv">{ar ? "السيرة الذاتية" : "CV"} *</label>
+                  <input id="ta-cv" type="file" onChange={(e) => setCvFile(e.target.files?.[0] ?? null)} />
+                  {cvFile && (
+                    <p className="field-note">
+                      <FileText className="h-3 w-3" /> {cvFile.name}
+                    </p>
+                  )}
+                </div>
+                <div className="field span-2">
+                  <label htmlFor="ta-samples">{ar ? "نماذج أعمال أو مشاريع (ملف واحد على الأقل)" : "Work samples (at least one)"} *</label>
+                  <input id="ta-samples" type="file" multiple onChange={(e) => setWorkSamples(Array.from(e.target.files ?? []))} />
+                  {workSamples.length > 0 && (
+                    <ul className="file-list">
+                      {workSamples.map((f, i) => (
+                        <li key={i}>
+                          <span>{f.name}</span>
+                          <button
+                            type="button"
+                            aria-label={ar ? "إزالة" : "Remove"}
+                            onClick={() => setWorkSamples((prev) => prev.filter((_, j) => j !== i))}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            </article>
+
+            <article className="pro-card">
+              <h2>{ar ? "٣. الموافقات" : "3. Consents"}</h2>
+              <div className="consent-list">
+                <label className="check-row">
+                  <Checkbox checked={consentEthics} onCheckedChange={(v) => setConsentEthics(!!v)} />
+                  <span>{ar ? "أوافق على سياسات وأخلاقيات الجمعية." : "I accept the association's ethics and policies."}</span>
+                </label>
+                <label className="check-row">
+                  <Checkbox checked={consentData} onCheckedChange={(v) => setConsentData(!!v)} />
+                  <span>{ar ? "أوافق على معالجة بياناتي الشخصية لأغراض التقييم." : "I consent to processing of my personal data for evaluation."}</span>
+                </label>
+                <label className="check-row">
+                  <Checkbox checked={consentProcess} onCheckedChange={(v) => setConsentProcess(!!v)} />
+                  <span>
+                    {ar
+                      ? "أفهم أن نظام المعادلة يتكون من 4 مراحل (نظري، عملي، تدريب، مقابلة) وإعادة تقييم دورية كل 6 أشهر."
+                      : "I understand the accreditation has 4 phases (theory, practical, training demo, interview) and a periodic re-evaluation every 6 months."}
+                  </span>
+                </label>
+              </div>
+            </article>
+
+            {uploadPct && (
+              <article className="pro-card">
+                <UploadProgress
+                  percent={uploadPct.pct}
+                  loaded={uploadPct.loaded}
+                  total={uploadPct.total}
+                  label={`${ar ? "الملف" : "File"} ${uploadPct.index}/${uploadPct.count} — ${uploadPct.name}`}
+                />
+              </article>
+            )}
+
+            <div className="apply-bar">
+              <button type="submit" className="auth-submit" disabled={submitting}>
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {ar ? "إرسال الطلب" : "Submit application"}
+              </button>
             </div>
-          </div>
-        </section>
-
-        {/* Consents */}
-        <section className="rounded-2xl border border-border bg-card p-5 space-y-3">
-          <h2 className="font-bold text-foreground">{ar ? "٣. الموافقات" : "3. Consents"}</h2>
-          <label className="flex items-start gap-2 cursor-pointer text-sm">
-            <Checkbox checked={consentEthics} onCheckedChange={(v) => setConsentEthics(!!v)} />
-            <span>{ar ? "أوافق على سياسات وأخلاقيات الجمعية." : "I accept the association's ethics and policies."}</span>
-          </label>
-          <label className="flex items-start gap-2 cursor-pointer text-sm">
-            <Checkbox checked={consentData} onCheckedChange={(v) => setConsentData(!!v)} />
-            <span>{ar ? "أوافق على معالجة بياناتي الشخصية لأغراض التقييم." : "I consent to processing of my personal data for evaluation."}</span>
-          </label>
-          <label className="flex items-start gap-2 cursor-pointer text-sm">
-            <Checkbox checked={consentProcess} onCheckedChange={(v) => setConsentProcess(!!v)} />
-            <span>
-              {ar
-                ? "أفهم أن نظام المعادلة يتكون من 4 مراحل (نظري، عملي، تدريب، مقابلة) وإعادة تقييم دورية كل 6 أشهر."
-                : "I understand the accreditation has 4 phases (theory, practical, training demo, interview) and a periodic re-evaluation every 6 months."}
-            </span>
-          </label>
-        </section>
-
-        {uploadPct && (
-          <div className="rounded-xl border border-border bg-card p-4">
-            <UploadProgress
-              percent={uploadPct.pct}
-              loaded={uploadPct.loaded}
-              total={uploadPct.total}
-              label={`${ar ? "الملف" : "File"} ${uploadPct.index}/${uploadPct.count} — ${uploadPct.name}`}
-            />
-          </div>
-        )}
-
-        <div className="flex justify-end gap-2">
-          <Button type="submit" disabled={submitting}>
-            {submitting && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-            <Upload className="h-4 w-4 mx-1" />
-            {ar ? "إرسال الطلب" : "Submit application"}
-          </Button>
+          </form>
         </div>
-      </form>
-    </div>
+      </section>
+    </>
   );
 }

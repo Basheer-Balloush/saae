@@ -74,6 +74,87 @@ html[dir] .lms-skin .lms-hero-copy h1.course-page-title { font-size: clamp(2rem,
 .lms-skin .instructor-list a:hover strong { color: var(--lms-lift); }
 .lms-skin .skin-reviews > section { margin-top: 0; }
 
+/* Forms (profile, trainer application) */
+.lms-skin .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.lms-skin .form-grid .span-2 { grid-column: 1 / -1; }
+.lms-skin .field input[type="tel"], .lms-skin .field input[type="url"], .lms-skin .field input[type="date"] { width: 100%; min-width: 0; height: 56px; padding: 0 20px; border: 1px solid var(--lms-border); border-radius: 16px; background: rgba(2, 16, 20, .6); color: var(--lms-paper); color-scheme: dark; font: 600 1rem/1 "Cairo", Arial, sans-serif; outline: none; }
+.lms-skin .field input[type="file"] { width: 100%; min-width: 0; padding: 12px 14px; border: 1px dashed var(--lms-border); border-radius: 16px; background: rgba(2, 16, 20, .45); color: var(--lms-muted); font: 600 .88rem/1.4 "Cairo", Arial, sans-serif; }
+.lms-skin .field input::file-selector-button { margin-inline-end: 12px; padding: 8px 14px; border: 1px solid var(--lms-border); border-radius: 999px; background: rgba(184, 232, 240, .08); color: var(--lms-cyan); font: 800 .8rem "Cairo", Arial, sans-serif; cursor: pointer; }
+.lms-skin .field [role="combobox"] { height: 56px; padding: 0 20px; border: 1px solid var(--lms-border); border-radius: 16px; background: rgba(2, 16, 20, .6); color: var(--lms-paper); font: 600 1rem/1 "Cairo", Arial, sans-serif; }
+.lms-skin .field legend { margin-bottom: 8px; }
+.lms-skin .field-note { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--lms-muted); font-size: .8rem; }
+.lms-skin .file-list { display: grid; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none; }
+.lms-skin .file-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; border: 1px solid var(--lms-border); border-radius: 12px; color: rgba(231, 241, 240, .82); font-size: .85rem; }
+.lms-skin .file-list li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lms-skin .file-list button { border: 0; background: none; color: var(--lms-muted); cursor: pointer; }
+.lms-skin .file-list button:hover { color: #fca5a5; }
+.lms-skin .consent-list { display: grid; gap: 14px; }
+.lms-skin .check-row { display: flex; align-items: flex-start; gap: 10px; color: rgba(231, 241, 240, .85); line-height: 1.7; cursor: pointer; }
+.lms-skin .check-row [role="checkbox"] { margin-top: 4px; }
+.lms-skin .readonly-box { display: flex; align-items: center; height: 56px; padding: 0 20px; overflow: hidden; border: 1px dashed var(--lms-border); border-radius: 16px; color: var(--lms-muted); white-space: nowrap; }
+.lms-skin .char-count { color: var(--lms-muted); font-size: .76rem; text-align: end; }
+.lms-skin .form-actions { display: flex; justify-content: flex-end; }
+.lms-skin .card-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.lms-skin .card-actions .action, .lms-skin .cv-actions .action, .lms-skin .form-actions .action { min-height: 48px; }
+.lms-skin .action.is-danger { border-color: rgba(248, 113, 113, .35); color: #fca5a5; }
+@media (max-width: 680px) {
+  .lms-skin .form-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Profile */
+.lms-skin .profile-avatar { overflow: hidden; }
+.lms-skin .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.lms-skin .profile-avatar svg { width: 48px; height: 48px; }
+.lms-skin .profile-stats-3 { grid-template-columns: repeat(3, 1fr); }
+.lms-skin .avatar-preview { position: relative; display: grid; place-items: center; width: 128px; height: 128px; margin: 4px auto; overflow: hidden; border-radius: 50%; background: rgba(184, 232, 240, .08); color: var(--lms-muted); box-shadow: 0 0 0 5px rgba(6, 35, 42, .9), 0 0 0 7px rgba(119, 224, 232, .5); }
+.lms-skin .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+.lms-skin .avatar-preview > svg { width: 48px; height: 48px; }
+.lms-skin .avatar-preview .avatar-preview-busy { position: absolute; }
+.lms-skin .file-hint { margin: 0; color: var(--lms-muted); font-size: .78rem; text-align: center; }
+.lms-skin .card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px; }
+.lms-skin .card-head span { color: var(--lms-muted); font-size: .88rem; }
+.lms-skin .card-head b { color: var(--lms-paper); }
+.lms-skin .pro-course { display: grid; gap: 8px; padding: 14px 16px; border: 1px solid var(--lms-border); border-radius: 14px; background: rgba(2, 16, 20, .3); }
+.lms-skin .pro-course-head { display: flex; justify-content: space-between; gap: 12px; }
+.lms-skin .pro-course-head a { overflow: hidden; color: var(--lms-paper); font-weight: 800; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.lms-skin .pro-course-head a:hover { color: var(--lms-lift); }
+.lms-skin .pro-course-head b { flex: none; color: var(--lms-cyan); }
+.lms-skin .pro-course small { color: var(--lms-muted); }
+.lms-skin .pro-subtitle { margin: 8px 0 0; color: var(--lms-cyan); font-size: .95rem; font-weight: 800; }
+.lms-skin .done-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; color: rgba(231, 241, 240, .82); }
+.lms-skin .apply-list a { flex: none; color: var(--lms-lift); font-weight: 800; text-decoration: none; }
+.lms-skin .apply-list .apply-list-main { display: grid; gap: 2px; min-width: 0; }
+.lms-skin .apply-list small { color: var(--lms-muted); font-size: .78rem; }
+.lms-skin .attempt-chip { padding: 3px 10px; border-radius: 999px; background: rgba(184, 232, 240, .08); color: var(--lms-muted); font-size: .7rem; font-weight: 800; }
+.lms-skin .instructor-bio { margin-bottom: 8px; }
+@media (max-width: 680px) {
+  .lms-skin .profile-stats-3 { grid-template-columns: minmax(0, 1fr); }
+  .lms-skin .profile-stats-3 > div + div { border-inline-start: 0; border-block-start: 1px solid rgba(184, 232, 240, .14); }
+}
+
+/* Certificate */
+.lms-skin .cert-print .action { font: inherit; font-size: .86rem; font-weight: 800; cursor: pointer; }
+.lms-skin .cert-sheet { position: relative; display: grid; justify-items: center; gap: 12px; max-width: 860px; margin: 0 auto; padding: clamp(40px, 7vw, 80px) clamp(24px, 6vw, 72px); border: 2px solid rgba(119, 224, 232, .35); border-radius: 28px; background: linear-gradient(160deg, rgba(12, 48, 58, .92), rgba(4, 23, 28, .96)); box-shadow: 0 30px 80px rgba(1, 12, 16, .5); text-align: center; }
+.lms-skin .cert-sheet::before { content: ""; position: absolute; inset: 14px; border: 1px solid rgba(184, 232, 240, .16); border-radius: 20px; pointer-events: none; }
+.lms-skin .cert-sheet-icon { width: 64px; height: 64px; color: var(--lms-lift); }
+.lms-skin .cert-sheet-brand { color: var(--lms-cyan); font-size: .76rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.lms-skin .cert-sheet h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
+.lms-skin .cert-sheet-lede { margin-top: 12px; color: var(--lms-muted); }
+.lms-skin .cert-sheet-course { color: var(--lms-lift); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; line-height: 1.4; }
+.lms-skin .cert-sheet-name { margin-top: 10px; color: var(--lms-paper); font-size: 1.2rem; font-weight: 800; }
+.lms-skin .cert-sheet-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px 40px; margin: 22px 0 0; }
+.lms-skin .cert-sheet-meta dt { color: var(--lms-muted); font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.lms-skin .cert-sheet-meta dd { margin: 4px 0 0; color: var(--lms-paper); font-weight: 700; }
+@media print {
+  .lms-skin .ambient, .lms-skin .radial-nav, .lms-skin .radial-language, .lms-skin .site-footer, .lms-skin .skip-link, .lms-skin .lms-subhero:has(.cert-print) { display: none !important; }
+  .lms-skin, .lms-skin .cert-section { background: #fff !important; }
+  .lms-skin .cert-section { padding: 0; }
+  .lms-skin .cert-sheet { border-color: #047383; background: #fff; box-shadow: none; }
+  .lms-skin .cert-sheet h2, .lms-skin .cert-sheet-name, .lms-skin .cert-sheet-meta dd { color: #122126; }
+  .lms-skin .cert-sheet-course, .lms-skin .cert-sheet-icon { color: #047383; }
+  .lms-skin .cert-sheet-brand, .lms-skin .cert-sheet-lede, .lms-skin .cert-sheet-meta dt { color: #4a6a70; }
+}
+
 /* Student dashboard */
 .lms-skin .study-card .course-thumb { min-height: 160px; }
 .lms-skin .req-main a { color: var(--lms-paper); font-size: 1.02rem; font-weight: 800; text-decoration: none; }
