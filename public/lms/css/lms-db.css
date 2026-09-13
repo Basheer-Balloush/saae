@@ -378,3 +378,12 @@ html:not([dir="rtl"]) .lms-skin .radial-nav-toggle { inset: 36px auto auto 22px;
    centres, takes the search bar's width so the three line up, and balances
    its lines. */
 .lms-skin .lms-hero-lede { max-width: 640px; margin-inline: auto; text-wrap: balance; }
+
+/* The bar's width follows the screen: it fills the space between the corner
+   buttons (560px keeps it clear of them), up to 1400px, with the links spread
+   evenly. It never gets narrower than its contents. */
+@media (min-width: 1101px) {
+  .lms-skin .radial-nav-items {
+    width: min(calc(100vw - 560px), 1400px); min-width: fit-content; justify-content: space-evenly;
+  }
+}

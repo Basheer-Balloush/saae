@@ -21,6 +21,7 @@ import { AssistantFab } from "@/components/site/AssistantFab";
 import { RouteProgress } from "@/components/site/RouteProgress";
 import { ScrollToHash } from "@/components/site/ScrollToHash";
 import { ConfirmProvider } from "@/hooks/useConfirm";
+import { isSkinnedLmsPath } from "@/components/lms-skin/skin";
 
 function NotFoundComponent() {
   const isAr = typeof document !== "undefined" && document.documentElement.lang === "ar";
@@ -182,10 +183,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+/* The cinematic pages and the redesigned LMS are dark. Painting html and body
+   dark from the first byte stops the white frame a full page load shows while
+   the rest of the page streams in. Light pages and the dashboards keep the
+   default ground. */
+const CINEMATIC_PATH = /^\/(about|contact|initiative|partners|news(\/[^/]+)?)?\/?$/;
+const DARK_GROUND = { backgroundColor: "#06232a", colorScheme: "dark" } as const;
+const isDarkPath = (pathname: string) => CINEMATIC_PATH.test(pathname) || isSkinnedLmsPath(pathname);
+
 function RootShell({ children }: { children: React.ReactNode }) {
+  const pathname = useLocation({ select: (location) => location.pathname });
+  const ground = isDarkPath(pathname) ? DARK_GROUND : undefined;
   const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');var l=localStorage.getItem('saae-lang')==='en'?'en':'ar';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" suppressHydrationWarning style={ground}>
       <head>
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM4Y7E9Y96" />
         <script
@@ -196,7 +207,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <HeadContent />
       </head>
-      <body>
+      <body style={ground}>
         {children}
         <Scripts />
       </body>
