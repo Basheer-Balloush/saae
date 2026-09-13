@@ -156,7 +156,12 @@ html[dir] .lms-skin .lms-hero-copy h1.course-page-title { font-size: clamp(2rem,
 }
 
 /* Student dashboard */
-.lms-skin .study-card .course-thumb { min-height: 160px; }
+/* The 16:9 cover ratio below would widen the thumb past its 220px column and cover the text. */
+.lms-skin .study-card .course-thumb { min-height: 160px; aspect-ratio: auto; }
+.lms-skin .study-body h3 { overflow-wrap: anywhere; }
+/* The whole card opens the course, not just the Continue link. */
+.lms-skin .study-foot a::after { content: ""; position: absolute; inset: 0; z-index: 3; }
+.lms-skin .study-card:hover .study-foot a { text-decoration: underline; text-underline-offset: 5px; }
 .lms-skin .req-main a { color: var(--lms-paper); font-size: 1.02rem; font-weight: 800; text-decoration: none; }
 .lms-skin .req-main a:hover { color: var(--lms-lift); }
 .lms-skin .req-main .req-note { color: rgba(231, 241, 240, .72); font-size: .86rem; line-height: 1.7; }
@@ -169,6 +174,7 @@ html[dir] .lms-skin .lms-hero-copy h1.course-page-title { font-size: clamp(2rem,
 .lms-skin .dash-subtitle { margin: 46px 0 18px; font-size: clamp(1.5rem, 2.6vw, 2rem); }
 @media (max-width: 680px) {
   .lms-skin .req-side { justify-items: start; }
+  .lms-skin .study-card .course-thumb { aspect-ratio: 16 / 9; }
 }
 
 /* Internships */
