@@ -13,6 +13,9 @@ body .radial-language {
 body .radial-language::before,body .radial-language::after { content: none !important; }
 body .radial-language:hover,body .radial-language:focus-visible { color:#fff !important; border-color:#c9fff8 !important; background:rgba(4,58,66,.94) !important; transform:translateY(-2px) !important; }
 body .radial-language .language-switch-icon,body .radial-language svg { width:17px !important; height:17px !important; flex:0 0 auto; animation:none !important; }
+/* The globe is a line icon. Pages whose own stylesheet never styles it (the
+   news articles) otherwise paint it solid black. */
+body .radial-language svg circle,body .radial-language svg path { fill:none; stroke:currentColor; stroke-width:1.6; }
 
 .radial-nav { position:fixed; inset:0; z-index:101; pointer-events:none; transition:background-color .32s ease,backdrop-filter .32s ease; }
 .radial-nav.is-open { pointer-events:auto; background:rgba(1,17,23,.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); }

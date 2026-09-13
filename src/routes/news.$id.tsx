@@ -18,6 +18,7 @@ import {
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/news-tv-interview-inline.js" },
   { src: "/cinematic/js/language.js" },
+  { src: "/cinematic/js/navigation.js" },
 ];
 
 /* The template's own labels are Arabic; language.js translates them to English. */

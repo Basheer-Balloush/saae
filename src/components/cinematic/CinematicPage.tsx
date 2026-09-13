@@ -1,4 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useRouterState } from "@tanstack/react-router";
+import { withSiteChrome } from "./radial-nav";
 
 export type CinematicScript = { src: string; module?: boolean };
 
@@ -71,6 +73,9 @@ function installReadyShim() {
 
 /** Renders a prototype page's static markup and boots its vanilla scripts in order. */
 export function CinematicPage({ html, scripts, htmlClass, bodyClass, htmlAttrs }: Props) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const page = useMemo(() => withSiteChrome(html, pathname), [html, pathname]);
+
   useEffect(() => {
     const root = document.documentElement;
     if (htmlClass) root.classList.add(htmlClass);
@@ -103,5 +108,5 @@ export function CinematicPage({ html, scripts, htmlClass, bodyClass, htmlAttrs }
     };
   }, [html, scripts, htmlClass, bodyClass, htmlAttrs]);
 
-  return <div className="cinematic" dangerouslySetInnerHTML={{ __html: html }} />;
+  return <div className="cinematic" dangerouslySetInnerHTML={{ __html: page }} />;
 }

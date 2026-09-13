@@ -5,6 +5,7 @@ import { CinematicPage, type CinematicScript } from "@/components/cinematic/Cine
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/news-buildex-aleppo-inline.js" },
   { src: "/cinematic/js/language.js" },
+  { src: "/cinematic/js/navigation.js" },
 ];
 
 export const Route = createFileRoute("/news/buildex-aleppo")({

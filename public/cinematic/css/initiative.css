@@ -38,6 +38,10 @@ a { color: inherit; }
 img { display: block; max-width: 100%; height: auto; }
 h1, h2, h3 { margin: 0; color: var(--initiative-paper); font-weight: 900; letter-spacing: -.04em; line-height: 1.06; }
 p { margin: 0; }
+/* The pay, waitlist and sponsor forms are the app's own light dialogs,
+   rendered outside the page. Keep this page's light text off them. */
+[role="dialog"] { color: var(--foreground); }
+[role="dialog"] h2 { color: inherit; }
 .page-shell { width: var(--initiative-page); margin-inline: auto; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .skip-link { position: fixed; z-index: 200; inset: 8px auto auto 8px; padding: 10px 14px; color: #06232a; background: var(--initiative-cyan); transform: translateY(-160%); }
