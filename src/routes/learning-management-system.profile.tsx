@@ -93,6 +93,11 @@ function ProfilePage() {
     setErrMsg(null);
     try {
       const overview = await fetchOverview();
+      if (!overview?.profile) {
+        setData(null);
+        setLoadState("error");
+        return;
+      }
       setData(overview);
       setLoadState("ready");
     } catch (e) {
