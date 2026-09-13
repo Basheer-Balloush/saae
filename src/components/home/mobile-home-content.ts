@@ -489,14 +489,13 @@ export interface WayEntry {
   body: LocalText;
   cta: LocalText;
   href: string;
-  image: string;
-  imageAlt: LocalText;
+  icon: "learning" | "communities" | "participation";
 }
 
 export const START_COPY = {
   eyebrow: { ar: "اعرف طريقك", en: "Find your way in" } satisfies LocalText,
   title: { ar: "من أين تبدأ؟", en: "Where to start?" } satisfies LocalText,
-  carouselLabel: { ar: "طرق البدء", en: "Ways to start" } satisfies LocalText,
+  linksLabel: { ar: "طرق البدء", en: "Ways to start" } satisfies LocalText,
 };
 
 export const WAYS: WayEntry[] = [
@@ -508,11 +507,7 @@ export const WAYS: WayEntry[] = [
     },
     cta: { ar: "ابدأ التعلّم", en: "Start learning" },
     href: "/learning-management-system",
-    image: "/cinematic/mobile/way-learning.webp",
-    imageAlt: {
-      ar: "صورة توضيحية مولّدة بالذكاء الاصطناعي: متعلّمة ومدرّبة تتعاونان على حاسوب محمول",
-      en: "AI-generated illustration: a learner and instructor working together on a laptop",
-    },
+    icon: "learning",
   },
   {
     title: { ar: "المجتمعات", en: "Communities" },
@@ -522,11 +517,7 @@ export const WAYS: WayEntry[] = [
     },
     cta: { ar: "استكشف المجتمعات", en: "Explore communities" },
     href: "#communities",
-    image: "/cinematic/mobile/way-communities.webp",
-    imageAlt: {
-      ar: "صورة توضيحية مولّدة بالذكاء الاصطناعي: مجموعة تتبادل الأفكار في مساحة عمل مشتركة",
-      en: "AI-generated illustration: peers exchanging ideas in a shared courtyard workspace",
-    },
+    icon: "communities",
   },
   {
     title: { ar: "المشاركة والتسجيل", en: "Participation & registration" },
@@ -536,11 +527,7 @@ export const WAYS: WayEntry[] = [
     },
     cta: { ar: "سجّل الآن", en: "Register now" },
     href: "/registration",
-    image: "/cinematic/mobile/way-registration.webp",
-    imageAlt: {
-      ar: "صورة توضيحية مولّدة بالذكاء الاصطناعي: رائدة أعمال ومرشد يختبران مستشعراً بيئياً",
-      en: "AI-generated illustration: an entrepreneur and mentor testing an environmental sensor",
-    },
+    icon: "participation",
   },
 ];
 
@@ -559,11 +546,12 @@ export const INITIATIVE_COPY = {
   } satisfies LocalText,
   primary: { ar: "استكشف المبادرة", en: "Explore the initiative" } satisfies LocalText,
   official: { ar: "البرنامج الرسمي", en: "Official programme" } satisfies LocalText,
-  image: "/cinematic/mobile/initiative-portrait.webp",
-  imageAlt: {
-    ar: "صورة توضيحية مولّدة بالذكاء الاصطناعي: شابة تحمل حاسوباً في باحة جامعية",
-    en: "AI-generated illustration: a young woman carrying a laptop in a university courtyard",
+  target: { ar: "هدف المبادرة", en: "The initiative's goal" } satisfies LocalText,
+  reach: {
+    ar: "معرفة تصل إلى كل سورية",
+    en: "Knowledge within reach across Syria",
   } satisfies LocalText,
+  image: "/cinematic/mobile/initiative-syria.svg",
 };
 
 export const COMMUNITIES_COPY = {

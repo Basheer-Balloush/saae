@@ -759,37 +759,47 @@
   display: none;
 }
 
+.mobile-home .mh-ways {
+  display: grid;
+  gap: 12px;
+}
+
 .mobile-home .mh-way-card {
-  flex: 0 0 82%;
-  scroll-snap-align: center;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  padding: 18px;
   border: 1px solid var(--mh-line);
-  border-radius: 24px;
-  overflow: hidden;
-  background: var(--mh-glass, rgba(12, 48, 58, 0.72));
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  border-radius: 18px;
+  background: linear-gradient(125deg, rgba(12, 48, 58, 0.85), rgba(6, 35, 42, 0.3));
   text-decoration: none;
   color: var(--mh-type);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease;
 }
 
-.mobile-home .mh-way-card img {
-  display: block;
-  inline-size: 100%;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  transition: transform 600ms var(--mh-ease);
+.mobile-home .mh-way-icon {
+  display: grid;
+  place-items: center;
+  inline-size: 48px;
+  block-size: 48px;
+  border-radius: 14px;
+  color: var(--mh-turquoise-lift);
+  border: 1px solid var(--mh-line);
+  background: rgba(0, 139, 157, 0.1);
 }
 
-.mobile-home .mh-way-card:active img,
-.mobile-home .mh-way-card:focus-visible img {
-  transform: scale(1.04);
+.mobile-home .mh-way-card:hover,
+.mobile-home .mh-way-card:focus-visible {
+  border-color: var(--mh-turquoise-lift);
+  background-color: rgba(0, 139, 157, 0.1);
 }
 
 .mobile-home .mh-way-body {
   display: grid;
   gap: 6px;
-  padding-block: 16px;
-  padding-inline: 16px;
 }
 
 .mobile-home .mh-way-title {
@@ -812,96 +822,56 @@
   font-weight: 800;
 }
 
-.mobile-home .mh-dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  padding-block: 10px 0;
-}
-
-.mobile-home .mh-dot {
-  inline-size: 8px;
-  block-size: 8px;
-  border-radius: 50%;
-  background: rgba(184, 232, 240, 0.3);
-}
-
-.mobile-home .mh-dot.mh-is-on {
-  background: var(--mh-turquoise-lift);
-  inline-size: 24px;
-  border-radius: 999px;
-}
-
 /* ---- Initiative feature ---- */
 .mobile-home .mh-initiative {
   position: relative;
-  min-block-size: 118svh;
-  display: flex;
-  align-items: flex-end;
+  padding-block: 48px;
   overflow: clip;
   isolation: isolate;
+  background: radial-gradient(ellipse at 50% 40%, rgba(0, 139, 157, 0.16), transparent 65%);
+  border-block: 1px solid var(--mh-line);
   scroll-margin-block-start: calc(var(--mh-header-h) + var(--mh-rail-h) + 8px);
 }
 
 .mobile-home .mh-initiative-media {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  overflow: clip;
+  margin: 8px auto 16px;
+  inline-size: min(100%, 500px);
 }
 
 .mobile-home .mh-initiative-media img {
+  display: block;
   inline-size: 100%;
-  block-size: 100%;
-  object-fit: cover;
+  block-size: auto;
+  filter: drop-shadow(0 12px 32px rgba(0, 139, 157, 0.18));
 }
 
-@supports (animation-timeline: view()) {
-  .mobile-home .mh-initiative-media img {
-    animation: mh-drift linear both;
-    animation-timeline: view();
-    animation-range: entry 0% exit 100%;
-  }
+.mobile-home .mh-initiative-target {
+  text-align: center;
 }
 
-@keyframes mh-drift {
-  from {
-    transform: translateY(-8%);
-  }
-  to {
-    transform: translateY(8%);
-  }
+.mobile-home .mh-initiative-target .mh-eyebrow {
+  justify-content: center;
+}
+
+.mobile-home .mh-initiative-reach {
+  margin: 8px 0 0;
+  color: var(--mh-ink-muted);
+  font-size: 1rem;
 }
 
 .mobile-home .mh-giant-num {
-  position: absolute;
-  inset-block-start: 44%;
-  inset-inline: 0;
-  z-index: -1;
+  margin: 0;
   text-align: center;
-  font-size: clamp(4rem, 22vw, 7rem);
+  font-size: clamp(2rem, 13vw, 5.5rem);
   font-weight: 900;
-  line-height: 1;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(119, 224, 232, 0.35);
+  line-height: 1.2;
+  color: var(--mh-turquoise-lift);
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
-  pointer-events: none;
-}
-
-.mobile-home .mh-initiative-scrim {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(
-    to top,
-    var(--mh-canvas) 8%,
-    rgba(6, 35, 42, 0.82) 42%,
-    transparent 75%
-  );
 }
 
 .mobile-home .mh-initiative-copy {
-  padding-block: 48px;
+  max-inline-size: 650px;
 }
 
 .mobile-home .mh-feature-actions {

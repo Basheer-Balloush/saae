@@ -269,6 +269,27 @@ describe("mobile homepage rendered output", () => {
     }
   });
 
+  it("restricts photography to news and keeps reviewed graphics elsewhere", () => {
+    const nonNewsAssets = new Set([
+      HERO_MEDIA.videoPoster,
+      CLOSING_COPY.videoPoster,
+      "/cinematic/mobile/initiative-syria.svg",
+      "/cinematic/mobile/saae-wordmark-ar-light.webp",
+      "/cinematic/mobile/saae-wordmark-en-light.webp",
+      "/cinematic/images/saae-map.png",
+      ...PARTNERS.map((partner) => partner.logo),
+    ]);
+    for (const markup of [arMarkup(), enMarkup()]) {
+      const newsSection = markup.match(/<section\b[^>]*\bid="news"[\s\S]*?<\/section>/)?.[0];
+      expect(newsSection).toBeDefined();
+      for (const story of NEWS) expect(newsSection).toContain(story.image);
+      const outsideNews = markup.replace(newsSection!, "");
+      for (const src of localAssets(outsideNews)) {
+        expect(nonNewsAssets.has(src), `unreviewed asset outside news: ${src}`).toBe(true);
+      }
+    }
+  });
+
   it("renders all communities, stories, partners, FAQs and mission steps", () => {
     const ar = arMarkup();
     const en = enMarkup();

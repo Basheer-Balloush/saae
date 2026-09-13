@@ -7,6 +7,7 @@ import {
   ArrowUpLeft,
   ArrowUpRight,
   BadgeCheck,
+  BookOpen,
   Building2,
   CodeXml,
   Database,
@@ -21,11 +22,13 @@ import {
   Megaphone,
   Menu,
   Minus,
+  Network,
   Pause,
   Phone,
   Play,
   Plus,
   Presentation,
+  Rocket,
   TrendingUp,
   X,
 } from "lucide-react";
@@ -65,6 +68,7 @@ import {
   type HomeLink,
   type Locale,
   type NewsEntry,
+  type WayEntry,
 } from "./mobile-home-content";
 
 function pick<T extends { ar: string; en: string }>(t: T, lang: Locale): string {
@@ -138,6 +142,11 @@ function CommunityIcon({ index }: { index: number }) {
   return <Icon size={20} aria-hidden="true" />;
 }
 
+function WayIcon({ kind }: { kind: WayEntry["icon"] }) {
+  const Icon = { learning: BookOpen, communities: Network, participation: Rocket }[kind];
+  return <Icon size={26} strokeWidth={1.5} aria-hidden="true" />;
+}
+
 function SocialIcon({ name }: { name: string }) {
   if (name === "Instagram") return <Instagram size={20} aria-hidden="true" />;
   if (name === "Facebook") return <Facebook size={20} aria-hidden="true" />;
@@ -209,7 +218,6 @@ export function MobileHomeView({
   const [rootsVideoPaused, setRootsVideoPaused] = useState(false);
   const rootsVideoPausedRef = useRef(false);
   const [newsIndex, setNewsIndex] = useState(0);
-  const [wayIndex, setWayIndex] = useState(0);
 
   const wordmark =
     lang === "ar"
@@ -228,7 +236,6 @@ export function MobileHomeView({
   const railListRef = useRef<HTMLUListElement | null>(null);
   const firstRailRun = useRef(true);
   const newsTrackRef = useRef<HTMLDivElement | null>(null);
-  const waysTrackRef = useRef<HTMLDivElement | null>(null);
   const closingTitle = useInView<HTMLHeadingElement>(0.5);
   const newsRefs = useRef<Array<HTMLElement | null>>([]);
 
@@ -388,7 +395,7 @@ export function MobileHomeView({
     list.scrollBy({ left: delta, behavior: scrollBehavior });
   }, [activeRail, scrollBehavior]);
 
-  /* News + ways visible-card tracking (no scroll listeners). */
+  /* News visible-card tracking (no scroll listeners). */
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") return;
     const track = newsTrackRef.current;
@@ -400,26 +407,6 @@ export function MobileHomeView({
           if (e.isIntersecting) {
             const i = Number((e.target as HTMLElement).dataset.newsCard);
             if (!Number.isNaN(i)) setNewsIndex(i);
-          }
-        }
-      },
-      { root: track, threshold: 0.6 },
-    );
-    cards.forEach((c) => io.observe(c));
-    return () => io.disconnect();
-  }, [motionReady]);
-
-  useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") return;
-    const track = waysTrackRef.current;
-    const cards = track?.querySelectorAll<HTMLElement>("[data-way-card]");
-    if (!track || !cards?.length) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            const i = Number((e.target as HTMLElement).dataset.wayCard);
-            if (!Number.isNaN(i)) setWayIndex(i);
           }
         }
       },
@@ -761,30 +748,12 @@ export function MobileHomeView({
                 {pick(START_COPY.title, lang)}
               </h2>
             </div>
-            <div
-              className="mh-snap"
-              ref={waysTrackRef}
-              role="region"
-              aria-roledescription="carousel"
-              aria-label={pick(START_COPY.carouselLabel, lang)}
-              tabIndex={0}
-            >
-              {WAYS.map((w, i) => (
-                <a
-                  key={pick(w.title, lang)}
-                  href={w.href}
-                  className="mh-way-card"
-                  data-way-card={i}
-                  data-index={i}
-                >
-                  <img
-                    src={w.image}
-                    alt={pick(w.imageAlt, lang)}
-                    width={800}
-                    height={500}
-                    loading="lazy"
-                    decoding="async"
-                  />
+            <nav className="mh-wrap mh-ways" aria-label={pick(START_COPY.linksLabel, lang)}>
+              {WAYS.map((w) => (
+                <a key={pick(w.title, lang)} href={w.href} className="mh-way-card">
+                  <span className="mh-way-icon">
+                    <WayIcon kind={w.icon} />
+                  </span>
                   <span className="mh-way-body">
                     <span className="mh-way-title">{pick(w.title, lang)}</span>
                     <span className="mh-way-text">{pick(w.body, lang)}</span>
@@ -795,32 +764,27 @@ export function MobileHomeView({
                   </span>
                 </a>
               ))}
-            </div>
-            <div className="mh-dots" aria-hidden="true">
-              {WAYS.map((w, i) => (
-                <span
-                  key={pick(w.title, lang)}
-                  className={i === wayIndex ? "mh-dot mh-is-on" : "mh-dot"}
-                />
-              ))}
-            </div>
+            </nav>
           </section>
 
           <section className="mh-initiative" id="initiative" aria-labelledby="mh-initiative-title">
+            <div className="mh-wrap mh-initiative-target">
+              <p className="mh-eyebrow">{pick(INITIATIVE_COPY.target, lang)}</p>
+              <p className="mh-giant-num" dir="ltr">
+                1,000,000
+              </p>
+              <p className="mh-initiative-reach">{pick(INITIATIVE_COPY.reach, lang)}</p>
+            </div>
             <div className="mh-initiative-media" aria-hidden="true">
               <img
                 src={INITIATIVE_COPY.image}
                 alt=""
-                width={900}
-                height={1125}
+                width={600}
+                height={460}
                 loading="lazy"
                 decoding="async"
               />
             </div>
-            <span className="mh-giant-num" aria-hidden="true">
-              1,000,000
-            </span>
-            <div className="mh-initiative-scrim" aria-hidden="true" />
             <div className="mh-wrap mh-initiative-copy">
               <p className="mh-eyebrow">{pick(INITIATIVE_COPY.eyebrow, lang)}</p>
               <h2 className="mh-section-h" id="mh-initiative-title">

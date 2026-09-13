@@ -10,27 +10,25 @@ The phone homepage includes the complete association landing page, opening with 
 - Both tree videos have pause controls and receive sources only on eligible clients. Reduced-motion and save-data users receive posters. Changing to reduced motion stops playback; a manually paused closing video remains paused after scrolling away and back.
 - The hero grows with enlarged text. Images reserve dimensions and below-fold images load lazily.
 
-## Generated imagery
+## People-free visual direction
 
-Four conceptual photographs were generated with the built-in OpenAI image tool on 2026-09-13. The tool does not expose a model selector, so no specific model version is claimed. See [prompts and provenance](mobile-image-prompts.json).
+People appear only in genuine news photographs. The four generated people images and their obsolete generation prompts have been removed from the project.
 
-| Asset under public/cinematic/mobile | Scene | Dimensions | Bytes |
-| --- | --- | --- | ---: |
-| way-learning.webp | Learner and instructor | 800 × 500 | 45,920 |
-| way-communities.webp | Peer discussion | 800 × 500 | 60,892 |
-| way-registration.webp | Entrepreneur and mentor testing a sensor | 800 × 500 | 54,872 |
-| initiative-portrait.webp | Learner in a university courtyard | 900 × 1125 | 67,158 |
+- Learning, communities, and registration are three visible navigation cards using book, network, and rocket symbols. There is no photo carousel or hidden entry point.
+- The national initiative uses a 6 KB SVG derived from the existing public/cinematic/js/syria-outline.js coordinates (Natural Earth admin-0 1:50m, public domain). The dot texture is decorative, not participation or coverage data. The one-million figure is explicitly labeled as the initiative goal.
+- Existing abstract tree videos, partner logos, wordmarks, and the contact map remain. Sampled frames from both tree videos show only branching structures and light.
+- No new AI-generated bitmap was needed: the new artwork is a native vector graphic.
 
-These are illustrative people and settings, not records of real participants or events. Informative images have bilingual descriptions identifying the generated illustration; the initiative background is decorative with empty alternative text. Real news photographs, logos, and tree videos retain their existing assets. WebP files are resized and encoded derivatives; original PNGs remain in local task outputs.
+This direction follows the original association's education, practical technology, research, entrepreneurship, and national development purpose: https://aisyria.org/about and https://aisyria.org/.
 
 ## Verification
 
-- All 27 unit tests passed across four files.
+- All 28 unit tests passed across four files.
 - Typecheck passed via the script's TypeScript fallback because tsgo is unavailable.
 - Production build passed with existing server-function deprecation, bundle-size, and Cloudflare configuration warnings.
 - Targeted lint passed with no errors and one existing language-provider Fast Refresh warning. Repository-wide lint was previously stopped after more than five minutes without results; run `bun run lint` for that broader check.
 - Chromium checks covered 320, 390, and 430px phone widths without horizontal overflow, 200% root text without hero clipping, closing-video pause persistence, and live reduced-motion changes. No application exceptions were recorded.
-- The mobile photo cards and initiative feature were visually inspected. Real-device Safari, field Core Web Vitals, and a complete site-wide accessibility audit were not performed.
+- The entry cards and national initiative graphic were visually inspected. A regression test limits non-news assets to the reviewed graphics. Real-device Safari, field Core Web Vitals, and a complete site-wide accessibility audit were not performed.
 
 ## Integration
 
