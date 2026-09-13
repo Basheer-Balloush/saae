@@ -1,4 +1,5 @@
 import { communityLabel } from "@/lib/communityCategories";
+import type { NewsEntry } from "@/components/home/mobile-home-content";
 
 /**
  * Database content for the cinematic pages.
@@ -168,6 +169,27 @@ function cardExcerptHtml(row: NewsCardRow): string {
 /* "Read the story" stays a bare text node so language.js translates it. */
 function readStoryHtml(id: string): string {
   return `<a class="news-cta" href="${newsHref(id)}">Read the story ${ARROW_SVG}</a>`;
+}
+
+/* The phone homepage draws its cards in React, so it takes plain bilingual
+   text rather than markup; React does the escaping. */
+export function mobileNewsEntries(rows: NewsCardRow[]): NewsEntry[] {
+  return rows.slice(0, HOME_NEWS_LIMIT).map((row) => {
+    const headline = titles(row);
+    const en = row.excerpt_en || row.excerpt || "";
+    const ar = row.excerpt_ar || row.excerpt || "";
+    return {
+      id: row.id,
+      tag: { en: communityLabel(row.category, "en"), ar: communityLabel(row.category, "ar") },
+      date: { en: formatNewsDate(row.published_at, "en"), ar: formatNewsDate(row.published_at, "ar") },
+      dateTime: row.published_at.slice(0, 10),
+      headline,
+      excerpt: { en: en || ar, ar: ar || en },
+      image: httpsUrl(row.image_url) ?? FALLBACK_IMAGE,
+      imageAlt: headline,
+      href: newsHref(row.id),
+    };
+  });
 }
 
 export type HomeNewsFragments = { slidesHtml: string; dotsHtml: string; total: number };

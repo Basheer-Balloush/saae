@@ -24,8 +24,9 @@ export interface CommunityEntry {
   href: string;
 }
 
+/** A homepage story, built from a news row by mobileNewsEntries. */
 export interface NewsEntry {
-  slug: string;
+  id: string;
   tag: LocalText;
   date: LocalText;
   dateTime: string;
@@ -170,90 +171,6 @@ export const COMMUNITIES: CommunityEntry[] = [
     name: { ar: "مجتمع الجودة الريادي", en: "Quality Entrepreneurship Community" },
     tagline: { ar: "رفع معيار المشاريع الناشئة.", en: "Raise the standard for new ventures." },
     href: "/communities/quality",
-  },
-];
-
-/** The four existing news stories, newest first. */
-export const NEWS: NewsEntry[] = [
-  {
-    slug: "tv-interview",
-    tag: { ar: "إعلام", en: "Broadcast" },
-    date: { ar: "19 تموز 2026", en: "19 July 2026" },
-    dateTime: "2026-07-19",
-    headline: {
-      ar: "مبادرة المليون مستخدم تصل إلى التلفزيون الوطني",
-      en: "The million-user initiative goes to national television",
-    },
-    excerpt: {
-      ar: "عرض رئيس الجمعية تقدم المبادرة على التلفزيون السوري، واضعاً برنامجاً وطنياً للذكاء الاصطناعي أمام جمهور وطني.",
-      en: "SAAE's chairman set out the initiative's progress on Syria TV, putting a national AI programme in front of a national audience.",
-    },
-    image: "/cinematic/mobile/news-tv-interview.webp",
-    imageAlt: {
-      ar: "ممثلو الجمعية يتحدثون خلال فعالية عامة حول الذكاء الاصطناعي",
-      en: "SAAE representatives speaking during a public AI event",
-    },
-    href: "/news/tv-interview",
-  },
-  {
-    slug: "initiative-launch",
-    tag: { ar: "مبادرة", en: "Initiative" },
-    date: { ar: "25 حزيران 2026", en: "25 June 2026" },
-    dateTime: "2026-06-25",
-    headline: {
-      ar: "انطلاق تدريب مليون مستخدم سوري للذكاء الاصطناعي",
-      en: "Training one million Syrian AI users begins",
-    },
-    excerpt: {
-      ar: "برنامج وطني لتعزيز التحول الرقمي وبناء القدرات المحلية، ومتاح للجميع.",
-      en: "A national programme to advance digital transformation and build the country's own capability, opened to the public.",
-    },
-    image: "/cinematic/mobile/news-initiative-launch.webp",
-    imageAlt: {
-      ar: "جمهور يحضر إطلاق المبادرة الوطنية للذكاء الاصطناعي",
-      en: "Audience attending the launch of SAAE's national AI initiative",
-    },
-    href: "/news/initiative-launch",
-  },
-  {
-    slug: "trainers-graduation",
-    tag: { ar: "تدريب", en: "Training" },
-    date: { ar: "25 حزيران 2026", en: "25 June 2026" },
-    dateTime: "2026-06-25",
-    headline: {
-      ar: "تخريج أول مدربي الذكاء الاصطناعي في سورية",
-      en: "Syria's first AI trainers graduate",
-    },
-    excerpt: {
-      ar: "أتمّت الدفعة الأولى أكثر من 100 ساعة تدريب وبدأت بنقل المعرفة العملية بالذكاء الاصطناعي إلى بيئات عملها.",
-      en: "The first cohort completed more than 100 hours of training and began carrying practical AI knowledge into rooms of their own.",
-    },
-    image: "/cinematic/mobile/news-trainers-graduation.webp",
-    imageAlt: {
-      ar: "مدربو الجمعية مجتمعون في فعالية للبرنامج",
-      en: "SAAE trainers gathered at a programme event",
-    },
-    href: "/news/trainers-graduation",
-  },
-  {
-    slug: "buildex-aleppo",
-    tag: { ar: "عمل تطبيقي", en: "Applied work" },
-    date: { ar: "10 حزيران 2026", en: "10 June 2026" },
-    dateTime: "2026-06-10",
-    headline: {
-      ar: "عرض مخطط حلب الكبرى في معرض بيلدكس",
-      en: "The Greater Aleppo plan shown at BUILDEX",
-    },
-    excerpt: {
-      ar: "شاركت الجمعية في جناح محافظة حلب بمسودة مخطط رئيسي يجمع المسح المكاني والمشاورة المجتمعية والبيانات الحضرية المفتوحة في خريطة واحدة.",
-      en: "SAAE joined Aleppo Governorate's pavilion with a draft master plan that puts spatial survey, community consultation and open urban data on one map.",
-    },
-    image: "/cinematic/mobile/news-buildex-aleppo.webp",
-    imageAlt: {
-      ar: "جناح الجمعية في جناح محافظة حلب في معرض بيلدكس",
-      en: "SAAE's stand in the Aleppo Governorate pavilion at the BUILDEX exhibition",
-    },
-    href: "/news/buildex-aleppo",
   },
 ];
 
@@ -420,17 +337,12 @@ export const PARTNERS: PartnerEntry[] = [
 ];
 
 /**
- * Desktop absolute-URL equivalents. Every non-fragment desktop href from
- * home.html is rendered either verbatim or as the mapped internal value, so
- * no rendered link ever points at https://aisyria.org.
+ * Desktop links whose phone equivalent is a section of this page. Every other
+ * non-fragment desktop href from home.html is rendered verbatim.
  */
 export const DESKTOP_HREF_EQUIVALENTS: Readonly<Record<string, string>> = {
-  "https://aisyria.org/#communities": "#communities",
-  "https://aisyria.org/#achievements": "#achievements",
-  "https://aisyria.org/learning-management-system": "/learning-management-system",
-  "https://aisyria.org/resources/ai-tools": "/resources/ai-tools",
-  "https://aisyria.org/one-million-initiative-home": "/one-million-initiative-home",
-  "https://aisyria.org/registration": "/registration",
+  "/about#communities-h": "#communities",
+  "/about#standing-h": "#achievements",
 };
 
 /** Header menu groups. */
@@ -676,6 +588,11 @@ export const NEWS_COPY = {
   readStory: { ar: "اقرأ القصة", en: "Read the story" } satisfies LocalText,
   allNews: { ar: "جميع الأخبار", en: "All news" } satisfies LocalText,
   carouselLabel: { ar: "آخر الأخبار", en: "Latest news" } satisfies LocalText,
+  empty: { ar: "لا توجد أخبار حالياً.", en: "No news yet." } satisfies LocalText,
+  failed: {
+    ar: "تعذّر تحميل الأخبار. يرجى المحاولة مرة أخرى.",
+    en: "News could not be loaded. Please try again.",
+  } satisfies LocalText,
 };
 
 export const MISSION_COPY = {

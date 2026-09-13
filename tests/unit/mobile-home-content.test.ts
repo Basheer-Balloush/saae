@@ -32,13 +32,44 @@ import {
   FAQS,
   HERO_MEDIA,
   MISSION_STEPS,
-  NEWS,
+  NEWS_COPY,
   OPENING,
   OPENING_HEADLINE,
   PARTNERS,
 } from "@/components/home/mobile-home-content";
+import { mobileNewsEntries, type NewsCardRow } from "@/lib/cinematic-db-content";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+
+/* Two stories shaped like the organization project's news rows. */
+const NEWS_ROWS: NewsCardRow[] = [
+  {
+    id: "3d1ad0d0-55da-4343-9d71-046dfc27a027",
+    title: "Chairman of the Board on Syria TV",
+    title_ar: "رئيس مجلس الإدارة على شاشة التلفزيون السوري",
+    title_en: "Chairman of the Board on Syria TV",
+    excerpt: null,
+    excerpt_ar: null,
+    excerpt_en: "The initiative's progress on national television.",
+    image_url:
+      "https://zkpuyhrmyslmstzwojvw.supabase.co/storage/v1/object/public/news-images/images/3d1ad.jpg",
+    category: "trainers",
+    published_at: "2026-07-19",
+  },
+  {
+    id: "d00e3f20-8d09-43e0-a4d5-a16f60af4e22",
+    title: "Launch of the Train One Million initiative",
+    title_ar: "إطلاق مبادرة تدريب مليون مستخدم",
+    title_en: "Launch of the Train One Million initiative",
+    excerpt: null,
+    excerpt_ar: "برنامج وطني.",
+    excerpt_en: "A national programme.",
+    image_url: null,
+    category: "data",
+    published_at: "2026-06-25",
+  },
+];
+const NEWS = mobileNewsEntries(NEWS_ROWS);
 
 /** renderToStaticMarkup escapes quotes/apostrophes; decode before text checks. */
 function decodeEntities(markup: string): string {
@@ -50,7 +81,9 @@ function decodeEntities(markup: string): string {
 
 function renderHome(lang: "ar" | "en"): string {
   return decodeEntities(
-    renderToStaticMarkup(createElement(MobileHomeView, { lang, onToggleLang: () => {} })),
+    renderToStaticMarkup(
+      createElement(MobileHomeView, { lang, onToggleLang: () => {}, news: NEWS }),
+    ),
   );
 }
 
@@ -106,10 +139,15 @@ describe("mobile homepage rendered output", () => {
     // Destinations from the real desktop source file — not a fixture list.
     // Pure in-page anchors (#hero-sec, …) are excluded here; the id test
     // below proves every rendered fragment resolves instead.
+    // Database regions are always replaced, so their sample links don't count.
+    const desktopSource = homeHtml.replace(
+      /<!-- db:([\w-]+):start -->[\s\S]*?<!-- db:\1:end -->/g,
+      "",
+    );
     const desktopHrefs = new Set<string>();
     const re = /href="([^"]*)"/g;
     let m: RegExpExecArray | null;
-    while ((m = re.exec(homeHtml)) !== null) {
+    while ((m = re.exec(desktopSource)) !== null) {
       if (!m[1].startsWith("#")) desktopHrefs.add(m[1]);
     }
 
@@ -121,16 +159,9 @@ describe("mobile homepage rendered output", () => {
     expect(missing, detail).toEqual([]);
   });
 
-  it("maps exactly the six approved desktop equivalents to internal targets", () => {
+  it("maps the desktop About-page section links to this page's sections", () => {
     expect(Object.keys(DESKTOP_HREF_EQUIVALENTS).sort()).toEqual(
-      [
-        "https://aisyria.org/#communities",
-        "https://aisyria.org/#achievements",
-        "https://aisyria.org/learning-management-system",
-        "https://aisyria.org/resources/ai-tools",
-        "https://aisyria.org/one-million-initiative-home",
-        "https://aisyria.org/registration",
-      ].sort(),
+      ["/about#communities-h", "/about#standing-h"].sort(),
     );
     for (const value of Object.values(DESKTOP_HREF_EQUIVALENTS)) {
       expect(value.startsWith("/") || value.startsWith("#")).toBe(true);
@@ -207,9 +238,7 @@ describe("mobile homepage rendered output", () => {
         continue;
       }
       if (pathname.startsWith("/news/")) {
-        const slug = pathname.slice("/news/".length);
-        const file = path.join(ROOT, `src/routes/news.${slug}.tsx`);
-        expect(existsSync(file), `missing news route file: ${file}`).toBe(true);
+        expect(existsSync(path.join(ROOT, "src/routes/news.$id.tsx"))).toBe(true);
         continue;
       }
       const table: Record<string, string> = {
@@ -251,11 +280,11 @@ describe("mobile homepage rendered output", () => {
     }
     expect(COMMUNITIES).toHaveLength(9);
     for (const n of NEWS) {
-      expect(both).toContain(`/news/${n.slug}`);
+      expect(both).toContain(n.href);
       expect(both).toContain(n.headline.ar);
       expect(both).toContain(n.headline.en);
     }
-    expect(NEWS).toHaveLength(4);
+    expect(NEWS).toHaveLength(2);
     for (const p of PARTNERS) {
       expect(both).toContain(p.name.en);
     }
@@ -270,6 +299,19 @@ describe("mobile homepage rendered output", () => {
       expect(both).toContain(s.title.en);
     }
     expect(MISSION_STEPS).toHaveLength(3);
+  });
+
+  it("shows a status line instead of the news carousel when there are no stories", () => {
+    const render = (lang: "ar" | "en", newsFailed: boolean) =>
+      decodeEntities(
+        renderToStaticMarkup(
+          createElement(MobileHomeView, { lang, onToggleLang: () => {}, news: [], newsFailed }),
+        ),
+      );
+    const empty = render("en", false);
+    expect(empty).toContain(NEWS_COPY.empty.en);
+    expect(empty).not.toContain("mh-news-card");
+    expect(render("ar", true)).toContain(NEWS_COPY.failed.ar);
   });
 
   it("renders final number values in SSR markup (count-up is enhancement only)", () => {

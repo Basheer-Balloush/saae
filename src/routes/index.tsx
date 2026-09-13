@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   NEWS_CARD_COLUMNS,
   applyHomeNews,
+  mobileNewsEntries,
   renderHomeNews,
   type NewsCardRow,
 } from "@/lib/cinematic-db-content";
@@ -49,9 +50,15 @@ export const Route = createFileRoute("/")({
         .order("published_at", { ascending: false })
         .order("created_at", { ascending: false })
         .limit(4);
-      return { news: renderHomeNews((data ?? []) as NewsCardRow[], Boolean(error)) };
+      const rows = (data ?? []) as NewsCardRow[];
+      const failed = Boolean(error);
+      return {
+        news: renderHomeNews(rows, failed),
+        mobileNews: mobileNewsEntries(rows),
+        newsFailed: failed,
+      };
     } catch {
-      return { news: renderHomeNews([], true) };
+      return { news: renderHomeNews([], true), mobileNews: [], newsFailed: true };
     }
   },
   head: () => ({
@@ -91,11 +98,11 @@ function DesktopHome({ html }: { html: string }) {
 }
 
 function Home() {
-  const { news } = Route.useLoaderData();
+  const { news, mobileNews, newsFailed } = Route.useLoaderData();
   const html = useMemo(() => applyHomeNews(homeHtml, news), [news]);
   const capability = useHeroCapability();
   // Mobile-first: SSR, first paint, phones and reduced motion get the phone
   // page; only a confirmed desktop mounts the cinematic enhancement.
   if (capability === "desktop") return <DesktopHome html={html} />;
-  return <MobileHome />;
+  return <MobileHome news={mobileNews} newsFailed={newsFailed} />;
 }

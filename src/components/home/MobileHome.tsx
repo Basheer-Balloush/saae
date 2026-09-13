@@ -52,7 +52,6 @@ import {
   MICRO_COPY,
   MISSION_COPY,
   MISSION_STEPS,
-  NEWS,
   NEWS_COPY,
   NUMBERS_COPY,
   OPENING,
@@ -65,6 +64,7 @@ import {
   WAYS,
   type HomeLink,
   type Locale,
+  type NewsEntry,
 } from "./mobile-home-content";
 
 function pick<T extends { ar: string; en: string }>(t: T, lang: Locale): string {
@@ -182,7 +182,18 @@ function MhCount({ count, value }: { count: number; value: string }) {
   );
 }
 
-export function MobileHomeView({ lang, onToggleLang }: { lang: Locale; onToggleLang: () => void }) {
+export function MobileHomeView({
+  lang,
+  onToggleLang,
+  news,
+  newsFailed = false,
+}: {
+  lang: Locale;
+  onToggleLang: () => void;
+  /** The newest homepage stories from the database. */
+  news: NewsEntry[];
+  newsFailed?: boolean;
+}) {
   const dir = lang === "ar" ? "rtl" : "ltr";
   const reducedMotion = usePrefersReducedMotion();
   const scrollBehavior = reducedMotion ? "auto" : "smooth";
@@ -434,7 +445,7 @@ export function MobileHomeView({ lang, onToggleLang }: { lang: Locale; onToggleL
   };
 
   const stepNews = (delta: number) => {
-    const next = Math.min(NEWS.length - 1, Math.max(0, newsIndex + delta));
+    const next = Math.min(news.length - 1, Math.max(0, newsIndex + delta));
     scrollNewsTo(next);
   };
 
@@ -850,76 +861,86 @@ export function MobileHomeView({ lang, onToggleLang }: { lang: Locale; onToggleL
               </h2>
               <p className="mh-section-p">{pick(NEWS_COPY.body, lang)}</p>
             </div>
-            <div
-              className="mh-snap mh-news-snap"
-              ref={newsTrackRef}
-              role="region"
-              aria-roledescription="carousel"
-              aria-label={pick(NEWS_COPY.carouselLabel, lang)}
-              tabIndex={0}
-            >
-              {NEWS.map((n, i) => (
-                <article
-                  key={n.slug}
-                  className="mh-news-card"
-                  data-news-card={i}
-                  data-index={i}
-                  ref={(el) => {
-                    newsRefs.current[i] = el;
-                  }}
-                >
-                  <a href={n.href} className="mh-news-link" aria-label={pick(n.headline, lang)}>
-                    <img
-                      src={n.image}
-                      alt={pick(n.imageAlt, lang)}
-                      width={800}
-                      height={600}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                    <span className="mh-news-body">
-                      <span className="mh-news-meta">
-                        <span className="mh-news-tag">{pick(n.tag, lang)}</span>
-                        <time dateTime={n.dateTime}>{pick(n.date, lang)}</time>
-                      </span>
-                      <span className="mh-news-head">{pick(n.headline, lang)}</span>
-                      <span className="mh-news-ex">{pick(n.excerpt, lang)}</span>
-                      <span className="mh-news-cta">
-                        {pick(NEWS_COPY.readStory, lang)}
-                        <ArrowUpRight size={16} aria-hidden="true" className="mh-flip" />
-                      </span>
-                    </span>
-                  </a>
-                </article>
-              ))}
-            </div>
-            <div className="mh-wrap mh-news-controls">
-              <div className="mh-carousel-btns">
-                <button
-                  type="button"
-                  className="mh-round-btn"
-                  aria-label={pick(MICRO_COPY.prev, lang)}
-                  disabled={newsIndex === 0}
-                  onClick={() => stepNews(-1)}
-                >
-                  <ArrowLeft size={20} aria-hidden="true" className="mh-flip" />
-                </button>
-                <button
-                  type="button"
-                  className="mh-round-btn"
-                  aria-label={pick(MICRO_COPY.next, lang)}
-                  disabled={newsIndex === NEWS.length - 1}
-                  onClick={() => stepNews(1)}
-                >
-                  <ArrowRight size={20} aria-hidden="true" className="mh-flip" />
-                </button>
+            {news.length === 0 ? (
+              <div className="mh-wrap">
+                <p className="mh-section-p" role="status">
+                  {pick(newsFailed ? NEWS_COPY.failed : NEWS_COPY.empty, lang)}
+                </p>
               </div>
-              <p className="mh-counter" aria-live="polite">
-                <span dir="ltr">
-                  {newsIndex + 1} / {NEWS.length}
-                </span>
-              </p>
-            </div>
+            ) : (
+              <>
+                <div
+                  className="mh-snap mh-news-snap"
+                  ref={newsTrackRef}
+                  role="region"
+                  aria-roledescription="carousel"
+                  aria-label={pick(NEWS_COPY.carouselLabel, lang)}
+                  tabIndex={0}
+                >
+                  {news.map((n, i) => (
+                    <article
+                      key={n.id}
+                      className="mh-news-card"
+                      data-news-card={i}
+                      data-index={i}
+                      ref={(el) => {
+                        newsRefs.current[i] = el;
+                      }}
+                    >
+                      <a href={n.href} className="mh-news-link" aria-label={pick(n.headline, lang)}>
+                        <img
+                          src={n.image}
+                          alt={pick(n.imageAlt, lang)}
+                          width={800}
+                          height={600}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        <span className="mh-news-body">
+                          <span className="mh-news-meta">
+                            <span className="mh-news-tag">{pick(n.tag, lang)}</span>
+                            <time dateTime={n.dateTime}>{pick(n.date, lang)}</time>
+                          </span>
+                          <span className="mh-news-head">{pick(n.headline, lang)}</span>
+                          <span className="mh-news-ex">{pick(n.excerpt, lang)}</span>
+                          <span className="mh-news-cta">
+                            {pick(NEWS_COPY.readStory, lang)}
+                            <ArrowUpRight size={16} aria-hidden="true" className="mh-flip" />
+                          </span>
+                        </span>
+                      </a>
+                    </article>
+                  ))}
+                </div>
+                <div className="mh-wrap mh-news-controls">
+                  <div className="mh-carousel-btns">
+                    <button
+                      type="button"
+                      className="mh-round-btn"
+                      aria-label={pick(MICRO_COPY.prev, lang)}
+                      disabled={newsIndex === 0}
+                      onClick={() => stepNews(-1)}
+                    >
+                      <ArrowLeft size={20} aria-hidden="true" className="mh-flip" />
+                    </button>
+                    <button
+                      type="button"
+                      className="mh-round-btn"
+                      aria-label={pick(MICRO_COPY.next, lang)}
+                      disabled={newsIndex === news.length - 1}
+                      onClick={() => stepNews(1)}
+                    >
+                      <ArrowRight size={20} aria-hidden="true" className="mh-flip" />
+                    </button>
+                  </div>
+                  <p className="mh-counter" aria-live="polite">
+                    <span dir="ltr">
+                      {newsIndex + 1} / {news.length}
+                    </span>
+                  </p>
+                </div>
+              </>
+            )}
             <div className="mh-wrap">
               <a className="mh-inline-link" href="/news">
                 {pick(NEWS_COPY.allNews, lang)}
@@ -1333,9 +1354,9 @@ function MhTrunkRow({ index, href, lang }: { index: number; href: string; lang: 
   );
 }
 
-export function MobileHome() {
+export function MobileHome({ news, newsFailed }: { news: NewsEntry[]; newsFailed?: boolean }) {
   const { lang, toggle } = useLang();
-  return <MobileHomeView lang={lang} onToggleLang={toggle} />;
+  return <MobileHomeView lang={lang} onToggleLang={toggle} news={news} newsFailed={newsFailed} />;
 }
 
 export default MobileHome;
