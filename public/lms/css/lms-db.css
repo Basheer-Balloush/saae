@@ -281,32 +281,72 @@ html[dir] .lms-skin .lms-hero-copy h1.course-page-title { font-size: clamp(2rem,
 /* CoursePrice brings its own pill; inside a course tag it is plain text. */
 .lms-skin .course-tags > span * { padding: 0; border-radius: 0; background: none; }
 
-/* Instructors and admins carry eight or more menu links, and with every label
-   showing the pill ran off both edges and under the language switch on wide
-   screens. With that many links it goes icon-only at every width, keeping the
-   label on the current page. Labels are hidden visually, not with display:none,
-   so each link keeps its name for screen readers. The first child is the lamp,
-   so a link in position nine means eight links or more. */
-.lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .radial-nav-item:not([aria-current="page"]) .radial-nav-label,
-.lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .tube-auth-label {
-  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
-}
-.lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .radial-nav-item,
-.lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .tube-auth { padding: 12px 14px; }
-.lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .radial-nav-item svg,
-.lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .tube-auth svg { width: 19px; height: 19px; }
+/* ---- LMS menu ---------------------------------------------------------------
+   The tree button and the language switch sit on the side the page is read
+   from: right in Arabic, left in English (navigation.css offsets, mirrored). */
+html[dir="rtl"] .lms-skin .radial-language { inset: 48px 124px auto auto !important; }
+html[dir="rtl"] .lms-skin .radial-nav-toggle { inset: 36px 22px auto auto; }
+html:not([dir="rtl"]) .lms-skin .radial-language { inset: 48px auto auto 124px !important; }
+html:not([dir="rtl"]) .lms-skin .radial-nav-toggle { inset: 36px auto auto 22px; }
 
-/* On a phone the menu opens as a list, each icon beside its label, instead of
-   a row of unlabelled icons that ran off the screen once there were eight or
-   more links. The lamp only works along a row, so the current page is marked
-   with a fill instead. !important lifts the labels back over the icon-only
-   rules above and in navigation.css. */
-@media (max-width: 680px) {
+/* Wide screens: one bar in the true centre. It shows icons, the current
+   page's name, and any other name on hover or keyboard focus. Names are
+   hidden visually, not removed, so every link keeps its name for screen
+   readers. */
+@media (min-width: 1101px) {
+  .lms-skin .radial-nav-items,
+  html[dir="rtl"] .lms-skin .radial-nav-items { left: 50%; transform-origin: top center; }
+  .lms-skin .radial-nav-item:not([aria-current="page"]) .radial-nav-label,
+  .lms-skin .tube-auth-label {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  .lms-skin .radial-nav-item, .lms-skin .tube-auth { padding: 12px 14px; }
+  .lms-skin .radial-nav-item svg, .lms-skin .tube-auth svg { width: 19px; height: 19px; }
+  .lms-skin .radial-nav-item:not([aria-current="page"]):is(:hover, :focus-visible) .radial-nav-label,
+  .lms-skin .tube-auth:is(:hover, :focus-visible) .tube-auth-label {
+    width: auto; height: auto; overflow: visible; clip-path: none;
+    top: calc(100% + 10px); left: 50%; z-index: 5; transform: translateX(-50%);
+    padding: 7px 11px; border: 1px solid rgba(177, 238, 237, .26); border-radius: 9px;
+    background: rgba(2, 29, 36, .96); box-shadow: 0 10px 26px rgba(0, 8, 12, .45);
+    color: #edfbf9; font-size: .78rem; line-height: 1.2; opacity: 1; pointer-events: none;
+  }
+}
+/* 1400px and up: a size larger. */
+@media (min-width: 1400px) {
+  .lms-skin .radial-nav-items { padding: 8px; gap: 4px; }
+  .lms-skin .radial-nav-item, .lms-skin .tube-auth { padding: 14px 17px; }
+  .lms-skin .radial-nav-item svg, .lms-skin .tube-auth svg { width: 22px; height: 22px; }
+}
+/* 1700px and up, with six links or fewer (visitors): every name fits beside
+   its icon, Arabic included, so every name shows. The lamp is the first
+   child, so no link in position eight means six links or fewer. */
+@media (min-width: 1700px) {
+  .lms-skin .radial-nav-items:not(:has(> .radial-nav-item:nth-child(8))) .radial-nav-item .radial-nav-label,
+  .lms-skin .radial-nav-items:not(:has(> .radial-nav-item:nth-child(8))) .tube-auth .tube-auth-label {
+    position: static; width: auto; height: auto; overflow: visible; clip-path: none;
+    transform: none; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none;
+    color: inherit; font-size: inherit; line-height: inherit;
+  }
+  .lms-skin .radial-nav-items:not(:has(> .radial-nav-item:nth-child(8))) .radial-nav-item,
+  .lms-skin .radial-nav-items:not(:has(> .radial-nav-item:nth-child(8))) .tube-auth { padding: 12px 18px; font-size: .92rem; }
+}
+
+/* Tablets and phones: no room for a centred bar, so the menu opens as a list
+   under the tree button, on the reading side, each icon beside its name.
+   The lamp only works along a row, so the current page gets a fill instead.
+   !important lifts the names back over the icon-only rules in lms.css and
+   navigation.css. */
+@media (max-width: 1100px) {
   .lms-skin .radial-nav-items {
     flex-direction: column; align-items: stretch; gap: 2px;
-    max-height: calc(100dvh - 120px); overflow-y: auto; overscroll-behavior: contain;
-    padding: 8px; border-radius: 24px; transform-origin: top center;
+    top: 118px; width: min(340px, calc(100vw - 20px));
+    max-height: calc(100dvh - 130px); overflow-y: auto; overscroll-behavior: contain;
+    padding: 8px; border-radius: 24px;
+    transform: translateY(-10px) scale(.96);
   }
+  html[dir="rtl"] .lms-skin .radial-nav-items { left: auto; right: 22px; transform-origin: top right; }
+  html:not([dir="rtl"]) .lms-skin .radial-nav-items { left: 22px; right: auto; transform-origin: top left; }
+  .lms-skin .radial-nav.is-open .radial-nav-items { transform: none; }
   .lms-skin .radial-nav-items .radial-nav-item,
   .lms-skin .radial-nav-items .tube-auth {
     justify-content: flex-start; gap: 12px; padding: 13px 16px !important; border-radius: 16px; font-size: .95rem;
@@ -324,17 +364,17 @@ html[dir] .lms-skin .lms-hero-copy h1.course-page-title { font-size: clamp(2rem,
     background: linear-gradient(90deg, transparent, rgba(119, 224, 232, .45), transparent);
   }
 }
-
-/* In the icon-only menu, hovering an icon or reaching it by keyboard shows its
-   name in a small label under it, so each icon says where it goes. */
-@media (min-width: 681px) {
-  .lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .radial-nav-item:not([aria-current="page"]):is(:hover, :focus-visible) .radial-nav-label,
-  .lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .tube-auth:is(:hover, :focus-visible) .tube-auth-label {
-    width: auto; height: auto; overflow: visible; clip-path: none;
-    top: calc(100% + 10px); left: 50%; z-index: 5;
-    transform: translateX(-50%);
-    padding: 7px 11px; border: 1px solid rgba(177, 238, 237, .26); border-radius: 9px;
-    background: rgba(2, 29, 36, .96); box-shadow: 0 10px 26px rgba(0, 8, 12, .45);
-    color: #edfbf9; font-size: .78rem; line-height: 1.2; opacity: 1; pointer-events: none;
-  }
+@media (max-width: 680px) {
+  .lms-skin .radial-nav-items { top: 98px; width: auto; }
+  html[dir] .lms-skin .radial-nav-items { left: 10px; right: 10px; }
+  html[dir="rtl"] .lms-skin .radial-language { inset: 34px 96px auto auto !important; }
+  html[dir="rtl"] .lms-skin .radial-nav-toggle { inset: 25px 15px auto auto; }
+  html:not([dir="rtl"]) .lms-skin .radial-language { inset: 34px auto auto 96px !important; }
+  html:not([dir="rtl"]) .lms-skin .radial-nav-toggle { inset: 25px auto auto 15px; }
 }
+
+/* LMS home hero: the subtitle's box sat against the start edge while its text
+   was centred inside it, so it looked off-centre under the title. It now
+   centres, takes the search bar's width so the three line up, and balances
+   its lines. */
+.lms-skin .lms-hero-lede { max-width: 640px; margin-inline: auto; text-wrap: balance; }
