@@ -295,3 +295,32 @@ html[dir] .lms-skin .lms-hero-copy h1.course-page-title { font-size: clamp(2rem,
 .lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .tube-auth { padding: 12px 14px; }
 .lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .radial-nav-item svg,
 .lms-skin .radial-nav-items:has(> .radial-nav-item:nth-child(9)) .tube-auth svg { width: 19px; height: 19px; }
+
+/* On a phone the menu opens as a list, each icon beside its label, instead of
+   a row of unlabelled icons that ran off the screen once there were eight or
+   more links. The lamp only works along a row, so the current page is marked
+   with a fill instead. !important lifts the labels back over the icon-only
+   rules above and in navigation.css. */
+@media (max-width: 680px) {
+  .lms-skin .radial-nav-items {
+    flex-direction: column; align-items: stretch; gap: 2px;
+    max-height: calc(100dvh - 120px); overflow-y: auto; overscroll-behavior: contain;
+    padding: 8px; border-radius: 24px; transform-origin: top center;
+  }
+  .lms-skin .radial-nav-items .radial-nav-item,
+  .lms-skin .radial-nav-items .tube-auth {
+    justify-content: flex-start; gap: 12px; padding: 13px 16px !important; border-radius: 16px; font-size: .95rem;
+  }
+  .lms-skin .radial-nav-items .radial-nav-label,
+  .lms-skin .radial-nav-items .tube-auth-label {
+    display: inline !important; position: static !important; width: auto !important; height: auto !important;
+    overflow: visible !important; clip-path: none !important;
+  }
+  .lms-skin .radial-nav-items .radial-nav-item[aria-current="page"],
+  .lms-skin .radial-nav-items .radial-nav-item[data-status="active"] { background: rgba(0, 139, 157, .28); color: #8ff0f5; }
+  .lms-skin .radial-nav-items .tube-lamp { display: none; }
+  .lms-skin .radial-nav-items .tube-divider {
+    width: auto; height: 1px; margin: 6px 12px;
+    background: linear-gradient(90deg, transparent, rgba(119, 224, 232, .45), transparent);
+  }
+}
