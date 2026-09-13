@@ -165,8 +165,10 @@
     status.classList.toggle("is-error", Boolean(isError));
   }
 
-  form?.addEventListener("submit", event => {
+  let sending = false;
+  form?.addEventListener("submit", async event => {
     event.preventDefault();
+    if (sending) return;
     const data = {
       name: $("f-name").value.trim(),
       email: $("f-email").value.trim(),
@@ -190,9 +192,14 @@
     /* The page saves to the database when the application provides a handler.
        The prefilled mail below stays as the fallback for the static preview. */
     if (typeof window.saaeContactSubmit === "function") {
+      sending = true;
+      const submitButtons = [...form.querySelectorAll('[type="submit"]')];
+      const disabledBefore = submitButtons.map(button => button.disabled);
+      form.setAttribute("aria-busy", "true");
+      submitButtons.forEach(button => { button.disabled = true; });
       say(COPY.sending[ar() ? 1 : 0], false);
-      window
-        .saaeContactSubmit({
+      try {
+        await window.saaeContactSubmit({
           full_name: data.name,
           email: data.email,
           phone: data.phone || null,
@@ -200,13 +207,17 @@
           inquiry_type: INQUIRY_TYPES[route] || "general",
           subject: data.subject,
           message: data.message,
-        })
-        .then(() => {
-          say(COPY.sent[ar() ? 1 : 0], false);
-          form.reset();
-          if (count) count.textContent = "0";
-        })
-        .catch(() => say(COPY.failed[ar() ? 1 : 0], true));
+        });
+        say(COPY.sent[ar() ? 1 : 0], false);
+        form.reset();
+        if (count) count.textContent = "0";
+      } catch {
+        say(COPY.failed[ar() ? 1 : 0], true);
+      } finally {
+        sending = false;
+        form.removeAttribute("aria-busy");
+        submitButtons.forEach((button, i) => { button.disabled = disabledBefore[i]; });
+      }
       return;
     }
     say(COPY.opening[ar() ? 1 : 0], false);

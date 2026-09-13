@@ -96,9 +96,21 @@ describe("the cinematic pages carry every region the loaders fill", () => {
 describe("homepage news", () => {
   const home = page("home.html");
 
-  it("keeps the design's static stories when the database returns nothing", () => {
-    expect(renderHomeNews([])).toBeNull();
-    expect(applyHomeNews(home, null)).toBe(home);
+  it("replaces static stories with a bilingual empty state", () => {
+    const html = applyHomeNews(home, renderHomeNews([]));
+    expect(html).toContain("No news yet");
+    expect(html).toContain("لا توجد أخبار حالياً");
+    expect(html).not.toContain('href="/news/tv-interview"');
+    expect(count(html, 'class="flow-dot"')).toBe(2);
+    expect(applyHomeNews(home, null)).toBe(html);
+  });
+
+  it("shows an error and retry instead of sample news on failure", () => {
+    const html = applyHomeNews(home, renderHomeNews([], true));
+    expect(html).toContain("News could not be loaded");
+    expect(html).toContain("Try again");
+    expect(html).not.toContain("No news yet");
+    expect(html).not.toContain('href="/news/tv-interview"');
   });
 
   it("shows the four newest stories plus the all-news card, with a dot each", () => {
@@ -136,8 +148,20 @@ describe("homepage news", () => {
 describe("news page", () => {
   const news = page("news.html");
 
-  it("keeps the static page when there is no news", () => {
-    expect(applyNewsList(news, renderNewsListHtml([]))).toBe(news);
+  it("replaces the static stories with an empty state", () => {
+    const html = applyNewsList(news, renderNewsListHtml([]));
+    expect(html).toContain("No news yet");
+    expect(html).not.toContain('href="/news/buildex-aleppo"');
+    expect(html).not.toContain('class="featured reveal"');
+    expect(applyNewsList(news, null)).toBe(html);
+  });
+
+  it("distinguishes a failed load from an empty database", () => {
+    const html = applyNewsList(news, renderNewsListHtml([], true));
+    expect(html).toContain("News could not be loaded");
+    expect(html).toContain("Try again");
+    expect(html).not.toContain("No news yet");
+    expect(html).not.toContain('href="/news/buildex-aleppo"');
   });
 
   it("features the newest story and lists every other one", () => {

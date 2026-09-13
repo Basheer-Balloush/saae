@@ -5,6 +5,15 @@ html:not([lang="ar"]) [data-db-lang="ar"] {
   display: none !important;
 }
 
+.db-news-status {
+  padding: 1.5rem;
+  text-align: start;
+}
+
+.db-news-status p {
+  margin-block: 1rem;
+}
+
 /* About: board and executive members, drawn on the community cards. */
 .community.member {
   text-align: center;

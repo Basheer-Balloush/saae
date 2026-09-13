@@ -28,14 +28,18 @@ const SCRIPTS: CinematicScript[] = [
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const { data } = await supabase
-      .from("news")
-      .select(NEWS_CARD_COLUMNS)
-      .eq("show_on_home", true)
-      .order("published_at", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(4);
-    return { news: renderHomeNews((data ?? []) as NewsCardRow[]) };
+    try {
+      const { data, error } = await supabase
+        .from("news")
+        .select(NEWS_CARD_COLUMNS)
+        .eq("show_on_home", true)
+        .order("published_at", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(4);
+      return { news: renderHomeNews((data ?? []) as NewsCardRow[], Boolean(error)) };
+    } catch {
+      return { news: renderHomeNews([], true) };
+    }
   },
   head: () => ({
     meta: [

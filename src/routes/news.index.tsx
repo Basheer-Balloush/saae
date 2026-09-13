@@ -21,12 +21,16 @@ const SCRIPTS: CinematicScript[] = [
 
 export const Route = createFileRoute("/news/")({
   loader: async () => {
-    const { data } = await supabase
-      .from("news")
-      .select(NEWS_CARD_COLUMNS)
-      .order("published_at", { ascending: false })
-      .order("created_at", { ascending: false });
-    return { list: renderNewsListHtml((data ?? []) as NewsCardRow[]) };
+    try {
+      const { data, error } = await supabase
+        .from("news")
+        .select(NEWS_CARD_COLUMNS)
+        .order("published_at", { ascending: false })
+        .order("created_at", { ascending: false });
+      return { list: renderNewsListHtml((data ?? []) as NewsCardRow[], Boolean(error)) };
+    } catch {
+      return { list: renderNewsListHtml([], true) };
+    }
   },
   head: () => ({
     meta: [{ title: "News | SAAE" }, { name: "theme-color", content: "#144248" }],

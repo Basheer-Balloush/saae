@@ -5,8 +5,8 @@ import { communityLabel } from "@/lib/communityCategories";
  *
  * The cinematic pages are static prototype markup. Each region that should
  * show live data is fenced with <!-- db:<name>:start --> and
- * <!-- db:<name>:end -->; what sits between them is the design's own
- * fallback, kept whenever the database returns nothing.
+ * <!-- db:<name>:end -->. News regions always replace the prototype content,
+ * including when the database is empty or unavailable.
  *
  * Loaders call the render* functions and return only the fragments, so the
  * page markup is not shipped a second time in the loader data. Dates are
@@ -172,9 +172,26 @@ function readStoryHtml(id: string): string {
 
 export type HomeNewsFragments = { slidesHtml: string; dotsHtml: string; total: number };
 
+function newsStatusHtml(failed: boolean): string {
+  const title = failed
+    ? bilingualHtml("News could not be loaded", "تعذّر تحميل الأخبار")
+    : bilingualHtml("No news yet", "لا توجد أخبار حالياً");
+  const detail = failed
+    ? bilingualHtml("Please try again.", "يرجى المحاولة مرة أخرى.")
+    : bilingualHtml("Check back for our latest updates.", "تابعونا للاطلاع على آخر المستجدات.");
+  const retry = failed
+    ? `<a href="/news" class="news-cta">${bilingualHtml("Try again", "حاول مرة أخرى")}</a>`
+    : "";
+  return `<div class="db-news-status" role="status"><h3>${title}</h3><p>${detail}</p>${retry}</div>`;
+}
+
 /** The homepage ring: up to four stories, then the design's own "all news" card. */
-export function renderHomeNews(rows: NewsCardRow[]): HomeNewsFragments | null {
-  if (rows.length === 0) return null;
+export function renderHomeNews(rows: NewsCardRow[], failed = false): HomeNewsFragments {
+  if (failed || rows.length === 0) return {
+    slidesHtml: `<li class="flow-slide news-slide" data-tint="4, 128, 144"><article class="news-card news-card-more"><div class="news-copy">${newsStatusHtml(failed)}</div></article></li>`,
+    dotsHtml: [0, 1].map(i => `<button class="flow-dot" type="button" data-go="${i}" aria-label="Show item ${i + 1} of 2"${i === 0 ? ' aria-current="true"' : ""}></button>`).join("\n"),
+    total: 2,
+  };
   const items = rows.slice(0, HOME_NEWS_LIMIT);
   const total = items.length + 1;
   const slidesHtml = items
@@ -204,7 +221,7 @@ export function renderHomeNews(rows: NewsCardRow[]): HomeNewsFragments | null {
 }
 
 export function applyHomeNews(html: string, fragments: HomeNewsFragments | null): string {
-  if (!fragments) return html;
+  fragments ??= renderHomeNews([]);
   return replaceRegion(
     replaceRegion(html, "home-news-slides", fragments.slidesHtml),
     "home-news-dots",
@@ -213,8 +230,8 @@ export function applyHomeNews(html: string, fragments: HomeNewsFragments | null)
 }
 
 /** The news page: the newest story featured, every other one in the grid. */
-export function renderNewsListHtml(rows: NewsCardRow[]): string | null {
-  if (rows.length === 0) return null;
+export function renderNewsListHtml(rows: NewsCardRow[], failed = false): string {
+  if (failed || rows.length === 0) return newsStatusHtml(failed);
   const [first, ...rest] = rows;
   const featured = [
     `<article class="featured reveal" style="--tint: ${TINTS[0]}">`,
@@ -255,7 +272,7 @@ export function renderNewsListHtml(rows: NewsCardRow[]): string | null {
 }
 
 export function applyNewsList(html: string, fragmentHtml: string | null): string {
-  return fragmentHtml === null ? html : replaceRegion(html, "news-list", fragmentHtml);
+  return replaceRegion(html, "news-list", fragmentHtml ?? renderNewsListHtml([]));
 }
 
 /* -------------------------------------------------------------- members -- */
