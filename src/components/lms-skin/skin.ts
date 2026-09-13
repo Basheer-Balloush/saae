@@ -30,4 +30,21 @@ export const isSkinnedLmsPath = (pathname: string) => {
    slugs are free text, so each category takes one by its display order. */
 const TONES = ["ai", "programming", "business", "design", "health", "education", "engineering", "research"];
 
-export const categoryTone = (index: number) => (index < 0 ? "ai" : TONES[index % TONES.length]);
+/* A category's tone (its colour and icon) comes from its name, English or
+   Arabic. A name with no match falls back to its place in the list. Order
+   matters: "Programming And Development" is programming, while
+   "Development" (التنمية) on its own is community development. */
+const TONE_BY_NAME: [RegExp, string][] = [
+  [/program|software|coding|\bcode\b|\bweb\b|برمج/i, "programming"],
+  [/\bai\b|artificial|machine learning|\bdata\b|ذكاء|بيانات/i, "ai"],
+  [/health|medic|\bcare\b|nurs|صح|طب/i, "health"],
+  [/teat?ch|educat|train|تعليم|تدريب/i, "education"],
+  [/architect|engineer|urban|عمار|هندس/i, "engineering"],
+  [/design|تصميم/i, "design"],
+  [/business|market|entrepren|manage|أعمال|تسويق|ريادة|إدارة/i, "business"],
+  [/develop|تنمية/i, "research"],
+];
+
+export const categoryTone = (index: number, name = "") =>
+  TONE_BY_NAME.find(([pattern]) => pattern.test(name))?.[1] ??
+  (index < 0 ? "ai" : TONES[index % TONES.length]);

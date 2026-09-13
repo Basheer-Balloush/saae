@@ -109,7 +109,7 @@ function Catalog() {
 
   const { courses, categories, total } = data;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const toneById = new Map(categories.map((c: Category, i: number) => [c.id, categoryTone(i)]));
+  const toneById = new Map(categories.map((c: Category, i: number) => [c.id, categoryTone(i, `${c.name_en ?? ""} ${c.name_ar}`)]));
 
   // Search box: local state mirrors the URL, debounced back into it.
   const [q, setQ] = useState(search.q);

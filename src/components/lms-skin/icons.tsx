@@ -165,6 +165,47 @@ export const IconCategoryProgramming = () => (
   </svg>
 );
 
+export const IconCategoryHealth = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M12 20s-7.5-4.6-7.5-10.2A4.1 4.1 0 0 1 12 7.3a4.1 4.1 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinejoin="round"
+    />
+    <path d="M7.5 12.5h2.4l1.4-2.6 2 4.6 1.3-2h1.9" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export const IconCategoryEducation = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M2 9.5 12 4.5l10 5-10 5-10-5Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+    <path d="M6 11.5v4.8c0 1.6 2.7 3.2 6 3.2s6-1.6 6-3.2v-4.8M22 9.5v5.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+);
+
+export const IconCategoryEngineering = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M3.5 9 12 4l8.5 5h-17Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+    <path d="M6 9v9M10 9v9M14 9v9M18 9v9M3 21h18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+);
+
+export const IconCategoryDesign = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="m12 19 7-7 3 3-7 7-3-3Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+    <path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5ZM2 2l7.6 7.6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="11" cy="11" r="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+  </svg>
+);
+
+export const IconCategoryGrowth = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="m3 17 6-6 4 4 8-8M14 7h7v7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 export const IconCategoryBusiness = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <rect x="3" y="7" width="18" height="13" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />

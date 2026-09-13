@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLang } from "@/lib/i18n";
-import { IconCategoryAI, IconCategoryBusiness, IconCategoryProgramming } from "./icons";
+import {
+  IconCategoryAI,
+  IconCategoryBusiness,
+  IconCategoryDesign,
+  IconCategoryEducation,
+  IconCategoryEngineering,
+  IconCategoryGrowth,
+  IconCategoryHealth,
+  IconCategoryProgramming,
+} from "./icons";
 
 export type CarouselCategory = { id: string; name: string; count: number; tone: string };
 
@@ -14,6 +23,11 @@ const VISIBLE_RADIUS = 3;
 export function ToneIcon({ tone }: { tone: string }) {
   if (tone === "programming") return <IconCategoryProgramming />;
   if (tone === "business") return <IconCategoryBusiness />;
+  if (tone === "health") return <IconCategoryHealth />;
+  if (tone === "education") return <IconCategoryEducation />;
+  if (tone === "engineering") return <IconCategoryEngineering />;
+  if (tone === "design") return <IconCategoryDesign />;
+  if (tone === "research") return <IconCategoryGrowth />;
   return <IconCategoryAI />;
 }
 
