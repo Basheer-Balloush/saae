@@ -4128,3 +4128,10 @@
       }
     }
 
+    /* The front card opens its community page. The name is the real link
+       (keyboard, middle-click, screen readers); home-inline.js lets a click
+       anywhere else on the front face follow it, except on the navigator. */
+    .community-card-link { color: inherit; text-decoration: none; }
+    .community-card-link:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: 4px; border-radius: 4px; }
+    .community-card-front { cursor: pointer; }
+    .community-card-front .community-card-progress { cursor: default; }
