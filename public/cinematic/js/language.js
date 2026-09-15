@@ -31,7 +31,7 @@
     "As the page scrolls, the story moves from accessible knowledge to practical skills, connected people, public value, and the Million Syrian AI Users initiative.": "بينما تتنقل في الصفحة، تنتقل القصة من المعرفة المتاحة إلى المهارات العملية، والناس المتصلين، والقيمة العامة، ومبادرة مليون مستخدم سوري للذكاء الاصطناعي.",
     "Loading cinematic scene": "جارٍ تحميل المشهد السينمائي",
     "Intelligence and entrepreneurship for a nation on the rise.": "ذكاء وريادة لوطن ينهض",
-    "The learning platform": "منصة التعلّم",
+    "The learning platform": "المنصة التعليمية التدريبية",
     "Structured pathways, not scattered tutorials.": "مسارات منظمة، لا دروس متفرقة.",
     "Certified training tracks that build professional and technical skill, open to anyone in Syria.": "مسارات تدريب معتمدة تبني مهارات مهنية وتقنية، ومتاحة للجميع في سورية.",
     "Ask about learning": "استفسر عن التعلّم",
