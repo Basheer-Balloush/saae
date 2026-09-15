@@ -595,14 +595,14 @@ export const MISSION_COPY = {
 export const PARTNERS_COPY = {
   eyebrow: { ar: "عمل مشترك", en: "Shared work" } satisfies LocalText,
   title: {
-    ar: "المؤسسات تدفعها إلى الأمام",
-    en: "Institutions carry it further",
+    ar: "شركاء النجاح",
+    en: "Partners in Success",
   } satisfies LocalText,
   body: {
     ar: "تعمل الجامعات والوزارات والشركات ومنظمات المجتمع مع الجمعية في التدريب والمشاريع التطبيقية.",
     en: "Universities, ministries, companies and community organisations already work with SAAE on training and applied projects.",
   } satisfies LocalText,
-  allPartners: { ar: "شاهد جميع الشركاء", en: "See all partners" } satisfies LocalText,
+  allPartners: { ar: "اكتشف جميع الشركاء", en: "Discover All Partners" } satisfies LocalText,
 };
 
 export const FAQ_COPY = {

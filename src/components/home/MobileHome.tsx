@@ -36,6 +36,7 @@ import {
 import { useLang } from "@/lib/i18n";
 import MotionButton from "@/components/ui/motion-button";
 import { HomepageNews } from "./HomepageNews";
+import "./homepage-partners.css";
 import { DESKTOP_HOME_QUERY } from "@/hooks/useHeroCapability";
 import "./mobile-home.css";
 import {
@@ -852,15 +853,15 @@ export function MobileHomeView({
           </section>
 
           <section
-            className={logosPaused ? "mh-section mh-is-paused" : "mh-section"}
+            className={`mh-section hn-root hp-partners${logosPaused ? " mh-is-paused" : ""}`}
             id="partners"
             aria-labelledby="mh-partners-title"
           >
+            <div className="hn-tech-details" aria-hidden="true"><span /><span /></div>
             <div className="mh-wrap mh-partners-head">
               <div>
-                <p className="mh-eyebrow">{pick(PARTNERS_COPY.eyebrow, lang)}</p>
-                <h2 className="mh-section-h" id="mh-partners-title">
-                  {pick(PARTNERS_COPY.title, lang)}
+                <h2 className="hn-intro-heading hp-heading" id="mh-partners-title">
+                  {lang === "ar" ? "شركاء " : "Partners in "}<span className="hn-headline-accent">{lang === "ar" ? "النجاح" : "Success"}</span>
                 </h2>
                 <p className="mh-section-p">{pick(PARTNERS_COPY.body, lang)}</p>
               </div>
@@ -930,14 +931,12 @@ export function MobileHomeView({
               </p>
             )}
             <div className="mh-wrap">
-              <a className="mh-inline-link" href="/partners">
-                {pick(PARTNERS_COPY.allPartners, lang)}
-                <ArrowUpRight size={16} aria-hidden="true" className="mh-flip" />
-              </a>
+              <div className="hp-actions"><MotionButton href="/partners" label={pick(PARTNERS_COPY.allPartners, lang)} className="hn-show-all" /></div>
             </div>
           </section>
 
-          <section className="mh-section" id="faq" aria-labelledby="mh-faq-title">
+          <section className="mh-section hn-root hp-faq" id="faq" aria-labelledby="mh-faq-title">
+            <div className="hn-tech-details" aria-hidden="true"><span /><span /></div>
             <div className="mh-wrap">
               <p className="mh-eyebrow">{pick(FAQ_COPY.eyebrow, lang)}</p>
               <h2 className="mh-section-h" id="mh-faq-title">
