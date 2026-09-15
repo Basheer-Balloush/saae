@@ -1050,16 +1050,11 @@
 
     /* 28 square was under the 24px AA minimum once the border is discounted, and
        it was the only way through nine cards. 40. */
-    .community-card-nav { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; color: rgba(224, 242, 243, .72); border: 1px solid rgba(119, 224, 232, .35); border-radius: 50%; background: rgba(119, 224, 232, .06); cursor: pointer; transition: color 180ms ease, background-color 180ms ease, transform 180ms var(--ease-out); }
+    .community-card-nav { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; color: rgba(224, 242, 243, .72); border: 1px solid rgba(119, 224, 232, .35); border-radius: 50%; background: rgba(119, 224, 232, .06); cursor: pointer; transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, transform 180ms var(--ease-out); }
     .community-card-nav svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .community-card-nav:hover { color: var(--saae-turquoise-lift); background: rgba(119, 224, 232, .17); transform: scale(1.08); }
+    /* --ink for the glyph, not --paper: the hover fill is a light colour. */
+    .community-card-nav:hover { color: var(--ink); border-color: rgba(119, 224, 232, .85); background: rgba(119, 224, 232, .88); transform: scale(1.08); }
     .community-card-nav:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: 3px; }
-
-    /* Of the eleven ways through the nine, this is the one a first-time reader
-       has to find, so it carries the turquoise and the rest keep the outline.
-       --ink for the glyph, not --paper: the fill is a light colour. */
-    .community-card-nav-next { color: var(--ink); border-color: rgba(119, 224, 232, .85); background: rgba(119, 224, 232, .88); }
-    .community-card-nav-next:hover { color: var(--ink); background: var(--saae-turquoise-lift); }
 
     /* The nine only announce themselves as nine if something moves. Cycling the
        cards on a timer would take the choice away and keep the particle field
