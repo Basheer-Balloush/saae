@@ -320,13 +320,14 @@
       </section>
 
       <!-- db:home-news-feature:end -->
-      <section class="section partners" id="partners" aria-labelledby="partners-title">
+      <div class="hp-handoff" id="partner-handoff">
+      <section class="section partners hn-root hp-partners" id="partners" aria-labelledby="partners-title">
+        <div class="hp-partner-surface">
+        <div class="hn-tech-details" aria-hidden="true"><span></span><span></span></div>
         <div class="partner-layout">
           <div class="page-shell">
             <div class="section-heading reveal">
-              <p class="eyebrow">Shared work</p>
-              <h2 id="partners-title" class="photo-head">Institutions carry it further</h2>
-              <p>Universities, ministries, companies and community organisations already work with SAAE on training and applied projects.</p>
+              <div id="partner-heading-root"></div>
             </div>
           </div>
 
@@ -338,14 +339,12 @@
             <div class="partner-carousel" id="partner-carousel-root" aria-hidden="true"></div>
 
             <div class="partner-outro" id="partner-outro">
-              <a class="button-link partner-outro-cta" href="/partners">
-                See all 23 partners
-                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </a>
+              <div id="partner-cta-root"></div>
             </div>
           </div>
         </div>
 
+        </div>
         <!-- The corridor is decoration, so the register itself lives here:
              all twenty-three names, in the order SAAE publishes them,
              readable to a screen reader and to a page with no CSS. -->
@@ -377,9 +376,10 @@
           <!-- db:home-partner-names:end -->
         </ul>
 
-</section>
+      </section>
 
       <section class="section mission" id="mission" aria-labelledby="mission-title">
+        <div class="hn-tech-details" aria-hidden="true"><span></span><span></span></div>
         <div class="page-shell">
           <h2 class="sr-only" id="mission-title">How SAAE works: train, apply, build</h2>
           <div class="mission-reel" id="mission-reel">
@@ -411,7 +411,9 @@
         </div>
       </section>
 
-      <section class="section faq" id="faq" aria-labelledby="faq-title">
+      </div>
+      <section class="section faq hn-root hp-faq" id="faq" aria-labelledby="faq-title">
+        <div class="hn-tech-details" aria-hidden="true"><span></span><span></span></div>
         <div class="page-shell">
           <div class="faq-layout">
             <div class="faq-intro reveal">

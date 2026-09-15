@@ -52,6 +52,7 @@ const DESKTOP_SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/anime.umd.min.js" },
   { src: "/cinematic/js/motion-anime.js" },
   { src: "/cinematic/js/home-mobile.js" },
+  { src: "/cinematic/js/partner-handoff.js" },
 ];
 
 export const Route = createFileRoute("/")({

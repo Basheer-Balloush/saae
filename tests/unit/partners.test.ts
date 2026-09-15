@@ -152,7 +152,7 @@ describe("mobile database partners", () => {
     const html = render();
     expect(html).toContain(row.name);
     expect(html).toContain(row.logo_url);
-    expect(html).toContain("See all partners");
+    expect(html).toContain("Discover All Partners");
     expect(html).not.toContain("partner-damascus.webp");
     expect(html).not.toContain("See all 23 partners");
     expect(html).not.toContain("mh-row-reverse");
@@ -166,5 +166,13 @@ describe("mobile database partners", () => {
   });
   it("keeps the name visible when the logo is absent", () => {
     expect(render([{ ...partner, logo: null }])).toContain(`<span>${row.name}</span>`);
+  });
+  it("uses the success-partners heading and matching directory button in Arabic", () => {
+    const html = render([partner], false, "ar");
+    expect(html).toContain("شركاء ");
+    expect(html).toContain("النجاح");
+    expect(html).toContain("اكتشف جميع الشركاء");
+    expect(html).toContain('data-slot="motion-button"');
+    expect(html).toContain('class="hn-tech-details"');
   });
 });

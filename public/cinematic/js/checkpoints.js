@@ -45,7 +45,13 @@
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-  const topOf = element => Math.round(element.getBoundingClientRect().top + window.scrollY);
+  const topOf = element => {
+    const transition = window.ScrollTrigger?.getById("partner-handoff");
+    if (transition && element.id === "partners") return Math.round(transition.start);
+    const mission = transition && element.closest("#mission");
+    const shift = mission ? Number(window.gsap.getProperty(mission, "y")) || 0 : 0;
+    return Math.round(element.getBoundingClientRect().top + window.scrollY - shift);
+  };
   const limit = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
 
   /* ---- Geometry ---------------------------------------------------------

@@ -1,0 +1,104 @@
+.hp-partners {
+  background: #061820;
+}
+.hp-faq {
+  position: relative;
+  isolation: isolate;
+  background: #061820;
+}
+.hp-faq .hn-tech-details {
+  z-index: -1;
+  opacity: .7;
+}
+.hp-faq .hn-tech-details span {
+  width: min(360px, 30%);
+  opacity: .34;
+}
+.hp-handoff,
+.hp-faq {
+  background-color: #061820;
+}
+.hp-partner-surface {
+  position: relative;
+  width: 100%;
+  isolation: isolate;
+}
+.hp-partners .section-heading .hp-heading {
+  font-family: "Cairo", Arial, sans-serif;
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+html.hero-opening-ready .hp-partners .hp-heading {
+  animation: none;
+}
+.hp-description {
+  max-width: 640px;
+  margin: 20px auto 0;
+  color: #9fbabe;
+  font-size: 18px;
+  line-height: 1.9;
+  text-wrap: pretty;
+}
+.hp-partners .section-heading::after {
+  display: none;
+}
+.hp-partners .partner-outro {
+  display: flex;
+  justify-content: center;
+}
+.hp-partners .partner-outro::before,
+.hp-partners .partner-outro::after {
+  display: none;
+}
+.hp-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 32px;
+}
+.hp-handoff {
+  position: relative;
+  overflow: clip;
+}
+.hp-handoff.is-horizontal .hp-partners {
+  height: 100svh;
+  min-height: 620px;
+  display: flex;
+  align-items: center;
+  padding: 48px 40px;
+}
+.hp-handoff.is-horizontal .mission {
+  position: relative;
+  z-index: 2;
+  margin-top: -100svh;
+  background: #061820;
+  isolation: isolate;
+}
+.hp-handoff .mission .hn-tech-details {
+  z-index: -1;
+  opacity: .7;
+}
+.hp-handoff .mission .hn-tech-details span {
+  width: min(360px, 30%);
+  opacity: .34;
+}
+.mobile-home .hp-partners .hp-heading {
+  font-size: 38px;
+  line-height: 1.5;
+  text-align: start;
+}
+@media (min-width: 768px) and (max-height: 680px) {
+  .hp-handoff.is-horizontal .hp-partners {
+    min-height: 0;
+    padding-block: 28px;
+  }
+  .hp-partners .section-heading .hp-heading {
+    font-size: 40px;
+  }
+}
+@media (max-width: 767px), (prefers-reduced-motion: reduce) {
+  .hp-handoff {
+    overflow: visible;
+  }
+}
