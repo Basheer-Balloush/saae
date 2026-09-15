@@ -376,6 +376,7 @@
       acceptNode(node) {
         const parent = node.parentElement;
         if (!parent || /^(SCRIPT|STYLE|SVG|NOSCRIPT)$/i.test(parent.tagName)) return NodeFilter.FILTER_REJECT;
+        if (parent.closest("[data-react-i18n]")) return NodeFilter.FILTER_REJECT;
         return node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
       }
     });
