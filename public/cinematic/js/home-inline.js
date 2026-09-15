@@ -746,22 +746,13 @@
         lastPaintedProgress = progress;
         lastBandProgress = bandProgress;
         stage.style.setProperty("--hero-progress", progress.toFixed(4));
-        /* The ground the journey is drawn on moves with it. The old march was
-           three near-identical navies inherited from the video, which is why
-           the whole hero read as one flat blue whatever the scene was doing.
-           It now walks the five beats through SAAE's own dark end: a deep
-           green petrol under the mark, cooling to the deepest blue where the
-           number is counted, and settling back to petrol under the land. That
-           last stop was green first, which was a mistake: it went green at
-           exactly the beat where the country's own rim does, and the two
-           cancelled each other out. Every stop is kept dark on purpose, since
-           the caption cards sit on this and their contrast is measured. */
+        /* Keep the ground dark and neutral so it does not tint the scene. */
         const heroTones = [
-          [8, 42, 40],
-          [7, 38, 51],
-          [8, 36, 66],
-          [8, 38, 58],
-          [6, 33, 48]
+          [8, 16, 24],
+          [9, 18, 27],
+          [8, 16, 24],
+          [9, 18, 27],
+          [8, 16, 24]
         ];
         const tonePos = clamp(progress, 0, 1) * (heroTones.length - 1);
         const toneLow = Math.min(heroTones.length - 2, Math.floor(tonePos));

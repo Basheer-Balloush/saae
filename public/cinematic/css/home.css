@@ -350,9 +350,9 @@
     }
 
     .cinematic-scroll {
-      --wash-r: 7;
-      --wash-g: 25;
-      --wash-b: 48;
+      --wash-r: 8;
+      --wash-g: 16;
+      --wash-b: 24;
       position: sticky;
       top: 0;
       height: 100vh;
@@ -449,15 +449,12 @@
     .hero-video.is-ready + .hero-wash + .hero-vignette + .hero-grain + .hero-poster { opacity: 0; }
 
     .hero-wash {
-      z-index: -3;
-      background:
-        linear-gradient(90deg, rgba(var(--wash-r), var(--wash-g), var(--wash-b), .7) 0%, rgba(4, 14, 31, .08) 42%, rgba(4, 14, 31, .06) 61%, rgba(var(--wash-r), var(--wash-g), var(--wash-b), .5) 100%),
-        linear-gradient(180deg, rgba(3, 10, 25, .5) 0%, transparent 24%, transparent 62%, rgba(3, 10, 25, .72) 100%);
+      display: none;
     }
 
     .hero-vignette {
       z-index: -2;
-      box-shadow: inset 0 0 18vw 6vw rgba(3, 10, 25, .5);
+      box-shadow: inset 0 0 18vw 6vw rgba(0, 0, 0, .5);
       pointer-events: none;
     }
 
@@ -546,7 +543,7 @@
       padding-block: 10px;
       padding-inline: 20px 0;
       border-inline-start: 2px solid var(--saae-turquoise-lift);
-      background: linear-gradient(90deg, rgba(3, 29, 34, .42), rgba(3, 29, 34, 0));
+      background: none;
       text-shadow: 0 3px 20px rgba(0, 0, 0, .78);
       transition: transform 360ms var(--ease-out), border-color 360ms ease, filter 360ms ease;
     }
@@ -3565,7 +3562,6 @@
     @media (min-width: 769px) {
       .site-loader { position: fixed; z-index: 120; inset: 0; display: grid; place-items: center; block-size: 100vh; block-size: 100dvh; overflow: hidden; isolation: isolate; background: #061820; opacity: 1; pointer-events: auto; user-select: none; touch-action: none; transition: opacity 460ms var(--ease-out), visibility 0s linear 460ms; }
       .site-loader::before { content: ""; position: absolute; z-index: -2; inset: 0; background: radial-gradient(ellipse 38% 45% at 50% 50%, color-mix(in srgb, var(--teal-lift) 13%, transparent), transparent 70%), radial-gradient(ellipse 65% 72% at 50% 56%, color-mix(in srgb, var(--teal) 5%, transparent), transparent 76%); opacity: .78; pointer-events: none; }
-      .site-loader::after { content: ""; position: absolute; z-index: -1; inset-block: 12%; inset-inline: 50%; inline-size: 1px; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--teal-lift) 16%, transparent), transparent); box-shadow: 0 0 90px 28px color-mix(in srgb, var(--teal-lift) 4%, transparent); opacity: .55; pointer-events: none; }
       .site-loader-inner { position: relative; display: grid; grid-template-columns: minmax(64px, 1fr) auto minmax(64px, 1fr); align-items: center; column-gap: clamp(18px, 3vw, 36px); inline-size: min(780px, calc(100vw - 72px)); direction: ltr; }
       .site-loader-halo { position: absolute; z-index: 0; inset-block-start: 50%; inset-inline-start: 50%; inline-size: clamp(310px, 25vw, 356px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--teal-lift) 12%, transparent), transparent 68%); filter: blur(12px); opacity: .7; transform: translate(-50%, -50%); animation: site-loader-halo-awaken .68s var(--ease-out) both, site-loader-halo-hold 3.6s ease-in-out .68s infinite; }
       .site-loader-tree { position: relative; z-index: 1; grid-column: 2; grid-row: 1; display: block; inline-size: clamp(210px, 17vw, 240px); aspect-ratio: 576 / 642; transform-origin: center; }
@@ -3752,14 +3748,10 @@
     /* The Arabic opening is intentionally concise: the headline is the whole
        message, so its removed supporting sentence cannot crowd the frame. */
     html[dir="rtl"] .hero-band[data-band="0"] { inset-block-start: 16%; width: min(460px, 31vw); }
-    html[dir="rtl"] .hero-band[data-band="0"] .hero-card-copy { width: 100%; padding-block: 16px; padding-inline: 26px 8px; background: linear-gradient(270deg, rgba(3, 29, 34, .42), rgba(3, 29, 34, 0)); }
-    /* Bands 1-2 use the same side-rail card as the opening beat, so they get
-       the same Arabic mirror: the wash fades out from the bordered edge and
-       the copy keeps optical padding off the rail. Without this the physical
-       90deg wash and the logical border disagree and the rail reads as a
-       stray line behind the copy. */
+    html[dir="rtl"] .hero-band[data-band="0"] .hero-card-copy { width: 100%; padding-block: 16px; padding-inline: 26px 8px; background: none; }
+    /* Keep Arabic copy optically spaced from the side rail. */
     html[dir="rtl"] .hero-band[data-band="2"] .hero-card-copy,
-    html[dir="rtl"] .hero-band[data-band="4"] .hero-card-copy { padding-inline: 26px 8px; background: linear-gradient(270deg, rgba(3, 29, 34, .42), rgba(3, 29, 34, 0)); }
+    html[dir="rtl"] .hero-band[data-band="4"] .hero-card-copy { padding-inline: 26px 8px; background: none; }
     html[dir="rtl"] .hero-band[data-band="0"] .hero-card-copy > p:not(.eyebrow) { display: none; }
     html[dir="rtl"] .hero-band[data-band="0"] .eyebrow { margin-bottom: 20px; word-spacing: .14em; }
     html[dir="rtl"] .hero-band[data-band="0"] h2 { max-width: 100%; margin-bottom: 0; font-size: clamp(2.35rem, 3.5vw, 3.8rem); letter-spacing: 0; line-height: 1.28; word-spacing: .08em; }
@@ -3767,7 +3759,7 @@
        card group—not merely its text—to the open right side in Arabic. */
     html[dir="rtl"] .community-flip { right: 0; left: auto; text-align: right; }
     html[dir="rtl"] .community-flip-track { margin-left: auto; }
-    html[dir="rtl"] .community-flip .hero-card-copy { background: linear-gradient(270deg, rgba(3, 29, 34, .42), rgba(3, 29, 34, 0)); }
+    html[dir="rtl"] .community-flip .hero-card-copy { background: none; }
     html[dir="rtl"] .community-card-icon { right: auto; left: auto; }
     html[dir="rtl"] .community-card-nav svg { transform: scaleX(-1); }
     /* The scroll words are the one display treatment that cannot be reused as
