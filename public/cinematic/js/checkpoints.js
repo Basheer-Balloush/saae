@@ -88,6 +88,15 @@
      alone. */
   const CROSSINGS = [[.055, .135], [.320, .372], [.492, .544], [.664, .716], [.836, .874]];
 
+  /* The learning beat's progress bar (hero-instrument.js:1165) fills across the
+     hold of FRUIT_VISITS[0] in tree-story.js: the content finishes assembling
+     at .406, starts dissolving at .468, and the bar reads full at .82 of that
+     hold. A journey stops where the bar is still empty and then plays the hold
+     itself, so the bar fills on its own. */
+  const LMS_EMPTY = .406;
+  const LMS_FULL = .406 + .82 * (.468 - .406);
+  const JOURNEY_STOPS = [BEATS[0], BEATS[1], LMS_EMPTY, LMS_FULL, BEATS[3], BEATS[4], BEATS[5]];
+
   /* ---- The registry -----------------------------------------------------
      Two kinds, and the difference is not cosmetic.
 
@@ -188,7 +197,10 @@
                stopping there was deliberate.
        cut     a move longer than this many screens cuts rather than scrubs.
        settle  how long the last screen of a cut takes.
-       hop     how long a short move takes. */
+       hop     how long a short move takes.
+       journey how long one wheel journey between two hero stops takes.
+       fill    how long the learning stop takes to fill its progress bar.
+       gap     seconds of wheel silence that separate one gesture from the next. */
   const DEFAULTS = {
     wait: .22,
     glide: .75,
@@ -196,7 +208,10 @@
     reach: 1.2,
     cut: 2.5,
     settle: .9,
-    hop: 1.1
+    hop: 1.1,
+    journey: 4.0,
+    fill: 2.0,
+    gap: .2
   };
   const tuning = Object.assign({}, DEFAULTS);
 
@@ -328,6 +343,8 @@
   function settle() {
     const engine = window.saaeScroll;
     if (!engine || gliding || reduced.matches || tuning.magnet === "off") return;
+    /* Inside the hero the wheel journeys own the page; a second owner here is how this page used to fight itself. */
+    if (journeyEnabled() && inJourneyZone(window.scrollY)) return;
 
     const span = Math.max(1, hero.offsetHeight - window.innerHeight);
     const progress = (window.scrollY - topOf(hero)) / span;
@@ -393,6 +410,8 @@
   }
 
   function release() {
+    journeyToken += 1;
+    journeying = false;
     if (!gliding) return;
     gliding = false;
     /* Ends the glide where it stands rather than cancelling it back: the
@@ -400,6 +419,113 @@
        it is from this frame on. */
     const engine = window.saaeScroll;
     if (engine) engine.scrollTo(window.scrollY, { immediate: true, force: true });
+  }
+
+  /* ---- Journeys ---------------------------------------------------------
+     One wheel gesture inside the hero plays a journey to the next stop in its
+     direction, and the rest of that gesture is swallowed. This bends the rule
+     at the top of this file -- nothing intercepts the wheel -- on purpose and
+     only inside the hero (asked for on 2026-09-15): from the top of the film
+     to the Syria beat, never below it. Journeys go through the engine like
+     every other move here, and share `gliding` with the magnet, so the two
+     can never move the page at the same time. */
+  let journeying = false;
+  let journeyToken = 0;
+  let lastWheelAt = 0;
+  let journeyEndsAt = 0;
+  let gestureOwned = false;
+  /* Sine rather than cubic: its fastest moment is 1.6 times the average speed, not 3, so the middle of a journey glides instead of rushing. */
+  const easeInOutSine = t => -(Math.cos(Math.PI * t) - 1) / 2;
+
+  function journeyEnabled() {
+    return Boolean(window.saaeScroll) && !reduced.matches && !document.documentElement.classList.contains("site-loading");
+  }
+
+  function inJourneyZone(y) {
+    return y >= topOf(hero) - 8 && y <= heroAt(BEATS[5]) + 8;
+  }
+
+  function journeyTarget(direction, y) {
+    if (direction > 0) {
+      for (let index = 0; index < JOURNEY_STOPS.length; index += 1) {
+        if (heroAt(JOURNEY_STOPS[index]) > y + 8) return JOURNEY_STOPS[index];
+      }
+      return null;
+    }
+    if (direction < 0) {
+      for (let index = JOURNEY_STOPS.length - 1; index >= 0; index -= 1) {
+        if (JOURNEY_STOPS[index] === LMS_EMPTY) continue;
+        if (heroAt(JOURNEY_STOPS[index]) < y - 8) return JOURNEY_STOPS[index];
+      }
+      return null;
+    }
+    return null;
+  }
+
+  function freeWheel(event) {
+    if (event.ctrlKey) return true;
+    if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return true;
+    if (event.deltaY === 0) return true;
+    if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable], dialog, [role=\"dialog\"], [data-journey-free]") !== null) return true;
+    let node = event.target instanceof Element ? event.target : null;
+    while (node && node !== document.body) {
+      const overflow = getComputedStyle(node).overflowY;
+      if ((overflow === "auto" || overflow === "scroll") && node.scrollHeight > node.clientHeight + 1) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function journeyTo(stop, direction) {
+    const engine = window.saaeScroll;
+    if (!engine) return;
+    const token = ++journeyToken;
+    journeying = true;
+    gliding = true;
+    const filling = direction > 0 && stop === LMS_FULL;
+    const duration = filling ? tuning.fill : tuning.journey;
+    journeyEndsAt = performance.now() + duration * 1000 + 400;
+    engine.scrollTo(heroAt(stop), {
+      duration,
+      easing: filling ? (t => t) : easeInOutSine,
+      force: true,
+      lock: true,
+      onComplete: () => {
+        if (token !== journeyToken) return;
+        journeying = false;
+        gliding = false;
+        if (direction > 0 && stop === LMS_EMPTY) journeyTo(LMS_FULL, 1);
+      }
+    });
+  }
+
+  /* Capture phase on window, so it runs before the engine's own wheel listener and can keep a swallowed notch from reaching it. */
+  function onJourneyWheel(event) {
+    if (!journeyEnabled() || freeWheel(event)) return;
+    const now = performance.now();
+    const quiet = now - lastWheelAt > tuning.gap * 1000;
+    lastWheelAt = now;
+    const y = window.scrollY;
+    /* A journey whose animation was replaced never reaches onComplete. Past its end time it is over, whatever the flag says. */
+    if (journeying && now > journeyEndsAt) { journeying = false; gliding = false; }
+    if (journeying) { event.preventDefault(); event.stopPropagation(); return; }
+    /* The rest of a gesture belongs to whatever its first notch did: swallowed
+       if it started a journey, left to the page if it did not. Swallowing a
+       free gesture's tail locked the page at the Syria stop, where a trackpad
+       swipe moved a pixel and every notch after it was eaten. */
+    if (!quiet) {
+      if (gestureOwned) { event.preventDefault(); event.stopPropagation(); }
+      return;
+    }
+    gestureOwned = false;
+    if (!inJourneyZone(y)) return;
+    const direction = event.deltaY > 0 ? 1 : -1;
+    const stop = journeyTarget(direction, y);
+    if (stop === null) return;
+    event.preventDefault();
+    event.stopPropagation();
+    gestureOwned = true;
+    journeyTo(stop, direction);
   }
 
   /* ---- Wiring -----------------------------------------------------------
@@ -478,6 +604,12 @@
     markFrame = requestAnimationFrame(() => { markFrame = 0; mark(); });
   }, { passive: true });
 
+  /* CinematicPage runs this file again whenever the page markup changes (news
+     and partners arrive after the first paint), and every run adds its
+     listeners again. Only the newest journey handler may own the wheel. */
+  if (window.saaeJourneyWheel) window.removeEventListener("wheel", window.saaeJourneyWheel, { capture: true });
+  window.saaeJourneyWheel = onJourneyWheel;
+  window.addEventListener("wheel", onJourneyWheel, { capture: true, passive: false });
   /* The hand going back on the wheel, in every form it takes. */
   window.addEventListener("wheel", release, { passive: true });
   window.addEventListener("touchstart", release, { passive: true });
@@ -504,6 +636,7 @@
     go: id => { const point = points.find(candidate => candidate.id === id); if (point) travel(point); },
     next: () => step(1),
     previous: () => step(-1),
+    journey: () => ({ journeying, stops: JOURNEY_STOPS.map(heroAt) }),
     /* Live, and returns the whole set so the console shows what is in force
        after every adjustment. tune() with nothing reads it; tune({}) is the
        same. reset() puts the defaults back. */
