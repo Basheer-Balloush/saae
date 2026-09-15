@@ -558,6 +558,15 @@
 
     .hero-band .eyebrow { margin-bottom: 12px; color: var(--saae-turquoise-lift); }
 
+    /* Initiative eyebrow is a long phrase — balance the wrap so it breaks
+       into even lines instead of leaving a single word on the last line. */
+    .hero-band[data-band="4"] .eyebrow { text-wrap: balance; }
+
+    /* Arabic only: force the initiative eyebrow onto two lines —
+       "مبادرة مليون مستخدم سوري" on top, "للذكاء الاصطناعي" below.
+       English keeps its natural inline flow. */
+    html[lang="ar"] .hero-band[data-band="4"] .eyebrow-line2 { display: block; }
+
     .hero-band h1,
     .hero-band h2 {
       max-width: min(100%, clamp(470px, 32vw, 620px));
