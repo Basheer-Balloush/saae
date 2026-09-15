@@ -29,24 +29,10 @@ export function applyPartnerDirectory(html: string, result: PartnerResult): stri
 
 export function applyHomePartners(html: string, result: PartnerResult): string {
   const rows = result.failed ? [] : result.partners;
-  const logoRows = rows.filter((p) => p.logo || p.lightLogo);
-  const marks = logoRows
-    .map((p, i) => {
-      // The stream draws each logo as a mask, which keeps only its transparency: a
-      // seal printed on a solid disc becomes a plain disc. Light logos are line art
-      // on transparent, so they are preferred here, as in the directory.
-      // CSS strings require escaping in addition to HTML attribute escaping.
-      const url = (p.lightLogo ?? p.logo)!.replace(
-        /["'\\()<>\s]/g,
-        (c) => `%${c.charCodeAt(0).toString(16).padStart(2, "0")}`,
-      );
-      // Fit every row into the existing 0..1 scroll clock, regardless of count.
-      const step = logoRows.length > 1 ? 0.52 / (logoRows.length - 1) : 0.26;
-      const style = `--gain: ${p.height / 96}; --i: ${logoRows.length === 1 ? 1 : i}; --step: ${step}s; --mark: url("${url}")`;
-      return `<span class="partner-mark${i % 2 ? " is-left" : ""}${i % 4 < 2 ? " is-high" : " is-low"}" style="${escapeHtml(style)}"></span>`;
-    })
-    .join("\n");
-  let output = replaceRegion(html, "home-partner-marks", marks);
+  // Desktop logos are drawn by the React logo carousel mounted into
+  // #partner-carousel-root (DesktopPartnerCarousel); this only fills the
+  // screen-reader names, the status line and the directory link.
+  let output = html;
   output = replaceRegion(
     output,
     "home-partner-names",

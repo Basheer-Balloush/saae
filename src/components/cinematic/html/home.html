@@ -311,56 +311,27 @@
       </section>
 
       <section class="section partners" id="partners" aria-labelledby="partners-title">
-        <div class="flow-reel flow-reel-partners" id="partner-reel">
-          <div class="flow-screen partner-screen" id="partner-screen">
-            <div class="page-shell">
-              <div class="section-heading reveal">
-                <p class="eyebrow">Shared work</p>
-                <h2 id="partners-title" class="photo-head">Institutions carry it further</h2>
-                <p>Universities, ministries, companies and community organisations already work with SAAE on training and applied projects.</p>
-              </div>
+        <div class="partner-layout">
+          <div class="page-shell">
+            <div class="section-heading reveal">
+              <p class="eyebrow">Shared work</p>
+              <h2 id="partners-title" class="photo-head">Institutions carry it further</h2>
+              <p>Universities, ministries, companies and community organisations already work with SAAE on training and applied projects.</p>
             </div>
+          </div>
 
-            <!-- db:home-partner-status:start --><!-- db:home-partner-status:end -->
-            <div class="partner-stage">
-              <div class="partner-stream" id="partner-stream">
-                <div class="partner-stream-field" aria-hidden="true">
-                  <div class="partner-stream-rails">
-                    <!-- db:home-partner-marks:start -->
-                    <span class="partner-mark is-high" style="--gain: 1.0; --i: 0; --mark: url(&quot;/cinematic/images/partners/partner-damascus-ink.webp&quot;)"></span>
-                    <span class="partner-mark is-left is-high" style="--gain: 1.0; --i: 1; --mark: url(&quot;/cinematic/images/partners/partner-yarmouk-ink.webp&quot;)"></span>
-                    <span class="partner-mark is-low" style="--gain: 0.883; --i: 2; --mark: url(&quot;/cinematic/images/partners/partner-social-affairs.webp&quot;)"></span>
-                    <span class="partner-mark is-left is-low" style="--gain: 0.994; --i: 3; --mark: url(&quot;/cinematic/images/partners/partner-aleppo.webp&quot;)"></span>
-                    <span class="partner-mark is-high" style="--gain: 1.0; --i: 4; --mark: url(&quot;/cinematic/images/partners/partner-engineers-ink.webp&quot;)"></span>
-                    <span class="partner-mark is-left is-high" style="--gain: 0.875; --i: 5; --mark: url(&quot;/cinematic/images/partners/partner-syrian-telecom.webp&quot;)"></span>
-                    <span class="partner-mark is-low" style="--gain: 1.241; --i: 6; --mark: url(&quot;/cinematic/images/partners/partner-sdo.webp&quot;)"></span>
-                    <span class="partner-mark is-left is-low" style="--gain: 0.94; --i: 7; --mark: url(&quot;/cinematic/images/partners/partner-al-ihsan.webp&quot;)"></span>
-                    <span class="partner-mark is-high" style="--gain: 0.899; --i: 8; --mark: url(&quot;/cinematic/images/partners/partner-med-axis.webp&quot;)"></span>
-                    <span class="partner-mark is-left is-high" style="--gain: 0.863; --i: 9; --mark: url(&quot;/cinematic/images/partners/partner-sharafai.webp&quot;)"></span>
-                    <span class="partner-mark is-low" style="--gain: 1.353; --i: 10; --mark: url(&quot;/cinematic/images/partners/partner-sarrdeh.webp&quot;)"></span>
-                    <span class="partner-mark is-left is-low" style="--gain: 1.019; --i: 11; --mark: url(&quot;/cinematic/images/partners/partner-devista.webp&quot;)"></span>
-                    <span class="partner-mark is-high" style="--gain: 1.23; --i: 12; --mark: url(&quot;/cinematic/images/partners/partner-ilmhub.webp&quot;)"></span>
-                    <span class="partner-mark is-left is-high" style="--gain: 1.058; --i: 13; --mark: url(&quot;/cinematic/images/partners/partner-stepup.webp&quot;)"></span>
-                    <span class="partner-mark is-low" style="--gain: 0.85; --i: 14; --mark: url(&quot;/cinematic/images/partners/partner-abqar.webp&quot;)"></span>
-                    <span class="partner-mark is-left is-low" style="--gain: 0.845; --i: 15; --mark: url(&quot;/cinematic/images/partners/partner-lmip.webp&quot;)"></span>
-                    <span class="partner-mark is-high" style="--gain: 1.251; --i: 16; --mark: url(&quot;/cinematic/images/partners/partner-joblink.webp&quot;)"></span>
-                    <span class="partner-mark is-left is-high" style="--gain: 0.989; --i: 17; --mark: url(&quot;/cinematic/images/partners/partner-azbooks.webp&quot;)"></span>
-                    <span class="partner-mark is-low" style="--gain: 1.0; --i: 18; --mark: url(&quot;/cinematic/images/partners/partner-circles.webp&quot;)"></span>
-                    <span class="partner-mark is-left is-low" style="--gain: 1.164; --i: 19; --mark: url(&quot;/cinematic/images/partners/partner-cubes.webp&quot;)"></span>
-                    <span class="partner-mark is-high" style="--gain: 1.277; --i: 20; --mark: url(&quot;/cinematic/images/partners/partner-baukant.webp&quot;)"></span>
-                    <span class="partner-mark is-left is-high" style="--gain: 1.215; --i: 21; --mark: url(&quot;/cinematic/images/partners/partner-bacca.webp&quot;)"></span>
-                    <span class="partner-mark is-low" style="--gain: 0.839; --i: 22; --mark: url(&quot;/cinematic/images/partners/partner-people.webp&quot;)"></span>
-                    <!-- db:home-partner-marks:end -->
-                  </div>
-                </div>
-              </div>
+          <!-- db:home-partner-status:start --><!-- db:home-partner-status:end -->
+          <div class="partner-stage">
+            <!-- The logo carousel (src/components/ui/logo-carousel.tsx) is
+                 mounted here by the desktop home route. It is decoration:
+                 the names are in the list below for screen readers. -->
+            <div class="partner-carousel" id="partner-carousel-root" aria-hidden="true"></div>
 
-              <div class="partner-outro" id="partner-outro">
-                <a class="button-link partner-outro-cta" href="/partners">
-                  See all 23 partners
-                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </a>
-              </div>
+            <div class="partner-outro" id="partner-outro">
+              <a class="button-link partner-outro-cta" href="/partners">
+                See all 23 partners
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
             </div>
           </div>
         </div>

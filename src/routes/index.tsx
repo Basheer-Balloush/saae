@@ -5,7 +5,7 @@ import type { CinematicScript } from "@/components/cinematic/CinematicPage";
 import { MobileHome } from "@/components/home/MobileHome";
 import { useHeroCapability } from "@/hooks/useHeroCapability";
 import { supabase } from "@/integrations/supabase/client";
-import { loadPartners } from "@/features/website/partners/data";
+import { loadPartners, type Partner } from "@/features/website/partners/data";
 import { applyHomePartners } from "@/features/website/partners/render";
 import {
   NEWS_CARD_COLUMNS,
@@ -18,6 +18,13 @@ import {
 // Desktop-only cinematic shell. Lazy so the phone import graph stays light.
 const CinematicPageLazy = React.lazy(() =>
   import("@/components/cinematic/CinematicPage").then((m) => ({ default: m.CinematicPage })),
+);
+
+// Desktop-only partners logo carousel, portalled into the cinematic markup.
+const DesktopPartnerCarouselLazy = React.lazy(() =>
+  import("@/components/home/DesktopPartnerCarousel").then((m) => ({
+    default: m.DesktopPartnerCarousel,
+  })),
 );
 
 /* Desktop only: the phone page loads none of these. The hero's two scripts
@@ -97,11 +104,16 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-function DesktopHome({ html }: { html: string }) {
+function DesktopHome({ html, partners }: { html: string; partners: Partner[] }) {
   return (
-    <Suspense fallback={null}>
-      <CinematicPageLazy html={html} scripts={DESKTOP_SCRIPTS} htmlClass="site-loading" />
-    </Suspense>
+    <>
+      <Suspense fallback={null}>
+        <CinematicPageLazy html={html} scripts={DESKTOP_SCRIPTS} htmlClass="site-loading" />
+      </Suspense>
+      <Suspense fallback={null}>
+        <DesktopPartnerCarouselLazy partners={partners} />
+      </Suspense>
+    </>
   );
 }
 
@@ -114,7 +126,9 @@ function Home() {
   const capability = useHeroCapability();
   // Mobile-first: SSR, first paint, phones and reduced motion get the phone
   // page; only a confirmed desktop mounts the cinematic enhancement.
-  if (capability === "desktop") return <DesktopHome html={html} />;
+  if (capability === "desktop") {
+    return <DesktopHome html={html} partners={partners.failed ? [] : partners.partners} />;
+  }
   return (
     <MobileHome
       news={mobileNews}
