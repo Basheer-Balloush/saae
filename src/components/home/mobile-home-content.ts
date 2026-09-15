@@ -460,10 +460,10 @@ export const ACHIEVEMENTS: AchievementEntry[] = [
 ];
 
 export const NUMBERS_COPY = {
-  eyebrow: { ar: "الجمعية بالأرقام", en: "SAAE in numbers" } satisfies LocalText,
+  eyebrow: { ar: "انجازات الجمعية", en: "SAAE achievements" } satisfies LocalText,
   title: {
-    ar: "أكثر من 5,000 متعلم مع الجمعية.",
-    en: "5,000+ people learning with SAAE.",
+    ar: "مجتمع يتجاوز 5,000 متعلم",
+    en: "A community of 5,000+ learners",
   } satisfies LocalText,
 };
 
@@ -537,12 +537,12 @@ export const INITIATIVE_COPY = {
     en: "The Million Syrian AI Users initiative",
   } satisfies LocalText,
   title: {
-    ar: "مليون شخص. خطوة وطنية إلى الأمام.",
-    en: "One million people. One national step forward.",
+    ar: "مليون شخص خطوة وطنية إلى الأمام",
+    en: "One million people One national step forward",
   } satisfies LocalText,
   body: {
-    ar: "جهد وطني يجعل معرفة الذكاء الاصطناعي عملية وموثوقة ومتاحة.",
-    en: "A national effort to make AI knowledge practical, trusted and reachable.",
+    ar: "مبادرة وطنية تمكّن مليون سوري من استخدام الذكاء الاصطناعي بثقة في العمل والدراسة والحياة اليومية.",
+    en: "A national initiative enabling one million Syrians to use AI confidently at work, in study, and in everyday life.",
   } satisfies LocalText,
   primary: { ar: "استكشف المبادرة", en: "Explore the initiative" } satisfies LocalText,
   official: { ar: "البرنامج الرسمي", en: "Official programme" } satisfies LocalText,
@@ -557,8 +557,8 @@ export const INITIATIVE_COPY = {
 export const COMMUNITIES_COPY = {
   eyebrow: { ar: "مجتمعات الجمعية", en: "SAAE communities" } satisfies LocalText,
   title: {
-    ar: "تسعة مجتمعات. جذور تجمعنا.",
-    en: "Nine communities. One shared foundation.",
+    ar: "تسعة مجتمعات جذور تجمعنا",
+    en: "Nine communities One shared foundation",
   } satisfies LocalText,
   body: {
     ar: "لكل مجتمع أسئلته وممارسوه. والمنهج المشترك يجعل الأجوبة تنتقل بينها.",
@@ -621,12 +621,12 @@ export const CLOSING_COPY = {
     en: "A shared future starts with shared knowledge.",
   } satisfies LocalText,
   title: {
-    ar: "من جذورنا، إلى كل سورية.",
-    en: "From our roots, to all of Syria.",
+    ar: "ننمو معاً في كل سورية",
+    en: "Growing together across Syria",
   } satisfies LocalText,
   body: {
-    ar: "من مجتمعاتنا ينمو التعلّم وتُثمر الفرص. وتحمل مبادرة مليون مستخدم سوري للذكاء الاصطناعي هذا الطموح إلى أنحاء سورية.",
-    en: "Our communities nurture learning and opportunity. The Million Syrian AI Users initiative carries that ambition across the country.",
+    ar: "من مجتمعاتنا التسعة تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
+    en: "From our nine communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.",
   } satisfies LocalText,
   primary: { ar: "ابدأ التعلّم", en: "Start learning" } satisfies LocalText,
   secondary: { ar: "سجّل الآن", en: "Register now" } satisfies LocalText,

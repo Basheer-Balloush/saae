@@ -96,6 +96,7 @@
   font-weight: 700;
   line-height: 1.6;
   letter-spacing: 0;
+  text-wrap: balance;
 }
 
 .mobile-home .mh-eyebrow::before {

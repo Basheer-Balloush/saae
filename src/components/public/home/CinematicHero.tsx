@@ -90,8 +90,8 @@ export function CinematicHero() {
             <article className="hero-band" data-band="2" aria-hidden="true">
               <div className="hero-card-copy">
                 <p className="eyebrow">The Million Syrian AI Users initiative</p>
-                <h2>One million people. One national step forward.</h2>
-                <p>A national effort to make AI knowledge practical, trusted and reachable.</p>
+                <h2>One million people One national step forward</h2>
+                <p>A national initiative enabling one million Syrians to use AI confidently at work, in study, and in everyday life.</p>
                 <Link className="button-link" to="/one-million-initiative-home">
                   Explore the initiative
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -100,8 +100,8 @@ export function CinematicHero() {
             </article>
             <article className="hero-band" data-band="3" aria-hidden="true">
               <div className="hero-card-copy">
-                <p className="eyebrow">SAAE in numbers</p>
-                <h2>5,000+ people learning with SAAE.</h2>
+                <p className="eyebrow">SAAE achievements</p>
+                <h2>A community of 5,000+ learners</h2>
               </div>
               <dl className="hero-stats">
                 <div style={{ "--i": '0' } as CSSProperties}><dt>trainees</dt><dd data-count="5000">5,000+</dd></div>

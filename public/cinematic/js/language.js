@@ -2,11 +2,11 @@
   "use strict";
 
   const arabic = {
-    "Nine communities. One shared foundation.": "تسعة مجتمعات. جذور تجمعنا.",
-    "Learning, grown from our communities.": "تعلّم ينمو من مجتمعاتنا.",
+    "Nine communities One shared foundation": "تسعة مجتمعات جذور تجمعنا",
+    "Learning, grown from our communities": "تعلّم ينمو من مجتمعاتنا",
     "Across Syria": "إلى كل سورية",
-    "From our roots, to all of Syria.": "من جذورنا، إلى كل سورية.",
-    "Our communities nurture learning and opportunity. The Million Syrian AI Users initiative carries that ambition across the country.": "من مجتمعاتنا ينمو التعلّم وتُثمر الفرص. وتحمل مبادرة مليون مستخدم سوري للذكاء الاصطناعي هذا الطموح إلى أنحاء سورية.",
+    "Growing together across Syria": "ننمو معاً في كل سورية",
+    "From our nine communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.": "من مجتمعاتنا التسعة تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
     "Nine SAAE communities grow through the root system": "تسعة مجتمعات للجمعية تنمو من جذور الشجرة",
     "Nine communities form the roots of the SAAE tree. Follow the trunk and branches to its fruits: learning, achievements, and the Million Syrian AI Users initiative, reaching across Syria.": "تسعة مجتمعات تشكّل جذور شجرة الجمعية. نتبع الجذع والأغصان إلى ثمارها: التعلّم والإنجازات ومبادرة مليون مستخدم سوري للذكاء الاصطناعي، وصولاً إلى أنحاء سورية.",
 
@@ -36,10 +36,14 @@
     "Certified training tracks that build professional and technical skill, open to anyone in Syria.": "مسارات تدريب معتمدة تبني مهارات مهنية وتقنية، ومتاحة للجميع في سورية.",
     "Ask about learning": "استفسر عن التعلّم",
     "The Million Syrian AI Users initiative": "مبادرة مليون مستخدم سوري للذكاء الاصطناعي",
-    "One million people. One national step forward.": "مليون شخص. خطوة وطنية إلى الأمام.",
-    "A national effort to make AI knowledge practical, trusted and reachable.": "جهد وطني يجعل معرفة الذكاء الاصطناعي عملية وموثوقة ومتاحة.",
-    "SAAE in numbers": "الجمعية بالأرقام",
-    "5,000+ people learning with SAAE.": "أكثر من 5,000 متعلم مع الجمعية.",
+    "One million people One national step forward": "مليون شخص خطوة وطنية إلى الأمام",
+    "A national initiative enabling one million Syrians to use AI confidently at work, in study, and in everyday life.": "مبادرة وطنية تمكّن مليون سوري من استخدام الذكاء الاصطناعي بثقة في العمل والدراسة والحياة اليومية.",
+    /* Split eyebrow (home band 4): each span translates on its own so the
+       Arabic breaks after "سوري" — keep both halves unique on every page. */
+    "The Million Syrian AI Users": "مبادرة مليون مستخدم سوري",
+    "initiative": "للذكاء الاصطناعي",
+    "SAAE achievements": "انجازات الجمعية",
+    "A community of 5,000+ learners": "مجتمع يتجاوز 5,000 متعلم",
     "trainees": "متدربون",
     "courses": "دورات",
     "strategic partners": "شركاء استراتيجيون",
