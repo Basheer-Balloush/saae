@@ -1058,6 +1058,101 @@
     .community-card-nav-next { color: var(--ink); border-color: rgba(119, 224, 232, .85); background: rgba(119, 224, 232, .88); }
     .community-card-nav-next:hover { color: var(--ink); background: var(--saae-turquoise-lift); }
 
+    /* Desktop hover lift for the communities card. The flip owns `transform`
+       on the track and on both faces, so the lift only touches paint
+       properties (border-color, box-shadow, color, opacity) plus two overlay
+       pseudo-elements neither face was using. Everything sits behind
+       (hover: hover) and (pointer: fine), which is also what keeps the phone
+       column out: its rules only apply to portrait coarse pointers, so they
+       never meet this block. The --card-spot-* properties are written from a
+       rAF-throttled pointermove listener in home-inline.js. */
+    @media (hover: hover) and (pointer: fine) {
+      .community-flip-track { --card-spot-x: 50%; --card-spot-y: 28%; }
+      /* The resting values above are what the card already paints, so the
+         transition below changes nothing at rest; it only eases the hover
+         in and back out again. */
+      .community-card-face {
+        transition: border-color 380ms ease, box-shadow 380ms ease;
+      }
+      /* The face copy stays above the overlays below. Relative plus a
+         z-index paints the same pixels at rest; it only matters once the
+         spotlight and the sheen fade in. */
+      .community-card-face > * { position: relative; z-index: 1; }
+      /* Cursor spotlight: a soft radial light that follows the pointer. Only
+         opacity ever transitions; the position rides the custom properties
+         the script writes, one frame at a time. border-radius: inherit keeps
+         it clipped to the card without touching overflow, which the 3D flip
+         would not thank us for. */
+      .community-card-face::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: radial-gradient(340px circle at var(--card-spot-x, 50%) var(--card-spot-y, 28%), rgba(119, 224, 232, .22), rgba(255, 255, 255, .07) 42%, transparent 68%);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 380ms ease;
+      }
+      /* Top-edge sheen: a thin highlight resting on the card's top edge. */
+      .community-card-face::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 14px;
+        right: 14px;
+        height: 2px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, transparent, rgba(119, 224, 232, .75) 22%, rgba(255, 255, 255, .9) 50%, rgba(119, 224, 232, .75) 78%, transparent);
+        box-shadow: 0 0 14px rgba(119, 224, 232, .45);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 380ms ease;
+      }
+      .community-card-icon {
+        transition: color 380ms ease, background-color 380ms ease, border-color 380ms ease, box-shadow 380ms ease;
+      }
+      /* Surface and border lift, applied to both faces at once so nothing
+         jumps while the card is mid-flip and the back face is showing. */
+      .community-flip-track:hover .community-card-face {
+        border-color: rgba(119, 224, 232, .78);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 24px 56px rgba(1, 16, 30, .36), 0 0 34px rgba(119, 224, 232, .16);
+      }
+      /* The spotlight is pointer-only; keyboard focus gets the lift, the
+         badge and the sheen, but no light chasing nothing. */
+      .community-flip-track:hover .community-card-face::before { opacity: 1; }
+      .community-flip-track:hover .community-card-face::after { opacity: 1; }
+      /* The badge lights up like the next arrow: turquoise fill, dark glyph. */
+      .community-flip-track:hover .community-card-icon {
+        color: var(--ink);
+        border-color: rgba(119, 224, 232, .9);
+        background: rgba(119, 224, 232, .88);
+        box-shadow: 0 0 18px rgba(119, 224, 232, .4);
+      }
+      /* Keyboard focus, as its own rules. :focus-within would keep the card
+         lit after a mouse click on an arrow, because the click leaves focus on
+         the button; :focus-visible only matches focus that came from the
+         keyboard. Kept apart from the :hover rules above so a browser without
+         :has() drops only these, not the hover lift with them. */
+      .community-flip-track:has(:focus-visible) .community-card-face {
+        border-color: rgba(119, 224, 232, .78);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 24px 56px rgba(1, 16, 30, .36), 0 0 34px rgba(119, 224, 232, .16);
+      }
+      .community-flip-track:has(:focus-visible) .community-card-face::after { opacity: 1; }
+      .community-flip-track:has(:focus-visible) .community-card-icon {
+        color: var(--ink);
+        border-color: rgba(119, 224, 232, .9);
+        background: rgba(119, 224, 232, .88);
+        box-shadow: 0 0 18px rgba(119, 224, 232, .4);
+      }
+    }
+    /* Reduced motion keeps a static hover highlight but drops the part that
+       moves: no spotlight overlay, and no pointer tracking (the script checks
+       the same gate before writing the --card-spot-* properties). The global
+       reduced-motion rule further down already collapses every transition. */
+    @media (prefers-reduced-motion: reduce) {
+      .community-card-face::before { content: none; }
+    }
+
     /* The nine only announce themselves as nine if something moves. The cards
        now cycle every five seconds by themselves (home-inline.js), which does
        that job. This pulse is kept for reduced motion, where nothing cycles:

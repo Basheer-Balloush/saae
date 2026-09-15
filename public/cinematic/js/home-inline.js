@@ -526,6 +526,28 @@
         communityHovered = false;
         scheduleCommunityAutoFlip();
       });
+      /* Cursor spotlight for the desktop card lift. Writes the pointer's
+         position into --card-spot-x/--card-spot-y on the flip track, where the
+         faces' ::before radial light reads it. One rect read per frame, touch
+         pointers ignored, and nothing written under reduced motion; the track
+         rect is used because the card may be rotated mid-flip. */
+      let communitySpotFrame = 0;
+      communityFlipGroup?.addEventListener("pointermove", event => {
+        if (event.pointerType === "touch") return;
+        if (communitySpotFrame) return;
+        const spotX = event.clientX;
+        const spotY = event.clientY;
+        communitySpotFrame = requestAnimationFrame(() => {
+          communitySpotFrame = 0;
+          if (reducedMotion.matches || !communityFlipTrack) return;
+          const rect = communityFlipTrack.getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) return;
+          const x = clamp((spotX - rect.left) / rect.width, 0, 1) * 100;
+          const y = clamp((spotY - rect.top) / rect.height, 0, 1) * 100;
+          communityFlipTrack.style.setProperty("--card-spot-x", `${x.toFixed(2)}%`);
+          communityFlipTrack.style.setProperty("--card-spot-y", `${y.toFixed(2)}%`);
+        });
+      });
       communityFlipGroup?.addEventListener("focusin", event => {
         let keyboard = false;
         try { keyboard = event.target.matches(":focus-visible"); } catch { keyboard = true; }
