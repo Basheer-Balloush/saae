@@ -549,7 +549,7 @@
     "main :is(p, h1, h2, h3, h4, h5, h6, a, button, dt, dd, small, label, time), footer :is(p, h1, h2, h3, h4, h5, h6, a, button, dt, dd, small, label, time)"
   )).filter(element => (
     element.textContent.trim()
-    && !element.closest(".hero-section, .hero-static, .site-loader, .language-wash")
+    && !element.closest(".hero-section, .hero-static, .site-loader, .language-wash, [data-react-i18n]")
     && !element.classList.contains("sr-only")
   ));
 

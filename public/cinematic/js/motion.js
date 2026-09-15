@@ -137,6 +137,9 @@
        spawning a tween per pointer event, so this stays cheap during a fast
        traverse across several buttons. */
     document.querySelectorAll(".button-link, .ribbon-cta").forEach(button => {
+      // Hero buttons get their MotionButton motion from CSS; a GSAP lift and
+      // arrow nudge here would stack on top of it.
+      if (button.closest("#hero-sec")) return;
       const arrow = button.querySelector("svg");
       const liftTo = gsap.quickTo(button, "y", { duration: .32, ease: "power3.out" });
       const arrowX = arrow ? gsap.quickTo(arrow, "x", { duration: .34, ease: "power3.out" }) : null;

@@ -34,6 +34,8 @@ import {
   X,
 } from "lucide-react";
 import { useLang } from "@/lib/i18n";
+import MotionButton from "@/components/ui/motion-button";
+import { HomepageNews } from "./HomepageNews";
 import { DESKTOP_HOME_QUERY } from "@/hooks/useHeroCapability";
 import "./mobile-home.css";
 import {
@@ -56,7 +58,6 @@ import {
   MICRO_COPY,
   MISSION_COPY,
   MISSION_STEPS,
-  NEWS_COPY,
   NUMBERS_COPY,
   OPENING,
   OPENING_HEADLINE,
@@ -243,7 +244,6 @@ export function MobileHomeView({
   const [rootsVideoActive, setRootsVideoActive] = useState(false);
   const [rootsVideoPaused, setRootsVideoPaused] = useState(false);
   const rootsVideoPausedRef = useRef(false);
-  const [newsIndex, setNewsIndex] = useState(0);
 
   const wordmark =
     lang === "ar"
@@ -261,9 +261,7 @@ export function MobileHomeView({
   const railRef = useRef<HTMLElement | null>(null);
   const railListRef = useRef<HTMLUListElement | null>(null);
   const firstRailRun = useRef(true);
-  const newsTrackRef = useRef<HTMLDivElement | null>(null);
   const closingTitle = useInView<HTMLHeadingElement>(0.5);
-  const newsRefs = useRef<Array<HTMLElement | null>>([]);
 
   useEffect(() => {
     setMotionReady(true);
@@ -430,47 +428,6 @@ export function MobileHomeView({
     list.scrollBy({ left: delta, behavior: scrollBehavior });
   }, [activeRail, scrollBehavior]);
 
-  /* News visible-card tracking (no scroll listeners). */
-  useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") return;
-    const track = newsTrackRef.current;
-    const cards = track?.querySelectorAll<HTMLElement>("[data-news-card]");
-    if (!track || !cards?.length) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            const i = Number((e.target as HTMLElement).dataset.newsCard);
-            if (!Number.isNaN(i)) setNewsIndex(i);
-          }
-        }
-      },
-      { root: track, threshold: 0.6 },
-    );
-    cards.forEach((c) => io.observe(c));
-    return () => io.disconnect();
-  }, [motionReady]);
-
-  /* News paging: scroll the track only, aligning the card's inline-start edge. */
-  const scrollNewsTo = (index: number) => {
-    const track = newsTrackRef.current;
-    const card = track?.querySelector<HTMLElement>(`[data-index="${index}"]`);
-    if (!track || !card) return;
-    const rtl = getComputedStyle(track).direction === "rtl";
-    const trackRect = track.getBoundingClientRect();
-    const cardRect = card.getBoundingClientRect();
-    const pad = parseFloat(getComputedStyle(track).paddingInlineStart) || 0;
-    const delta = rtl
-      ? cardRect.right - trackRect.right + pad
-      : cardRect.left - trackRect.left - pad;
-    track.scrollBy({ left: delta, behavior: scrollBehavior });
-  };
-
-  const stepNews = (delta: number) => {
-    const next = Math.min(news.length - 1, Math.max(0, newsIndex + delta));
-    scrollNewsTo(next);
-  };
-
   const heroTitleWords = words(pick(OPENING_HEADLINE, lang));
   const closingWords = words(pick(CLOSING_COPY.title, lang));
 
@@ -589,13 +546,12 @@ export function MobileHomeView({
                       </li>
                     ))}
                   </ul>
-                  <a
-                    className="mh-menu-cta"
+                  <MotionButton
+                    label={pick(OPENING.primary.label, lang)}
                     href={OPENING.primary.href}
                     onClick={() => setMenuOpen(false)}
-                  >
-                    {pick(OPENING.primary.label, lang)}
-                  </a>
+                    classes="w-full justify-center"
+                  />
                   <div className="mh-menu-contact">
                     <a href={CONTACT.email}>
                       <Mail size={18} aria-hidden="true" />
@@ -697,12 +653,17 @@ export function MobileHomeView({
             </h1>
             <p className="mh-support mh-kinetic mh-k-3">{pick(OPENING.support, lang)}</p>
             <div className="mh-actions mh-kinetic mh-k-4">
-              <a className="mh-btn-primary" href={OPENING.primary.href}>
-                {pick(OPENING.primary.label, lang)}
-              </a>
-              <a className="mh-btn-secondary" href={OPENING.secondary.href}>
-                {pick(OPENING.secondary.label, lang)}
-              </a>
+              <MotionButton
+                label={pick(OPENING.primary.label, lang)}
+                href={OPENING.primary.href}
+                classes="min-w-0 flex-1 justify-center"
+              />
+              <MotionButton
+                variant="secondary"
+                label={pick(OPENING.secondary.label, lang)}
+                href={OPENING.secondary.href}
+                classes="min-w-0 flex-1 justify-center"
+              />
             </div>
           </div>
           {heroVideoActive ? (
@@ -827,12 +788,17 @@ export function MobileHomeView({
               </h2>
               <p className="mh-section-p">{pick(INITIATIVE_COPY.body, lang)}</p>
               <div className="mh-feature-actions">
-                <a className="mh-btn-primary" href="/initiative">
-                  {pick(INITIATIVE_COPY.primary, lang)}
-                </a>
-                <a className="mh-btn-secondary" href="/one-million-initiative-home">
-                  {pick(INITIATIVE_COPY.official, lang)}
-                </a>
+                <MotionButton
+                  label={pick(INITIATIVE_COPY.primary, lang)}
+                  href="/initiative"
+                  classes="w-full min-w-0 justify-center"
+                />
+                <MotionButton
+                  variant="secondary"
+                  label={pick(INITIATIVE_COPY.official, lang)}
+                  href="/one-million-initiative-home"
+                  classes="w-full min-w-0 justify-center"
+                />
               </div>
             </div>
           </section>
@@ -852,101 +818,7 @@ export function MobileHomeView({
             </div>
           </section>
 
-          <section className="mh-section" id="news" aria-labelledby="mh-news-title">
-            <div className="mh-wrap">
-              <p className="mh-eyebrow">{pick(NEWS_COPY.eyebrow, lang)}</p>
-              <h2 className="mh-section-h" id="mh-news-title">
-                {pick(NEWS_COPY.title, lang)}
-              </h2>
-              <p className="mh-section-p">{pick(NEWS_COPY.body, lang)}</p>
-            </div>
-            {news.length === 0 ? (
-              <div className="mh-wrap">
-                <p className="mh-section-p" role="status">
-                  {pick(newsFailed ? NEWS_COPY.failed : NEWS_COPY.empty, lang)}
-                </p>
-              </div>
-            ) : (
-              <>
-                <div
-                  className="mh-snap mh-news-snap"
-                  ref={newsTrackRef}
-                  role="region"
-                  aria-roledescription="carousel"
-                  aria-label={pick(NEWS_COPY.carouselLabel, lang)}
-                  tabIndex={0}
-                >
-                  {news.map((n, i) => (
-                    <article
-                      key={n.id}
-                      className="mh-news-card"
-                      data-news-card={i}
-                      data-index={i}
-                      ref={(el) => {
-                        newsRefs.current[i] = el;
-                      }}
-                    >
-                      <a href={n.href} className="mh-news-link" aria-label={pick(n.headline, lang)}>
-                        <img
-                          src={n.image}
-                          alt={pick(n.imageAlt, lang)}
-                          width={800}
-                          height={600}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                        <span className="mh-news-body">
-                          <span className="mh-news-meta">
-                            <span className="mh-news-tag">{pick(n.tag, lang)}</span>
-                            <time dateTime={n.dateTime}>{pick(n.date, lang)}</time>
-                          </span>
-                          <span className="mh-news-head">{pick(n.headline, lang)}</span>
-                          <span className="mh-news-ex">{pick(n.excerpt, lang)}</span>
-                          <span className="mh-news-cta">
-                            {pick(NEWS_COPY.readStory, lang)}
-                            <ArrowUpRight size={16} aria-hidden="true" className="mh-flip" />
-                          </span>
-                        </span>
-                      </a>
-                    </article>
-                  ))}
-                </div>
-                <div className="mh-wrap mh-news-controls">
-                  <div className="mh-carousel-btns">
-                    <button
-                      type="button"
-                      className="mh-round-btn"
-                      aria-label={pick(MICRO_COPY.prev, lang)}
-                      disabled={newsIndex === 0}
-                      onClick={() => stepNews(-1)}
-                    >
-                      <ArrowLeft size={20} aria-hidden="true" className="mh-flip" />
-                    </button>
-                    <button
-                      type="button"
-                      className="mh-round-btn"
-                      aria-label={pick(MICRO_COPY.next, lang)}
-                      disabled={newsIndex === news.length - 1}
-                      onClick={() => stepNews(1)}
-                    >
-                      <ArrowRight size={20} aria-hidden="true" className="mh-flip" />
-                    </button>
-                  </div>
-                  <p className="mh-counter" aria-live="polite">
-                    <span dir="ltr">
-                      {newsIndex + 1} / {news.length}
-                    </span>
-                  </p>
-                </div>
-              </>
-            )}
-            <div className="mh-wrap">
-              <a className="mh-inline-link" href="/news">
-                {pick(NEWS_COPY.allNews, lang)}
-                <ArrowUpRight size={16} aria-hidden="true" className="mh-flip" />
-              </a>
-            </div>
-          </section>
+          <HomepageNews news={news} newsFailed={newsFailed} lang={lang} />
 
           <section className="mh-section" id="mission" aria-labelledby="mh-mission-title">
             <div className="mh-wrap">
@@ -1113,9 +985,12 @@ export function MobileHomeView({
                   );
                 })}
               </ul>
-              <a className="mh-btn-secondary mh-write-btn" href="/contact#write">
-                {pick(FAQ_COPY.writeToUs, lang)}
-              </a>
+              <MotionButton
+                variant="secondary"
+                label={pick(FAQ_COPY.writeToUs, lang)}
+                href="/contact#write"
+                classes="w-full justify-center"
+              />
             </div>
           </section>
         </div>
@@ -1170,12 +1045,17 @@ export function MobileHomeView({
             </h2>
             <p className="mh-join-body">{pick(CLOSING_COPY.body, lang)}</p>
             <div className="mh-actions">
-              <a className="mh-btn-primary" href="/learning-management-system">
-                {pick(CLOSING_COPY.primary, lang)}
-              </a>
-              <a className="mh-btn-secondary" href="/registration">
-                {pick(CLOSING_COPY.secondary, lang)}
-              </a>
+              <MotionButton
+                label={pick(CLOSING_COPY.primary, lang)}
+                href="/learning-management-system"
+                classes="min-w-0 flex-1 justify-center"
+              />
+              <MotionButton
+                variant="secondary"
+                label={pick(CLOSING_COPY.secondary, lang)}
+                href="/registration"
+                classes="min-w-0 flex-1 justify-center"
+              />
             </div>
           </div>
         </section>

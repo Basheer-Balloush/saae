@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import homeHtml from "@/components/cinematic/html/home.html?raw";
 import type { CinematicScript } from "@/components/cinematic/CinematicPage";
 import { MobileHome } from "@/components/home/MobileHome";
+import type { NewsEntry } from "@/components/home/mobile-home-content";
 import { useHeroCapability } from "@/hooks/useHeroCapability";
 import { supabase } from "@/integrations/supabase/client";
 import { loadPartners, type Partner } from "@/features/website/partners/data";
@@ -12,12 +13,16 @@ import {
   applyHomeNews,
   mobileNewsEntries,
   renderHomeNews,
+  replaceRegion,
   type NewsCardRow,
 } from "@/lib/cinematic-db-content";
 
 // Desktop-only cinematic shell. Lazy so the phone import graph stays light.
 const CinematicPageLazy = React.lazy(() =>
   import("@/components/cinematic/CinematicPage").then((m) => ({ default: m.CinematicPage })),
+);
+const HomepageNewsPortalLazy = React.lazy(() =>
+  import("@/components/home/HomepageNews").then(m => ({ default: m.HomepageNewsPortal })),
 );
 
 // Desktop-only partners logo carousel, portalled into the cinematic markup.
@@ -104,11 +109,22 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-function DesktopHome({ html, partners }: { html: string; partners: Partner[] }) {
+function DesktopHome({
+  html,
+  news,
+  newsFailed,
+  partners,
+}: {
+  html: string;
+  news: NewsEntry[];
+  newsFailed: boolean;
+  partners: Partner[];
+}) {
   return (
     <>
       <Suspense fallback={null}>
         <CinematicPageLazy html={html} scripts={DESKTOP_SCRIPTS} htmlClass="site-loading" />
+        <HomepageNewsPortalLazy html={html} news={news} newsFailed={newsFailed} />
       </Suspense>
       <Suspense fallback={null}>
         <DesktopPartnerCarouselLazy partners={partners} />
@@ -120,14 +136,25 @@ function DesktopHome({ html, partners }: { html: string; partners: Partner[] }) 
 function Home() {
   const { news, mobileNews, newsFailed, partners } = Route.useLoaderData();
   const html = useMemo(
-    () => applyHomePartners(applyHomeNews(homeHtml, news), partners),
+    () => replaceRegion(
+      applyHomePartners(applyHomeNews(homeHtml, news), partners),
+      "home-news-feature",
+      '<section class="section news hn-section" id="news" aria-labelledby="news-title"><div id="home-news-slot"></div></section>',
+    ),
     [news, partners],
   );
   const capability = useHeroCapability();
   // Mobile-first: SSR, first paint, phones and reduced motion get the phone
   // page; only a confirmed desktop mounts the cinematic enhancement.
   if (capability === "desktop") {
-    return <DesktopHome html={html} partners={partners.failed ? [] : partners.partners} />;
+    return (
+      <DesktopHome
+        html={html}
+        news={mobileNews}
+        newsFailed={newsFailed}
+        partners={partners.failed ? [] : partners.partners}
+      />
+    );
   }
   return (
     <MobileHome

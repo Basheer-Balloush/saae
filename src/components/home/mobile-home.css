@@ -96,6 +96,7 @@
   font-weight: 700;
   line-height: 1.6;
   letter-spacing: 0;
+  text-wrap: balance;
 }
 
 .mobile-home .mh-eyebrow::before {
@@ -368,21 +369,10 @@
   color: var(--mh-turquoise-lift);
 }
 
-.mobile-home .mh-menu-cta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-block-size: 52px;
-  max-inline-size: 560px;
+.mobile-home .mh-menu-panel [data-slot="motion-button"] {
   margin-block-start: 22px;
+  max-inline-size: 560px;
   margin-inline: auto;
-  padding-block: 12px;
-  padding-inline: 22px;
-  border-radius: 999px;
-  background: var(--mh-turquoise-lift);
-  color: var(--mh-ink);
-  font-weight: 900;
-  text-decoration: none;
 }
 
 .mobile-home .mh-menu-contact {
@@ -576,32 +566,28 @@
   margin-block-end: 18px;
 }
 
-.mobile-home .mh-btn-primary,
-.mobile-home .mh-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-block-size: 52px;
-  padding-block: 12px;
-  padding-inline: 22px;
-  border-radius: 999px;
-  font-weight: 900;
-  font-size: 1rem;
-  text-decoration: none;
+/* ---- MotionButton theme ------------------------------------------------
+   SAAE palette for the phone surfaces (all dark): paper pill with an ink
+   label, turquoise fill, paper on the fill. Secondary rests quiet with a
+   paper label and fills the same way. Scoped to .mobile-home; no new
+   global tokens. */
+.mobile-home {
+  --motion-button-surface: var(--mh-paper);
+  --motion-button-border: rgba(184, 232, 240, 0.55);
+  --motion-button-fill: var(--mh-turquoise);
+  --motion-button-icon: var(--mh-paper);
+  --motion-button-label: var(--mh-ink);
+  --motion-button-label-active: var(--mh-paper);
 }
-
-.mobile-home .mh-btn-primary {
-  border: 1px solid var(--mh-turquoise-lift);
-  background: var(--mh-turquoise-lift);
-  color: var(--mh-ink);
+.mobile-home [data-slot="motion-button"][data-variant="secondary"] {
+  --motion-button-label: var(--mh-paper);
 }
-
-.mobile-home .mh-btn-secondary {
-  border: 1px solid rgba(184, 232, 240, 0.55);
-  background: var(--mh-glass, rgba(12, 48, 58, 0.72));
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  color: var(--mh-type);
+/* Narrow two-across rows: let long labels wrap instead of clipping. */
+.mobile-home .mh-actions [data-slot="motion-button-label"],
+.mobile-home .mh-feature-actions [data-slot="motion-button-label"] {
+  white-space: normal;
+  font-size: 0.95rem;
+  line-height: 1.35;
 }
 
 .mobile-home .mh-video-toggle {
@@ -883,10 +869,6 @@
 @media (min-width: 340px) {
   .mobile-home .mh-actions {
     flex-wrap: nowrap;
-  }
-  .mobile-home .mh-actions .mh-btn-primary,
-  .mobile-home .mh-actions .mh-btn-secondary {
-    flex: 1 1 0;
   }
   .mobile-home .mh-feature-actions {
     grid-template-columns: 1fr 1fr;
@@ -1409,10 +1391,6 @@
   font-weight: 700;
 }
 
-.mobile-home .mh-write-btn {
-  inline-size: 100%;
-}
-
 /* ---- Closing band ---- */
 .mobile-home .mh-join {
   position: relative;
@@ -1762,7 +1740,6 @@
   .mobile-home .mh-menu-head,
   .mobile-home .mh-menu-group-title,
   .mobile-home .mh-menu-list,
-  .mobile-home .mh-menu-cta,
   .mobile-home .mh-menu-contact,
   .mobile-home .mh-menu-social {
     max-inline-size: 560px;

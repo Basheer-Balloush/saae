@@ -57,7 +57,7 @@
     ".flow", ".flow-slide",          // sections.js carousels
     ".mission-reel", ".mission-card",
     ".te-w", ".band-w",              // split word spans
-    ".sr-only", ".site-loader", ".language-wash"
+    ".sr-only", ".site-loader", ".language-wash", "[data-react-i18n]"
   ].join(",");
 
   /* A second, narrower list. These elements ARE driven by another file, but

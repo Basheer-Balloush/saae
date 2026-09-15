@@ -39,7 +39,7 @@
      layout wrapper, and splitting both would nest the spans. */
   const CANDIDATES = "h1, h2, h3, h4, h5, h6, p, li, dt, dd, blockquote, figcaption, .eyebrow, .mission-index";
   const SCOPES = ["main", "footer"];
-  const BLOCKED = ".hero-section, .hero-static, .site-loader, .language-wash, .mission-words, .sr-only, [aria-hidden='true']";
+  const BLOCKED = ".hero-section, .hero-static, .site-loader, .language-wash, .mission-words, .sr-only, [aria-hidden='true'], [data-react-i18n]";
   /* Headings filled with the SAAE photo (background-clip:text) must stay
      whole. Splitting wraps every word in an inline-block .te-w that keeps a
      translate3d(0,0,0) even at rest, and a clipped background behind

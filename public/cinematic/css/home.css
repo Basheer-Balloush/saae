@@ -350,9 +350,9 @@
     }
 
     .cinematic-scroll {
-      --wash-r: 7;
-      --wash-g: 25;
-      --wash-b: 48;
+      --wash-r: 8;
+      --wash-g: 16;
+      --wash-b: 24;
       position: sticky;
       top: 0;
       height: 100vh;
@@ -449,15 +449,12 @@
     .hero-video.is-ready + .hero-wash + .hero-vignette + .hero-grain + .hero-poster { opacity: 0; }
 
     .hero-wash {
-      z-index: -3;
-      background:
-        linear-gradient(90deg, rgba(var(--wash-r), var(--wash-g), var(--wash-b), .7) 0%, rgba(4, 14, 31, .08) 42%, rgba(4, 14, 31, .06) 61%, rgba(var(--wash-r), var(--wash-g), var(--wash-b), .5) 100%),
-        linear-gradient(180deg, rgba(3, 10, 25, .5) 0%, transparent 24%, transparent 62%, rgba(3, 10, 25, .72) 100%);
+      display: none;
     }
 
     .hero-vignette {
       z-index: -2;
-      box-shadow: inset 0 0 18vw 6vw rgba(3, 10, 25, .5);
+      box-shadow: inset 0 0 18vw 6vw rgba(0, 0, 0, .5);
       pointer-events: none;
     }
 
@@ -546,7 +543,7 @@
       padding-block: 10px;
       padding-inline: 20px 0;
       border-inline-start: 2px solid var(--saae-turquoise-lift);
-      background: linear-gradient(90deg, rgba(3, 29, 34, .42), rgba(3, 29, 34, 0));
+      background: none;
       text-shadow: 0 3px 20px rgba(0, 0, 0, .78);
       transition: transform 360ms var(--ease-out), border-color 360ms ease, filter 360ms ease;
     }
@@ -557,6 +554,15 @@
        thing on screen that kept moving while everything else held. */
 
     .hero-band .eyebrow { margin-bottom: 12px; color: var(--saae-turquoise-lift); }
+
+    /* Initiative eyebrow is a long phrase — balance the wrap so it breaks
+       into even lines instead of leaving a single word on the last line. */
+    .hero-band[data-band="4"] .eyebrow { text-wrap: balance; }
+
+    /* Arabic only: force the initiative eyebrow onto two lines —
+       "مبادرة مليون مستخدم سوري" on top, "للذكاء الاصطناعي" below.
+       English keeps its natural inline flow. */
+    html[lang="ar"] .hero-band[data-band="4"] .eyebrow-line2 { display: block; }
 
     .hero-band h1,
     .hero-band h2 {
@@ -1060,11 +1066,106 @@
     .community-card-nav:hover { color: var(--ink); border-color: rgba(119, 224, 232, .85); background: rgba(119, 224, 232, .88); transform: scale(1.08); }
     .community-card-nav:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: 3px; }
 
-    /* The nine only announce themselves as nine if something moves. Cycling the
-       cards on a timer would take the choice away and keep the particle field
-       working the whole time the beat is on screen; instead the next arrow
-       pulses three times when the beat is first reached, and never again once
-       the navigator has been used. */
+    /* Desktop hover lift for the communities card. The flip owns `transform`
+       on the track and on both faces, so the lift only touches paint
+       properties (border-color, box-shadow, color, opacity) plus two overlay
+       pseudo-elements neither face was using. Everything sits behind
+       (hover: hover) and (pointer: fine), which is also what keeps the phone
+       column out: its rules only apply to portrait coarse pointers, so they
+       never meet this block. The --card-spot-* properties are written from a
+       rAF-throttled pointermove listener in home-inline.js. */
+    @media (hover: hover) and (pointer: fine) {
+      .community-flip-track { --card-spot-x: 50%; --card-spot-y: 28%; }
+      /* The resting values above are what the card already paints, so the
+         transition below changes nothing at rest; it only eases the hover
+         in and back out again. */
+      .community-card-face {
+        transition: border-color 380ms ease, box-shadow 380ms ease;
+      }
+      /* The face copy stays above the overlays below. Relative plus a
+         z-index paints the same pixels at rest; it only matters once the
+         spotlight and the sheen fade in. */
+      .community-card-face > * { position: relative; z-index: 1; }
+      /* Cursor spotlight: a soft radial light that follows the pointer. Only
+         opacity ever transitions; the position rides the custom properties
+         the script writes, one frame at a time. border-radius: inherit keeps
+         it clipped to the card without touching overflow, which the 3D flip
+         would not thank us for. */
+      .community-card-face::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: radial-gradient(340px circle at var(--card-spot-x, 50%) var(--card-spot-y, 28%), rgba(119, 224, 232, .22), rgba(255, 255, 255, .07) 42%, transparent 68%);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 380ms ease;
+      }
+      /* Top-edge sheen: a thin highlight resting on the card's top edge. */
+      .community-card-face::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 14px;
+        right: 14px;
+        height: 2px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, transparent, rgba(119, 224, 232, .75) 22%, rgba(255, 255, 255, .9) 50%, rgba(119, 224, 232, .75) 78%, transparent);
+        box-shadow: 0 0 14px rgba(119, 224, 232, .45);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 380ms ease;
+      }
+      .community-card-icon {
+        transition: color 380ms ease, background-color 380ms ease, border-color 380ms ease, box-shadow 380ms ease;
+      }
+      /* Surface and border lift, applied to both faces at once so nothing
+         jumps while the card is mid-flip and the back face is showing. */
+      .community-flip-track:hover .community-card-face {
+        border-color: rgba(119, 224, 232, .78);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 24px 56px rgba(1, 16, 30, .36), 0 0 34px rgba(119, 224, 232, .16);
+      }
+      /* The spotlight is pointer-only; keyboard focus gets the lift, the
+         badge and the sheen, but no light chasing nothing. */
+      .community-flip-track:hover .community-card-face::before { opacity: 1; }
+      .community-flip-track:hover .community-card-face::after { opacity: 1; }
+      /* The badge lights up like the next arrow: turquoise fill, dark glyph. */
+      .community-flip-track:hover .community-card-icon {
+        color: var(--ink);
+        border-color: rgba(119, 224, 232, .9);
+        background: rgba(119, 224, 232, .88);
+        box-shadow: 0 0 18px rgba(119, 224, 232, .4);
+      }
+      /* Keyboard focus, as its own rules. :focus-within would keep the card
+         lit after a mouse click on an arrow, because the click leaves focus on
+         the button; :focus-visible only matches focus that came from the
+         keyboard. Kept apart from the :hover rules above so a browser without
+         :has() drops only these, not the hover lift with them. */
+      .community-flip-track:has(:focus-visible) .community-card-face {
+        border-color: rgba(119, 224, 232, .78);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 24px 56px rgba(1, 16, 30, .36), 0 0 34px rgba(119, 224, 232, .16);
+      }
+      .community-flip-track:has(:focus-visible) .community-card-face::after { opacity: 1; }
+      .community-flip-track:has(:focus-visible) .community-card-icon {
+        color: var(--ink);
+        border-color: rgba(119, 224, 232, .9);
+        background: rgba(119, 224, 232, .88);
+        box-shadow: 0 0 18px rgba(119, 224, 232, .4);
+      }
+    }
+    /* Reduced motion keeps a static hover highlight but drops the part that
+       moves: no spotlight overlay, and no pointer tracking (the script checks
+       the same gate before writing the --card-spot-* properties). The global
+       reduced-motion rule further down already collapses every transition. */
+    @media (prefers-reduced-motion: reduce) {
+      .community-card-face::before { content: none; }
+    }
+
+    /* The nine only announce themselves as nine if something moves. The cards
+       now cycle every five seconds by themselves (home-inline.js), which does
+       that job. This pulse is kept for reduced motion, where nothing cycles:
+       the next arrow pulses three times when the beat is first reached, and
+       never again once the navigator has been used. */
     @keyframes community-nav-invite {
       0%, 100% { box-shadow: 0 0 0 0 rgba(119, 224, 232, .5); }
       55% { box-shadow: 0 0 0 10px rgba(119, 224, 232, 0); }
@@ -3571,7 +3672,6 @@
     @media (min-width: 769px) {
       .site-loader { position: fixed; z-index: 120; inset: 0; display: grid; place-items: center; block-size: 100vh; block-size: 100dvh; overflow: hidden; isolation: isolate; background: #061820; opacity: 1; pointer-events: auto; user-select: none; touch-action: none; transition: opacity 460ms var(--ease-out), visibility 0s linear 460ms; }
       .site-loader::before { content: ""; position: absolute; z-index: -2; inset: 0; background: radial-gradient(ellipse 38% 45% at 50% 50%, color-mix(in srgb, var(--teal-lift) 13%, transparent), transparent 70%), radial-gradient(ellipse 65% 72% at 50% 56%, color-mix(in srgb, var(--teal) 5%, transparent), transparent 76%); opacity: .78; pointer-events: none; }
-      .site-loader::after { content: ""; position: absolute; z-index: -1; inset-block: 12%; inset-inline: 50%; inline-size: 1px; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--teal-lift) 16%, transparent), transparent); box-shadow: 0 0 90px 28px color-mix(in srgb, var(--teal-lift) 4%, transparent); opacity: .55; pointer-events: none; }
       .site-loader-inner { position: relative; display: grid; grid-template-columns: minmax(64px, 1fr) auto minmax(64px, 1fr); align-items: center; column-gap: clamp(18px, 3vw, 36px); inline-size: min(780px, calc(100vw - 72px)); direction: ltr; }
       .site-loader-halo { position: absolute; z-index: 0; inset-block-start: 50%; inset-inline-start: 50%; inline-size: clamp(310px, 25vw, 356px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--teal-lift) 12%, transparent), transparent 68%); filter: blur(12px); opacity: .7; transform: translate(-50%, -50%); animation: site-loader-halo-awaken .68s var(--ease-out) both, site-loader-halo-hold 3.6s ease-in-out .68s infinite; }
       .site-loader-tree { position: relative; z-index: 1; grid-column: 2; grid-row: 1; display: block; inline-size: clamp(210px, 17vw, 240px); aspect-ratio: 576 / 642; transform-origin: center; }
@@ -3758,14 +3858,10 @@
     /* The Arabic opening is intentionally concise: the headline is the whole
        message, so its removed supporting sentence cannot crowd the frame. */
     html[dir="rtl"] .hero-band[data-band="0"] { inset-block-start: 16%; width: max-content; }
-    html[dir="rtl"] .hero-band[data-band="0"] .hero-card-copy { width: 100%; padding-block: 16px; padding-inline: 26px 8px; background: linear-gradient(270deg, rgba(3, 29, 34, .42), rgba(3, 29, 34, 0)); }
-    /* Bands 1-2 use the same side-rail card as the opening beat, so they get
-       the same Arabic mirror: the wash fades out from the bordered edge and
-       the copy keeps optical padding off the rail. Without this the physical
-       90deg wash and the logical border disagree and the rail reads as a
-       stray line behind the copy. */
+    html[dir="rtl"] .hero-band[data-band="0"] .hero-card-copy { width: 100%; padding-block: 16px; padding-inline: 26px 8px; background: none; }
+    /* Keep Arabic copy optically spaced from the side rail. */
     html[dir="rtl"] .hero-band[data-band="2"] .hero-card-copy,
-    html[dir="rtl"] .hero-band[data-band="4"] .hero-card-copy { padding-inline: 26px 8px; background: linear-gradient(270deg, rgba(3, 29, 34, .42), rgba(3, 29, 34, 0)); }
+    html[dir="rtl"] .hero-band[data-band="4"] .hero-card-copy { padding-inline: 26px 8px; background: none; }
     html[dir="rtl"] .hero-band[data-band="0"] .hero-card-copy > p:not(.eyebrow) { display: none; }
     html[dir="rtl"] .hero-band[data-band="0"] .eyebrow { margin-bottom: 20px; letter-spacing: 0; word-spacing: normal; white-space: nowrap; }
     html[dir="rtl"] .hero-band[data-band="0"] h2 { max-width: 100%; margin-bottom: 0; font-size: clamp(2.5rem, 4vw, 4.4rem); letter-spacing: 0; line-height: 1.1; }
@@ -3795,7 +3891,7 @@
        card group—not merely its text—to the open right side in Arabic. */
     html[dir="rtl"] .community-flip { right: 0; left: auto; text-align: right; }
     html[dir="rtl"] .community-flip-track { margin-left: auto; }
-    html[dir="rtl"] .community-flip .hero-card-copy { background: linear-gradient(270deg, rgba(3, 29, 34, .42), rgba(3, 29, 34, 0)); }
+    html[dir="rtl"] .community-flip .hero-card-copy { background: none; }
     html[dir="rtl"] .community-card-icon { right: auto; left: auto; }
     html[dir="rtl"] .community-card-nav svg { transform: scaleX(-1); }
     /* The scroll words are the one display treatment that cannot be reused as
@@ -4066,4 +4162,118 @@
       body .partner-mark.is-left {
         animation-name: partner-stream-left;
       }
+    }
+
+    /* ---- Hero MotionButton port -------------------------------------------
+       Every `.button-link` inside `#hero-sec` shares one MotionButton look: a
+       pill with a solid turquoise circle holding the arrow at the inline-start
+       and the label beside it. On hover and keyboard `:focus-visible` the
+       circle grows to fill the pill, the arrow nudges forward and the label
+       flips to contrast on the fill (~500ms).
+
+       Scoped under `#hero-sec` on purpose: `.button-link` outside the hero
+       (the partners CTA, the footer CTA) keeps the old teal-gradient
+       treatment untouched. */
+    #hero-sec .button-link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      max-width: 100%;
+      min-width: 11rem;
+      min-height: 3.5rem;
+      padding-block: .25rem;
+      padding-inline-start: 3.5rem;
+      padding-inline-end: 1.5rem;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--ink);
+      overflow: hidden;
+      font-weight: 800;
+      text-decoration: none;
+      transform: none;
+      box-shadow: 0 10px 28px rgba(0, 139, 157, .28);
+      transition: box-shadow 260ms ease, border-color 260ms ease, background-color 260ms ease;
+    }
+    /* The sheen sweep belongs to the retired gradient treatment. */
+    #hero-sec .button-link::after { content: none; }
+    #hero-sec .button-link .circle {
+      position: absolute;
+      inset-block: .25rem;
+      inset-inline-start: .25rem;
+      width: 3rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--saae-turquoise), #047383);
+      transition: width 500ms ease;
+    }
+    /* Anchored at the inline-start, so the fill grows with the reading
+       direction in LTR and RTL with no extra mirroring. */
+    #hero-sec .button-link:hover .circle,
+    #hero-sec .button-link:focus-visible .circle { width: calc(100% - .5rem); }
+    #hero-sec .button-link .motion-icon {
+      position: absolute;
+      inset-inline-start: .25rem;
+      top: 50%;
+      width: 3rem;
+      height: 3rem;
+      margin-top: -1.5rem;
+      display: grid;
+      place-items: center;
+      color: var(--paper);
+      transition: transform 500ms ease;
+    }
+    #hero-sec .button-link .motion-icon svg { width: 1.5rem; height: 1.5rem; }
+    #hero-sec .button-link:hover .motion-icon,
+    #hero-sec .button-link:focus-visible .motion-icon { transform: translateX(.4rem); }
+    /* The arrow points with the reading direction. The flip lives on the
+       wrapper, not the svg: motion.js drives the svg's own transform for its
+       hover nudge, which would overwrite a flip written there. The existing
+       `html[dir="rtl"] .button-link svg` flip and the old diagonal svg nudge
+       are neutralised below for the same reason, so the arrow never flips
+       twice and never travels twice at the stylesheet level. */
+    html[dir="rtl"] #hero-sec .button-link .motion-icon { transform: scaleX(-1); }
+    html[dir="rtl"] #hero-sec .button-link:hover .motion-icon,
+    html[dir="rtl"] #hero-sec .button-link:focus-visible .motion-icon { transform: translateX(-.4rem) scaleX(-1); }
+    html[dir="rtl"] #hero-sec .button-link .motion-icon svg,
+    #hero-sec .button-link:hover .motion-icon svg,
+    #hero-sec .button-link:focus-visible .motion-icon svg { transform: none; }
+    #hero-sec .button-link .motion-icon svg { transition: none; }
+    #hero-sec .button-link .button-text {
+      position: relative;
+      z-index: 1;
+      white-space: nowrap;
+      transition: color 500ms ease;
+    }
+    #hero-sec .button-link:hover .button-text,
+    #hero-sec .button-link:focus-visible .button-text { color: var(--paper); }
+    /* Secondary (`button-quiet`): the same circle motion on a quiet pill. The
+       resting label is already paper, which is the contrast colour on the
+       turquoise fill, so it holds through the hover. */
+    #hero-sec .button-link.button-quiet {
+      border-color: rgba(184, 232, 240, .5);
+      background: rgba(3, 22, 24, .52);
+      color: var(--paper);
+      box-shadow: none;
+    }
+    #hero-sec .button-link.button-quiet:hover,
+    #hero-sec .button-link.button-quiet:focus-visible {
+      border-color: var(--saae-turquoise-lift);
+      background: rgba(3, 22, 24, .52);
+      box-shadow: 0 12px 28px rgba(1, 16, 30, .34);
+    }
+    #hero-sec .button-link:focus-visible {
+      outline: 3px solid var(--saae-turquoise-lift);
+      outline-offset: 3px;
+      box-shadow: 0 0 0 6px rgba(3, 22, 24, .55), 0 16px 36px rgba(0, 139, 157, .42);
+    }
+    @media (max-width: 620px) {
+      #hero-sec .button-link { min-width: 0; padding-inline-end: 1.25rem; }
+    }
+    /* Reduced motion keeps a static hover/focus fill: the circle still fills
+       and the label still flips, just instantly. */
+    @media (prefers-reduced-motion: reduce) {
+      #hero-sec .button-link .circle,
+      #hero-sec .button-link .motion-icon,
+      #hero-sec .button-link .button-text { transition: none; }
     }

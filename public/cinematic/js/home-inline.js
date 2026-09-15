@@ -173,8 +173,9 @@
       let communityBrowsed = false;
       const communityFlipGroup = document.querySelector(".community-flip");
       const communityTarget = () => (communityFlipPending >= 0 ? communityFlipPending : communityFlipIndex);
-      const COMMUNITY_FLIP_FIRST_DELAY_MS = 650;
-      const COMMUNITY_FLIP_INTERVAL_MS = 2400;
+      /* How long a card holds before the next one turns in by itself, while
+         the reader stays on the communities beat. */
+      const COMMUNITY_FLIP_INTERVAL_MS = 5000;
       const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
       const isStaticExperience = () => gates.some(gate => gate.matches);
       const paintedStyleProperties = new WeakMap();
@@ -471,20 +472,116 @@
         }, communityFlipDurationMs() + (interrupted ? 40 : 20));
       }
 
-      function startCommunityFlip() {
-        stopCommunityFlip();
-        showCommunityCard(communityFlipIndex);
-        if (!communityBrowsed) communityFlipGroup?.classList.add("is-inviting");
+      /* ---- the auto-flip ---------------------------------------------------
+         While the reader stays on the communities beat, the card turns to the
+         next community every five seconds. It holds still while the reader is
+         working with it: a pointer over the card or the pips, or keyboard
+         focus inside the navigator. A card that turns away mid-sentence, or out
+         from under a cursor on its way to the next arrow, is worse than a card
+         that never moved. Mouse clicks leave focus on the button they pressed,
+         so only keyboard focus (:focus-visible) counts, otherwise one click
+         would stop the cycle until the reader clicked somewhere else. */
+      let communityHovered = false;
+      let communityKeyboardFocus = false;
+      const communityCardFront = document.querySelector(".community-card-front");
+      const communityAutoFlipAllowed = () => !reducedMotion.matches;
+
+      /* The front face is a polite live region so a press is read out. A timer
+         is not a press: announcing every five seconds would talk over whatever
+         the screen reader was doing, so automatic turns go by silently. */
+      function setCommunityAnnouncements(on) {
+        communityCardFront?.setAttribute("aria-live", on ? "polite" : "off");
       }
 
-      function selectCommunity(index, direction) {
+      /* (Re)start the countdown to the next automatic flip, always from a full
+         five seconds. Never under reduced motion, where a card that turns on
+         its own is exactly the movement the reader asked not to get. */
+      function scheduleCommunityAutoFlip() {
         clearInterval(communityFlipTimer);
         clearTimeout(communityFlipTimer);
         communityFlipTimer = 0;
+        if (activeBand !== 1 || !communityAutoFlipAllowed()) return;
+        if (communityHovered || communityKeyboardFocus) return;
+        communityFlipTimer = window.setInterval(() => {
+          /* A background tab owes nobody a flip. */
+          if (document.hidden) return;
+          setCommunityAnnouncements(false);
+          advanceCommunityFlip();
+        }, COMMUNITY_FLIP_INTERVAL_MS);
+      }
+
+      function pauseCommunityAutoFlip() {
+        clearInterval(communityFlipTimer);
+        clearTimeout(communityFlipTimer);
+        communityFlipTimer = 0;
+      }
+
+      communityFlipGroup?.addEventListener("pointerenter", event => {
+        if (event.pointerType === "touch") return;
+        communityHovered = true;
+        pauseCommunityAutoFlip();
+      });
+      communityFlipGroup?.addEventListener("pointerleave", event => {
+        if (event.pointerType === "touch") return;
+        communityHovered = false;
+        scheduleCommunityAutoFlip();
+      });
+      /* Cursor spotlight for the desktop card lift. Writes the pointer's
+         position into --card-spot-x/--card-spot-y on the flip track, where the
+         faces' ::before radial light reads it. One rect read per frame, touch
+         pointers ignored, and nothing written under reduced motion; the track
+         rect is used because the card may be rotated mid-flip. */
+      let communitySpotFrame = 0;
+      communityFlipGroup?.addEventListener("pointermove", event => {
+        if (event.pointerType === "touch") return;
+        if (communitySpotFrame) return;
+        const spotX = event.clientX;
+        const spotY = event.clientY;
+        communitySpotFrame = requestAnimationFrame(() => {
+          communitySpotFrame = 0;
+          if (reducedMotion.matches || !communityFlipTrack) return;
+          const rect = communityFlipTrack.getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) return;
+          const x = clamp((spotX - rect.left) / rect.width, 0, 1) * 100;
+          const y = clamp((spotY - rect.top) / rect.height, 0, 1) * 100;
+          communityFlipTrack.style.setProperty("--card-spot-x", `${x.toFixed(2)}%`);
+          communityFlipTrack.style.setProperty("--card-spot-y", `${y.toFixed(2)}%`);
+        });
+      });
+      communityFlipGroup?.addEventListener("focusin", event => {
+        let keyboard = false;
+        try { keyboard = event.target.matches(":focus-visible"); } catch { keyboard = true; }
+        if (!keyboard) return;
+        communityKeyboardFocus = true;
+        pauseCommunityAutoFlip();
+      });
+      communityFlipGroup?.addEventListener("focusout", event => {
+        if (communityFlipGroup.contains(event.relatedTarget)) return;
+        if (!communityKeyboardFocus) return;
+        communityKeyboardFocus = false;
+        scheduleCommunityAutoFlip();
+      });
+
+      function startCommunityFlip() {
+        stopCommunityFlip();
+        showCommunityCard(communityFlipIndex);
+        /* The pulsing next arrow was the only sign there were nine. When the
+           cards cycle by themselves they say so already, and the pulse would
+           just be a second thing moving; it stays for reduced motion, where
+           nothing cycles. */
+        if (!communityBrowsed && !communityAutoFlipAllowed()) communityFlipGroup?.classList.add("is-inviting");
+        scheduleCommunityAutoFlip();
+      }
+
+      function selectCommunity(index, direction) {
         /* The invitation has done its work the moment the navigator is used. */
         communityBrowsed = true;
         communityFlipGroup?.classList.remove("is-inviting");
+        setCommunityAnnouncements(true);
         transitionCommunityCard(index, direction);
+        /* A manual press keeps the auto-flip going but gives the card the reader
+           just chose a full five seconds, rather than turning it away early. */
+        scheduleCommunityAutoFlip();
       }
 
       communityCardPrevious?.addEventListener("click", () => selectCommunity(communityTarget() - 1, -1));
@@ -746,22 +843,13 @@
         lastPaintedProgress = progress;
         lastBandProgress = bandProgress;
         stage.style.setProperty("--hero-progress", progress.toFixed(4));
-        /* The ground the journey is drawn on moves with it. The old march was
-           three near-identical navies inherited from the video, which is why
-           the whole hero read as one flat blue whatever the scene was doing.
-           It now walks the five beats through SAAE's own dark end: a deep
-           green petrol under the mark, cooling to the deepest blue where the
-           number is counted, and settling back to petrol under the land. That
-           last stop was green first, which was a mistake: it went green at
-           exactly the beat where the country's own rim does, and the two
-           cancelled each other out. Every stop is kept dark on purpose, since
-           the caption cards sit on this and their contrast is measured. */
+        /* Keep the ground dark and neutral so it does not tint the scene. */
         const heroTones = [
-          [8, 42, 40],
-          [7, 38, 51],
-          [8, 36, 66],
-          [8, 38, 58],
-          [6, 33, 48]
+          [8, 16, 24],
+          [9, 18, 27],
+          [8, 16, 24],
+          [9, 18, 27],
+          [8, 16, 24]
         ];
         const tonePos = clamp(progress, 0, 1) * (heroTones.length - 1);
         const toneLow = Math.min(heroTones.length - 2, Math.floor(tonePos));
@@ -1484,9 +1572,13 @@
       let siteLoaderFrameTimer = 0;
       let siteLoaderFrameRequest = 0;
 
-      const preventSiteLoaderScroll = event => event.preventDefault();
+      const siteLoaderOwnsInput = () => siteLoader && siteLoader.isConnected &&
+        !siteLoaderDismissed && document.documentElement.classList.contains("site-loading");
+      const preventSiteLoaderScroll = event => {
+        if (siteLoaderOwnsInput()) event.preventDefault();
+      };
       const preventSiteLoaderKeyScroll = event => {
-        if (siteLoaderScrollKeys.has(event.key)) event.preventDefault();
+        if (siteLoaderOwnsInput() && siteLoaderScrollKeys.has(event.key)) event.preventDefault();
       };
       const setSiteLoaderProgress = value => {
         if (!siteLoader || !siteLoaderProgress || siteLoaderDismissed) return;
@@ -1534,8 +1626,9 @@
       const dismissSiteLoader = () => {
         if (siteLoaderDismissed || !siteLoader) return;
         siteLoaderDismissed = true;
-        cleanupSiteLoader();
-        activateHeroVideo();
+        // Release input before any rendering that could fail on this device.
+        document.documentElement.classList.remove("site-loading");
+        releaseSiteLoaderInputLock();
         // Start the copy on the same frame as the curtain fade. It remains in
         // motion when the page first becomes visible, rather than waiting.
         document.documentElement.classList.add("hero-opening-ready");
@@ -1547,6 +1640,8 @@
           releaseSiteLoaderInputLock();
           schedulePagePaint();
         }, fadeDuration);
+        cleanupSiteLoader();
+        activateHeroVideo();
       };
       const completeSiteLoader = () => {
         if (!siteLoader || siteLoaderDismissed || siteLoaderCompleting || !siteLoaderMinimumComplete || !siteLoaderVideoReady) return;

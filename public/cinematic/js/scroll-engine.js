@@ -32,10 +32,12 @@
 (function () {
   "use strict";
 
+  if (window.saaeScrollDestroy) window.saaeScrollDestroy();
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   const coarse = window.matchMedia("(pointer: coarse)");
 
   let lenis = null;
+  let disposed = false;
 
   /* ---- Pace ------------------------------------------------------------
    *
@@ -116,7 +118,7 @@
   }
 
   function start() {
-    if (lenis || !window.Lenis || !window.gsap) return;
+    if (disposed || lenis || !window.Lenis || !window.gsap) return;
     if (reduced.matches || coarse.matches) return;
 
     lenis = new window.Lenis({
@@ -157,6 +159,7 @@
   }
 
   function sync() {
+    if (disposed) return;
     if (reduced.matches || coarse.matches) stop();
     else start();
   }
@@ -165,6 +168,15 @@
      already tears itself down and back up when they do. */
   reduced.addEventListener("change", sync);
   coarse.addEventListener("change", sync);
+
+  window.saaeScrollDestroy = () => {
+    disposed = true;
+    reduced.removeEventListener("change", sync);
+    coarse.removeEventListener("change", sync);
+    document.removeEventListener("DOMContentLoaded", sync);
+    stop();
+    window.saaeScrollDestroy = null;
+  };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", sync, { once: true });
