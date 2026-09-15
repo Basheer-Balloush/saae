@@ -102,6 +102,7 @@ export const Route = createFileRoute("/")({
       { rel: "canonical", href: "https://aisyria.org/" },
       { rel: "stylesheet", href: "/cinematic/css/home.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
+      { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
       { rel: "stylesheet", href: "/cinematic/css/db-content.css" },
       { rel: "stylesheet", href: "/cinematic/css/home-mobile.css" },
     ],

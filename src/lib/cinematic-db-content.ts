@@ -77,8 +77,6 @@ export type MemberRow = {
 const FALLBACK_IMAGE = "/cinematic/images/event-initiative.jpg";
 const TINTS = ["4, 128, 144", "105, 143, 63", "249, 156, 0"];
 const HOME_NEWS_LIMIT = 4;
-const ARROW_SVG =
-  '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const CALENDAR_SVG =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const PREV_SVG =
@@ -166,9 +164,18 @@ function cardExcerptHtml(row: NewsCardRow): string {
   return `<p class="news-excerpt">${bilingualHtml(en || ar, ar || en)}</p>`;
 }
 
-/* "Read the story" stays a bare text node so language.js translates it. */
+/* The shared MotionButton markup (public/cinematic/css/motion-button.css):
+   the circle and arrow are decoration, the label is the link's name. */
+const MOTION_ARROW_SVG =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
+
+function motionLinkHtml(href: string, labelHtml: string, className: string): string {
+  return `<a class="${className} motion-button" href="${href}"><span class="circle" aria-hidden="true"></span><span class="motion-icon" aria-hidden="true">${MOTION_ARROW_SVG}</span><span class="button-text">${labelHtml}</span></a>`;
+}
+
+/* "Read the story" stays the only text in its span so language.js translates it. */
 function readStoryHtml(id: string): string {
-  return `<a class="news-cta" href="${newsHref(id)}">Read the story ${ARROW_SVG}</a>`;
+  return motionLinkHtml(newsHref(id), "Read the story", "news-cta");
 }
 
 /* The phone homepage draws its cards in React, so it takes plain bilingual
@@ -202,7 +209,7 @@ function newsStatusHtml(failed: boolean): string {
     ? bilingualHtml("Please try again.", "يرجى المحاولة مرة أخرى.")
     : bilingualHtml("Check back for our latest updates.", "تابعونا للاطلاع على آخر المستجدات.");
   const retry = failed
-    ? `<a href="/news" class="news-cta">${bilingualHtml("Try again", "حاول مرة أخرى")}</a>`
+    ? motionLinkHtml("/news", bilingualHtml("Try again", "حاول مرة أخرى"), "news-cta")
     : "";
   return `<div class="db-news-status" role="status"><h3>${title}</h3><p>${detail}</p>${retry}</div>`;
 }

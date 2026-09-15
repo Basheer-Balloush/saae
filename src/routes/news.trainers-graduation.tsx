@@ -14,6 +14,7 @@ export const Route = createFileRoute("/news/trainers-graduation")({
     links: [
       { rel: "stylesheet", href: "/cinematic/css/news-trainers-graduation-inline.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
+      { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
     ],
   }),
   component: Page,

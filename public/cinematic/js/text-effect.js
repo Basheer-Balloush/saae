@@ -76,6 +76,12 @@
   /* Splitting happens per text node, in place, so inline children -- links,
      <strong>, <br> -- keep their position and their behaviour. */
   const split = element => {
+    /* The homepage can run more than one copy of this file. Each copy only
+       restores the spans it made, so a second copy splitting already-split
+       text nests the spans and language.js can no longer match the sentence
+       (it stays English, word order reversed). The records live on the
+       element, so every copy can see that another one got here first. */
+    if (element.__teRecords) return null;
     const requested = element.closest("[data-text-effect-per]")?.dataset.textEffectPer || "word";
 
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {

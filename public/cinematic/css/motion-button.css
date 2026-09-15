@@ -1,0 +1,140 @@
+/* =============================================================================
+   SAAE — MotionButton
+   -----------------------------------------------------------------------------
+   The site's one button look, shared by every cinematic page (the React pages
+   use src/components/ui/motion-button.tsx). A pill with a solid turquoise
+   circle holding the arrow at the inline-start and the label beside it. On
+   hover and keyboard `:focus-visible` the circle grows to fill the pill, the
+   arrow nudges forward and the label flips to contrast on the fill (~500ms).
+
+   Markup:
+     <a class="motion-button" href="…">
+       <span class="circle" aria-hidden="true"></span>
+       <span class="motion-icon" aria-hidden="true"><svg …/></span>
+       <span class="button-text">Label</span>
+     </a>
+   Add `button-quiet` for the secondary, dark pill.
+
+   Applies to `.motion-button` anywhere and to every `.button-link` inside the
+   homepage hero. The `:is()` carries the hero's id specificity, so these rules
+   beat each page's older button styles without !important. Colours fall back
+   to literals because not every page defines the homepage's tokens.
+   ========================================================================== */
+
+:is(#hero-sec .button-link, .motion-button) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 11rem;
+  min-height: 3.5rem;
+  padding-block: .25rem;
+  padding-inline-start: 3.5rem;
+  padding-inline-end: 1.5rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--paper, #fefdfc);
+  color: var(--ink, #1e1e1e);
+  overflow: hidden;
+  font-weight: 800;
+  text-decoration: none;
+  transform: none;
+  filter: none;
+  box-shadow: 0 10px 28px rgba(0, 139, 157, .28);
+  transition: box-shadow 260ms ease, border-color 260ms ease, background-color 260ms ease;
+}
+/* Buttons converted from the older pills carry their own type settings. */
+.motion-button {
+  gap: 0;
+  font-size: 1rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+/* The sheen sweeps belong to the retired gradient treatment. */
+:is(#hero-sec .button-link, .motion-button)::before,
+:is(#hero-sec .button-link, .motion-button)::after { content: none; }
+:is(#hero-sec .button-link, .motion-button) .circle {
+  position: absolute;
+  inset-block: .25rem;
+  inset-inline-start: .25rem;
+  width: 3rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--saae-turquoise, #008b9d), #047383);
+  transition: width 500ms ease;
+}
+/* Anchored at the inline-start, so the fill grows with the reading
+   direction in LTR and RTL with no extra mirroring. */
+:is(#hero-sec .button-link, .motion-button):hover .circle,
+:is(#hero-sec .button-link, .motion-button):focus-visible .circle { width: calc(100% - .5rem); }
+:is(#hero-sec .button-link, .motion-button) .motion-icon {
+  position: absolute;
+  inset-inline-start: .25rem;
+  top: 50%;
+  width: 3rem;
+  height: 3rem;
+  margin-top: -1.5rem;
+  display: grid;
+  place-items: center;
+  color: var(--paper, #fefdfc);
+  transition: transform 500ms ease;
+}
+:is(#hero-sec .button-link, .motion-button) .motion-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: currentColor;
+}
+:is(#hero-sec .button-link, .motion-button):hover .motion-icon,
+:is(#hero-sec .button-link, .motion-button):focus-visible .motion-icon { transform: translateX(.4rem); }
+/* The arrow points with the reading direction. The flip lives on the
+   wrapper, not the svg: motion.js drives the svg's own transform for its
+   hover nudge, which would overwrite a flip written there. The pages' own
+   `html[dir="rtl"] … svg` flips and diagonal svg nudges are neutralised
+   below for the same reason, so the arrow never flips or travels twice. */
+html[dir="rtl"] :is(#hero-sec .button-link, .motion-button) .motion-icon { transform: scaleX(-1); }
+html[dir="rtl"] :is(#hero-sec .button-link, .motion-button):hover .motion-icon,
+html[dir="rtl"] :is(#hero-sec .button-link, .motion-button):focus-visible .motion-icon { transform: translateX(-.4rem) scaleX(-1); }
+html[dir="rtl"] :is(#hero-sec .button-link, .motion-button) .motion-icon svg,
+:is(#hero-sec .button-link, .motion-button):hover .motion-icon svg,
+:is(#hero-sec .button-link, .motion-button):focus-visible .motion-icon svg { transform: none; }
+:is(#hero-sec .button-link, .motion-button) .motion-icon svg { transition: none; }
+:is(#hero-sec .button-link, .motion-button) .button-text {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+  transition: color 500ms ease;
+}
+:is(#hero-sec .button-link, .motion-button):hover .button-text,
+:is(#hero-sec .button-link, .motion-button):focus-visible .button-text { color: var(--paper, #fefdfc); }
+/* Secondary (`button-quiet`): the same circle motion on a quiet pill. The
+   resting label is already paper, which is the contrast colour on the
+   turquoise fill, so it holds through the hover. */
+:is(#hero-sec .button-link, .motion-button).button-quiet {
+  border-color: rgba(184, 232, 240, .5);
+  background: rgba(3, 22, 24, .52);
+  color: var(--paper, #fefdfc);
+  box-shadow: none;
+}
+:is(#hero-sec .button-link, .motion-button).button-quiet:hover,
+:is(#hero-sec .button-link, .motion-button).button-quiet:focus-visible {
+  border-color: var(--saae-turquoise-lift, #77e0e8);
+  background: rgba(3, 22, 24, .52);
+  box-shadow: 0 12px 28px rgba(1, 16, 30, .34);
+}
+:is(#hero-sec .button-link, .motion-button):focus-visible {
+  outline: 3px solid var(--saae-turquoise-lift, #77e0e8);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(3, 22, 24, .55), 0 16px 36px rgba(0, 139, 157, .42);
+}
+@media (max-width: 620px) {
+  :is(#hero-sec .button-link, .motion-button) { min-width: 0; padding-inline-end: 1.25rem; }
+}
+/* Reduced motion keeps a static hover/focus fill: the circle still fills
+   and the label still flips, just instantly. */
+@media (prefers-reduced-motion: reduce) {
+  :is(#hero-sec .button-link, .motion-button) .circle,
+  :is(#hero-sec .button-link, .motion-button) .motion-icon,
+  :is(#hero-sec .button-link, .motion-button) .button-text { transition: none; }
+}

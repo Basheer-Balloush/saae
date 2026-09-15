@@ -53,6 +53,7 @@ export const Route = createFileRoute("/contact")({
     links: [
       { rel: "stylesheet", href: "/cinematic/css/contact.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
+      { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
     ],
   }),
   component: Page,
