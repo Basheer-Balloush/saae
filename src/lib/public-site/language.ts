@@ -443,7 +443,7 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
   const updateHeroOpeningTitle = (lang) => {
     const title = document.querySelector("[data-hero-opening-title]");
     if (!title) return;
-    if (lang === "ar") title.innerHTML = '<span class="hero-opening-line">ذكاء وريادة</span><span class="hero-opening-line">لوطن ينهض</span>';
+    if (lang === "ar") title.innerHTML = '<span class="hero-opening-line">ذكاء</span><span class="hero-opening-line">وريادة</span><span class="hero-opening-line">لوطن</span><span class="hero-opening-line">ينهض</span>';
     else title.innerHTML = '<span class="hero-opening-line">Intelligence and entrepreneurship for a nation on the rise.</span>';
   };
 
