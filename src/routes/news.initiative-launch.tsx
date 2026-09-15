@@ -14,6 +14,7 @@ export const Route = createFileRoute("/news/initiative-launch")({
     links: [
       { rel: "stylesheet", href: "/cinematic/css/news-initiative-launch-inline.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
+      { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
     ],
   }),
   component: Page,

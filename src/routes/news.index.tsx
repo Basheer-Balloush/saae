@@ -37,6 +37,7 @@ export const Route = createFileRoute("/news/")({
     links: [
       { rel: "stylesheet", href: "/cinematic/css/news-inline.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
+      { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
       { rel: "stylesheet", href: "/cinematic/css/db-content.css" },
     ],
   }),

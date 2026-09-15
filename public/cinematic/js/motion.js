@@ -56,6 +56,9 @@
     const splitBandWords = band => {
       band.querySelectorAll("h2").forEach(head => {
         if (head.querySelector(".hero-opening-line")) return;
+        // The community card rewrites its own name on every flip, and that name
+        // is a link home-inline.js holds on to; splitting it would detach both.
+        if (head.closest(".community-card-face")) return;
         if (head.dataset.words === "1" && head.querySelector(".band-w")) return;
         const text = head.textContent.trim().split(/\s+/).filter(Boolean);
         if (!text.length) return;
@@ -137,9 +140,9 @@
        spawning a tween per pointer event, so this stays cheap during a fast
        traverse across several buttons. */
     document.querySelectorAll(".button-link, .ribbon-cta").forEach(button => {
-      // Hero buttons get their MotionButton motion from CSS; a GSAP lift and
-      // arrow nudge here would stack on top of it.
-      if (button.closest("#hero-sec")) return;
+      // MotionButton-style buttons (the hero ones and any .motion-button) get
+      // their motion from CSS; a GSAP lift and arrow nudge would stack on it.
+      if (button.closest("#hero-sec") || button.classList.contains("motion-button")) return;
       const arrow = button.querySelector("svg");
       const liftTo = gsap.quickTo(button, "y", { duration: .32, ease: "power3.out" });
       const arrowX = arrow ? gsap.quickTo(arrow, "x", { duration: .34, ease: "power3.out" }) : null;

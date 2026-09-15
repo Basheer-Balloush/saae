@@ -1,0 +1,561 @@
+  @font-face { font-family: "Cairo"; src: url("/cinematic/fonts/cairo-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Cairo"; src: url("/cinematic/fonts/cairo-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+  @font-face { font-family: "Cairo"; src: url("/cinematic/fonts/cairo-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+  @font-face { font-family: "Cairo"; src: url("/cinematic/fonts/cairo-900.woff2") format("woff2"); font-weight: 900; font-display: swap; }
+  /* Arabic cuts, so the language toggle does not fall back to a system face
+     mid-sentence. Same unicode-range split the landing page uses. */
+  @font-face { font-family: "Cairo"; src: url("/cinematic/fonts/cairo-arabic-400.ttf") format("truetype"); font-weight: 400; font-display: swap; unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF; }
+  @font-face { font-family: "Cairo"; src: url("/cinematic/fonts/cairo-arabic-600.ttf") format("truetype"); font-weight: 600; font-display: swap; unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF; }
+  @font-face { font-family: "Cairo"; src: url("/cinematic/fonts/cairo-arabic-700.ttf") format("truetype"); font-weight: 700; font-display: swap; unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF; }
+  @font-face { font-family: "Cairo"; src: url("/cinematic/fonts/cairo-arabic-900.ttf") format("truetype"); font-weight: 900; font-display: swap; unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF; }
+
+  :root {
+    --petrol: #048090;
+    --olive: #698f3f;
+    --petrol-lift: #b8e8f0;
+    --olive-lift: #a8cf7e;
+    --saae-turquoise: #008b9d;
+    --saae-turquoise-lift: #77e0e8;
+    --paper: #fefdfc;
+    --canvas: #06232a;
+    --teal: #227f8c;
+    --teal-lift: #b8e8f0;
+    --type: #e7f1f0;
+    --ink-muted: #9fbabe;
+    --line: rgba(184, 232, 240, .16);
+    --page: min(1180px, calc(100vw - 48px));
+    --ease-out: cubic-bezier(.16, 1, .3, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { color-scheme: dark; }
+
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--type);
+    font-family: "Cairo", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  .page-shell { width: var(--page); margin-inline: auto; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* The same ground as the landing page: a deep vertical grade, one neutral
+     spotlight, a petrol halo, a vignette and a static grain. No coloured light
+     crosses the content. Fixed here rather than sticky, because this page is
+     short enough that a sticky layer would run out before the page does. */
+  .ambient { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+    background: linear-gradient(180deg, #08333d 0%, #05242c 38%, #041b22 70%, #02131a 100%); }
+  .ambient span { position: absolute; z-index: 1; display: block; border-radius: 50%; will-change: transform, opacity; }
+  .orb-petrol { width: 98vw; height: 74vh; left: 1vw; top: -16vh; background: radial-gradient(closest-side, rgba(184, 232, 240, .085), rgba(184, 232, 240, 0)); animation: amb-a 26s ease-in-out infinite alternate; }
+  .orb-olive { width: 64vw; height: 44vh; left: 18vw; top: 22vh; background: radial-gradient(closest-side, rgba(4, 128, 144, .19), rgba(4, 128, 144, 0)); animation: amb-b 34s ease-in-out infinite alternate; }
+  .ambient-grid { display: none; }
+  .ambient::before { content: ""; position: absolute; inset: 0; z-index: 2; background: radial-gradient(116% 80% at 50% 24%, transparent 32%, rgba(1, 9, 13, .88) 100%); }
+  .ambient::after { content: ""; position: absolute; inset: 0; z-index: 3; opacity: .05; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 180px 180px; }
+  @keyframes amb-a { from { transform: scale(.96); opacity: .78; } to { transform: scale(1.07); opacity: 1; } }
+  @keyframes amb-b { from { transform: translate3d(0, 3vh, 0) scale(1); opacity: .7; } to { transform: translate3d(0, -3vh, 0) scale(1.12); opacity: 1; } }
+
+  .content { position: relative; z-index: 1; }
+
+  /* No header: the language toggle is the only chrome, and the head clears it
+     on its own. The way back is in the footer, with everything else. */
+  .head { padding: clamp(96px, 11vw, 138px) 0 clamp(38px, 5vw, 60px); }
+  .eyebrow { margin: 0 0 16px; color: var(--petrol-lift); font-size: .76rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+  h1 { margin: 0 0 22px; font-size: clamp(2.6rem, 6vw, 5.2rem); font-weight: 900; letter-spacing: -.05em; line-height: 1.03; }
+  /* SAAE photo-fill display head: the panoramic collage poured through the
+     letterforms under a teal veil, in the mark-photo recipe. Both
+     directions: Arabic joins are protected by zero tracking below. Solid
+     ink remains where background-clip:text is unavailable. */
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .photo-head {
+      background-image:
+        linear-gradient(180deg, rgba(198, 237, 243, .85), rgba(160, 218, 227, .88)),
+        url("/cinematic/images/about-wordmark.webp");
+      background-size: cover;
+      background-position: center;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      /* No glyph may sit outside the box: background-clip:text only paints
+         inside it, so an overflowing glyph goes transparent -- invisible.
+         Long words therefore break (hyphenated) instead of overflowing;
+         the inline padding covers glyph overhang. */
+      overflow-wrap: break-word;
+      hyphens: auto;
+      padding-block: .12em;
+      padding-inline: .06em;
+    }
+  }
+  /* Joined script stays joined under the fill: release the Latin packing. */
+  html[dir="rtl"] .photo-head { letter-spacing: 0; }
+  .head p { max-width: 66ch; margin: 0; color: var(--ink-muted); font-size: clamp(1.02rem, 1.5vw, 1.25rem); }
+  .rule { width: 108px; height: 3px; margin-top: 30px; background: linear-gradient(90deg, var(--petrol), var(--olive)); }
+
+
+  /* ==== COPIED FROM index.html: the footer ============================== */
+  .site-footer { position: relative; z-index: 1; background: #04171c; color: var(--type); }
+
+  .footer-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr));
+    gap: clamp(30px, 4vw, 62px);
+    padding-block: clamp(54px, 6.5vw, 92px);
+    border-top: 2px solid transparent;
+    border-image: linear-gradient(90deg, var(--olive), var(--petrol), var(--saae-turquoise)) 1;
+  }
+
+  /* The official lockup in its own colours, one file per reading direction:
+     the lockup is not a mirrored layout, the Arabic sets its own line under
+     the wordmark. On this footer's #04171c the olive clears 4.6:1 and the
+     petrol 3.7:1, against a 3:1 bar for a graphic. */
+  .footer-logo {
+    display: block;
+    width: min(100%, 268px);
+    height: auto;
+    margin-bottom: 22px;
+  }
+  .footer-logo-ar { display: none; }
+  html[dir="rtl"] .footer-logo-en { display: none; }
+  html[dir="rtl"] .footer-logo-ar { display: block; }
+
+  .footer-name { margin-bottom: 8px; color: var(--paper); font-size: 1.06rem; font-weight: 800; line-height: 1.4; }
+  .footer-location { max-width: 34ch; margin-bottom: 14px; color: var(--ink-muted); font-size: .92rem; }
+  .footer-claim { max-width: 32ch; margin-bottom: 0; color: var(--petrol-lift); font-size: .92rem; font-weight: 700; }
+
+  .footer-col-title {
+    margin: 0 0 20px;
+    color: var(--ink-muted);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  .footer-col ul { margin: 0; padding: 0; list-style: none; }
+  .footer-col li + li { margin-top: 2px; }
+
+  .footer-col a {
+    position: relative;
+    display: inline-block;
+    padding-block: 7px;
+    color: var(--type);
+    font-size: .95rem;
+    text-decoration: none;
+    transition: color 320ms var(--ease-out), transform 320ms var(--ease-out);
+  }
+
+  .footer-col a::before {
+    content: "";
+    position: absolute;
+    inset-block-end: 3px;
+    inset-inline: 0;
+    height: 1px;
+    background: var(--petrol-lift);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 320ms var(--ease-out);
+  }
+
+  .footer-col a:hover,
+  .footer-col a:focus-visible { color: var(--petrol-lift); transform: translate3d(5px, 0, 0); }
+  .footer-col a:hover::before,
+  .footer-col a:focus-visible::before { transform: scaleX(1); }
+
+  .footer-social { display: flex; gap: 10px; margin-top: 22px; }
+  .footer-social li + li { margin-top: 0; }
+
+  .footer-social a {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    color: var(--type);
+    transition: color 320ms var(--ease-out), border-color 320ms var(--ease-out), transform 320ms var(--ease-out);
+  }
+
+  .footer-social a::before { content: none; }
+  .footer-social svg { width: 20px; height: 20px; }
+
+  .footer-social a:hover,
+  .footer-social a:focus-visible {
+    color: var(--petrol-lift);
+    border-color: var(--petrol-lift);
+    transform: translate3d(0, -3px, 0);
+  }
+
+  .footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 26px;
+    padding-block: clamp(22px, 2.6vw, 32px);
+    border-top: 1px solid var(--line);
+    color: var(--ink-muted);
+    font-size: .88rem;
+  }
+
+  /* ==== COPIED FROM index.html: the language toggle and its wash ========
+     Pinned to the top here. On the landing page it starts at 13vh because a
+     film is playing behind it; this page has no header for it to clear. */
+  .language-switch {
+    position: fixed;
+    z-index: 130;
+    top: 18px;
+    inset-inline-start: max(18px, calc((100vw - var(--page)) / 2));
+    inset-inline-end: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-width: 112px;
+    min-height: 44px;
+    padding: 7px 13px 7px 9px;
+    border: 1px solid rgba(119, 224, 232, .5);
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(10, 55, 64, .94), rgba(3, 25, 31, .86));
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .12);
+    color: var(--paper);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: .78rem;
+    font-weight: 900;
+    letter-spacing: .04em;
+    transition: transform 320ms var(--ease-out), border-color 320ms var(--ease-out), box-shadow 320ms var(--ease-out);
+  }
+  .language-switch:hover,
+  .language-switch:focus-visible {
+    transform: translateY(-2px);
+    border-color: var(--saae-turquoise-lift);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .36), inset 0 1px 0 rgba(255, 255, 255, .16);
+  }
+  .language-switch:active { transform: translateY(-1px) scale(.98); }
+  .language-switch-icon { width: 20px; height: 20px; animation: language-switch-orbit 8s linear infinite; }
+  .language-switch-icon path, .language-switch-icon circle { fill: none; stroke: currentColor; stroke-width: 1.6; }
+  .language-switch-label { min-width: 2.15em; text-align: center; }
+  @keyframes language-switch-orbit { to { transform: rotate(1turn); } }
+
+  .language-wash { position: fixed; z-index: 125; inset: 0; display: grid; place-items: center; pointer-events: none; overflow: hidden; background: #061820; opacity: 0; visibility: hidden; transition: opacity 200ms ease, visibility 0s linear 200ms; }
+  .language-wash::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 38% 45% at 50% 50%, rgba(184, 232, 240, .13), transparent 70%), radial-gradient(ellipse 65% 72% at 50% 56%, rgba(34, 127, 140, .16), transparent 76%); }
+  .language-wash.is-entering, .language-wash.is-leaving { opacity: 1; visibility: visible; transition-delay: 0s; }
+  .language-wash.is-entering ~ .language-switch,
+  .language-wash.is-leaving ~ .language-switch { display: none; }
+  .language-transition-inner { position: relative; display: grid; grid-template-columns: minmax(66px, 1fr) auto minmax(66px, 1fr); align-items: center; column-gap: clamp(18px, 3vw, 36px); inline-size: min(780px, calc(100vw - 72px)); direction: ltr; }
+  .language-transition-halo { position: absolute; inset: 50% auto auto 50%; inline-size: clamp(250px, 24vw, 340px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(184, 232, 240, .15), transparent 68%); filter: blur(12px); opacity: 0; transform: translate(-50%, -50%) scale(.74); }
+  .language-transition-tree { position: relative; z-index: 1; grid-column: 2; display: block; inline-size: clamp(170px, 16vw, 220px); aspect-ratio: 576 / 642; opacity: 0; transform: translateY(18px) scale(.92); }
+  .language-transition-tree img { display: block; inline-size: 100%; block-size: 100%; object-fit: contain; filter: drop-shadow(0 0 7px rgba(184, 232, 240, .48)); }
+  .language-transition-rail { position: relative; z-index: 1; block-size: 4px; margin-block-start: 98px; overflow: hidden; border-radius: 999px; background: #0a3540; box-shadow: inset 0 0 0 1px rgba(184, 232, 240, .09); }
+  .language-transition-rail::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--petrol); transform: scaleX(0); }
+  .language-transition-rail-start { grid-column: 1; } .language-transition-rail-end { grid-column: 3; } .language-transition-rail-end::after { transform-origin: 100% 50%; } .language-transition-rail-start::after { transform-origin: 0 50%; }
+  .language-transition-copy { position: absolute; inset: calc(50% + clamp(116px, 11vw, 142px)) 0 auto; margin: 0; color: var(--teal-lift); text-align: center; font-size: .8rem; font-weight: 700; letter-spacing: .08em; opacity: 0; }
+  .language-wash.is-entering .language-transition-halo { animation: language-loader-halo 650ms var(--ease-out) both; }
+  .language-wash.is-entering .language-transition-tree { animation: language-loader-tree 620ms var(--ease-out) 80ms both; }
+  .language-wash.is-entering .language-transition-rail::after { animation: language-loader-rail 570ms var(--ease-out) 70ms both; }
+  .language-wash.is-entering .language-transition-copy { animation: language-loader-copy 280ms ease 220ms both; }
+  .language-wash.is-leaving .language-transition-inner { animation: language-loader-out 400ms var(--ease-out) both; }
+  @keyframes language-loader-halo { to { opacity: .82; transform: translate(-50%, -50%) scale(1); } }
+  @keyframes language-loader-tree { to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes language-loader-rail { to { transform: scaleX(1); } }
+  @keyframes language-loader-copy { to { opacity: 1; } }
+  @keyframes language-loader-out { to { opacity: 0; transform: scale(.97); filter: blur(2px); } }
+
+  /* ---- Arabic ----------------------------------------------------------- */
+  html[dir="rtl"] body { font-family: "Cairo", "Tahoma", sans-serif; }
+  html[dir="rtl"] h1 { letter-spacing: 0; line-height: 1.3; }
+  html[dir="rtl"] .photo-head { hyphens: manual; }
+  html[dir="rtl"] .eyebrow, html[dir="rtl"] .footer-col-title { letter-spacing: 0; word-spacing: .12em; }
+  html[dir="rtl"] .footer-col a { transform: none; }
+  html[dir="rtl"] .footer-col a:hover, html[dir="rtl"] .footer-col a:focus-visible { transform: translate3d(-5px, 0, 0); }
+  html[dir="rtl"] .footer-col a::before { transform-origin: 100% 50%; }
+
+  a:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: 3px; border-radius: 4px; }
+
+  @media (max-width: 1020px) { .footer-main { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 620px) { .footer-main { grid-template-columns: minmax(0, 1fr); } }
+  @media (prefers-reduced-motion: reduce) {
+    .ambient span, .language-switch-icon { animation: none; }
+    .footer-col a:hover, .footer-col a:focus-visible,
+    .footer-social a:hover, .footer-social a:focus-visible { transform: none; }
+  }
+
+  /* ---- teal footer with map card (shared design, matches aisyria.org) ---- */
+  .site-footer { background: #04171c; color: #fff; }
+  .site-footer .footer-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, .65fr) minmax(0, .75fr) minmax(0, 1.1fr);
+    gap: clamp(28px, 4vw, 56px);
+    padding-block: clamp(54px, 6vw, 84px) clamp(38px, 4.5vw, 58px);
+    align-items: start;
+  }
+  /* Original lockups in their own colours, one file per reading
+     direction: English sets its line under the wordmark, Arabic mirrors. */
+  .site-footer .footer-logo {
+    display: block;
+    width: min(100%, 205px);
+    height: auto;
+    margin-bottom: 20px;
+  }
+  .site-footer .footer-logo-ar { display: none; }
+  html[dir="rtl"] .site-footer .footer-logo-en { display: none; }
+  html[dir="rtl"] .site-footer .footer-logo-ar { display: block; }
+  .site-footer .footer-claim {
+    max-width: 36ch;
+    margin: 0;
+    color: rgba(255, 255, 255, .93);
+    font-size: .95rem;
+    line-height: 1.85;
+  }
+  .site-footer .footer-social { display: flex; gap: 12px; margin: 22px 0 0; padding: 0; list-style: none; }
+  .site-footer .footer-social li + li { margin-top: 0; }
+  .site-footer .footer-social a {
+    width: 42px;
+    height: 42px;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .45);
+    border-radius: 50%;
+    transition: background-color .3s ease, transform .3s ease;
+  }
+  .site-footer .footer-social a::before { content: none; }
+  .site-footer .footer-social svg { width: 19px; height: 19px; }
+  .site-footer .footer-social a:hover,
+  .site-footer .footer-social a:focus-visible { background: rgba(255, 255, 255, .16); transform: translateY(-2px); }
+  .site-footer .footer-social a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .site-footer .footer-col-title { margin: 0 0 18px; color: #fff; font-size: 1.02rem; font-weight: 800; }
+  .site-footer .footer-col ul { margin: 0; padding: 0; list-style: none; }
+  .site-footer .footer-col li + li { margin-top: 10px; }
+  .site-footer .footer-col a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 0;
+    color: rgba(255, 255, 255, .93);
+    font-size: .95rem;
+    text-decoration: none;
+    transform: none;
+  }
+  .site-footer .footer-col a::before { content: none; }
+  .site-footer .footer-col a:hover,
+  .site-footer .footer-col a:focus-visible { color: #fff; text-decoration: underline; text-underline-offset: 4px; transform: none; }
+  .site-footer .footer-col a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 4px; }
+  .site-footer .footer-map {
+    background: linear-gradient(180deg, #0c303a, #061d24);
+    color: rgba(216, 237, 237, .92);
+    border-radius: 18px;
+    padding: 14px 14px 18px;
+    box-shadow: 0 24px 60px rgba(3, 20, 25, .25);
+  }
+  .site-footer .map-shot { display: block; border-radius: 12px; overflow: hidden; }
+  .site-footer .map-shot img { display: block; width: 100%; height: auto; }
+  .site-footer .map-lines { margin: 14px 4px 0; padding: 0; list-style: none; display: grid; gap: 9px; font-size: .86rem; }
+  .site-footer .map-lines li { display: flex; align-items: center; gap: 9px; }
+  .site-footer .map-lines li + li { margin-top: 0; }
+  .site-footer .map-lines svg {
+    width: 17px;
+    height: 17px;
+    flex: none;
+    fill: none;
+    stroke: #048090;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .site-footer .map-lines a { color: rgba(216, 237, 237, .92); text-decoration: none; font-weight: 600; min-height: 0; }
+  .site-footer .map-lines a:hover,
+  .site-footer .map-lines a:focus-visible { color: var(--saae-turquoise-lift); text-decoration: underline; }
+  .site-footer .map-visit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 13px 4px 0;
+    color: #048090;
+    font-weight: 800;
+    font-size: .9rem;
+    text-decoration: none;
+  }
+  .site-footer .map-visit:hover,
+  .site-footer .map-visit:focus-visible { text-decoration: underline; }
+  .site-footer .visit-arrow { display: inline-block; }
+  html[dir="rtl"] .site-footer .visit-arrow { transform: scaleX(-1); }
+  .site-footer .map-attr { margin: 10px 4px 0; font-size: .68rem; color: rgba(216, 237, 237, .58); }
+  .site-footer .map-attr a { color: inherit; }
+  .site-footer .footer-bottom {
+    display: block;
+    padding-block: 20px 26px;
+    border-top: 1px solid rgba(255, 255, 255, .3);
+    color: rgba(255, 255, 255, .93);
+    font-size: .85rem;
+    text-align: center;
+  }
+  @media (max-width: 1020px) {
+    .site-footer .footer-main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .site-footer .footer-map { grid-column: 1 / -1; }
+  }
+  @media (max-width: 620px) {
+    .site-footer .footer-main { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  /* ==== COPIED FROM about-inline.css: the community cards ============= */
+
+  /* ---- Communities ------------------------------------------------------
+     Nine cards rather than nine list rows, because each one now carries what
+     the community actually works on as well as its name. Everything is
+     visible at rest: the hover is a lift and a light, never a disclosure, so
+     nothing is hidden from a reader who cannot hover. */
+  .communities { padding-top: var(--gap); padding-bottom: clamp(72px, 9vw, 128px); }
+  .community-grid {
+    margin: clamp(44px, 5vw, 66px) 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(16px, 2vw, 24px);
+  }
+  .community {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: clamp(22px, 2.4vw, 30px);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: linear-gradient(158deg, #0e3b41, #06232a 58%, #04171c);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, .42);
+    transition: transform 620ms var(--ease-out), border-color 520ms var(--ease-out), box-shadow 520ms var(--ease-out);
+  }
+  /* The light that arrives with the pointer: a petrol wash from the corner
+     the number sits in. */
+  .community::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 90% at 12% 0%, rgba(4, 128, 144, .38), transparent 62%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 520ms var(--ease-out);
+  }
+  .community > * { position: relative; }
+  .community:hover, .community:focus-within {
+    transform: translate3d(0, -6px, 0);
+    border-color: rgba(184, 232, 240, .42);
+    box-shadow: 0 30px 66px rgba(0, 0, 0, .55);
+  }
+  .community:hover::before, .community:focus-within::before { opacity: 1; }
+
+  .community-n { color: var(--olive-lift); font-size: .74rem; font-weight: 800; letter-spacing: .14em; transition: color 520ms var(--ease-out); }
+  .community:hover .community-n, .community:focus-within .community-n { color: var(--petrol-lift); }
+  .community h3 { font-size: clamp(1.06rem, 1.5vw, 1.24rem); letter-spacing: -.02em; }
+  .community-line { color: var(--type); font-size: .92rem; line-height: 1.6; }
+  .community-focus {
+    margin-top: 4px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-muted);
+    font-size: .8rem;
+    line-height: 1.6;
+  }
+  .community-focus span {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--petrol-lift);
+    font-size: .64rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  /* ==== Community pages ==================================================
+     The partner register's ground and the About page's community cards
+     (above), so a community reads as another page of the same site. */
+  .community h3, .community p { margin: 0; }
+  .community-sigil { display: inline-grid; place-items: center; width: 64px; height: 64px; margin-bottom: 22px; border: 1px solid rgba(119, 224, 232, .42); border-radius: 50%; background: radial-gradient(circle, rgba(4, 128, 144, .35), rgba(4, 128, 144, 0) 70%); box-shadow: 0 0 34px rgba(0, 139, 157, .28); }
+  .community-sigil svg { width: 30px; height: 30px; fill: none; stroke: var(--saae-turquoise-lift); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .community-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 34px; }
+  .community-join { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding-inline: 24px; border: 1px solid rgba(119, 224, 232, .68); border-radius: 999px; background: linear-gradient(135deg, var(--saae-turquoise), #047383); box-shadow: 0 10px 28px rgba(0, 139, 157, .28); color: #f7ffff; font: inherit; font-weight: 800; cursor: pointer; transition: transform 260ms var(--ease-out), box-shadow 260ms ease; }
+  .community-join:hover, .community-join:focus-visible { transform: translateY(-3px); box-shadow: 0 16px 36px rgba(0, 139, 157, .42); }
+  .community-quiet { display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding-inline: 22px; border: 1px solid rgba(184, 232, 240, .5); border-radius: 999px; background: rgba(3, 22, 24, .52); color: var(--paper); font-weight: 700; text-decoration: none; transition: border-color 260ms ease; }
+  .community-quiet:hover { border-color: var(--saae-turquoise-lift); }
+  .community-join svg { width: 18px; height: 18px; }
+  html[dir="rtl"] .community-join svg { transform: scaleX(-1); }
+  .community-join:focus-visible, .community-quiet:focus-visible, .community-story:focus-visible { outline: 3px solid var(--saae-turquoise-lift); outline-offset: 3px; }
+
+  .community-section { padding-block: clamp(56px, 7vw, 96px); }
+  .community-section .head { padding: 0 0 clamp(8px, 2vw, 18px); }
+  .community-section h2, .community-close h2 { margin: 0 0 16px; font-size: clamp(2rem, 4.2vw, 3.4rem); font-weight: 900; letter-spacing: -.04em; line-height: 1.08; }
+
+  .community-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: clamp(16px, 2vw, 24px); margin: 0; padding: 0; list-style: none; }
+  .community-stat { padding-top: 18px; border-top: 1px solid var(--line); }
+  .community-stat b { display: block; color: var(--paper); font-size: clamp(2.2rem, 4vw, 3.4rem); font-weight: 900; letter-spacing: -.04em; line-height: 1; direction: ltr; unicode-bidi: isolate; }
+  html[dir="rtl"] .community-stat b { text-align: right; }
+  .community-stat > span { display: block; margin-top: 10px; color: var(--ink-muted); font-size: .92rem; }
+
+  .community-news { display: grid; gap: clamp(14px, 1.8vw, 20px); margin: clamp(28px, 4vw, 44px) 0 0; padding: 0; list-style: none; }
+  .community-story { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: clamp(18px, 3vw, 40px); padding: clamp(22px, 2.4vw, 30px); border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(158deg, #0e3b41, #06232a 58%, #04171c); box-shadow: 0 18px 44px rgba(0, 0, 0, .42); text-decoration: none; transition: transform 620ms var(--ease-out), border-color 520ms var(--ease-out); }
+  .community-story:hover { transform: translate3d(0, -4px, 0); border-color: rgba(184, 232, 240, .42); }
+  .community-story .news-meta { margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; color: var(--ink-muted); font-size: .82rem; }
+  .community-story .news-tag { color: var(--olive-lift); font-size: .7rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .community-story h3 { margin: 0; color: var(--paper); font-size: clamp(1.1rem, 1.6vw, 1.35rem); line-height: 1.4; }
+  .community-story-excerpt { margin: 10px 0 0; color: var(--ink-muted); font-size: .95rem; line-height: 1.7; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .community-story-cta { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; color: var(--petrol-lift); font-size: .85rem; font-weight: 800; }
+  .community-story-cta svg { width: 16px; height: 16px; }
+  html[dir="rtl"] .community-story-cta svg { transform: scaleX(-1); }
+  .community-empty { margin: clamp(28px, 4vw, 44px) 0 0; padding: clamp(28px, 4vw, 44px); border: 1px dashed rgba(184, 232, 240, .28); border-radius: 18px; color: var(--ink-muted); text-align: center; }
+
+  .community-close { padding-bottom: clamp(72px, 9vw, 128px); }
+  .community-close-panel { position: relative; overflow: hidden; padding: clamp(40px, 6vw, 76px); border: 1px solid rgba(184, 232, 240, .26); border-radius: 24px; background: radial-gradient(90% 120% at 100% 0%, rgba(4, 128, 144, .42), transparent 60%), linear-gradient(158deg, #0e3b41, #06232a 58%, #04171c); box-shadow: 0 30px 66px rgba(0, 0, 0, .5); }
+  html[dir="rtl"] .community-close-panel { background: radial-gradient(90% 120% at 0% 0%, rgba(4, 128, 144, .42), transparent 60%), linear-gradient(202deg, #0e3b41, #06232a 58%, #04171c); }
+  .community-close-panel > p:not(.eyebrow) { max-width: 56ch; margin: 0; color: var(--ink-muted); font-size: clamp(1.02rem, 1.5vw, 1.2rem); }
+
+  html[dir="rtl"] .community-story .news-tag, html[dir="rtl"] .community-focus span, html[dir="rtl"] .community-n { letter-spacing: 0; }
+  @media (max-width: 1020px) { .community-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 620px) {
+    .community-grid { grid-template-columns: minmax(0, 1fr); }
+    .community-story { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .community-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .community, .community-story, .community-join { transition: none; }
+    .community:hover, .community:focus-within, .community-story:hover, .community-join:hover { transform: none; }
+  }
+
+  /* ==== Community hero ====================================================
+     The contact and About composition: copy beside a mark stage, where the
+     community's number is poured in the SAAE photo fill over a hollow ghost
+     word. The type stays light; the mark carries the weight. */
+  .community-hero { position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; gap: clamp(28px, 5vw, 72px); min-height: min(760px, 92vh); padding: clamp(110px, 12vw, 150px) calc((100% - var(--page)) / 2) clamp(48px, 6vw, 80px); }
+  .hero-glow { position: absolute; border-radius: 50%; pointer-events: none; }
+  .hero-glow-a { inset: -18% 42% 24% -16%; background: radial-gradient(circle, rgba(94, 216, 230, .18), transparent 66%); animation: amb-a 22s ease-in-out infinite alternate; }
+  .hero-glow-b { inset: 44% -10% -26% 44%; background: radial-gradient(circle, rgba(129, 166, 87, .14), transparent 68%); }
+  .community-hero-copy { position: relative; z-index: 2; }
+  .community-label { margin: 0; padding-inline-start: 18px; border-inline-start: 2px solid rgba(119, 224, 232, .55); color: var(--saae-turquoise-lift); font-size: .74rem; font-weight: 800; line-height: 1.6; letter-spacing: .2em; text-transform: uppercase; }
+  html[dir="rtl"] .community-label { font-size: .88rem; letter-spacing: 0; }
+  .community-title { margin: 18px 0 0; color: var(--paper); font-size: clamp(2.3rem, 4.2vw, 3.7rem); font-weight: 700; letter-spacing: -.035em; line-height: 1.08; text-wrap: balance; }
+  html[dir="rtl"] .community-title { letter-spacing: 0; line-height: 1.3; }
+  .community-intro { max-width: 46ch; margin: 22px 0 0; color: var(--ink-muted); font-size: clamp(1rem, 1.3vw, 1.12rem); line-height: 1.85; }
+  .community-markstage { position: relative; z-index: 1; display: grid; justify-items: end; align-content: center; min-height: clamp(260px, 32vw, 440px); }
+  .community-ghost { position: absolute; inset-inline-end: -6%; top: 50%; transform: translateY(-95%); color: transparent; -webkit-text-stroke: 1.4px rgba(184, 232, 240, .16); font-size: clamp(72px, 11vw, 160px); font-weight: 900; letter-spacing: -.03em; white-space: nowrap; pointer-events: none; user-select: none; }
+  html[dir="rtl"] .community-ghost { letter-spacing: 0; }
+  .community-mark { position: relative; margin: 0; font-size: clamp(150px, 22vw, 300px); font-weight: 900; letter-spacing: -.04em; line-height: .9; direction: ltr; }
+  .community-markstage .community-sigil { position: absolute; inset-inline-start: 6%; bottom: 16%; margin: 0; width: 78px; height: 78px; background: radial-gradient(circle, rgba(4, 128, 144, .35), rgba(4, 23, 28, .78) 72%); backdrop-filter: blur(8px); }
+  .community-markstage .community-sigil svg { width: 34px; height: 34px; }
+  .community-dots { display: flex; gap: 10px; margin: 22px 0 0; padding: 0; list-style: none; }
+  .community-dots li { width: 7px; height: 7px; border-radius: 50%; background: rgba(184, 232, 240, .22); }
+  .community-dots li.is-current { width: 26px; border-radius: 999px; background: var(--saae-turquoise-lift); box-shadow: 0 0 14px rgba(119, 224, 232, .6); }
+  @media (max-width: 900px) {
+    .community-hero { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 110px; }
+    .community-markstage { order: -1; justify-items: start; min-height: 0; }
+    .community-mark { font-size: clamp(110px, 34vw, 180px); }
+    .community-ghost { inset-inline-end: auto; inset-inline-start: 30%; font-size: clamp(56px, 16vw, 110px); }
+    .community-markstage .community-sigil { inset-inline-start: auto; inset-inline-end: 0; bottom: 30%; }
+  }
+  @media (prefers-reduced-motion: reduce) { .hero-glow-a { animation: none; } }
