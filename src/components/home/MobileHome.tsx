@@ -34,6 +34,7 @@ import {
   X,
 } from "lucide-react";
 import { useLang } from "@/lib/i18n";
+import MotionButton from "@/components/ui/motion-button";
 import { DESKTOP_HOME_QUERY } from "@/hooks/useHeroCapability";
 import "./mobile-home.css";
 import {
@@ -589,13 +590,12 @@ export function MobileHomeView({
                       </li>
                     ))}
                   </ul>
-                  <a
-                    className="mh-menu-cta"
+                  <MotionButton
+                    label={pick(OPENING.primary.label, lang)}
                     href={OPENING.primary.href}
                     onClick={() => setMenuOpen(false)}
-                  >
-                    {pick(OPENING.primary.label, lang)}
-                  </a>
+                    classes="w-full justify-center"
+                  />
                   <div className="mh-menu-contact">
                     <a href={CONTACT.email}>
                       <Mail size={18} aria-hidden="true" />
@@ -697,12 +697,17 @@ export function MobileHomeView({
             </h1>
             <p className="mh-support mh-kinetic mh-k-3">{pick(OPENING.support, lang)}</p>
             <div className="mh-actions mh-kinetic mh-k-4">
-              <a className="mh-btn-primary" href={OPENING.primary.href}>
-                {pick(OPENING.primary.label, lang)}
-              </a>
-              <a className="mh-btn-secondary" href={OPENING.secondary.href}>
-                {pick(OPENING.secondary.label, lang)}
-              </a>
+              <MotionButton
+                label={pick(OPENING.primary.label, lang)}
+                href={OPENING.primary.href}
+                classes="min-w-0 flex-1 justify-center"
+              />
+              <MotionButton
+                variant="secondary"
+                label={pick(OPENING.secondary.label, lang)}
+                href={OPENING.secondary.href}
+                classes="min-w-0 flex-1 justify-center"
+              />
             </div>
           </div>
           {heroVideoActive ? (
@@ -827,12 +832,17 @@ export function MobileHomeView({
               </h2>
               <p className="mh-section-p">{pick(INITIATIVE_COPY.body, lang)}</p>
               <div className="mh-feature-actions">
-                <a className="mh-btn-primary" href="/initiative">
-                  {pick(INITIATIVE_COPY.primary, lang)}
-                </a>
-                <a className="mh-btn-secondary" href="/one-million-initiative-home">
-                  {pick(INITIATIVE_COPY.official, lang)}
-                </a>
+                <MotionButton
+                  label={pick(INITIATIVE_COPY.primary, lang)}
+                  href="/initiative"
+                  classes="w-full min-w-0 justify-center"
+                />
+                <MotionButton
+                  variant="secondary"
+                  label={pick(INITIATIVE_COPY.official, lang)}
+                  href="/one-million-initiative-home"
+                  classes="w-full min-w-0 justify-center"
+                />
               </div>
             </div>
           </section>
@@ -1113,9 +1123,12 @@ export function MobileHomeView({
                   );
                 })}
               </ul>
-              <a className="mh-btn-secondary mh-write-btn" href="/contact#write">
-                {pick(FAQ_COPY.writeToUs, lang)}
-              </a>
+              <MotionButton
+                variant="secondary"
+                label={pick(FAQ_COPY.writeToUs, lang)}
+                href="/contact#write"
+                classes="w-full justify-center"
+              />
             </div>
           </section>
         </div>
@@ -1170,12 +1183,17 @@ export function MobileHomeView({
             </h2>
             <p className="mh-join-body">{pick(CLOSING_COPY.body, lang)}</p>
             <div className="mh-actions">
-              <a className="mh-btn-primary" href="/learning-management-system">
-                {pick(CLOSING_COPY.primary, lang)}
-              </a>
-              <a className="mh-btn-secondary" href="/registration">
-                {pick(CLOSING_COPY.secondary, lang)}
-              </a>
+              <MotionButton
+                label={pick(CLOSING_COPY.primary, lang)}
+                href="/learning-management-system"
+                classes="min-w-0 flex-1 justify-center"
+              />
+              <MotionButton
+                variant="secondary"
+                label={pick(CLOSING_COPY.secondary, lang)}
+                href="/registration"
+                classes="min-w-0 flex-1 justify-center"
+              />
             </div>
           </div>
         </section>
