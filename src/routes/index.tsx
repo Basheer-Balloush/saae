@@ -6,7 +6,7 @@ import { MobileHome } from "@/components/home/MobileHome";
 import type { NewsEntry } from "@/components/home/mobile-home-content";
 import { useHeroCapability } from "@/hooks/useHeroCapability";
 import { supabase } from "@/integrations/supabase/client";
-import { loadPartners } from "@/features/website/partners/data";
+import { loadPartners, type Partner } from "@/features/website/partners/data";
 import { applyHomePartners } from "@/features/website/partners/render";
 import {
   NEWS_CARD_COLUMNS,
@@ -23,6 +23,13 @@ const CinematicPageLazy = React.lazy(() =>
 );
 const HomepageNewsPortalLazy = React.lazy(() =>
   import("@/components/home/HomepageNews").then(m => ({ default: m.HomepageNewsPortal })),
+);
+
+// Desktop-only partners logo carousel, portalled into the cinematic markup.
+const DesktopPartnerCarouselLazy = React.lazy(() =>
+  import("@/components/home/DesktopPartnerCarousel").then((m) => ({
+    default: m.DesktopPartnerCarousel,
+  })),
 );
 
 /* Desktop only: the phone page loads none of these. The hero's two scripts
@@ -102,12 +109,27 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-function DesktopHome({ html, news, newsFailed }: { html: string; news: NewsEntry[]; newsFailed: boolean }) {
+function DesktopHome({
+  html,
+  news,
+  newsFailed,
+  partners,
+}: {
+  html: string;
+  news: NewsEntry[];
+  newsFailed: boolean;
+  partners: Partner[];
+}) {
   return (
-    <Suspense fallback={null}>
-      <CinematicPageLazy html={html} scripts={DESKTOP_SCRIPTS} htmlClass="site-loading" />
-      <HomepageNewsPortalLazy html={html} news={news} newsFailed={newsFailed} />
-    </Suspense>
+    <>
+      <Suspense fallback={null}>
+        <CinematicPageLazy html={html} scripts={DESKTOP_SCRIPTS} htmlClass="site-loading" />
+        <HomepageNewsPortalLazy html={html} news={news} newsFailed={newsFailed} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <DesktopPartnerCarouselLazy partners={partners} />
+      </Suspense>
+    </>
   );
 }
 
@@ -124,7 +146,16 @@ function Home() {
   const capability = useHeroCapability();
   // Mobile-first: SSR, first paint, phones and reduced motion get the phone
   // page; only a confirmed desktop mounts the cinematic enhancement.
-  if (capability === "desktop") return <DesktopHome html={html} news={mobileNews} newsFailed={newsFailed} />;
+  if (capability === "desktop") {
+    return (
+      <DesktopHome
+        html={html}
+        news={mobileNews}
+        newsFailed={newsFailed}
+        partners={partners.failed ? [] : partners.partners}
+      />
+    );
+  }
   return (
     <MobileHome
       news={mobileNews}

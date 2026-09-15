@@ -117,17 +117,10 @@ describe("desktop partner displays", () => {
       expect(html).toContain('role="status"');
     }
   });
-  it("fits any partner count into the cinematic scroll and escapes CSS URLs", () => {
-    const partners = Array.from({ length: 40 }, (_, i) => ({ ...partner, id: String(i) }));
-    const html = applyHomePartners(homeHtml, { partners, failed: false });
-    expect((html.match(/class="partner-mark/g) ?? []).length).toBe(40);
-    expect(html).toContain(`--step: ${0.52 / 39}s`);
-    const single = applyHomePartners(homeHtml, {
-      partners: [{ ...partner, logo: 'https://example.org/a");color:red;.png' }],
-      failed: false,
-    });
-    expect(single).toContain("--step: 0.26s");
-    expect(single).toContain("a%22%29;color:red;.png");
+  it("leaves the desktop logos to the carousel mount", () => {
+    const html = applyHomePartners(homeHtml, { partners: [partner], failed: false });
+    expect(html).toContain('id="partner-carousel-root"');
+    expect(html).not.toContain('class="partner-mark');
   });
 });
 
