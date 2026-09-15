@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { withSiteChrome } from "./radial-nav";
+import { installCinematicScrollSafety } from "./scroll-safety";
 import type { CinematicRuntime, CinematicRuntimeContext } from "./runtime";
 
 export type CinematicScript = { src: string; module?: boolean };
@@ -128,6 +129,9 @@ function CinematicPageImpl({ html, scripts, htmlClass, bodyClass, htmlAttrs }: P
     if (htmlClass) root.classList.add(htmlClass);
     if (bodyClass) document.body.classList.add(bodyClass);
     if (htmlAttrs) for (const [k, v] of Object.entries(htmlAttrs)) root.setAttribute(k, v);
+    const releaseScroll = htmlClass === "site-loading"
+      ? installCinematicScrollSafety(mountRef.current ?? document.body)
+      : () => {};
     const disposers: Array<() => void> = [];
     const ctx: CinematicRuntimeContext = {
       locale: root.lang === "en" ? "en" : "ar",
@@ -153,6 +157,7 @@ function CinematicPageImpl({ html, scripts, htmlClass, bodyClass, htmlAttrs }: P
     const { added, cancel } = appendCinematicScripts(scripts, tryInitFromGlobals);
     return () => {
       cancel();
+      releaseScroll();
       for (const dispose of disposers) {
         try {
           dispose();

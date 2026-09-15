@@ -35,6 +35,8 @@
 (() => {
   "use strict";
 
+  if (window.saaeCheckpointsDestroy) window.saaeCheckpointsDestroy();
+  let destroyed = false;
   const hero = document.getElementById("hero-sec");
   if (!hero) return;
 
@@ -198,20 +200,20 @@
        cut     a move longer than this many screens cuts rather than scrubs.
        settle  how long the last screen of a cut takes.
        hop     how long a short move takes.
-       journey how long one wheel journey between two hero stops takes.
+       journey how long one wheel or keyboard journey between two hero stops takes.
        fill    how long the learning stop takes to fill its progress bar.
        gap     seconds of wheel silence that separate one gesture from the next. */
   const DEFAULTS = {
-    wait: .22,
+    wait: .20,
     glide: .75,
     magnet: "crossings",
     reach: 1.2,
     cut: 2.5,
     settle: .9,
     hop: 1.1,
-    journey: 4.0,
+    journey: 3.8,
     fill: 2.0,
-    gap: .2
+    gap: .18
   };
   const tuning = Object.assign({}, DEFAULTS);
 
@@ -410,8 +412,11 @@
   }
 
   function release() {
+    window.clearTimeout(journeySafetyTimer);
     journeyToken += 1;
     journeying = false;
+    gestureOwned = false;
+    lastWheelAt = -Infinity;
     if (!gliding) return;
     gliding = false;
     /* Ends the glide where it stands rather than cancelling it back: the
@@ -422,7 +427,7 @@
   }
 
   /* ---- Journeys ---------------------------------------------------------
-     One wheel gesture inside the hero plays a journey to the next stop in its
+     One wheel gesture or scroll key inside the hero plays a journey to the next stop in its
      direction, and the rest of that gesture is swallowed. This bends the rule
      at the top of this file -- nothing intercepts the wheel -- on purpose and
      only inside the hero (asked for on 2026-09-15): from the top of the film
@@ -430,15 +435,27 @@
      every other move here, and share `gliding` with the magnet, so the two
      can never move the page at the same time. */
   let journeying = false;
+  let journeyFailed = false;
   let journeyToken = 0;
-  let lastWheelAt = 0;
+  let lastWheelAt = -Infinity;
   let journeyEndsAt = 0;
+  let journeySafetyTimer = 0;
   let gestureOwned = false;
   /* Sine rather than cubic: its fastest moment is 1.6 times the average speed, not 3, so the middle of a journey glides instead of rushing. */
   const easeInOutSine = t => -(Math.cos(Math.PI * t) - 1) / 2;
 
   function journeyEnabled() {
-    return Boolean(window.saaeScroll) && !reduced.matches && !document.documentElement.classList.contains("site-loading");
+    return !journeyFailed && Boolean(window.saaeScroll) && !reduced.matches && !document.documentElement.classList.contains("site-loading");
+  }
+
+  function recoverJourney() {
+    journeyFailed = true;
+    // If the engine cannot advance, return ownership to the browser for this visit.
+    try {
+      release();
+    } finally {
+      if (window.saaeScrollDestroy) window.saaeScrollDestroy();
+    }
   }
 
   function inJourneyZone(y) {
@@ -462,18 +479,20 @@
     return null;
   }
 
-  function freeWheel(event) {
-    if (event.ctrlKey) return true;
-    if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return true;
-    if (event.deltaY === 0) return true;
-    if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable], dialog, [role=\"dialog\"], [data-journey-free]") !== null) return true;
-    let node = event.target instanceof Element ? event.target : null;
+  function freeJourneyInput(target) {
+    if (target instanceof Element && target.closest("input, textarea, select, [contenteditable], dialog, [role=\"dialog\"], [data-journey-free]") !== null) return true;
+    let node = target instanceof Element ? target : null;
     while (node && node !== document.body) {
       const overflow = getComputedStyle(node).overflowY;
       if ((overflow === "auto" || overflow === "scroll") && node.scrollHeight > node.clientHeight + 1) return true;
       node = node.parentElement;
     }
     return false;
+  }
+
+  function freeWheel(event) {
+    return event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
+      event.deltaY === 0 || freeJourneyInput(event.target);
   }
 
   function journeyTo(stop, direction) {
@@ -485,13 +504,20 @@
     const filling = direction > 0 && stop === LMS_FULL;
     const duration = filling ? tuning.fill : tuning.journey;
     journeyEndsAt = performance.now() + duration * 1000 + 400;
+    window.clearTimeout(journeySafetyTimer);
+    // A replaced animation or suspended ticker must never leave input owned forever.
+    journeySafetyTimer = window.setTimeout(() => {
+      if (token === journeyToken) recoverJourney();
+    }, duration * 1000 + 400);
     engine.scrollTo(heroAt(stop), {
       duration,
       easing: filling ? (t => t) : easeInOutSine,
       force: true,
-      lock: true,
+      // Wheel/key handlers own only their gestures; touch scrolling stays native.
+      lock: false,
       onComplete: () => {
         if (token !== journeyToken) return;
+        window.clearTimeout(journeySafetyTimer);
         journeying = false;
         gliding = false;
         if (direction > 0 && stop === LMS_EMPTY) journeyTo(LMS_FULL, 1);
@@ -501,13 +527,12 @@
 
   /* Capture phase on window, so it runs before the engine's own wheel listener and can keep a swallowed notch from reaching it. */
   function onJourneyWheel(event) {
-    if (!journeyEnabled() || freeWheel(event)) return;
+    if (event.defaultPrevented || !journeyEnabled() || freeWheel(event)) return;
     const now = performance.now();
+    if (journeying && now > journeyEndsAt) { recoverJourney(); return; }
     const quiet = now - lastWheelAt > tuning.gap * 1000;
     lastWheelAt = now;
     const y = window.scrollY;
-    /* A journey whose animation was replaced never reaches onComplete. Past its end time it is over, whatever the flag says. */
-    if (journeying && now > journeyEndsAt) { journeying = false; gliding = false; }
     if (journeying) { event.preventDefault(); event.stopPropagation(); return; }
     /* The rest of a gesture belongs to whatever its first notch did: swallowed
        if it started a journey, left to the page if it did not. Swallowing a
@@ -528,12 +553,38 @@
     journeyTo(stop, direction);
   }
 
+  function onJourneyKey(event) {
+    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || !journeyEnabled()) return;
+    const direction = event.key === "ArrowDown" || event.key === "PageDown" ? 1 :
+      event.key === "ArrowUp" || event.key === "PageUp" ? -1 :
+      event.key === " " ? (event.shiftKey ? -1 : 1) : 0;
+    if (!direction || (event.shiftKey && event.key !== " ") || freeJourneyInput(event.target)) return;
+    if (event.target instanceof Element && event.target.closest("button, a, summary, [role=\"button\"], [role=\"link\"], [role=\"slider\"], [role=\"tab\"], [role=\"listbox\"], [role=\"menu\"]")) return;
+    const now = performance.now();
+    if (journeying && now > journeyEndsAt) { recoverJourney(); return; }
+    const y = window.scrollY;
+    if (!journeying && !inJourneyZone(y)) return;
+    const stop = journeyTarget(direction, y);
+    if (!journeying && stop === null) return;
+    event.preventDefault();
+    event.stopPropagation();
+    // Holding a key must not skip several stops or interrupt the current journey.
+    if (!journeying && !event.repeat) journeyTo(stop, direction);
+  }
+
   /* ---- Wiring -----------------------------------------------------------
      Delegated, so the panel can be rebuilt or translated underneath it. The
      href stays on every link and is still the fallback if this file never
      runs: on touch it is a working anchor, and with no JS at all it is the
      only navigation there is. */
-  document.addEventListener("click", event => {
+  const listeners = [];
+  function on(target, type, listener, options) {
+    const activeListener = event => { if (!destroyed) listener(event); };
+    target.addEventListener(type, activeListener, options);
+    listeners.push(() => target.removeEventListener(type, activeListener, options));
+  }
+
+  on(document, "click", event => {
     const link = event.target.closest("[data-checkpoint]");
     if (!link) return;
     const point = points.find(candidate => candidate.id === link.dataset.checkpoint);
@@ -547,7 +598,7 @@
      everyone already knows in order to give back a shortcut nobody asked for
      is a bad trade. Alt+Down and Alt+Up are unbound in the browsers this
      targets, so this adds a way through without removing one. */
-  window.addEventListener("keydown", event => {
+  on(window, "keydown", event => {
     if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
     /* Alt+Arrow moves the caret by word on macOS, and the page carries a chat
        widget. Inside anything that takes typing, the keys belong to the field. */
@@ -571,6 +622,7 @@
      the timer can only fire once everything -- the engine included -- has come
      to rest. */
   function onMoved() {
+    if (destroyed) return;
     const y = window.scrollY;
     if (y !== lastY) {
       heading = y > lastY ? 1 : -1;
@@ -588,16 +640,19 @@
      fed from the engine there rather than from the window. Measured here: a
      programmatic move of 1400px produced exactly zero native scroll events.
      Listening only to the window would have left the magnet armed by luck. */
-  let hooked = false;
+  let hookedEngine = null;
   function hookEngine() {
     const engine = window.saaeScroll;
-    if (hooked || !engine || typeof engine.on !== "function") return;
-    hooked = true;
+    if (hookedEngine === engine) return;
+    if (hookedEngine && typeof hookedEngine.off === "function") hookedEngine.off("scroll", onMoved);
+    hookedEngine = null;
+    if (!engine || typeof engine.on !== "function") return;
+    hookedEngine = engine;
     engine.on("scroll", onMoved);
   }
 
   let markFrame = 0;
-  window.addEventListener("scroll", () => {
+  on(window, "scroll", () => {
     hookEngine();
     onMoved();
     if (markFrame) return;
@@ -609,27 +664,46 @@
      listeners again. Only the newest journey handler may own the wheel. */
   if (window.saaeJourneyWheel) window.removeEventListener("wheel", window.saaeJourneyWheel, { capture: true });
   window.saaeJourneyWheel = onJourneyWheel;
-  window.addEventListener("wheel", onJourneyWheel, { capture: true, passive: false });
+  on(window, "wheel", onJourneyWheel, { capture: true, passive: false });
+  if (window.saaeJourneyKey) window.removeEventListener("keydown", window.saaeJourneyKey, { capture: true });
+  window.saaeJourneyKey = onJourneyKey;
+  on(window, "keydown", onJourneyKey, { capture: true });
   /* The hand going back on the wheel, in every form it takes. */
-  window.addEventListener("wheel", release, { passive: true });
-  window.addEventListener("touchstart", release, { passive: true });
-  window.addEventListener("pointerdown", release, { passive: true });
-  window.addEventListener("keydown", event => { if (!event.altKey) release(); });
+  on(window, "wheel", release, { passive: true });
+  on(window, "touchstart", release, { passive: true, capture: true });
+  on(window, "pointerdown", release, { passive: true });
+  on(window, "keydown", event => { if (!event.altKey && !event.defaultPrevented) release(); });
 
-  window.addEventListener("resize", remeasure, { passive: true });
-  window.addEventListener("load", remeasure);
+  on(window, "resize", remeasure, { passive: true });
+  on(window, "load", remeasure);
   /* The hero and the reel are sized in viewport units and the Arabic face sets
      type at a different size, so a language change moves every offset on the
      page. */
-  window.addEventListener("saae:languagechange", remeasure);
-  if ("ResizeObserver" in window) new ResizeObserver(remeasure).observe(document.body);
+  on(window, "saae:languagechange", remeasure);
+  const observer = "ResizeObserver" in window ? new ResizeObserver(remeasure) : null;
+  if (observer) observer.observe(document.body);
 
   measure();
   hookEngine();
   /* The engine starts on its own schedule and may not exist yet on this line;
      it is also torn down and rebuilt whenever reduced motion is toggled
      mid-visit. Both are covered by trying again on the events that follow. */
-  window.addEventListener("load", hookEngine);
+  on(window, "load", hookEngine);
+
+  window.saaeCheckpointsDestroy = () => {
+    destroyed = true;
+    release();
+    window.clearTimeout(stillTimer);
+    window.cancelAnimationFrame(measureFrame);
+    window.cancelAnimationFrame(markFrame);
+    if (observer) observer.disconnect();
+    if (hookedEngine && typeof hookedEngine.off === "function") hookedEngine.off("scroll", onMoved);
+    listeners.forEach(remove => remove());
+    window.saaeJourneyWheel = null;
+    window.saaeJourneyKey = null;
+    window.saaeCheckpoints = null;
+    window.saaeCheckpointsDestroy = null;
+  };
 
   window.saaeCheckpoints = {
     list: () => points.map(({ id, offset, rail: isRail }) => ({ id, offset, rail: Boolean(isRail) })),

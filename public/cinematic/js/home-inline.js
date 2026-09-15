@@ -1572,9 +1572,13 @@
       let siteLoaderFrameTimer = 0;
       let siteLoaderFrameRequest = 0;
 
-      const preventSiteLoaderScroll = event => event.preventDefault();
+      const siteLoaderOwnsInput = () => siteLoader && siteLoader.isConnected &&
+        !siteLoaderDismissed && document.documentElement.classList.contains("site-loading");
+      const preventSiteLoaderScroll = event => {
+        if (siteLoaderOwnsInput()) event.preventDefault();
+      };
       const preventSiteLoaderKeyScroll = event => {
-        if (siteLoaderScrollKeys.has(event.key)) event.preventDefault();
+        if (siteLoaderOwnsInput() && siteLoaderScrollKeys.has(event.key)) event.preventDefault();
       };
       const setSiteLoaderProgress = value => {
         if (!siteLoader || !siteLoaderProgress || siteLoaderDismissed) return;
@@ -1622,8 +1626,9 @@
       const dismissSiteLoader = () => {
         if (siteLoaderDismissed || !siteLoader) return;
         siteLoaderDismissed = true;
-        cleanupSiteLoader();
-        activateHeroVideo();
+        // Release input before any rendering that could fail on this device.
+        document.documentElement.classList.remove("site-loading");
+        releaseSiteLoaderInputLock();
         // Start the copy on the same frame as the curtain fade. It remains in
         // motion when the page first becomes visible, rather than waiting.
         document.documentElement.classList.add("hero-opening-ready");
@@ -1635,6 +1640,8 @@
           releaseSiteLoaderInputLock();
           schedulePagePaint();
         }, fadeDuration);
+        cleanupSiteLoader();
+        activateHeroVideo();
       };
       const completeSiteLoader = () => {
         if (!siteLoader || siteLoaderDismissed || siteLoaderCompleting || !siteLoaderMinimumComplete || !siteLoaderVideoReady) return;
