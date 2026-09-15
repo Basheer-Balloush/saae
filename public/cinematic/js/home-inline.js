@@ -264,6 +264,9 @@
         quality: '<svg viewBox="0 0 24 24"><path d="m12 3 2 4 4.5.7-3.2 3.2.8 4.6-4.1-2.1-4.1 2.1.8-4.6L5.5 7.7 10 7l2-4Z"/><path d="M7 16v5l5-2 5 2v-5"/></svg>'
       };
 
+      /* Card icon name -> /communities/$key route, where the two differ. */
+      const COMMUNITY_ROUTE_KEYS = { city: "architecture", healthcare: "medical" };
+
       const communityFlipItems = [
         { number: "01", name: "Data", copy: "Turn information into insight.", icon: "data" },
         { number: "02", name: "Smart Urban", copy: "Design smarter, more responsive cities.", icon: "city" },
@@ -296,6 +299,7 @@
         fields[1].textContent = item.name;
         fields[2].textContent = item.copy;
         fields[3].textContent = `${Number(item.number)} / ${communityFlipItems.length}`;
+        if (side === "front" && fields[1].tagName === "A") fields[1].href = `/communities/${COMMUNITY_ROUTE_KEYS[item.icon] || item.icon}`;
       }
 
       function paintCommunityNavigation(index) {
@@ -484,6 +488,15 @@
       let communityHovered = false;
       let communityKeyboardFocus = false;
       const communityCardFront = document.querySelector(".community-card-front");
+      /* A click anywhere on the front face opens that community's page, the
+         same place the name link goes. The navigator keeps its own job, and a
+         click that ends a text selection is left alone. */
+      communityCardFront?.addEventListener("click", event => {
+        if (!(event.target instanceof Element) || event.target.closest("a, button, .community-card-progress")) return;
+        if (String(window.getSelection?.() || "").length > 0) return;
+        const link = communityCardFront.querySelector(".community-card-link");
+        if (link) window.location.assign(link.href);
+      });
       const communityAutoFlipAllowed = () => !reducedMotion.matches;
 
       /* The front face is a polite live region so a press is read out. A timer
