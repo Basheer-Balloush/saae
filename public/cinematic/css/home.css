@@ -1058,11 +1058,11 @@
     .community-card-nav-next { color: var(--ink); border-color: rgba(119, 224, 232, .85); background: rgba(119, 224, 232, .88); }
     .community-card-nav-next:hover { color: var(--ink); background: var(--saae-turquoise-lift); }
 
-    /* The nine only announce themselves as nine if something moves. Cycling the
-       cards on a timer would take the choice away and keep the particle field
-       working the whole time the beat is on screen; instead the next arrow
-       pulses three times when the beat is first reached, and never again once
-       the navigator has been used. */
+    /* The nine only announce themselves as nine if something moves. The cards
+       now cycle every five seconds by themselves (home-inline.js), which does
+       that job. This pulse is kept for reduced motion, where nothing cycles:
+       the next arrow pulses three times when the beat is first reached, and
+       never again once the navigator has been used. */
     @keyframes community-nav-invite {
       0%, 100% { box-shadow: 0 0 0 0 rgba(119, 224, 232, .5); }
       55% { box-shadow: 0 0 0 10px rgba(119, 224, 232, 0); }

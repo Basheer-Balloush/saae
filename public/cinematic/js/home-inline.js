@@ -173,8 +173,9 @@
       let communityBrowsed = false;
       const communityFlipGroup = document.querySelector(".community-flip");
       const communityTarget = () => (communityFlipPending >= 0 ? communityFlipPending : communityFlipIndex);
-      const COMMUNITY_FLIP_FIRST_DELAY_MS = 650;
-      const COMMUNITY_FLIP_INTERVAL_MS = 2400;
+      /* How long a card holds before the next one turns in by itself, while
+         the reader stays on the communities beat. */
+      const COMMUNITY_FLIP_INTERVAL_MS = 5000;
       const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
       const isStaticExperience = () => gates.some(gate => gate.matches);
       const paintedStyleProperties = new WeakMap();
@@ -471,20 +472,94 @@
         }, communityFlipDurationMs() + (interrupted ? 40 : 20));
       }
 
-      function startCommunityFlip() {
-        stopCommunityFlip();
-        showCommunityCard(communityFlipIndex);
-        if (!communityBrowsed) communityFlipGroup?.classList.add("is-inviting");
+      /* ---- the auto-flip ---------------------------------------------------
+         While the reader stays on the communities beat, the card turns to the
+         next community every five seconds. It holds still while the reader is
+         working with it: a pointer over the card or the pips, or keyboard
+         focus inside the navigator. A card that turns away mid-sentence, or out
+         from under a cursor on its way to the next arrow, is worse than a card
+         that never moved. Mouse clicks leave focus on the button they pressed,
+         so only keyboard focus (:focus-visible) counts, otherwise one click
+         would stop the cycle until the reader clicked somewhere else. */
+      let communityHovered = false;
+      let communityKeyboardFocus = false;
+      const communityCardFront = document.querySelector(".community-card-front");
+      const communityAutoFlipAllowed = () => !reducedMotion.matches;
+
+      /* The front face is a polite live region so a press is read out. A timer
+         is not a press: announcing every five seconds would talk over whatever
+         the screen reader was doing, so automatic turns go by silently. */
+      function setCommunityAnnouncements(on) {
+        communityCardFront?.setAttribute("aria-live", on ? "polite" : "off");
       }
 
-      function selectCommunity(index, direction) {
+      /* (Re)start the countdown to the next automatic flip, always from a full
+         five seconds. Never under reduced motion, where a card that turns on
+         its own is exactly the movement the reader asked not to get. */
+      function scheduleCommunityAutoFlip() {
         clearInterval(communityFlipTimer);
         clearTimeout(communityFlipTimer);
         communityFlipTimer = 0;
+        if (activeBand !== 1 || !communityAutoFlipAllowed()) return;
+        if (communityHovered || communityKeyboardFocus) return;
+        communityFlipTimer = window.setInterval(() => {
+          /* A background tab owes nobody a flip. */
+          if (document.hidden) return;
+          setCommunityAnnouncements(false);
+          advanceCommunityFlip();
+        }, COMMUNITY_FLIP_INTERVAL_MS);
+      }
+
+      function pauseCommunityAutoFlip() {
+        clearInterval(communityFlipTimer);
+        clearTimeout(communityFlipTimer);
+        communityFlipTimer = 0;
+      }
+
+      communityFlipGroup?.addEventListener("pointerenter", event => {
+        if (event.pointerType === "touch") return;
+        communityHovered = true;
+        pauseCommunityAutoFlip();
+      });
+      communityFlipGroup?.addEventListener("pointerleave", event => {
+        if (event.pointerType === "touch") return;
+        communityHovered = false;
+        scheduleCommunityAutoFlip();
+      });
+      communityFlipGroup?.addEventListener("focusin", event => {
+        let keyboard = false;
+        try { keyboard = event.target.matches(":focus-visible"); } catch { keyboard = true; }
+        if (!keyboard) return;
+        communityKeyboardFocus = true;
+        pauseCommunityAutoFlip();
+      });
+      communityFlipGroup?.addEventListener("focusout", event => {
+        if (communityFlipGroup.contains(event.relatedTarget)) return;
+        if (!communityKeyboardFocus) return;
+        communityKeyboardFocus = false;
+        scheduleCommunityAutoFlip();
+      });
+
+      function startCommunityFlip() {
+        stopCommunityFlip();
+        showCommunityCard(communityFlipIndex);
+        /* The pulsing next arrow was the only sign there were nine. When the
+           cards cycle by themselves they say so already, and the pulse would
+           just be a second thing moving; it stays for reduced motion, where
+           nothing cycles. */
+        if (!communityBrowsed && !communityAutoFlipAllowed()) communityFlipGroup?.classList.add("is-inviting");
+        scheduleCommunityAutoFlip();
+      }
+
+      function selectCommunity(index, direction) {
         /* The invitation has done its work the moment the navigator is used. */
         communityBrowsed = true;
         communityFlipGroup?.classList.remove("is-inviting");
+        setCommunityAnnouncements(true);
         transitionCommunityCard(index, direction);
+        /* A manual press keeps the auto-flip going but gives the card the reader
+           just chose a full five seconds, rather than turning it away early. */
+        scheduleCommunityAutoFlip();
       }
 
       communityCardPrevious?.addEventListener("click", () => selectCommunity(communityTarget() - 1, -1));
