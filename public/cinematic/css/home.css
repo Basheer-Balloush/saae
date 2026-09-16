@@ -3822,13 +3822,15 @@
     /* The Arabic opening is intentionally concise: the headline is the whole
        message, so its removed supporting sentence cannot crowd the frame. */
     html[dir="rtl"] .hero-band[data-band="0"] { inset-block-start: 16%; width: max-content; }
-    html[dir="rtl"] .hero-band[data-band="0"] .hero-card-copy { width: 100%; padding-block: 16px; padding-inline: 26px 8px; background: none; }
+    /* The opening card, its eyebrow and its headline share one design in both languages. */
+    .hero-band[data-band="0"] .hero-card-copy { width: 100%; padding-block: 16px; padding-inline: 26px 8px; background: none; }
     /* Keep Arabic copy optically spaced from the side rail. */
     html[dir="rtl"] .hero-band[data-band="2"] .hero-card-copy,
     html[dir="rtl"] .hero-band[data-band="4"] .hero-card-copy { padding-inline: 26px 8px; background: none; }
     html[dir="rtl"] .hero-band[data-band="0"] .hero-card-copy > p:not(.eyebrow) { display: none; }
-    html[dir="rtl"] .hero-band[data-band="0"] .eyebrow { margin-bottom: 20px; letter-spacing: 0; word-spacing: normal; white-space: nowrap; }
-    html[dir="rtl"] .hero-band[data-band="0"] h2 { max-width: 100%; margin-bottom: 0; font-size: clamp(2.5rem, 4vw, 4.4rem); letter-spacing: 0; line-height: 1.1; }
+    .hero-band[data-band="0"] .eyebrow { margin-bottom: 20px; letter-spacing: 0; word-spacing: normal; white-space: nowrap; }
+    /* html + .hero-card-copy keep this above the Arabic "all bands" h2 rule (line-height 1.28). */
+    html .hero-band[data-band="0"] .hero-card-copy > h2 { max-width: 100%; margin-bottom: 0; font-size: clamp(2.5rem, 4vw, 4.4rem); letter-spacing: 0; line-height: 1.1; }
     /* English takes the same four-beat layout as Arabic: a full-width headline
        with the second and fourth lines stepped in. */
     .hero-band[data-band="0"] h2[data-hero-opening-title] { max-width: 100%; margin-bottom: 0; }
