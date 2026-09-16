@@ -20,10 +20,16 @@ export type CommunityNewsRow = {
   published_at: string;
 };
 export type CommunityNewsResult = { rows: CommunityNewsRow[]; failed: boolean };
+export type CommunityNeighbour = { key: string; index: number; name: Bilingual };
 export type CommunityPageData = {
   index: number;
   total: number;
   name: Bilingual;
+  /** The homepage card's name ("Healthcare") and its one-line promise. */
+  shortName: Bilingual;
+  tagline: Bilingual;
+  prev: CommunityNeighbour;
+  next: CommunityNeighbour;
   mission: Bilingual;
   iconSvg: string;
   details: { label: Bilingual; text: Bilingual }[];
@@ -36,31 +42,90 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const b = (t: Bilingual) => bilingualHtml(t.en, t.ar);
 const ARROW =
   '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const JOIN_BUTTON = `<button class="community-join" type="button" data-community-join>${bilingualHtml("Join the community", "انضم إلى المجتمع")} ${ARROW}</button>`;
+/* The site's shared MotionButton (public/cinematic/css/motion-button.css):
+   a turquoise circle holding the icon that fills the pill on hover. */
+const MOTION_ARROW =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>';
+const MOTION_DOWN =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="m6 13 6 6 6-6"/></svg>';
+const motionInner = (icon: string, label: string) =>
+  `<span class="circle" aria-hidden="true"></span><span class="motion-icon" aria-hidden="true">${icon}</span><span class="button-text">${label}</span>`;
+const JOIN_BUTTON = `<button class="button-primary motion-button community-join" type="button" data-community-join>${motionInner(MOTION_ARROW, bilingualHtml("Join the community", "انضم إلى المجتمع"))}</button>`;
+const LATEST_BUTTON = `<a class="button-ghost motion-button button-quiet community-quiet" href="#community-news">${motionInner(MOTION_DOWN, bilingualHtml("Latest activity", "آخر الأنشطة"))}</a>`;
 
-/* The contact/About composition: light copy beside a mark stage, where the
-   community's number takes the SAAE photo fill over a hollow ghost word. */
+/* The homepage headline's two-tone fall, one block per language because the
+   word order differs: "Healthcare / Community." against "مجتمع / الرعاية الصحية.". */
+function titleHtml(short: Bilingual): string {
+  const line = (text: string, accent = false) =>
+    `<span class="community-title-line${accent ? " community-title-accent" : ""}">${escapeHtml(text)}</span>`;
+  return (
+    `<span data-db-lang="en">${line(short.en)}${line("Community.", true)}</span>` +
+    `<span data-db-lang="ar" dir="rtl">${line("مجتمع", true)}${line(`${short.ar}.`)}</span>`
+  );
+}
+
+/* One shared foundation: nine roots from a single trunk, this community's
+   root lit and ending in its seal. Drawn left to right in community order;
+   the stylesheet mirrors it for Arabic and counter-mirrors the icon. */
+function rootsSvg(p: CommunityPageData): string {
+  const trunk = { x: 200, y: 10 };
+  const roots = Array.from({ length: p.total }, (_, i) => {
+    const x = 28 + i * ((400 - 56) / (p.total - 1));
+    const y = 252 - Math.abs(i - (p.total - 1) / 2) * 22;
+    const current = i + 1 === p.index;
+    const path = `M${trunk.x} ${trunk.y} C${trunk.x} 120 ${x.toFixed(1)} ${(y - 96).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    return { x, y, current, path };
+  });
+  const lit = roots.find((r) => r.current) ?? roots[0];
+  return [
+    `<svg class="community-roots" viewBox="0 0 400 290" aria-hidden="true" focusable="false">`,
+    ...roots
+      .filter((r) => !r.current)
+      .map(
+        (r) =>
+          `  <path class="root" d="${r.path}"/><circle class="root-node" cx="${r.x.toFixed(1)}" cy="${r.y.toFixed(1)}" r="3"/>`,
+      ),
+    `  <path class="root is-current" pathLength="1" d="${lit.path}"/>`,
+    `  <circle class="root-trunk" cx="${trunk.x}" cy="${trunk.y}" r="4"/>`,
+    `  <circle class="root-seal" cx="${lit.x.toFixed(1)}" cy="${lit.y.toFixed(1)}" r="21"/>`,
+    `  <g transform="translate(${(lit.x - 10).toFixed(1)} ${(lit.y - 10).toFixed(1)}) scale(0.8333)"><g class="root-icon">${p.iconSvg}</g></g>`,
+    `</svg>`,
+  ].join("\n");
+}
+
+const CHEVRON =
+  '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m10 3-5 5 5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function pagerLinkHtml(n: CommunityNeighbour, dir: "prev" | "next"): string {
+  const label =
+    dir === "prev" ? bilingualHtml("Previous", "السابق") : bilingualHtml("Next", "التالي");
+  return `<a class="community-pager-link is-${dir}" href="/communities/${encodeURIComponent(n.key)}" rel="${dir}"><span class="community-pager-dir">${CHEVRON}${label}</span><span class="community-pager-name"><b dir="ltr">${pad(n.index)}</b> ${b(n.name)}</span></a>`;
+}
+
+/* The contact/About composition: light two-tone copy beside a mark stage,
+   where the number takes the SAAE photo fill above the community's root. */
 function heroHtml(p: CommunityPageData): string {
-  const dots = Array.from(
-    { length: p.total },
-    (_, i) => `<li${i + 1 === p.index ? ' class="is-current"' : ""}></li>`,
-  ).join("");
   return [
     `<section class="community-hero">`,
     `  <span class="hero-glow hero-glow-a" aria-hidden="true"></span>`,
     `  <span class="hero-glow hero-glow-b" aria-hidden="true"></span>`,
     `  <div class="community-hero-copy">`,
-    `    <p class="community-label">${bilingualHtml("SAAE communities", "مجتمعات SAAE")}</p>`,
-    `    <h1 class="community-title">${bilingualHtml(`${p.name.en}.`, `${p.name.ar}.`)}</h1>`,
+    `    <p class="community-label">${bilingualHtml("SAAE communities", "مجتمعات SAAE")}<span class="community-label-n" dir="ltr">${pad(p.index)} / ${pad(p.total)}</span></p>`,
+    `    <h1 class="community-title">${titleHtml(p.shortName)}</h1>`,
+    `    <p class="community-tagline">${b(p.tagline)}</p>`,
     `    <p class="community-intro">${b(p.mission)}</p>`,
-    `    <div class="community-actions">${JOIN_BUTTON}<a class="community-quiet" href="#community-news">${bilingualHtml("Latest activity", "آخر الأنشطة")}</a></div>`,
+    `    <div class="community-actions">${JOIN_BUTTON}${LATEST_BUTTON}</div>`,
     `  </div>`,
     `  <div class="community-markstage" aria-hidden="true">`,
     `    <span class="community-ghost">${bilingualHtml("COMMUNITY", "مجتمع")}</span>`,
     `    <p class="photo-head community-mark">${pad(p.index)}</p>`,
-    `    <span class="community-sigil"><svg viewBox="0 0 24 24">${p.iconSvg}</svg></span>`,
-    `    <ol class="community-dots">${dots}</ol>`,
+    `    ${rootsSvg(p)}`,
     `  </div>`,
+    `  <nav class="community-pager">`,
+    `    <h2 class="sr-only">${bilingualHtml("Other communities", "مجتمعات أخرى")}</h2>`,
+    `    ${pagerLinkHtml(p.prev, "prev")}`,
+    `    ${pagerLinkHtml(p.next, "next")}`,
+    `  </nav>`,
     `</section>`,
   ].join("\n");
 }

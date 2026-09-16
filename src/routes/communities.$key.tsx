@@ -15,6 +15,8 @@ import {
   DETAILS,
   METRICS_BY_KEY,
   MISSION,
+  SHORT_NAME,
+  TAGLINE,
 } from "@/features/website/communities/content";
 import {
   COMMUNITY_NEWS_COLUMNS,
@@ -77,6 +79,7 @@ export const Route = createFileRoute("/communities/$key")({
       links: [
         { rel: "canonical", href: url },
         { rel: "stylesheet", href: "/cinematic/css/communities-inline.css" },
+        { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
         { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
         { rel: "stylesheet", href: "/cinematic/css/db-content.css" },
       ],
@@ -111,6 +114,13 @@ export const Route = createFileRoute("/communities/$key")({
   component: CommunityPage,
 });
 
+/* The community before or after this one, wrapping at both ends. */
+function neighbour(k: CommunityKey, step: -1 | 1) {
+  const i = (COMMUNITY_KEYS.indexOf(k) + step + COMMUNITY_KEYS.length) % COMMUNITY_KEYS.length;
+  const key = COMMUNITY_KEYS[i];
+  return { key, index: i + 1, name: SHORT_NAME[key] };
+}
+
 function CommunityPage() {
   const { key } = Route.useParams();
   const k = key as CommunityKey;
@@ -123,6 +133,10 @@ function CommunityPage() {
           index: COMMUNITY_KEYS.indexOf(k) + 1,
           total: COMMUNITY_KEYS.length,
           name: { en: COMMUNITY_LABELS_EN[k], ar: COMMUNITY_LABELS_AR[k] },
+          shortName: SHORT_NAME[k],
+          tagline: TAGLINE[k],
+          prev: neighbour(k, -1),
+          next: neighbour(k, 1),
           mission: MISSION[k],
           iconSvg: COMMUNITY_ICON_SVG[k],
           details: DETAILS[k] ?? [],
