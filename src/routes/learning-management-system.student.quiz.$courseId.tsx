@@ -12,6 +12,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { QuizMenu, type QuizListItem } from "@/components/lms/quiz/QuizMenu";
 import { QuizAttempt } from "@/components/lms/quiz/QuizAttempt";
 import { getUnansweredQuestions } from "@/lib/quiz-validation";
+import { clearQuizDraft, loadQuizDraft, quizDraftKey, saveQuizDraft } from "@/lib/quiz-draft";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 import { sendCertificateEmail } from "@/lib/certificate-email.functions";
 
@@ -82,6 +83,9 @@ function QuizPage() {
   const { quiz: selectedQuizId, review: reviewParam } = Route.useSearch();
   const navigate = useNavigate();
   const { user } = useLmsAuth();
+  // Depend on the account id, not the user object: a session refresh hands over a
+  // new object for the same account, and reloading then wiped answers mid-quiz.
+  const userId = user?.id ?? null;
   const { lang } = useLang();
   const tr = lmsT[lang];
   const ar = lang === "ar";
@@ -112,7 +116,7 @@ function QuizPage() {
 
   // Load the course quiz list (always, so statuses stay fresh after submissions)
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     let cancelled = false;
     (async () => {
       setListError(false);
@@ -131,11 +135,11 @@ function QuizPage() {
     return () => {
       cancelled = true;
     };
-  }, [courseId, user, reloadKey, listKey]);
+  }, [courseId, userId, reloadKey, listKey]);
 
   // Load the selected quiz: attempt state + saved attempt (for review)
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     if (!selectedQuizId) {
       setState(null);
       setReview(null);
@@ -162,14 +166,17 @@ function QuizPage() {
         setLoading(false);
         return;
       }
-      setState(attemptRes.data as unknown as LoadedState);
+      const loaded = attemptRes.data as unknown as LoadedState;
+      setState(loaded);
+      // Bring back anything the student had already answered on this device.
+      setAnswers(loadQuizDraft(quizDraftKey(userId, loaded.quiz.id, loaded.quiz.version), loaded.questions));
       setReview(reviewRes.error ? null : (reviewRes.data as unknown as ReviewData));
       setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
-  }, [selectedQuizId, user, reloadKey]);
+  }, [selectedQuizId, userId, reloadKey]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -200,6 +207,15 @@ function QuizPage() {
       {tr.backToCourse}
     </Button>
   );
+
+  const draftKey = state && userId ? quizDraftKey(userId, state.quiz.id, state.quiz.version) : null;
+
+  const answerQuestion = (key: string, index: number) =>
+    setAnswers((current) => {
+      const next = { ...current, [key]: index };
+      if (draftKey) saveQuizDraft(draftKey, next);
+      return next;
+    });
 
   const onSubmit = async () => {
     if (
@@ -236,9 +252,11 @@ function QuizPage() {
               : "Please answer every question. If the quiz changed, reload it before trying again.",
           );
         } else if (msg.includes("already_passed")) {
+          if (draftKey) clearQuizDraft(draftKey);
           toast.error(tr.quizLockedPassed);
           setReloadKey((k) => k + 1);
         } else if (msg.includes("attempts_exhausted")) {
+          if (draftKey) clearQuizDraft(draftKey);
           toast.error(tr.quizLockedAttempts);
           setReloadKey((k) => k + 1);
         } else if (msg.includes("cooldown_active")) {
@@ -258,6 +276,7 @@ function QuizPage() {
         }
         return;
       }
+      if (draftKey) clearQuizDraft(draftKey);
       setResult(data as Result);
       // Refresh list statuses and the saved-attempt review data WITHOUT remounting
       // the attempt loader (that would wipe the freshly shown result).
@@ -586,7 +605,7 @@ function QuizPage() {
       title={title}
       questions={state.questions}
       answers={answers}
-      onAnswer={(key, index) => setAnswers((current) => ({ ...current, [key]: index }))}
+      onAnswer={answerQuestion}
       onSubmit={onSubmit}
       onBack={goToList}
       onReview={reviewData ? () => setShowReview(true) : undefined}
