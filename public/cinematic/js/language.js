@@ -452,7 +452,7 @@
     const title = document.querySelector("[data-hero-opening-title]");
     if (!title) return;
     if (lang === "ar") title.innerHTML = '<span class="hero-opening-line">ذكاء</span><span class="hero-opening-line">وريادة</span><span class="hero-opening-line">لوطن</span><span class="hero-opening-line">ينهض</span>';
-    else title.innerHTML = '<span class="hero-opening-line">Intelligence and entrepreneurship for a nation on the rise.</span>';
+    else title.innerHTML = '<span class="hero-opening-line">Intelligence</span><span class="hero-opening-line">and entrepreneurship</span><span class="hero-opening-line">for a nation</span><span class="hero-opening-line">on the rise.</span>';
   };
 
   /* Desktop playback deliberately holds window.scrollY at zero. The hero adds
