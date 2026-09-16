@@ -18,6 +18,7 @@ export type CommunityNewsRow = {
   excerpt_en: string | null;
   category: string;
   published_at: string;
+  image_url: string | null;
 };
 export type CommunityNewsResult = { rows: CommunityNewsRow[]; failed: boolean };
 export type CommunityNeighbour = { key: string; index: number; name: Bilingual };
@@ -36,7 +37,7 @@ export type CommunityPageData = {
   metrics: { value: string; label: Bilingual }[];
 };
 export const COMMUNITY_NEWS_COLUMNS =
-  "id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,category,published_at";
+  "id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,category,published_at,image_url";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const b = (t: Bilingual) => bilingualHtml(t.en, t.ar);
@@ -150,7 +151,7 @@ function workHtml(details: CommunityPageData["details"]): string {
     `  <ul class="community-grid">`,
     ...details.map(
       (d, i) =>
-        `    <li class="community"><span class="community-n">${pad(i + 1)}</span><h3>${b(d.label)}</h3><p class="community-line">${b(d.text)}</p></li>`,
+        `    <li class="community"><h3>${b(d.label)}</h3><p class="community-line">${b(d.text)}</p></li>`,
     ),
     `  </ul>`,
     `</section>`,
@@ -160,12 +161,19 @@ function workHtml(details: CommunityPageData["details"]): string {
 function storyHtml(r: CommunityNewsRow): string {
   const title = { en: r.title_en || r.title, ar: r.title_ar || r.title };
   const excerpt = { en: r.excerpt_en || r.excerpt || "", ar: r.excerpt_ar || r.excerpt || "" };
+  // Only https images, the same rule the news page applies to its cards.
+  const photo = r.image_url && /^https:\/\//i.test(r.image_url) ? r.image_url : null;
   return [
-    `<li><a class="community-story" href="/news/${encodeURIComponent(r.id)}">`,
-    `  <p class="news-meta"><span class="news-tag">${bilingualHtml(communityLabel(r.category, "en"), communityLabel(r.category, "ar"))}</span><time datetime="${escapeHtml(r.published_at.slice(0, 10))}">${bilingualHtml(formatNewsDate(r.published_at, "en"), formatNewsDate(r.published_at, "ar"))}</time></p>`,
-    `  <div><h3>${b(title)}</h3>${excerpt.en || excerpt.ar ? `<p class="community-story-excerpt">${b(excerpt)}</p>` : ""}<span class="community-story-cta">${bilingualHtml("Read the story", "اقرأ الخبر")} ${ARROW}</span></div>`,
+    `<li><a class="community-story${photo ? "" : " is-textonly"}" href="/news/${encodeURIComponent(r.id)}">`,
+    photo
+      ? `  <figure class="community-story-photo"><img src="${escapeHtml(photo)}" alt="" loading="lazy" decoding="async" draggable="false"></figure>`
+      : "",
+    `  <div class="community-story-body"><p class="news-meta"><span class="news-tag">${bilingualHtml(communityLabel(r.category, "en"), communityLabel(r.category, "ar"))}</span><time datetime="${escapeHtml(r.published_at.slice(0, 10))}">${bilingualHtml(formatNewsDate(r.published_at, "en"), formatNewsDate(r.published_at, "ar"))}</time></p>`,
+    `  <h3>${b(title)}</h3>${excerpt.en || excerpt.ar ? `<p class="community-story-excerpt">${b(excerpt)}</p>` : ""}<span class="community-story-cta">${bilingualHtml("Read the story", "اقرأ الخبر")} ${ARROW}</span></div>`,
     `</a></li>`,
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function newsHtml(news: CommunityNewsResult): string {
@@ -185,7 +193,6 @@ function newsHtml(news: CommunityNewsResult): string {
 function closeHtml(): string {
   return [
     `<section class="community-close page-shell"><div class="community-close-panel">`,
-    `  <p class="eyebrow">${bilingualHtml("Join", "انضم")}</p>`,
     `  <h2 class="photo-head">${bilingualHtml("Be part of the story.", "كُنْ جزءاً من القصّة.")}</h2>`,
     `  <p>${bilingualHtml("We invite researchers, students and practitioners to join a community working — quietly and persistently — to build lasting impact.", "ندعو الباحثين والطلاب والممارسين للانضمام إلى مجتمعٍ يعمل بهدوءٍ وإصرارٍ على بناء أثرٍ مستدام.")}</p>`,
     `  <div class="community-actions">${JOIN_BUTTON}</div>`,
