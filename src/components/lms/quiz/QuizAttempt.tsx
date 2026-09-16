@@ -142,6 +142,11 @@ export function QuizAttempt({
               ? `أجبت عن ${answered} من ${questions.length} سؤالاً`
               : `${answered} of ${questions.length} questions answered`}
           </p>
+          <p className="quiz-progress-copy quiz-draft-note">
+            {ar
+              ? "تُحفظ إجاباتك على هذا الجهاز حتى ترسل الاختبار."
+              : "Your answers are saved on this device until you submit."}
+          </p>
           <nav
             className="quiz-question-nav"
             aria-label={ar ? "انتقل إلى سؤال" : "Jump to a question"}
