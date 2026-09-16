@@ -478,16 +478,8 @@
      The partner register's ground and the About page's community cards
      (above), so a community reads as another page of the same site. */
   .community h3, .community p { margin: 0; }
-  .community-sigil { display: inline-grid; place-items: center; width: 64px; height: 64px; margin-bottom: 22px; border: 1px solid rgba(119, 224, 232, .42); border-radius: 50%; background: radial-gradient(circle, rgba(4, 128, 144, .35), rgba(4, 128, 144, 0) 70%); box-shadow: 0 0 34px rgba(0, 139, 157, .28); }
-  .community-sigil svg { width: 30px; height: 30px; fill: none; stroke: var(--saae-turquoise-lift); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   .community-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 34px; }
-  .community-join { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding-inline: 24px; border: 1px solid rgba(119, 224, 232, .68); border-radius: 999px; background: linear-gradient(135deg, var(--saae-turquoise), #047383); box-shadow: 0 10px 28px rgba(0, 139, 157, .28); color: #f7ffff; font: inherit; font-weight: 800; cursor: pointer; transition: transform 260ms var(--ease-out), box-shadow 260ms ease; }
-  .community-join:hover, .community-join:focus-visible { transform: translateY(-3px); box-shadow: 0 16px 36px rgba(0, 139, 157, .42); }
-  .community-quiet { display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding-inline: 22px; border: 1px solid rgba(184, 232, 240, .5); border-radius: 999px; background: rgba(3, 22, 24, .52); color: var(--paper); font-weight: 700; text-decoration: none; transition: border-color 260ms ease; }
-  .community-quiet:hover { border-color: var(--saae-turquoise-lift); }
-  .community-join svg { width: 18px; height: 18px; }
-  html[dir="rtl"] .community-join svg { transform: scaleX(-1); }
-  .community-join:focus-visible, .community-quiet:focus-visible, .community-story:focus-visible { outline: 3px solid var(--saae-turquoise-lift); outline-offset: 3px; }
+  .community-story:focus-visible { outline: 3px solid var(--saae-turquoise-lift); outline-offset: 3px; }
 
   .community-section { padding-block: clamp(56px, 7vw, 96px); }
   .community-section .head { padding: 0 0 clamp(8px, 2vw, 18px); }
@@ -524,38 +516,75 @@
     .community-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .community, .community-story, .community-join { transition: none; }
-    .community:hover, .community:focus-within, .community-story:hover, .community-join:hover { transform: none; }
+    .community, .community-story { transition: none; }
+    .community:hover, .community:focus-within, .community-story:hover { transform: none; }
   }
 
   /* ==== Community hero ====================================================
-     The contact and About composition: copy beside a mark stage, where the
-     community's number is poured in the SAAE photo fill over a hollow ghost
-     word. The type stays light; the mark carries the weight. */
-  .community-hero { position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; gap: clamp(28px, 5vw, 72px); min-height: min(760px, 92vh); padding: clamp(110px, 12vw, 150px) calc((100% - var(--page)) / 2) clamp(48px, 6vw, 80px); }
+     The contact and About composition: light copy beside a mark stage. The
+     copy borrows the homepage headline's two-tone fall and the homepage
+     card's one-line promise; the stage pours the community's number in the
+     SAAE photo fill above the root system the homepage says every community
+     grows through, with this one's root lit. A pager closes the hero. */
+  .community-hero { position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); align-items: center; column-gap: clamp(28px, 5vw, 72px); row-gap: clamp(36px, 5vw, 56px); min-height: min(860px, 100vh); padding: clamp(110px, 12vw, 150px) calc((100% - var(--page)) / 2) clamp(28px, 4vw, 40px); }
   .hero-glow { position: absolute; border-radius: 50%; pointer-events: none; }
   .hero-glow-a { inset: -18% 42% 24% -16%; background: radial-gradient(circle, rgba(94, 216, 230, .18), transparent 66%); animation: amb-a 22s ease-in-out infinite alternate; }
   .hero-glow-b { inset: 44% -10% -26% 44%; background: radial-gradient(circle, rgba(129, 166, 87, .14), transparent 68%); }
   .community-hero-copy { position: relative; z-index: 2; }
-  .community-label { margin: 0; padding-inline-start: 18px; border-inline-start: 2px solid rgba(119, 224, 232, .55); color: var(--saae-turquoise-lift); font-size: .74rem; font-weight: 800; line-height: 1.6; letter-spacing: .2em; text-transform: uppercase; }
+
+  .community-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; margin: 0; padding-inline-start: 18px; border-inline-start: 2px solid rgba(119, 224, 232, .55); color: var(--saae-turquoise-lift); font-size: .74rem; font-weight: 800; line-height: 1.6; letter-spacing: .2em; text-transform: uppercase; }
+  .community-label-n { color: var(--ink-muted); font-weight: 700; letter-spacing: .12em; }
   html[dir="rtl"] .community-label { font-size: .88rem; letter-spacing: 0; }
-  .community-title { margin: 18px 0 0; color: var(--paper); font-size: clamp(2.3rem, 4.2vw, 3.7rem); font-weight: 700; letter-spacing: -.035em; line-height: 1.08; text-wrap: balance; }
-  html[dir="rtl"] .community-title { letter-spacing: 0; line-height: 1.3; }
-  .community-intro { max-width: 46ch; margin: 22px 0 0; color: var(--ink-muted); font-size: clamp(1rem, 1.3vw, 1.12rem); line-height: 1.85; }
-  .community-markstage { position: relative; z-index: 1; display: grid; justify-items: end; align-content: center; min-height: clamp(260px, 32vw, 440px); }
-  .community-ghost { position: absolute; inset-inline-end: -6%; top: 50%; transform: translateY(-95%); color: transparent; -webkit-text-stroke: 1.4px rgba(184, 232, 240, .16); font-size: clamp(72px, 11vw, 160px); font-weight: 900; letter-spacing: -.03em; white-space: nowrap; pointer-events: none; user-select: none; }
+
+  .community-title { margin: 20px 0 0; font-size: clamp(2.7rem, 5.2vw, 4.6rem); line-height: 1.02; letter-spacing: -.04em; }
+  .community-title-line { display: block; color: var(--paper); font-weight: 700; filter: drop-shadow(0 2px 9px rgba(2, 18, 22, .82)) drop-shadow(0 0 26px rgba(0, 96, 110, .42)); }
+  .community-title-accent { color: var(--saae-turquoise-lift); font-weight: 400; }
+  html[dir="rtl"] .community-title { letter-spacing: 0; line-height: 1.22; }
+
+  .community-tagline { display: flex; align-items: center; gap: 14px; margin: 26px 0 0; color: var(--olive-lift); font-size: clamp(1.02rem, 1.4vw, 1.2rem); font-weight: 700; line-height: 1.5; }
+  .community-tagline::before { content: ""; flex: none; width: 34px; height: 2px; background: linear-gradient(90deg, var(--petrol), var(--olive)); }
+  html[dir="rtl"] .community-tagline::before { background: linear-gradient(270deg, var(--petrol), var(--olive)); }
+  .community-intro { max-width: 46ch; margin: 14px 0 0; color: var(--ink-muted); font-size: clamp(1rem, 1.25vw, 1.08rem); line-height: 1.85; }
+
+  .community-markstage { position: relative; z-index: 1; display: grid; justify-items: center; align-content: center; }
+  .community-ghost { position: absolute; inset-inline: -10%; top: 14%; text-align: center; color: transparent; -webkit-text-stroke: 1.4px rgba(184, 232, 240, .14); font-size: clamp(64px, 9.5vw, 138px); font-weight: 900; letter-spacing: -.03em; line-height: 1; white-space: nowrap; pointer-events: none; user-select: none; }
   html[dir="rtl"] .community-ghost { letter-spacing: 0; }
-  .community-mark { position: relative; margin: 0; font-size: clamp(150px, 22vw, 300px); font-weight: 900; letter-spacing: -.04em; line-height: .9; direction: ltr; }
-  .community-markstage .community-sigil { position: absolute; inset-inline-start: 6%; bottom: 16%; margin: 0; width: 78px; height: 78px; background: radial-gradient(circle, rgba(4, 128, 144, .35), rgba(4, 23, 28, .78) 72%); backdrop-filter: blur(8px); }
-  .community-markstage .community-sigil svg { width: 34px; height: 34px; }
-  .community-dots { display: flex; gap: 10px; margin: 22px 0 0; padding: 0; list-style: none; }
-  .community-dots li { width: 7px; height: 7px; border-radius: 50%; background: rgba(184, 232, 240, .22); }
-  .community-dots li.is-current { width: 26px; border-radius: 999px; background: var(--saae-turquoise-lift); box-shadow: 0 0 14px rgba(119, 224, 232, .6); }
+  .community-mark { position: relative; margin: 0; font-size: clamp(120px, 15vw, 214px); font-weight: 900; letter-spacing: -.04em; line-height: .88; direction: ltr; }
+
+  .community-roots { position: relative; display: block; width: min(100%, 440px); height: auto; margin-top: -4px; overflow: visible; }
+  html[dir="rtl"] .community-roots { transform: scaleX(-1); }
+  .community-roots .root { fill: none; stroke: rgba(184, 232, 240, .2); stroke-width: 1.2; stroke-linecap: round; }
+  .community-roots .root-node { fill: rgba(184, 232, 240, .34); }
+  .community-roots .root.is-current { stroke: var(--saae-turquoise-lift); stroke-width: 2.2; filter: drop-shadow(0 0 6px rgba(119, 224, 232, .7)); stroke-dasharray: 1; stroke-dashoffset: 1; animation: community-root-grow 1.6s var(--ease-out) .35s forwards; }
+  .community-roots .root-trunk { fill: var(--olive-lift); filter: drop-shadow(0 0 8px rgba(168, 207, 126, .6)); }
+  .community-roots .root-seal { fill: #06232a; stroke: var(--saae-turquoise-lift); stroke-width: 1.5; filter: drop-shadow(0 0 12px rgba(0, 139, 157, .7)); animation: community-seal-in 700ms var(--ease-out) 1.5s both; transform-box: fill-box; transform-origin: center; }
+  .community-roots .root-icon { fill: none; stroke: var(--saae-turquoise-lift); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; animation: community-seal-in 700ms var(--ease-out) 1.6s both; transform-box: fill-box; transform-origin: center; }
+  html[dir="rtl"] .community-roots .root-icon { scale: -1 1; }
+  @keyframes community-root-grow { to { stroke-dashoffset: 0; } }
+  @keyframes community-seal-in { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+
+  .community-pager { position: relative; z-index: 2; grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .community-pager-link { display: grid; gap: 6px; justify-items: start; color: var(--ink-muted); text-decoration: none; }
+  .community-pager-link.is-next { justify-items: end; text-align: end; }
+  .community-pager-dir { display: inline-flex; align-items: center; gap: 8px; color: var(--petrol-lift); font-size: .7rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+  html[dir="rtl"] .community-pager-dir { font-size: .82rem; letter-spacing: 0; }
+  .community-pager-link.is-next .community-pager-dir { flex-direction: row-reverse; }
+  .community-pager-dir svg { width: 14px; height: 14px; transition: transform 320ms var(--ease-out); }
+  .community-pager-link.is-next .community-pager-dir svg, html[dir="rtl"] .community-pager-link.is-prev .community-pager-dir svg { transform: scaleX(-1); }
+  html[dir="rtl"] .community-pager-link.is-next .community-pager-dir svg { transform: none; }
+  .community-pager-name { color: var(--paper); font-size: clamp(1rem, 1.3vw, 1.12rem); font-weight: 700; transition: color 320ms ease; }
+  .community-pager-name b { margin-inline-end: 6px; color: var(--olive-lift); font-weight: 800; }
+  .community-pager-link:hover .community-pager-name, .community-pager-link:focus-visible .community-pager-name { color: var(--saae-turquoise-lift); }
+  .community-pager-link:focus-visible { outline: 3px solid var(--saae-turquoise-lift); outline-offset: 6px; border-radius: 6px; }
+
   @media (max-width: 900px) {
     .community-hero { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 110px; }
-    .community-markstage { order: -1; justify-items: start; min-height: 0; }
-    .community-mark { font-size: clamp(110px, 34vw, 180px); }
-    .community-ghost { inset-inline-end: auto; inset-inline-start: 30%; font-size: clamp(56px, 16vw, 110px); }
-    .community-markstage .community-sigil { inset-inline-start: auto; inset-inline-end: 0; bottom: 30%; }
+    .community-markstage { order: -1; }
+    .community-mark { font-size: clamp(96px, 26vw, 150px); }
+    .community-roots { width: min(100%, 340px); }
+    .community-ghost { font-size: clamp(52px, 15vw, 100px); }
   }
-  @media (prefers-reduced-motion: reduce) { .hero-glow-a { animation: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-glow-a, .community-roots .root-seal, .community-roots .root-icon { animation: none; }
+    .community-roots .root.is-current { animation: none; stroke-dashoffset: 0; }
+  }

@@ -296,3 +296,38 @@ export const METRICS_BY_KEY: Record<CommunityKey, Metric[]> = {
     { value: "+60", label: { ar: "أداة جودة مطوَّرة", en: "Quality Tools Developed" } },
   ],
 };
+
+/* The homepage community card's names and one-line promises
+   (public/cinematic/js/home-inline.js), so a page opens where its card left off. */
+export const SHORT_NAME: Record<CommunityKey, Bilingual> = {
+  data: { en: "Data", ar: "البيانات" },
+  architecture: { en: "Smart Urban", ar: "العمراني الذكي" },
+  medical: { en: "Healthcare", ar: "الرعاية الصحية" },
+  research: { en: "Smart Research", ar: "البحث الذكي" },
+  software: { en: "Software", ar: "البرمجيات" },
+  economy: { en: "Smart Economy", ar: "الاقتصاد الذكي" },
+  trainers: { en: "Trainers", ar: "المدربين" },
+  media: { en: "Media", ar: "الإعلام" },
+  quality: { en: "Quality Entrepreneurship", ar: "الجودة الريادية" },
+};
+
+export const TAGLINE: Record<CommunityKey, Bilingual> = {
+  data: { en: "Turn information into insight.", ar: "حوّل المعلومات إلى رؤى." },
+  architecture: {
+    en: "Design smarter, more responsive cities.",
+    ar: "صمّم مدناً أذكى وأكثر استجابة.",
+  },
+  medical: {
+    en: "Apply AI where care matters.",
+    ar: "طبّق الذكاء الاصطناعي حيث تكون الرعاية مهمة.",
+  },
+  research: {
+    en: "Move ideas from questions to evidence.",
+    ar: "انقل الأفكار من الأسئلة إلى الأدلة.",
+  },
+  software: { en: "Build useful digital systems.", ar: "ابنِ أنظمة رقمية مفيدة." },
+  economy: { en: "Turn innovation into opportunity.", ar: "حوّل الابتكار إلى فرص." },
+  trainers: { en: "Equip the people who teach others.", ar: "تجهيز من يعلّمون غيرهم." },
+  media: { en: "Make knowledge clear and accessible.", ar: "جعل المعرفة واضحة ومتاحة." },
+  quality: { en: "Raise the standard for new ventures.", ar: "رفع معيار المشاريع الناشئة." },
+};
