@@ -12,6 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getContact, addNote, deleteNote, updateContact } from "@/lib/crm.functions";
 import { toUserMessage } from "@/lib/safe-error";
 import { useLang } from "@/lib/i18n";
+import { useAuth } from "@/hooks/useAuth";
+import { useFormDraft } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
 
 type Data = Awaited<ReturnType<typeof getContact>>;
 
@@ -24,7 +27,10 @@ export function CrmContactDetail({ contactId }: { contactId: string }) {
   const patchContact = useServerFn(updateContact);
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
-  const [noteBody, setNoteBody] = useState("");
+  const { user } = useAuth();
+  const noteDraft = useFormDraft(formDraftKey(user?.id, "crm-contact-note", contactId), "");
+  const noteBody = noteDraft.values;
+  const setNoteBody = noteDraft.setValues;
   const [saving, setSaving] = useState(false);
 
   const load = () => {
@@ -42,7 +48,7 @@ export function CrmContactDetail({ contactId }: { contactId: string }) {
     setSaving(true);
     try {
       await submitNote({ data: { contactId, body: noteBody.trim() } });
-      setNoteBody("");
+      noteDraft.clearDraft();
       load();
     } catch (e) { toast.error(toUserMessage(e)); }
     finally { setSaving(false); }

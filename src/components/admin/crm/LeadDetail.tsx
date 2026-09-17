@@ -16,6 +16,9 @@ import {
 } from "@/lib/crm.functions";
 import { toUserMessage } from "@/lib/safe-error";
 import { useLang } from "@/lib/i18n";
+import { useAuth } from "@/hooks/useAuth";
+import { useFormDraft } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
 
 const STATUSES = ["new", "contacted", "qualified", "converted", "archived"] as const;
 type StatusT = (typeof STATUSES)[number];
@@ -60,7 +63,10 @@ export function LeadDetail({ variant, leadId }: { variant: "individual" | "compa
   const [data, setData] = useState<Awaited<ReturnType<typeof getIndividualLead>> | Awaited<ReturnType<typeof getCompanyLead>> | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [noteBody, setNoteBody] = useState("");
+  const { user } = useAuth();
+  const noteDraft = useFormDraft(formDraftKey(user?.id, "crm-lead-note", leadId), "");
+  const noteBody = noteDraft.values;
+  const setNoteBody = noteDraft.setValues;
 
   const load = () => {
     setLoading(true);
@@ -106,7 +112,7 @@ export function LeadDetail({ variant, leadId }: { variant: "individual" | "compa
     setSaving(true);
     try {
       await addNoteFn({ data: { leadType: variant, leadId, body: noteBody.trim() } });
-      setNoteBody("");
+      noteDraft.clearDraft();
       toast.success(tr.saved);
       load();
     } catch (e) { toast.error(toUserMessage(e)); }

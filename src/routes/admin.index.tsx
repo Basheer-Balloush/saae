@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
 import { toUserMessage } from "@/lib/safe-error";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRecordDraft, useReopenDraftForm } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
+import { DraftNotice } from "@/components/admin/DraftNotice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -231,7 +234,7 @@ const newsSchema = z.object({
 });
 
 function AdminDashboard() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const { lang } = useLang();
   const labels = ADMIN_TEXT[lang];
   void COMMUNITY_LABELS_AR; void COMMUNITY_LABELS_EN;
@@ -254,6 +257,16 @@ function AdminDashboard() {
   }, [isAdmin, refreshKey]);
 
   const refresh = () => setRefreshKey((k) => k + 1);
+
+  useReopenDraftForm({
+    userId: user?.id,
+    form: "news",
+    rows: items,
+    open: (row) => {
+      setEditing(row);
+      setShowForm(true);
+    },
+  });
 
   const handleDelete = async (id: string) => {
     if (!(await confirmDialog({ title: labels.deleteNewsConfirm, destructive: true }))) return;
@@ -360,6 +373,7 @@ function AdminDashboard() {
       {showForm && (
         <NewsForm
           initial={editing}
+          draftKey={formDraftKey(user?.id, "news", editing?.id ?? "new")}
           labels={labels}
           lang={lang}
           onClose={() => setShowForm(false)}
@@ -396,12 +410,14 @@ async function uploadToBucket(
 
 function NewsForm({
   initial,
+  draftKey,
   labels,
   lang,
   onClose,
   onSaved,
 }: {
   initial: NewsRow | null;
+  draftKey: string | null;
   labels: AdminLabels;
   lang: "en" | "ar";
   onClose: () => void;
@@ -429,6 +445,24 @@ function NewsForm({
   const [images, setImages] = useState<string[]>(initial?.images ?? []);
   const [videos, setVideos] = useState<string[]>(initial?.videos ?? []);
   const [saving, setSaving] = useState(false);
+
+  const draftValues = useMemo(
+    () => ({ titleAr, titleEn, excerptAr, excerptEn, contentAr, contentEn, categories, publishedAt, showOnHome, imageUrl, images, videos }),
+    [titleAr, titleEn, excerptAr, excerptEn, contentAr, contentEn, categories, publishedAt, showOnHome, imageUrl, images, videos],
+  );
+  const [loadedValues] = useState(draftValues);
+  const draft = useRecordDraft({
+    key: draftKey,
+    loaded: loadedValues,
+    current: draftValues,
+    apply: (d) => {
+      setTitleAr(d.titleAr); setTitleEn(d.titleEn);
+      setExcerptAr(d.excerptAr); setExcerptEn(d.excerptEn);
+      setContentAr(d.contentAr); setContentEn(d.contentEn);
+      setCategories(d.categories); setPublishedAt(d.publishedAt); setShowOnHome(d.showOnHome);
+      setImageUrl(d.imageUrl); setImages(d.images); setVideos(d.videos);
+    },
+  });
 
   // Per-field upload lanes — each has independent uploading flag, progress, and error.
   const [coverUploading, setCoverUploading] = useState(false);
@@ -685,6 +719,7 @@ function NewsForm({
         if (error) throw error;
         toast.success(labels.created);
       }
+      draft.clear();
       onSaved();
     } catch (err: unknown) {
       toast.error(toUserMessage(err));
@@ -707,6 +742,7 @@ function NewsForm({
         </div>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-5">
+          <DraftNotice show={draft.restored} onDiscard={draft.discard} />
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="title_en">{labels.titleEn}</Label>
@@ -954,10 +990,21 @@ type MemberRow = {
 };
 
 export function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar" }) {
+  const { user } = useAuth();
   const [list, setList] = useState<MemberRow[]>([]);
   const [editing, setEditing] = useState<MemberRow | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [bump, setBump] = useState(0);
+
+  useReopenDraftForm({
+    userId: user?.id,
+    form: "member",
+    rows: list,
+    open: (row) => {
+      setEditing(row);
+      setShowForm(true);
+    },
+  });
 
   useEffect(() => {
     supabase
@@ -1037,6 +1084,7 @@ export function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en"
       {showForm && (
         <MemberForm
           initial={editing}
+          draftKey={formDraftKey(user?.id, "member", editing?.id ?? "new")}
           labels={labels}
           lang={lang}
           onClose={() => setShowForm(false)}
@@ -1049,12 +1097,14 @@ export function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en"
 
 function MemberForm({
   initial,
+  draftKey,
   labels,
   lang,
   onClose,
   onSaved,
 }: {
   initial: MemberRow | null;
+  draftKey: string | null;
   labels: AdminLabels;
   lang: "en" | "ar";
   onClose: () => void;
@@ -1069,6 +1119,21 @@ function MemberForm({
   const [bioEn, setBioEn] = useState(initial?.bio_en ?? "");
   const [photoUrl, setPhotoUrl] = useState(initial?.photo_url ?? "");
   const [order, setOrder] = useState(initial?.display_order ?? 0);
+  const draftValues = useMemo(
+    () => ({ category, nameAr, nameEn, posAr, posEn, bioAr, bioEn, photoUrl, order }),
+    [category, nameAr, nameEn, posAr, posEn, bioAr, bioEn, photoUrl, order],
+  );
+  const [loadedValues] = useState(draftValues);
+  const draft = useRecordDraft({
+    key: draftKey,
+    loaded: loadedValues,
+    current: draftValues,
+    apply: (d) => {
+      setCategory(d.category); setNameAr(d.nameAr); setNameEn(d.nameEn);
+      setPosAr(d.posAr); setPosEn(d.posEn); setBioAr(d.bioAr); setBioEn(d.bioEn);
+      setPhotoUrl(d.photoUrl); setOrder(d.order);
+    },
+  });
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
@@ -1118,6 +1183,7 @@ function MemberForm({
         if (error) throw error;
         toast.success(labels.created);
       }
+      draft.clear();
       onSaved();
     } catch (err: any) {
       toast.error(toUserMessage(err));
@@ -1139,6 +1205,7 @@ function MemberForm({
         </div>
 
         <form onSubmit={onSubmit} className="mt-5 space-y-5">
+          <DraftNotice show={draft.restored} onDiscard={draft.discard} />
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>{labels.category}</Label>
@@ -1269,10 +1336,21 @@ async function uploadPartnerLogo(
 
 export function PartnersAdmin({ lang }: { lang: "en" | "ar" }) {
   const ar = lang === "ar";
+  const { user } = useAuth();
   const [rows, setRows] = useState<PartnerRow[]>([]);
   const [editing, setEditing] = useState<PartnerRow | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [bump, setBump] = useState(0);
+
+  useReopenDraftForm({
+    userId: user?.id,
+    form: "partner",
+    rows,
+    open: (row) => {
+      setEditing(row);
+      setShowForm(true);
+    },
+  });
 
   useEffect(() => {
     supabase
@@ -1369,6 +1447,7 @@ export function PartnersAdmin({ lang }: { lang: "en" | "ar" }) {
       {showForm && (
         <PartnerForm
           initial={editing}
+          draftKey={formDraftKey(user?.id, "partner", editing?.id ?? "new")}
           lang={lang}
           onClose={() => setShowForm(false)}
           onSaved={() => { setShowForm(false); setBump((k) => k + 1); }}
@@ -1379,9 +1458,10 @@ export function PartnersAdmin({ lang }: { lang: "en" | "ar" }) {
 }
 
 function PartnerForm({
-  initial, lang, onClose, onSaved,
+  initial, draftKey, lang, onClose, onSaved,
 }: {
   initial: PartnerRow | null;
+  draftKey: string | null;
   lang: "en" | "ar";
   onClose: () => void;
   onSaved: () => void;
@@ -1393,6 +1473,20 @@ function PartnerForm({
   const [sizeClass, setSizeClass] = useState(initial?.size_class ?? "h-24");
   const [displayOrder, setDisplayOrder] = useState(initial?.display_order ?? 0);
   const [showOnHome, setShowOnHome] = useState(initial?.show_on_home ?? true);
+  const draftValues = useMemo(
+    () => ({ name, logoUrl, logoLightUrl, sizeClass, displayOrder, showOnHome }),
+    [name, logoUrl, logoLightUrl, sizeClass, displayOrder, showOnHome],
+  );
+  const [loadedValues] = useState(draftValues);
+  const draft = useRecordDraft({
+    key: draftKey,
+    loaded: loadedValues,
+    current: draftValues,
+    apply: (d) => {
+      setName(d.name); setLogoUrl(d.logoUrl); setLogoLightUrl(d.logoLightUrl);
+      setSizeClass(d.sizeClass); setDisplayOrder(d.displayOrder); setShowOnHome(d.showOnHome);
+    },
+  });
   const [uploading, setUploading] = useState<"dark" | "light" | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploadPct, setUploadPct] = useState<{ which: "dark" | "light"; pct: number; loaded: number; total: number; name: string } | null>(null);
@@ -1436,6 +1530,7 @@ function PartnerForm({
     setSaving(false);
     if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(ar ? (initial ? "تم التحديث" : "تم الإنشاء") : (initial ? "Updated" : "Created"));
+    draft.clear();
     onSaved();
   };
 
@@ -1452,6 +1547,7 @@ function PartnerForm({
         </div>
 
         <form onSubmit={submit} className="space-y-4">
+          <DraftNotice show={draft.restored} onDiscard={draft.discard} />
           <div>
             <Label>{ar ? "الاسم" : "Name"}</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} required />

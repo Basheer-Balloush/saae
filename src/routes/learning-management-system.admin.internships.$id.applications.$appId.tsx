@@ -19,6 +19,9 @@ import {
 } from "lucide-react";
 
 import { useLang } from "@/lib/i18n";
+import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { useFormDraft } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
 import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
 import {
   adminGetApplication,
@@ -183,11 +186,19 @@ function ApplicationDetail() {
   } | null>(null);
   const [admins, setAdmins] = useState<Array<{ user_id: string; email: string | null }>>([]);
 
-  const [nextStatus, setNextStatus] = useState<ApplicationStatus | "">("");
-  const [reason, setReason] = useState("");
+  const { user } = useLmsAuth();
+  const statusDraft = useFormDraft<{ nextStatus: ApplicationStatus | ""; reason: string }>(
+    formDraftKey(user?.id, "internship-application-status", appId),
+    { nextStatus: "", reason: "" },
+  );
+  const { nextStatus, reason } = statusDraft.values;
+  const setNextStatus = (v: ApplicationStatus | "") => statusDraft.setValues((d) => ({ ...d, nextStatus: v }));
+  const setReason = (v: string) => statusDraft.setValues((d) => ({ ...d, reason: v }));
   const [savingStatus, setSavingStatus] = useState(false);
 
-  const [note, setNote] = useState("");
+  const noteDraft = useFormDraft(formDraftKey(user?.id, "internship-application-note", appId), "");
+  const note = noteDraft.values;
+  const setNote = noteDraft.setValues;
   const [savingNote, setSavingNote] = useState(false);
 
   const [savingAssign, setSavingAssign] = useState(false);
@@ -208,8 +219,6 @@ function ApplicationDetail() {
       setCvAccess({ status: "idle" });
       setCvPreviewFailed(false);
       setAssignValue(res.application.assigned_admin ?? "__none__");
-      setNextStatus("");
-      setReason("");
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       const notFound = msg.includes("application_not_found") || msg.includes("P0002");
@@ -302,6 +311,7 @@ function ApplicationDetail() {
         },
       });
       toast.success(t.profileSaved);
+      statusDraft.clearDraft();
       await load();
     } catch (err) {
       toast.error(mapErr(err, lang));
@@ -316,7 +326,7 @@ function ApplicationDetail() {
     setSavingNote(true);
     try {
       await addNoteFn({ data: { application_id: appId, body } });
-      setNote("");
+      noteDraft.clearDraft();
       await load();
     } catch (err) {
       toast.error(mapErr(err, lang));

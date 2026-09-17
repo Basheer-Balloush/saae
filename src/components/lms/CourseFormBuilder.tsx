@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2, Loader2, GripVertical, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { useRecordDraft } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
+import { DraftNotice } from "@/components/admin/DraftNotice";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,9 +42,11 @@ export function CourseFormBuilder({ courseId }: { courseId: string }) {
   const [fields, setFields] = useState<Field[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadedFields, setLoadedFields] = useState<Field[] | null>(null);
 
   const load = async () => {
     setLoading(true);
+    setLoadedFields(null);
     const { data: f } = await supabase
       .from("lms_course_forms")
       .select("id,course_id,is_active")
@@ -54,7 +59,7 @@ export function CourseFormBuilder({ courseId }: { courseId: string }) {
         .select("*")
         .eq("form_id", f.id)
         .order("display_order");
-      setFields(
+      const loadedList =
         ((ff as Array<{
           id: string; form_id: string; display_order: number; field_type: string;
           label_ar: string; label_en: string | null; help_text: string | null;
@@ -64,8 +69,9 @@ export function CourseFormBuilder({ courseId }: { courseId: string }) {
           field_type: x.field_type as FieldType,
           options: Array.isArray(x.options) ? (x.options as string[]) : [],
           validation: (x.validation as Record<string, unknown>) ?? {},
-        }))
-      );
+        }));
+      setFields(loadedList);
+      setLoadedFields(loadedList);
     } else {
       setForm(null);
       setFields([]);
@@ -74,6 +80,13 @@ export function CourseFormBuilder({ courseId }: { courseId: string }) {
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [courseId]);
+
+  const draft = useRecordDraft<Field[]>({
+    key: formDraftKey(user?.id, "lms-course-form", courseId),
+    loaded: loadedFields,
+    current: loadedFields ? fields : null,
+    apply: setFields,
+  });
 
   const enableForm = async () => {
     if (!user) return;
@@ -178,6 +191,7 @@ export function CourseFormBuilder({ courseId }: { courseId: string }) {
       }
       await supabase.from("lms_course_forms").update({ updated_at: new Date().toISOString() }).eq("id", form.id);
       toast.success(ar ? "تم حفظ النموذج" : "Form saved");
+      draft.clear();
       await load();
     } catch (e) {
       toast.error(toUserMessage(e));
@@ -228,6 +242,8 @@ export function CourseFormBuilder({ courseId }: { courseId: string }) {
           </label>
         )}
       </div>
+
+      <DraftNotice show={draft.restored} onDiscard={draft.discard} />
 
       {/* Locked base fields — always shown to students */}
       <div className="space-y-2">

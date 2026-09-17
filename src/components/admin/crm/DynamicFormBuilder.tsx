@@ -15,6 +15,10 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
 import { useLang } from "@/lib/i18n";
+import { useAuth } from "@/hooks/useAuth";
+import { useRecordDraft } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
+import { DraftNotice } from "@/components/admin/DraftNotice";
 import { toUserMessage } from "@/lib/safe-error";
 import {
   FIELD_TYPES,
@@ -106,6 +110,23 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
   const [fields, setFields] = useState<FormField[]>(initial?.fields ?? []);
   const [saving, setSaving] = useState(false);
   const [slugConfirm, setSlugConfirm] = useState(false);
+
+  const { user } = useAuth();
+  const draftValues = useMemo(
+    () => ({ nameAr, nameEn, descAr, descEn, submitAr, submitEn, slug, slugTouched, status, fields }),
+    [nameAr, nameEn, descAr, descEn, submitAr, submitEn, slug, slugTouched, status, fields],
+  );
+  const [loadedValues, setLoadedValues] = useState(draftValues);
+  const draft = useRecordDraft({
+    key: formDraftKey(user?.id, "dynamic-form", initial?.id ?? "new"),
+    loaded: loadedValues,
+    current: draftValues,
+    apply: (d) => {
+      setNameAr(d.nameAr); setNameEn(d.nameEn); setDescAr(d.descAr); setDescEn(d.descEn);
+      setSubmitAr(d.submitAr); setSubmitEn(d.submitEn); setSlug(d.slug); setSlugTouched(d.slugTouched);
+      setStatus(d.status); setFields(d.fields);
+    },
+  });
 
   const wasPublished = initial?.status === "published";
   const originalSlug = initial?.slug;
@@ -202,6 +223,8 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
         ? await update({ data: { ...parsed.data, id: initial.id } })
         : await create({ data: parsed.data });
       toast.success(tr.saved);
+      draft.clear();
+      setLoadedValues(draftValues);
       navigate({ to: "/admin/forms/$formId/edit", params: { formId: saved.id } });
     } catch (e) {
       const msg = toUserMessage(e);
@@ -215,6 +238,7 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
 
   return (
     <div className="space-y-6">
+      <DraftNotice show={draft.restored} onDiscard={draft.discard} />
       {/* Meta */}
       <div className="grid gap-4 rounded-xl border border-border bg-card p-4 sm:grid-cols-2">
         <div className="space-y-1">
@@ -418,6 +442,8 @@ export function DynamicFormBuilder({ initial }: { initial?: DynamicForm }) {
                         ? await update({ data: { ...parsed.data, id: initial.id } })
                         : await create({ data: parsed.data });
                       toast.success(tr.saved);
+                      draft.clear();
+                      setLoadedValues(draftValues);
                       navigate({ to: "/admin/forms/$formId/edit", params: { formId: saved.id } });
                     } catch (e) {
                       toast.error(toUserMessage(e));

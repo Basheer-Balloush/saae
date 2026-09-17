@@ -19,6 +19,12 @@ import {
   adminCreateDonation, adminDeleteDonation, adminUpdateSettings, adminListCourses,
 } from "@/lib/initiative.functions";
 import { confirmDialog } from "@/hooks/useConfirm";
+import { useAuth } from "@/hooks/useAuth";
+import { useFormDraft, useRecordDraft } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
+import { DraftNotice } from "@/components/admin/DraftNotice";
+
+const EMPTY_DONATION = { donor_name: "", donor_display_name: "", donor_type: "company", email: "", phone: "", logo_url: "", chairs_count: 10, currency: "USD", confirm: true };
 
 export const Route = createFileRoute("/admin/initiative")({
   ssr: false,
@@ -40,26 +46,33 @@ function AdminInitiative() {
 
   const [stats, setStats] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
+  const [loadedSettings, setLoadedSettings] = useState<any>(null);
   const [donations, setDonations] = useState<any[]>([]);
   const [waitlist, setWaitlist] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
 
   const reloadAll = () => {
     statsFn().then(setStats).catch(() => {});
-    settingsFn().then(setSettings).catch(() => {});
+    settingsFn().then((s) => { setSettings(s); setLoadedSettings(s); }).catch(() => {});
     donationsFn().then(setDonations).catch(() => {});
     waitlistFn().then(setWaitlist).catch(() => {});
     coursesFn().then(setCourses).catch(() => {});
   };
   useEffect(() => { reloadAll(); }, []);
 
+  const { user } = useAuth();
+  const [tab, setTab] = useState("donations");
+
   // donation form
-  const [df, setDf] = useState({ donor_name: "", donor_display_name: "", donor_type: "company", email: "", phone: "", logo_url: "", chairs_count: 10, currency: "USD", confirm: true });
+  const donationDraft = useFormDraft(formDraftKey(user?.id, "initiative-donation", "new"), EMPTY_DONATION);
+  const df = donationDraft.values;
+  const setDf = donationDraft.setValues;
   const submitDonation = async () => {
     try {
       await createFn({ data: { ...df, chairs_count: Number(df.chairs_count), donor_type: df.donor_type as any, currency: df.currency as any } });
       toast.success("تم");
-      setDf({ ...df, donor_name: "", donor_display_name: "", email: "", phone: "" });
+      // Keep the donor type, logo and amounts for entering similar donations in a row.
+      donationDraft.clearDraft({ ...EMPTY_DONATION, donor_type: df.donor_type, logo_url: df.logo_url, chairs_count: df.chairs_count, currency: df.currency, confirm: df.confirm });
       reloadAll();
     } catch (e: any) { toast.error(e?.message); }
   };
@@ -76,10 +89,20 @@ function AdminInitiative() {
         values_ar: settings.values_ar, values_en: settings.values_en,
       };
       await updateFn({ data: payload });
+      setLoadedSettings(settings);
       toast.success("تم حفظ الإعدادات");
     } catch (e: any) { toast.error(e?.message); }
   };
 
+  const settingsDraft = useRecordDraft({
+    key: formDraftKey(user?.id, "initiative-settings", "current"),
+    loaded: loadedSettings,
+    current: settings,
+    apply: (d) => {
+      setSettings(d);
+      setTab("settings");
+    },
+  });
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -93,7 +116,7 @@ function AdminInitiative() {
         <Card label="إجمالي مقاعد ممولة" value={stats?.totalFunded ?? 0} />
       </div>
 
-      <Tabs defaultValue="donations" className="mt-8">
+      <Tabs value={tab} onValueChange={setTab} className="mt-8">
         <TabsList>
           <TabsTrigger value="donations">التبرعات</TabsTrigger>
           <TabsTrigger value="waitlist">قائمة الانتظار</TabsTrigger>
@@ -175,6 +198,7 @@ function AdminInitiative() {
         <TabsContent value="settings">
           {settings && (
             <div className="space-y-4 rounded-2xl border border-border bg-card p-6">
+              <DraftNotice show={settingsDraft.restored} onDiscard={settingsDraft.discard} />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div><Label>سعر المقعد (USD)</Label><Input type="number" step="0.01" value={settings.seat_price_usd} onChange={(e) => setSettings({ ...settings, seat_price_usd: e.target.value })} /></div>
                 <div><Label>سعر صرف USD→SYP</Label><Input type="number" value={settings.usd_to_syp_rate} onChange={(e) => setSettings({ ...settings, usd_to_syp_rate: e.target.value })} /></div>
