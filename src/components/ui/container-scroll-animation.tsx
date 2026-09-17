@@ -38,7 +38,7 @@ export function ContainerScroll({
   const titleX = useTransform(
     scrollProgress,
     [0, 0.38, 0.72, 1],
-    layout === "split" ? [-270, -270, 0, 0] : [0, 0, 0, 0],
+    layout === "split" ? [0, 0, 270, 270] : [0, 0, 0, 0],
   );
   const cardY = useTransform(scrollProgress, [0, 0.66, 0.94], [140, 140, 0]);
   const cardRotate = useTransform(scrollProgress, [0, 0.66, 0.94], [4, 4, 0]);
@@ -58,10 +58,13 @@ export function ContainerScroll({
       if (!element) return;
 
       const rect = element.getBoundingClientRect();
-      const start = window.innerHeight * 0.92;
+      // The split FAQ starts when its section reaches the viewport. Using the
+      // viewport-bottom trigger here made a hash jump begin halfway through
+      // the title movement instead of showing the title centered first.
+      const start = layout === "split" ? 0 : window.innerHeight * 0.92;
       const end =
         layout === "split"
-          ? Math.min(start - 1, window.innerHeight - element.offsetHeight)
+          ? Math.min(-1, window.innerHeight - element.offsetHeight)
           : -window.innerHeight * 0.15;
       const distance = start - rect.top;
       const totalDistance = start - end;
