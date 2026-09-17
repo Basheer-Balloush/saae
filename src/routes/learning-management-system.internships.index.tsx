@@ -6,7 +6,11 @@ import { Loader2 } from "lucide-react";
 
 import { useLang } from "@/lib/i18n";
 import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
-import { listPublicInternships, type PublicInternshipCard } from "@/lib/lms-internships-public.functions";
+import {
+  getApplyState,
+  listPublicInternships,
+  type PublicInternshipCard,
+} from "@/lib/lms-internships-public.functions";
 import { SubHero } from "@/components/lms-skin/SubHero";
 import { IconSearch } from "@/components/lms-skin/icons";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
@@ -145,7 +149,14 @@ function InternshipCard({ item, lang }: { item: PublicInternshipCard; lang: "ar"
   const summary = lang === "ar" ? item.summary_ar : item.summary_en;
   const location = lang === "ar" ? item.location_ar : item.location_en;
   const duration = lang === "ar" ? item.duration_ar : item.duration_en;
-  const closed = item.status === "closed";
+  const state = getApplyState(item);
+  const stateLabel = {
+    open: t.internshipOpen,
+    not_open_yet: t.internshipOpensSoon,
+    deadline_passed: t.internshipDeadlinePassed,
+    closed: t.internshipClosed,
+    unavailable: t.internshipHidden,
+  }[state];
   const meta = [
     location,
     duration,
@@ -170,9 +181,7 @@ function InternshipCard({ item, lang }: { item: PublicInternshipCard; lang: "ar"
             </span>
           )}
           <span className="opp-foot">
-            <span className={`status ${closed ? "is-review" : "is-open"}`}>
-              {closed ? t.internshipClosed : ar ? "التقديم مفتوح" : "Open"}
-            </span>
+            <span className={`status ${state === "open" ? "is-open" : "is-review"}`}>{stateLabel}</span>
             <span className="opp-apply">
               <span>{ar ? "تفاصيل الفرصة" : "View the internship"}</span> <span aria-hidden="true">{ar ? "←" : "→"}</span>
             </span>
