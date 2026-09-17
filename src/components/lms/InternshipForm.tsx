@@ -16,6 +16,10 @@ import {
 import { toast } from "sonner";
 
 import { useLang } from "@/lib/i18n";
+import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { useFormDraft } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
+import { DraftNotice } from "@/components/admin/DraftNotice";
 import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
 import {
   LIFECYCLE,
@@ -99,12 +103,12 @@ const DEFAULT_VALUES: InternshipFormValues = {
 export function InternshipForm({ mode, initial, applicationsCount = 0, onSubmit }: Props) {
   const { lang, dir } = useLang();
   const t = lmsInternshipsT[lang];
-  const [values, setValues] = useState<InternshipFormValues>(initial ?? DEFAULT_VALUES);
+  const { user } = useLmsAuth();
+  const { values, setValues, clearDraft, restored } = useFormDraft<InternshipFormValues>(
+    formDraftKey(user?.id, "lms-internship", initial?.id ?? "new"),
+    initial ?? DEFAULT_VALUES,
+  );
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (initial) setValues(initial);
-  }, [initial]);
 
   const set = <K extends keyof InternshipFormValues>(key: K, v: InternshipFormValues[K]) =>
     setValues((prev) => ({ ...prev, [key]: v }));
@@ -123,6 +127,7 @@ export function InternshipForm({ mode, initial, applicationsCount = 0, onSubmit 
         questions: values.questions.map((q, i) => ({ ...q, sort_order: i })),
       };
       await onSubmit(normalized);
+      clearDraft(mode === "edit" ? normalized : undefined);
     } catch {
       // handled upstream
     } finally {
@@ -185,6 +190,8 @@ export function InternshipForm({ mode, initial, applicationsCount = 0, onSubmit 
           </Button>
         </div>
       </header>
+
+      <DraftNotice show={restored} onDiscard={() => clearDraft()} />
 
       {/* Identity */}
       <Section title={lang === "ar" ? "الهوية" : "Identity"}>

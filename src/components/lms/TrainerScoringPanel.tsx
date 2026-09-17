@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
+import { useRecordDraft } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
+import { DraftNotice } from "@/components/admin/DraftNotice";
 import { Loader2, Plus, Trash2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,9 +65,19 @@ export default function TrainerScoringPanel({
   const [savingId, setSavingId] = useState<string | null>(null);
   const [pickEvaluator, setPickEvaluator] = useState("");
   const [activating, setActivating] = useState(false);
+  // Scores typed but not yet saved survive a refresh, and saving one score (which
+  // reloads the panel) no longer wipes the others.
+  const [loadedScores, setLoadedScores] = useState<Record<string, { points: string; comment: string }> | null>(null);
+  const scoresDraft = useRecordDraft({
+    key: formDraftKey(me, "trainer-scores", applicationId),
+    loaded: loadedScores,
+    current: loadedScores ? myScores : null,
+    apply: setMyScores,
+  });
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadedScores(null);
     const { data: auth } = await supabase.auth.getUser();
     const uid = auth.user?.id ?? null;
     setMe(uid);
@@ -87,6 +100,7 @@ export default function TrainerScoringPanel({
       if (row.evaluator_id === uid) mine[row.criterion_id] = { points: String(row.points), comment: row.comment ?? "" };
     }
     setMyScores(mine);
+    setLoadedScores(mine);
     setSummary(sum.error ? null : ((sum.data as unknown) as Summary));
     setLoading(false);
   }, [applicationId, applicantId]);
@@ -165,6 +179,7 @@ export default function TrainerScoringPanel({
   return (
     <section className="rounded-xl border border-border p-4 space-y-4">
       <h3 className="font-bold">{ar ? "التقييم والاعتماد" : "Scoring & accreditation"}</h3>
+      <DraftNotice show={scoresDraft.restored} onDiscard={scoresDraft.discard} />
 
       {/* Evaluators */}
       <div className="space-y-2">

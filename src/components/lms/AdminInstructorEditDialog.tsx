@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/ui/upload-progress";
+import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { useRecordDraft } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
+import { DraftNotice } from "@/components/admin/DraftNotice";
+
+type InstructorEdits = {
+  fullNameAr: string; fullNameEn: string; specialtyAr: string; specialtyEn: string;
+  bioAr: string; bioEn: string; linkedin: string; github: string; avatarUrl: string;
+};
 
 export function AdminInstructorEditDialog({
   userId,
@@ -38,6 +47,24 @@ export function AdminInstructorEditDialog({
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { user } = useLmsAuth();
+  const [loadedValues, setLoadedValues] = useState<InstructorEdits | null>(null);
+  const currentValues = useMemo<InstructorEdits>(
+    () => ({ fullNameAr, fullNameEn, specialtyAr, specialtyEn, bioAr, bioEn, linkedin, github, avatarUrl }),
+    [fullNameAr, fullNameEn, specialtyAr, specialtyEn, bioAr, bioEn, linkedin, github, avatarUrl],
+  );
+  const draft = useRecordDraft<InstructorEdits>({
+    key: formDraftKey(user?.id, "lms-instructor", userId),
+    loaded: loadedValues,
+    current: loadedValues ? currentValues : null,
+    apply: (d) => {
+      setFullNameAr(d.fullNameAr); setFullNameEn(d.fullNameEn);
+      setSpecialtyAr(d.specialtyAr); setSpecialtyEn(d.specialtyEn);
+      setBioAr(d.bioAr); setBioEn(d.bioEn);
+      setLinkedin(d.linkedin); setGithub(d.github); setAvatarUrl(d.avatarUrl);
+    },
+  });
 
   const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -71,6 +98,7 @@ export function AdminInstructorEditDialog({
   };
 
   useEffect(() => {
+    setLoadedValues(null);
     if (!open) return;
     setLoading(true);
     (async () => {
@@ -80,15 +108,27 @@ export function AdminInstructorEditDialog({
         .eq("user_id", userId)
         .maybeSingle();
       const d = (data ?? {}) as Record<string, string | null>;
-      setFullNameAr(d.full_name_ar ?? d.full_name ?? "");
-      setFullNameEn(d.full_name_en ?? "");
-      setSpecialtyAr(d.specialty_ar ?? d.specialty ?? "");
-      setSpecialtyEn(d.specialty_en ?? "");
-      setBioAr(d.bio_ar ?? d.bio ?? "");
-      setBioEn(d.bio_en ?? "");
-      setLinkedin(d.linkedin_url ?? "");
-      setGithub(d.github_url ?? "");
-      setAvatarUrl(d.avatar_url ?? "");
+      const loaded: InstructorEdits = {
+        fullNameAr: d.full_name_ar ?? d.full_name ?? "",
+        fullNameEn: d.full_name_en ?? "",
+        specialtyAr: d.specialty_ar ?? d.specialty ?? "",
+        specialtyEn: d.specialty_en ?? "",
+        bioAr: d.bio_ar ?? d.bio ?? "",
+        bioEn: d.bio_en ?? "",
+        linkedin: d.linkedin_url ?? "",
+        github: d.github_url ?? "",
+        avatarUrl: d.avatar_url ?? "",
+      };
+      setFullNameAr(loaded.fullNameAr);
+      setFullNameEn(loaded.fullNameEn);
+      setSpecialtyAr(loaded.specialtyAr);
+      setSpecialtyEn(loaded.specialtyEn);
+      setBioAr(loaded.bioAr);
+      setBioEn(loaded.bioEn);
+      setLinkedin(loaded.linkedin);
+      setGithub(loaded.github);
+      setAvatarUrl(loaded.avatarUrl);
+      setLoadedValues(loaded);
       setLoading(false);
     })();
   }, [open, userId]);
@@ -119,6 +159,7 @@ export function AdminInstructorEditDialog({
     setSaving(false);
     if (error) { toast.error(toUserMessage(error)); return; }
     toast.success(ar ? "تم الحفظ" : "Saved");
+    draft.clear();
     onSaved?.();
     onOpenChange(false);
   };
@@ -133,6 +174,7 @@ export function AdminInstructorEditDialog({
           <p className="text-center py-8 text-muted-foreground">…</p>
         ) : (
           <div className="space-y-4">
+            <DraftNotice show={draft.restored} onDiscard={draft.discard} />
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
                 <Label>الاسم (عربي)</Label>

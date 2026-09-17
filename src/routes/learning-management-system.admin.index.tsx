@@ -71,6 +71,13 @@ import {
   type OpsHealthSummary,
 } from "@/lib/lms-ops.functions";
 import { confirmDialog } from "@/hooks/useConfirm";
+import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { useFormDraft } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
+import { DraftNotice } from "@/components/admin/DraftNotice";
+
+const EMPTY_CATEGORY = { name_ar: "", name_en: "", slug: "" };
+const EMPTY_NEW_COURSE = { title_ar: "", title_en: "", description_ar: "", description_en: "", instructor_id: "" };
 
 export const Route = createFileRoute("/learning-management-system/admin/")({
   head: () => ({ meta: [{ title: "LMS · Admin" }] }),
@@ -218,7 +225,10 @@ function AdminHome() {
     load();
   };
 
-  const [newCat, setNewCat] = useState({ name_ar: "", name_en: "", slug: "" });
+  const { user } = useLmsAuth();
+  const catDraft = useFormDraft(formDraftKey(user?.id, "lms-category", "new"), EMPTY_CATEGORY);
+  const newCat = catDraft.values;
+  const setNewCat = catDraft.setValues;
   const addCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCat.name_ar || !newCat.slug) return;
@@ -232,7 +242,7 @@ function AdminHome() {
       toast.error(toUserMessage(error));
       return;
     }
-    setNewCat({ name_ar: "", name_en: "", slug: "" });
+    catDraft.clearDraft();
     load();
   };
   const deleteCategory = async (id: string) => {
@@ -243,13 +253,18 @@ function AdminHome() {
 
   // ---- Admin create course on behalf of an approved instructor ----
   const [newCourseOpen, setNewCourseOpen] = useState(false);
-  const [newCourse, setNewCourse] = useState({
-    title_ar: "",
-    title_en: "",
-    description_ar: "",
-    description_en: "",
-    instructor_id: "",
-  });
+  const courseDraft = useFormDraft(formDraftKey(user?.id, "lms-new-course", "new"), EMPTY_NEW_COURSE);
+  const newCourse = courseDraft.values;
+  const setNewCourse = courseDraft.setValues;
+  // After a refresh, bring back whichever form has unsaved input.
+  useEffect(() => {
+    if (courseDraft.restored) {
+      setTab("courses");
+      setNewCourseOpen(true);
+    } else if (catDraft.restored) {
+      setTab("categories");
+    }
+  }, [courseDraft.restored, catDraft.restored]);
   const [courseErrors, setCourseErrors] = useState<CourseFieldErrors>({});
   const courseFieldRefs = useRef<
     Partial<Record<RequiredCourseField, HTMLInputElement | HTMLTextAreaElement | null>>
@@ -282,13 +297,7 @@ function AdminHome() {
     }
     toast.success(ar ? "تم إنشاء الدورة" : "Course created");
     setNewCourseOpen(false);
-    setNewCourse({
-      title_ar: "",
-      title_en: "",
-      description_ar: "",
-      description_en: "",
-      instructor_id: "",
-    });
+    courseDraft.clearDraft();
     setCourseErrors({});
     if (data) window.location.href = `/learning-management-system/instructor/courses/${data.id}`;
   };
@@ -669,6 +678,7 @@ function AdminHome() {
                         <DialogTitle>{ar ? "دورة جديدة" : "New course"}</DialogTitle>
                       </DialogHeader>
                       <form onSubmit={createCourse} noValidate className="space-y-3">
+                        <DraftNotice show={courseDraft.restored} onDiscard={() => courseDraft.clearDraft()} />
                         <div>
                           <Label>{ar ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
                           <Input
@@ -860,6 +870,7 @@ function AdminHome() {
                 title={ar ? "إدارة التصنيفات" : "Manage categories"}
                 count={categories.length}
               >
+                <DraftNotice show={catDraft.restored} onDiscard={() => catDraft.clearDraft()} />
                 <form
                   onSubmit={addCategory}
                   className="grid sm:grid-cols-[1fr_1fr_1fr_auto] gap-2 rounded-xl border border-border bg-card p-4"

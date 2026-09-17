@@ -18,6 +18,15 @@ import {
 import { createContact } from "@/lib/crm.functions";
 import { toUserMessage } from "@/lib/safe-error";
 import { useLang } from "@/lib/i18n";
+import { useAuth } from "@/hooks/useAuth";
+import { useFormDraft } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
+import { DraftNotice } from "@/components/admin/DraftNotice";
+
+const EMPTY_CONTACT = {
+  display_name: "", contact_type: "individual", primary_email: "",
+  primary_phone: "", organization: "", notes: "",
+};
 
 export function CrmNewContactDialog({
   open, onOpenChange, onCreated,
@@ -28,12 +37,13 @@ export function CrmNewContactDialog({
   const create = useServerFn(createContact);
   const [saving, setSaving] = useState(false);
   const [duplicateId, setDuplicateId] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    display_name: "", contact_type: "individual", primary_email: "",
-    primary_phone: "", organization: "", notes: "",
-  });
+  const { user } = useAuth();
+  // Kept as a draft when the dialog is closed or the page reloads; cleared once created.
+  const draft = useFormDraft(formDraftKey(user?.id, "crm-contact", "new"), EMPTY_CONTACT);
+  const form = draft.values;
+  const setForm = draft.setValues;
 
-  const reset = () => { setForm({ display_name: "", contact_type: "individual", primary_email: "", primary_phone: "", organization: "", notes: "" }); setDuplicateId(null); };
+  const reset = () => { draft.clearDraft(); setDuplicateId(null); };
 
   const submit = async (force = false) => {
     if (!form.display_name.trim()) { toast.error(ar ? "الاسم مطلوب" : "Name is required"); return; }
@@ -66,12 +76,13 @@ export function CrmNewContactDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) setDuplicateId(null); onOpenChange(v); }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{ar ? "جهة اتصال جديدة" : "New contact"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          <DraftNotice show={draft.restored} onDiscard={() => draft.clearDraft()} />
           <div>
             <Label>{ar ? "الاسم" : "Name"}</Label>
             <Input value={form.display_name} onChange={(e) => setForm((f) => ({ ...f, display_name: e.target.value }))} />

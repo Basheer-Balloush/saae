@@ -1,11 +1,14 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList, ArrowRight, FileText } from "lucide-react";
 import { CoursePrice } from "@/components/lms/CoursePrice";
 import { supabase } from "@/integrations/supabase/client";
 import { useCourseParticipantNames } from "@/hooks/useCourseParticipantNames";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { useRecordDraft } from "@/hooks/useFormDraft";
+import { formDraftKey } from "@/lib/form-draft";
+import { DraftNotice } from "@/components/admin/DraftNotice";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { Button } from "@/components/ui/button";
@@ -64,6 +67,31 @@ type LessonAttachment = { name: string; url: string; path?: string };
 type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; video_status: string; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; is_preview: boolean; duration_seconds: number; display_order: number; attachments: LessonAttachment[] | null };
 type Category = { id: string; name_ar: string; name_en: string | null };
 
+// Everything typed on this page that a refresh could lose: the course fields sent by
+// saveCourse, plus section and lesson texts (those save on blur).
+const COURSE_DRAFT_FIELDS = [
+  "slug", "title_ar", "title_en", "description_ar", "description_en", "cover_url", "level",
+  "price", "sale_price", "is_free", "enrollment_open", "enrollment_deadline", "max_students",
+  "start_date", "end_date", "schedule_days", "schedule_time_from", "schedule_time_to",
+  "location_ar", "location_en", "duration_hours",
+] as const satisfies readonly (keyof Course)[];
+type CourseEdits = {
+  course: Partial<Course>;
+  categoryIds: string[];
+  sections: Record<string, Pick<Section, "title_ar" | "title_en">>;
+  lessons: Record<string, Pick<Lesson, "title_ar" | "title_en" | "content_md_ar" | "content_md_en">>;
+};
+function courseEdits(c: Course, categoryIds: string[], sections: Section[], lessons: Lesson[]): CourseEdits {
+  return {
+    course: Object.fromEntries(COURSE_DRAFT_FIELDS.map((k) => [k, c[k]])) as Partial<Course>,
+    categoryIds: [...categoryIds].sort(),
+    sections: Object.fromEntries(sections.map((x) => [x.id, { title_ar: x.title_ar, title_en: x.title_en }])),
+    lessons: Object.fromEntries(
+      lessons.map((l) => [l.id, { title_ar: l.title_ar, title_en: l.title_en, content_md_ar: l.content_md_ar, content_md_en: l.content_md_en }]),
+    ),
+  };
+}
+
 function CourseBuilder() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
@@ -106,7 +134,11 @@ function CourseBuilder() {
   const originallyFilled = useRef<Partial<Record<RequiredCourseField, boolean>>>({});
   const fieldRefs = useRef<Partial<Record<RequiredCourseField, HTMLInputElement | HTMLTextAreaElement | null>>>({});
 
+  const [loadedEdits, setLoadedEdits] = useState<CourseEdits | null>(null);
+
   const load = async () => {
+    // No draft saving while a fresh copy arrives piece by piece.
+    setLoadedEdits(null);
     const [{ data: c }, { data: cats }, { data: links }] = await Promise.all([
       supabase.from("lms_courses").select("*").eq("id", id).maybeSingle(),
       supabase.from("lms_categories").select("id,name_ar,name_en").order("display_order"),
@@ -125,12 +157,17 @@ function CourseBuilder() {
       const { data: secs } = await supabase.from("lms_sections").select("id,title,title_ar,title_en,display_order").eq("course_id", id).order("display_order");
       const sList = (secs as Section[]) ?? [];
       setSections(sList);
+      let lList: Lesson[] = [];
       if (sList.length) {
         const { data: lss } = await supabase.from("lms_lessons")
           .select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,video_status,content_md,content_md_ar,content_md_en,is_preview,duration_seconds,display_order,attachments")
           .in("section_id", sList.map((s) => s.id)).order("display_order");
-        setLessons((lss as Lesson[]) ?? []);
+        lList = (lss as Lesson[]) ?? [];
       }
+      setLessons(lList);
+      setLoadedEdits(
+        courseEdits(c as Course, ((links as { category_id: string }[]) ?? []).map((l) => l.category_id), sList, lList),
+      );
     }
     const { data: reqs } = await supabase
       .from("lms_enrollment_requests")
@@ -147,6 +184,22 @@ function CourseBuilder() {
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [id]);
+
+  const currentEdits = useMemo(
+    () => (course ? courseEdits(course, selectedCategoryIds, sections, lessons) : null),
+    [course, selectedCategoryIds, sections, lessons],
+  );
+  const courseDraft = useRecordDraft<CourseEdits>({
+    key: formDraftKey(user?.id, "lms-course", id),
+    loaded: loadedEdits,
+    current: currentEdits,
+    apply: (d) => {
+      setCourse((prev) => (prev ? { ...prev, ...d.course } : prev));
+      setSelectedCategoryIds(d.categoryIds);
+      setSections((prev) => prev.map((x) => (d.sections[x.id] ? { ...x, ...d.sections[x.id] } : x)));
+      setLessons((prev) => prev.map((l) => (d.lessons[l.id] ? { ...l, ...d.lessons[l.id] } : l)));
+    },
+  });
 
   if (!course) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
 
@@ -281,6 +334,7 @@ function CourseBuilder() {
       }
     }
     setSaving(false);
+    setLoadedEdits(currentEdits);
     toast.success(lang === "ar" ? "تم الحفظ" : "Saved");
     return true;
   };
@@ -614,6 +668,7 @@ function CourseBuilder() {
         </div>
       </div>
 
+      <DraftNotice show={courseDraft.restored} onDiscard={courseDraft.discard} />
 
       {/* Details */}
       <section className="rounded-2xl border border-border bg-card p-5 space-y-3">
