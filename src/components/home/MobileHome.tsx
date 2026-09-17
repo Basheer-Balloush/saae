@@ -7,7 +7,6 @@ import {
   ArrowUp,
   ArrowUpLeft,
   ArrowUpRight,
-  BadgeCheck,
   BookOpen,
   Building2,
   CodeXml,
@@ -90,15 +89,14 @@ function words(text: string): string[] {
 }
 
 const COMMUNITY_ICONS = [
+  CodeXml,
   Database,
   Building2,
   HeartPulse,
   FlaskConical,
-  CodeXml,
   TrendingUp,
   Presentation,
   Megaphone,
-  BadgeCheck,
 ] as const;
 
 const RAIL_IDS = ["initiative", "communities", "news", "mission", "partners", "faq"];
@@ -818,6 +816,13 @@ export function MobileHomeView({
                   <MhTrunkRow key={c.key} index={i} href={c.href} lang={lang} />
                 ))}
               </ol>
+              <div className="mh-feature-actions">
+                <MotionButton
+                  label={pick(COMMUNITIES_COPY.cta, lang)}
+                  href="/about#communities-h"
+                  classes="w-full min-w-0 justify-center"
+                />
+              </div>
             </div>
           </section>
 

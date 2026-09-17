@@ -2,13 +2,14 @@
   "use strict";
 
   const arabic = {
-    "Nine communities One shared foundation": "تسعة مجتمعات جذور تجمعنا",
+    "Specialized communities, one shared foundation": "مجتمعات متخصصة، وجذور تجمعنا",
     "Learning, grown from our communities": "تعلّم ينمو من مجتمعاتنا",
     "Across Syria": "إلى كل سورية",
     "Growing together across Syria": "ننمو معاً في كل سورية",
-    "From our nine communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.": "من مجتمعاتنا التسعة تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
-    "Nine SAAE communities grow through the root system": "تسعة مجتمعات للجمعية تنمو من جذور الشجرة",
-    "Nine communities form the roots of the SAAE tree. Follow the trunk and branches to its fruits: learning, achievements, and the Million Syrian AI Users initiative, reaching across Syria.": "تسعة مجتمعات تشكّل جذور شجرة الجمعية. نتبع الجذع والأغصان إلى ثمارها: التعلّم والإنجازات ومبادرة مليون مستخدم سوري للذكاء الاصطناعي، وصولاً إلى أنحاء سورية.",
+    "From our communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.": "من مجتمعاتنا تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
+    "SAAE communities grow through the root system": "مجتمعات الجمعية تنمو من جذور الشجرة",
+    "Our communities form the roots of the SAAE tree. Follow the trunk and branches to its fruits: learning, achievements, and the Million Syrian AI Users initiative, reaching across Syria.": "مجتمعاتنا تشكّل جذور شجرة الجمعية. نتبع الجذع والأغصان إلى ثمارها: التعلّم والإنجازات ومبادرة مليون مستخدم سوري للذكاء الاصطناعي، وصولاً إلى أنحاء سورية.",
+    "Explore communities": "استكشف المجتمعات",
 
     "Skip to main content": "انتقل إلى المحتوى الرئيسي",
     "Syrian Association for AI & Entrepreneurship": "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",

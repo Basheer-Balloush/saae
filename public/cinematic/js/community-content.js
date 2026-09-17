@@ -11,19 +11,20 @@
  * use 7 to 9. Below roughly three dots per stroke a line stops reading as a
  * line, and at this scale that is the only rule that matters.
  *
- * The order is the association's own, matching the community list on the About
- * page one for one: numbering, names and sequence all come from there rather
- * than from anything invented here.
+ * The order matches the homepage card, software first: numbering, names and
+ * sequence all come from there rather than from anything invented here. The
+ * About page keeps its own nine-item order including Quality Entrepreneurship.
  */
 
 const W = 960, H = 560;
 
 export const COMMUNITY_ICONS = [
-  "data", "city", "healthcare", "research",
-  "software", "economy", "trainers", "media", "quality"
+  "software", "data", "city", "healthcare",
+  "research", "economy", "trainers", "media"
 ];
 
 export function communityMask(index) {
+  const key = typeof index === "string" ? index : (COMMUNITY_ICONS[index] || "data");
   const canvas = document.createElement("canvas");
   canvas.width = W; canvas.height = H;
   const c = canvas.getContext("2d", { willReadFrequently: true });
@@ -39,9 +40,17 @@ export function communityMask(index) {
 
   const cx = W / 2, cy = H / 2;
 
-  switch (COMMUNITY_ICONS[index] || "data") {
+  switch (key) {
 
-    /* 01 Data -- a stack of records. */
+    /* 01 Software -- brackets and a slash, the oldest sign there is. */
+    case "software": {
+      line([[cx - 118, cy - 150], [cx - 260, cy], [cx - 118, cy + 150]]);
+      line([[cx + 118, cy - 150], [cx + 260, cy], [cx + 118, cy + 150]]);
+      line([[cx + 44, cy - 168], [cx - 44, cy + 168]]);
+      break;
+    }
+
+    /* 02 Data -- a stack of records. */
     case "data": {
       const rx = 150, ry = 52;
       for (let i = 0; i < 3; i++) ell(cx, cy - 118 + i * 118, rx, ry);
@@ -50,7 +59,7 @@ export function communityMask(index) {
       break;
     }
 
-    /* 02 Smart Urban -- a skyline that is clearly built, not drawn. */
+    /* 03 Smart Urban -- a skyline that is clearly built, not drawn. */
     case "city": {
       const base = cy + 150;
       const towers = [[-230, 150], [-110, 250], [10, 190], [130, 300], [250, 170]];
@@ -68,7 +77,7 @@ export function communityMask(index) {
       break;
     }
 
-    /* 03 Healthcare -- a heart carrying a pulse. */
+    /* 04 Healthcare -- a heart carrying a pulse. */
     case "healthcare": {
       c.beginPath();
       c.moveTo(cx, cy + 150);
@@ -81,7 +90,7 @@ export function communityMask(index) {
       break;
     }
 
-    /* 04 Smart Research -- a flask, and what comes out of it. */
+    /* 05 Smart Research -- a flask, and what comes out of it. */
     case "research": {
       line([[cx - 70, cy - 175], [cx - 70, cy - 40], [cx - 175, cy + 135]]);
       line([[cx + 70, cy - 175], [cx + 70, cy - 40], [cx + 175, cy + 135]]);
@@ -89,14 +98,6 @@ export function communityMask(index) {
       line([[cx - 108, cy - 175], [cx - 32, cy - 175]]);
       line([[cx + 32, cy - 175], [cx + 108, cy - 175]]);
       dot(cx - 62, cy + 62, 20); dot(cx + 24, cy + 96, 15); dot(cx + 74, cy + 40, 11);
-      break;
-    }
-
-    /* 05 Software -- brackets and a slash, the oldest sign there is. */
-    case "software": {
-      line([[cx - 118, cy - 150], [cx - 260, cy], [cx - 118, cy + 150]]);
-      line([[cx + 118, cy - 150], [cx + 260, cy], [cx + 118, cy + 150]]);
-      line([[cx + 44, cy - 168], [cx - 44, cy + 168]]);
       break;
     }
 
@@ -179,25 +180,6 @@ export function communityMask(index) {
       dot(cx, cy - 85, 22);
       c.lineWidth = 15;
       for (const r of [66, 112, 158]) arc(cx, cy - 85, r, Math.PI * 1.17, Math.PI * 1.83);
-      break;
-    }
-
-    /* 09 Quality Entrepreneurship -- a standard met, and marked. */
-    case "quality": {
-      const r = 150;
-      c.beginPath();
-      for (let i = 0; i < 12; i++) {
-        const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
-        const rr = i % 2 ? r : r * 0.86;
-        const x = cx + Math.cos(a) * rr, y = cy - 40 + Math.sin(a) * rr;
-        i ? c.lineTo(x, y) : c.moveTo(x, y);
-      }
-      c.closePath(); c.stroke();
-      c.lineWidth = 20;
-      line([[cx - 62, cy - 44], [cx - 16, cy + 6], [cx + 68, cy - 96]]);
-      c.lineWidth = 18;
-      line([[cx - 92, cy + 96], [cx - 132, cy + 226], [cx - 40, cy + 186]]);
-      line([[cx + 92, cy + 96], [cx + 132, cy + 226], [cx + 40, cy + 186]]);
       break;
     }
   }

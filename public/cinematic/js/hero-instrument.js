@@ -764,7 +764,7 @@ async function createScene(canvas) {
      The roots beat used to hand the community cards to the SCROLL: a step
      function over progress picked one of six, so browsing them meant scrubbing
      the page, you could not go back without scrolling back, and each one got
-     whatever fraction of a second your wheel happened to give it. Nine
+     whatever fraction of a second your wheel happened to give it. Eight
      communities cannot be read that way at all.
 
      The field now gathers out of the roots into ONE community's pictogram and
@@ -772,19 +772,21 @@ async function createScene(canvas) {
      position's. That is the whole reason it can be drawn properly: a shape
      nobody is rushing past can afford to be a shape.
 
-     Sampled on demand and cached. Nine masks at the full lattice density is
+     Sampled on demand and cached, keyed by icon name so card order never
+     matters. Eight masks at the full lattice density is
      real work and real memory, and a visitor who never presses the button
-     should not pay for eight pictograms they will not see. */
+     should not pay for seven pictograms they will not see. */
   const communityWorld = new THREE.Vector2(
     treeBox.x0 + 151 / 301.81 * treeBox.w,
     treeBox.y1 - 302 / 339 * treeBox.h);
   const communityCache = new Map();
   const COMMUNITY_COUNT = COMMUNITY_ICONS.length;
 
-  function communityShape(index) {
-    const hit = communityCache.get(index);
+  function communityShape(indexOrIcon) {
+    const key = typeof indexOrIcon === "string" ? indexOrIcon : (COMMUNITY_ICONS[indexOrIcon] || COMMUNITY_ICONS[0]);
+    const hit = communityCache.get(key);
     if (hit) return hit;
-    const mask = communityMask(index);
+    const mask = communityMask(key);
     const w = 8.0, h = w / mask.aspect;
     const area = { x0: communityWorld.x - w / 2, x1: communityWorld.x + w / 2,
                    y0: communityWorld.y - h / 2, y1: communityWorld.y + h / 2, w, h };
@@ -797,7 +799,7 @@ async function createScene(canvas) {
       pitch *= 1.15;
     } while (raw.length / 3 > K);
     const built = expand(raw, K, (x, y) => x);
-    communityCache.set(index, built);
+    communityCache.set(key, built);
     return built;
   }
 
@@ -968,15 +970,15 @@ async function createScene(canvas) {
   const story = createTreeStory(scene, treeToWorld, C.reach);
   const lastFruit = treeToWorld(FRUITS[2]);
   flightU.uFruit.value.set(lastFruit.x,lastFruit.y);
-  let selectedRoot = 0;
+  let selectedRoot = COMMUNITY_ICONS[0];
   /* What is currently BUILT into the buffer, which lags the selection for as
      long as the swap takes: the old pictogram scatters, the new one gathers,
      and the exchange happens at the bottom of that dip where there is nothing
-     on screen to jump. */
-  let communityShown = 0;
+     on screen to jump. Icon names, so card order never matters. */
+  let communityShown = COMMUNITY_ICONS[0];
   let communitySwitchAt = 0;
   /* Long enough to read as one shape becoming another rather than a cut, short
-     enough that pressing next nine times is not a chore. The card flip beside
+     enough that pressing next eight times is not a chore. The card flip beside
      it is 750; the field arrives first on purpose, because the field is what
      the eye is on. */
   const COMMUNITY_SWAP_MS = 620;
@@ -1033,14 +1035,14 @@ async function createScene(canvas) {
        competes with either. */
     const communityMix = smooth(.150, .205, p) * (1 - smooth(.285, .318, p));
     const communityOn = communityMix > .0015;
-    /* Browsing the nine is a move between pictograms, not a trip home.
+    /* Browsing the eight is a move between pictograms, not a trip home.
 
        The first one is built out of the tree -- that is what communityMix does
        as it opens, and it is the right entrance: the communities ARE the roots,
        and the shape should say so once. Every one after it is reached from the
        one before, directly. What used to happen instead was that each switch
        dipped communityMix toward zero, which is the road back to the tree, so
-       the field flew home and came out again nine times over. The dip is gone;
+       the field flew home and came out again eight times over. The dip is gone;
        the swap is a separate value that never touches the road from the tree. */
     let swap = 0;
     if (!communityOn || breathPinned) {
@@ -1239,8 +1241,10 @@ async function createScene(canvas) {
   return {
     render, resize, dispose, setBand() {},
     communities: COMMUNITY_COUNT,
-    setCommunity(index) {
-      const next = Math.max(0, Math.min(COMMUNITY_COUNT - 1, index | 0));
+    setCommunity(indexOrIcon) {
+      const next = typeof indexOrIcon === "string"
+        ? (COMMUNITY_ICONS.includes(indexOrIcon) ? indexOrIcon : COMMUNITY_ICONS[0])
+        : (COMMUNITY_ICONS[Math.max(0, Math.min(COMMUNITY_COUNT - 1, indexOrIcon | 0))] || COMMUNITY_ICONS[0]);
       if (next === selectedRoot) return;
 
       /* A press that lands mid-swap.
