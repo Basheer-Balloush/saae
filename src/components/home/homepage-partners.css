@@ -4,6 +4,7 @@
 .hp-faq {
   position: relative;
   isolation: isolate;
+  padding-block: 0;
   background: #061820;
 }
 .hp-faq .hn-tech-details {
@@ -28,6 +29,10 @@
 
 .cs-scroll-split {
   min-height: 220svh;
+}
+
+.hp-faq-scroll.cs-scroll-split {
+  min-height: max(6100px, 680svh);
 }
 
 .cs-scroll-perspective {
@@ -59,6 +64,11 @@
   text-align: center;
 }
 
+html[dir="rtl"] .cs-scroll-header .faq-intro,
+html[dir="rtl"] .cs-scroll-header .mh-faq-scroll-heading {
+  text-align: center;
+}
+
 .cs-scroll-header .faq-intro h2,
 .cs-scroll-header .mh-faq-scroll-heading h2 {
   margin: 0;
@@ -73,8 +83,9 @@
 .cs-scroll-card {
   position: absolute;
   z-index: 2;
-  width: min(420px, 38vw);
-  height: min(720px, 82svh);
+  width: min(380px, 34vw, 45svh);
+  height: auto;
+  aspect-ratio: 420 / 720;
   max-width: calc(100vw - 40px);
   border: 0;
   padding: 0;
@@ -124,7 +135,15 @@
 
 .hp-faq-scroll-card .faq-item {
   border: 0;
-  background: rgba(8, 39, 46, 0.84);
+  background: transparent;
+}
+
+.hp-faq-scroll-card .faq-item::after {
+  display: none;
+}
+
+.hp-faq-device [data-iphone-content] {
+  justify-content: center;
 }
 
 .hp-faq-scroll-card .faq-trigger {
@@ -160,8 +179,8 @@
   }
 
   .cs-scroll-card {
-    width: min(420px, calc(100vw - 32px));
-    height: min(720px, 78svh);
+    width: min(380px, calc(100vw - 32px), 45svh);
+    height: auto;
   }
 }
 

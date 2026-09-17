@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   motion,
   useMotionValue,
@@ -33,17 +33,33 @@ export function ContainerScroll({
   const containerRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const scrollProgress = useMotionValue(0);
+  const [splitOffset, setSplitOffset] = useState(270);
   // The split FAQ has three deliberate beats: title alone, title moving right,
   // then the phone entering after the title has settled.
   const titleX = useTransform(
     scrollProgress,
-    [0, 0.38, 0.72, 1],
-    layout === "split" ? [0, 0, 270, 270] : [0, 0, 0, 0],
+    [0, 0.2, 0.5, 1],
+    layout === "split" ? [0, 0, splitOffset, splitOffset] : [0, 0, 0, 0],
   );
-  const cardY = useTransform(scrollProgress, [0, 0.66, 0.94], [140, 140, 0]);
-  const cardRotate = useTransform(scrollProgress, [0, 0.66, 0.94], [4, 4, 0]);
-  const cardScale = useTransform(scrollProgress, [0, 0.66, 0.94], [0.96, 0.96, 1]);
-  const cardOpacity = useTransform(scrollProgress, [0, 0.66, 0.86], [0, 0, 1]);
+  const cardX = useTransform(
+    scrollProgress,
+    [0, 1],
+    layout === "split" ? [-splitOffset, -splitOffset] : [0, 0],
+  );
+  const cardY = useTransform(scrollProgress, [0, 0.56, 0.78], [120, 120, 0]);
+  const cardRotate = useTransform(scrollProgress, [0, 0.56, 0.78], [3, 3, 0]);
+  const cardScale = useTransform(scrollProgress, [0, 0.56, 0.78], [0.97, 0.97, 1]);
+  const cardOpacity = useTransform(scrollProgress, [0, 0.56, 0.75], [0, 0, 1]);
+
+  useEffect(() => {
+    if (layout !== "split") return;
+    const updateOffset = () => {
+      setSplitOffset(Math.min(300, Math.max(190, window.innerWidth * 0.22)));
+    };
+    updateOffset();
+    window.addEventListener("resize", updateOffset, { passive: true });
+    return () => window.removeEventListener("resize", updateOffset);
+  }, [layout]);
 
   useEffect(() => {
     if (reducedMotion) {
@@ -113,6 +129,7 @@ export function ContainerScroll({
             ...(reducedMotion
               ? {}
               : {
+                  x: cardX,
                   y: cardY,
                   rotateX: cardRotate,
                   scale: cardScale,
