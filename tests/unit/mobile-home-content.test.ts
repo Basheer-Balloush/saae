@@ -313,7 +313,9 @@ describe("mobile homepage rendered output", () => {
       expect(both).toContain(c.name.ar);
       expect(both).toContain(c.name.en);
     }
-    expect(COMMUNITIES).toHaveLength(9);
+    expect(COMMUNITIES).toHaveLength(8);
+    expect(COMMUNITIES[0].key).toBe("software");
+    expect(COMMUNITIES.map((c) => c.key)).not.toContain("quality");
     for (const n of NEWS) {
       expect(both).toContain(n.href);
       expect(both).toContain(n.headline.ar);
