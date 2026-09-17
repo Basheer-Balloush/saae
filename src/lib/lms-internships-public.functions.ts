@@ -210,14 +210,26 @@ export const getPublicInternshipBySlug = createServerFn({ method: "POST" })
     return detail;
   });
 
+export type ApplyState = "open" | "not_open_yet" | "deadline_passed" | "closed" | "unavailable";
+
+// Mirrors the block_reason order in lms-internships-apply.functions.ts.
+export function getApplyState(o: {
+  status: string;
+  opens_at: string | null;
+  deadline_at: string | null;
+}): ApplyState {
+  if (o.status === "closed") return "closed";
+  if (o.status !== "published") return "unavailable";
+  const now = Date.now();
+  if (o.opens_at && new Date(o.opens_at).getTime() > now) return "not_open_yet";
+  if (o.deadline_at && new Date(o.deadline_at).getTime() < now) return "deadline_passed";
+  return "open";
+}
+
 export function isApplyOpen(o: {
   status: string;
   opens_at: string | null;
   deadline_at: string | null;
 }): boolean {
-  if (o.status !== "published") return false;
-  const now = Date.now();
-  if (o.opens_at && new Date(o.opens_at).getTime() > now) return false;
-  if (o.deadline_at && new Date(o.deadline_at).getTime() < now) return false;
-  return true;
+  return getApplyState(o) === "open";
 }

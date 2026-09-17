@@ -9,7 +9,7 @@ import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import {
   getPublicInternshipBySlug,
-  isApplyOpen,
+  getApplyState,
   type PublicInternshipDetail,
 } from "@/lib/lms-internships-public.functions";
 import { SubHero } from "@/components/lms-skin/SubHero";
@@ -149,8 +149,17 @@ function InternshipDetail() {
   const duration = lang === "ar" ? d.duration_ar : d.duration_en;
   const stipend = lang === "ar" ? d.stipend_ar : d.stipend_en;
 
-  const open = isApplyOpen(d);
-  const isClosed = d.status === "closed";
+  const applyState = getApplyState(d);
+  const open = applyState === "open";
+  const closedNote = {
+    open: "",
+    not_open_yet: d.opens_at
+      ? `${t.internshipOpensOn} ${new Date(d.opens_at).toLocaleString(lang, { dateStyle: "long", timeStyle: "short" })}`
+      : t.internshipOpensSoon,
+    deadline_passed: t.internshipDeadlinePassed,
+    closed: t.internshipClosed,
+    unavailable: t.internshipHidden,
+  }[applyState];
 
   const applyHref = user
     ? `/learning-management-system/internships/${d.slug}/apply`
@@ -186,9 +195,9 @@ function InternshipDetail() {
           </nav>
         }
         copyChildren={
-          isClosed ? (
+          !open ? (
             <p className="course-tags course-hero-tags">
-              <span>{t.internshipClosed}</span>
+              <span>{closedNote}</span>
             </p>
           ) : null
         }
@@ -247,7 +256,7 @@ function InternshipDetail() {
                     {user ? t.internshipApply : t.internshipApplyLoginRequired}
                   </a>
                 ) : (
-                  <div className="enroll-note is-closed">{isClosed ? t.internshipClosed : t.internshipHidden}</div>
+                  <div className="enroll-note is-closed">{closedNote}</div>
                 )}
               </div>
             </article>
