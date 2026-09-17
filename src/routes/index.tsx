@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import homeHtml from "@/components/cinematic/html/home.html?raw";
 import type { CinematicScript } from "@/components/cinematic/CinematicPage";
 import { MobileHome } from "@/components/home/MobileHome";
+import { DesktopFaqScroll } from "@/components/home/DesktopFaqScroll";
 import type { NewsEntry } from "@/components/home/mobile-home-content";
 import { useHeroCapability } from "@/hooks/useHeroCapability";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,13 +23,19 @@ const CinematicPageLazy = React.lazy(() =>
   import("@/components/cinematic/CinematicPage").then((m) => ({ default: m.CinematicPage })),
 );
 const HomepageNewsPortalLazy = React.lazy(() =>
-  import("@/components/home/HomepageNews").then(m => ({ default: m.HomepageNewsPortal })),
+  import("@/components/home/HomepageNews").then((m) => ({ default: m.HomepageNewsPortal })),
 );
 
 // Desktop-only partners logo carousel, portalled into the cinematic markup.
 const DesktopPartnerCarouselLazy = React.lazy(() =>
   import("@/components/home/DesktopPartnerCarousel").then((m) => ({
     default: m.DesktopPartnerCarousel,
+  })),
+);
+
+const DesktopMotionFooterLazy = React.lazy(() =>
+  import("@/components/home/DesktopMotionFooter").then((m) => ({
+    default: m.DesktopMotionFooter,
   })),
 );
 
@@ -131,6 +138,10 @@ function DesktopHome({
       <Suspense fallback={null}>
         <DesktopPartnerCarouselLazy partners={partners} />
       </Suspense>
+      <DesktopFaqScroll />
+      <Suspense fallback={null}>
+        <DesktopMotionFooterLazy />
+      </Suspense>
     </>
   );
 }
@@ -138,11 +149,12 @@ function DesktopHome({
 function Home() {
   const { news, mobileNews, newsFailed, partners } = Route.useLoaderData();
   const html = useMemo(
-    () => replaceRegion(
-      applyHomePartners(applyHomeNews(homeHtml, news), partners),
-      "home-news-feature",
-      '<section class="section news hn-section" id="news" aria-labelledby="news-title"><div id="home-news-slot"></div></section>',
-    ),
+    () =>
+      replaceRegion(
+        applyHomePartners(applyHomeNews(homeHtml, news), partners),
+        "home-news-feature",
+        '<section class="section news hn-section" id="news" aria-labelledby="news-title"><div id="home-news-slot"></div></section>',
+      ),
     [news, partners],
   );
   const capability = useHeroCapability();

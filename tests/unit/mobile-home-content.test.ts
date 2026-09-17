@@ -264,6 +264,7 @@ describe("mobile homepage rendered output", () => {
         "/resources/ai-tools": "src/routes/resources.ai-tools.tsx",
         "/one-million-initiative-home": "src/routes/one-million-initiative-home.tsx",
         "/registration": "src/routes/registration.tsx",
+        "/learning-management-system/catalog": "src/routes/learning-management-system.catalog.tsx",
       };
       expect(table[pathname] !== undefined, `unexpected local route: ${href}`).toBe(true);
       const routeFile = path.join(ROOT, table[pathname]);
@@ -289,6 +290,7 @@ describe("mobile homepage rendered output", () => {
       "/cinematic/mobile/saae-wordmark-ar-light.webp",
       "/cinematic/mobile/saae-wordmark-en-light.webp",
       "/cinematic/images/saae-map.png",
+      "/cinematic/images/faq-phone-mockup.avif",
       ...PARTNERS.map((partner) => partner.logo),
     ]);
     for (const markup of [arMarkup(), enMarkup()]) {

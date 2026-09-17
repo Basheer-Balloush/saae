@@ -107,6 +107,7 @@
     "Entrepreneurship and institutional partnership carry proven work into companies, services and public capacity that outlast the programme that started them.": "تنقل ريادة الأعمال والشراكات المؤسسية العمل المثبت إلى شركات وخدمات وقدرات عامة تستمر بعد انتهاء البرنامج.",
     "Practical answers": "إجابات عملية",
     "A clear way in.": "طريق واضح للبداية.",
+    "Frequently Asked Questions": "أسئلة شائعة",
     "The questions people actually ask before they start.": "الأسئلة التي يطرحها الناس فعلاً قبل البداية.",
     "Who is SAAE for?": "لمن تناسب الجمعية؟",
     "Students, educators, professionals, founders and institutions that want practical contact with AI — not only people who already work in technology.": "للطلاب والمعلّمين والمهنيين ورواد الأعمال والمؤسسات الراغبة بتجربة عملية مع الذكاء الاصطناعي، لا للعاملين في التقنية فقط.",
@@ -385,6 +386,14 @@
     return nodes;
   };
 
+  const normalizeText = (value) => value.replace(/\s+/g, " ").trim();
+
+  const replaceTranslatedText = (source, translated) => {
+    const leading = source.match(/^\s*/)?.[0] || "";
+    const trailing = source.match(/\s*$/)?.[0] || "";
+    return `${leading}${translated}${trailing}`;
+  };
+
   const translateText = (lang) => {
     /* Most pages are authored in English and gain Arabic through `arabic`.
        The news articles are authored in Arabic (data-i18n-source="ar") and
@@ -394,11 +403,10 @@
     getTextNodes().forEach(node => {
       if (node.__saaeLanguageSource == null) node.__saaeLanguageSource = node.nodeValue;
       const source = node.__saaeLanguageSource;
-      const key = source.trim();
-      if (!arSource && lang === "ar" && arabic[key]) {
-        node.nodeValue = source.replace(key, arabic[key]);
-      } else if (arSource && lang === "en" && english[key]) {
-        node.nodeValue = source.replace(key, english[key]);
+      const key = normalizeText(source);
+      const dictionary = !arSource && lang === "ar" ? arabic : arSource && lang === "en" ? english : null;
+      if (dictionary && dictionary[key]) {
+        node.nodeValue = replaceTranslatedText(source, dictionary[key]);
       } else {
         node.nodeValue = source;
       }
