@@ -4,17 +4,32 @@
    written once. language.js finds the switch by #language-switch and
    navigation.js finds the menu by its data-radial-* hooks: keep those. */
 
-const LANGUAGE_BUTTON = `<button class="language-switch radial-language" id="language-switch" type="button" aria-label="التبديل إلى العربية" aria-pressed="false">
+const LANGUAGE_BUTTON = `<button class="language-switch radial-language" id="language-switch" type="button" aria-label="Switch to English" aria-pressed="true">
   <svg class="language-switch-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9S14.5 18.5 12 21c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3Z"></path></svg>
-  <span class="language-switch-label">العربية</span>
+  <span class="language-switch-label">English</span>
 </button>`;
 
 type NavItem = { href: string; en: string; ar: string; icon: string };
 
 const ITEMS: NavItem[] = [
-  { href: "/", en: "Home", ar: "الرئيسية", icon: `<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"/><path d="M9 21v-7h6v7"/>` },
-  { href: "/news", en: "News", ar: "الأخبار", icon: `<path d="M4 5h16v15H4z"/><path d="M7 8h6M7 11h10M7 14h10M7 17h7"/>` },
-  { href: "/about", en: "About", ar: "عن الجمعية", icon: `<circle cx="12" cy="12" r="8"/><path d="m15 9-2 4-4 2 2-4Z"/>` },
+  {
+    href: "/",
+    en: "Home",
+    ar: "الرئيسية",
+    icon: `<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"/><path d="M9 21v-7h6v7"/>`,
+  },
+  {
+    href: "/news",
+    en: "News",
+    ar: "الأخبار",
+    icon: `<path d="M4 5h16v15H4z"/><path d="M7 8h6M7 11h10M7 14h10M7 17h7"/>`,
+  },
+  {
+    href: "/about",
+    en: "About",
+    ar: "عن الجمعية",
+    icon: `<circle cx="12" cy="12" r="8"/><path d="m15 9-2 4-4 2 2-4Z"/>`,
+  },
   {
     href: "/partners",
     en: "Partners",
@@ -27,7 +42,12 @@ const ITEMS: NavItem[] = [
     ar: "المبادرة",
     icon: `<path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"/><path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8Z"/>`,
   },
-  { href: "/learning-management-system", en: "LMS", ar: "منصة التعلّم", icon: `<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>` },
+  {
+    href: "/learning-management-system",
+    en: "LMS",
+    ar: "منصة التعلّم",
+    icon: `<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>`,
+  },
   {
     href: "/contact",
     en: "Contact",

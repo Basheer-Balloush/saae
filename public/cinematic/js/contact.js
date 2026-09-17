@@ -236,5 +236,5 @@
   /* ---- boot ------------------------------------------------------------- */
   let saved = null;
   try { saved = localStorage.getItem("saae-lang") || localStorage.getItem("saae-lang"); } catch (_) { /* private mode */ }
-  setLanguage(saved === "ar" ? "ar" : "en");
+  setLanguage(saved === "en" ? "en" : "ar");
 })();

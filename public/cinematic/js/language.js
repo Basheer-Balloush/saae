@@ -509,8 +509,8 @@
   };
 
   document.addEventListener("DOMContentLoaded", () => {
-    let initial = "en";
-    try { initial = localStorage.getItem("saae-lang") || "en"; } catch (_) { /* Storage is optional. */ }
+    let initial = "ar";
+    try { initial = localStorage.getItem("saae-lang") || "ar"; } catch (_) { /* Storage is optional. */ }
     setLanguage(initial, false);
     document.getElementById("language-switch")?.addEventListener("click", () => {
       setLanguage(document.documentElement.lang === "ar" ? "en" : "ar", true);
