@@ -260,35 +260,32 @@
         software: '<svg viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></svg>',
         economy: '<svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3M2 19h21"/><path d="m4 7 6-3 6 5 6-7"/></svg>',
         trainers: '<svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="3"/><path d="M5 21v-2.5C5 15.5 8.1 14 12 14s7 1.5 7 4.5V21M12 14v7M8 18h8"/></svg>',
-        media: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3V9"/></svg>',
-        quality: '<svg viewBox="0 0 24 24"><path d="m12 3 2 4 4.5.7-3.2 3.2.8 4.6-4.1-2.1-4.1 2.1.8-4.6L5.5 7.7 10 7l2-4Z"/><path d="M7 16v5l5-2 5 2v-5"/></svg>'
+        media: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3V9"/></svg>'
       };
 
       /* Card icon name -> /communities/$key route, where the two differ. */
       const COMMUNITY_ROUTE_KEYS = { city: "architecture", healthcare: "medical" };
 
       const communityFlipItems = [
-        { number: "01", name: "Data", copy: "Turn information into insight.", icon: "data" },
-        { number: "02", name: "Smart Urban", copy: "Design smarter, more responsive cities.", icon: "city" },
-        { number: "03", name: "Healthcare", copy: "Apply AI where care matters.", icon: "healthcare" },
-        { number: "04", name: "Smart Research", copy: "Move ideas from questions to evidence.", icon: "research" },
-        { number: "05", name: "Software", copy: "Build useful digital systems.", icon: "software" },
+        { number: "01", name: "Software", copy: "Build useful digital systems.", icon: "software" },
+        { number: "02", name: "Data", copy: "Turn information into insight.", icon: "data" },
+        { number: "03", name: "Smart Urban", copy: "Design smarter, more responsive cities.", icon: "city" },
+        { number: "04", name: "Healthcare", copy: "Apply AI where care matters.", icon: "healthcare" },
+        { number: "05", name: "Smart Research", copy: "Move ideas from questions to evidence.", icon: "research" },
         { number: "06", name: "Smart Economy", copy: "Turn innovation into opportunity.", icon: "economy" },
         { number: "07", name: "Trainers", copy: "Equip the people who teach others.", icon: "trainers" },
-        { number: "08", name: "Media", copy: "Make knowledge clear and accessible.", icon: "media" },
-        { number: "09", name: "Quality Entrepreneurship", copy: "Raise the standard for new ventures.", icon: "quality" }
+        { number: "08", name: "Media", copy: "Make knowledge clear and accessible.", icon: "media" }
       ];
 
       const arabicCommunityFlipItems = [
-        { number: "01", name: "البيانات", copy: "حوّل المعلومات إلى رؤى.", icon: "data" },
-        { number: "02", name: "العمراني الذكي", copy: "صمّم مدناً أذكى وأكثر استجابة.", icon: "city" },
-        { number: "03", name: "الرعاية الصحية", copy: "طبّق الذكاء الاصطناعي حيث تكون الرعاية مهمة.", icon: "healthcare" },
-        { number: "04", name: "البحث الذكي", copy: "انقل الأفكار من الأسئلة إلى الأدلة.", icon: "research" },
-        { number: "05", name: "البرمجيات", copy: "ابنِ أنظمة رقمية مفيدة.", icon: "software" },
+        { number: "01", name: "البرمجيات", copy: "ابنِ أنظمة رقمية مفيدة.", icon: "software" },
+        { number: "02", name: "البيانات", copy: "حوّل المعلومات إلى رؤى.", icon: "data" },
+        { number: "03", name: "العمراني الذكي", copy: "صمّم مدناً أذكى وأكثر استجابة.", icon: "city" },
+        { number: "04", name: "الرعاية الصحية", copy: "طبّق الذكاء الاصطناعي حيث تكون الرعاية مهمة.", icon: "healthcare" },
+        { number: "05", name: "البحث الذكي", copy: "انقل الأفكار من الأسئلة إلى الأدلة.", icon: "research" },
         { number: "06", name: "الاقتصاد الذكي", copy: "حوّل الابتكار إلى فرص.", icon: "economy" },
         { number: "07", name: "المدربون", copy: "تجهيز من يعلّمون غيرهم.", icon: "trainers" },
-        { number: "08", name: "الإعلام", copy: "جعل المعرفة واضحة ومتاحة.", icon: "media" },
-        { number: "09", name: "الجودة الريادية", copy: "رفع معيار المشاريع الناشئة.", icon: "quality" }
+        { number: "08", name: "الإعلام", copy: "جعل المعرفة واضحة ومتاحة.", icon: "media" }
       ];
 
       function paintCommunityFace(side, item) {
@@ -344,7 +341,7 @@
         paintCommunityFace("back", communityFlipItems[(communityFlipIndex + 1) % communityFlipItems.length]);
         paintCommunityNavigation(communityFlipIndex);
         paintCommunityPips(communityFlipIndex);
-        instrument?.setCommunity?.(communityFlipIndex);
+        instrument?.setCommunity?.(communityFlipItems[communityFlipIndex].icon);
       }
 
       window.addEventListener("saae:languagechange", event => {
@@ -357,15 +354,14 @@
           communityFlipItems.splice(0, communityFlipItems.length, ...source);
         } else {
           communityFlipItems.splice(0, communityFlipItems.length,
-            { number: "01", name: "Data", copy: "Turn information into insight.", icon: "data" },
-            { number: "02", name: "Smart Urban", copy: "Design smarter, more responsive cities.", icon: "city" },
-            { number: "03", name: "Healthcare", copy: "Apply AI where care matters.", icon: "healthcare" },
-            { number: "04", name: "Smart Research", copy: "Move ideas from questions to evidence.", icon: "research" },
-            { number: "05", name: "Software", copy: "Build useful digital systems.", icon: "software" },
+            { number: "01", name: "Software", copy: "Build useful digital systems.", icon: "software" },
+            { number: "02", name: "Data", copy: "Turn information into insight.", icon: "data" },
+            { number: "03", name: "Smart Urban", copy: "Design smarter, more responsive cities.", icon: "city" },
+            { number: "04", name: "Healthcare", copy: "Apply AI where care matters.", icon: "healthcare" },
+            { number: "05", name: "Smart Research", copy: "Move ideas from questions to evidence.", icon: "research" },
             { number: "06", name: "Smart Economy", copy: "Turn innovation into opportunity.", icon: "economy" },
             { number: "07", name: "Trainers", copy: "Equip the people who teach others.", icon: "trainers" },
-            { number: "08", name: "Media", copy: "Make knowledge clear and accessible.", icon: "media" },
-            { number: "09", name: "Quality Entrepreneurship", copy: "Raise the standard for new ventures.", icon: "quality" }
+            { number: "08", name: "Media", copy: "Make knowledge clear and accessible.", icon: "media" }
           );
         }
         const captions = missionWordCaptions[arabicMode ? "ar" : "en"];
@@ -578,7 +574,7 @@
       function startCommunityFlip() {
         stopCommunityFlip();
         showCommunityCard(communityFlipIndex);
-        /* The pulsing next arrow was the only sign there were nine. When the
+        /* The pulsing next arrow was the only sign there were eight. When the
            cards cycle by themselves they say so already, and the pulse would
            just be a second thing moving; it stays for reduced motion, where
            nothing cycles. */
@@ -601,7 +597,7 @@
       communityCardNext?.addEventListener("click", () => selectCommunity(communityTarget() + 1, 1));
 
       /* Arrow keys across the whole navigator, so once anything in it has focus
-         the nine are one control rather than eleven separate ones. Mirrored in
+         the eight are one control rather than ten separate ones. Mirrored in
          Arabic: an arrow key points at a direction on screen, and in RTL the
          next community is to the LEFT. */
       communityFlipGroup?.addEventListener("keydown", event => {
@@ -881,7 +877,7 @@
            overwritten by their next wheel movement -- and it gave each
            community whatever slice of a second the scroll happened to allow.
 
-           Scroll brings the reader to the beat. Which of the nine they look
+           Scroll brings the reader to the beat. Which of the eight they look
            at, and for how long, is theirs. */
         void lastRootStep;
 

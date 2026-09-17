@@ -875,6 +875,11 @@
   }
 }
 
+/* A lone action (the communities link) takes the whole row, not half of it. */
+.mobile-home .mh-feature-actions > :only-child {
+  grid-column: 1 / -1;
+}
+
 /* ---- Communities trunk ---- */
 .mobile-home .mh-trunk {
   position: relative;

@@ -113,8 +113,14 @@ export const OPENING = {
   },
 };
 
-/** All nine communities, in the association's own order. */
+/** All eight homepage communities, software first. */
 export const COMMUNITIES: CommunityEntry[] = [
+  {
+    key: "software",
+    name: { ar: "مجتمع البرمجيات", en: "Software Community" },
+    tagline: { ar: "بناء أنظمة رقمية نافعة.", en: "Build useful digital systems." },
+    href: "/communities/software",
+  },
   {
     key: "data",
     name: { ar: "مجتمع البيانات", en: "Data Community" },
@@ -143,12 +149,6 @@ export const COMMUNITIES: CommunityEntry[] = [
     href: "/communities/research",
   },
   {
-    key: "software",
-    name: { ar: "مجتمع البرمجيات", en: "Software Community" },
-    tagline: { ar: "بناء أنظمة رقمية نافعة.", en: "Build useful digital systems." },
-    href: "/communities/software",
-  },
-  {
     key: "economy",
     name: { ar: "مجتمع الاقتصاد الذكي", en: "Smart Economy Community" },
     tagline: { ar: "تحويل الابتكار إلى فرصة.", en: "Turn innovation into opportunity." },
@@ -165,12 +165,6 @@ export const COMMUNITIES: CommunityEntry[] = [
     name: { ar: "المجتمع الإعلامي", en: "Media Community" },
     tagline: { ar: "جعل المعرفة واضحة ومتاحة.", en: "Make knowledge clear and accessible." },
     href: "/communities/media",
-  },
-  {
-    key: "quality",
-    name: { ar: "مجتمع الجودة الريادي", en: "Quality Entrepreneurship Community" },
-    tagline: { ar: "رفع معيار المشاريع الناشئة.", en: "Raise the standard for new ventures." },
-    href: "/communities/quality",
   },
 ];
 
@@ -522,8 +516,8 @@ export const WAYS: WayEntry[] = [
   {
     title: { ar: "المجتمعات", en: "Communities" },
     body: {
-      ar: "تسعة مجتمعات. جذور تجمعنا.",
-      en: "Nine communities. One shared foundation.",
+      ar: "مجتمعات متخصصة. جذور تجمعنا.",
+      en: "Specialized communities. One shared foundation.",
     },
     cta: { ar: "استكشف المجتمعات", en: "Explore communities" },
     href: "#communities",
@@ -567,13 +561,14 @@ export const INITIATIVE_COPY = {
 export const COMMUNITIES_COPY = {
   eyebrow: { ar: "مجتمعات الجمعية", en: "SAAE communities" } satisfies LocalText,
   title: {
-    ar: "تسعة مجتمعات جذور تجمعنا",
-    en: "Nine communities One shared foundation",
+    ar: "مجتمعات متخصصة، وجذور تجمعنا",
+    en: "Specialized communities, one shared foundation",
   } satisfies LocalText,
   body: {
     ar: "لكل مجتمع أسئلته وممارسوه. والمنهج المشترك يجعل الأجوبة تنتقل بينها.",
     en: "Each community brings its own questions and its own practitioners. Shared methods let the answers travel between them.",
   } satisfies LocalText,
+  cta: { ar: "استكشف المجتمعات", en: "Explore communities" } satisfies LocalText,
 };
 
 export const NEWS_COPY = {
@@ -634,8 +629,8 @@ export const CLOSING_COPY = {
     en: "Growing together across Syria",
   } satisfies LocalText,
   body: {
-    ar: "من مجتمعاتنا التسعة تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
-    en: "From our nine communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.",
+    ar: "من مجتمعاتنا تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
+    en: "From our communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.",
   } satisfies LocalText,
   primary: { ar: "ابدأ التعلّم", en: "Start learning" } satisfies LocalText,
   secondary: { ar: "سجّل الآن", en: "Register now" } satisfies LocalText,
