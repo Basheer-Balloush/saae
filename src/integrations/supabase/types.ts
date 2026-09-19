@@ -3984,14 +3984,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      lms_remove_course_instructor: { Args: { _course_id: string; _instructor_id: string }; Returns: undefined }
-      lms_my_teaching_course_ids: { Args: never; Returns: string[] }
-      lms_get_course_assignments: { Args: { _course_id: string }; Returns: { instructor_user_id: string; can_edit: boolean; can_grade: boolean; can_manage_enrollments: boolean }[] }
-
-      lms_get_course_participant_names: { Args: { _course_id: string }; Returns: { user_id: string; full_name: string | null }[] }
-      has_ams_portal_access: { Args: never; Returns: boolean }
-      lms_set_user_role: { Args: { _user_id: string; _role: "admin" | "lms_instructor" | "lms_student" }; Returns: undefined }
-
       _ams_derive_session_dates: {
         Args: { _count: number; _lms_course_id: string }
         Returns: {
