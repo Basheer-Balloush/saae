@@ -2,22 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot, Send, X, Loader2 } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
+import { loadChatSession, saveChatSession, type ChatSession } from "@/lib/chat-session";
 import { useLang } from "@/lib/i18n";
 import { AssistantFeedbackForm } from "@/components/site/AssistantFeedbackForm";
 
-function getOrCreateSessionId(): string {
-  if (typeof window === "undefined") return "ssr";
-  const KEY = "saae_chat_session";
-  let id = window.localStorage.getItem(KEY);
-  if (!id) {
-    id =
-      (crypto.randomUUID && crypto.randomUUID()) ||
-      `s_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-    window.localStorage.setItem(KEY, id);
-  }
-  return id;
-}
+const SSR_SESSION: ChatSession = { id: "ssr", lastActivity: 0, messages: [] };
 
 export function AssistantChatModal({
   open,
@@ -39,7 +29,12 @@ export function AssistantChatModal({
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  const sessionId = useMemo(() => getOrCreateSessionId(), []);
+  // The conversation the visitor is in. It ends after CHAT_IDLE_MS without a
+  // message, so each visit is its own conversation for the admin and for the model.
+  const [session, setSession] = useState<ChatSession>(() =>
+    typeof window === "undefined" ? SSR_SESSION : loadChatSession(),
+  );
+  const sessionId = session.id;
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
@@ -49,9 +44,25 @@ export function AssistantChatModal({
     [sessionId, lang],
   );
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, setMessages, status, error } = useChat({
     transport,
+    messages: session.messages as UIMessage[],
   });
+
+  // Opening the widget after a long pause starts a fresh conversation.
+  useEffect(() => {
+    if (!open) return;
+    const current = loadChatSession();
+    if (current.id === sessionId) return;
+    setSession(current);
+    setMessages(current.messages as UIMessage[]);
+  }, [open, sessionId, setMessages]);
+
+  // Keep this device's copy in step with what the server stores for the conversation.
+  useEffect(() => {
+    if (messages.length === 0) return;
+    saveChatSession({ id: sessionId, lastActivity: Date.now(), messages });
+  }, [messages, sessionId]);
 
   const isLoading = status === "submitted" || status === "streaming";
 
