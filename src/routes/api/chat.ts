@@ -347,7 +347,7 @@ export const Route = createFileRoute("/api/chat")({
           }
         }
 
-        const trustedMessages: UIMessage[] = ((history ?? []) as Array<{
+        const storedMessages: UIMessage[] = ((history ?? []) as Array<{
           role: string;
           content: string | null;
           parts: unknown;
@@ -358,6 +358,13 @@ export const Route = createFileRoute("/api/chat")({
             ? (m.parts as UIMessage["parts"])
             : [{ type: "text", text: m.content ?? "" }],
         }));
+
+        // If transcript storage is unavailable, fall back to the current user turn
+        // so the model always receives a non-empty prompt.
+        const trustedMessages: UIMessage[] =
+          storedMessages.length > 0
+            ? storedMessages
+            : [{ id: "live-0", role: "user", parts: [{ type: "text", text: lastUserText }] }];
 
         const tools = {
           submit_individual_lead: tool({
