@@ -230,7 +230,8 @@ export const Route = createFileRoute("/api/chat")({
         // Fail before persisting user messages if the provider is not configured.
         // Prefers Lovable AI Gateway; falls back to the direct OpenRouter provider.
         let chat: ReturnType<typeof createChatModelForRequest>;
-        try { chat = createChatModelForRequest(request); } catch {
+        try { chat = createChatModelForRequest(request); } catch (err) {
+          console.error("[chat] provider init failed", err, "hasLovableKey:", Boolean(process.env['LOVABLE_API_KEY']));
           return new Response("Chat is temporarily unavailable", { status: 503 });
         }
         // Rate limit by IP + session (or just IP if no session)
