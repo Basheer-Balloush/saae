@@ -27,4 +27,4 @@ for (const [name, value] of Object.entries(process.env)) {
     `Private variable must not have a VITE_ prefix: ${name}`);
   assert(!value?.startsWith('sb_secret_'), `Privileged key in browser variable: ${name}`);
 }
-console.log('Public build configuration targets organization Supabase; no credential values printed.');
+console.log('No credential values printed.');
