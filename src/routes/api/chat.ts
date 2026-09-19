@@ -2,7 +2,7 @@ import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
-import { createChatModel } from "@/lib/ai-gateway";
+import { createChatModelForRequest, withLovableAiGatewayRunIdHeader } from "@/lib/ai-gateway.server";
 
 
 // --- In-memory sliding-window rate limiter (per-instance) ---
@@ -228,8 +228,9 @@ export const Route = createFileRoute("/api/chat")({
     handlers: {
       POST: async ({ request }: { request: Request }) => {
         // Fail before persisting user messages if the provider is not configured.
-        let model: ReturnType<typeof createChatModel>;
-        try { model = createChatModel(); } catch {
+        // Prefers Lovable AI Gateway; falls back to the direct OpenRouter provider.
+        let chat: ReturnType<typeof createChatModelForRequest>;
+        try { chat = createChatModelForRequest(request); } catch {
           return new Response("Chat is temporarily unavailable", { status: 503 });
         }
         // Rate limit by IP + session (or just IP if no session)
@@ -426,14 +427,15 @@ export const Route = createFileRoute("/api/chat")({
         };
 
         const result = streamText({
-          model,
+          model: chat.model,
           system: SYSTEM_PROMPT + extraContext,
           tools,
           stopWhen: stepCountIs(50),
           messages: await convertToModelMessages(trustedMessages),
+          ...(chat.providerOptions ? { providerOptions: chat.providerOptions } : {}),
         });
 
-        return result.toUIMessageStreamResponse({
+        const response = result.toUIMessageStreamResponse({
           originalMessages: trustedMessages,
           onFinish: async ({ messages: finalMessages }) => {
             if (!conversationId) return;
@@ -444,6 +446,10 @@ export const Route = createFileRoute("/api/chat")({
             await persistMessage(conversationId, "assistant", text, (newest as { parts?: unknown }).parts ?? null);
           },
         });
+
+        return chat.gateway
+          ? withLovableAiGatewayRunIdHeader(response, chat.gateway)
+          : response;
       },
     },
   },

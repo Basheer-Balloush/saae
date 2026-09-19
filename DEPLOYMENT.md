@@ -4,9 +4,9 @@
 
 Prepared from the supplied `saae-main.zip`, preserving that snapshot and merging the prepared provider migration and latest role-interface fixes. Nothing was pushed to GitHub or deployed remotely during this merge. Production readiness still requires the live checks below.
 
-- Email senders call Resend directly; website chat calls OpenRouter directly; knowledge embeddings call OpenAI directly.
-- The latest co-instructor removal fix uses the protected database RPC instead of a direct table delete.
-- Runtime Lovable email/AI gateway calls were removed. The Lovable Vite build helper and unused locked dependencies were retained to avoid an unrelated dependency upgrade; these are not hosted email/AI connectors.
+- Email senders call Resend directly; knowledge embeddings call OpenAI directly.
+- Website chat prefers the Lovable AI Gateway when `LOVABLE_API_KEY` is configured (Lovable-hosted deployment) and falls back to the direct OpenRouter provider (`OPENROUTER_API_KEY` + `CHAT_MODEL`) when it is not — the Cloudflare Worker staging deployment intentionally does not carry Lovable secrets, so it keeps using OpenRouter.
+- The Lovable Vite build helper and unused locked dependencies were retained to avoid an unrelated dependency upgrade; these are not hosted email/AI connectors.
 - Worker configuration targets `saae-organization-staging`, preserves dashboard variables, enables observability, and schedules no cron jobs.
 - No database rows, user roles, stored image links, live domains, or remote credentials were changed by this merge.
 

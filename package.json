@@ -24,6 +24,7 @@
     "test:plans": "node --test tests/offline/*.test.mjs"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3",
     "@ai-sdk/openai-compatible": "^2.0.47",
     "@ai-sdk/react": "^3.0.179",
     "@capacitor/android": "^8.4.1",
