@@ -212,7 +212,7 @@ function createLovableChatModel(request: Request): ChatModelSelection {
 }
 
 export function createChatModelForRequest(request: Request): ChatModelSelection {
-  if (process.env['LOVABLE_API_KEY']) {
+  if (readLovableApiKey()) {
     return createLovableChatModel(request);
   }
   // Cloudflare Worker deployment: direct OpenRouter provider (CHAT_MODEL required).
