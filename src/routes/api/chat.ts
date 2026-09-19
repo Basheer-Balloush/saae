@@ -151,25 +151,31 @@ type ChatBody = ChatRequestBody & {
 };
 
 async function upsertConversation(sessionId: string, lang: string | null, userAgent: string | null) {
-  // upsert by session_id, return id
-  const { data, error } = await supabaseAdmin
-    .from("chat_conversations")
-    .upsert(
-      {
-        session_id: sessionId,
-        lang,
-        user_agent: userAgent,
-        last_message_at: new Date().toISOString(),
-      },
-      { onConflict: "session_id" },
-    )
-    .select("id")
-    .single();
-  if (error) {
-    console.error("[chat] upsert conversation failed", error.message);
+  // Transcript logging is best-effort: never fail the chat reply when the
+  // admin client is unconfigured (e.g. local dev without a service-role key).
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("chat_conversations")
+      .upsert(
+        {
+          session_id: sessionId,
+          lang,
+          user_agent: userAgent,
+          last_message_at: new Date().toISOString(),
+        },
+        { onConflict: "session_id" },
+      )
+      .select("id")
+      .single();
+    if (error) {
+      console.error("[chat] upsert conversation failed", error.message);
+      return null;
+    }
+    return data?.id ?? null;
+  } catch (err) {
+    console.error("[chat] conversation logging unavailable", err);
     return null;
   }
-  return data?.id ?? null;
 }
 
 async function persistMessage(
@@ -178,17 +184,21 @@ async function persistMessage(
   content: string,
   parts: unknown,
 ) {
-  const { error } = await supabaseAdmin.from("chat_messages").insert({
-    conversation_id: conversationId,
-    role,
-    content,
-    parts: (parts as never) ?? null,
-  });
-  if (error) console.error("[chat] persist message failed", error.message);
-  await supabaseAdmin
-    .from("chat_conversations")
-    .update({ last_message_at: new Date().toISOString() })
-    .eq("id", conversationId);
+  try {
+    const { error } = await supabaseAdmin.from("chat_messages").insert({
+      conversation_id: conversationId,
+      role,
+      content,
+      parts: (parts as never) ?? null,
+    });
+    if (error) console.error("[chat] persist message failed", error.message);
+    await supabaseAdmin
+      .from("chat_conversations")
+      .update({ last_message_at: new Date().toISOString() })
+      .eq("id", conversationId);
+  } catch (err) {
+    console.error("[chat] message logging unavailable", err);
+  }
 }
 
 async function retrieveKnowledge(question: string): Promise<string> {
