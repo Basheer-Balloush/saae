@@ -1,7 +1,6 @@
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowUp, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import React, { useRef } from "react";
-import { AbuAlJoud3D } from "@/components/ui/abu-al-joud-3d";
 
 export type MotionFooterLocale = "ar" | "en";
 
@@ -25,8 +24,8 @@ type FooterCopy = {
 const COPY: Record<MotionFooterLocale, FooterCopy> = {
   ar: {
     eyebrow: "أهلاً، أنا أبو الجود",
-    title: "مساعدك الذكي في الجمعية",
-    body: "اسألني عن برامج الجمعية ومجتمعاتها وفعالياتها، وسأقترح لك الطريق الأنسب أو أوصلك بالفريق المختص.",
+    title: "اسأل أبو الجود",
+    body: "إذا كان لديك أي سؤال عن الجمعية أو برامجها أو دوراتها أو مجتمعاتها، اسألني وسأساعدك على الوصول إلى الخطوة الأنسب.",
     primaryCta: "ابدأ الحديث مع أبو الجود",
     assistantLabel: "تحدّث مع أبو الجود",
     assistantSpeech: "كيف فيني ساعدك اليوم؟",
@@ -41,8 +40,8 @@ const COPY: Record<MotionFooterLocale, FooterCopy> = {
   },
   en: {
     eyebrow: "Hello, I am Abu Al-Joud",
-    title: "Your intelligent SAAE guide",
-    body: "Ask me about SAAE programmes, communities and events. I can recommend the right path or connect you with the right team.",
+    title: "Ask Abu Al-Joud",
+    body: "If you have questions about SAAE, its programmes, courses, or communities, ask me and I will guide you to the right next step.",
     primaryCta: "Chat with Abu Al-Joud",
     assistantLabel: "Talk to Abu Al-Joud",
     assistantSpeech: "How can I help you today?",
@@ -206,6 +205,7 @@ export function MotionFooter({ locale = "ar" }: { locale?: MotionFooterLocale })
 
         <div className="hmf-shell">
           <motion.div
+            id="assistant-chatbot-section"
             className="hmf-assistant-intro"
             initial={false}
             animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
@@ -239,13 +239,34 @@ export function MotionFooter({ locale = "ar" }: { locale?: MotionFooterLocale })
               </div>
             </div>
 
-            <AbuAlJoud3D
-              active={isVisible}
-              label={copy.assistantLabel}
-              onActivate={openAssistant}
-              speech={copy.assistantSpeech}
-              status={copy.assistantStatus}
-            />
+            <motion.button
+              type="button"
+              className="hmf-assistant-character"
+              onClick={openAssistant}
+              aria-label={copy.assistantLabel}
+              initial={false}
+              animate={
+                isVisible
+                  ? { opacity: 1, y: 0, rotate: 0, scale: 1 }
+                  : { opacity: 0, y: 42, rotate: -2, scale: 0.94 }
+              }
+              whileHover={prefersReducedMotion ? undefined : { y: -8, rotate: 1.5 }}
+              whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+              transition={{ ...transition, delay: prefersReducedMotion ? 0 : 0.18 }}
+            >
+              <span className="hmf-character-halo" aria-hidden="true" />
+              <img
+                src="/cinematic/images/abu-al-joud-comic-welcome.webp"
+                alt={copy.assistantLabel}
+                width="480"
+                height="720"
+                draggable={false}
+              />
+              <span className="hmf-character-prompt">
+                <MessageCircle aria-hidden="true" />
+                {copy.assistantSpeech}
+              </span>
+            </motion.button>
           </motion.div>
 
           <motion.div

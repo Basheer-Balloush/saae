@@ -39,6 +39,12 @@ const DesktopMotionFooterLazy = React.lazy(() =>
   })),
 );
 
+const DesktopSectionGuideLazy = React.lazy(() =>
+  import("@/components/home/DesktopSectionGuide").then((m) => ({
+    default: m.DesktopSectionGuide,
+  })),
+);
+
 /* Desktop only: the phone page loads none of these. The hero's two scripts
    come first and the rest run after them in order. They stay one list so the
    page-ready events the later scripts wait for are replayed once, after all
@@ -137,6 +143,9 @@ function DesktopHome({
       </Suspense>
       <Suspense fallback={null}>
         <DesktopPartnerCarouselLazy partners={partners} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <DesktopSectionGuideLazy />
       </Suspense>
       <DesktopFaqScroll />
       <Suspense fallback={null}>
