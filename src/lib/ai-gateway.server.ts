@@ -173,8 +173,14 @@ export type ChatModelSelection =
       gateway: undefined;
     };
 
+// Bracket access is not touched by Vite's `define`, which only rewrites the
+// dotted member expression, so read both forms for the dev-server inlining.
+function readLovableApiKey(): string | undefined {
+  return process.env.LOVABLE_API_KEY || process.env['LOVABLE_API_KEY'] || undefined;
+}
+
 function createLovableChatModel(request: Request): ChatModelSelection {
-  const key = process.env['LOVABLE_API_KEY'];
+  const key = readLovableApiKey();
   if (!key) throw new Error('CHAT_CONFIGURATION_MISSING');
 
   const initialRunId = getLovableAiGatewayRunId(request);
@@ -206,7 +212,7 @@ function createLovableChatModel(request: Request): ChatModelSelection {
 }
 
 export function createChatModelForRequest(request: Request): ChatModelSelection {
-  if (process.env['LOVABLE_API_KEY']) {
+  if (readLovableApiKey()) {
     return createLovableChatModel(request);
   }
   // Cloudflare Worker deployment: direct OpenRouter provider (CHAT_MODEL required).

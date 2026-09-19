@@ -151,25 +151,31 @@ type ChatBody = ChatRequestBody & {
 };
 
 async function upsertConversation(sessionId: string, lang: string | null, userAgent: string | null) {
-  // upsert by session_id, return id
-  const { data, error } = await supabaseAdmin
-    .from("chat_conversations")
-    .upsert(
-      {
-        session_id: sessionId,
-        lang,
-        user_agent: userAgent,
-        last_message_at: new Date().toISOString(),
-      },
-      { onConflict: "session_id" },
-    )
-    .select("id")
-    .single();
-  if (error) {
-    console.error("[chat] upsert conversation failed", error.message);
+  // Transcript logging is best-effort: never fail the chat reply when the
+  // admin client is unconfigured (e.g. local dev without a service-role key).
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("chat_conversations")
+      .upsert(
+        {
+          session_id: sessionId,
+          lang,
+          user_agent: userAgent,
+          last_message_at: new Date().toISOString(),
+        },
+        { onConflict: "session_id" },
+      )
+      .select("id")
+      .single();
+    if (error) {
+      console.error("[chat] upsert conversation failed", error.message);
+      return null;
+    }
+    return data?.id ?? null;
+  } catch (err) {
+    console.error("[chat] conversation logging unavailable", err);
     return null;
   }
-  return data?.id ?? null;
 }
 
 async function persistMessage(
@@ -178,17 +184,21 @@ async function persistMessage(
   content: string,
   parts: unknown,
 ) {
-  const { error } = await supabaseAdmin.from("chat_messages").insert({
-    conversation_id: conversationId,
-    role,
-    content,
-    parts: (parts as never) ?? null,
-  });
-  if (error) console.error("[chat] persist message failed", error.message);
-  await supabaseAdmin
-    .from("chat_conversations")
-    .update({ last_message_at: new Date().toISOString() })
-    .eq("id", conversationId);
+  try {
+    const { error } = await supabaseAdmin.from("chat_messages").insert({
+      conversation_id: conversationId,
+      role,
+      content,
+      parts: (parts as never) ?? null,
+    });
+    if (error) console.error("[chat] persist message failed", error.message);
+    await supabaseAdmin
+      .from("chat_conversations")
+      .update({ last_message_at: new Date().toISOString() })
+      .eq("id", conversationId);
+  } catch (err) {
+    console.error("[chat] message logging unavailable", err);
+  }
 }
 
 async function retrieveKnowledge(question: string): Promise<string> {
@@ -230,7 +240,8 @@ export const Route = createFileRoute("/api/chat")({
         // Fail before persisting user messages if the provider is not configured.
         // Prefers Lovable AI Gateway; falls back to the direct OpenRouter provider.
         let chat: ReturnType<typeof createChatModelForRequest>;
-        try { chat = createChatModelForRequest(request); } catch {
+        try { chat = createChatModelForRequest(request); } catch (err) {
+          console.error("[chat] provider init failed", err, "hasLovableKey:", Boolean(process.env['LOVABLE_API_KEY']));
           return new Response("Chat is temporarily unavailable", { status: 503 });
         }
         // Rate limit by IP + session (or just IP if no session)
@@ -319,15 +330,24 @@ export const Route = createFileRoute("/api/chat")({
         // Rebuild trusted conversation history from DB (server-side only) so that
         // clients cannot fabricate prior `assistant`/`system` turns to bypass the
         // system prompt. The client only supplies new user turns.
-        const { data: history } = await supabaseAdmin
-          .from("chat_messages")
-          .select("role, content, parts")
-          .eq("conversation_id", conversationId as string)
-          .in("role", ["user", "assistant"])
-          .order("created_at", { ascending: true })
-          .limit(50);
+        // Best-effort: without storage the turn proceeds with the new user message only.
+        let history: Array<{ role: string; content: string | null; parts: unknown }> | null = null;
+        if (conversationId) {
+          try {
+            const res = await supabaseAdmin
+              .from("chat_messages")
+              .select("role, content, parts")
+              .eq("conversation_id", conversationId as string)
+              .in("role", ["user", "assistant"])
+              .order("created_at", { ascending: true })
+              .limit(50);
+            history = res.data as typeof history;
+          } catch (err) {
+            console.error("[chat] history unavailable", err);
+          }
+        }
 
-        const trustedMessages: UIMessage[] = ((history ?? []) as Array<{
+        const storedMessages: UIMessage[] = ((history ?? []) as Array<{
           role: string;
           content: string | null;
           parts: unknown;
@@ -338,6 +358,13 @@ export const Route = createFileRoute("/api/chat")({
             ? (m.parts as UIMessage["parts"])
             : [{ type: "text", text: m.content ?? "" }],
         }));
+
+        // If transcript storage is unavailable, fall back to the current user turn
+        // so the model always receives a non-empty prompt.
+        const trustedMessages: UIMessage[] =
+          storedMessages.length > 0
+            ? storedMessages
+            : [{ id: "live-0", role: "user", parts: [{ type: "text", text: lastUserText }] }];
 
         const tools = {
           submit_individual_lead: tool({
