@@ -50,6 +50,27 @@
       "when": 1788186796156,
       "tag": "0006_quiz_review_and_attempt_state",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789815864005,
+      "tag": "0007_add_lms_my_teaching_course_ids_rpc",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789815980836,
+      "tag": "0008_add_role_and_ams_access_rpcs",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789816176757,
+      "tag": "0009_add_missing_course_and_queue_rpcs",
+      "breakpoints": true
     }
   ]
 }
