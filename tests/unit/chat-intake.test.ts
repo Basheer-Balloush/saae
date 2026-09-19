@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   courseUrl,
   noCourseFallback,
+  providerBusyMessage,
   toCourseOptions,
   ORG_EMAIL,
   ORG_PHONE,
@@ -64,5 +65,26 @@ describe("course options offered by the assistant", () => {
     expect(ar.email).toBe(ORG_EMAIL);
     expect(ar.message).toContain(ORG_PHONE);
     expect(noCourseFallback("en").message).toContain("No published course");
+  });
+});
+
+describe("when the provider refuses the call", () => {
+  it("explains a rate limit in the visitor's language, with the phone number", () => {
+    const err = new Error("Failed after 3 attempts. Last error: Too Many Requests");
+    expect(providerBusyMessage(err, "ar")).toContain(ORG_PHONE);
+    expect(providerBusyMessage(err, "ar")).toContain("مزدحمة");
+    expect(providerBusyMessage(err, "en")).toContain("busy right now");
+  });
+
+  it("recognises the provider's other ways of saying the same thing", () => {
+    for (const text of ["429 quota exceeded", "RESOURCE_EXHAUSTED", "rate-limit reached"]) {
+      expect(providerBusyMessage(new Error(text), "en")).toContain("busy right now");
+    }
+  });
+
+  it("falls back to a plain apology for any other failure", () => {
+    const msg = providerBusyMessage(new Error("socket hang up"), "en");
+    expect(msg).toContain("Something went wrong");
+    expect(msg).toContain(ORG_EMAIL);
   });
 });

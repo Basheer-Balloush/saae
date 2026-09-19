@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
 import { createChatModel } from "@/lib/ai-gateway";
-import { noCourseFallback, toCourseOptions, ORG_EMAIL, ORG_PHONE, type CatalogRow } from "@/lib/chat-intake";
+import { noCourseFallback, providerBusyMessage, toCourseOptions, ORG_EMAIL, ORG_PHONE, type CatalogRow } from "@/lib/chat-intake";
 
 
 // --- In-memory sliding-window rate limiter (per-instance) ---
@@ -541,12 +541,21 @@ export const Route = createFileRoute("/api/chat")({
           model,
           system: SYSTEM_PROMPT + extraContext,
           tools,
-          stopWhen: stepCountIs(50),
+          // Every step and every retry is another provider call, and the provider
+          // bills and rate-limits per call. 50 steps with 3 attempts each could
+          // burn a daily quota on one conversation.
+          maxRetries: 1,
+          stopWhen: stepCountIs(12),
           messages: await convertToModelMessages(trustedMessages),
         });
 
         return result.toUIMessageStreamResponse({
           originalMessages: trustedMessages,
+          // The visitor should read why the answer stopped, not a raw provider error.
+          onError: (error) => {
+            console.error("[chat] stream failed", error);
+            return providerBusyMessage(error, lang === "en" ? "en" : "ar");
+          },
           onFinish: async ({ messages: finalMessages }) => {
             if (!conversationId) return;
             // Find the latest assistant message (the one just produced)
