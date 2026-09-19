@@ -330,13 +330,22 @@ export const Route = createFileRoute("/api/chat")({
         // Rebuild trusted conversation history from DB (server-side only) so that
         // clients cannot fabricate prior `assistant`/`system` turns to bypass the
         // system prompt. The client only supplies new user turns.
-        const { data: history } = await supabaseAdmin
-          .from("chat_messages")
-          .select("role, content, parts")
-          .eq("conversation_id", conversationId as string)
-          .in("role", ["user", "assistant"])
-          .order("created_at", { ascending: true })
-          .limit(50);
+        // Best-effort: without storage the turn proceeds with the new user message only.
+        let history: Array<{ role: string; content: string | null; parts: unknown }> | null = null;
+        if (conversationId) {
+          try {
+            const res = await supabaseAdmin
+              .from("chat_messages")
+              .select("role, content, parts")
+              .eq("conversation_id", conversationId as string)
+              .in("role", ["user", "assistant"])
+              .order("created_at", { ascending: true })
+              .limit(50);
+            history = res.data as typeof history;
+          } catch (err) {
+            console.error("[chat] history unavailable", err);
+          }
+        }
 
         const trustedMessages: UIMessage[] = ((history ?? []) as Array<{
           role: string;
