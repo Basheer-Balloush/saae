@@ -5,7 +5,7 @@
 Prepared from the supplied `saae-main.zip`, preserving that snapshot and merging the prepared provider migration and latest role-interface fixes. Nothing was pushed to GitHub or deployed remotely during this merge. Production readiness still requires the live checks below.
 
 - Email senders call Resend directly; knowledge embeddings call OpenAI directly.
-- Website chat prefers the Lovable AI Gateway when `LOVABLE_API_KEY` is configured (Lovable-hosted deployment) and falls back to the direct OpenRouter provider (`OPENROUTER_API_KEY` + `CHAT_MODEL`) when it is not — the Cloudflare Worker staging deployment intentionally does not carry Lovable secrets, so it keeps using OpenRouter.
+- Website chat prefers the Lovable AI Gateway when `LOVABLE_API_KEY` is configured (Lovable-hosted deployment). Without it, it calls a provider directly: Google Gemini when `GEMINI_API_KEY` is set, otherwise OpenRouter with `OPENROUTER_API_KEY`, in both cases with `CHAT_MODEL`. The Cloudflare Worker deployment intentionally does not carry Lovable secrets.
 - The Lovable Vite build helper and unused locked dependencies were retained to avoid an unrelated dependency upgrade; these are not hosted email/AI connectors.
 - Worker configuration targets `saae-organization-staging`, preserves dashboard variables, enables observability, and schedules no cron jobs.
 - No database rows, user roles, stored image links, live domains, or remote credentials were changed by this merge.
@@ -63,7 +63,7 @@ Test signup/confirmation, confirmation resend, password recovery, and representa
 
 ### AI and WhatsApp
 
-Set `OPENROUTER_API_KEY` as a Worker secret and choose a valid `CHAT_MODEL`. Set `OPENAI_API_KEY` for knowledge embeddings (`text-embedding-3-small`, 1536 dimensions). Test website chat, knowledge retrieval, failure handling, and response latency. Real provider calls were not made during local verification.
+Set either `GEMINI_API_KEY` (Google AI Studio) or `OPENROUTER_API_KEY` as a Worker secret and choose a matching `CHAT_MODEL` (`gemini-3.8-flash` for Google, `google/gemini-3.8-flash` for OpenRouter). Both keys reach the same OpenAI-compatible interface; Gemini is used when both are present. Set `OPENAI_API_KEY` for knowledge embeddings (`text-embedding-3-small`, 1536 dimensions). Test website chat, knowledge retrieval, failure handling, and response latency. Real provider calls were not made during local verification.
 
 The supplied source contains WhatsApp `wa.me` links, not an automated WhatsApp bot implementation. Those links remain intact. Identify where the separate WhatsApp chatbot is hosted and how it authenticates before declaring that integration migrated.
 
