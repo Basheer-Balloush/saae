@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
 import { createChatModelForRequest, withLovableAiGatewayRunIdHeader } from "@/lib/ai-gateway.server";
+import { noCourseFallback, toCourseOptions, ORG_EMAIL, ORG_PHONE, type CatalogRow } from "@/lib/chat-intake";
 
 
 // --- In-memory sliding-window rate limiter (per-instance) ---
@@ -111,8 +112,27 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 
 # === نهاية المرجع ===
 
+# رحلة التعرّف (ابدأ بها مع كل زائر جديد)
+اسأل الأسئلة التالية **واحداً تلو الآخر**، سؤالاً واحداً في كل رسالة، واعرض الخيارات مرقّمة ليختار بسهولة، وأخبره بتقدّمه («سؤال 3 من 6»). لا تسأل أكثر من سؤال في الرسالة الواحدة، ولا تكرّر سؤالاً أجاب عنه ضمناً.
+1) من أنت اليوم؟ (طالب أو خريج / محترف في مجال آخر / صاحب شركة أو مسؤول فيها / مدرّب أو خبير)
+2) ما مجالك أو اهتمامك؟ (البيانات، البرمجيات، الرعاية الصحية، العمران الذكي، البحث العلمي، الاقتصاد الذكي، الإعلام، الجودة وريادة الأعمال، التدريب، أو مجال آخر)
+3) ما مستواك في الذكاء الاصطناعي؟ (مبتدئ تماماً / أعرف الأساسيات / أعمل عليه فعلياً)
+4) ماذا تريد الآن؟ (فرصة تدريب أو عمل / نمو أكاديمي وبحث / تطوير أعمال شركتي / التعاون والشراكة معكم)
+5) ما الذي تستطيع تقديمه للجمعية وشبكتها؟ (خبرة تقنية / تدريب ومحتوى / شبكة علاقات / رعاية أو تمويل / لا شيء حالياً)
+6) كم وقتاً تستطيع تخصيصه أسبوعياً؟ (أقل من ساعتين / 2-5 ساعات / أكثر من 5)
+7) (اختياري) ما الذي يعيقك الآن؟ ويمكنه التخطّي.
+8) اطلب بياناته للتواصل (الاسم + إيميل أو هاتف) موضِّحاً أنها لمتابعة خطوته. من يرفض يُكمل ويأخذ توصيته دون حفظ بيانات تواصل.
+
+# بعد انتهاء الأسئلة — نفّذ بهذا الترتيب
+أ) اتّصل بأداة \`find_courses\` مع مجاله ومستواه للبحث عن دورة مناسبة **من دورات الجمعية الحقيقية**.
+ب) إذا رجعت الأداة بدورات: اقترح واحدة (أو اثنتين) بالاسم والرابط والسعر كما رجعت حرفياً. ممنوع اختراع اسم دورة أو رابط أو سعر.
+ج) إذا رجعت الأداة فارغة: اعتذر بلطف وأعطه رقم الجمعية \`${ORG_PHONE}\` والبريد \`${ORG_EMAIL}\` للتواصل المباشر، ولا تخترع بديلاً.
+د) إذا كان يريد شراكة أو خدمة لشركته: اجمع بيانات الشركة ثم احفظها بأداة \`submit_company_lead\`. وإذا كان فرداً وأعطى بياناته: احفظها بأداة \`submit_individual_lead\`.
+هـ) في كل الحالات، اتّصل أخيراً بأداة \`save_visitor_profile\` لحفظ ملفّه: خلاصة عنه، هدفه، ما رُشِّح له، خطوته خلال أسبوع، ومعلومة تُذكر في لقاء قادم.
+و) اعرض عليه في رسالة واحدة: ملفّه المختصر، هدفه، ما رُشِّح له، وخطوة واحدة ينفّذها خلال أسبوع.
+
 # مهامك الأساسية
-1) أجب فقط بالاعتماد على المرجع أعلاه. لا تخترع.
+1) أجب فقط بالاعتماد على المرجع أعلاه وعلى ما ترجعه الأدوات. لا تخترع.
 2) إذا كان الزائر فرداً مهتمّاً بالتدريب أو الانضمام، اجمع منه البيانات التالية واحدةً تلو الأخرى بأسلوب محادثة طبيعية (لا تطلبها كلها مرّة واحدة):
    - الاسم الكامل
    - الإيميل
@@ -367,6 +387,98 @@ export const Route = createFileRoute("/api/chat")({
             : [{ id: "live-0", role: "user", parts: [{ type: "text", text: lastUserText }] }];
 
         const tools = {
+          find_courses: tool({
+            description:
+              "Search the association's published courses. Call before recommending any course. Returns [] when nothing matches; then give the association's phone instead of inventing a course.",
+            inputSchema: z.object({
+              topic: z.string().nullable().optional(),
+              level: z.enum(["beginner", "intermediate", "advanced"]).nullable().optional(),
+            }),
+            execute: async (input) => {
+              const { data, error } = await supabaseAdmin.rpc("lms_list_catalog_public", {
+                _limit: 12,
+                _offset: 0,
+                ...(input.topic ? { _search: input.topic } : {}),
+                ...(input.level ? { _level: input.level } : {}),
+              });
+              if (error) {
+                console.error("[chat] find_courses failed", error.message, { conversationId });
+                return { ok: false, courses: [], ...noCourseFallback(lang === "en" ? "en" : "ar") };
+              }
+              let rows = (data ?? []) as unknown as CatalogRow[];
+              // A topic with no match should not end the journey: fall back to the
+              // whole catalogue rather than telephoning the visitor away.
+              if (rows.length === 0 && (input.topic || input.level)) {
+                const { data: all } = await supabaseAdmin.rpc("lms_list_catalog_public", { _limit: 12, _offset: 0 });
+                rows = (all ?? []) as unknown as CatalogRow[];
+              }
+              const courses = toCourseOptions(rows, lang === "en" ? "en" : "ar");
+              if (courses.length === 0) {
+                return { ok: true, courses: [], ...noCourseFallback(lang === "en" ? "en" : "ar") };
+              }
+              return { ok: true, courses };
+            },
+          }),
+
+          save_visitor_profile: tool({
+            description:
+              "Save the visitor's profile after the intake questions. Call once, at the end, whether or not contact details were shared.",
+            inputSchema: z.object({
+              summary: z.string().min(2).max(2000),
+              goal: z.string().nullable().optional(),
+              who: z.enum(["student", "professional", "company", "trainer"]).nullable().optional(),
+              field: z.string().nullable().optional(),
+              ai_level: z.enum(["beginner", "basics", "working"]).nullable().optional(),
+              intent: z.enum(["opportunity", "academic", "business", "collaboration"]).nullable().optional(),
+              can_offer: z.string().nullable().optional(),
+              weekly_hours: z.enum(["lt2", "2to5", "gt5"]).nullable().optional(),
+              blocker: z.string().nullable().optional(),
+              recommendation: z.enum(["course", "contact", "lead"]),
+              recommended_course_title: z.string().nullable().optional(),
+              recommended_course_url: z.string().nullable().optional(),
+              next_step: z.string().nullable().optional(),
+              remember_note: z.string().nullable().optional(),
+              contact_name: z.string().nullable().optional(),
+              contact_email: z.string().email().nullable().optional(),
+              contact_phone: z.string().nullable().optional(),
+            }),
+            execute: async (input) => {
+              const { error, data } = await supabaseAdmin
+                .from("chat_visitor_profiles" as never)
+                .insert({
+                  conversation_id: conversationId,
+                  session_id: chatSessionId,
+                  lang,
+                  who: input.who ?? null,
+                  field: input.field ?? null,
+                  ai_level: input.ai_level ?? null,
+                  intent: input.intent ?? null,
+                  can_offer: input.can_offer ?? null,
+                  weekly_hours: input.weekly_hours ?? null,
+                  blocker: input.blocker ?? null,
+                  summary: input.summary,
+                  goal: input.goal ?? null,
+                  next_step: input.next_step ?? null,
+                  remember_note: input.remember_note ?? null,
+                  recommendation: input.recommendation,
+                  recommended_course_title: input.recommended_course_title ?? null,
+                  recommended_course_url: input.recommended_course_url ?? null,
+                  contact_name: input.contact_name ?? null,
+                  contact_email: input.contact_email ?? null,
+                  contact_phone: input.contact_phone ?? null,
+                  raw: input,
+                } as never)
+                .select("id")
+                .single();
+              if (error) {
+                console.error("[chat] save_visitor_profile failed", error.message, { conversationId });
+                return { ok: false, error: error.message };
+              }
+              console.log("[chat] visitor_profile saved", { id: (data as { id?: string } | null)?.id, conversationId });
+              return { ok: true, id: (data as { id?: string } | null)?.id };
+            },
+          }),
+
           submit_individual_lead: tool({
             description:
               "Save an individual visitor's contact info after collecting it conversationally. Call ONLY when full_name and at least one contact (email or phone) are confirmed.",
