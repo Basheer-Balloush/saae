@@ -60,3 +60,17 @@ export function noCourseFallback(lang: "ar" | "en"): { message: string; phone: s
     email: ORG_EMAIL,
   };
 }
+
+/** Shown when the model provider refuses the call (quota, overload, outage). */
+export function providerBusyMessage(error: unknown, lang: "ar" | "en"): string {
+  const text = error instanceof Error ? `${error.name} ${error.message}` : String(error ?? "");
+  const rateLimited = /too many requests|rate.?limit|quota|429|resource[_ ]exhausted/i.test(text);
+  if (rateLimited) {
+    return lang === "ar"
+      ? `الخدمة مزدحمة الآن وتعذّر إكمال الرد. جرّب بعد بضع دقائق، أو تواصل مباشرة على ${ORG_PHONE} أو ${ORG_EMAIL}.`
+      : `The assistant is busy right now and could not finish the reply. Try again in a few minutes, or contact us on ${ORG_PHONE} or ${ORG_EMAIL}.`;
+  }
+  return lang === "ar"
+    ? `حدث خطأ غير متوقّع أثناء الرد. جرّب مرة أخرى، أو تواصل على ${ORG_PHONE} أو ${ORG_EMAIL}.`
+    : `Something went wrong while answering. Please try again, or contact us on ${ORG_PHONE} or ${ORG_EMAIL}.`;
+}
