@@ -2,13 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUp,
-  Bot,
   Building2,
   GraduationCap,
   Handshake,
   Loader2,
-  MessageSquarePlus,
-  Sparkles,
   X,
 } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
@@ -17,7 +14,6 @@ import { loadChatSession, saveChatSession, type ChatSession } from "@/lib/chat-s
 import { parseChoices } from "@/lib/chat-choices";
 import { formatMessage } from "@/lib/chat-format";
 import { useLang } from "@/lib/i18n";
-import { AssistantFeedbackForm } from "@/components/site/AssistantFeedbackForm";
 import "./assistant-chat-modal.css";
 
 const SSR_SESSION: ChatSession = { id: "ssr", lastActivity: 0, messages: [] };
@@ -38,11 +34,9 @@ export function AssistantChatModal({
   const isRtl = dir === "rtl";
 
   const [input, setInput] = useState("");
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const feedbackRef = useRef<HTMLDivElement | null>(null);
 
   // The conversation the visitor is in. It ends after CHAT_IDLE_MS without a
   // message, so each visit is its own conversation for the admin and for the model.
@@ -123,17 +117,6 @@ export function AssistantChatModal({
     return () => cancelAnimationFrame(id);
   }, [messages, status, open]);
 
-  useEffect(() => {
-    if (!feedbackOpen) return;
-    const panel = feedbackRef.current;
-    const el = scrollRef.current;
-    if (!panel || !el) return;
-    const id = requestAnimationFrame(() => {
-      el.scrollTo({ top: Math.max(panel.offsetTop - 16, 0), behavior: "smooth" });
-    });
-    return () => cancelAnimationFrame(id);
-  }, [feedbackOpen]);
-
   // The cinematic pages capture wheel events for their own scroll journeys, which
   // left this thread unscrollable. Inside the chat, the chat owns the wheel.
   useEffect(() => {
@@ -208,10 +191,6 @@ export function AssistantChatModal({
                   <img src="/cinematic/images/abu-al-joud-3d.webp" alt="" />
                 </span>
                 <div>
-                  <div className="assistant-chat-kicker">
-                    <Sparkles aria-hidden="true" />
-                    <span>{isRtl ? "مساعد الجمعية الذكي" : "SAAE intelligent guide"}</span>
-                  </div>
                   <p id="assistant-chat-title" className="assistant-chat-name">
                     {a.chat.name}
                   </p>
@@ -219,19 +198,6 @@ export function AssistantChatModal({
               </div>
 
               <div className="assistant-chat-tools">
-                <span className="assistant-chat-status">
-                  <span aria-hidden="true" />
-                  {a.chat.status}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setFeedbackOpen((value) => !value)}
-                  className="assistant-chat-icon-button"
-                  aria-label={isRtl ? "إرسال ملاحظة" : "Send feedback"}
-                  title={isRtl ? "إرسال ملاحظة" : "Send feedback"}
-                >
-                  <MessageSquarePlus aria-hidden="true" />
-                </button>
                 <button
                   type="button"
                   onClick={onClose}
@@ -245,7 +211,7 @@ export function AssistantChatModal({
             </header>
 
             <div ref={scrollRef} className="assistant-chat-body chat-scroll">
-              {messages.length === 0 && !feedbackOpen && (
+              {messages.length === 0 && (
                 <div className="assistant-chat-welcome">
                   <motion.div
                     initial={{ opacity: 0, x: isRtl ? -24 : 24 }}
@@ -264,10 +230,6 @@ export function AssistantChatModal({
                     transition={{ duration: 0.48, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
                     className="assistant-chat-intro"
                   >
-                    <p className="assistant-chat-eyebrow">
-                      <Bot aria-hidden="true" />
-                      {isRtl ? "أهلاً بك" : "Welcome"}
-                    </p>
                     <h2>{a.title}</h2>
                     <p className="assistant-chat-subtitle">{a.subtitle}</p>
 
@@ -291,32 +253,8 @@ export function AssistantChatModal({
                         );
                       })}
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setFeedbackOpen(true)}
-                      className="assistant-chat-feedback-link"
-                    >
-                      <MessageSquarePlus aria-hidden="true" />
-                      {isRtl ? "أرسل ملاحظة إلى فريق الجمعية" : "Send feedback to the SAAE team"}
-                    </button>
                   </motion.div>
                 </div>
-              )}
-
-              {feedbackOpen && (
-                <motion.div
-                  ref={feedbackRef}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="assistant-chat-feedback-panel"
-                >
-                  <AssistantFeedbackForm
-                    lang={lang === "ar" ? "ar" : "en"}
-                    sessionId={sessionId}
-                    onClose={() => setFeedbackOpen(false)}
-                  />
-                </motion.div>
               )}
 
               {messages.length > 0 && (
