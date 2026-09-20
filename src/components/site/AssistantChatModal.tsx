@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { loadChatSession, saveChatSession, type ChatSession } from "@/lib/chat-session";
 import { parseChoices } from "@/lib/chat-choices";
+import { formatMessage } from "@/lib/chat-format";
 import { useLang } from "@/lib/i18n";
 import { AssistantFeedbackForm } from "@/components/site/AssistantFeedbackForm";
 
@@ -234,7 +235,17 @@ export function AssistantChatModal({
                             isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
                           }`}
                         >
-                          {text}
+                          {isUser
+                            ? text
+                            : formatMessage(text).map((seg, si) =>
+                                seg.bold ? (
+                                  <strong key={si} className="font-semibold">
+                                    {seg.text}
+                                  </strong>
+                                ) : (
+                                  <span key={si}>{seg.text}</span>
+                                ),
+                              )}
                         </div>
                         {showChoices && (
                           <div className="flex flex-wrap gap-2">
