@@ -38,3 +38,19 @@ describe("answer buttons", () => {
     expect(parseChoices("س\n[[ Choices :  نعم | لا ]]").choices).toEqual(["نعم", "لا"]);
   });
 });
+
+describe("markers the model writes imperfectly", () => {
+  it("reads the line even when wrapped in backticks, as the prompt example is", () => {
+    const { text, choices } = parseChoices(
+      "أهلاً، كيف أقدر أساعدك؟\n`[[choices: عندي سؤال | رشّح لي مساراً | شراكة]]`",
+    );
+    expect(choices).toEqual(["عندي سؤال", "رشّح لي مساراً", "شراكة"]);
+    expect(text).toBe("أهلاً، كيف أقدر أساعدك؟");
+    expect(text).not.toContain("`");
+  });
+
+  it("copes with a code fence or a trailing full stop", () => {
+    expect(parseChoices("س\n```[[choices: أ | ب]]```").choices).toEqual(["أ", "ب"]);
+    expect(parseChoices("س\n[[choices: أ | ب]].").choices).toEqual(["أ", "ب"]);
+  });
+});
