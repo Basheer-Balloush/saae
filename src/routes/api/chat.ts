@@ -590,7 +590,12 @@ export const Route = createFileRoute("/api/chat")({
           originalMessages: trustedMessages,
           // The visitor should read why the answer stopped, not a raw provider error.
           onError: (error) => {
-            console.error("[chat] stream failed", error);
+            console.error("[chat] stream failed", {
+              error,
+              message: error instanceof Error ? error.message : String(error),
+              status: (error as { statusCode?: number; status?: number })?.statusCode ?? (error as { status?: number })?.status,
+              body: (error as { responseBody?: string })?.responseBody,
+            });
             return providerBusyMessage(error, lang === "en" ? "en" : "ar");
           },
           onFinish: async ({ messages: finalMessages }) => {
