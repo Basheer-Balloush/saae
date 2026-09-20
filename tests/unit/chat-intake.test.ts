@@ -88,3 +88,24 @@ describe("when the provider refuses the call", () => {
     expect(msg).toContain(ORG_EMAIL);
   });
 });
+
+describe("diagnosing a failure from the chat window", () => {
+  it("adds the provider's status code so the cause is visible without server logs", () => {
+    const err = Object.assign(new Error("Not Found"), { statusCode: 404 });
+    expect(providerBusyMessage(err, "en")).toContain("(404)");
+    expect(providerBusyMessage(err, "ar")).toContain("(404)");
+  });
+
+  it("finds the status on a wrapped error, or in the message text", () => {
+    expect(providerBusyMessage({ cause: { status: 402 } }, "en")).toContain("(402)");
+    expect(providerBusyMessage(new Error("request failed with 401"), "en")).toContain("(401)");
+  });
+
+  it("says nothing extra when there is no status to show", () => {
+    expect(providerBusyMessage(new Error("socket hang up"), "en")).not.toContain("(");
+  });
+
+  it("keeps the rate-limit wording free of codes", () => {
+    expect(providerBusyMessage(new Error("Too Many Requests"), "en")).toContain("busy right now");
+  });
+});

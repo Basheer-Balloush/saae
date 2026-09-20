@@ -62,8 +62,21 @@ export function noCourseFallback(lang: "ar" | "en"): { message: string; phone: s
 }
 
 /** Shown when the model provider refuses the call (quota, overload, outage). */
+function statusOf(error: unknown): number | null {
+  const candidate = error as { statusCode?: unknown; status?: unknown; cause?: unknown } | null;
+  const direct = candidate?.statusCode ?? candidate?.status;
+  if (typeof direct === "number") return direct;
+  const nested = (candidate?.cause as { statusCode?: unknown; status?: unknown } | undefined) ?? undefined;
+  const fromCause = nested?.statusCode ?? nested?.status;
+  if (typeof fromCause === "number") return fromCause;
+  const match = /\b(4\d\d|5\d\d)\b/.exec(error instanceof Error ? error.message : String(error ?? ""));
+  return match ? Number(match[1]) : null;
+}
+
 export function providerBusyMessage(error: unknown, lang: "ar" | "en"): string {
   const text = error instanceof Error ? `${error.name} ${error.message}` : String(error ?? "");
+  const status = statusOf(error);
+  const ref = status ? ` (${status})` : "";
   const rateLimited = /too many requests|rate.?limit|quota|429|resource[_ ]exhausted/i.test(text);
   if (rateLimited) {
     return lang === "ar"
@@ -71,6 +84,6 @@ export function providerBusyMessage(error: unknown, lang: "ar" | "en"): string {
       : `The assistant is busy right now and could not finish the reply. Try again in a few minutes, or contact us on ${ORG_PHONE} or ${ORG_EMAIL}.`;
   }
   return lang === "ar"
-    ? `حدث خطأ غير متوقّع أثناء الرد. جرّب مرة أخرى، أو تواصل على ${ORG_PHONE} أو ${ORG_EMAIL}.`
-    : `Something went wrong while answering. Please try again, or contact us on ${ORG_PHONE} or ${ORG_EMAIL}.`;
+    ? `حدث خطأ غير متوقّع أثناء الرد${ref}. جرّب مرة أخرى، أو تواصل على ${ORG_PHONE} أو ${ORG_EMAIL}.`
+    : `Something went wrong while answering${ref}. Please try again, or contact us on ${ORG_PHONE} or ${ORG_EMAIL}.`;
 }

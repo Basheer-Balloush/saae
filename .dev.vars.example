@@ -8,10 +8,13 @@ EMAIL_FROM="SAAE <noreply@aisyria.org>"
 TEST_EMAIL_ALLOWLIST=
 RESEND_API_KEY=
 # Website chat: set GEMINI_API_KEY (Google AI Studio) or OPENROUTER_API_KEY.
-# Gemini wins when both are set. CHAT_MODEL names the model for the key in use:
-# "gemini-3.8-flash" for Google, "google/gemini-3.8-flash" for OpenRouter.
+# CHAT_MODEL names the model: "gemini-3.8-flash" for Google, or a provider-prefixed
+# id such as "google/gemini-3.1-flash-lite" or "qwen/qwen3.8-27b:free" for OpenRouter.
+# A prefixed id goes to OpenRouter even if a Gemini key is also present; set
+# CHAT_PROVIDER=google|openrouter to decide it yourself.
 GEMINI_API_KEY=
 OPENROUTER_API_KEY=
+CHAT_PROVIDER=
 CHAT_MODEL=gemini-3.8-flash
 # Admin knowledge base embeddings (text-embedding-3-small, 1536 dimensions).
 OPENAI_API_KEY=
