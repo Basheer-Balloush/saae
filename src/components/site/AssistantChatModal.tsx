@@ -42,6 +42,7 @@ export function AssistantChatModal({
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const feedbackRef = useRef<HTMLDivElement | null>(null);
 
   // The conversation the visitor is in. It ends after CHAT_IDLE_MS without a
   // message, so each visit is its own conversation for the admin and for the model.
@@ -121,6 +122,17 @@ export function AssistantChatModal({
     });
     return () => cancelAnimationFrame(id);
   }, [messages, status, open]);
+
+  useEffect(() => {
+    if (!feedbackOpen) return;
+    const panel = feedbackRef.current;
+    const el = scrollRef.current;
+    if (!panel || !el) return;
+    const id = requestAnimationFrame(() => {
+      el.scrollTo({ top: Math.max(panel.offsetTop - 16, 0), behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [feedbackOpen]);
 
   // The cinematic pages capture wheel events for their own scroll journeys, which
   // left this thread unscrollable. Inside the chat, the chat owns the wheel.
@@ -294,6 +306,7 @@ export function AssistantChatModal({
 
               {feedbackOpen && (
                 <motion.div
+                  ref={feedbackRef}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="assistant-chat-feedback-panel"

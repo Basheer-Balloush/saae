@@ -49,8 +49,11 @@ describe("course options offered by the assistant", () => {
   it("states the price the visitor would actually pay", () => {
     expect(toCourseOptions([row({ is_free: true })], "ar")[0].price).toBe("مجاني");
     expect(toCourseOptions([row({ is_free: true })], "en")[0].price).toBe("Free");
-    expect(toCourseOptions([row()], "en")[0].price).toBe("100 USD");
-    expect(toCourseOptions([row({ sale_price: 60 })], "en")[0].price).toBe("60 USD");
+    // The site quotes Syrian pounds; the assistant must not invent dollars.
+    expect(toCourseOptions([row()], "en")[0].price).toBe("100 SYP");
+    expect(toCourseOptions([row()], "ar")[0].price).toBe("ل.س 100");
+    expect(toCourseOptions([row({ sale_price: 60 })], "en")[0].price).toBe("60 SYP");
+    expect(toCourseOptions([row({ price: 150000 })], "ar")[0].price).toBe("ل.س 150,000");
     expect(toCourseOptions([row({ price: null })], "en")[0].price).toBe("Price not set");
   });
 
@@ -86,5 +89,26 @@ describe("when the provider refuses the call", () => {
     const msg = providerBusyMessage(new Error("socket hang up"), "en");
     expect(msg).toContain("Something went wrong");
     expect(msg).toContain(ORG_EMAIL);
+  });
+});
+
+describe("diagnosing a failure from the chat window", () => {
+  it("adds the provider's status code so the cause is visible without server logs", () => {
+    const err = Object.assign(new Error("Not Found"), { statusCode: 404 });
+    expect(providerBusyMessage(err, "en")).toContain("(404)");
+    expect(providerBusyMessage(err, "ar")).toContain("(404)");
+  });
+
+  it("finds the status on a wrapped error, or in the message text", () => {
+    expect(providerBusyMessage({ cause: { status: 402 } }, "en")).toContain("(402)");
+    expect(providerBusyMessage(new Error("request failed with 401"), "en")).toContain("(401)");
+  });
+
+  it("says nothing extra when there is no status to show", () => {
+    expect(providerBusyMessage(new Error("socket hang up"), "en")).not.toContain("(");
+  });
+
+  it("keeps the rate-limit wording free of codes", () => {
+    expect(providerBusyMessage(new Error("Too Many Requests"), "en")).toContain("busy right now");
   });
 });
