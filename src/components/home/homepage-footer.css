@@ -146,6 +146,8 @@
 }
 
 .hmf-assistant-intro {
+  position: relative;
+  z-index: 3;
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
   align-items: center;
@@ -179,11 +181,32 @@
 .hmf-assistant-copy h2 {
   margin: 0;
   color: #f5feff;
+  font-family: "Cairo", Arial, sans-serif;
   font-size: clamp(2.8rem, 4.7vw, 5.2rem);
   font-weight: 900;
   line-height: 1.08;
   letter-spacing: 0;
   text-shadow: 0 0 36px rgba(114, 220, 230, 0.13);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hmf-assistant-copy .hmf-title {
+    padding-block: 0;
+    padding-inline: 0.06em;
+    background-image:
+      linear-gradient(180deg, rgba(198, 237, 243, 0.88), rgba(160, 218, 227, 0.9)),
+      url("/cinematic/images/about-wordmark.webp");
+    background-position: center;
+    background-size: cover;
+    background-clip: text;
+    color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+[dir="rtl"] .hmf-assistant-copy h2 {
+  letter-spacing: 0;
 }
 
 .hmf-intro {
@@ -223,6 +246,20 @@
   justify-content: flex-start;
   gap: 12px;
   margin-top: 26px;
+}
+
+.hmf-footer-cta {
+  --motion-button-surface: #fefdfc;
+  --motion-button-fill: #008b9d;
+  --motion-button-icon: #fefdfc;
+  --motion-button-label: #1e1e1e;
+  --motion-button-label-active: #fefdfc;
+  min-height: 50px;
+  font-family: "Cairo", Arial, sans-serif;
+}
+
+.hmf-footer-cta [data-slot="motion-button-label"] {
+  font-weight: 800;
 }
 
 .hmf-action {
@@ -331,6 +368,19 @@
   font-weight: 800;
   line-height: 1.6;
   text-align: start;
+}
+
+.hmf-character-prompt::before {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: -8px;
+  width: 14px;
+  height: 14px;
+  border-bottom: 1px solid rgba(114, 220, 230, 0.42);
+  border-left: 1px solid rgba(114, 220, 230, 0.42);
+  background: rgba(3, 25, 31, 0.94);
+  content: "";
+  transform: translateY(-50%) rotate(45deg);
 }
 
 .hmf-character-prompt svg {

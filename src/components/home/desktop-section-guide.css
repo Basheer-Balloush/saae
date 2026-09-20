@@ -269,6 +269,56 @@
   height: 238px;
 }
 
+html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="1"] {
+  right: clamp(38px, 5vw, 84px);
+  bottom: clamp(58px, 8vh, 104px);
+  left: auto;
+}
+
+html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="2"] {
+  width: 506px;
+  height: 238px;
+}
+
+html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="2"] .section-guide-copy {
+  left: 132px;
+  width: 360px;
+  padding: 16px 18px 15px;
+}
+
+html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="2"] .community-comic-speaker {
+  width: 132px;
+  height: 232px;
+}
+
+html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="2"] .section-guide-copy h2,
+html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="4"] .section-guide-copy h2 {
+  font-size: 21px;
+  line-height: 1.28;
+}
+
+html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="2"] .section-guide-body,
+html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="4"] .section-guide-body {
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="4"] {
+  width: 472px;
+  height: 232px;
+}
+
+html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="4"] .section-guide-copy {
+  left: 126px;
+  width: 332px;
+  padding: 16px 18px 15px;
+}
+
+html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="4"] .community-comic-speaker {
+  width: 126px;
+  height: 228px;
+}
+
 .section-guide[data-guide-context="comic"] .section-guide-greeting {
   color: #72d6df;
   font-weight: 800;

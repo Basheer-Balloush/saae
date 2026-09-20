@@ -80,6 +80,17 @@ html[dir="rtl"] .cs-scroll-header .mh-faq-scroll-heading {
   letter-spacing: 0;
 }
 
+html[lang="en"] .hp-faq-scroll .cs-scroll-header .faq-intro {
+  transform: translateY(-72px);
+}
+
+html[lang="en"] .cs-scroll-header .faq-intro h2,
+html[lang="en"] .cs-scroll-header .mh-faq-scroll-heading h2 {
+  width: max-content;
+  margin-inline: auto;
+  text-align: center;
+}
+
 .cs-scroll-card {
   position: absolute;
   z-index: 2;

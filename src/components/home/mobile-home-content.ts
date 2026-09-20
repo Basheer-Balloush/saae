@@ -611,7 +611,7 @@ export const PARTNERS_COPY = {
 };
 
 export const FAQ_COPY = {
-  title: { ar: "أسئلة شائعة", en: "Frequently Asked Questions" } satisfies LocalText,
+  title: { ar: "أسئلة شائعة", en: "FAQ'S" } satisfies LocalText,
   body: {
     ar: "الأسئلة التي يطرحها الناس فعلاً قبل البداية.",
     en: "The questions people actually ask before they start.",
