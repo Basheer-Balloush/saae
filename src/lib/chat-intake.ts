@@ -28,11 +28,16 @@ export type CourseOption = {
 export const courseUrl = (row: { slug: string | null; id: string }) =>
   `https://aisyria.org/learning-management-system/courses/${row.slug || row.id}`;
 
+/* Course prices are stored in Syrian pounds and shown that way across the site
+   (CoursePrice renders "ل.س 500" / "500 SYP"), so the assistant must quote the
+   same currency — a price the visitor cannot compare to the course page is worse
+   than no price. */
 function priceLabel(row: CatalogRow, lang: "ar" | "en"): string {
   if (row.is_free) return lang === "ar" ? "مجاني" : "Free";
   const effective = row.sale_price != null && row.sale_price > 0 ? row.sale_price : row.price;
   if (effective == null || Number.isNaN(effective)) return lang === "ar" ? "السعر غير محدّد" : "Price not set";
-  return `${effective} USD`;
+  const amount = Number(effective).toLocaleString("en-US");
+  return lang === "ar" ? `ل.س ${amount}` : `${amount} SYP`;
 }
 
 /** The courses the assistant may mention: titles in the visitor's language, with real links. */
