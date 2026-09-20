@@ -42,6 +42,8 @@ function loadModel() {
 
 type AbuAlJoud3DProps = {
   active?: boolean;
+  cue?: string | number;
+  interactive?: boolean;
   label: string;
   onActivate: () => void;
   speech: string;
@@ -50,6 +52,8 @@ type AbuAlJoud3DProps = {
 
 export function AbuAlJoud3D({
   active = true,
+  cue,
+  interactive = true,
   label,
   onActivate,
   speech,
@@ -83,7 +87,9 @@ export function AbuAlJoud3D({
         if (cancelled) return;
         sceneRef.current = createScene(host, {
           reducedMotion,
-          onActivate: () => activateRef.current(),
+          onActivate: () => {
+            if (interactive) activateRef.current();
+          },
         });
         sceneRef.current.setActive(activeRef.current);
         setState("ready");
@@ -96,29 +102,39 @@ export function AbuAlJoud3D({
       sceneRef.current?.dispose();
       sceneRef.current = null;
     };
-  }, [requested, reducedMotion]);
+  }, [interactive, requested, reducedMotion]);
+
+  useEffect(() => {
+    if (active && state === "ready" && cue !== undefined) {
+      sceneRef.current?.wave();
+    }
+  }, [active, cue, state]);
 
   return (
     <div className="aj3d-stage" data-model-state={state}>
       <div
         ref={hostRef}
         className="aj3d-canvas"
-        role="group"
-        tabIndex={0}
+        role={interactive ? "group" : "img"}
+        tabIndex={interactive ? 0 : undefined}
         aria-label={
           isArabic
             ? "أبو الجود، شخصية ثلاثية الأبعاد تفاعلية"
             : "Abu Al-Joud, interactive 3D character"
         }
-        onKeyDown={(event) => {
-          if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-            event.preventDefault();
-            sceneRef.current?.turn(event.key === "ArrowLeft" ? -0.3 : 0.3);
-          } else if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            onActivate();
-          }
-        }}
+        onKeyDown={
+          interactive
+            ? (event) => {
+                if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+                  event.preventDefault();
+                  sceneRef.current?.turn(event.key === "ArrowLeft" ? -0.3 : 0.3);
+                } else if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onActivate();
+                }
+              }
+            : undefined
+        }
       />
       {state !== "ready" && (
         <div className="aj3d-loading" role="status">
@@ -127,14 +143,14 @@ export function AbuAlJoud3D({
               className="aj3d-loading-ring"
               aria-label={isArabic ? "جارٍ التحميل" : "Loading"}
             />
-          ) : (
+          ) : interactive ? (
             <button type="button" className="hmf-action" onClick={onActivate}>
               {label}
             </button>
-          )}
+          ) : null}
         </div>
       )}
-      {state === "ready" && (
+      {state === "ready" && interactive && (
         <>
           <span className="aj3d-speech" aria-hidden="true">
             <i />

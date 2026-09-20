@@ -189,7 +189,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
    default ground. */
 const CINEMATIC_PATH = /^\/(about|contact|initiative|partners|news(\/[^/]+)?)?\/?$/;
 const DARK_GROUND = { backgroundColor: "#06232a", colorScheme: "dark" } as const;
-const isDarkPath = (pathname: string) => CINEMATIC_PATH.test(pathname) || isSkinnedLmsPath(pathname);
+const isDarkPath = (pathname: string) =>
+  CINEMATIC_PATH.test(pathname) || isSkinnedLmsPath(pathname);
 
 function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = useLocation({ select: (location) => location.pathname });
@@ -339,7 +340,9 @@ function RootComponent() {
                 <Outlet />
               </motion.div>
             </AnimatePresence>
-            {!isAms && !isLms && !isAdmin && <AssistantFab />}
+            {!isAms && !isLms && !isAdmin && (
+              <AssistantFab hideDesktopTrigger={location.pathname === "/"} />
+            )}
             <Toaster richColors position="top-center" />
           </ConfirmProvider>
         </LanguageProvider>

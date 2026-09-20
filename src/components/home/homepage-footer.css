@@ -274,141 +274,86 @@
   background: #047f8f;
 }
 
-.aj3d-stage {
+.hmf-assistant-character {
   position: relative;
-  width: min(470px, 100%);
-  height: clamp(360px, 49vh, 520px);
-  justify-self: center;
-}
-
-.aj3d-canvas {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  outline: none;
-  border-radius: 8px;
-  touch-action: pan-y;
-}
-
-.aj3d-canvas canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  cursor: grab;
-  touch-action: pan-y;
-}
-
-.aj3d-canvas:focus-visible {
-  outline: 2px solid var(--hmf-accent);
-  outline-offset: 4px;
-}
-
-.aj3d-loading {
-  position: absolute;
-  inset: 0;
   display: grid;
-  place-items: center;
-}
-
-.aj3d-loading-ring {
-  width: 36px;
-  height: 36px;
-  border: 2px solid var(--hmf-line);
-  border-top-color: var(--hmf-accent);
-  border-radius: 50%;
-  animation: aj3d-loading 1s linear infinite;
-}
-
-@keyframes aj3d-loading {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.aj3d-tools {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  display: flex;
-  gap: 8px;
-  transform: translateX(-50%);
-}
-
-.aj3d-tools button {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--hmf-line);
-  border-radius: 50%;
-  color: var(--hmf-accent);
-  background: #06232a;
+  place-items: end center;
+  width: min(390px, 100%);
+  min-height: clamp(360px, 48vh, 500px);
+  border: 0;
+  padding: 0;
+  color: var(--hmf-ink);
+  background: transparent;
   cursor: pointer;
-  transition:
-    background 180ms,
-    border-color 180ms;
+  justify-self: center;
+  isolation: isolate;
 }
 
-.aj3d-tools button:hover,
-.aj3d-tools button:focus-visible {
-  border-color: var(--hmf-accent);
-  background: #12434b;
+.hmf-assistant-character img {
+  display: block;
+  width: min(320px, 82%);
+  height: auto;
+  filter: drop-shadow(0 26px 44px rgba(0, 0, 0, 0.34))
+    drop-shadow(0 0 24px rgba(114, 220, 230, 0.22));
+  transform-origin: 50% 100%;
+  animation: hmf-character-float 4.6s ease-in-out infinite;
+  user-select: none;
 }
 
-.aj3d-speech,
-.aj3d-status {
+.hmf-character-halo {
   position: absolute;
-  z-index: 6;
+  inset: 21% 10% 8%;
+  z-index: -1;
+  border: 1px solid rgba(114, 220, 230, 0.18);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(114, 220, 230, 0.18), transparent 46%),
+    linear-gradient(180deg, rgba(6, 62, 72, 0.4), rgba(2, 19, 24, 0));
+  box-shadow: inset 0 0 48px rgba(114, 220, 230, 0.1);
+}
+
+.hmf-character-prompt {
+  position: absolute;
+  right: 0;
+  bottom: 12%;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  border: 1px solid var(--hmf-line);
-  color: var(--hmf-ink);
-  background: rgba(3, 25, 31, 0.88);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(12px);
-  pointer-events: none;
-}
-
-.aj3d-speech {
-  top: 12%;
-  inset-inline-end: -3%;
-  max-width: 135px;
-  padding: 10px 13px;
+  gap: 9px;
+  max-width: 178px;
+  padding: 11px 14px;
+  border: 1px solid rgba(114, 220, 230, 0.42);
   border-radius: 6px;
-  font-size: 0.72rem;
+  color: var(--hmf-ink);
+  background: rgba(3, 25, 31, 0.86);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.26);
+  backdrop-filter: blur(10px);
+  font-size: 0.74rem;
   font-weight: 800;
   line-height: 1.6;
-  transform: translateZ(86px);
+  text-align: start;
 }
 
-.aj3d-speech i {
+.hmf-character-prompt svg {
   flex: 0 0 auto;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--hmf-accent);
-  box-shadow: 0 0 11px rgba(114, 220, 230, 0.84);
+  width: 17px;
+  height: 17px;
+  color: var(--hmf-accent);
 }
 
-.aj3d-status {
-  inset-inline-start: -2%;
-  bottom: 13%;
-  padding: 7px 10px;
-  border-radius: 999px;
-  color: var(--hmf-muted);
-  font-size: 0.65rem;
-  font-weight: 800;
-  transform: translateZ(68px);
+.hmf-assistant-character:focus-visible {
+  outline: 2px solid var(--hmf-accent);
+  outline-offset: 7px;
+  border-radius: 8px;
 }
 
-.aj3d-status i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #60f2c0;
-  box-shadow: 0 0 10px rgba(96, 242, 192, 0.72);
+@keyframes hmf-character-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.6deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(0.8deg);
+  }
 }
 
 .hmf-information {
@@ -567,8 +512,11 @@
   .hmf-actions {
     margin-top: 18px;
   }
-  .aj3d-stage {
-    height: 345px;
+  .hmf-assistant-character {
+    min-height: 330px;
+  }
+  .hmf-assistant-character img {
+    width: min(260px, 78%);
   }
   .hmf-information {
     padding-block: 16px;

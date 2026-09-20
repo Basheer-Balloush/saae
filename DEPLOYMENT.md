@@ -6,6 +6,7 @@ Prepared from the supplied `saae-main.zip`, preserving that snapshot and merging
 
 - Email senders call Resend directly; knowledge embeddings call OpenAI directly.
 - Website chat prefers the Lovable AI Gateway when `LOVABLE_API_KEY` is configured (Lovable-hosted deployment). Without it, it calls a provider directly: Google Gemini when `GEMINI_API_KEY` is set, otherwise OpenRouter with `OPENROUTER_API_KEY`, in both cases with `CHAT_MODEL`. The Cloudflare Worker deployment intentionally does not carry Lovable secrets.
+- The latest co-instructor removal fix uses the protected database RPC instead of a direct table delete.
 - The Lovable Vite build helper and unused locked dependencies were retained to avoid an unrelated dependency upgrade; these are not hosted email/AI connectors.
 - Worker configuration targets `saae-organization-staging`, preserves dashboard variables, enables observability, and schedules no cron jobs.
 - No database rows, user roles, stored image links, live domains, or remote credentials were changed by this merge.
@@ -23,15 +24,15 @@ These changes are intended for the existing `migration` branch only. Leave Lovab
 
 Repository: `Basheer-Balloush/saae`; staging deployment branch: `migration`; root: repository root. The Cloudflare branch setting must be changed separately; a Git commit does not change it.
 
-| Setting | Value |
-| --- | --- |
-| Build command | `bun install --frozen-lockfile && npm run build:staging` |
-| Deploy command | `npx wrangler deploy --config dist/server/wrangler.json --keep-vars` |
-| Build variable `NODE_VERSION` | `24.14.0` |
-| Build variable `BUN_VERSION` | `1.3.9` |
-| Build variable `SKIP_DEPENDENCY_INSTALL` | `1` |
-| Build variable `VITE_SUPABASE_URL` | `https://zkpuyhrmyslmstzwojvw.supabase.co` |
-| Build variable `VITE_SUPABASE_PUBLISHABLE_KEY` | Organization project's public anon/publishable key |
+| Setting                                        | Value                                                                |
+| ---------------------------------------------- | -------------------------------------------------------------------- |
+| Build command                                  | `bun install --frozen-lockfile && npm run build:staging`             |
+| Deploy command                                 | `npx wrangler deploy --config dist/server/wrangler.json --keep-vars` |
+| Build variable `NODE_VERSION`                  | `24.14.0`                                                            |
+| Build variable `BUN_VERSION`                   | `1.3.9`                                                              |
+| Build variable `SKIP_DEPENDENCY_INSTALL`       | `1`                                                                  |
+| Build variable `VITE_SUPABASE_URL`             | `https://zkpuyhrmyslmstzwojvw.supabase.co`                           |
+| Build variable `VITE_SUPABASE_PUBLISHABLE_KEY` | Organization project's public anon/publishable key                   |
 
 The explicit install command uses the existing lockfile. A fresh install on Cloudflare's Linux build image remains to be verified by its first successful build. See Cloudflare's [build-image settings](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/).
 
