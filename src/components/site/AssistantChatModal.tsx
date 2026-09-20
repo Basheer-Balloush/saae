@@ -4,6 +4,7 @@ import { Bot, Send, X, Loader2 } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { loadChatSession, saveChatSession, type ChatSession } from "@/lib/chat-session";
+import { parseChoices } from "@/lib/chat-choices";
 import { useLang } from "@/lib/i18n";
 import { AssistantFeedbackForm } from "@/components/site/AssistantFeedbackForm";
 
@@ -208,9 +209,12 @@ export function AssistantChatModal({
               )}
 
               <div className="space-y-4">
-                {messages.map((m) => {
-                  const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
+                {messages.map((m, i) => {
+                  const raw = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
                   const isUser = m.role === "user";
+                  const { text, choices } = isUser ? { text: raw, choices: [] } : parseChoices(raw);
+                  // Only the newest answer's buttons stay live; older ones are history.
+                  const showChoices = !isUser && choices.length > 0 && i === messages.length - 1 && !isLoading;
                   return (
                     <div
                       key={m.id}
@@ -224,12 +228,28 @@ export function AssistantChatModal({
                             : "justify-start"
                       }`}
                     >
-                      <div
-                        className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                          isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-                        }`}
-                      >
-                        {text}
+                      <div className="flex max-w-[85%] flex-col gap-2">
+                        <div
+                          className={`whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                            isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                          }`}
+                        >
+                          {text}
+                        </div>
+                        {showChoices && (
+                          <div className="flex flex-wrap gap-2">
+                            {choices.map((choice) => (
+                              <button
+                                key={choice}
+                                type="button"
+                                onClick={() => sendMessage({ text: choice })}
+                                className="rounded-full border border-border bg-background px-3.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+                              >
+                                {choice}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
