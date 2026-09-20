@@ -14,6 +14,8 @@ import {
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { loadChatSession, saveChatSession, type ChatSession } from "@/lib/chat-session";
+import { parseChoices } from "@/lib/chat-choices";
+import { formatMessage } from "@/lib/chat-format";
 import { useLang } from "@/lib/i18n";
 import { AssistantFeedbackForm } from "@/components/site/AssistantFeedbackForm";
 import "./assistant-chat-modal.css";
@@ -39,6 +41,7 @@ export function AssistantChatModal({
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   // The conversation the visitor is in. It ends after CHAT_IDLE_MS without a
   // message, so each visit is its own conversation for the admin and for the model.
@@ -107,9 +110,36 @@ export function AssistantChatModal({
     }
   }, [open, status]);
 
+  // Keep the newest message in view, including when the window opens on a
+  // restored conversation (the thread is not mounted before that).
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, status]);
+    if (!open) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const id = requestAnimationFrame(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: messages.length > 2 ? "auto" : "smooth" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [messages, status, open]);
+
+  // The cinematic pages capture wheel events for their own scroll journeys, which
+  // left this thread unscrollable. Inside the chat, the chat owns the wheel.
+  useEffect(() => {
+    if (!open) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const onWheel = (event: WheelEvent) => {
+      const step = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? el.clientHeight : 1;
+      const before = el.scrollTop;
+      el.scrollTop = before + event.deltaY * step;
+      if (el.scrollTop !== before) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -202,7 +232,7 @@ export function AssistantChatModal({
               </div>
             </header>
 
-            <div className="assistant-chat-body chat-scroll">
+            <div ref={scrollRef} className="assistant-chat-body chat-scroll">
               {messages.length === 0 && !feedbackOpen && (
                 <div className="assistant-chat-welcome">
                   <motion.div
@@ -278,11 +308,15 @@ export function AssistantChatModal({
 
               {messages.length > 0 && (
                 <div className="assistant-chat-thread">
-                  {messages.map((message) => {
-                    const text = message.parts
+                  {messages.map((message, index) => {
+                    const raw = message.parts
                       .map((part) => (part.type === "text" ? part.text : ""))
                       .join("");
                     const isUser = message.role === "user";
+                    const { text, choices } = isUser ? { text: raw, choices: [] } : parseChoices(raw);
+                    // Only the newest question's buttons stay live; earlier ones are history.
+                    const showChoices =
+                      !isUser && choices.length > 0 && index === messages.length - 1 && !isLoading;
                     return (
                       <motion.div
                         key={message.id}
@@ -299,7 +333,27 @@ export function AssistantChatModal({
                           <span className="assistant-chat-message-role">
                             {isUser ? (isRtl ? "أنت" : "You") : a.chat.name}
                           </span>
-                          <p>{text}</p>
+                          <p>
+                            {isUser
+                              ? text
+                              : formatMessage(text).map((seg, si) =>
+                                  seg.bold ? <strong key={si}>{seg.text}</strong> : <span key={si}>{seg.text}</span>,
+                                )}
+                          </p>
+                          {showChoices && (
+                            <div className="assistant-chat-choices">
+                              {choices.map((choice) => (
+                                <button
+                                  key={choice}
+                                  type="button"
+                                  className="assistant-chat-choice"
+                                  onClick={() => sendMessage({ text: choice })}
+                                >
+                                  {choice}
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     );
