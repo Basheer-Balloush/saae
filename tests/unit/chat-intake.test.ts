@@ -49,8 +49,11 @@ describe("course options offered by the assistant", () => {
   it("states the price the visitor would actually pay", () => {
     expect(toCourseOptions([row({ is_free: true })], "ar")[0].price).toBe("مجاني");
     expect(toCourseOptions([row({ is_free: true })], "en")[0].price).toBe("Free");
-    expect(toCourseOptions([row()], "en")[0].price).toBe("100 USD");
-    expect(toCourseOptions([row({ sale_price: 60 })], "en")[0].price).toBe("60 USD");
+    // The site quotes Syrian pounds; the assistant must not invent dollars.
+    expect(toCourseOptions([row()], "en")[0].price).toBe("100 SYP");
+    expect(toCourseOptions([row()], "ar")[0].price).toBe("ل.س 100");
+    expect(toCourseOptions([row({ sale_price: 60 })], "en")[0].price).toBe("60 SYP");
+    expect(toCourseOptions([row({ price: 150000 })], "ar")[0].price).toBe("ل.س 150,000");
     expect(toCourseOptions([row({ price: null })], "en")[0].price).toBe("Price not set");
   });
 
