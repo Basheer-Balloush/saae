@@ -1,6 +1,7 @@
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowUp, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import React, { useRef } from "react";
+import MotionButton from "@/components/ui/motion-button";
 
 export type MotionFooterLocale = "ar" | "en";
 
@@ -70,38 +71,6 @@ const LINKS = {
     { ar: "التسجيل", en: "Registration", href: "/registration" },
   ],
 };
-
-type MagneticButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  reducedMotion: boolean;
-};
-
-function MagneticButton({
-  reducedMotion,
-  onPointerMove,
-  onPointerLeave,
-  ...props
-}: MagneticButtonProps) {
-  const handlePointerMove = (event: React.PointerEvent<HTMLButtonElement>) => {
-    onPointerMove?.(event);
-    if (reducedMotion || event.pointerType !== "mouse") return;
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - rect.left - rect.width / 2) * 0.16;
-    const y = (event.clientY - rect.top - rect.height / 2) * 0.2;
-    event.currentTarget.style.setProperty("--magnetic-x", `${x}px`);
-    event.currentTarget.style.setProperty("--magnetic-y", `${y}px`);
-  };
-
-  const handlePointerLeave = (event: React.PointerEvent<HTMLButtonElement>) => {
-    onPointerLeave?.(event);
-    event.currentTarget.style.setProperty("--magnetic-x", "0px");
-    event.currentTarget.style.setProperty("--magnetic-y", "0px");
-  };
-
-  return (
-    <button {...props} onPointerMove={handlePointerMove} onPointerLeave={handlePointerLeave} />
-  );
-}
 
 function SocialIcon({ network }: { network: "instagram" | "facebook" | "linkedin" }) {
   if (network === "instagram") {
@@ -212,11 +181,7 @@ export function MotionFooter({ locale = "ar" }: { locale?: MotionFooterLocale })
             transition={{ ...transition, delay: prefersReducedMotion ? 0 : 0.08 }}
           >
             <div className="hmf-assistant-copy">
-              <p className="hmf-eyebrow">
-                <span />
-                {copy.eyebrow}
-              </p>
-              <h2>{copy.title}</h2>
+              <h2 className="hmf-title">{copy.title}</h2>
               <p className="hmf-intro">{copy.body}</p>
               <div className="hmf-assistant-features" aria-label={copy.title}>
                 {copy.features.map((feature) => (
@@ -227,15 +192,11 @@ export function MotionFooter({ locale = "ar" }: { locale?: MotionFooterLocale })
                 ))}
               </div>
               <div className="hmf-actions">
-                <MagneticButton
-                  type="button"
+                <MotionButton
+                  label={copy.primaryCta}
                   onClick={openAssistant}
-                  className="hmf-action hmf-action-primary"
-                  reducedMotion={prefersReducedMotion}
-                >
-                  <MessageCircle aria-hidden="true" />
-                  <span>{copy.primaryCta}</span>
-                </MagneticButton>
+                  className="hmf-footer-cta"
+                />
               </div>
             </div>
 

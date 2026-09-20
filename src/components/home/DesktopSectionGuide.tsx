@@ -261,6 +261,18 @@ function useActiveGuideContext() {
 
     const sync = () => {
       frame = 0;
+      const assistantSection = document.getElementById("assistant-chatbot-section");
+      if (assistantSection) {
+        const assistantRect = assistantSection.getBoundingClientRect();
+        const assistantIsVisible =
+          assistantRect.top < window.innerHeight * 0.92 &&
+          assistantRect.bottom > window.innerHeight * 0.08;
+        if (assistantIsVisible) {
+          setActive(null);
+          return;
+        }
+      }
+
       const viewportLine = window.innerHeight * 0.52;
       const candidates = ordered
         .map((context) => {
