@@ -2,7 +2,9 @@
    the last line of its message is [[choices: A | B | C]]. The marker is stripped
    from what the visitor reads, and a message without one simply has no buttons. */
 
-const MARKER = /\[\[\s*choices\s*:\s*([^\]]+)\]\]\s*$/i;
+// The model often wraps the line in backticks, copying the prompt's own example,
+// and sometimes adds a full stop. All of that still means "these are the answers".
+const MARKER = /`{0,3}\s*\[\[\s*choices\s*:\s*([^\]]+)\]\]\s*`{0,3}[.\s]*$/i;
 const MAX_CHOICES = 6;
 const MAX_LABEL = 60;
 
