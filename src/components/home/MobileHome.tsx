@@ -40,7 +40,7 @@ import { HomepageNews } from "./HomepageNews";
 import "./homepage-partners.css";
 import { DESKTOP_HOME_QUERY } from "@/hooks/useHeroCapability";
 import "./mobile-home.css";
-import { MobileHeroGuide, useMobileTreeHero } from "./MobileTreeHero";
+import { MobileTreeHero } from "./MobileTreeHero";
 import {
   ACHIEVEMENTS,
   CLOSING_COPY,
@@ -62,7 +62,6 @@ import {
   MISSION_STEPS,
   NUMBERS_COPY,
   OPENING,
-  OPENING_HEADLINE,
   PARTNERS_COPY,
   RAIL_COPY,
   SOCIAL_LINKS,
@@ -249,10 +248,7 @@ export function MobileHomeView({
       ? "/cinematic/mobile/saae-wordmark-ar-light.webp"
       : "/cinematic/mobile/saae-wordmark-en-light.webp";
   const wordmarkSize = lang === "ar" ? { width: 480, height: 162 } : { width: 480, height: 165 };
-  const heroLine1 = lang === "ar" ? "ذكاء وريادة" : null;
-  const heroLine2 = lang === "ar" ? pick(OPENING_HEADLINE, lang).replace("ذكاء وريادة ", "") : null;
 
-  const heroSectionRef = useRef<HTMLElement | null>(null);
   const heroSentinelRef = useRef<HTMLDivElement | null>(null);
   const rootsVideoRef = useRef<HTMLVideoElement | null>(null);
   const rootsBandRef = useRef<HTMLElement | null>(null);
@@ -275,8 +271,6 @@ export function MobileHomeView({
     io.observe(el);
     return () => io.disconnect();
   }, []);
-
-  const tree = useMobileTreeHero(heroSectionRef);
 
   /* Roots video: src assigned lazily near the band, plays while visible. */
   useEffect(() => {
@@ -367,7 +361,6 @@ export function MobileHomeView({
     list.scrollBy({ left: delta, behavior: scrollBehavior });
   }, [activeRail, scrollBehavior]);
 
-  const heroTitleWords = words(pick(OPENING_HEADLINE, lang));
   const closingWords = words(pick(CLOSING_COPY.title, lang));
 
   return (
@@ -380,7 +373,7 @@ export function MobileHomeView({
       <noscript>
         <style>
           {
-            ".mobile-home.mh-gate{visibility:visible!important}.mh-tree-hero{block-size:auto!important}.mh-tree-hero .mh-hero-copy,.mh-tree-hero .mh-word{opacity:1!important;transform:none!important}.mh-tree-cue{display:none}"
+            ".mobile-home.mh-gate{visibility:visible!important}.mh-tree-hero{block-size:auto!important}.mh-tree-stage{position:relative!important;block-size:auto!important;padding-block:96px 120px}.mh-bands{position:static!important;display:flex!important;flex-direction:column;gap:40px}.mh-band,.mh-band-opening,.mh-tree-hero .mh-word{opacity:1!important;transform:none!important}.mh-tree-cue{display:none}"
           }
         </style>
       </noscript>
@@ -528,92 +521,7 @@ export function MobileHomeView({
       </header>
 
       <main id="main-content">
-        <section
-          className={`mh-hero mh-tree-hero${tree.revealed ? " mh-is-revealed" : ""}`}
-          id="hero-sec"
-          aria-labelledby="mh-hero-title"
-          data-hero-layout="centred"
-          data-tree={tree.mode}
-          ref={heroSectionRef}
-        >
-          <div ref={heroSentinelRef} className="mh-hero-sentinel" aria-hidden="true" />
-          <div className="mh-tree-stage">
-            <canvas className="mh-tree-canvas" id="hero-canvas" aria-hidden="true" />
-            <img
-              className="mh-tree-still"
-              src="/cinematic/images/initiative-tree.svg"
-              alt=""
-              aria-hidden="true"
-              decoding="async"
-            />
-            <div className="mh-hero-scrim" aria-hidden="true" />
-            <div className="mh-wrap mh-hero-copy">
-              <p className="mh-eyebrow mh-kinetic mh-k-0">{pick(OPENING.eyebrow, lang)}</p>
-              <h1 className="mh-title" id="mh-hero-title">
-                <span className="mh-sr-only">{pick(OPENING_HEADLINE, lang)}</span>
-                <span aria-hidden="true" className="mh-h1-visual">
-                  {heroLine1 ? (
-                    <>
-                      <span className="mh-h1-line">
-                        {words(heroLine1).map((w, i) => (
-                          <span key={i} className="mh-mask">
-                            <span className="mh-word mh-k-1" style={{ "--i": i } as CSSProperties}>
-                              {w}
-                            </span>
-                          </span>
-                        ))}
-                      </span>
-                      <br />
-                      <span className="mh-h1-line">
-                        {words(heroLine2 ?? "").map((w, i) => (
-                          <span key={i} className="mh-mask">
-                            <span
-                              className={w === "ينهض" ? "mh-word mh-k-2 mh-grad" : "mh-word mh-k-2"}
-                              style={{ "--i": i + 2 } as CSSProperties}
-                            >
-                              {w}
-                            </span>
-                          </span>
-                        ))}
-                      </span>
-                    </>
-                  ) : (
-                    heroTitleWords.map((w, i) => (
-                      <span key={i} className="mh-mask">
-                        <span
-                          className={
-                            w.toLowerCase().startsWith("rise") ? "mh-word mh-grad" : "mh-word"
-                          }
-                          style={{ "--i": i } as CSSProperties}
-                        >
-                          {w}
-                        </span>
-                      </span>
-                    ))
-                  )}
-                </span>
-              </h1>
-              <p className="mh-support mh-kinetic mh-k-3">{pick(OPENING.support, lang)}</p>
-              <div className="mh-actions mh-kinetic mh-k-4">
-                <MotionButton
-                  label={pick(OPENING.primary.label, lang)}
-                  href={OPENING.primary.href}
-                  classes="min-w-0 flex-1 justify-center"
-                />
-                <MotionButton
-                  variant="secondary"
-                  label={pick(OPENING.secondary.label, lang)}
-                  href={OPENING.secondary.href}
-                  classes="min-w-0 flex-1 justify-center"
-                />
-              </div>
-            </div>
-            <p className="mh-tree-cue" aria-hidden="true">
-              <span>{lang === "ar" ? "مرّر للأسفل" : "Scroll"}</span>
-            </p>
-            <MobileHeroGuide lang={lang === "ar" ? "ar" : "en"} revealed={tree.revealed} />
-          </div>
-        </section>
+        <MobileTreeHero lang={lang === "ar" ? "ar" : "en"} sentinelRef={heroSentinelRef} />
 
         <div className="mh-chapters">
           <nav
