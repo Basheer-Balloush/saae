@@ -30,13 +30,20 @@
         target.querySelector(".pillar-trigger")?.focus();
       });
     });
+    const updateLocalizedAttributes = (lang) => {
+      document.querySelectorAll("[data-label-en][data-label-ar]").forEach((element) => {
+        element.setAttribute("aria-label", element.dataset[lang === "ar" ? "labelAr" : "labelEn"] || "");
+      });
+    };
+    updateLocalizedAttributes(document.documentElement.lang);
+    window.addEventListener("saae:languagechange", (event) => updateLocalizedAttributes(event.detail?.lang));
 
     const figures = [...document.querySelectorAll(".figure")];
     const finishFigures = () => {
       figures.forEach((figure) => {
         figure.classList.add("is-in");
         const number = figure.querySelector("[data-count]");
-        if (number) number.textContent = `${Number(number.dataset.count).toLocaleString("en-US")}${number.dataset.suffix || ""}`;
+        if (number) number.textContent = `${number.dataset.prefix || ""}${Number(number.dataset.count).toLocaleString("en-US")}${number.dataset.suffix || ""}`;
       });
     };
 
@@ -46,12 +53,13 @@
         const number = figure.querySelector("[data-count]");
         if (!number) return;
         const target = Number(number.dataset.count);
+        const prefix = number.dataset.prefix || "";
         const suffix = number.dataset.suffix || "";
         const start = performance.now() + index * 90;
         const tick = (now) => {
           const progress = Math.max(0, Math.min((now - start) / 1200, 1));
           const eased = 1 - Math.pow(1 - progress, 3);
-          number.textContent = `${Math.round(target * eased).toLocaleString("en-US")}${suffix}`;
+          number.textContent = `${prefix}${Math.round(target * eased).toLocaleString("en-US")}${suffix}`;
           if (progress < 1) window.requestAnimationFrame(tick);
         };
         window.requestAnimationFrame(tick);
