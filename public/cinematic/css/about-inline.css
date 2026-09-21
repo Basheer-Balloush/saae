@@ -75,7 +75,8 @@
     text-transform: uppercase;
   }
 
-  /* Matches the quiet ambient field used by the Home sections below the hero. */
+  /* Matches the Home news/partners field shown in the approved reference:
+     deep ink, edge circuits, and a faint technical grid. */
   .ambient {
     position: fixed;
     inset: 0;
@@ -83,25 +84,33 @@
     overflow: hidden;
     pointer-events: none;
     contain: layout paint style;
-    background: linear-gradient(180deg, #08333d 0%, #05242c 38%, #041b22 70%, #02131a 100%);
+    background: #061820;
   }
-  .ambient span { position: absolute; z-index: 1; display: block; border-radius: 50%; will-change: transform, opacity; }
-  .orb-petrol {
-    width: 98vw; height: 74vh; left: 1vw; top: -16vh;
-    background: radial-gradient(closest-side, rgba(184, 232, 240, .085), rgba(184, 232, 240, 0));
-    animation: amb-a 26s ease-in-out infinite alternate;
+  .ambient span {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    bottom: 0;
+    display: block;
+    width: min(360px, 30%);
+    opacity: .34;
+    background: url("/cinematic/images/news-circuit-pattern.svg") left top / 280px 560px repeat-y;
+    mask-image: linear-gradient(90deg, #000 35%, transparent);
   }
-  .orb-olive {
-    width: 64vw; height: 44vh; left: 18vw; top: 22vh;
-    background: radial-gradient(closest-side, rgba(4, 128, 144, .19), rgba(4, 128, 144, 0));
-    animation: amb-b 34s ease-in-out infinite alternate;
-  }
+  .orb-petrol { left: 0; }
+  .orb-olive { right: 0; transform: scaleX(-1); background-position-y: 220px; }
   .ambient::before {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: 2;
-    background: radial-gradient(116% 80% at 50% 24%, transparent 32%, rgba(1, 9, 13, .88) 100%);
+    z-index: 0;
+    background-image:
+      radial-gradient(circle, rgba(114, 214, 223, .32) 1px, transparent 1.5px),
+      linear-gradient(rgba(114, 214, 223, .08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(114, 214, 223, .08) 1px, transparent 1px);
+    background-size: 192px 192px, 96px 96px, 96px 96px;
+    background-position: 48px 48px;
+    mask-image: linear-gradient(90deg, #000, rgba(0, 0, 0, .2) 24%, transparent 40%, transparent 60%, rgba(0, 0, 0, .2) 76%, #000);
   }
   .ambient::after {
     content: "";
@@ -112,8 +121,6 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size: 180px 180px;
   }
-  @keyframes amb-a { from { transform: scale(.96); opacity: .78; } to { transform: scale(1.07); opacity: 1; } }
-  @keyframes amb-b { from { transform: translate3d(0, 3vh, 0) scale(1); opacity: .7; } to { transform: translate3d(0, -3vh, 0) scale(1.12); opacity: 1; } }
 
   .content { position: relative; z-index: 1; overflow: clip; }
 
@@ -566,13 +573,15 @@
     .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 620px) {
+    .ambient::before { opacity: .6; }
+    .ambient span { width: 22%; opacity: .25; background-size: 168px 336px; }
     .community-grid { grid-template-columns: minmax(0, 1fr); }
     .footer-main { grid-template-columns: minmax(0, 1fr); }
     .facts { grid-template-columns: minmax(0, 1fr); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ambient span, .language-switch-icon { animation: none; }
+    .language-switch-icon { animation: none; }
     .js .reveal { opacity: 1; transform: none; }
     .community:hover, .community:focus-within,
     .footer-col a:hover, .footer-col a:focus-visible,
