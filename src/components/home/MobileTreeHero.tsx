@@ -19,7 +19,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import MotionButton from "@/components/ui/motion-button";
-import { COMMUNITIES, OPENING, OPENING_HEADLINE } from "./mobile-home-content";
+import { ACHIEVEMENTS, COMMUNITIES, OPENING, OPENING_HEADLINE } from "./mobile-home-content";
 
 /* The phone hero plays the desktop hero's whole journey: the pixel tree from
    public/cinematic/js/hero-instrument.js in its centred portrait layout, with
@@ -253,12 +253,6 @@ const COPY = {
   achievements: {
     eyebrow: { ar: "انجازات الجمعية", en: "SAAE achievements" },
     title: { ar: "مجتمع يتجاوز 5,000 متعلم", en: "A community of 5,000+ learners" },
-    stats: [
-      { value: "+5,000", label: { ar: "متدربون", en: "trainees" } },
-      { value: "+120", label: { ar: "دورات", en: "courses" } },
-      { value: "+30", label: { ar: "شركاء استراتيجيون", en: "strategic partners" } },
-      { value: "9", label: { ar: "مجتمعات", en: "communities" } },
-    ],
   },
   million: {
     eyebrow: {
@@ -578,7 +572,7 @@ export function MobileTreeHero({
             <p className="mh-eyebrow">{pick(COPY.achievements.eyebrow)}</p>
             <h2 className="mh-band-title">{pick(COPY.achievements.title)}</h2>
             <dl className="mh-tree-stats">
-              {COPY.achievements.stats.map((s) => (
+              {ACHIEVEMENTS.map((s) => (
                 <div key={s.value}>
                   <dt>{pick(s.label)}</dt>
                   <dd>{s.value}</dd>

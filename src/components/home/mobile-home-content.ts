@@ -345,8 +345,8 @@ export const PARTNERS: PartnerEntry[] = [
  * non-fragment desktop href from home.html is rendered verbatim.
  */
 export const DESKTOP_HREF_EQUIVALENTS: Readonly<Record<string, string>> = {
-  "/about#communities-h": "#communities",
-  "/about#standing-h": "#achievements",
+  "/about#communities-h": "#hero-sec",
+  "/about#standing-h": "#hero-sec",
 };
 
 /** Header menu groups. */
@@ -354,8 +354,8 @@ export const MENU_ASSOCIATION: HomeLink[] = [
   { label: { ar: "عن الجمعية", en: "About SAAE" }, href: "/about" },
   { label: { ar: "الأخبار", en: "News" }, href: "/news" },
   { label: { ar: "الشركاء", en: "Partners" }, href: "/partners" },
-  { label: { ar: "المجتمعات", en: "Communities" }, href: "#communities" },
-  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#achievements" },
+  { label: { ar: "المجتمعات", en: "Communities" }, href: "/about#communities-h" },
+  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#hero-sec" },
 ];
 
 export const MENU_PARTICIPATE: HomeLink[] = [
@@ -389,8 +389,8 @@ export const FOOTER_OFFICIAL: HomeLink[] = [
 
 /** Footer "Explore" anchor group (in-page + local). */
 export const FOOTER_DISCOVER: HomeLink[] = [
-  { label: { ar: "المجتمعات", en: "Communities" }, href: "#communities" },
-  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#achievements" },
+  { label: { ar: "المجتمعات", en: "Communities" }, href: "/about#communities-h" },
+  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#hero-sec" },
   { label: { ar: "الأخبار", en: "News" }, href: "#news" },
   { label: { ar: "الشركاء", en: "Partners" }, href: "#partners" },
   { label: { ar: "إجابات", en: "Answers" }, href: "#faq" },
@@ -480,7 +480,7 @@ export const RAIL_COPY = {
   label: { ar: "أقسام الصفحة", en: "Page sections" } satisfies LocalText,
   items: [
     { label: { ar: "المبادرة", en: "Initiative" }, href: "#initiative" },
-    { label: { ar: "المجتمعات", en: "Communities" }, href: "#communities" },
+    { label: { ar: "المجتمعات", en: "Communities" }, href: "/about#communities-h" },
     { label: { ar: "الأخبار", en: "News" }, href: "#news" },
     { label: { ar: "كيف نعمل", en: "How we work" }, href: "#mission" },
     { label: { ar: "الشركاء", en: "Partners" }, href: "#partners" },
