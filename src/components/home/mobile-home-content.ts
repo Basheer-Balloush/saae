@@ -71,10 +71,6 @@ export const OPENING = {
     ar: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",
     en: "Syrian Association for AI & Entrepreneurship",
   } satisfies LocalText,
-  support: {
-    ar: "تعلّم وبحث وريادة أعمال عملية في الذكاء الاصطناعي، متصلة بالناس في كل سورية.",
-    en: "Practical AI learning, research and entrepreneurship, connected for people across Syria.",
-  } satisfies LocalText,
   /** Primary learning CTA → local learning platform route (same tab). */
   primary: {
     label: { ar: "ابدأ التعلّم", en: "Start learning" } satisfies LocalText,
@@ -82,34 +78,7 @@ export const OPENING = {
   },
   /** Initiative secondary action → local initiative page. */
   secondary: {
-    label: { ar: "اكتشف المبادرة", en: "Discover the initiative" } satisfies LocalText,
     href: "/initiative",
-  },
-  heroImage: {
-    src: "/cinematic/mobile/hero-tree-poster.webp",
-    alt: {
-      ar: "جمهور يحضر إطلاق المبادرة الوطنية للذكاء الاصطناعي",
-      en: "Audience attending the launch of SAAE's national AI initiative",
-    } satisfies LocalText,
-    caption: {
-      ar: "من إطلاق المبادرة الوطنية للذكاء الاصطناعي.",
-      en: "At the launch of the national AI initiative.",
-    } satisfies LocalText,
-  },
-  /** Hero tree loop (client-assigned src only, never SSR). */
-  video: {
-    src: "/cinematic/mobile/hero-tree-loop.mp4",
-    poster: "/cinematic/mobile/hero-tree-poster.webp",
-    trigger: { ar: "شاهد شجرة الجمعية", en: "Watch the SAAE tree" } satisfies LocalText,
-    title: { ar: "شجرة الجمعية", en: "The SAAE tree" } satisfies LocalText,
-    description: {
-      ar: "شاهد الفيديو.",
-      en: "Watch the video.",
-    } satisfies LocalText,
-    fallback: {
-      ar: "تعذّر تشغيل الفيديو. يمكنك استكشاف المبادرة بدلاً من ذلك.",
-      en: "The video could not play. You can explore the initiative instead.",
-    } satisfies LocalText,
   },
 };
 
@@ -345,8 +314,8 @@ export const PARTNERS: PartnerEntry[] = [
  * non-fragment desktop href from home.html is rendered verbatim.
  */
 export const DESKTOP_HREF_EQUIVALENTS: Readonly<Record<string, string>> = {
-  "/about#communities-h": "#communities",
-  "/about#standing-h": "#achievements",
+  "/about#communities-h": "#hero-sec",
+  "/about#standing-h": "#hero-sec",
 };
 
 /** Header menu groups. */
@@ -354,8 +323,8 @@ export const MENU_ASSOCIATION: HomeLink[] = [
   { label: { ar: "عن الجمعية", en: "About SAAE" }, href: "/about" },
   { label: { ar: "الأخبار", en: "News" }, href: "/news" },
   { label: { ar: "الشركاء", en: "Partners" }, href: "/partners" },
-  { label: { ar: "المجتمعات", en: "Communities" }, href: "#communities" },
-  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#achievements" },
+  { label: { ar: "المجتمعات", en: "Communities" }, href: "/about#communities-h" },
+  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#hero-sec" },
 ];
 
 export const MENU_PARTICIPATE: HomeLink[] = [
@@ -389,8 +358,8 @@ export const FOOTER_OFFICIAL: HomeLink[] = [
 
 /** Footer "Explore" anchor group (in-page + local). */
 export const FOOTER_DISCOVER: HomeLink[] = [
-  { label: { ar: "المجتمعات", en: "Communities" }, href: "#communities" },
-  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#achievements" },
+  { label: { ar: "المجتمعات", en: "Communities" }, href: "/about#communities-h" },
+  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#hero-sec" },
   { label: { ar: "الأخبار", en: "News" }, href: "#news" },
   { label: { ar: "الشركاء", en: "Partners" }, href: "#partners" },
   { label: { ar: "إجابات", en: "Answers" }, href: "#faq" },
@@ -463,114 +432,6 @@ export const ACHIEVEMENTS: AchievementEntry[] = [
   { value: "9", count: 9, label: { ar: "مجتمعات", en: "communities" } },
 ];
 
-export const NUMBERS_COPY = {
-  eyebrow: { ar: "انجازات الجمعية", en: "SAAE achievements" } satisfies LocalText,
-  title: {
-    ar: "مجتمع يتجاوز 5,000 متعلم",
-    en: "A community of 5,000+ learners",
-  } satisfies LocalText,
-};
-
-export interface RailEntry {
-  label: LocalText;
-  href: string;
-}
-
-export const RAIL_COPY = {
-  label: { ar: "أقسام الصفحة", en: "Page sections" } satisfies LocalText,
-  items: [
-    { label: { ar: "المبادرة", en: "Initiative" }, href: "#initiative" },
-    { label: { ar: "المجتمعات", en: "Communities" }, href: "#communities" },
-    { label: { ar: "الأخبار", en: "News" }, href: "#news" },
-    { label: { ar: "كيف نعمل", en: "How we work" }, href: "#mission" },
-    { label: { ar: "الشركاء", en: "Partners" }, href: "#partners" },
-    { label: { ar: "إجابات", en: "Answers" }, href: "#faq" },
-  ] satisfies RailEntry[],
-};
-
-export interface WayEntry {
-  title: LocalText;
-  body: LocalText;
-  cta: LocalText;
-  href: string;
-  icon: "learning" | "communities" | "participation";
-}
-
-export const START_COPY = {
-  eyebrow: { ar: "اعرف طريقك", en: "Find your way in" } satisfies LocalText,
-  title: { ar: "من أين تبدأ؟", en: "Where to start?" } satisfies LocalText,
-  linksLabel: { ar: "طرق البدء", en: "Ways to start" } satisfies LocalText,
-};
-
-export const WAYS: WayEntry[] = [
-  {
-    title: { ar: "منصة التعلّم", en: "Learning platform" },
-    body: {
-      ar: "مسارات تدريب معتمدة تبني مهارات مهنية وتقنية، ومتاحة للجميع في سورية.",
-      en: "Certified training tracks that build professional and technical skill, open to anyone in Syria.",
-    },
-    cta: { ar: "ابدأ التعلّم", en: "Start learning" },
-    href: "/learning-management-system",
-    icon: "learning",
-  },
-  {
-    title: { ar: "المجتمعات", en: "Communities" },
-    body: {
-      ar: "مجتمعات متخصصة. جذور تجمعنا.",
-      en: "Specialized communities. One shared foundation.",
-    },
-    cta: { ar: "استكشف المجتمعات", en: "Explore communities" },
-    href: "#communities",
-    icon: "communities",
-  },
-  {
-    title: { ar: "المشاركة والتسجيل", en: "Participation & registration" },
-    body: {
-      ar: "ستُنشر مواعيد البرامج والتسجيل على هذا الموقع.",
-      en: "Programme dates and registration will be published on this website.",
-    },
-    cta: { ar: "سجّل الآن", en: "Register now" },
-    href: "/registration",
-    icon: "participation",
-  },
-];
-
-export const INITIATIVE_COPY = {
-  eyebrow: {
-    ar: "مبادرة مليون مستخدم سوري للذكاء الاصطناعي",
-    en: "The Million Syrian AI Users initiative",
-  } satisfies LocalText,
-  title: {
-    ar: "مليون شخص خطوة وطنية إلى الأمام",
-    en: "One million people One national step forward",
-  } satisfies LocalText,
-  body: {
-    ar: "مبادرة وطنية تمكّن مليون سوري من استخدام الذكاء الاصطناعي بثقة في العمل والدراسة والحياة اليومية.",
-    en: "A national initiative enabling one million Syrians to use AI confidently at work, in study, and in everyday life.",
-  } satisfies LocalText,
-  primary: { ar: "استكشف المبادرة", en: "Explore the initiative" } satisfies LocalText,
-  official: { ar: "البرنامج الرسمي", en: "Official programme" } satisfies LocalText,
-  target: { ar: "هدف المبادرة", en: "The initiative's goal" } satisfies LocalText,
-  reach: {
-    ar: "معرفة تصل إلى كل سورية",
-    en: "Knowledge within reach across Syria",
-  } satisfies LocalText,
-  image: "/cinematic/mobile/initiative-syria.svg",
-};
-
-export const COMMUNITIES_COPY = {
-  eyebrow: { ar: "مجتمعات الجمعية", en: "SAAE communities" } satisfies LocalText,
-  title: {
-    ar: "مجتمعات متخصصة، وجذور تجمعنا",
-    en: "Specialized communities, one shared foundation",
-  } satisfies LocalText,
-  body: {
-    ar: "لكل مجتمع أسئلته وممارسوه. والمنهج المشترك يجعل الأجوبة تنتقل بينها.",
-    en: "Each community brings its own questions and its own practitioners. Shared methods let the answers travel between them.",
-  } satisfies LocalText,
-  cta: { ar: "استكشف المجتمعات", en: "Explore communities" } satisfies LocalText,
-};
-
 export const NEWS_COPY = {
   eyebrow: { ar: "آخر الأخبار", en: "Latest news" } satisfies LocalText,
   title: { ar: "العمل كما يحدث", en: "The work, as it happens" } satisfies LocalText,
@@ -619,30 +480,6 @@ export const FAQ_COPY = {
   writeToUs: { ar: "راسلنا", en: "Write to us" } satisfies LocalText,
 };
 
-export const CLOSING_COPY = {
-  eyebrow: {
-    ar: "يبدأ المستقبل المشترك بالمعرفة المشتركة.",
-    en: "A shared future starts with shared knowledge.",
-  } satisfies LocalText,
-  title: {
-    ar: "ننمو معاً في كل سورية",
-    en: "Growing together across Syria",
-  } satisfies LocalText,
-  body: {
-    ar: "من مجتمعاتنا تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
-    en: "From our communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.",
-  } satisfies LocalText,
-  primary: { ar: "ابدأ التعلّم", en: "Start learning" } satisfies LocalText,
-  secondary: { ar: "سجّل الآن", en: "Register now" } satisfies LocalText,
-  videoSrc: "/cinematic/mobile/roots-tree-loop.mp4",
-  videoPoster: "/cinematic/mobile/roots-tree-poster.webp",
-};
-
-export const HERO_MEDIA = {
-  videoSrc: "/cinematic/mobile/hero-tree-loop.mp4",
-  videoPoster: "/cinematic/mobile/hero-tree-poster.webp",
-};
-
 export const MICRO_COPY = {
   skip: { ar: "انتقل إلى المحتوى الرئيسي", en: "Skip to main content" } satisfies LocalText,
   menu: { ar: "القائمة", en: "Menu" } satisfies LocalText,
@@ -657,8 +494,6 @@ export const MICRO_COPY = {
     ar: "روابط أقسام الموقع والمشاركة.",
     en: "Links to site sections and participation.",
   } satisfies LocalText,
-  pauseVideo: { ar: "إيقاف الفيديو مؤقتاً", en: "Pause video" } satisfies LocalText,
-  playVideo: { ar: "تشغيل الفيديو", en: "Play video" } satisfies LocalText,
   pauseLogos: { ar: "إيقاف حركة الشعارات", en: "Pause logos" } satisfies LocalText,
   playLogos: { ar: "تشغيل حركة الشعارات", en: "Play logos" } satisfies LocalText,
   scrollCue: { ar: "مرّر", en: "Scroll" } satisfies LocalText,

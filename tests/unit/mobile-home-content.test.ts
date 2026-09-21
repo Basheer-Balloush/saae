@@ -26,11 +26,9 @@ import { MobileHomeView } from "@/components/home/MobileHome";
 import { DESKTOP_HOME_QUERY } from "@/hooks/useHeroCapability";
 import {
   ACHIEVEMENTS,
-  CLOSING_COPY,
   COMMUNITIES,
   DESKTOP_HREF_EQUIVALENTS,
   FAQS,
-  HERO_MEDIA,
   MISSION_STEPS,
   NEWS_COPY,
   OPENING,
@@ -189,13 +187,25 @@ describe("mobile homepage rendered output", () => {
     }
   });
 
-  it("keeps video sources client-assigned while SSR carries both posters", () => {
+  it("renders no autoplaying video on the phone homepage", () => {
     for (const markup of [arMarkup(), enMarkup()]) {
       expect(markup).not.toContain("hero-scrub.mp4");
+      expect(markup).not.toContain("hero-tree-loop.mp4");
       expect(markup).not.toContain("tv-interview-");
-      expect(markup).not.toMatch(/<video[^>]*\ssrc=/);
-      expect(markup).toContain(HERO_MEDIA.videoPoster);
-      expect(markup).toContain(CLOSING_COPY.videoPoster);
+      expect(markup).not.toContain("<video");
+    }
+  });
+
+  it("renders the pixel-tree hero with Abu Al-Joud and the headline gated on scroll", () => {
+    for (const markup of [arMarkup(), enMarkup()]) {
+      const hero = markup.match(/<section\b[^>]*\bid="hero-sec"[\s\S]*?<\/section>/)?.[0];
+      expect(hero).toBeDefined();
+      expect(hero).toContain('data-hero-layout="centred"');
+      expect(hero).toContain('id="hero-canvas"');
+      expect(hero).not.toContain("<video");
+      expect(hero).not.toContain("mh-is-revealed");
+      expect(hero).toContain("mh-hero-guide");
+      expect(hero).toContain("/cinematic/images/abu-al-joud-comic-welcome.webp");
     }
   });
 
@@ -219,19 +229,7 @@ describe("mobile homepage rendered output", () => {
     for (const f of fragments) {
       expect(have.has(f), `in-page target missing: #${f}`).toBe(true);
     }
-    for (const required of [
-      "main-content",
-      "hero-sec",
-      "achievements",
-      "start",
-      "initiative",
-      "communities",
-      "news",
-      "mission",
-      "partners",
-      "faq",
-      "join",
-    ]) {
+    for (const required of ["main-content", "hero-sec", "news", "mission", "partners", "faq"]) {
       expect(have.has(required), `section id missing: #${required}`).toBe(true);
     }
   });
@@ -284,9 +282,8 @@ describe("mobile homepage rendered output", () => {
 
   it("restricts photography to news and keeps reviewed graphics elsewhere", () => {
     const nonNewsAssets = new Set([
-      HERO_MEDIA.videoPoster,
-      CLOSING_COPY.videoPoster,
-      "/cinematic/mobile/initiative-syria.svg",
+      "/cinematic/images/initiative-tree.svg",
+      "/cinematic/images/abu-al-joud-comic-welcome.webp",
       "/cinematic/mobile/saae-wordmark-ar-light.webp",
       "/cinematic/mobile/saae-wordmark-en-light.webp",
       "/cinematic/images/saae-map.png",
@@ -308,8 +305,10 @@ describe("mobile homepage rendered output", () => {
     const ar = arMarkup();
     const en = enMarkup();
     const both = `${ar}\n${en}`;
+    // The hero's community card links one community at a time and names all
+    // eight in its pips; the card's arrows and pips reach the rest.
+    expect(both).toContain(`/communities/${COMMUNITIES[0].key}`);
     for (const c of COMMUNITIES) {
-      expect(both).toContain(`/communities/${c.key}`);
       expect(both).toContain(c.name.ar);
       expect(both).toContain(c.name.en);
     }

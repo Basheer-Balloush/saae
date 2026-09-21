@@ -628,7 +628,11 @@ async function createScene(canvas) {
   } catch (_) { gl = null; }
   if (!gl) throw new Error("no WebGL2 context");
 
-  const tierName = pickTier();
+  /* The phone homepage runs the same scene in a centred, portrait layout: no
+     caption lane beside the subject, the tree in the middle of the screen, the
+     light tier, and a lattice tall enough to fill a phone. */
+  const centred = canvas.closest("[data-hero-layout='centred']") !== null;
+  const tierName = centred ? "low" : pickTier();
   const tier = TIERS[tierName];
   const PITCH = tier.shape;
 
@@ -845,16 +849,18 @@ async function createScene(canvas) {
   };
 
   /* ---- the ground lattice ---- */
-  const gCols = Math.round(FIELD_W / tier.ground) + 1;
-  const gRows = Math.round(FIELD_H / tier.ground) + 1;
+  const fieldW = centred ? 28 : FIELD_W;
+  const fieldH = centred ? 52 : FIELD_H;
+  const gCols = Math.round(fieldW / tier.ground) + 1;
+  const gRows = Math.round(fieldH / tier.ground) + 1;
   const gCount = gCols * gRows;
   const gPos = new Float32Array(gCount * 3);
   const gRad = new Float32Array(gCount);
   for (let r = 0; r < gRows; r++) {
     for (let c = 0; c < gCols; c++) {
       const i = r * gCols + c;
-      const x = (c / (gCols - 1) - 0.5) * FIELD_W + SUBJECT_X;
-      const y = (0.5 - r / (gRows - 1)) * FIELD_H;
+      const x = (c / (gCols - 1) - 0.5) * fieldW + SUBJECT_X;
+      const y = (0.5 - r / (gRows - 1)) * fieldH;
       gPos[i * 3] = x; gPos[i * 3 + 1] = y; gPos[i * 3 + 2] = 0;
       gRad[i] = Math.hypot(x - SUBJECT_X, y);
     }
@@ -984,6 +990,8 @@ async function createScene(canvas) {
   const COMMUNITY_SWAP_MS = 620;
 
   let pointerStrength = 0, breathPinned = false;
+  /* Where the centred layout's headline sits, so the dots behind it can quieten. */
+  const centredCalm = { y: 0.45, w: 0 };
   /* The page's own spring measures this and used to discard it. */
   let scrollSpeed = 0;
   let entranceStart = 0, entrancePinned = false, entranceFrame = 0, lastProgress = 0;
@@ -1098,6 +1106,28 @@ async function createScene(canvas) {
     camX += (mapX-camX)*state.mapCamera;
     camY *= 1-state.mapCamera;
     camZ += (mapZ-camZ)*state.mapCamera;
+    if (centred) {
+      /* Portrait phones. There is no lane beside the subject for the caption,
+         so the caption takes the top of the screen and every subject -- tree,
+         pictogram, country -- is centred across the width and raised into the
+         space above it. The tree is fitted to the width; a pictogram or the
+         country fills most of it. */
+      /* The subject takes the upper part of the screen and the caption the
+         lower. Negative lowers the camera, which raises the subject; the
+         close-ups and pictograms rise further to clear the taller captions. */
+      const LOWERED = -.2 - .14 * Math.max(state.entry, contentMix);
+      const treeFit = Math.max(1, (treeBox.w * 1.3) / (2 * halfFov * camera.aspect * 29.6));
+      const treeZ = state.zoom * treeFit;
+      const contentZ = 8.0 / (camera.aspect * .84 * 2 * halfFov);
+      const storyZ = (treeZ + (contentZ - treeZ) * contentMix) * push;
+      const mapViewH = Math.max(mapBox.h / .8, (mapBox.w + 3.4) / (camera.aspect * .9));
+      const mapZC = mapViewH / (2 * halfFov);
+      const storyY = focus.y * state.entry + storyZ * halfFov * LOWERED;
+      const mapY = -mapViewH * .5 * .3;
+      camX = focus.x + (SUBJECT_X - focus.x) * state.mapCamera;
+      camY = storyY + (mapY - storyY) * state.mapCamera;
+      camZ = storyZ + (mapZC - storyZ) * state.mapCamera;
+    }
     camera.position.set(camX,camY,camZ);
     camera.lookAt(camX,camY,0);
 
@@ -1182,7 +1212,8 @@ async function createScene(canvas) {
     network.update(.80 + smooth(.935,.995,p)*.20, entrance, performance.now() / 1000, breathPinned,
       document.documentElement.lang);
 
-    calm.set(-0.52 * sign, 0.0, 0.82, 0.62);
+    if (centred) calm.set(0, centredCalm.y, 0.95, centredCalm.w);
+    else calm.set(-0.52 * sign, 0.0, 0.82, 0.62);
     renderer.render(scene, camera);
   }
 
@@ -1268,6 +1299,7 @@ async function createScene(canvas) {
       contentNextAttribute.needsUpdate = true;
       communitySwitchAt = performance.now();
     },
+    setCalm(y, w) { centredCalm.y = y; centredCalm.w = Math.max(0, Math.min(1, w)); },
     setPointer(x, y, s) { pointerStrength = s; if (s > 0) pointer.set(x, y, 0); },
     /* Signed, and expected in roughly -1..1; the page normalises its own
        spring velocity before it gets here because only the page knows what
@@ -1335,7 +1367,12 @@ const STATIC_GATES = [
   const canvas = document.getElementById("hero-canvas");
   const heroSection = document.getElementById("hero-sec");
   if (!canvas || !heroSection) return;
-  if (STATIC_GATES.some(q => window.matchMedia(q).matches)) return;
+  /* The phone page asks for the centred layout and takes the scene on phones;
+     only reduced motion keeps it static there. */
+  const gates = heroSection.dataset.heroLayout === "centred"
+    ? ["(prefers-reduced-motion: reduce)"]
+    : STATIC_GATES;
+  if (gates.some(q => window.matchMedia(q).matches)) return;
 
   let instance = null;
   try {

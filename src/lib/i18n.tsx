@@ -27,6 +27,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setPreferenceLoaded(true);
   }, []);
 
+  // The cinematic pages keep their own language switch (public/cinematic/js/language.js).
+  // It announces the change on the window rather than going through React, so without
+  // this the app layer — the chat widget above all — would stay in the old language.
+  useEffect(() => {
+    const onLanguageChange = (event: Event) => {
+      const next = (event as CustomEvent<{ lang?: string }>).detail?.lang;
+      if (next === "ar" || next === "en") setLangState(next);
+    };
+    window.addEventListener("saae:languagechange", onLanguageChange);
+    return () => window.removeEventListener("saae:languagechange", onLanguageChange);
+  }, []);
+
   useEffect(() => {
     if (!preferenceLoaded) return;
     document.documentElement.lang = lang;

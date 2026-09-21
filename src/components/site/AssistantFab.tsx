@@ -6,7 +6,8 @@ import { AssistantChatModal } from "./AssistantChatModal";
 
 const DISMISS_KEY = "saae-assistant-greeting-dismissed";
 
-export function AssistantFab({ hideDesktopTrigger = false }: { hideDesktopTrigger?: boolean }) {
+/** hideTrigger keeps the chat (opened by "assistant:open") but drops the round button. */
+export function AssistantFab({ hideTrigger = false }: { hideTrigger?: boolean }) {
   const { t, dir } = useLang();
   const [open, setOpen] = useState(false);
   const [prefill, setPrefill] = useState<string | null>(null);
@@ -53,7 +54,7 @@ export function AssistantFab({ hideDesktopTrigger = false }: { hideDesktopTrigge
       <div
         className={`fixed bottom-6 z-40 flex items-end gap-3 ${
           isRtl ? "right-6 flex-row-reverse" : "left-6 flex-row-reverse"
-        } ${hideDesktopTrigger ? "min-[900px]:hidden" : ""}`}
+        } ${hideTrigger ? "hidden" : ""}`}
       >
         <AnimatePresence>
           {showGreeting && !open && (
