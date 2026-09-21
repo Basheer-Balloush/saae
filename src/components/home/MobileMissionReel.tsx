@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties, type RefObject } from "react";
 import { MISSION_COPY, MISSION_STEPS, type Locale } from "./mobile-home-content";
 
 /* The desktop homepage's "how we work" reel (home.html .mission-reel, driven
@@ -6,7 +6,14 @@ import { MISSION_COPY, MISSION_STEPS, type Locale } from "./mobile-home-content"
    giant word for each step rolls up through the top of the frame as the reader
    passes it, and the step's copy below hands off to the next one, with the
    rule beside it drawing how far through the step the reader is. Stacked on a
-   phone: words above, copy below. */
+   phone: words above, copy below.
+
+   It arrives the way the desktop's does (partner-handoff.js): the section
+   before it pins at the bottom of the screen and slides out to the right while
+   the reel's first frame slides in from the left, over a little more than a
+   screen of scrolling. MobileHome wraps that section in .mh-handoff-out and
+   follows it with the runway; the reel is pulled up over both (see
+   mobile-home.css), so its stage is pinned for the whole hand-off. */
 
 const WORDS = {
   en: ["TRAIN", "APPLY", "BUILD"],
@@ -26,27 +33,69 @@ const CAPTIONS = {
   ],
 } as const;
 
+/* The hand-off's length, as a share of the screen height: the desktop's 1.1. */
+const HANDOFF = 1.1;
+
 const clamp = (x: number, a: number, b: number) => Math.max(a, Math.min(b, x));
 
-export function MobileMissionReel({ lang }: { lang: Locale }) {
+export function MobileMissionReel({
+  lang,
+  outRef,
+}: {
+  lang: Locale;
+  outRef?: RefObject<HTMLElement | null>;
+}) {
   const reelRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const wordRefs = useRef<Array<HTMLSpanElement | null>>([]);
   const itemRefs = useRef<Array<HTMLElement | null>>([]);
 
   useEffect(() => {
     const reel = reelRef.current;
-    if (!reel) return;
+    const stage = stageRef.current;
+    if (!reel || !stage) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const steps = MISSION_STEPS.length;
     let frame = 0;
 
-    // The same arithmetic as the desktop reel in home-inline.js.
+    /* The outgoing section pins with its bottom on the screen's bottom edge,
+       the runway after it is the hand-off's length, and the reel is pulled up
+       over both so its stage is pinned from the moment the section pins. All
+       in pixels from the real screen height, so the three always agree. */
+    const section = reel.parentElement;
+    const pinOut = () => {
+      const out = outRef?.current;
+      if (!out || !section || reduced) return;
+      const view = window.innerHeight;
+      const handoff = view * HANDOFF;
+      out.style.top = `${Math.min(0, view - out.offsetHeight)}px`;
+      const runway = out.nextElementSibling as HTMLElement | null;
+      if (runway) runway.style.blockSize = `${handoff}px`;
+      section.style.marginBlockStart = `${-(handoff + view)}px`;
+      reel.style.blockSize = `${view * 3 + handoff}px`;
+    };
+
     const paint = () => {
       frame = 0;
+      const view = window.innerHeight;
       const rect = reel.getBoundingClientRect();
+      const into = -rect.top;
+      const handoff = reduced ? 0 : view * HANDOFF;
+
+      // The hand-off: out to the right, in from the left, as on the desktop.
+      const entry = handoff ? clamp(into / handoff, 0, 1) : 1;
+      stage.style.transform =
+        entry < 1 ? `translate3d(${((entry - 1) * 100).toFixed(2)}%, 0, 0)` : "";
+      stage.style.visibility = entry > 0 ? "visible" : "hidden";
+      const out = outRef?.current;
+      if (out)
+        out.style.transform = entry > 0 ? `translate3d(${(entry * 100).toFixed(2)}%, 0, 0)` : "";
+
+      // The steps: the same arithmetic as the desktop reel in home-inline.js,
+      // over the part of the runway that follows the hand-off.
       const progress = reduced
         ? 0
-        : clamp(-rect.top / Math.max(1, rect.height - window.innerHeight), 0, 1);
+        : clamp((into - handoff) / Math.max(1, rect.height - view - handoff), 0, 1);
       const scaled = clamp(progress, 0, 0.9999) * steps;
       const index = Math.min(steps - 1, Math.floor(scaled));
       const wordPos = clamp(scaled, 0.5, steps - 0.5);
@@ -71,16 +120,32 @@ export function MobileMissionReel({ lang }: { lang: Locale }) {
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(paint);
     };
+    const onResize = () => {
+      pinOut();
+      schedule();
+    };
 
+    pinOut();
     paint();
+    // The news above changes height as its stories and images load.
+    const sizes = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(onResize);
+    if (outRef?.current) sizes?.observe(outRef.current);
     window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      sizes?.disconnect();
       window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
+      window.removeEventListener("resize", onResize);
+      const out = outRef?.current;
+      if (out) {
+        out.style.transform = "";
+        out.style.top = "";
+      }
+      if (section) section.style.marginBlockStart = "";
+      reel.style.blockSize = "";
     };
-  }, [lang]);
+  }, [lang, outRef]);
 
   return (
     <section className="mh-mission" id="mission" aria-labelledby="mh-mission-title">
@@ -88,7 +153,7 @@ export function MobileMissionReel({ lang }: { lang: Locale }) {
         {MISSION_COPY.title[lang]}
       </h2>
       <div className="mh-mission-reel" ref={reelRef}>
-        <div className="mh-mission-sticky">
+        <div className="mh-mission-sticky" ref={stageRef}>
           <div className="mh-mission-words" aria-hidden="true">
             {WORDS[lang].map((word, i) => (
               <span

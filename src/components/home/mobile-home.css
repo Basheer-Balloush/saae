@@ -759,13 +759,34 @@
    stage with the giant word rolling through its top half and the step's copy
    handing off below it (MobileMissionReel.tsx writes --word-t, --word-y and
    --mission-local from the scroll). */
+/* The hand-off into it (MobileMissionReel.tsx sets the pixel sizes): the news
+   pins and slides out while the reel's stage slides in over it. */
+.mobile-home .mh-handoff {
+  position: relative;
+  overflow-x: clip;
+}
+.mobile-home .mh-handoff-out {
+  position: sticky;
+  z-index: 0;
+}
+.mobile-home .mh-handoff-runway {
+  block-size: 110svh;
+}
 .mobile-home .mh-mission {
   position: relative;
+  z-index: 1;
+  margin-block-start: -210svh;
+  overflow-x: clip;
+  pointer-events: none;
   scroll-margin-block-start: 0;
+}
+.mobile-home .mh-mission-sticky {
+  pointer-events: auto;
+  background: var(--mh-canvas);
 }
 .mobile-home .mh-mission-reel {
   position: relative;
-  block-size: 300svh;
+  block-size: 410svh;
 }
 .mobile-home .mh-mission-sticky {
   position: sticky;
@@ -920,6 +941,16 @@
   line-height: 1.8;
 }
 @media (prefers-reduced-motion: reduce) {
+  .mobile-home .mh-handoff-out {
+    position: static;
+  }
+  .mobile-home .mh-handoff-runway {
+    display: none;
+  }
+  .mobile-home .mh-mission {
+    margin-block-start: 0;
+    pointer-events: auto;
+  }
   .mobile-home .mh-mission-reel {
     block-size: auto;
   }

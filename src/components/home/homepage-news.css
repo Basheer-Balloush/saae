@@ -84,8 +84,11 @@ html.hero-opening-ready .hn-root .hn-intro-copy .hn-intro-heading { animation: n
 /* Phones keep the desktop's expansion: the cover grows from half size to the
    full width as the reader scrolls, and "Latest / News" parts and fades. */
 @media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
-  .hn-expansion { height: 150svh; }
-  .hn-sticky { position: sticky; top: 0; height: 100svh; min-height: 0; grid-template-rows: minmax(0, 1fr); padding: 0 16px; overflow: clip; }
+  /* The cover sits under the heading and the navigation, not in the middle of
+     a full screen: the stage is anchored to the top and tucked up under the
+     intro, so no empty screen opens between the words and the picture. */
+  .hn-expansion { height: 130svh; margin-top: -72px; }
+  .hn-sticky { position: sticky; top: 0; height: 100svh; min-height: 0; grid-template-rows: auto; place-items: start center; padding: 96px 16px 0; overflow: clip; }
   .hn-display span { font-size: 52px; }
 }
 @media (prefers-reduced-motion: reduce) {

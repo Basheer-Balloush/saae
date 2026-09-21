@@ -112,6 +112,7 @@ export function MobileHomeView({
   const wordmarkSize = lang === "ar" ? { width: 480, height: 162 } : { width: 480, height: 165 };
 
   const heroSentinelRef = useRef<HTMLDivElement | null>(null);
+  const handoffOutRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setMotionReady(true);
@@ -141,9 +142,15 @@ export function MobileHomeView({
         <MobileTreeHero lang={lang === "ar" ? "ar" : "en"} sentinelRef={heroSentinelRef} />
 
         <div className="mh-chapters">
-          <HomepageNews news={news} newsFailed={newsFailed} lang={lang} />
+          {/* The news pins and slides out as "how we work" slides in (MobileMissionReel). */}
+          <div className="mh-handoff">
+            <div className="mh-handoff-out" ref={handoffOutRef}>
+              <HomepageNews news={news} newsFailed={newsFailed} lang={lang} />
+            </div>
+            <div className="mh-handoff-runway" aria-hidden="true" />
+          </div>
 
-          <MobileMissionReel lang={lang} />
+          <MobileMissionReel lang={lang} outRef={handoffOutRef} />
 
           <section
             className={`mh-section hn-root hp-partners${logosPaused ? " mh-is-paused" : ""}`}
