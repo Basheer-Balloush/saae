@@ -4,4 +4,4 @@
 - [x] Verify Arabic content visibility, RTL alignment, responsiveness, reduced motion, and preview health on desktop and mobile.
 
 - [x] Update the existing About page labels, bidirectional layout, pillar interaction, statistics, and communities presentation.
-- [ ] Verify English/Arabic desktop, tablet, mobile, keyboard/touch behavior, reduced motion, and preview health.
+- [x] Verify English/Arabic desktop, tablet, mobile, keyboard/touch behavior, reduced motion, and preview health.
