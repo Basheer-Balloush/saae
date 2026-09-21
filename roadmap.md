@@ -12,3 +12,4 @@
 - [x] Center the About communities heading, refine its bilingual introduction, replace card numbers with Home community marks, and retain the shared Home footer.
 - [x] Restyle the existing About statistics bar as responsive glass panels within the circuit-pattern visual system.
 - [x] Fix community-card descriptions stacking one word per line (text-effect word spans caught by the `.community-focus span` label rule); label now uses `.focus-label` and animation wrappers stay inline.
+- [x] Reorganize the About communities into a balanced 4/2/1-column grid with equal-height rows and no staggered layout gaps.
