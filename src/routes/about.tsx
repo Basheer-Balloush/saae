@@ -28,7 +28,21 @@ export const Route = createFileRoute("/about")({
     return { members: renderMembersHtml((data ?? []) as MemberRow[]) };
   },
   head: () => ({
-    meta: [{ title: "About | SAAE" }, { name: "theme-color", content: "#144248" }],
+    meta: [
+      { title: "About SAAE | AI, Education & Entrepreneurship in Syria" },
+      {
+        name: "description",
+        content: "Learn how SAAE connects AI education, research, communities and entrepreneurship to build practical capability across Syria.",
+      },
+      { property: "og:title", content: "About SAAE | AI, Education & Entrepreneurship in Syria" },
+      {
+        property: "og:description",
+        content: "Meet the Syrian association turning AI knowledge into practical skills, research and public value.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "theme-color", content: "#144248" },
+    ],
     links: [
       { rel: "stylesheet", href: "/cinematic/css/about-inline.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
