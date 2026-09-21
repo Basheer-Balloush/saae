@@ -12,7 +12,7 @@
         pillar.classList.toggle("is-active", active);
         const trigger = pillar.querySelector(".pillar-trigger");
         const panel = pillar.querySelector(".pillar-copy");
-        trigger?.setAttribute("aria-selected", String(active));
+        trigger?.setAttribute("aria-pressed", String(active));
         panel?.setAttribute("aria-hidden", String(!active));
       });
     };

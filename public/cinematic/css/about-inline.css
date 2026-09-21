@@ -222,7 +222,7 @@
      ~2-3.6rem: the panoramic collage cannot resolve inside glyphs that
      small and only reads as a muddy wash (see the pic-1 failure). */
 
-  /* ---- What we do -------------------------------------------------------
+  /* ---- Pillars ----------------------------------------------------------
      Photographs used to carry this section. What carries it now is the
      landing page's own device: the pillar's name set oversized and hollow,
      filling in as the row is entered. Nothing here is decoration that could
@@ -288,7 +288,8 @@
   .pillar-copy {
     max-width: 60ch;
     max-height: 0;
-    margin: 0 0 0 calc(62px + clamp(18px, 3vw, 48px));
+    margin: 0;
+    margin-inline-start: calc(62px + clamp(18px, 3vw, 48px));
     overflow: hidden;
     color: var(--ink-muted);
     font-size: .96rem;
@@ -297,7 +298,6 @@
     transform: translate3d(0, -10px, 0);
     transition: max-height 500ms var(--ease-out), margin 500ms var(--ease-out), opacity 420ms ease, transform 500ms var(--ease-out), color 500ms ease;
   }
-  html[dir="rtl"] .pillar-copy { margin-inline-start: calc(62px + clamp(18px, 3vw, 48px)); margin-inline-end: 0; }
   .pillar.is-active .pillar-copy {
     max-height: 9rem;
     margin-bottom: clamp(24px, 3vw, 36px);
