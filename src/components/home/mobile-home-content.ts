@@ -318,24 +318,6 @@ export const DESKTOP_HREF_EQUIVALENTS: Readonly<Record<string, string>> = {
   "/about#standing-h": "#hero-sec",
 };
 
-/** Header menu groups. */
-export const MENU_ASSOCIATION: HomeLink[] = [
-  { label: { ar: "عن الجمعية", en: "About SAAE" }, href: "/about" },
-  { label: { ar: "الأخبار", en: "News" }, href: "/news" },
-  { label: { ar: "الشركاء", en: "Partners" }, href: "/partners" },
-  { label: { ar: "المجتمعات", en: "Communities" }, href: "/about#communities-h" },
-  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#hero-sec" },
-];
-
-export const MENU_PARTICIPATE: HomeLink[] = [
-  { label: { ar: "المبادرة", en: "Initiative" }, href: "/initiative" },
-  { label: { ar: "التسجيل", en: "Registration" }, href: "/registration" },
-  { label: { ar: "منصة التعلّم", en: "Learning platform" }, href: "/learning-management-system" },
-  { label: { ar: "أدوات الذكاء الاصطناعي", en: "AI tools" }, href: "/resources/ai-tools" },
-  { label: { ar: "تواصل معنا", en: "Contact" }, href: "/contact" },
-  { label: { ar: "راسلنا", en: "Write to us" }, href: "/contact#write" },
-];
-
 /** Footer link groups. */
 export const FOOTER_EXPLORE: HomeLink[] = [
   { label: { ar: "الرئيسية", en: "Home" }, href: "/" },
@@ -450,12 +432,10 @@ export const NEWS_COPY = {
 };
 
 export const MISSION_COPY = {
-  eyebrow: { ar: "كيف نعمل", en: "How we work" } satisfies LocalText,
   title: {
     ar: "كيف تعمل الجمعية: درّب، طبّق، وابنِ",
     en: "How SAAE works: train, apply, build",
   } satisfies LocalText,
-  aboutLink: { ar: "عن الجمعية", en: "About SAAE" } satisfies LocalText,
 };
 
 export const PARTNERS_COPY = {
@@ -482,18 +462,7 @@ export const FAQ_COPY = {
 
 export const MICRO_COPY = {
   skip: { ar: "انتقل إلى المحتوى الرئيسي", en: "Skip to main content" } satisfies LocalText,
-  menu: { ar: "القائمة", en: "Menu" } satisfies LocalText,
-  closeMenu: { ar: "أغلق القائمة", en: "Close menu" } satisfies LocalText,
-  association: { ar: "الجمعية", en: "Association" } satisfies LocalText,
-  participate: { ar: "شارك", en: "Participate" } satisfies LocalText,
-  switchTo: { ar: "English", en: "العربية" } satisfies LocalText,
-  switchLabel: { ar: "التبديل إلى الإنجليزية", en: "Switch to Arabic" } satisfies LocalText,
   newTab: { ar: "، يفتح في علامة تبويب جديدة", en: ", opens in a new tab" } satisfies LocalText,
-  brandName: { ar: "SAAE", en: "SAAE" } satisfies LocalText,
-  menuDesc: {
-    ar: "روابط أقسام الموقع والمشاركة.",
-    en: "Links to site sections and participation.",
-  } satisfies LocalText,
   pauseLogos: { ar: "إيقاف حركة الشعارات", en: "Pause logos" } satisfies LocalText,
   playLogos: { ar: "تشغيل حركة الشعارات", en: "Play logos" } satisfies LocalText,
   scrollCue: { ar: "مرّر", en: "Scroll" } satisfies LocalText,
