@@ -75,109 +75,45 @@
     text-transform: uppercase;
   }
 
-  /* Home-hero continuation: the About page keeps the same fixed dark field as
-     the landing journey, then borrows the hero's tree/network silhouette and
-     cyan light language at much lower contrast so the copy remains primary. */
+  /* Matches the quiet ambient field used by the Home sections below the hero. */
   .ambient {
     position: fixed;
     inset: 0;
     z-index: 0;
     overflow: hidden;
     pointer-events: none;
-    isolation: isolate;
-    contain: strict;
-    background:
-      radial-gradient(ellipse 74% 46% at 50% -8%, rgba(119, 224, 232, .105), transparent 70%),
-      linear-gradient(180deg, #071f2b 0%, #062c35 22%, #05242c 48%, #041b22 74%, #02131a 100%);
+    contain: layout paint style;
+    background: linear-gradient(180deg, #08333d 0%, #05242c 38%, #041b22 70%, #02131a 100%);
   }
-  .ambient span {
-    position: absolute;
-    z-index: 1;
-    display: block;
-    border-radius: 50%;
-    will-change: transform, opacity;
-  }
+  .ambient span { position: absolute; z-index: 1; display: block; border-radius: 50%; will-change: transform, opacity; }
   .orb-petrol {
-    width: 104vw;
-    height: 82vh;
-    left: -2vw;
-    top: -22vh;
-    background: radial-gradient(closest-side, rgba(184, 232, 240, .13), rgba(4, 128, 144, .04) 52%, transparent 76%);
-    animation: amb-a 28s ease-in-out infinite alternate;
+    width: 98vw; height: 74vh; left: 1vw; top: -16vh;
+    background: radial-gradient(closest-side, rgba(184, 232, 240, .085), rgba(184, 232, 240, 0));
+    animation: amb-a 26s ease-in-out infinite alternate;
   }
   .orb-olive {
-    width: 72vw;
-    height: 54vh;
-    left: 14vw;
-    top: 24vh;
-    background: radial-gradient(closest-side, rgba(0, 139, 157, .17), rgba(4, 128, 144, .035) 58%, transparent 78%);
-    animation: amb-b 36s ease-in-out infinite alternate;
+    width: 64vw; height: 44vh; left: 18vw; top: 22vh;
+    background: radial-gradient(closest-side, rgba(4, 128, 144, .19), rgba(4, 128, 144, 0));
+    animation: amb-b 34s ease-in-out infinite alternate;
   }
-  /* A single oversized mark references the Home hero's tree without turning
-     the About page into a duplicate hero. It stays behind the opening content
-     and dissolves before the denser lower sections. */
   .ambient::before {
     content: "";
     position: absolute;
+    inset: 0;
     z-index: 2;
-    inset: -7vh 0 auto;
-    height: min(112vh, 1040px);
-    background:
-      linear-gradient(180deg, rgba(2, 19, 27, 0) 44%, rgba(2, 19, 27, .7) 82%, #02131a 100%),
-      radial-gradient(ellipse 44% 54% at 50% 34%, rgba(119, 224, 232, .075), transparent 72%),
-      url("/cinematic/images/saae-tree-loader.png") center 16% / min(42vw, 540px) auto no-repeat;
-    opacity: .31;
-    filter: saturate(.82) contrast(1.08);
-    animation: amb-tree 30s ease-in-out infinite alternate;
+    background: radial-gradient(116% 80% at 50% 24%, transparent 32%, rgba(1, 9, 13, .88) 100%);
   }
-  /* The Home hero's dot/network rhythm becomes a barely visible technical
-     lattice. It is static and mask-faded, avoiding noise behind body copy. */
   .ambient::after {
     content: "";
     position: absolute;
     inset: 0;
     z-index: 3;
-    opacity: .22;
-    background-image:
-      radial-gradient(circle, rgba(119, 224, 232, .24) 0 1px, transparent 1.4px),
-      linear-gradient(180deg, rgba(1, 9, 13, .05), rgba(1, 9, 13, .78)),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
-    background-size: 46px 46px, 100% 100%, 180px 180px;
-    mask-image: linear-gradient(180deg, rgba(0, 0, 0, .72), rgba(0, 0, 0, .22) 42%, transparent 82%);
-  }
-  @keyframes amb-a { from { transform: scale(.96); opacity: .72; } to { transform: scale(1.06); opacity: 1; } }
-  @keyframes amb-b { from { transform: translate3d(0, 3vh, 0) scale(1); opacity: .66; } to { transform: translate3d(0, -3vh, 0) scale(1.1); opacity: .96; } }
-  @keyframes amb-tree { from { transform: translate3d(0, -1.2vh, 0) scale(.985); } to { transform: translate3d(0, 1.2vh, 0) scale(1.015); } }
-
-  /* This request is specifically for the Arabic experience. Keep the signed-
-     off English background exactly as it was. */
-  html:not([dir="rtl"]) .ambient {
-    background: linear-gradient(180deg, #08333d 0%, #05242c 38%, #041b22 70%, #02131a 100%);
-  }
-  html:not([dir="rtl"]) .orb-petrol {
-    width: 98vw; height: 74vh; left: 1vw; top: -16vh;
-    background: radial-gradient(closest-side, rgba(184, 232, 240, .085), rgba(184, 232, 240, 0));
-    animation: amb-a 26s ease-in-out infinite alternate;
-  }
-  html:not([dir="rtl"]) .orb-olive {
-    width: 64vw; height: 44vh; left: 18vw; top: 22vh;
-    background: radial-gradient(closest-side, rgba(4, 128, 144, .19), rgba(4, 128, 144, 0));
-    animation: amb-b 34s ease-in-out infinite alternate;
-  }
-  html:not([dir="rtl"]) .ambient::before {
-    inset: 0;
-    height: auto;
-    background: radial-gradient(116% 80% at 50% 24%, transparent 32%, rgba(1, 9, 13, .88) 100%);
-    opacity: 1;
-    filter: none;
-    animation: none;
-  }
-  html:not([dir="rtl"]) .ambient::after {
     opacity: .05;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size: 180px 180px;
-    mask-image: none;
   }
+  @keyframes amb-a { from { transform: scale(.96); opacity: .78; } to { transform: scale(1.07); opacity: 1; } }
+  @keyframes amb-b { from { transform: translate3d(0, 3vh, 0) scale(1); opacity: .7; } to { transform: translate3d(0, -3vh, 0) scale(1.12); opacity: 1; } }
 
   .content { position: relative; z-index: 1; overflow: clip; }
 
@@ -620,14 +556,6 @@
     .footer-main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 900px) {
-    .ambient::before {
-      inset-block-start: 7vh;
-      height: 92vh;
-      background-size: min(58vw, 430px) auto;
-      background-position: center 18%;
-      opacity: .25;
-    }
-    .ambient::after { background-size: 40px 40px, 100% 100%, 180px 180px; opacity: .18; }
     .hero-grid { grid-template-columns: minmax(0, 1fr); }
     .markstage { justify-content: flex-start; margin-top: clamp(26px, 6vw, 48px); }
     .ghost-about { left: -3%; font-size: clamp(62px, 17vw, 132px); transform: translateY(-100%); }
@@ -638,28 +566,13 @@
     .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 620px) {
-    .ambient {
-      background:
-        radial-gradient(ellipse 110% 40% at 50% -4%, rgba(119, 224, 232, .11), transparent 72%),
-        linear-gradient(180deg, #071f2b 0%, #062a33 24%, #05232b 54%, #031920 82%, #02131a 100%);
-    }
-    .orb-petrol { width: 150vw; left: -25vw; top: -18vh; }
-    .orb-olive { width: 118vw; left: -9vw; top: 32vh; opacity: .74; }
-    .ambient::before {
-      inset-block-start: 18vh;
-      height: 70vh;
-      background-size: min(78vw, 340px) auto;
-      background-position: center 12%;
-      opacity: .2;
-    }
-    .ambient::after { background-size: 36px 36px, 100% 100%, 180px 180px; opacity: .14; }
     .community-grid { grid-template-columns: minmax(0, 1fr); }
     .footer-main { grid-template-columns: minmax(0, 1fr); }
     .facts { grid-template-columns: minmax(0, 1fr); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ambient span, .ambient::before, .language-switch-icon { animation: none; }
+    .ambient span, .language-switch-icon { animation: none; }
     .js .reveal { opacity: 1; transform: none; }
     .community:hover, .community:focus-within,
     .footer-col a:hover, .footer-col a:focus-visible,
