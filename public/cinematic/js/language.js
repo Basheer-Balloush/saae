@@ -159,7 +159,7 @@
        string that also appears on the landing page is already above; only what
        is new to the About page is listed here. */
     "A non-profit built so that AI knowledge becomes a working skill, in Syria, taught in the open.": "جمعية غير ربحية قامت لتصبح معرفة الذكاء الاصطناعي مهارة عملية، في سورية، تُدرَّس في العلن.",
-    "From learning to public value.": "من التعلّم إلى قيمة عامة.",
+    "From learning to public value": "من التعلّم إلى قيمة عامة",
     "How SAAE works": "كيف تعمل الجمعية",
     "SAAE connects education, research and entrepreneurship so useful knowledge can become capability, evidence and action.": "تربط الجمعية بين التعليم والبحث وريادة الأعمال لتتحول المعرفة النافعة إلى قدرة وأدلة وعمل.",
     "LEARN": "تعلَّم",
