@@ -289,25 +289,15 @@
   html[dir="rtl"] .pillar:hover .pillar-word,
   html[dir="rtl"] .pillar:focus-within .pillar-word,
   html[dir="rtl"] .pillar.is-active .pillar-word { transform: translate3d(-6px, 0, 0); }
+  /* Static pillars: every description is visible without interaction. */
   .pillar-copy {
     max-width: 60ch;
-    max-height: 0;
     margin: 0;
     margin-inline-start: calc(62px + clamp(18px, 3vw, 48px));
-    overflow: hidden;
-    color: var(--ink-muted);
-    font-size: .96rem;
-    line-height: 1.72;
-    opacity: 0;
-    transform: translate3d(0, -10px, 0);
-    transition: max-height 500ms var(--ease-out), margin 500ms var(--ease-out), opacity 420ms ease, transform 500ms var(--ease-out), color 500ms ease;
-  }
-  .pillar.is-active .pillar-copy {
-    max-height: 9rem;
     margin-bottom: clamp(24px, 3vw, 36px);
     color: var(--type);
-    opacity: 1;
-    transform: none;
+    font-size: .96rem;
+    line-height: 1.72;
   }
 
   /* ---- Figures ---------------------------------------------------------- */

@@ -5,31 +5,6 @@
     document.documentElement.classList.add("js");
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
-    const pillars = [...document.querySelectorAll(".pillar")];
-    const activatePillar = (next) => {
-      pillars.forEach((pillar) => {
-        const active = pillar === next;
-        pillar.classList.toggle("is-active", active);
-        const trigger = pillar.querySelector(".pillar-trigger");
-        const panel = pillar.querySelector(".pillar-copy");
-        trigger?.setAttribute("aria-pressed", String(active));
-        panel?.setAttribute("aria-hidden", String(!active));
-      });
-    };
-
-    pillars.forEach((pillar, index) => {
-      const trigger = pillar.querySelector(".pillar-trigger");
-      trigger?.addEventListener("click", () => activatePillar(pillar));
-      trigger?.addEventListener("keydown", (event) => {
-        if (!["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft", "Home", "End"].includes(event.key)) return;
-        event.preventDefault();
-        const backwards = event.key === "ArrowUp" || event.key === "ArrowLeft";
-        const targetIndex = event.key === "Home" ? 0 : event.key === "End" ? pillars.length - 1 : (index + (backwards ? -1 : 1) + pillars.length) % pillars.length;
-        const target = pillars[targetIndex];
-        activatePillar(target);
-        target.querySelector(".pillar-trigger")?.focus();
-      });
-    });
     const updateLocalizedAttributes = (lang) => {
       document.querySelectorAll("[data-label-en][data-label-ar]").forEach((element) => {
         element.setAttribute("aria-label", element.dataset[lang === "ar" ? "labelAr" : "labelEn"] || "");
