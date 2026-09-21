@@ -487,7 +487,10 @@
     word-break: normal;
     overflow-wrap: normal;
   }
-  .community-focus span {
+  /* The label is classed so the text-effect animation's word spans (.te-w)
+     are never caught by a bare `span` selector -- that used to turn every
+     word into an uppercase block, stacking the description one word per line. */
+  .community-focus .focus-label {
     display: block;
     margin-bottom: 4px;
     color: var(--petrol-lift);
@@ -495,6 +498,16 @@
     font-weight: 800;
     letter-spacing: .16em;
     text-transform: uppercase;
+  }
+  /* Animation wrappers stay plain inline text so the description flows as
+     normal wrapped lines. */
+  .community-focus .te-seg, .community-focus .te-w {
+    display: inline;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
   }
 
   /* ---- Reveals ----------------------------------------------------------
@@ -681,7 +694,7 @@
      clips them at the Latin line-height. It also needs less size to hold the
      same weight on the row. */
   html[dir="rtl"] .pillar-word { letter-spacing: 0; line-height: 1.45; font-size: clamp(2rem, 4.2vw, 3.4rem); }
-  html[dir="rtl"] .eyebrow, html[dir="rtl"] .facts dt, html[dir="rtl"] .community-focus span,
+  html[dir="rtl"] .eyebrow, html[dir="rtl"] .facts dt, html[dir="rtl"] .community-focus .focus-label,
   html[dir="rtl"] .footer-col-title { letter-spacing: 0; word-spacing: .12em; }
   html[dir="rtl"] .community h3,
   html[dir="rtl"] .community-line,
