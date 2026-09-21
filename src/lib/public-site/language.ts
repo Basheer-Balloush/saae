@@ -151,7 +151,7 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
        is new to the About page is listed here. */
     "A non-profit built so that AI knowledge becomes a working skill, in Syria, taught in the open.": "جمعية غير ربحية قامت لتصبح معرفة الذكاء الاصطناعي مهارة عملية، في سورية، تُدرَّس في العلن.",
     "What we do": "ما الذي نقوم به",
-    "From learning to public value.": "من التعلّم إلى قيمة عامة.",
+    "From learning to public value": "من التعلّم إلى قيمة عامة",
     "SAAE connects education, research and entrepreneurship so useful knowledge can become capability, evidence and action.": "تربط الجمعية بين التعليم والبحث وريادة الأعمال لتتحول المعرفة النافعة إلى قدرة وأدلة وعمل.",
     "LEARN": "تعلَّم",
     "RESEARCH": "ابحث",
