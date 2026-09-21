@@ -27,7 +27,10 @@ export function AssistantFab({ hideDesktopTrigger = false }: { hideDesktopTrigge
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (sessionStorage.getItem(DISMISS_KEY)) return;
-    const show = window.setTimeout(() => setShowGreeting(true), 2500);
+    // Abu Al-Joud already greets from the phone hero; two bubbles would talk over each other.
+    const show = window.setTimeout(() => {
+      if (!document.querySelector(".mh-hero-guide")) setShowGreeting(true);
+    }, 2500);
     const hide = window.setTimeout(() => setShowGreeting(false), 12000);
     return () => {
       window.clearTimeout(show);

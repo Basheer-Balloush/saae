@@ -628,7 +628,11 @@ async function createScene(canvas) {
   } catch (_) { gl = null; }
   if (!gl) throw new Error("no WebGL2 context");
 
-  const tierName = pickTier();
+  /* The phone homepage runs the same scene in a centred, portrait layout: no
+     caption lane beside the subject, the tree in the middle of the screen, the
+     light tier, and a lattice tall enough to fill a phone. */
+  const centred = canvas.closest("[data-hero-layout='centred']") !== null;
+  const tierName = centred ? "low" : pickTier();
   const tier = TIERS[tierName];
   const PITCH = tier.shape;
 
@@ -845,16 +849,18 @@ async function createScene(canvas) {
   };
 
   /* ---- the ground lattice ---- */
-  const gCols = Math.round(FIELD_W / tier.ground) + 1;
-  const gRows = Math.round(FIELD_H / tier.ground) + 1;
+  const fieldW = centred ? 28 : FIELD_W;
+  const fieldH = centred ? 52 : FIELD_H;
+  const gCols = Math.round(fieldW / tier.ground) + 1;
+  const gRows = Math.round(fieldH / tier.ground) + 1;
   const gCount = gCols * gRows;
   const gPos = new Float32Array(gCount * 3);
   const gRad = new Float32Array(gCount);
   for (let r = 0; r < gRows; r++) {
     for (let c = 0; c < gCols; c++) {
       const i = r * gCols + c;
-      const x = (c / (gCols - 1) - 0.5) * FIELD_W + SUBJECT_X;
-      const y = (0.5 - r / (gRows - 1)) * FIELD_H;
+      const x = (c / (gCols - 1) - 0.5) * fieldW + SUBJECT_X;
+      const y = (0.5 - r / (gRows - 1)) * fieldH;
       gPos[i * 3] = x; gPos[i * 3 + 1] = y; gPos[i * 3 + 2] = 0;
       gRad[i] = Math.hypot(x - SUBJECT_X, y);
     }
@@ -984,6 +990,8 @@ async function createScene(canvas) {
   const COMMUNITY_SWAP_MS = 620;
 
   let pointerStrength = 0, breathPinned = false;
+  /* Where the centred layout's headline sits, so the dots behind it can quieten. */
+  const centredCalm = { y: 0.45, w: 0 };
   /* The page's own spring measures this and used to discard it. */
   let scrollSpeed = 0;
   let entranceStart = 0, entrancePinned = false, entranceFrame = 0, lastProgress = 0;
@@ -1092,6 +1100,17 @@ async function createScene(canvas) {
     let camX = openingX + (storyX-openingX)*state.entry;
     let camY = focus.y*state.entry;
     let camZ = storyZoom;
+    if (centred) {
+      /* Portrait: fit the whole tree across the width and keep it centred.
+         The same fit carries through the descent, so the roots arrive at the
+         scale the opening promised. */
+      const fit = Math.max(1, (treeBox.w * 1.16) / (2 * halfFov * camera.aspect * 29.6));
+      camX = focus.x;
+      camZ = storyZoom * fit;
+      /* As the camera reaches the roots, frame them in the lower half so the
+         headline above has open field to sit on. */
+      camY += camZ * halfFov * 0.4 * state.entry;
+    }
     const viewH = Math.max(mapBox.h / .83, (mapBox.w+3.6)/(camera.aspect*.65));
     const mapZ = viewH/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2)));
     const mapX = SUBJECT_X-sign*viewH*camera.aspect*.15;
@@ -1182,7 +1201,8 @@ async function createScene(canvas) {
     network.update(.80 + smooth(.935,.995,p)*.20, entrance, performance.now() / 1000, breathPinned,
       document.documentElement.lang);
 
-    calm.set(-0.52 * sign, 0.0, 0.82, 0.62);
+    if (centred) calm.set(0, centredCalm.y, 0.95, centredCalm.w);
+    else calm.set(-0.52 * sign, 0.0, 0.82, 0.62);
     renderer.render(scene, camera);
   }
 
@@ -1268,6 +1288,7 @@ async function createScene(canvas) {
       contentNextAttribute.needsUpdate = true;
       communitySwitchAt = performance.now();
     },
+    setCalm(y, w) { centredCalm.y = y; centredCalm.w = Math.max(0, Math.min(1, w)); },
     setPointer(x, y, s) { pointerStrength = s; if (s > 0) pointer.set(x, y, 0); },
     /* Signed, and expected in roughly -1..1; the page normalises its own
        spring velocity before it gets here because only the page knows what
@@ -1335,7 +1356,12 @@ const STATIC_GATES = [
   const canvas = document.getElementById("hero-canvas");
   const heroSection = document.getElementById("hero-sec");
   if (!canvas || !heroSection) return;
-  if (STATIC_GATES.some(q => window.matchMedia(q).matches)) return;
+  /* The phone page asks for the centred layout and takes the scene on phones;
+     only reduced motion keeps it static there. */
+  const gates = heroSection.dataset.heroLayout === "centred"
+    ? ["(prefers-reduced-motion: reduce)"]
+    : STATIC_GATES;
+  if (gates.some(q => window.matchMedia(q).matches)) return;
 
   let instance = null;
   try {

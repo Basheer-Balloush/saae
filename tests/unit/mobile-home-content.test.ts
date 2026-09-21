@@ -30,7 +30,6 @@ import {
   COMMUNITIES,
   DESKTOP_HREF_EQUIVALENTS,
   FAQS,
-  HERO_MEDIA,
   MISSION_STEPS,
   NEWS_COPY,
   OPENING,
@@ -189,13 +188,26 @@ describe("mobile homepage rendered output", () => {
     }
   });
 
-  it("keeps video sources client-assigned while SSR carries both posters", () => {
+  it("keeps video sources client-assigned while SSR carries the closing poster", () => {
     for (const markup of [arMarkup(), enMarkup()]) {
       expect(markup).not.toContain("hero-scrub.mp4");
+      expect(markup).not.toContain("hero-tree-loop.mp4");
       expect(markup).not.toContain("tv-interview-");
       expect(markup).not.toMatch(/<video[^>]*\ssrc=/);
-      expect(markup).toContain(HERO_MEDIA.videoPoster);
       expect(markup).toContain(CLOSING_COPY.videoPoster);
+    }
+  });
+
+  it("renders the pixel-tree hero with Abu Al-Joud and the headline gated on scroll", () => {
+    for (const markup of [arMarkup(), enMarkup()]) {
+      const hero = markup.match(/<section\b[^>]*\bid="hero-sec"[\s\S]*?<\/section>/)?.[0];
+      expect(hero).toBeDefined();
+      expect(hero).toContain('data-hero-layout="centred"');
+      expect(hero).toContain('id="hero-canvas"');
+      expect(hero).not.toContain("<video");
+      expect(hero).not.toContain("mh-is-revealed");
+      expect(hero).toContain("mh-hero-guide");
+      expect(hero).toContain("/cinematic/images/abu-al-joud-comic-welcome.webp");
     }
   });
 
@@ -284,8 +296,9 @@ describe("mobile homepage rendered output", () => {
 
   it("restricts photography to news and keeps reviewed graphics elsewhere", () => {
     const nonNewsAssets = new Set([
-      HERO_MEDIA.videoPoster,
       CLOSING_COPY.videoPoster,
+      "/cinematic/images/initiative-tree.svg",
+      "/cinematic/images/abu-al-joud-comic-welcome.webp",
       "/cinematic/mobile/initiative-syria.svg",
       "/cinematic/mobile/saae-wordmark-ar-light.webp",
       "/cinematic/mobile/saae-wordmark-en-light.webp",
