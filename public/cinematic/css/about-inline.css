@@ -619,9 +619,12 @@
     .ambient span { width: 22%; opacity: .25; background-size: 168px 336px; }
     .community-grid { grid-template-columns: minmax(0, 1fr); }
     .community:nth-child(n) { --card-offset: 0px; }
-    .pillar { grid-template-columns: minmax(0, 1fr); }
-    .pillar-trigger { padding-block-end: 8px; }
-    .pillar-copy { max-width: none; padding-block: 0 clamp(24px, 7vw, 34px); padding-inline-start: calc(44px + clamp(18px, 3vw, 48px)); }
+    .pillar { grid-template-columns: minmax(118px, .78fr) minmax(0, 1.22fr); column-gap: clamp(14px, 4vw, 22px); }
+    .pillar-trigger { grid-template-columns: 24px minmax(0, 1fr); gap: 8px; min-block-size: 0; padding-block: 24px; }
+    html[dir="rtl"] .pillar-word { font-size: clamp(1.45rem, 7vw, 2rem); }
+    .pillar-word { font-size: clamp(1.35rem, 7vw, 2rem); }
+    .pillar-n { font-size: .68rem; }
+    .pillar-copy { max-width: none; padding-block: 24px; font-size: .8rem; line-height: 1.65; }
     .footer-main { grid-template-columns: minmax(0, 1fr); }
     .facts { grid-template-columns: minmax(0, 1fr); }
   }

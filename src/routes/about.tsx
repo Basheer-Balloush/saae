@@ -1,8 +1,10 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import pageHtml from "@/components/cinematic/html/about.html?raw";
 import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
 import { DesktopMotionFooter } from "@/components/home/DesktopMotionFooter";
+import { useLang } from "@/lib/i18n";
+import { applyPublicLanguage } from "@/lib/public-site/language";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MEMBER_COLUMNS,
@@ -55,7 +57,13 @@ export const Route = createFileRoute("/about")({
 
 function Page() {
   const { members } = Route.useLoaderData();
+  const { lang } = useLang();
   const html = useMemo(() => applyMembers(pageHtml, members), [members]);
+
+  useEffect(() => {
+    applyPublicLanguage(lang);
+  }, [lang, html]);
+
   return (
     <>
       <CinematicPage html={html} scripts={SCRIPTS} />
