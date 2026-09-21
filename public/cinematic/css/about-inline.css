@@ -306,21 +306,97 @@
   .standing { padding-top: var(--gap); }
   .figures {
     margin: clamp(40px, 5vw, 60px) 0 0;
-    padding: 0;
+    padding: clamp(18px, 2.4vw, 30px);
     list-style: none;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: clamp(16px, 2.4vw, 30px);
+    gap: clamp(10px, 1.5vw, 18px);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border: 1px solid rgba(119, 224, 232, .1);
+    border-radius: 8px;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(0, 184, 198, .09), transparent 62%),
+      rgba(3, 27, 34, .44);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025), 0 24px 64px rgba(0, 8, 12, .16);
   }
-  .figures li { border-top: 1px solid var(--line); padding-top: 22px; }
-  .figures .num { display: block; color: var(--paper); font-size: clamp(2rem, 3.6vw, 2.9rem); font-weight: 900; letter-spacing: -.045em; line-height: 1; }
-  .figures .label { display: block; margin-top: 12px; color: var(--ink-muted); font-size: .88rem; line-height: 1.55; }
+  .figures::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: .13;
+    background-image:
+      linear-gradient(rgba(60, 196, 210, .16) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(60, 196, 210, .16) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(ellipse at center, #000 0%, transparent 82%);
+  }
+  .figures li {
+    position: relative;
+    min-height: clamp(150px, 15vw, 184px);
+    padding: clamp(24px, 2.8vw, 34px) clamp(14px, 1.8vw, 24px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid rgba(193, 238, 241, .09);
+    border-radius: 8px;
+    background: rgba(225, 249, 250, .035);
+    backdrop-filter: blur(12px) saturate(120%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025);
+    transition: border-color 420ms ease, background-color 420ms ease, box-shadow 420ms ease, transform 420ms var(--ease-out);
+  }
+  .figures li::before {
+    content: "";
+    position: absolute;
+    inset-block-start: -1px;
+    inset-inline-start: 50%;
+    width: 48px;
+    height: 1px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, transparent, var(--saae-turquoise-lift), transparent);
+    box-shadow: 0 0 14px rgba(119, 224, 232, .34);
+  }
+  .figures li::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: 50%;
+    inset-block-end: -1px;
+    width: 0;
+    height: 1px;
+    transform: translateX(-50%);
+    background: var(--saae-turquoise-lift);
+    box-shadow: 0 0 16px rgba(119, 224, 232, .4);
+    transition: width 500ms var(--ease-out);
+  }
+  .figures li:hover, .figures li:focus-within {
+    transform: translate3d(0, -4px, 0);
+    border-color: rgba(119, 224, 232, .42);
+    background: rgba(119, 224, 232, .075);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 16px 34px rgba(0, 139, 157, .12);
+  }
+  .figures li:hover::after, .figures li:focus-within::after { width: 100%; }
+  .figures .num {
+    display: block;
+    color: var(--paper);
+    font-size: clamp(2.35rem, 4vw, 3.35rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 1;
+    text-shadow: 0 0 26px rgba(119, 224, 232, .1);
+    transition: color 420ms ease, text-shadow 420ms ease, transform 420ms var(--ease-out);
+  }
+  .figures .label { display: block; max-width: 22ch; margin-top: 16px; color: var(--ink-muted); font-size: .9rem; font-weight: 600; line-height: 1.65; }
   .js .figure { opacity: 0; transform: translate3d(0, 18px, 0); }
-  .js .figure.is-in { opacity: 1; transform: none; transition: opacity 560ms var(--ease-out), transform 560ms var(--ease-out), border-color 560ms ease, filter 560ms ease; border-color: rgba(119, 224, 232, .38); filter: drop-shadow(0 8px 18px rgba(0, 139, 157, .1)); }
-  .figure-community-link { display: block; color: inherit; text-decoration: none; }
+  .js .figure.is-in { opacity: 1; transform: none; transition: opacity 560ms var(--ease-out), transform 560ms var(--ease-out), border-color 420ms ease, background-color 420ms ease, box-shadow 420ms ease; }
+  .figure-community-link { display: flex; min-height: 100%; width: 100%; flex-direction: column; align-items: center; justify-content: center; color: inherit; text-decoration: none; }
   .figure-community-link .label { color: var(--type); font-weight: 700; }
-  .figure-community-link:hover .num, .figure-community-link:focus-visible .num { color: var(--saae-turquoise-lift); text-shadow: 0 0 22px rgba(119, 224, 232, .22); }
-  .figure-community-link:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: 7px; border-radius: 2px; }
+  .figures li:hover .num, .figures li:focus-within .num { color: var(--saae-turquoise-lift); text-shadow: 0 0 24px rgba(119, 224, 232, .3); transform: scale(1.04); }
+  .figure-community-link:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: 5px; border-radius: 4px; }
   .communities { scroll-margin-top: 96px; }
 
   /* ---- Communities ------------------------------------------------------
@@ -644,6 +720,9 @@
     .pillar-word { font-size: clamp(1.35rem, 7vw, 2rem); }
     .pillar-n { font-size: .68rem; }
     .pillar-copy { max-width: none; padding-block: 24px; font-size: .8rem; line-height: 1.65; }
+    .figures { grid-template-columns: minmax(0, 1fr); padding: 12px; gap: 10px; }
+    .figures li { min-height: 138px; padding: 24px 18px; }
+    .figures .label { max-width: 28ch; }
     .footer-main { grid-template-columns: minmax(0, 1fr); }
     .facts { grid-template-columns: minmax(0, 1fr); }
   }
@@ -653,10 +732,12 @@
     .js .reveal { opacity: 1; transform: none; }
     .js .figure, .js .community { opacity: 1; transform: none; }
     .community:hover, .community:focus-visible, .community:focus-within,
+    .figures li:hover, .figures li:focus-within,
     .footer-col a:hover, .footer-col a:focus-visible,
     .footer-social a:hover, .footer-social a:focus-visible { transform: none; }
     .pillar:hover .pillar-word, .pillar:focus-within .pillar-word, .pillar.is-active .pillar-word { transform: none; }
     .community:hover .community-mark, .community:focus-visible .community-mark, .community:focus-within .community-mark { transform: none; }
+    .figures li:hover .num, .figures li:focus-within .num { transform: none; }
     .pillar-copy { transition: none; }
   }
   /* ---- teal footer with map card (shared design, matches aisyria.org) ---- */

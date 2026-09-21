@@ -10,3 +10,4 @@
 - [x] Remove the About statistics subtitle and the trailing period from its heading in both languages.
 - [x] Show the eight-community count, link it to the existing community section, and remove the dated figures note.
 - [x] Center the About communities heading, refine its bilingual introduction, replace card numbers with Home community marks, and retain the shared Home footer.
+- [x] Restyle the existing About statistics bar as responsive glass panels within the circuit-pattern visual system.
