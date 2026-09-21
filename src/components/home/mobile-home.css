@@ -767,10 +767,11 @@
   position: sticky;
   inset-block-start: 0;
   display: grid;
-  grid-template-rows: 46% 1fr;
+  grid-template-rows: 40% 1fr;
   block-size: 100svh;
   min-block-size: 560px;
-  padding-block: 96px 24px;
+  /* The bottom is left for Abu Al-Joud's card, so it never covers the copy. */
+  padding-block: 92px 200px;
   padding-inline: var(--mh-gutter);
   overflow: clip;
 }
@@ -914,6 +915,23 @@
   color: var(--mh-type);
   font-size: 0.95rem;
   line-height: 1.8;
+}
+/* Short phones: a smaller giant word, so its tagline clears the step copy. */
+@media (max-height: 740px) {
+  .mobile-home .mh-mission-sticky {
+    padding-block-start: 84px;
+  }
+  .mobile-home .mh-mission-words span,
+  .mobile-home[dir="rtl"] .mh-mission-words span {
+    font-size: clamp(4rem, 21vw, 5.6rem);
+  }
+  .mobile-home .mh-mission-words span::after {
+    inset-block-start: calc(100% + 8px);
+    padding-block-start: 6px;
+  }
+  .mobile-home .mh-mission-item h3 {
+    font-size: clamp(1.6rem, 7.4vw, 2rem);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .mobile-home .mh-handoff-out {
