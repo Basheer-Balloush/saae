@@ -9,3 +9,4 @@
 - [x] Place each LEARN, RESEARCH, and BUILD description opposite its title on wider screens while preserving RTL/LTR.
 - [x] Remove the About statistics subtitle and the trailing period from its heading in both languages.
 - [x] Show the eight-community count, link it to the existing community section, and remove the dated figures note.
+- [x] Center the About communities heading, refine its bilingual introduction, replace card numbers with Home community marks, and retain the shared Home footer.
