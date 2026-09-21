@@ -68,22 +68,31 @@ html.hero-opening-ready .hn-root .hn-intro-copy .hn-intro-heading { animation: n
 @media (max-width: 767px), (prefers-reduced-motion: reduce) {
   .hn-root::before { opacity: .6; }
   .hn-tech-details span { width: 22%; opacity: .25; background-size: 168px 336px; }
-  .mobile-home .hn-root { scroll-margin-block-start: calc(var(--mh-header-h) + var(--mh-rail-h) + 8px); }
-  .hn-expansion { height: auto; }
-  .hn-sticky { position: relative; top: auto; height: auto; min-height: 0; grid-template-rows: auto; padding: 0 24px 32px; overflow: visible; }
+  .mobile-home .hn-root { scroll-margin-block-start: 8px; }
   .hn-intro-heading { font-size: 38px; line-height: 1.5; }
   .hn-intro-copy { top: 0; min-height: 0; padding: 32px 24px 24px; }
   .hn-intro-content { padding-inline: 0; }
   .hn-intro-body { position: static; margin-top: 12px; font-size: 16px; }
   .hn-media-stage { width: 100%; height: auto; aspect-ratio: 3 / 2; }
-  .hn-media { transform: none !important; will-change: auto; }
-  .hn-display { display: none; }
   .hn-story-grid { grid-template-columns: minmax(0, 1fr); gap: 36px; }
   .hn-story { padding: 16px; }
   .hn-story h3 { font-size: 20px; }
   .hn-story-meta { padding-block: 16px 10px; }
   .hn-more { padding-top: 12px; }
   .hn-actions { margin-top: 36px; }
+}
+/* Phones keep the desktop's expansion: the cover grows from half size to the
+   full width as the reader scrolls, and "Latest / News" parts and fades. */
+@media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+  .hn-expansion { height: 150svh; }
+  .hn-sticky { position: sticky; top: 0; height: 100svh; min-height: 0; grid-template-rows: minmax(0, 1fr); padding: 0 16px; overflow: clip; }
+  .hn-display span { font-size: 52px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hn-expansion { height: auto; }
+  .hn-sticky { position: relative; top: auto; height: auto; min-height: 0; grid-template-rows: auto; padding: 0 24px 32px; overflow: visible; }
+  .hn-media { transform: none !important; will-change: auto; }
+  .hn-display { display: none; }
 }
 @media (min-width: 768px) and (max-height: 680px) and (prefers-reduced-motion: no-preference) {
   .hn-root { --hn-media-max-height: calc(100svh - 56px); }

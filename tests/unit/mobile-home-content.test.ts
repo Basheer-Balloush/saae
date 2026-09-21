@@ -283,6 +283,7 @@ describe("mobile homepage rendered output", () => {
   it("restricts photography to news and keeps reviewed graphics elsewhere", () => {
     const nonNewsAssets = new Set([
       "/cinematic/images/initiative-tree.svg",
+      "/cinematic/images/logo-tree-transparent.png",
       "/cinematic/images/abu-al-joud-comic-welcome.webp",
       "/cinematic/mobile/saae-wordmark-ar-light.webp",
       "/cinematic/mobile/saae-wordmark-en-light.webp",

@@ -1,18 +1,14 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Partner } from "@/features/website/partners/data";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
 import {
   ArrowUp,
   ArrowUpLeft,
-  ArrowUpRight,
   BookOpen,
   Facebook,
-  Globe,
   Instagram,
   Linkedin,
   Mail,
   MapPin,
-  Menu,
   Minus,
   Network,
   Pause,
@@ -20,7 +16,6 @@ import {
   Play,
   Plus,
   Rocket,
-  X,
 } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import MotionButton from "@/components/ui/motion-button";
@@ -31,6 +26,8 @@ import "./homepage-partners.css";
 import { DESKTOP_HOME_QUERY } from "@/hooks/useHeroCapability";
 import "./mobile-home.css";
 import { MobileTreeHero } from "./MobileTreeHero";
+import { MobileRadialNav } from "./MobileRadialNav";
+import { MobileMissionReel } from "./MobileMissionReel";
 import {
   CONTACT,
   FAQS,
@@ -40,11 +37,7 @@ import {
   FOOTER_EXPLORE,
   FOOTER_OFFICIAL,
   FOOTER_RIGHTS,
-  MENU_ASSOCIATION,
-  MENU_PARTICIPATE,
   MICRO_COPY,
-  MISSION_COPY,
-  MISSION_STEPS,
   OPENING,
   PARTNERS_COPY,
   SOCIAL_LINKS,
@@ -108,10 +101,8 @@ export function MobileHomeView({
     visiblePartners.slice(Math.ceil(visiblePartners.length / 2)),
   ].filter((row) => row.length);
   const dir = lang === "ar" ? "rtl" : "ltr";
-  const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [motionReady, setMotionReady] = useState(false);
-  const [headerSolid, setHeaderSolid] = useState(false);
   const [logosPaused, setLogosPaused] = useState(false);
 
   const wordmark =
@@ -124,17 +115,6 @@ export function MobileHomeView({
 
   useEffect(() => {
     setMotionReady(true);
-  }, []);
-
-  /* Header glass once the hero top sentinel leaves. */
-  useEffect(() => {
-    const el = heroSentinelRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(([entry]) => setHeaderSolid(!entry.isIntersecting), {
-      threshold: 0,
-    });
-    io.observe(el);
-    return () => io.disconnect();
   }, []);
 
   return (
@@ -155,144 +135,7 @@ export function MobileHomeView({
         {pick(MICRO_COPY.skip, lang)}
       </a>
 
-      <header className={headerSolid ? "mh-header mh-is-solid" : "mh-header"}>
-        <div className="mh-header-row">
-          <a className="mh-brand" href="/" aria-label={pick(MICRO_COPY.brandName, lang)}>
-            <img
-              src={wordmark}
-              alt=""
-              width={wordmarkSize.width}
-              height={wordmarkSize.height}
-              decoding="async"
-            />
-          </a>
-          <span className="mh-header-spacer" aria-hidden="true" />
-          <button
-            type="button"
-            className="mh-lang"
-            onClick={onToggleLang}
-            aria-label={pick(MICRO_COPY.switchLabel, lang)}
-          >
-            <Globe size={18} aria-hidden="true" />
-            {pick(MICRO_COPY.switchTo, lang)}
-          </button>
-          <DialogPrimitive.Root open={menuOpen} onOpenChange={setMenuOpen}>
-            <DialogPrimitive.Trigger asChild>
-              <button
-                type="button"
-                className="mh-menu-btn"
-                aria-label={pick(MICRO_COPY.menu, lang)}
-              >
-                <Menu size={20} aria-hidden="true" />
-                <span className="mh-menu-btn-label">{pick(MICRO_COPY.menu, lang)}</span>
-              </button>
-            </DialogPrimitive.Trigger>
-            <DialogPrimitive.Portal>
-              <div className="mobile-home mh-portal-scope" dir={dir} lang={lang}>
-                <DialogPrimitive.Overlay className="mh-menu-overlay" />
-                <DialogPrimitive.Content
-                  className="mh-menu-panel"
-                  aria-label={pick(MICRO_COPY.menu, lang)}
-                >
-                  <DialogPrimitive.Description className="mh-sr-only">
-                    {pick(MICRO_COPY.menuDesc, lang)}
-                  </DialogPrimitive.Description>
-                  <img
-                    className="mh-menu-logo"
-                    src={wordmark}
-                    alt={pick(OPENING.eyebrow, lang)}
-                    width={wordmarkSize.width}
-                    height={wordmarkSize.height}
-                    decoding="async"
-                  />
-                  <div className="mh-menu-head">
-                    <DialogPrimitive.Title className="mh-menu-title">
-                      {pick(MICRO_COPY.menu, lang)}
-                    </DialogPrimitive.Title>
-                    <DialogPrimitive.Close asChild>
-                      <button
-                        type="button"
-                        className="mh-menu-close"
-                        aria-label={pick(MICRO_COPY.closeMenu, lang)}
-                      >
-                        <X size={20} aria-hidden="true" />
-                      </button>
-                    </DialogPrimitive.Close>
-                  </div>
-                  <h2 className="mh-menu-group-title">{pick(MICRO_COPY.association, lang)}</h2>
-                  <ul className="mh-menu-list">
-                    {MENU_ASSOCIATION.map((l, i) => (
-                      <li key={l.href} style={{ "--i": i } as CSSProperties}>
-                        <a href={l.href} {...extProps(l)} onClick={() => setMenuOpen(false)}>
-                          <span className="mh-menu-num" aria-hidden="true">
-                            {String(i + 1).padStart(2, "0")}
-                          </span>
-                          {pick(l.label, lang)}
-                          <ArrowUpRight size={18} aria-hidden="true" className="mh-flip" />
-                          {l.external ? (
-                            <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
-                          ) : null}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                  <h2 className="mh-menu-group-title">{pick(MICRO_COPY.participate, lang)}</h2>
-                  <ul className="mh-menu-list">
-                    {MENU_PARTICIPATE.map((l, i) => (
-                      <li
-                        key={l.href}
-                        style={{ "--i": i + MENU_ASSOCIATION.length } as CSSProperties}
-                      >
-                        <a href={l.href} {...extProps(l)} onClick={() => setMenuOpen(false)}>
-                          <span className="mh-menu-num" aria-hidden="true">
-                            {String(i + 1 + MENU_ASSOCIATION.length).padStart(2, "0")}
-                          </span>
-                          {pick(l.label, lang)}
-                          <ArrowUpRight size={18} aria-hidden="true" className="mh-flip" />
-                          {l.external ? (
-                            <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
-                          ) : null}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                  <MotionButton
-                    label={pick(OPENING.primary.label, lang)}
-                    href={OPENING.primary.href}
-                    onClick={() => setMenuOpen(false)}
-                    classes="w-full justify-center"
-                  />
-                  <div className="mh-menu-contact">
-                    <a href={CONTACT.email}>
-                      <Mail size={18} aria-hidden="true" />
-                      <span dir="ltr">info@aisyria.org</span>
-                    </a>
-                    <a href={CONTACT.phone}>
-                      <Phone size={18} aria-hidden="true" />
-                      <span dir="ltr">{CONTACT.phoneDisplay}</span>
-                    </a>
-                  </div>
-                  <ul className="mh-menu-social" aria-label={pick(MICRO_COPY.followUs, lang)}>
-                    {SOCIAL_LINKS.map((s) => (
-                      <li key={s.href}>
-                        <a
-                          href={s.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={pick(s.label, lang)}
-                        >
-                          <SocialIcon name={s.labelEn} />
-                          <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </DialogPrimitive.Content>
-              </div>
-            </DialogPrimitive.Portal>
-          </DialogPrimitive.Root>
-        </div>
-      </header>
+      <MobileRadialNav lang={lang === "ar" ? "ar" : "en"} onToggleLang={onToggleLang} />
 
       <main id="main-content">
         <MobileTreeHero lang={lang === "ar" ? "ar" : "en"} sentinelRef={heroSentinelRef} />
@@ -300,36 +143,7 @@ export function MobileHomeView({
         <div className="mh-chapters">
           <HomepageNews news={news} newsFailed={newsFailed} lang={lang} />
 
-          <section className="mh-section" id="mission" aria-labelledby="mh-mission-title">
-            <div className="mh-wrap">
-              <p className="mh-eyebrow">{pick(MISSION_COPY.eyebrow, lang)}</p>
-              <h2 className="mh-section-h" id="mh-mission-title">
-                {pick(MISSION_COPY.title, lang)}
-              </h2>
-              <ol className="mh-stack">
-                {MISSION_STEPS.map((s, i) => (
-                  <li
-                    key={pick(s.index, lang)}
-                    className={`mh-stack-card mh-accent-${i}`}
-                    style={{ "--i": i } as CSSProperties}
-                  >
-                    <span className="mh-stack-num" aria-hidden="true">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <p className="mh-step-index">{pick(s.index, lang)}</p>
-                    <h3 className="mh-stack-title">{pick(s.title, lang)}</h3>
-                    <p className="mh-stack-body">{pick(s.body, lang)}</p>
-                  </li>
-                ))}
-              </ol>
-              <p className="mh-below-stack">
-                <a className="mh-inline-link" href="/about">
-                  {pick(MISSION_COPY.aboutLink, lang)}
-                  <ArrowUpRight size={16} aria-hidden="true" className="mh-flip" />
-                </a>
-              </p>
-            </div>
-          </section>
+          <MobileMissionReel lang={lang} />
 
           <section
             className={`mh-section hn-root hp-partners${logosPaused ? " mh-is-paused" : ""}`}
