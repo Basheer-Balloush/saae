@@ -8,3 +8,4 @@
 - [x] Reuse the Home screen footer on the existing About page without changing other sections.
 - [x] Place each LEARN, RESEARCH, and BUILD description opposite its title on wider screens while preserving RTL/LTR.
 - [x] Remove the About statistics subtitle and the trailing period from its heading in both languages.
+- [x] Show the eight-community count, link it to the existing community section, and remove the dated figures note.

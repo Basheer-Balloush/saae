@@ -172,7 +172,6 @@
     "courses turning AI into a working skill": "دورة تحوّل الذكاء الاصطناعي إلى مهارة عملية",
     "strategic partners across Syria": "شريكاً استراتيجياً في أنحاء سورية",
     "Specialist Communities": "المجتمعات التخصصية",
-    "Figures published by SAAE, September 2026.": "أرقام نشرتها الجمعية، أيلول 2026.",
     "Each community brings its own questions and its own practitioners. Shared methods let the answers travel between them.": "لكل مجتمع أسئلته وممارسوه. والمنهج المشترك يجعل الأجوبة تنتقل بينها.",
     "Works on": "يعمل على",
     "Data": "البيانات",

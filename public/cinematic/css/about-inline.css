@@ -317,11 +317,11 @@
   .figures .label { display: block; margin-top: 12px; color: var(--ink-muted); font-size: .88rem; line-height: 1.55; }
   .js .figure { opacity: 0; transform: translate3d(0, 18px, 0); }
   .js .figure.is-in { opacity: 1; transform: none; transition: opacity 560ms var(--ease-out), transform 560ms var(--ease-out), border-color 560ms ease, filter 560ms ease; border-color: rgba(119, 224, 232, .38); filter: drop-shadow(0 8px 18px rgba(0, 139, 157, .1)); }
-  .community-symbol { display: grid; place-items: center; inline-size: 48px; block-size: 48px; color: var(--saae-turquoise-lift); }
-  .community-symbol svg { inline-size: 100%; block-size: 100%; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 12px rgba(119, 224, 232, .22)); }
-  .figure-community .label { margin-top: 8px; color: var(--type); font-weight: 700; }
-  .source { margin-top: 30px; color: var(--ink-muted); font-size: .84rem; }
-  .source a { color: var(--petrol-lift); }
+  .figure-community-link { display: block; color: inherit; text-decoration: none; }
+  .figure-community-link .label { color: var(--type); font-weight: 700; }
+  .figure-community-link:hover .num, .figure-community-link:focus-visible .num { color: var(--saae-turquoise-lift); text-shadow: 0 0 22px rgba(119, 224, 232, .22); }
+  .figure-community-link:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: 7px; border-radius: 2px; }
+  .communities { scroll-margin-top: 96px; }
 
   /* ---- Communities ------------------------------------------------------
      Each card carries what the community actually works on as well as its name. Everything is
