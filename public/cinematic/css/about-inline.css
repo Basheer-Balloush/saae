@@ -214,24 +214,22 @@
   .head h2 { max-width: 20ch; font-size: clamp(2.1rem, 4.4vw, 3.6rem); text-wrap: balance; }
   .head > p:not(.eyebrow) { max-width: 56ch; margin-top: 20px; color: var(--ink-muted); font-size: clamp(.98rem, 1.4vw, 1.12rem); }
   .rule { width: 108px; height: 3px; margin-top: 30px; background: linear-gradient(90deg, var(--petrol), var(--olive)); }
+  .head-centered { margin-inline: auto; text-align: center; }
+  .head-centered h2, .head-centered > p:not(.eyebrow) { margin-inline: auto; unicode-bidi: plaintext; }
+  .head-centered .rule { margin-inline: auto; }
 
   /* Section heads keep their solid ink. They are sentence heads at
      ~2-3.6rem: the panoramic collage cannot resolve inside glyphs that
      small and only reads as a muddy wash (see the pic-1 failure). */
 
-  /* ---- What we do -------------------------------------------------------
+  /* ---- Pillars ----------------------------------------------------------
      Photographs used to carry this section. What carries it now is the
      landing page's own device: the pillar's name set oversized and hollow,
      filling in as the row is entered. Nothing here is decoration that could
      be swapped for a different picture. */
-  .pillars { margin: clamp(46px, 6vw, 76px) 0 0; padding: 0; list-style: none; }
+  .pillars { margin: clamp(34px, 5vw, 62px) 0 0; padding: 0; list-style: none; }
   .pillar {
     position: relative;
-    display: grid;
-    grid-template-columns: 62px minmax(0, 1.05fr) minmax(0, 1fr);
-    align-items: center;
-    gap: clamp(18px, 3vw, 48px);
-    padding-block: clamp(26px, 3vw, 40px);
     border-top: 1px solid var(--line);
     transition: border-color 520ms var(--ease-out);
   }
@@ -248,9 +246,25 @@
     transform-origin: 0 50%;
     transition: transform 620ms var(--ease-out);
   }
-  .pillar:hover::after, .pillar:focus-within::after { transform: scaleX(1); }
+  .pillar:hover::after, .pillar:focus-within::after, .pillar.is-active::after { transform: scaleX(1); }
   html[dir="rtl"] .pillar::after { transform-origin: 100% 50%; }
 
+  .pillar-trigger {
+    display: grid;
+    grid-template-columns: 62px minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(18px, 3vw, 48px);
+    inline-size: 100%;
+    min-block-size: 88px;
+    padding: clamp(22px, 2.6vw, 34px) 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .pillar-trigger:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: 5px; border-radius: 4px; }
   .pillar-n { color: var(--olive-lift); font-size: .78rem; font-weight: 800; letter-spacing: .14em; }
   .pillar-word {
     margin: 0;
@@ -262,15 +276,35 @@
     line-height: 1;
     transition: color 520ms var(--ease-out), -webkit-text-stroke-color 520ms var(--ease-out), transform 620ms var(--ease-out);
   }
-  .pillar:hover .pillar-word, .pillar:focus-within .pillar-word {
+  .pillar:hover .pillar-word, .pillar:focus-within .pillar-word, .pillar.is-active .pillar-word {
     color: var(--saae-turquoise-lift);
     -webkit-text-stroke-color: transparent;
+    text-shadow: 0 0 28px rgba(119, 224, 232, .2);
     transform: translate3d(6px, 0, 0);
   }
   html[dir="rtl"] .pillar:hover .pillar-word,
-  html[dir="rtl"] .pillar:focus-within .pillar-word { transform: translate3d(-6px, 0, 0); }
-  .pillar-copy { margin: 0; max-width: 48ch; color: var(--ink-muted); font-size: .96rem; line-height: 1.72; transition: color 520ms var(--ease-out); }
-  .pillar:hover .pillar-copy, .pillar:focus-within .pillar-copy { color: var(--type); }
+  html[dir="rtl"] .pillar:focus-within .pillar-word,
+  html[dir="rtl"] .pillar.is-active .pillar-word { transform: translate3d(-6px, 0, 0); }
+  .pillar-copy {
+    max-width: 60ch;
+    max-height: 0;
+    margin: 0;
+    margin-inline-start: calc(62px + clamp(18px, 3vw, 48px));
+    overflow: hidden;
+    color: var(--ink-muted);
+    font-size: .96rem;
+    line-height: 1.72;
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+    transition: max-height 500ms var(--ease-out), margin 500ms var(--ease-out), opacity 420ms ease, transform 500ms var(--ease-out), color 500ms ease;
+  }
+  .pillar.is-active .pillar-copy {
+    max-height: 9rem;
+    margin-bottom: clamp(24px, 3vw, 36px);
+    color: var(--type);
+    opacity: 1;
+    transform: none;
+  }
 
   /* ---- Figures ---------------------------------------------------------- */
   .standing { padding-top: var(--gap); }
@@ -285,12 +319,16 @@
   .figures li { border-top: 1px solid var(--line); padding-top: 22px; }
   .figures .num { display: block; color: var(--paper); font-size: clamp(2rem, 3.6vw, 2.9rem); font-weight: 900; letter-spacing: -.045em; line-height: 1; }
   .figures .label { display: block; margin-top: 12px; color: var(--ink-muted); font-size: .88rem; line-height: 1.55; }
+  .js .figure { opacity: 0; transform: translate3d(0, 18px, 0); }
+  .js .figure.is-in { opacity: 1; transform: none; transition: opacity 560ms var(--ease-out), transform 560ms var(--ease-out), border-color 560ms ease, filter 560ms ease; border-color: rgba(119, 224, 232, .38); filter: drop-shadow(0 8px 18px rgba(0, 139, 157, .1)); }
+  .community-symbol { display: grid; place-items: center; inline-size: 48px; block-size: 48px; color: var(--saae-turquoise-lift); }
+  .community-symbol svg { inline-size: 100%; block-size: 100%; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 12px rgba(119, 224, 232, .22)); }
+  .figure-community .label { margin-top: 8px; color: var(--type); font-weight: 700; }
   .source { margin-top: 30px; color: var(--ink-muted); font-size: .84rem; }
   .source a { color: var(--petrol-lift); }
 
   /* ---- Communities ------------------------------------------------------
-     Nine cards rather than nine list rows, because each one now carries what
-     the community actually works on as well as its name. Everything is
+     Each card carries what the community actually works on as well as its name. Everything is
      visible at rest: the hover is a lift and a light, never a disclosure, so
      nothing is hidden from a reader who cannot hover. */
   .communities { padding-top: var(--gap); padding-bottom: clamp(72px, 9vw, 128px); }
@@ -299,8 +337,9 @@
     padding: 0;
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: clamp(16px, 2vw, 24px);
+    align-items: start;
   }
   .community {
     position: relative;
@@ -315,6 +354,10 @@
     box-shadow: 0 18px 44px rgba(0, 0, 0, .42);
     transition: transform 620ms var(--ease-out), border-color 520ms var(--ease-out), box-shadow 520ms var(--ease-out);
   }
+  .js .community { opacity: 0; transform: translate3d(0, 28px, 0); }
+  .js .community:nth-child(even) { transform: translate3d(0, 44px, 0); }
+  .js .community.is-in { opacity: 1; transform: translate3d(0, var(--card-offset, 0px), 0); transition: opacity 600ms var(--ease-out), transform 600ms var(--ease-out), border-color 520ms var(--ease-out), box-shadow 520ms var(--ease-out); }
+  .community:nth-child(4n + 2), .community:nth-child(4n + 4) { --card-offset: 28px; }
   /* The light that arrives with the pointer: a petrol wash from the corner
      the number sits in. */
   .community::before {
@@ -327,15 +370,16 @@
     transition: opacity 520ms var(--ease-out);
   }
   .community > * { position: relative; }
-  .community:hover, .community:focus-within {
-    transform: translate3d(0, -6px, 0);
+  .community:hover, .community:focus-visible, .community:focus-within {
+    transform: translate3d(0, calc(var(--card-offset, 0px) - 6px), 0);
     border-color: rgba(184, 232, 240, .42);
-    box-shadow: 0 30px 66px rgba(0, 0, 0, .55);
+    box-shadow: 0 30px 66px rgba(0, 0, 0, .55), 0 0 28px rgba(0, 139, 157, .12);
   }
-  .community:hover::before, .community:focus-within::before { opacity: 1; }
+  .community:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: 4px; }
+  .community:hover::before, .community:focus-visible::before, .community:focus-within::before { opacity: 1; }
 
   .community-n { color: var(--olive-lift); font-size: .74rem; font-weight: 800; letter-spacing: .14em; transition: color 520ms var(--ease-out); }
-  .community:hover .community-n, .community:focus-within .community-n { color: var(--petrol-lift); }
+  .community:hover .community-n, .community:focus-visible .community-n, .community:focus-within .community-n { color: var(--petrol-lift); }
   .community h3 { font-size: clamp(1.06rem, 1.5vw, 1.24rem); letter-spacing: -.02em; }
   .community-line { color: var(--type); font-size: .92rem; line-height: 1.6; }
   .community-focus {
@@ -560,6 +604,8 @@
   /* ---- Narrow ----------------------------------------------------------- */
   @media (max-width: 1020px) {
     .community-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .community:nth-child(n) { --card-offset: 0px; }
+    .community:nth-child(even) { --card-offset: 22px; }
     .footer-main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 900px) {
@@ -568,14 +614,15 @@
     .ghost-about { left: -3%; font-size: clamp(62px, 17vw, 132px); transform: translateY(-100%); }
     html[dir="rtl"] .ghost-about { left: auto; right: -3%; }
     .mark-photo { font-size: clamp(104px, 27vw, 250px); }
-    .pillar { grid-template-columns: 44px minmax(0, 1fr); row-gap: 14px; }
-    .pillar-copy { grid-column: 2; }
+    .pillar-trigger { grid-template-columns: 44px minmax(0, 1fr); }
+    .pillar-copy { margin-inline-start: calc(44px + clamp(18px, 3vw, 48px)); }
     .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 620px) {
     .ambient::before { opacity: .6; }
     .ambient span { width: 22%; opacity: .25; background-size: 168px 336px; }
     .community-grid { grid-template-columns: minmax(0, 1fr); }
+    .community:nth-child(n) { --card-offset: 0px; }
     .footer-main { grid-template-columns: minmax(0, 1fr); }
     .facts { grid-template-columns: minmax(0, 1fr); }
   }
@@ -583,10 +630,12 @@
   @media (prefers-reduced-motion: reduce) {
     .language-switch-icon { animation: none; }
     .js .reveal { opacity: 1; transform: none; }
-    .community:hover, .community:focus-within,
+    .js .figure, .js .community { opacity: 1; transform: none; }
+    .community:hover, .community:focus-visible, .community:focus-within,
     .footer-col a:hover, .footer-col a:focus-visible,
     .footer-social a:hover, .footer-social a:focus-visible { transform: none; }
-    .pillar:hover .pillar-word, .pillar:focus-within .pillar-word { transform: none; }
+    .pillar:hover .pillar-word, .pillar:focus-within .pillar-word, .pillar.is-active .pillar-word { transform: none; }
+    .pillar-copy { transition: none; }
   }
   /* ---- teal footer with map card (shared design, matches aisyria.org) ---- */
   .site-footer { background: #04171c; color: #fff; }

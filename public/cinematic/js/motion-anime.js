@@ -344,16 +344,6 @@
       hover(list("li.story, .featured"), -6);
     }
 
-    if (page === "about") {
-      /* The live About page: every link on the site points here. Its own
-         inline observer fades three whole sections in and stops there, so the
-         nine communities, the three pillars and the four figures inside them
-         arrived already composed. They arrive one at a time now. */
-      rise(list(".pillar-word"), { y: 24, stepDelay: 130 });
-      rise(list(".community"), { y: 18, stepDelay: 82 });
-      count(list(".num"));
-    }
-
     if (page === "about-v2") {
       rise(list(".chapter"), { y: 26, stepDelay: 105 });
       rise(list(".branch"), { y: 22, stepDelay: 120 });
