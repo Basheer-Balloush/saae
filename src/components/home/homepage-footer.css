@@ -1,4 +1,5 @@
-#home-motion-footer-root:not(:empty) + .home-footer-fallback {
+#home-motion-footer-root:not(:empty) + .home-footer-fallback,
+#about-motion-footer-root:not(:empty) + .home-footer-fallback {
   display: none;
 }
 

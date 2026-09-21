@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import pageHtml from "@/components/cinematic/html/about.html?raw";
 import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
+import { DesktopMotionFooter } from "@/components/home/DesktopMotionFooter";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MEMBER_COLUMNS,
@@ -55,5 +56,10 @@ export const Route = createFileRoute("/about")({
 function Page() {
   const { members } = Route.useLoaderData();
   const html = useMemo(() => applyMembers(pageHtml, members), [members]);
-  return <CinematicPage html={html} scripts={SCRIPTS} />;
+  return (
+    <>
+      <CinematicPage html={html} scripts={SCRIPTS} />
+      <DesktopMotionFooter targetSelector="#about-motion-footer-root" />
+    </>
+  );
 }

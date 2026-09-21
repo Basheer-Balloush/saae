@@ -5,3 +5,4 @@
 
 - [x] Update the existing About page labels, bidirectional layout, pillar interaction, statistics, and communities presentation.
 - [x] Verify English/Arabic desktop, tablet, mobile, keyboard/touch behavior, reduced motion, and preview health.
+- [x] Reuse the Home screen footer on the existing About page without changing other sections.
