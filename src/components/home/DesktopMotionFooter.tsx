@@ -5,8 +5,8 @@ import { MotionFooter, type MotionFooterLocale } from "@/components/ui/motion-fo
 import { usePortalTarget } from "@/hooks/usePortalTarget";
 import "./homepage-footer.css";
 
-export function DesktopMotionFooter() {
-  const target = usePortalTarget("#home-motion-footer-root");
+export function DesktopMotionFooter({ targetSelector = "#home-motion-footer-root" }: { targetSelector?: string }) {
+  const target = usePortalTarget(targetSelector);
   const [locale, setLocale] = useState<MotionFooterLocale>("ar");
 
   useEffect(() => {
