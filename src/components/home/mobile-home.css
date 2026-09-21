@@ -567,10 +567,11 @@
 }
 
 /* ---- Tree hero ----------------------------------------------------------
-   The desktop's pixel tree in its centred phone layout (MobileTreeHero.tsx).
-   The section is a scroll runway; the stage sticks for its length. The tree
-   forms first, the camera travels to the roots, and the copy arrives there:
-   .mh-is-revealed is set from scroll, and unset again on the way back up. */
+   The desktop hero's journey on a phone (MobileTreeHero.tsx): the pixel tree
+   in hero-instrument.js's centred layout and the six captions on the desktop
+   schedule. The section is the scroll runway and the stage sticks for its
+   length. The scene takes the top; the captions sit at the bottom. */
+
 /* The route also loads the desktop page's phone sheet (home-mobile.css), whose
    #hero-sec { display: flex } would pin the stage to the bottom of the runway. */
 .mobile-home #hero-sec.mh-tree-hero {
@@ -578,7 +579,8 @@
 }
 .mobile-home .mh-hero.mh-tree-hero {
   min-block-size: 0;
-  block-size: 200svh;
+  /* Desktop runs 21 screens; a thumb covers ground faster than a wheel. */
+  block-size: 1300svh;
   overflow: visible;
   background: var(--mh-canvas);
 }
@@ -586,9 +588,6 @@
 .mobile-home .mh-tree-stage {
   position: sticky;
   inset-block-start: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
   block-size: 100svh;
   min-block-size: 560px;
   overflow: clip;
@@ -599,20 +598,20 @@
   position: absolute;
   inset: 0;
   z-index: -3;
+  display: block;
   inline-size: 100%;
   block-size: 100%;
-  display: block;
 }
 
 /* The drawn tree holds the stage while the scene loads, and is the hero when
-   it cannot run (reduced motion, no WebGL2). */
+   the scene cannot run. */
 .mobile-home .mh-tree-still {
   position: absolute;
-  inset-inline: 12%;
-  inset-block: 18% 14%;
+  inset-inline: 14%;
+  inset-block: 12% 44%;
   z-index: -2;
-  inline-size: 76%;
-  block-size: 68%;
+  inline-size: 72%;
+  block-size: 44%;
   object-fit: contain;
   opacity: 0.22;
   transition: opacity 900ms var(--mh-ease);
@@ -620,88 +619,192 @@
 .mobile-home .mh-tree-hero[data-tree="live"] .mh-tree-still {
   opacity: 0;
 }
-.mobile-home .mh-tree-hero[data-tree="static"] .mh-tree-still {
-  opacity: 0.32;
-}
 
-/* Darkens only behind the copy, and only once the copy is there. */
 .mobile-home .mh-tree-hero .mh-hero-scrim {
   z-index: -1;
-  opacity: 0;
   background: linear-gradient(
-    to bottom,
-    rgba(6, 35, 42, 0.9) 0%,
+    to top,
+    rgba(6, 35, 42, 0.92) 0%,
     rgba(6, 35, 42, 0.6) 34%,
     transparent 56%
   );
-  transition: opacity 700ms var(--mh-ease);
-}
-.mobile-home .mh-tree-hero.mh-is-revealed .mh-hero-scrim {
-  opacity: 1;
 }
 
-.mobile-home .mh-tree-hero .mh-hero-copy {
-  padding-block-start: calc(var(--mh-header-h) + 20px);
-  padding-block-end: 0;
+/* Six captions on one spot at the bottom, above Abu Al-Joud's row; the
+   journey fades one into the next. */
+.mobile-home .mh-bands {
+  position: absolute;
+  inset-block-end: calc(92px + env(safe-area-inset-bottom, 0px));
+  inset-inline: 0;
+  display: grid;
+}
+.mobile-home .mh-band {
+  grid-area: 1 / 1;
+  align-self: end;
   opacity: 0;
-  transform: translateY(20px);
-  pointer-events: none;
-  transition:
-    opacity 500ms var(--mh-ease),
-    transform 800ms var(--mh-ease);
+  will-change: opacity, transform;
 }
-.mobile-home .mh-tree-hero.mh-is-revealed .mh-hero-copy {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
+.mobile-home .mh-band[aria-hidden="true"] {
+  pointer-events: none;
 }
 
+.mobile-home .mh-band .mh-eyebrow {
+  margin-block-end: 8px;
+}
+.mobile-home .mh-band-title {
+  margin: 0 0 10px;
+  color: var(--mh-paper);
+  font-size: clamp(1.55rem, 7.4vw, 2.1rem);
+  font-weight: 900;
+  line-height: 1.3;
+  text-wrap: balance;
+  text-shadow: 0 2px 18px rgba(3, 16, 19, 0.8);
+}
+.mobile-home .mh-band-title:lang(en) {
+  line-height: 1.15;
+}
+.mobile-home .mh-band-body {
+  margin: 0 0 14px;
+  max-inline-size: 36ch;
+  color: var(--mh-type);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  text-shadow: 0 1px 10px rgba(3, 16, 19, 0.8);
+}
+
+/* Opening: the tree forms first, then the headline rises into place. */
 .mobile-home .mh-tree-hero .mh-title {
-  font-size: clamp(2.2rem, 11.5vw, 3.4rem);
+  font-size: clamp(2.2rem, 11.5vw, 3.2rem);
   line-height: 1.4;
 }
 .mobile-home .mh-tree-hero .mh-title:lang(en) {
-  font-size: clamp(2rem, 9vw, 2.75rem);
+  font-size: clamp(2rem, 9vw, 2.6rem);
   line-height: 1.15;
 }
-
-/* The word and fade animations wait for the reveal instead of playing on load. */
-.mobile-home .mh-tree-hero .mh-word,
-.mobile-home .mh-tree-hero .mh-kinetic {
+.mobile-home .mh-band-opening {
+  opacity: 0;
+  transition: opacity 500ms var(--mh-ease);
+}
+.mobile-home .mh-tree-hero.mh-opening-ready .mh-band-opening {
+  opacity: 1;
+}
+.mobile-home .mh-tree-hero .mh-word {
   animation-name: none;
 }
-.mobile-home .mh-tree-hero:not(.mh-is-revealed) .mh-word {
+.mobile-home .mh-tree-hero:not(.mh-opening-ready) .mh-word {
   transform: translateY(110%);
 }
-.mobile-home .mh-tree-hero.mh-is-revealed .mh-word {
+.mobile-home .mh-tree-hero.mh-opening-ready .mh-word {
   animation-name: mh-rise;
 }
-.mobile-home .mh-tree-hero.mh-is-revealed .mh-kinetic {
-  animation-name: mh-fade-up;
-}
 
-/* Two stacked full-width actions: side by side, the labels broke over three lines. */
-.mobile-home .mh-tree-hero .mh-actions {
-  flex-direction: column;
-  flex-wrap: nowrap;
+/* Communities: the card that picks which pictogram the field draws. */
+.mobile-home .mh-tree-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  align-items: center;
   max-inline-size: 22rem;
+  padding: 12px 14px 10px;
+  border: 1px solid rgba(184, 232, 240, 0.2);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--mh-panel) 78%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  animation: mh-fade-up 420ms var(--mh-ease) both;
 }
-.mobile-home .mh-tree-hero .mh-actions > * {
-  inline-size: 100%;
+.mobile-home .mh-tree-card-icon {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border: 1px solid rgba(184, 232, 240, 0.28);
+  border-radius: 50%;
+  color: var(--mh-turquoise-lift);
 }
-.mobile-home .mh-tree-hero .mh-actions [data-slot="motion-button-label"] {
-  white-space: nowrap;
+.mobile-home .mh-tree-card-name {
+  color: var(--mh-paper);
+  font-size: 1.05rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.mobile-home .mh-tree-card-text p {
+  margin: 2px 0 0;
+  color: var(--mh-ink-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.mobile-home .mh-tree-card-nav {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-block-start: 6px;
+  color: var(--mh-ink-muted);
+  font-size: 0.78rem;
+}
+.mobile-home .mh-tree-card-nav button {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 32px;
+  block-size: 32px;
+  border: 1px solid rgba(184, 232, 240, 0.28);
+  border-radius: 50%;
+  background: none;
+  color: var(--mh-type);
+}
+.mobile-home .mh-tree-pips {
+  display: flex;
+  gap: 6px;
+  margin-block: 10px 12px;
+}
+.mobile-home .mh-tree-pips button {
+  inline-size: 7px;
+  block-size: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 99px;
+  background: rgba(184, 232, 240, 0.3);
+  transition:
+    inline-size 300ms var(--mh-ease),
+    background 300ms;
+}
+.mobile-home .mh-tree-pips button.mh-is-current {
+  inline-size: 20px;
+  background: var(--mh-turquoise-lift);
 }
 
-@media (max-height: 740px) {
-  .mobile-home .mh-tree-hero .mh-support {
-    display: none;
-  }
+/* Achievements: the four figures as small tiles; the field draws them large. */
+.mobile-home .mh-tree-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  max-inline-size: 22rem;
+  margin: 4px 0 0;
+}
+.mobile-home .mh-tree-stats div {
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 8px 12px;
+  border: 1px solid rgba(184, 232, 240, 0.18);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mh-panel) 70%, transparent);
+}
+.mobile-home .mh-tree-stats dt {
+  color: var(--mh-ink-muted);
+  font-size: 0.75rem;
+}
+.mobile-home .mh-tree-stats dd {
+  margin: 0;
+  color: var(--mh-turquoise-lift);
+  font-size: 1.15rem;
+  font-weight: 800;
 }
 
 .mobile-home .mh-tree-cue {
   position: absolute;
-  inset-block-end: calc(26px + env(safe-area-inset-bottom, 0px));
+  inset-block-end: calc(40px + env(safe-area-inset-bottom, 0px));
   inset-inline: 0;
   display: flex;
   flex-direction: column;
@@ -711,13 +814,13 @@
   color: var(--mh-ink-muted);
   font-size: 0.8rem;
   letter-spacing: 0.04em;
-  opacity: calc(1 - var(--mh-tree-t, 0) * 8);
+  opacity: calc(1 - var(--mh-tree-t, 0) * 30);
   pointer-events: none;
 }
 .mobile-home .mh-tree-cue::after {
   content: "";
   inline-size: 1px;
-  block-size: 34px;
+  block-size: 30px;
   background: linear-gradient(to bottom, var(--mh-turquoise-lift), transparent);
   animation: mh-cue 1.8s var(--mh-ease) infinite;
   transform-origin: top;
@@ -737,16 +840,17 @@
   }
 }
 
-/* Abu Al-Joud: bottom inline-end corner, clear of the chat button on the other side. */
+/* Abu Al-Joud: bottom inline-end corner, clear of the chat button on the
+   other side. He says his line as each beat arrives, then goes quiet. */
 .mobile-home .mh-hero-guide {
   position: absolute;
-  inset-block-end: calc(14px + env(safe-area-inset-bottom, 0px));
-  inset-inline-end: 8px;
+  inset-block-end: calc(12px + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: 6px;
   z-index: 2;
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  max-inline-size: min(78vw, 300px);
+  max-inline-size: calc(100vw - 96px);
   padding: 0;
   border: 0;
   background: none;
@@ -767,33 +871,36 @@
   transform: none;
   pointer-events: auto;
 }
-
 .mobile-home .mh-hero-guide-bubble {
-  position: relative;
-  margin-block-end: 84px;
-  padding: 10px 14px;
+  margin-block-end: 18px;
+  padding: 8px 12px;
   border: 1px solid rgba(184, 232, 240, 0.28);
   border-radius: 16px;
   border-end-end-radius: 4px;
-  background: color-mix(in srgb, var(--mh-panel) 88%, transparent);
+  background: color-mix(in srgb, var(--mh-panel) 90%, transparent);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   color: var(--mh-type);
-  font-size: 0.86rem;
-  line-height: 1.55;
+  font-size: 0.8rem;
+  line-height: 1.45;
   box-shadow: 0 10px 30px rgba(3, 16, 19, 0.45);
-  animation: mh-fade-up 520ms var(--mh-ease) both;
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  transform-origin: bottom right;
+  transition:
+    opacity 400ms var(--mh-ease),
+    transform 400ms var(--mh-ease);
 }
-
+.mobile-home .mh-hero-guide.mh-is-talking .mh-hero-guide-bubble {
+  opacity: 1;
+  transform: none;
+}
 .mobile-home .mh-hero-guide-figure {
   flex: none;
-  inline-size: 84px;
+  inline-size: 58px;
   block-size: auto;
   filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45));
   animation: mh-guide-bob 3.6s ease-in-out infinite;
-}
-.mobile-home .mh-hero-guide[data-stage="headline"] .mh-hero-guide-figure {
-  inline-size: 76px;
 }
 @keyframes mh-guide-bob {
   0%,
@@ -805,29 +912,49 @@
   }
 }
 
-/* Reduced motion: no runway, no sticky stage; the drawn tree and the copy together. */
-@media (prefers-reduced-motion: reduce) {
-  .mobile-home .mh-hero.mh-tree-hero {
-    block-size: auto;
-  }
-  .mobile-home .mh-tree-stage {
-    position: relative;
-  }
-  .mobile-home .mh-tree-cue {
-    display: none;
-  }
-  .mobile-home .mh-hero-guide-figure {
-    animation: none;
-  }
-}
+/* No scene (reduced motion, no WebGL2, or it never arrived): no runway. The
+   drawn tree heads a column holding all six captions, every one of them live. */
 .mobile-home .mh-hero.mh-tree-hero[data-tree="static"] {
   block-size: auto;
 }
 .mobile-home .mh-tree-hero[data-tree="static"] .mh-tree-stage {
   position: relative;
+  block-size: auto;
+  min-block-size: 0;
+  padding-block: calc(var(--mh-header-h) + 18px) 120px;
 }
+.mobile-home .mh-tree-hero[data-tree="static"] .mh-tree-still {
+  position: relative;
+  inset: auto;
+  display: block;
+  inline-size: 60%;
+  block-size: auto;
+  margin: 0 auto 24px;
+  opacity: 0.4;
+}
+.mobile-home .mh-tree-hero[data-tree="static"] .mh-hero-scrim,
 .mobile-home .mh-tree-hero[data-tree="static"] .mh-tree-cue {
   display: none;
+}
+.mobile-home .mh-tree-hero[data-tree="static"] .mh-bands {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.mobile-home .mh-tree-hero[data-tree="static"] .mh-band {
+  opacity: 1;
+}
+.mobile-home .mh-tree-hero[data-tree="static"] .mh-band-opening,
+.mobile-home .mh-tree-hero[data-tree="static"] .mh-word {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-home .mh-hero-guide-figure {
+    animation: none;
+  }
 }
 
 /* ---- MotionButton theme ------------------------------------------------

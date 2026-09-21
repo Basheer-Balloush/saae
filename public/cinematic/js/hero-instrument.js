@@ -1100,23 +1100,34 @@ async function createScene(canvas) {
     let camX = openingX + (storyX-openingX)*state.entry;
     let camY = focus.y*state.entry;
     let camZ = storyZoom;
-    if (centred) {
-      /* Portrait: fit the whole tree across the width and keep it centred.
-         The same fit carries through the descent, so the roots arrive at the
-         scale the opening promised. */
-      const fit = Math.max(1, (treeBox.w * 1.16) / (2 * halfFov * camera.aspect * 29.6));
-      camX = focus.x;
-      camZ = storyZoom * fit;
-      /* As the camera reaches the roots, frame them in the lower half so the
-         headline above has open field to sit on. */
-      camY += camZ * halfFov * 0.4 * state.entry;
-    }
     const viewH = Math.max(mapBox.h / .83, (mapBox.w+3.6)/(camera.aspect*.65));
     const mapZ = viewH/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2)));
     const mapX = SUBJECT_X-sign*viewH*camera.aspect*.15;
     camX += (mapX-camX)*state.mapCamera;
     camY *= 1-state.mapCamera;
     camZ += (mapZ-camZ)*state.mapCamera;
+    if (centred) {
+      /* Portrait phones. There is no lane beside the subject for the caption,
+         so the caption takes the top of the screen and every subject -- tree,
+         pictogram, country -- is centred across the width and raised into the
+         space above it. The tree is fitted to the width; a pictogram or the
+         country fills most of it. */
+      /* The subject takes the upper part of the screen and the caption the
+         lower. Negative lowers the camera, which raises the subject; the
+         close-ups and pictograms rise further to clear the taller captions. */
+      const LOWERED = -.2 - .14 * Math.max(state.entry, contentMix);
+      const treeFit = Math.max(1, (treeBox.w * 1.3) / (2 * halfFov * camera.aspect * 29.6));
+      const treeZ = state.zoom * treeFit;
+      const contentZ = 8.0 / (camera.aspect * .84 * 2 * halfFov);
+      const storyZ = (treeZ + (contentZ - treeZ) * contentMix) * push;
+      const mapViewH = Math.max(mapBox.h / .8, (mapBox.w + 3.4) / (camera.aspect * .9));
+      const mapZC = mapViewH / (2 * halfFov);
+      const storyY = focus.y * state.entry + storyZ * halfFov * LOWERED;
+      const mapY = -mapViewH * .5 * .3;
+      camX = focus.x + (SUBJECT_X - focus.x) * state.mapCamera;
+      camY = storyY + (mapY - storyY) * state.mapCamera;
+      camZ = storyZ + (mapZC - storyZ) * state.mapCamera;
+    }
     camera.position.set(camX,camY,camZ);
     camera.lookAt(camX,camY,0);
 
