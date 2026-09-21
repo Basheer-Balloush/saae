@@ -40,6 +40,7 @@ import { HomepageNews } from "./HomepageNews";
 import "./homepage-partners.css";
 import { DESKTOP_HOME_QUERY } from "@/hooks/useHeroCapability";
 import "./mobile-home.css";
+import { MobileHeroGuide, useMobileTreeHero } from "./MobileTreeHero";
 import {
   ACHIEVEMENTS,
   CLOSING_COPY,
@@ -53,7 +54,6 @@ import {
   FOOTER_EXPLORE,
   FOOTER_OFFICIAL,
   FOOTER_RIGHTS,
-  HERO_MEDIA,
   INITIATIVE_COPY,
   MENU_ASSOCIATION,
   MENU_PARTICIPATE,
@@ -240,8 +240,6 @@ export function MobileHomeView({
   const [headerSolid, setHeaderSolid] = useState(false);
   const [activeRail, setActiveRail] = useState<string | null>("initiative");
   const [logosPaused, setLogosPaused] = useState(false);
-  const [heroVideoActive, setHeroVideoActive] = useState(false);
-  const [heroVideoPaused, setHeroVideoPaused] = useState(false);
   const [rootsVideoActive, setRootsVideoActive] = useState(false);
   const [rootsVideoPaused, setRootsVideoPaused] = useState(false);
   const rootsVideoPausedRef = useRef(false);
@@ -254,7 +252,6 @@ export function MobileHomeView({
   const heroLine1 = lang === "ar" ? "ذكاء وريادة" : null;
   const heroLine2 = lang === "ar" ? pick(OPENING_HEADLINE, lang).replace("ذكاء وريادة ", "") : null;
 
-  const heroVideoRef = useRef<HTMLVideoElement | null>(null);
   const heroSectionRef = useRef<HTMLElement | null>(null);
   const heroSentinelRef = useRef<HTMLDivElement | null>(null);
   const rootsVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -279,66 +276,7 @@ export function MobileHomeView({
     return () => io.disconnect();
   }, []);
 
-  const heroVideoPausedRef = useRef(false);
-  useEffect(() => {
-    heroVideoPausedRef.current = heroVideoPaused;
-  }, [heroVideoPaused]);
-
-  // Add loadeddata handler to toggle a class when video is ready
-  useEffect(() => {
-    const v = heroVideoRef.current;
-    if (!v) return;
-    const onLoaded = () => document.querySelector(".mobile-home")?.classList.add("mh-hero-ready");
-    v.addEventListener("loadeddata", onLoaded);
-    return () => v.removeEventListener("loadeddata", onLoaded);
-  }, []);
-
-  /* Hero video: src assigned only on eligible phones, pauses off-screen. */
-  useEffect(() => {
-    const video = heroVideoRef.current;
-    if (!video) return;
-    if (!canAutoplayVideo()) {
-      video.pause();
-      setHeroVideoActive(false);
-      return;
-    }
-    let heroVisible = true;
-    if (canAutoplayVideo()) {
-      if (!video.src) video.src = HERO_MEDIA.videoSrc;
-      setHeroVideoActive(true);
-      if (!heroVideoPausedRef.current) video.play().catch(() => undefined);
-    }
-    if (typeof IntersectionObserver === "undefined") return;
-    const hero = heroSectionRef.current;
-    if (!hero) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        heroVisible = entry.isIntersecting;
-        if (!video.src) return;
-        if (heroVisible && canAutoplayVideo() && !heroVideoPausedRef.current)
-          video.play().catch(() => undefined);
-        else video.pause();
-      },
-      { threshold: 0.15 },
-    );
-    io.observe(hero);
-    return () => {
-      io.disconnect();
-      video.pause();
-    };
-  }, [reducedMotion]);
-
-  const toggleHeroVideo = () => {
-    const video = heroVideoRef.current;
-    if (!video || !video.src) return;
-    if (video.paused) {
-      video.play().catch(() => undefined);
-      setHeroVideoPaused(false);
-    } else {
-      video.pause();
-      setHeroVideoPaused(true);
-    }
-  };
+  const tree = useMobileTreeHero(heroSectionRef);
 
   /* Roots video: src assigned lazily near the band, plays while visible. */
   useEffect(() => {
@@ -440,7 +378,11 @@ export function MobileHomeView({
     >
       <style>{`@media ${DESKTOP_HOME_QUERY}{.mobile-home.mh-gate{visibility:hidden}}`}</style>
       <noscript>
-        <style>{".mobile-home.mh-gate{visibility:visible!important}"}</style>
+        <style>
+          {
+            ".mobile-home.mh-gate{visibility:visible!important}.mh-tree-hero{block-size:auto!important}.mh-tree-hero .mh-hero-copy,.mh-tree-hero .mh-word{opacity:1!important;transform:none!important}.mh-tree-cue{display:none}"
+          }
+        </style>
       </noscript>
       <a className="mh-skip" href="#main-content">
         {pick(MICRO_COPY.skip, lang)}
@@ -587,105 +529,90 @@ export function MobileHomeView({
 
       <main id="main-content">
         <section
-          className="mh-hero"
+          className={`mh-hero mh-tree-hero${tree.revealed ? " mh-is-revealed" : ""}`}
           id="hero-sec"
           aria-labelledby="mh-hero-title"
+          data-hero-layout="centred"
+          data-tree={tree.mode}
           ref={heroSectionRef}
         >
           <div ref={heroSentinelRef} className="mh-hero-sentinel" aria-hidden="true" />
-          <video
-            ref={heroVideoRef}
-            className="mh-hero-video"
-            muted
-            playsInline
-            loop
-            preload="metadata"
-            poster={HERO_MEDIA.videoPoster}
-            aria-hidden="true"
-            disablePictureInPicture
-            tabIndex={-1}
-          />
-          <div className="mh-hero-scrim" aria-hidden="true" />
-          <div className="mh-wrap mh-hero-copy">
-            <p className="mh-eyebrow mh-kinetic mh-k-0">{pick(OPENING.eyebrow, lang)}</p>
-            <h1 className="mh-title" id="mh-hero-title">
-              <span className="mh-sr-only">{pick(OPENING_HEADLINE, lang)}</span>
-              <span aria-hidden="true" className="mh-h1-visual">
-                {heroLine1 ? (
-                  <>
-                    <span className="mh-h1-line">
-                      {words(heroLine1).map((w, i) => (
-                        <span key={i} className="mh-mask">
-                          <span className="mh-word mh-k-1" style={{ "--i": i } as CSSProperties}>
-                            {w}
+          <div className="mh-tree-stage">
+            <canvas className="mh-tree-canvas" id="hero-canvas" aria-hidden="true" />
+            <img
+              className="mh-tree-still"
+              src="/cinematic/images/initiative-tree.svg"
+              alt=""
+              aria-hidden="true"
+              decoding="async"
+            />
+            <div className="mh-hero-scrim" aria-hidden="true" />
+            <div className="mh-wrap mh-hero-copy">
+              <p className="mh-eyebrow mh-kinetic mh-k-0">{pick(OPENING.eyebrow, lang)}</p>
+              <h1 className="mh-title" id="mh-hero-title">
+                <span className="mh-sr-only">{pick(OPENING_HEADLINE, lang)}</span>
+                <span aria-hidden="true" className="mh-h1-visual">
+                  {heroLine1 ? (
+                    <>
+                      <span className="mh-h1-line">
+                        {words(heroLine1).map((w, i) => (
+                          <span key={i} className="mh-mask">
+                            <span className="mh-word mh-k-1" style={{ "--i": i } as CSSProperties}>
+                              {w}
+                            </span>
                           </span>
-                        </span>
-                      ))}
-                    </span>
-                    <br />
-                    <span className="mh-h1-line">
-                      {words(heroLine2 ?? "").map((w, i) => (
-                        <span key={i} className="mh-mask">
-                          <span
-                            className={w === "ينهض" ? "mh-word mh-k-2 mh-grad" : "mh-word mh-k-2"}
-                            style={{ "--i": i + 2 } as CSSProperties}
-                          >
-                            {w}
-                          </span>
-                        </span>
-                      ))}
-                    </span>
-                  </>
-                ) : (
-                  heroTitleWords.map((w, i) => (
-                    <span key={i} className="mh-mask">
-                      <span
-                        className={
-                          w.toLowerCase().startsWith("rise") ? "mh-word mh-grad" : "mh-word"
-                        }
-                        style={{ "--i": i } as CSSProperties}
-                      >
-                        {w}
+                        ))}
                       </span>
-                    </span>
-                  ))
-                )}
-              </span>
-            </h1>
-            <p className="mh-support mh-kinetic mh-k-3">{pick(OPENING.support, lang)}</p>
-            <div className="mh-actions mh-kinetic mh-k-4">
-              <MotionButton
-                label={pick(OPENING.primary.label, lang)}
-                href={OPENING.primary.href}
-                classes="min-w-0 flex-1 justify-center"
-              />
-              <MotionButton
-                variant="secondary"
-                label={pick(OPENING.secondary.label, lang)}
-                href={OPENING.secondary.href}
-                classes="min-w-0 flex-1 justify-center"
-              />
+                      <br />
+                      <span className="mh-h1-line">
+                        {words(heroLine2 ?? "").map((w, i) => (
+                          <span key={i} className="mh-mask">
+                            <span
+                              className={w === "ينهض" ? "mh-word mh-k-2 mh-grad" : "mh-word mh-k-2"}
+                              style={{ "--i": i + 2 } as CSSProperties}
+                            >
+                              {w}
+                            </span>
+                          </span>
+                        ))}
+                      </span>
+                    </>
+                  ) : (
+                    heroTitleWords.map((w, i) => (
+                      <span key={i} className="mh-mask">
+                        <span
+                          className={
+                            w.toLowerCase().startsWith("rise") ? "mh-word mh-grad" : "mh-word"
+                          }
+                          style={{ "--i": i } as CSSProperties}
+                        >
+                          {w}
+                        </span>
+                      </span>
+                    ))
+                  )}
+                </span>
+              </h1>
+              <p className="mh-support mh-kinetic mh-k-3">{pick(OPENING.support, lang)}</p>
+              <div className="mh-actions mh-kinetic mh-k-4">
+                <MotionButton
+                  label={pick(OPENING.primary.label, lang)}
+                  href={OPENING.primary.href}
+                  classes="min-w-0 flex-1 justify-center"
+                />
+                <MotionButton
+                  variant="secondary"
+                  label={pick(OPENING.secondary.label, lang)}
+                  href={OPENING.secondary.href}
+                  classes="min-w-0 flex-1 justify-center"
+                />
+              </div>
             </div>
+            <p className="mh-tree-cue" aria-hidden="true">
+              <span>{lang === "ar" ? "مرّر للأسفل" : "Scroll"}</span>
+            </p>
+            <MobileHeroGuide lang={lang === "ar" ? "ar" : "en"} revealed={tree.revealed} />
           </div>
-          {heroVideoActive ? (
-            <button
-              type="button"
-              className="mh-video-toggle"
-              aria-pressed={!heroVideoPaused}
-              aria-label={
-                heroVideoPaused
-                  ? pick(MICRO_COPY.playVideo, lang)
-                  : pick(MICRO_COPY.pauseVideo, lang)
-              }
-              onClick={toggleHeroVideo}
-            >
-              {heroVideoPaused ? (
-                <Play size={20} aria-hidden="true" />
-              ) : (
-                <Pause size={20} aria-hidden="true" />
-              )}
-            </button>
-          ) : null}
         </section>
 
         <div className="mh-chapters">

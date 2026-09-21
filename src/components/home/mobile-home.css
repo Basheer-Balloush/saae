@@ -566,6 +566,270 @@
   margin-block-end: 18px;
 }
 
+/* ---- Tree hero ----------------------------------------------------------
+   The desktop's pixel tree in its centred phone layout (MobileTreeHero.tsx).
+   The section is a scroll runway; the stage sticks for its length. The tree
+   forms first, the camera travels to the roots, and the copy arrives there:
+   .mh-is-revealed is set from scroll, and unset again on the way back up. */
+/* The route also loads the desktop page's phone sheet (home-mobile.css), whose
+   #hero-sec { display: flex } would pin the stage to the bottom of the runway. */
+.mobile-home #hero-sec.mh-tree-hero {
+  display: block;
+}
+.mobile-home .mh-hero.mh-tree-hero {
+  min-block-size: 0;
+  block-size: 200svh;
+  overflow: visible;
+  background: var(--mh-canvas);
+}
+
+.mobile-home .mh-tree-stage {
+  position: sticky;
+  inset-block-start: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  block-size: 100svh;
+  min-block-size: 560px;
+  overflow: clip;
+  isolation: isolate;
+}
+
+.mobile-home .mh-tree-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  inline-size: 100%;
+  block-size: 100%;
+  display: block;
+}
+
+/* The drawn tree holds the stage while the scene loads, and is the hero when
+   it cannot run (reduced motion, no WebGL2). */
+.mobile-home .mh-tree-still {
+  position: absolute;
+  inset-inline: 12%;
+  inset-block: 18% 14%;
+  z-index: -2;
+  inline-size: 76%;
+  block-size: 68%;
+  object-fit: contain;
+  opacity: 0.22;
+  transition: opacity 900ms var(--mh-ease);
+}
+.mobile-home .mh-tree-hero[data-tree="live"] .mh-tree-still {
+  opacity: 0;
+}
+.mobile-home .mh-tree-hero[data-tree="static"] .mh-tree-still {
+  opacity: 0.32;
+}
+
+/* Darkens only behind the copy, and only once the copy is there. */
+.mobile-home .mh-tree-hero .mh-hero-scrim {
+  z-index: -1;
+  opacity: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(6, 35, 42, 0.9) 0%,
+    rgba(6, 35, 42, 0.6) 34%,
+    transparent 56%
+  );
+  transition: opacity 700ms var(--mh-ease);
+}
+.mobile-home .mh-tree-hero.mh-is-revealed .mh-hero-scrim {
+  opacity: 1;
+}
+
+.mobile-home .mh-tree-hero .mh-hero-copy {
+  padding-block-start: calc(var(--mh-header-h) + 20px);
+  padding-block-end: 0;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition:
+    opacity 500ms var(--mh-ease),
+    transform 800ms var(--mh-ease);
+}
+.mobile-home .mh-tree-hero.mh-is-revealed .mh-hero-copy {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.mobile-home .mh-tree-hero .mh-title {
+  font-size: clamp(2.2rem, 11.5vw, 3.4rem);
+  line-height: 1.4;
+}
+.mobile-home .mh-tree-hero .mh-title:lang(en) {
+  font-size: clamp(2rem, 9vw, 2.75rem);
+  line-height: 1.15;
+}
+
+/* The word and fade animations wait for the reveal instead of playing on load. */
+.mobile-home .mh-tree-hero .mh-word,
+.mobile-home .mh-tree-hero .mh-kinetic {
+  animation-name: none;
+}
+.mobile-home .mh-tree-hero:not(.mh-is-revealed) .mh-word {
+  transform: translateY(110%);
+}
+.mobile-home .mh-tree-hero.mh-is-revealed .mh-word {
+  animation-name: mh-rise;
+}
+.mobile-home .mh-tree-hero.mh-is-revealed .mh-kinetic {
+  animation-name: mh-fade-up;
+}
+
+/* Two stacked full-width actions: side by side, the labels broke over three lines. */
+.mobile-home .mh-tree-hero .mh-actions {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  max-inline-size: 22rem;
+}
+.mobile-home .mh-tree-hero .mh-actions > * {
+  inline-size: 100%;
+}
+.mobile-home .mh-tree-hero .mh-actions [data-slot="motion-button-label"] {
+  white-space: nowrap;
+}
+
+@media (max-height: 740px) {
+  .mobile-home .mh-tree-hero .mh-support {
+    display: none;
+  }
+}
+
+.mobile-home .mh-tree-cue {
+  position: absolute;
+  inset-block-end: calc(26px + env(safe-area-inset-bottom, 0px));
+  inset-inline: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--mh-ink-muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  opacity: calc(1 - var(--mh-tree-t, 0) * 8);
+  pointer-events: none;
+}
+.mobile-home .mh-tree-cue::after {
+  content: "";
+  inline-size: 1px;
+  block-size: 34px;
+  background: linear-gradient(to bottom, var(--mh-turquoise-lift), transparent);
+  animation: mh-cue 1.8s var(--mh-ease) infinite;
+  transform-origin: top;
+}
+@keyframes mh-cue {
+  0% {
+    transform: scaleY(0);
+    opacity: 1;
+  }
+  70% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+/* Abu Al-Joud: bottom inline-end corner, clear of the chat button on the other side. */
+.mobile-home .mh-hero-guide {
+  position: absolute;
+  inset-block-end: calc(14px + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  max-inline-size: min(78vw, 300px);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(24px);
+  pointer-events: none;
+  transition:
+    opacity 600ms var(--mh-ease),
+    transform 700ms var(--mh-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-home .mh-hero-guide.mh-is-shown {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.mobile-home .mh-hero-guide-bubble {
+  position: relative;
+  margin-block-end: 84px;
+  padding: 10px 14px;
+  border: 1px solid rgba(184, 232, 240, 0.28);
+  border-radius: 16px;
+  border-end-end-radius: 4px;
+  background: color-mix(in srgb, var(--mh-panel) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--mh-type);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  box-shadow: 0 10px 30px rgba(3, 16, 19, 0.45);
+  animation: mh-fade-up 520ms var(--mh-ease) both;
+}
+
+.mobile-home .mh-hero-guide-figure {
+  flex: none;
+  inline-size: 84px;
+  block-size: auto;
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45));
+  animation: mh-guide-bob 3.6s ease-in-out infinite;
+}
+.mobile-home .mh-hero-guide[data-stage="headline"] .mh-hero-guide-figure {
+  inline-size: 76px;
+}
+@keyframes mh-guide-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Reduced motion: no runway, no sticky stage; the drawn tree and the copy together. */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-home .mh-hero.mh-tree-hero {
+    block-size: auto;
+  }
+  .mobile-home .mh-tree-stage {
+    position: relative;
+  }
+  .mobile-home .mh-tree-cue {
+    display: none;
+  }
+  .mobile-home .mh-hero-guide-figure {
+    animation: none;
+  }
+}
+.mobile-home .mh-hero.mh-tree-hero[data-tree="static"] {
+  block-size: auto;
+}
+.mobile-home .mh-tree-hero[data-tree="static"] .mh-tree-stage {
+  position: relative;
+}
+.mobile-home .mh-tree-hero[data-tree="static"] .mh-tree-cue {
+  display: none;
+}
+
 /* ---- MotionButton theme ------------------------------------------------
    SAAE palette for the phone surfaces (all dark): paper pill with an ink
    label, turquoise fill, paper on the fill. Secondary rests quiet with a

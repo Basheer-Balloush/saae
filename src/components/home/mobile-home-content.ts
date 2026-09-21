@@ -638,11 +638,6 @@ export const CLOSING_COPY = {
   videoPoster: "/cinematic/mobile/roots-tree-poster.webp",
 };
 
-export const HERO_MEDIA = {
-  videoSrc: "/cinematic/mobile/hero-tree-loop.mp4",
-  videoPoster: "/cinematic/mobile/hero-tree-poster.webp",
-};
-
 export const MICRO_COPY = {
   skip: { ar: "انتقل إلى المحتوى الرئيسي", en: "Skip to main content" } satisfies LocalText,
   menu: { ar: "القائمة", en: "Menu" } satisfies LocalText,
