@@ -412,7 +412,7 @@
     padding: 0;
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: clamp(16px, 2vw, 24px);
     align-items: start;
   }
@@ -443,7 +443,7 @@
     pointer-events: none;
     transition: opacity 520ms var(--ease-out);
   }
-  .community > * { position: relative; }
+  .community > * { position: relative; min-inline-size: 0; }
   .community:hover, .community:focus-visible, .community:focus-within {
     transform: translate3d(0, calc(var(--card-offset, 0px) - 6px), 0);
     border-color: rgba(184, 232, 240, .42);
@@ -474,12 +474,18 @@
   .community h3 { font-size: clamp(1.06rem, 1.5vw, 1.24rem); letter-spacing: -.02em; }
   .community-line { color: var(--type); font-size: .92rem; line-height: 1.6; }
   .community-focus {
+    display: block;
+    inline-size: 100%;
     margin-top: 4px;
     padding-top: 14px;
     border-top: 1px solid var(--line);
     color: var(--ink-muted);
     font-size: .8rem;
     line-height: 1.6;
+    text-align: start;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
   }
   .community-focus span {
     display: block;
@@ -677,6 +683,13 @@
   html[dir="rtl"] .pillar-word { letter-spacing: 0; line-height: 1.45; font-size: clamp(2rem, 4.2vw, 3.4rem); }
   html[dir="rtl"] .eyebrow, html[dir="rtl"] .facts dt, html[dir="rtl"] .community-focus span,
   html[dir="rtl"] .footer-col-title { letter-spacing: 0; word-spacing: .12em; }
+  html[dir="rtl"] .community h3,
+  html[dir="rtl"] .community-line,
+  html[dir="rtl"] .community-focus {
+    direction: rtl;
+    unicode-bidi: isolate;
+    text-align: right;
+  }
   html[dir="rtl"] .markstage { justify-content: flex-start; }
   /* The wordmark is the page H1 now: Arabic keeps the display size but takes
      open metrics -- joined script plus clip:text means tight Latin leading
