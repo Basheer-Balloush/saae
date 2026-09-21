@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type RefObject,
-} from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import {
   Building2,
   ChevronLeft,
@@ -343,9 +336,10 @@ const COMMUNITY_ICONS = [
   Megaphone,
 ] as const;
 
-function words(text: string): string[] {
-  return text.split(" ").filter((w) => w.length > 0);
-}
+const OPENING_LINES = {
+  ar: ["ذكاء", "وريادة", "لوطن", "ينهض"],
+  en: ["Intelligence", "and entrepreneurship", "for a nation", "on the rise."],
+} as const;
 
 /** Abu Al-Joud: a line for each beat, shown for a few seconds as the beat arrives. */
 function HeroGuide({ lang, band }: { lang: Lang; band: number }) {
@@ -501,7 +495,6 @@ export function MobileTreeHero({
   });
 
   const headline = pick(OPENING_HEADLINE);
-  const lines = lang === "ar" ? ["ذكاء وريادة", headline.replace("ذكاء وريادة ", "")] : [headline];
 
   return (
     <section
@@ -530,23 +523,12 @@ export function MobileTreeHero({
               <p className="mh-eyebrow">{pick(OPENING.eyebrow)}</p>
               <h1 className="mh-title" id="mh-hero-title">
                 <span className="mh-sr-only">{headline}</span>
-                <span aria-hidden="true" className="mh-h1-visual">
-                  {lines.map((line, li) => (
-                    <span key={li} className="mh-h1-line">
-                      {words(line).map((w, i) => (
-                        <span key={i} className="mh-mask">
-                          <span
-                            className={
-                              w === "ينهض" || w.toLowerCase().startsWith("rise")
-                                ? "mh-word mh-grad"
-                                : "mh-word"
-                            }
-                            style={{ "--i": li * 2 + i } as CSSProperties}
-                          >
-                            {w}
-                          </span>
-                        </span>
-                      ))}
+                {/* The desktop opening's four lines (home.css .hero-opening-line):
+                    ink ramp, photo fill, white, photo fill. */}
+                <span aria-hidden="true" className="mh-open-title">
+                  {OPENING_LINES[lang].map((line) => (
+                    <span key={line} className="mh-open-line">
+                      {line}
                     </span>
                   ))}
                 </span>
