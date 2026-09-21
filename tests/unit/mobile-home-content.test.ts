@@ -284,7 +284,6 @@ describe("mobile homepage rendered output", () => {
     const nonNewsAssets = new Set([
       "/cinematic/images/initiative-tree.svg",
       "/cinematic/images/abu-al-joud-comic-welcome.webp",
-      "/cinematic/mobile/initiative-syria.svg",
       "/cinematic/mobile/saae-wordmark-ar-light.webp",
       "/cinematic/mobile/saae-wordmark-en-light.webp",
       "/cinematic/images/saae-map.png",
