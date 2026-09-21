@@ -44,6 +44,62 @@ export const getConversationMessages = createServerFn({ method: "POST" })
     return { messages: rows ?? [] };
   });
 
+/* chat_visitor_profiles is newer than the generated Database types, so it is read
+   through the untyped client with the row shape stated here. */
+export type VisitorProfile = {
+  id: string;
+  created_at: string;
+  lang: string | null;
+  who: string | null;
+  field: string | null;
+  ai_level: string | null;
+  intent: string | null;
+  can_offer: string | null;
+  weekly_hours: string | null;
+  blocker: string | null;
+  summary: string;
+  goal: string | null;
+  next_step: string | null;
+  remember_note: string | null;
+  recommendation: "course" | "contact" | "lead";
+  recommended_course_title: string | null;
+  recommended_course_url: string | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  conversation_id: string | null;
+};
+
+export const listVisitorProfiles = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data, error } = await (context.supabase as unknown as SupabaseClient)
+      .from("chat_visitor_profiles")
+      .select(
+        "id, created_at, lang, who, field, ai_level, intent, can_offer, weekly_hours, blocker, summary, goal, next_step, remember_note, recommendation, recommended_course_title, recommended_course_url, contact_name, contact_email, contact_phone, conversation_id",
+      )
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return { profiles: (data ?? []) as VisitorProfile[] };
+  });
+
+export const deleteVisitorProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { profileId: string }) =>
+    z.object({ profileId: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { error } = await (context.supabase as unknown as SupabaseClient)
+      .from("chat_visitor_profiles")
+      .delete()
+      .eq("id", data.profileId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const deleteConversation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { conversationId: string }) =>

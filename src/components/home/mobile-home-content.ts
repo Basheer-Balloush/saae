@@ -113,8 +113,14 @@ export const OPENING = {
   },
 };
 
-/** All nine communities, in the association's own order. */
+/** All eight homepage communities, software first. */
 export const COMMUNITIES: CommunityEntry[] = [
+  {
+    key: "software",
+    name: { ar: "مجتمع البرمجيات", en: "Software Community" },
+    tagline: { ar: "بناء أنظمة رقمية نافعة.", en: "Build useful digital systems." },
+    href: "/communities/software",
+  },
   {
     key: "data",
     name: { ar: "مجتمع البيانات", en: "Data Community" },
@@ -143,12 +149,6 @@ export const COMMUNITIES: CommunityEntry[] = [
     href: "/communities/research",
   },
   {
-    key: "software",
-    name: { ar: "مجتمع البرمجيات", en: "Software Community" },
-    tagline: { ar: "بناء أنظمة رقمية نافعة.", en: "Build useful digital systems." },
-    href: "/communities/software",
-  },
-  {
     key: "economy",
     name: { ar: "مجتمع الاقتصاد الذكي", en: "Smart Economy Community" },
     tagline: { ar: "تحويل الابتكار إلى فرصة.", en: "Turn innovation into opportunity." },
@@ -165,12 +165,6 @@ export const COMMUNITIES: CommunityEntry[] = [
     name: { ar: "المجتمع الإعلامي", en: "Media Community" },
     tagline: { ar: "جعل المعرفة واضحة ومتاحة.", en: "Make knowledge clear and accessible." },
     href: "/communities/media",
-  },
-  {
-    key: "quality",
-    name: { ar: "مجتمع الجودة الريادي", en: "Quality Entrepreneurship Community" },
-    tagline: { ar: "رفع معيار المشاريع الناشئة.", en: "Raise the standard for new ventures." },
-    href: "/communities/quality",
   },
 ];
 
@@ -202,48 +196,58 @@ export const MISSION_STEPS: MissionStep[] = [
   },
 ];
 
-/** FAQ — existing answers, reviewed copy only. */
+/** Homepage FAQs reflect the site's learning, community and contact flows. */
 export const FAQS: FaqEntry[] = [
   {
-    question: { ar: "لمن تناسب الجمعية؟", en: "Who is SAAE for?" },
+    question: { ar: "كيف أسجّل في إحدى دورات الجمعية؟", en: "How do I register for a course?" },
     answer: {
-      ar: "للطلاب والمعلّمين والمهنيين ورواد الأعمال والمؤسسات الراغبة بتجربة عملية مع الذكاء الاصطناعي، لا للعاملين في التقنية فقط.",
-      en: "Students, educators, professionals, founders and institutions that want practical contact with AI — not only people who already work in technology.",
+      ar: "تصفّح الدورات، وافتح الدورة المناسبة للاطلاع على تفاصيلها وحالة التسجيل. عند فتح التسجيل، اتبع الخطوات الموضّحة في صفحتها. ابدأ من",
+      en: "Browse the courses and open one to check its details and enrollment status. When enrollment is open, follow the steps on its page. Start with the",
     },
-  },
-  {
-    question: { ar: "هل أحتاج إلى خبرة تقنية؟", en: "Do I need technical experience?" },
-    answer: {
-      ar: "لا. تتضمن برامج الجمعية العامة نقاط بداية للمبتدئين في الذكاء الاصطناعي، وتوضح كل دورة متطلباتها الخاصة.",
-      en: "No. SAAE's public programmes include starting points for people who are new to AI. Individual courses set their own requirements, which are listed with each course.",
-    },
-  },
-  {
-    question: { ar: "كيف أشارك؟", en: "How do I take part?" },
-    answer: {
-      ar: "ستُنشر مواعيد البرامج والتسجيل على هذا الموقع. وحتى ذلك الحين، استخدم نموذج التواصل للاستفسار عن الدفعة الحالية ومحتوى كل مسار.",
-      en: "Programme dates and registration will be published on this website. Until then, use the contact form to ask about the current intake and what each track involves.",
+    answerLink: {
+      href: "/learning-management-system/catalog",
+      text: { ar: "كتالوج الدورات", en: "course catalog" },
     },
   },
   {
     question: {
-      ar: "هل يمكن لمؤسسة أن تعمل مع الجمعية؟",
-      en: "Can an organisation work with SAAE?",
+      ar: "هل أحتاج إلى خبرة سابقة في الذكاء الاصطناعي؟",
+      en: "Do I need previous AI experience?",
     },
     answer: {
-      ar: "نعم. تتشارك الجامعات والوزارات والشركات ومنظمات المجتمع في التدريب والعمل التطبيقي. تُرسل استفسارات الشراكة إلى",
-      en: "Yes. Universities, ministries, companies and community organisations already partner on training and applied work. Partnership questions go to",
-    },
-    answerLink: {
-      href: "mailto:info@aisyria.org",
-      text: { ar: "info@aisyria.org", en: "info@aisyria.org" },
+      ar: "يعتمد ذلك على مستوى الدورة. يمكنك تصفية الدورات حسب المستوى، ثم مراجعة وصف الدورة ومتطلباتها قبل التسجيل. إذا لم تكن متأكّدًا من المسار المناسب، تواصل معنا.",
+      en: "It depends on the course level. Filter the catalog by level, then review the course description and requirements before registering. Contact us if you need help choosing a suitable path.",
     },
   },
   {
-    question: { ar: "أين ستُنشر التحديثات؟", en: "Where will updates be published?" },
+    question: { ar: "هل جميع الدورات مجانية؟", en: "Are all courses free?" },
     answer: {
-      ar: "سيصبح هذا الموقع المعاد تصميمه الواجهة العامة الرسمية للجمعية. وستُنشر البرامج والتسجيلات والإعلانات هنا مع إطلاق كل قسم.",
-      en: "This redesigned website is becoming SAAE's official public home. Programmes, registration and announcements will be published here as each section launches.",
+      ar: "تختلف الرسوم من دورة إلى أخرى. تحقّق من السعر وحالة الدورة في صفحتها. للدورات المدفوعة، اتبع خطوات طلب التسجيل؛ وبعد القبول يتم التواصل معك لترتيب الدفع.",
+      en: "Fees vary by course. Check the price and availability on the course page. For paid courses, follow the enrollment request steps; after acceptance, the team contacts you to arrange payment.",
+    },
+  },
+  {
+    question: {
+      ar: "كيف أنضم إلى أحد مجتمعات الجمعية؟",
+      en: "How can I join a SAAE community?",
+    },
+    answer: {
+      ar: "اختر المجتمع الأقرب إلى اهتمامك من قسم المجتمعات، وافتح صفحته للتعرّف إلى نشاطاته. اضغط «انضم إلى المجتمع» لبدء الاستفسار عن التسجيل والمشاركة مع مساعد الجمعية.",
+      en: "Choose a community that matches your interests and open its page to explore its activities. Select Join Community to ask the association's assistant about signing up and participating.",
+    },
+  },
+  {
+    question: {
+      ar: "كيف أتواصل بشأن تدريب أو شراكة؟",
+      en: "How do I ask about training or a partnership?",
+    },
+    answer: {
+      ar: "أرسل رسالة عبر نموذج التواصل، واختر نوع الاستفسار: تدريب أو شراكة. اذكر احتياجك واسم المؤسسة إن وُجد، مع بيانات تواصل صحيحة. يمكنك البدء من",
+      en: "Use the contact form and select Training or Partnership as the inquiry type. Describe what you need, include your organization if applicable, and provide accurate contact details. Open the",
+    },
+    answerLink: {
+      href: "/contact#write",
+      text: { ar: "نموذج التواصل", en: "contact form" },
     },
   },
 ];
@@ -512,8 +516,8 @@ export const WAYS: WayEntry[] = [
   {
     title: { ar: "المجتمعات", en: "Communities" },
     body: {
-      ar: "تسعة مجتمعات. جذور تجمعنا.",
-      en: "Nine communities. One shared foundation.",
+      ar: "مجتمعات متخصصة. جذور تجمعنا.",
+      en: "Specialized communities. One shared foundation.",
     },
     cta: { ar: "استكشف المجتمعات", en: "Explore communities" },
     href: "#communities",
@@ -557,13 +561,14 @@ export const INITIATIVE_COPY = {
 export const COMMUNITIES_COPY = {
   eyebrow: { ar: "مجتمعات الجمعية", en: "SAAE communities" } satisfies LocalText,
   title: {
-    ar: "تسعة مجتمعات جذور تجمعنا",
-    en: "Nine communities One shared foundation",
+    ar: "مجتمعات متخصصة، وجذور تجمعنا",
+    en: "Specialized communities, one shared foundation",
   } satisfies LocalText,
   body: {
     ar: "لكل مجتمع أسئلته وممارسوه. والمنهج المشترك يجعل الأجوبة تنتقل بينها.",
     en: "Each community brings its own questions and its own practitioners. Shared methods let the answers travel between them.",
   } satisfies LocalText,
+  cta: { ar: "استكشف المجتمعات", en: "Explore communities" } satisfies LocalText,
 };
 
 export const NEWS_COPY = {
@@ -606,8 +611,7 @@ export const PARTNERS_COPY = {
 };
 
 export const FAQ_COPY = {
-  eyebrow: { ar: "إجابات عملية", en: "Practical answers" } satisfies LocalText,
-  title: { ar: "طريق واضح للبداية.", en: "A clear way in." } satisfies LocalText,
+  title: { ar: "أسئلة شائعة", en: "FAQ'S" } satisfies LocalText,
   body: {
     ar: "الأسئلة التي يطرحها الناس فعلاً قبل البداية.",
     en: "The questions people actually ask before they start.",
@@ -625,8 +629,8 @@ export const CLOSING_COPY = {
     en: "Growing together across Syria",
   } satisfies LocalText,
   body: {
-    ar: "من مجتمعاتنا التسعة تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
-    en: "From our nine communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.",
+    ar: "من مجتمعاتنا تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
+    en: "From our communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.",
   } satisfies LocalText,
   primary: { ar: "ابدأ التعلّم", en: "Start learning" } satisfies LocalText,
   secondary: { ar: "سجّل الآن", en: "Register now" } satisfies LocalText,

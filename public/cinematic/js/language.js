@@ -2,13 +2,14 @@
   "use strict";
 
   const arabic = {
-    "Nine communities One shared foundation": "تسعة مجتمعات جذور تجمعنا",
+    "Specialized communities, one shared foundation": "مجتمعات متخصصة، وجذور تجمعنا",
     "Learning, grown from our communities": "تعلّم ينمو من مجتمعاتنا",
     "Across Syria": "إلى كل سورية",
     "Growing together across Syria": "ننمو معاً في كل سورية",
-    "From our nine communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.": "من مجتمعاتنا التسعة تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
-    "Nine SAAE communities grow through the root system": "تسعة مجتمعات للجمعية تنمو من جذور الشجرة",
-    "Nine communities form the roots of the SAAE tree. Follow the trunk and branches to its fruits: learning, achievements, and the Million Syrian AI Users initiative, reaching across Syria.": "تسعة مجتمعات تشكّل جذور شجرة الجمعية. نتبع الجذع والأغصان إلى ثمارها: التعلّم والإنجازات ومبادرة مليون مستخدم سوري للذكاء الاصطناعي، وصولاً إلى أنحاء سورية.",
+    "From our communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.": "من مجتمعاتنا تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
+    "SAAE communities grow through the root system": "مجتمعات الجمعية تنمو من جذور الشجرة",
+    "Our communities form the roots of the SAAE tree. Follow the trunk and branches to its fruits: learning, achievements, and the Million Syrian AI Users initiative, reaching across Syria.": "مجتمعاتنا تشكّل جذور شجرة الجمعية. نتبع الجذع والأغصان إلى ثمارها: التعلّم والإنجازات ومبادرة مليون مستخدم سوري للذكاء الاصطناعي، وصولاً إلى أنحاء سورية.",
+    "Explore communities": "استكشف المجتمعات",
 
     "Skip to main content": "انتقل إلى المحتوى الرئيسي",
     "Syrian Association for AI & Entrepreneurship": "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",
@@ -107,6 +108,7 @@
     "Entrepreneurship and institutional partnership carry proven work into companies, services and public capacity that outlast the programme that started them.": "تنقل ريادة الأعمال والشراكات المؤسسية العمل المثبت إلى شركات وخدمات وقدرات عامة تستمر بعد انتهاء البرنامج.",
     "Practical answers": "إجابات عملية",
     "A clear way in.": "طريق واضح للبداية.",
+    "Frequently Asked Questions": "أسئلة شائعة",
     "The questions people actually ask before they start.": "الأسئلة التي يطرحها الناس فعلاً قبل البداية.",
     "Who is SAAE for?": "لمن تناسب الجمعية؟",
     "Students, educators, professionals, founders and institutions that want practical contact with AI — not only people who already work in technology.": "للطلاب والمعلّمين والمهنيين ورواد الأعمال والمؤسسات الراغبة بتجربة عملية مع الذكاء الاصطناعي، لا للعاملين في التقنية فقط.",
@@ -385,6 +387,14 @@
     return nodes;
   };
 
+  const normalizeText = (value) => value.replace(/\s+/g, " ").trim();
+
+  const replaceTranslatedText = (source, translated) => {
+    const leading = source.match(/^\s*/)?.[0] || "";
+    const trailing = source.match(/\s*$/)?.[0] || "";
+    return `${leading}${translated}${trailing}`;
+  };
+
   const translateText = (lang) => {
     /* Most pages are authored in English and gain Arabic through `arabic`.
        The news articles are authored in Arabic (data-i18n-source="ar") and
@@ -394,11 +404,10 @@
     getTextNodes().forEach(node => {
       if (node.__saaeLanguageSource == null) node.__saaeLanguageSource = node.nodeValue;
       const source = node.__saaeLanguageSource;
-      const key = source.trim();
-      if (!arSource && lang === "ar" && arabic[key]) {
-        node.nodeValue = source.replace(key, arabic[key]);
-      } else if (arSource && lang === "en" && english[key]) {
-        node.nodeValue = source.replace(key, english[key]);
+      const key = normalizeText(source);
+      const dictionary = !arSource && lang === "ar" ? arabic : arSource && lang === "en" ? english : null;
+      if (dictionary && dictionary[key]) {
+        node.nodeValue = replaceTranslatedText(source, dictionary[key]);
       } else {
         node.nodeValue = source;
       }
@@ -501,8 +510,8 @@
   };
 
   document.addEventListener("DOMContentLoaded", () => {
-    let initial = "en";
-    try { initial = localStorage.getItem("saae-lang") || "en"; } catch (_) { /* Storage is optional. */ }
+    let initial = "ar";
+    try { initial = localStorage.getItem("saae-lang") || "ar"; } catch (_) { /* Storage is optional. */ }
     setLanguage(initial, false);
     document.getElementById("language-switch")?.addEventListener("click", () => {
       setLanguage(document.documentElement.lang === "ar" ? "en" : "ar", true);

@@ -808,6 +808,33 @@
   font-weight: 800;
 }
 
+.mobile-home:lang(en) .mh-ways .mh-way-card:first-child {
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  padding: 16px;
+}
+
+.mobile-home:lang(en) .mh-ways .mh-way-card:first-child .mh-way-icon {
+  inline-size: 42px;
+  block-size: 42px;
+  border-radius: 12px;
+}
+
+.mobile-home:lang(en) .mh-ways .mh-way-card:first-child .mh-way-title {
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.mobile-home:lang(en) .mh-ways .mh-way-card:first-child .mh-way-text {
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.mobile-home:lang(en) .mh-ways .mh-way-card:first-child .mh-way-cta {
+  min-block-size: 38px;
+  font-size: 0.9rem;
+}
+
 /* ---- Initiative feature ---- */
 .mobile-home .mh-initiative {
   position: relative;
@@ -860,6 +887,12 @@
   max-inline-size: 650px;
 }
 
+.mobile-home:lang(en) #mh-initiative-title {
+  max-inline-size: 11ch;
+  font-size: clamp(2rem, 8.5vw, 3.6rem);
+  line-height: 1.12;
+}
+
 .mobile-home .mh-feature-actions {
   display: grid;
   gap: 10px;
@@ -875,6 +908,11 @@
   }
 }
 
+/* A lone action (the communities link) takes the whole row, not half of it. */
+.mobile-home .mh-feature-actions > :only-child {
+  grid-column: 1 / -1;
+}
+
 /* ---- Communities trunk ---- */
 .mobile-home .mh-trunk {
   position: relative;
@@ -885,6 +923,11 @@
   padding-inline: 0;
   display: grid;
   gap: 8px;
+}
+
+.mobile-home:lang(en) #communities .mh-trunk {
+  inline-size: calc(100% - 16px);
+  transform: translateX(16px);
 }
 
 .mobile-home .mh-trunk::before {
@@ -1307,6 +1350,18 @@
   padding: 0;
   display: grid;
   gap: 10px;
+}
+
+.mobile-home:lang(en) .mh-faq-scroll-heading {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.mobile-home:lang(en) #mh-faq-title {
+  inline-size: min-content;
+  margin-inline: auto;
+  text-align: center;
 }
 
 .mobile-home .mh-faq-item {

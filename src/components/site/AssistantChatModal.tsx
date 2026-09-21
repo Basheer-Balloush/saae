@@ -1,11 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bot, Send, X, Loader2 } from "lucide-react";
+import {
+  ArrowUp,
+  Bot,
+  Building2,
+  GraduationCap,
+  Handshake,
+  Loader2,
+  MessageSquarePlus,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { loadChatSession, saveChatSession, type ChatSession } from "@/lib/chat-session";
+import { parseChoices } from "@/lib/chat-choices";
+import { formatMessage } from "@/lib/chat-format";
 import { useLang } from "@/lib/i18n";
 import { AssistantFeedbackForm } from "@/components/site/AssistantFeedbackForm";
+import "./assistant-chat-modal.css";
 
 const SSR_SESSION: ChatSession = { id: "ssr", lastActivity: 0, messages: [] };
 
@@ -28,6 +41,8 @@ export function AssistantChatModal({
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const feedbackRef = useRef<HTMLDivElement | null>(null);
 
   // The conversation the visitor is in. It ends after CHAT_IDLE_MS without a
   // message, so each visit is its own conversation for the admin and for the model.
@@ -65,8 +80,21 @@ export function AssistantChatModal({
   }, [messages, sessionId]);
 
   const isLoading = status === "submitted" || status === "streaming";
+  const suggestions = [
+    {
+      icon: GraduationCap,
+      text: isRtl ? "أنا مهتم ببرامج التدريب" : "I'm interested in training programs",
+    },
+    {
+      icon: Handshake,
+      text: isRtl ? "أبحث عن فرصة شراكة" : "I'm looking for a partnership opportunity",
+    },
+    {
+      icon: Building2,
+      text: isRtl ? "أخبرني عن الجمعية" : "Tell me about the association",
+    },
+  ];
 
-  // Lock body scroll while open
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -76,7 +104,6 @@ export function AssistantChatModal({
     };
   }, [open]);
 
-  // Focus textarea on open + after streaming finishes
   useEffect(() => {
     if (open && status !== "streaming") {
       const id = setTimeout(() => inputRef.current?.focus(), 80);
@@ -84,12 +111,48 @@ export function AssistantChatModal({
     }
   }, [open, status]);
 
-  // Auto-scroll
+  // Keep the newest message in view, including when the window opens on a
+  // restored conversation (the thread is not mounted before that).
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, status]);
+    if (!open) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const id = requestAnimationFrame(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: messages.length > 2 ? "auto" : "smooth" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [messages, status, open]);
 
-  // Esc closes
+  useEffect(() => {
+    if (!feedbackOpen) return;
+    const panel = feedbackRef.current;
+    const el = scrollRef.current;
+    if (!panel || !el) return;
+    const id = requestAnimationFrame(() => {
+      el.scrollTo({ top: Math.max(panel.offsetTop - 16, 0), behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [feedbackOpen]);
+
+  // The cinematic pages capture wheel events for their own scroll journeys, which
+  // left this thread unscrollable. Inside the chat, the chat owns the wheel.
+  useEffect(() => {
+    if (!open) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const onWheel = (event: WheelEvent) => {
+      const step = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? el.clientHeight : 1;
+      const before = el.scrollTop;
+      el.scrollTop = before + event.deltaY * step;
+      if (el.scrollTop !== before) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -99,7 +162,6 @@ export function AssistantChatModal({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // Auto-send prefill when opened with one
   useEffect(() => {
     if (open && prefill) {
       sendMessage({ text: prefill });
@@ -124,142 +186,213 @@ export function AssistantChatModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          transition={{ duration: 0.22 }}
+          className="assistant-chat-overlay"
           onClick={onClose}
           dir={dir}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 20 }}
+          <motion.section
+            initial={{ opacity: 0, scale: 0.975, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 20 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="relative flex h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
+            exit={{ opacity: 0, scale: 0.98, y: 18 }}
+            transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+            className="assistant-chat-shell"
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="assistant-chat-title"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-border bg-card/95 px-6 py-4 backdrop-blur">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  <Bot className="h-5 w-5" />
+            <header className="assistant-chat-header">
+              <div className="assistant-chat-brand">
+                <span className="assistant-chat-avatar" aria-hidden="true">
+                  <img src="/cinematic/images/abu-al-joud-3d.webp" alt="" />
                 </span>
-                <div className="leading-tight">
-                  <p className="text-sm font-semibold text-foreground">{a.chat.name}</p>
-                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                    {a.chat.status}
+                <div>
+                  <div className="assistant-chat-kicker">
+                    <Sparkles aria-hidden="true" />
+                    <span>{isRtl ? "مساعد الجمعية الذكي" : "SAAE intelligent guide"}</span>
+                  </div>
+                  <p id="assistant-chat-title" className="assistant-chat-name">
+                    {a.chat.name}
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={onClose}
-                className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
 
-            {/* Messages */}
-            <div className="chat-scroll flex-1 overflow-y-auto px-6 py-6">
-              {messages.length === 0 && (
-                <div className="flex h-full flex-col items-center justify-center text-center">
-                  <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <Bot className="h-7 w-7" />
-                  </span>
-                  <h3 className="mt-4 text-base font-semibold text-foreground">{a.title}</h3>
-                  <p className="mt-2 max-w-sm text-sm text-muted-foreground">{a.subtitle}</p>
-                  <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-                    {[
-                      isRtl ? "أنا فرد مهتم بالتدريب" : "I'm an individual interested in training",
-                      isRtl
-                        ? "أمثّل شركة وأبحث عن شراكة"
-                        : "I represent a company looking to partner",
-                      isRtl ? "أخبرني عن الجمعية" : "Tell me about the association",
-                    ].map((q) => (
-                      <button
-                        key={q}
-                        type="button"
-                        onClick={() => sendMessage({ text: q })}
-                        className="rounded-full border border-border bg-background px-4 py-2 text-xs font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
-                      >
-                        {q}
-                      </button>
-                    ))}
+              <div className="assistant-chat-tools">
+                <span className="assistant-chat-status">
+                  <span aria-hidden="true" />
+                  {a.chat.status}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setFeedbackOpen((value) => !value)}
+                  className="assistant-chat-icon-button"
+                  aria-label={isRtl ? "إرسال ملاحظة" : "Send feedback"}
+                  title={isRtl ? "إرسال ملاحظة" : "Send feedback"}
+                >
+                  <MessageSquarePlus aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="assistant-chat-icon-button"
+                  aria-label={isRtl ? "إغلاق المحادثة" : "Close chat"}
+                  title={isRtl ? "إغلاق المحادثة" : "Close chat"}
+                >
+                  <X aria-hidden="true" />
+                </button>
+              </div>
+            </header>
+
+            <div ref={scrollRef} className="assistant-chat-body chat-scroll">
+              {messages.length === 0 && !feedbackOpen && (
+                <div className="assistant-chat-welcome">
+                  <motion.div
+                    initial={{ opacity: 0, x: isRtl ? -24 : 24 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.48, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+                    className="assistant-chat-portrait"
+                    aria-hidden="true"
+                  >
+                    <span className="assistant-chat-portrait-label">SAAE / AI</span>
+                    <img src="/cinematic/images/abu-al-joud-3d.webp" alt="" />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, x: isRtl ? 24 : -24 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.48, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
+                    className="assistant-chat-intro"
+                  >
+                    <p className="assistant-chat-eyebrow">
+                      <Bot aria-hidden="true" />
+                      {isRtl ? "أهلاً بك" : "Welcome"}
+                    </p>
+                    <h2>{a.title}</h2>
+                    <p className="assistant-chat-subtitle">{a.subtitle}</p>
+
+                    <div className="assistant-chat-suggestions">
+                      {suggestions.map((suggestion) => {
+                        const Icon = suggestion.icon;
+                        return (
+                          <button
+                            key={suggestion.text}
+                            type="button"
+                            onClick={() => sendMessage({ text: suggestion.text })}
+                            className="assistant-chat-suggestion"
+                          >
+                            <Icon aria-hidden="true" />
+                            <span>{suggestion.text}</span>
+                            <ArrowUp
+                              className="assistant-chat-suggestion-arrow"
+                              aria-hidden="true"
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => setFeedbackOpen(true)}
-                      className="rounded-full border border-primary bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                      className="assistant-chat-feedback-link"
                     >
-                      {isRtl ? "إرسال ملاحظة / رأي" : "Send feedback"}
+                      <MessageSquarePlus aria-hidden="true" />
+                      {isRtl ? "أرسل ملاحظة إلى فريق الجمعية" : "Send feedback to the SAAE team"}
                     </button>
-                  </div>
-                  {feedbackOpen && (
-                    <div className="mt-6 w-full max-w-md">
-                      <AssistantFeedbackForm
-                        lang={lang === "ar" ? "ar" : "en"}
-                        sessionId={sessionId}
-                        onClose={() => setFeedbackOpen(false)}
-                      />
-                    </div>
-                  )}
+                  </motion.div>
                 </div>
               )}
 
-              <div className="space-y-4">
-                {messages.map((m) => {
-                  const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
-                  const isUser = m.role === "user";
-                  return (
-                    <div
-                      key={m.id}
-                      className={`flex ${
-                        isUser
-                          ? isRtl
-                            ? "justify-start"
-                            : "justify-end"
-                          : isRtl
-                            ? "justify-end"
-                            : "justify-start"
-                      }`}
-                    >
-                      <div
-                        className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                          isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-                        }`}
+              {feedbackOpen && (
+                <motion.div
+                  ref={feedbackRef}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="assistant-chat-feedback-panel"
+                >
+                  <AssistantFeedbackForm
+                    lang={lang === "ar" ? "ar" : "en"}
+                    sessionId={sessionId}
+                    onClose={() => setFeedbackOpen(false)}
+                  />
+                </motion.div>
+              )}
+
+              {messages.length > 0 && (
+                <div className="assistant-chat-thread">
+                  {messages.map((message, index) => {
+                    const raw = message.parts
+                      .map((part) => (part.type === "text" ? part.text : ""))
+                      .join("");
+                    const isUser = message.role === "user";
+                    const { text, choices } = isUser ? { text: raw, choices: [] } : parseChoices(raw);
+                    // Only the newest question's buttons stay live; earlier ones are history.
+                    const showChoices =
+                      !isUser && choices.length > 0 && index === messages.length - 1 && !isLoading;
+                    return (
+                      <motion.div
+                        key={message.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`assistant-chat-message ${isUser ? "is-user" : "is-assistant"}`}
                       >
-                        {text}
+                        {!isUser && (
+                          <span className="assistant-chat-message-avatar" aria-hidden="true">
+                            <img src="/cinematic/images/abu-al-joud-3d.webp" alt="" />
+                          </span>
+                        )}
+                        <div className="assistant-chat-message-content">
+                          <span className="assistant-chat-message-role">
+                            {isUser ? (isRtl ? "أنت" : "You") : a.chat.name}
+                          </span>
+                          <p>
+                            {isUser
+                              ? text
+                              : formatMessage(text).map((seg, si) =>
+                                  seg.bold ? <strong key={si}>{seg.text}</strong> : <span key={si}>{seg.text}</span>,
+                                )}
+                          </p>
+                          {showChoices && (
+                            <div className="assistant-chat-choices">
+                              {choices.map((choice) => (
+                                <button
+                                  key={choice}
+                                  type="button"
+                                  className="assistant-chat-choice"
+                                  onClick={() => sendMessage({ text: choice })}
+                                >
+                                  {choice}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+
+                  {isLoading && (
+                    <div className="assistant-chat-message is-assistant">
+                      <span className="assistant-chat-message-avatar" aria-hidden="true">
+                        <img src="/cinematic/images/abu-al-joud-3d.webp" alt="" />
+                      </span>
+                      <div className="assistant-chat-typing">
+                        <Loader2 aria-hidden="true" />
+                        {a.chat.typing}
                       </div>
                     </div>
-                  );
-                })}
+                  )}
 
-                {isLoading && (
-                  <div className={`flex ${isRtl ? "justify-end" : "justify-start"}`}>
-                    <div className="inline-flex items-center gap-2 rounded-2xl bg-muted px-4 py-2.5 text-sm text-muted-foreground">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      {a.chat.typing}
-                    </div>
-                  </div>
-                )}
-
-                {error && (
-                  <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-2.5 text-xs text-destructive">
-                    {error.message}
-                  </div>
-                )}
-              </div>
+                  {error && <div className="assistant-chat-error">{error.message}</div>}
+                </div>
+              )}
 
               <div ref={bottomRef} />
             </div>
 
-            {/* Composer */}
-            <form
-              onSubmit={handleSubmit}
-              className="border-t border-border bg-card/95 px-4 py-3 backdrop-blur"
-            >
-              <div className="flex items-end gap-2 rounded-2xl border border-border bg-background p-2">
+            <form onSubmit={handleSubmit} className="assistant-chat-composer">
+              <div className="assistant-chat-composer-box">
                 <textarea
                   ref={inputRef}
                   value={input}
@@ -271,20 +404,28 @@ export function AssistantChatModal({
                     }
                   }}
                   rows={1}
-                  placeholder={isRtl ? "اكتب رسالتك..." : "Type your message..."}
-                  className="max-h-32 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                  placeholder={isRtl ? "اسأل أبو الجود..." : "Ask Abu Al-Joud..."}
+                  aria-label={isRtl ? "رسالتك إلى أبو الجود" : "Your message to Abu Al-Joud"}
                 />
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className="inline-flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label="Send"
+                  className="assistant-chat-send"
+                  aria-label={isRtl ? "إرسال الرسالة" : "Send message"}
+                  title={isRtl ? "إرسال الرسالة" : "Send message"}
                 >
-                  <Send className={`h-4 w-4 ${isRtl ? "-scale-x-100" : ""}`} />
+                  {isLoading ? (
+                    <Loader2 className="animate-spin" aria-hidden="true" />
+                  ) : (
+                    <ArrowUp aria-hidden="true" />
+                  )}
                 </button>
               </div>
+              <p>
+                {isRtl ? "إجابات ذكية من معرفة الجمعية" : "Intelligent answers from SAAE knowledge"}
+              </p>
             </form>
-          </motion.div>
+          </motion.section>
         </motion.div>
       )}
     </AnimatePresence>

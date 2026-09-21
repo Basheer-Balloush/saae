@@ -1,0 +1,94 @@
+/* Shared pieces of the assistant's intake: the course options it may recommend,
+   and what it falls back to when the catalogue has nothing to offer. Kept out of
+   the route so the rules can be tested without calling a model. */
+
+export const ORG_PHONE = "+963 930 763 547";
+export const ORG_EMAIL = "info@aisyria.org";
+
+export type CatalogRow = {
+  id: string;
+  slug: string | null;
+  title_ar: string | null;
+  title_en: string | null;
+  level: string | null;
+  is_free: boolean | null;
+  price: number | null;
+  sale_price: number | null;
+  delivery_mode: string | null;
+};
+
+export type CourseOption = {
+  title: string;
+  url: string;
+  level: string | null;
+  price: string;
+  delivery_mode: string | null;
+};
+
+export const courseUrl = (row: { slug: string | null; id: string }) =>
+  `https://aisyria.org/learning-management-system/courses/${row.slug || row.id}`;
+
+/* Course prices are stored in Syrian pounds and shown that way across the site
+   (CoursePrice renders "ل.س 500" / "500 SYP"), so the assistant must quote the
+   same currency — a price the visitor cannot compare to the course page is worse
+   than no price. */
+function priceLabel(row: CatalogRow, lang: "ar" | "en"): string {
+  if (row.is_free) return lang === "ar" ? "مجاني" : "Free";
+  const effective = row.sale_price != null && row.sale_price > 0 ? row.sale_price : row.price;
+  if (effective == null || Number.isNaN(effective)) return lang === "ar" ? "السعر غير محدّد" : "Price not set";
+  const amount = Number(effective).toLocaleString("en-US");
+  return lang === "ar" ? `ل.س ${amount}` : `${amount} SYP`;
+}
+
+/** The courses the assistant may mention: titles in the visitor's language, with real links. */
+export function toCourseOptions(rows: CatalogRow[], lang: "ar" | "en", limit = 3): CourseOption[] {
+  return rows
+    .filter((row) => (lang === "ar" ? row.title_ar || row.title_en : row.title_en || row.title_ar))
+    .slice(0, limit)
+    .map((row) => ({
+      title: (lang === "ar" ? row.title_ar || row.title_en : row.title_en || row.title_ar) as string,
+      url: courseUrl(row),
+      level: row.level,
+      price: priceLabel(row, lang),
+      delivery_mode: row.delivery_mode,
+    }));
+}
+
+/** Said when the catalogue has nothing for this visitor: never invent a course. */
+export function noCourseFallback(lang: "ar" | "en"): { message: string; phone: string; email: string } {
+  return {
+    message:
+      lang === "ar"
+        ? `لا توجد دورة منشورة تناسب هذا الطلب حالياً. تواصل مع الجمعية على ${ORG_PHONE} أو ${ORG_EMAIL} وسيُرشدك الفريق إلى الخطوة المناسبة.`
+        : `No published course matches this request right now. Contact the association on ${ORG_PHONE} or ${ORG_EMAIL} and the team will point you to the right next step.`,
+    phone: ORG_PHONE,
+    email: ORG_EMAIL,
+  };
+}
+
+/** Shown when the model provider refuses the call (quota, overload, outage). */
+function statusOf(error: unknown): number | null {
+  const candidate = error as { statusCode?: unknown; status?: unknown; cause?: unknown } | null;
+  const direct = candidate?.statusCode ?? candidate?.status;
+  if (typeof direct === "number") return direct;
+  const nested = (candidate?.cause as { statusCode?: unknown; status?: unknown } | undefined) ?? undefined;
+  const fromCause = nested?.statusCode ?? nested?.status;
+  if (typeof fromCause === "number") return fromCause;
+  const match = /\b(4\d\d|5\d\d)\b/.exec(error instanceof Error ? error.message : String(error ?? ""));
+  return match ? Number(match[1]) : null;
+}
+
+export function providerBusyMessage(error: unknown, lang: "ar" | "en"): string {
+  const text = error instanceof Error ? `${error.name} ${error.message}` : String(error ?? "");
+  const status = statusOf(error);
+  const ref = status ? ` (${status})` : "";
+  const rateLimited = /too many requests|rate.?limit|quota|429|resource[_ ]exhausted/i.test(text);
+  if (rateLimited) {
+    return lang === "ar"
+      ? `الخدمة مزدحمة الآن وتعذّر إكمال الرد. جرّب بعد بضع دقائق، أو تواصل مباشرة على ${ORG_PHONE} أو ${ORG_EMAIL}.`
+      : `The assistant is busy right now and could not finish the reply. Try again in a few minutes, or contact us on ${ORG_PHONE} or ${ORG_EMAIL}.`;
+  }
+  return lang === "ar"
+    ? `حدث خطأ غير متوقّع أثناء الرد${ref}. جرّب مرة أخرى، أو تواصل على ${ORG_PHONE} أو ${ORG_EMAIL}.`
+    : `Something went wrong while answering${ref}. Please try again, or contact us on ${ORG_PHONE} or ${ORG_EMAIL}.`;
+}

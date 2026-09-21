@@ -7,7 +7,6 @@ import {
   ArrowUp,
   ArrowUpLeft,
   ArrowUpRight,
-  BadgeCheck,
   BookOpen,
   Building2,
   CodeXml,
@@ -35,6 +34,8 @@ import {
 } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import MotionButton from "@/components/ui/motion-button";
+import { ContainerScrollItem } from "@/components/ui/container-scroll-animation";
+import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import { HomepageNews } from "./HomepageNews";
 import "./homepage-partners.css";
 import { DESKTOP_HOME_QUERY } from "@/hooks/useHeroCapability";
@@ -88,15 +89,14 @@ function words(text: string): string[] {
 }
 
 const COMMUNITY_ICONS = [
+  CodeXml,
   Database,
   Building2,
   HeartPulse,
   FlaskConical,
-  CodeXml,
   TrendingUp,
   Presentation,
   Megaphone,
-  BadgeCheck,
 ] as const;
 
 const RAIL_IDS = ["initiative", "communities", "news", "mission", "partners", "faq"];
@@ -816,6 +816,13 @@ export function MobileHomeView({
                   <MhTrunkRow key={c.key} index={i} href={c.href} lang={lang} />
                 ))}
               </ol>
+              <div className="mh-feature-actions">
+                <MotionButton
+                  label={pick(COMMUNITIES_COPY.cta, lang)}
+                  href="/about#communities-h"
+                  classes="w-full min-w-0 justify-center"
+                />
+              </div>
             </div>
           </section>
 
@@ -937,60 +944,72 @@ export function MobileHomeView({
 
           <section className="mh-section hn-root hp-faq" id="faq" aria-labelledby="mh-faq-title">
             <div className="hn-tech-details" aria-hidden="true"><span /><span /></div>
-            <div className="mh-wrap">
-              <p className="mh-eyebrow">{pick(FAQ_COPY.eyebrow, lang)}</p>
-              <h2 className="mh-section-h" id="mh-faq-title">
-                {pick(FAQ_COPY.title, lang)}
-              </h2>
-              <p className="mh-section-p">{pick(FAQ_COPY.body, lang)}</p>
-              <ul className="mh-faq-list">
-                {FAQS.map((f, i) => {
-                  const open = openFaq === i;
-                  return (
-                    <li key={pick(f.question, lang)} className="mh-faq-item">
-                      <h3 className="mh-faq-h">
-                        <button
-                          type="button"
-                          className="mh-faq-q"
-                          aria-expanded={open}
-                          aria-controls={`mh-faq-a-${i}`}
-                          id={`mh-faq-q-${i}`}
-                          onClick={() => setOpenFaq(open ? null : i)}
-                        >
-                          <span>{pick(f.question, lang)}</span>
-                          <span className="mh-faq-icon" aria-hidden="true">
-                            {open ? <Minus size={20} /> : <Plus size={20} />}
-                          </span>
-                        </button>
-                      </h3>
-                      <div
-                        className={open ? "mh-faq-panel mh-is-open" : "mh-faq-panel"}
-                        id={`mh-faq-a-${i}`}
-                        role="region"
-                        aria-labelledby={`mh-faq-q-${i}`}
-                        inert={!open}
+            <ContainerScroll
+              className="mh-faq-scroll"
+              cardClassName="mh-faq-scroll-card"
+              titleComponent={
+                <div className="mh-faq-scroll-heading">
+                  <h2 className="mh-section-h" id="mh-faq-title">
+                    {pick(FAQ_COPY.title, lang)}
+                  </h2>
+                </div>
+              }
+            >
+              <div className="mh-wrap mh-faq-scroll-content">
+                <ul className="mh-faq-list">
+                  {FAQS.map((f, i) => {
+                    const open = openFaq === i;
+                    return (
+                      <ContainerScrollItem
+                        key={pick(f.question, lang)}
+                        index={i}
+                        total={FAQS.length}
+                        className="mh-faq-item"
                       >
-                        <p className="mh-faq-a">
-                          {pick(f.answer, lang)}
-                          {f.answerLink ? (
-                            <>
-                              {" "}
-                              <a href={f.answerLink.href}>{pick(f.answerLink.text, lang)}</a>.
-                            </>
-                          ) : null}
-                        </p>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-              <MotionButton
-                variant="secondary"
-                label={pick(FAQ_COPY.writeToUs, lang)}
-                href="/contact#write"
-                classes="w-full justify-center"
-              />
-            </div>
+                        <h3 className="mh-faq-h">
+                          <button
+                            type="button"
+                            className="mh-faq-q"
+                            aria-expanded={open}
+                            aria-controls={`mh-faq-a-${i}`}
+                            id={`mh-faq-q-${i}`}
+                            onClick={() => setOpenFaq(open ? null : i)}
+                          >
+                            <span>{pick(f.question, lang)}</span>
+                            <span className="mh-faq-icon" aria-hidden="true">
+                              {open ? <Minus size={20} /> : <Plus size={20} />}
+                            </span>
+                          </button>
+                        </h3>
+                        <div
+                          className={open ? "mh-faq-panel mh-is-open" : "mh-faq-panel"}
+                          id={`mh-faq-a-${i}`}
+                          role="region"
+                          aria-labelledby={`mh-faq-q-${i}`}
+                          inert={!open}
+                        >
+                          <p className="mh-faq-a">
+                            {pick(f.answer, lang)}
+                            {f.answerLink ? (
+                              <>
+                                {" "}
+                                <a href={f.answerLink.href}>{pick(f.answerLink.text, lang)}</a>.
+                              </>
+                            ) : null}
+                          </p>
+                        </div>
+                      </ContainerScrollItem>
+                    );
+                  })}
+                </ul>
+                <MotionButton
+                  variant="secondary"
+                  label={pick(FAQ_COPY.writeToUs, lang)}
+                  href="/contact#write"
+                  classes="w-full justify-center"
+                />
+              </div>
+            </ContainerScroll>
           </section>
         </div>
 

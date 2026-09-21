@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage, webpPath } from "@/lib/image-compress";
 
 export type ProgressCb = (percent: number, loaded: number, total: number) => void;
 
@@ -23,7 +24,19 @@ export interface UploadResult {
  * upload progress either — XMLHttpRequest is the only option.
  */
 export async function uploadToSupabaseStorage(args: UploadArgs): Promise<UploadResult> {
-  const { bucket, path, file, upsert = true, contentType, onProgress, signal } = args;
+  const { bucket, upsert = true, onProgress, signal } = args;
+
+  // Shrink photographs here rather than at each call site, so every picture the
+  // site serves — news, covers, avatars, logos — is stored at a sensible size.
+  // compressImage returns the original whenever it cannot do better.
+  const original = args.file;
+  const file =
+    original instanceof File && typeof (original as File).type === "string"
+      ? await compressImage(original as File)
+      : original;
+  const compressed = file !== original;
+  const path = compressed ? webpPath(args.path) : args.path;
+  const contentType = compressed ? "image/webp" : args.contentType;
 
   const SUPABASE_URL =
     import.meta.env.VITE_SUPABASE_URL || (typeof process !== "undefined" ? process.env.SUPABASE_URL : undefined);

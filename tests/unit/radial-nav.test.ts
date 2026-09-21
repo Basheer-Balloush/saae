@@ -4,10 +4,13 @@ import { describe, it, expect } from "vitest";
 import { radialNavHtml, withSiteChrome } from "@/components/cinematic/radial-nav";
 
 const HTML_DIR = path.resolve(import.meta.dirname, "../../src/components/cinematic/html");
+const PUBLIC_JS_DIR = path.resolve(import.meta.dirname, "../../public/cinematic/js");
 const pages = readdirSync(HTML_DIR).filter((f) => f.endsWith(".html"));
 const page = (name: string) => readFileSync(path.join(HTML_DIR, name), "utf8");
+const publicScript = (name: string) => readFileSync(path.join(PUBLIC_JS_DIR, name), "utf8");
 const count = (haystack: string, needle: string) => haystack.split(needle).length - 1;
-const current = (html: string) => [...html.matchAll(/href="([^"]*)" aria-current="page"/g)].map((m) => m[1]);
+const current = (html: string) =>
+  [...html.matchAll(/href="([^"]*)" aria-current="page"/g)].map((m) => m[1]);
 
 describe("shared radial menu", () => {
   it.each([
@@ -30,10 +33,31 @@ describe("shared radial menu", () => {
 
   it("keeps the hooks navigation.js and language.js look for", () => {
     const html = withSiteChrome("<!-- cinematic:language --><!-- cinematic:nav -->", "/");
-    for (const hook of ['id="language-switch"', "data-radial-nav", "data-radial-items", "data-radial-toggle", "data-radial-close"]) {
+    for (const hook of [
+      'id="language-switch"',
+      "data-radial-nav",
+      "data-radial-items",
+      "data-radial-toggle",
+      "data-radial-close",
+    ]) {
       expect(count(html, hook)).toBe(1);
     }
     expect(count(html, 'class="radial-nav-item"')).toBe(7);
+  });
+
+  it("renders the Arabic language state before client scripts load", () => {
+    const html = withSiteChrome("<!-- cinematic:language --><!-- cinematic:nav -->", "/");
+    expect(html).toContain('aria-label="Switch to English"');
+    expect(html).toContain('aria-pressed="true"');
+    expect(html).toContain('<span class="language-switch-label">English</span>');
+  });
+
+  it("defaults new cinematic visitors to Arabic while preserving saved English", () => {
+    const sharedLanguage = publicScript("language.js");
+    const contactLanguage = publicScript("contact.js");
+    expect(sharedLanguage).toContain('let initial = "ar";');
+    expect(sharedLanguage).toContain('localStorage.getItem("saae-lang") || "ar"');
+    expect(contactLanguage).toContain('saved === "en" ? "en" : "ar"');
   });
 });
 
