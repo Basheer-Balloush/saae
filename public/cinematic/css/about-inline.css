@@ -215,7 +215,11 @@
   .head > p:not(.eyebrow) { max-width: 56ch; margin-top: 20px; color: var(--ink-muted); font-size: clamp(.98rem, 1.4vw, 1.12rem); }
   .rule { width: 108px; height: 3px; margin-top: 30px; background: linear-gradient(90deg, var(--petrol), var(--olive)); }
   .head-centered { margin-inline: auto; text-align: center; }
-  .head-centered h2, .head-centered > p:not(.eyebrow) { margin-inline: auto; unicode-bidi: plaintext; text-wrap: balance; }
+  /* No text-wrap: balance here: Chromium's balancer breaks bidi reordering
+     and renders RTL words in reverse order. Plaintext alone centers mixed
+     Arabic/English lines with correct word order. */
+  .head-centered h2, .head-centered > p:not(.eyebrow) { margin-inline: auto; unicode-bidi: plaintext; }
+  html[dir="rtl"] .head h2 { text-wrap: auto; }
   .head-centered .rule { margin-inline: auto; }
 
   /* Section heads keep their solid ink. They are sentence heads at
