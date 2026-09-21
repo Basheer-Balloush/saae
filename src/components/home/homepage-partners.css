@@ -4,6 +4,7 @@
 .hp-faq {
   position: relative;
   isolation: isolate;
+  padding-block: 0;
   background: #061820;
 }
 .hp-faq .hn-tech-details {
@@ -17,6 +18,207 @@
 .hp-handoff,
 .hp-faq {
   background-color: #061820;
+}
+
+/* The FAQ animation owns a sticky viewport inside the section. Keeping these
+   rules here lets the desktop portal share the site's existing FAQ palette. */
+.cs-scroll-container {
+  position: relative;
+  width: 100%;
+}
+
+.cs-scroll-split {
+  min-height: 220svh;
+}
+
+.hp-faq-scroll.cs-scroll-split {
+  min-height: max(6100px, 680svh);
+}
+
+.cs-scroll-perspective {
+  position: sticky;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100svh;
+  min-height: 620px;
+  overflow: clip;
+  perspective: 1200px;
+}
+
+.cs-scroll-header {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.cs-scroll-header .faq-intro,
+.cs-scroll-header .mh-faq-scroll-heading {
+  position: static;
+  width: min(720px, 82vw);
+  margin: 0;
+  text-align: center;
+}
+
+html[dir="rtl"] .cs-scroll-header .faq-intro,
+html[dir="rtl"] .cs-scroll-header .mh-faq-scroll-heading {
+  text-align: center;
+}
+
+.cs-scroll-header .faq-intro h2,
+.cs-scroll-header .mh-faq-scroll-heading h2 {
+  margin: 0;
+  color: var(--paper, #eefbfc);
+  font-family: "Cairo", Arial, sans-serif;
+  font-size: clamp(2.8rem, 6vw, 5.8rem);
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+html[lang="en"] .hp-faq-scroll .cs-scroll-header .faq-intro {
+  transform: translateY(-72px);
+}
+
+html[lang="en"] .cs-scroll-header .faq-intro h2,
+html[lang="en"] .cs-scroll-header .mh-faq-scroll-heading h2 {
+  width: max-content;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.cs-scroll-card {
+  position: absolute;
+  z-index: 2;
+  width: min(380px, 34vw, 45svh);
+  height: auto;
+  aspect-ratio: 420 / 720;
+  max-width: calc(100vw - 40px);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  transform-style: preserve-3d;
+}
+
+.cs-scroll-card-inner {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.cs-scroll-stacked .cs-scroll-perspective {
+  position: relative;
+  display: block;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  perspective: none;
+}
+
+.cs-scroll-stacked .cs-scroll-header {
+  position: relative;
+  inset: auto;
+  display: block;
+  pointer-events: auto;
+}
+
+.cs-scroll-stacked .cs-scroll-card {
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-width: none;
+  margin-top: 28px;
+}
+
+.cs-scroll-stacked .cs-scroll-card-inner {
+  height: auto;
+}
+
+.hp-faq-scroll-card .faq-list {
+  width: 100%;
+  margin: 0;
+  border: 0;
+}
+
+.hp-faq-scroll-card .faq-item {
+  border: 0;
+  background: transparent;
+}
+
+.hp-faq-scroll-card .faq-item::after {
+  display: none;
+}
+
+.hp-faq-device [data-iphone-content] {
+  justify-content: center;
+}
+
+.hp-faq-scroll-card .faq-trigger {
+  padding: 22px 18px 16px;
+  gap: 12px;
+  text-align: start;
+}
+
+.hp-faq-scroll-card .faq-question {
+  font-family: "Cairo", Arial, sans-serif;
+  font-size: clamp(0.95rem, 1.2vw, 1.2rem);
+  line-height: 1.45;
+}
+
+.hp-faq-scroll-card .faq-answer p {
+  padding: 0 18px 22px;
+  font-size: clamp(0.82rem, 1vw, 0.98rem);
+  line-height: 1.8;
+}
+
+@media (max-width: 767px) {
+  .cs-scroll-split {
+    min-height: 185svh;
+  }
+
+  .cs-scroll-perspective {
+    min-height: 0;
+  }
+
+  .cs-scroll-header .faq-intro h2,
+  .cs-scroll-header .mh-faq-scroll-heading h2 {
+    font-size: clamp(2.2rem, 11vw, 3.8rem);
+  }
+
+  .cs-scroll-card {
+    width: min(380px, calc(100vw - 32px), 45svh);
+    height: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-scroll-split {
+    min-height: auto;
+  }
+
+  .cs-scroll-perspective {
+    position: relative;
+    height: auto;
+    min-height: 0;
+    padding-block: 80px;
+  }
+
+  .cs-scroll-header,
+  .cs-scroll-card {
+    position: relative;
+    inset: auto;
+    transform: none !important;
+  }
+
+  .cs-scroll-perspective {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
 }
 .hp-partner-surface {
   position: relative;

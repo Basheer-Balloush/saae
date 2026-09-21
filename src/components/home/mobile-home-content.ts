@@ -71,10 +71,6 @@ export const OPENING = {
     ar: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",
     en: "Syrian Association for AI & Entrepreneurship",
   } satisfies LocalText,
-  support: {
-    ar: "تعلّم وبحث وريادة أعمال عملية في الذكاء الاصطناعي، متصلة بالناس في كل سورية.",
-    en: "Practical AI learning, research and entrepreneurship, connected for people across Syria.",
-  } satisfies LocalText,
   /** Primary learning CTA → local learning platform route (same tab). */
   primary: {
     label: { ar: "ابدأ التعلّم", en: "Start learning" } satisfies LocalText,
@@ -82,39 +78,18 @@ export const OPENING = {
   },
   /** Initiative secondary action → local initiative page. */
   secondary: {
-    label: { ar: "اكتشف المبادرة", en: "Discover the initiative" } satisfies LocalText,
     href: "/initiative",
-  },
-  heroImage: {
-    src: "/cinematic/mobile/hero-tree-poster.webp",
-    alt: {
-      ar: "جمهور يحضر إطلاق المبادرة الوطنية للذكاء الاصطناعي",
-      en: "Audience attending the launch of SAAE's national AI initiative",
-    } satisfies LocalText,
-    caption: {
-      ar: "من إطلاق المبادرة الوطنية للذكاء الاصطناعي.",
-      en: "At the launch of the national AI initiative.",
-    } satisfies LocalText,
-  },
-  /** Hero tree loop (client-assigned src only, never SSR). */
-  video: {
-    src: "/cinematic/mobile/hero-tree-loop.mp4",
-    poster: "/cinematic/mobile/hero-tree-poster.webp",
-    trigger: { ar: "شاهد شجرة الجمعية", en: "Watch the SAAE tree" } satisfies LocalText,
-    title: { ar: "شجرة الجمعية", en: "The SAAE tree" } satisfies LocalText,
-    description: {
-      ar: "شاهد الفيديو.",
-      en: "Watch the video.",
-    } satisfies LocalText,
-    fallback: {
-      ar: "تعذّر تشغيل الفيديو. يمكنك استكشاف المبادرة بدلاً من ذلك.",
-      en: "The video could not play. You can explore the initiative instead.",
-    } satisfies LocalText,
   },
 };
 
-/** All nine communities, in the association's own order. */
+/** All eight homepage communities, software first. */
 export const COMMUNITIES: CommunityEntry[] = [
+  {
+    key: "software",
+    name: { ar: "مجتمع البرمجيات", en: "Software Community" },
+    tagline: { ar: "بناء أنظمة رقمية نافعة.", en: "Build useful digital systems." },
+    href: "/communities/software",
+  },
   {
     key: "data",
     name: { ar: "مجتمع البيانات", en: "Data Community" },
@@ -143,12 +118,6 @@ export const COMMUNITIES: CommunityEntry[] = [
     href: "/communities/research",
   },
   {
-    key: "software",
-    name: { ar: "مجتمع البرمجيات", en: "Software Community" },
-    tagline: { ar: "بناء أنظمة رقمية نافعة.", en: "Build useful digital systems." },
-    href: "/communities/software",
-  },
-  {
     key: "economy",
     name: { ar: "مجتمع الاقتصاد الذكي", en: "Smart Economy Community" },
     tagline: { ar: "تحويل الابتكار إلى فرصة.", en: "Turn innovation into opportunity." },
@@ -165,12 +134,6 @@ export const COMMUNITIES: CommunityEntry[] = [
     name: { ar: "المجتمع الإعلامي", en: "Media Community" },
     tagline: { ar: "جعل المعرفة واضحة ومتاحة.", en: "Make knowledge clear and accessible." },
     href: "/communities/media",
-  },
-  {
-    key: "quality",
-    name: { ar: "مجتمع الجودة الريادي", en: "Quality Entrepreneurship Community" },
-    tagline: { ar: "رفع معيار المشاريع الناشئة.", en: "Raise the standard for new ventures." },
-    href: "/communities/quality",
   },
 ];
 
@@ -202,48 +165,58 @@ export const MISSION_STEPS: MissionStep[] = [
   },
 ];
 
-/** FAQ — existing answers, reviewed copy only. */
+/** Homepage FAQs reflect the site's learning, community and contact flows. */
 export const FAQS: FaqEntry[] = [
   {
-    question: { ar: "لمن تناسب الجمعية؟", en: "Who is SAAE for?" },
+    question: { ar: "كيف أسجّل في إحدى دورات الجمعية؟", en: "How do I register for a course?" },
     answer: {
-      ar: "للطلاب والمعلّمين والمهنيين ورواد الأعمال والمؤسسات الراغبة بتجربة عملية مع الذكاء الاصطناعي، لا للعاملين في التقنية فقط.",
-      en: "Students, educators, professionals, founders and institutions that want practical contact with AI — not only people who already work in technology.",
+      ar: "تصفّح الدورات، وافتح الدورة المناسبة للاطلاع على تفاصيلها وحالة التسجيل. عند فتح التسجيل، اتبع الخطوات الموضّحة في صفحتها. ابدأ من",
+      en: "Browse the courses and open one to check its details and enrollment status. When enrollment is open, follow the steps on its page. Start with the",
     },
-  },
-  {
-    question: { ar: "هل أحتاج إلى خبرة تقنية؟", en: "Do I need technical experience?" },
-    answer: {
-      ar: "لا. تتضمن برامج الجمعية العامة نقاط بداية للمبتدئين في الذكاء الاصطناعي، وتوضح كل دورة متطلباتها الخاصة.",
-      en: "No. SAAE's public programmes include starting points for people who are new to AI. Individual courses set their own requirements, which are listed with each course.",
-    },
-  },
-  {
-    question: { ar: "كيف أشارك؟", en: "How do I take part?" },
-    answer: {
-      ar: "ستُنشر مواعيد البرامج والتسجيل على هذا الموقع. وحتى ذلك الحين، استخدم نموذج التواصل للاستفسار عن الدفعة الحالية ومحتوى كل مسار.",
-      en: "Programme dates and registration will be published on this website. Until then, use the contact form to ask about the current intake and what each track involves.",
+    answerLink: {
+      href: "/learning-management-system/catalog",
+      text: { ar: "كتالوج الدورات", en: "course catalog" },
     },
   },
   {
     question: {
-      ar: "هل يمكن لمؤسسة أن تعمل مع الجمعية؟",
-      en: "Can an organisation work with SAAE?",
+      ar: "هل أحتاج إلى خبرة سابقة في الذكاء الاصطناعي؟",
+      en: "Do I need previous AI experience?",
     },
     answer: {
-      ar: "نعم. تتشارك الجامعات والوزارات والشركات ومنظمات المجتمع في التدريب والعمل التطبيقي. تُرسل استفسارات الشراكة إلى",
-      en: "Yes. Universities, ministries, companies and community organisations already partner on training and applied work. Partnership questions go to",
-    },
-    answerLink: {
-      href: "mailto:info@aisyria.org",
-      text: { ar: "info@aisyria.org", en: "info@aisyria.org" },
+      ar: "يعتمد ذلك على مستوى الدورة. يمكنك تصفية الدورات حسب المستوى، ثم مراجعة وصف الدورة ومتطلباتها قبل التسجيل. إذا لم تكن متأكّدًا من المسار المناسب، تواصل معنا.",
+      en: "It depends on the course level. Filter the catalog by level, then review the course description and requirements before registering. Contact us if you need help choosing a suitable path.",
     },
   },
   {
-    question: { ar: "أين ستُنشر التحديثات؟", en: "Where will updates be published?" },
+    question: { ar: "هل جميع الدورات مجانية؟", en: "Are all courses free?" },
     answer: {
-      ar: "سيصبح هذا الموقع المعاد تصميمه الواجهة العامة الرسمية للجمعية. وستُنشر البرامج والتسجيلات والإعلانات هنا مع إطلاق كل قسم.",
-      en: "This redesigned website is becoming SAAE's official public home. Programmes, registration and announcements will be published here as each section launches.",
+      ar: "تختلف الرسوم من دورة إلى أخرى. تحقّق من السعر وحالة الدورة في صفحتها. للدورات المدفوعة، اتبع خطوات طلب التسجيل؛ وبعد القبول يتم التواصل معك لترتيب الدفع.",
+      en: "Fees vary by course. Check the price and availability on the course page. For paid courses, follow the enrollment request steps; after acceptance, the team contacts you to arrange payment.",
+    },
+  },
+  {
+    question: {
+      ar: "كيف أنضم إلى أحد مجتمعات الجمعية؟",
+      en: "How can I join a SAAE community?",
+    },
+    answer: {
+      ar: "اختر المجتمع الأقرب إلى اهتمامك من قسم المجتمعات، وافتح صفحته للتعرّف إلى نشاطاته. اضغط «انضم إلى المجتمع» لبدء الاستفسار عن التسجيل والمشاركة مع مساعد الجمعية.",
+      en: "Choose a community that matches your interests and open its page to explore its activities. Select Join Community to ask the association's assistant about signing up and participating.",
+    },
+  },
+  {
+    question: {
+      ar: "كيف أتواصل بشأن تدريب أو شراكة؟",
+      en: "How do I ask about training or a partnership?",
+    },
+    answer: {
+      ar: "أرسل رسالة عبر نموذج التواصل، واختر نوع الاستفسار: تدريب أو شراكة. اذكر احتياجك واسم المؤسسة إن وُجد، مع بيانات تواصل صحيحة. يمكنك البدء من",
+      en: "Use the contact form and select Training or Partnership as the inquiry type. Describe what you need, include your organization if applicable, and provide accurate contact details. Open the",
+    },
+    answerLink: {
+      href: "/contact#write",
+      text: { ar: "نموذج التواصل", en: "contact form" },
     },
   },
 ];
@@ -341,8 +314,8 @@ export const PARTNERS: PartnerEntry[] = [
  * non-fragment desktop href from home.html is rendered verbatim.
  */
 export const DESKTOP_HREF_EQUIVALENTS: Readonly<Record<string, string>> = {
-  "/about#communities-h": "#communities",
-  "/about#standing-h": "#achievements",
+  "/about#communities-h": "#hero-sec",
+  "/about#standing-h": "#hero-sec",
 };
 
 /** Header menu groups. */
@@ -350,8 +323,8 @@ export const MENU_ASSOCIATION: HomeLink[] = [
   { label: { ar: "عن الجمعية", en: "About SAAE" }, href: "/about" },
   { label: { ar: "الأخبار", en: "News" }, href: "/news" },
   { label: { ar: "الشركاء", en: "Partners" }, href: "/partners" },
-  { label: { ar: "المجتمعات", en: "Communities" }, href: "#communities" },
-  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#achievements" },
+  { label: { ar: "المجتمعات", en: "Communities" }, href: "/about#communities-h" },
+  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#hero-sec" },
 ];
 
 export const MENU_PARTICIPATE: HomeLink[] = [
@@ -385,8 +358,8 @@ export const FOOTER_OFFICIAL: HomeLink[] = [
 
 /** Footer "Explore" anchor group (in-page + local). */
 export const FOOTER_DISCOVER: HomeLink[] = [
-  { label: { ar: "المجتمعات", en: "Communities" }, href: "#communities" },
-  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#achievements" },
+  { label: { ar: "المجتمعات", en: "Communities" }, href: "/about#communities-h" },
+  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#hero-sec" },
   { label: { ar: "الأخبار", en: "News" }, href: "#news" },
   { label: { ar: "الشركاء", en: "Partners" }, href: "#partners" },
   { label: { ar: "إجابات", en: "Answers" }, href: "#faq" },
@@ -459,113 +432,6 @@ export const ACHIEVEMENTS: AchievementEntry[] = [
   { value: "9", count: 9, label: { ar: "مجتمعات", en: "communities" } },
 ];
 
-export const NUMBERS_COPY = {
-  eyebrow: { ar: "انجازات الجمعية", en: "SAAE achievements" } satisfies LocalText,
-  title: {
-    ar: "مجتمع يتجاوز 5,000 متعلم",
-    en: "A community of 5,000+ learners",
-  } satisfies LocalText,
-};
-
-export interface RailEntry {
-  label: LocalText;
-  href: string;
-}
-
-export const RAIL_COPY = {
-  label: { ar: "أقسام الصفحة", en: "Page sections" } satisfies LocalText,
-  items: [
-    { label: { ar: "المبادرة", en: "Initiative" }, href: "#initiative" },
-    { label: { ar: "المجتمعات", en: "Communities" }, href: "#communities" },
-    { label: { ar: "الأخبار", en: "News" }, href: "#news" },
-    { label: { ar: "كيف نعمل", en: "How we work" }, href: "#mission" },
-    { label: { ar: "الشركاء", en: "Partners" }, href: "#partners" },
-    { label: { ar: "إجابات", en: "Answers" }, href: "#faq" },
-  ] satisfies RailEntry[],
-};
-
-export interface WayEntry {
-  title: LocalText;
-  body: LocalText;
-  cta: LocalText;
-  href: string;
-  icon: "learning" | "communities" | "participation";
-}
-
-export const START_COPY = {
-  eyebrow: { ar: "اعرف طريقك", en: "Find your way in" } satisfies LocalText,
-  title: { ar: "من أين تبدأ؟", en: "Where to start?" } satisfies LocalText,
-  linksLabel: { ar: "طرق البدء", en: "Ways to start" } satisfies LocalText,
-};
-
-export const WAYS: WayEntry[] = [
-  {
-    title: { ar: "منصة التعلّم", en: "Learning platform" },
-    body: {
-      ar: "مسارات تدريب معتمدة تبني مهارات مهنية وتقنية، ومتاحة للجميع في سورية.",
-      en: "Certified training tracks that build professional and technical skill, open to anyone in Syria.",
-    },
-    cta: { ar: "ابدأ التعلّم", en: "Start learning" },
-    href: "/learning-management-system",
-    icon: "learning",
-  },
-  {
-    title: { ar: "المجتمعات", en: "Communities" },
-    body: {
-      ar: "تسعة مجتمعات. جذور تجمعنا.",
-      en: "Nine communities. One shared foundation.",
-    },
-    cta: { ar: "استكشف المجتمعات", en: "Explore communities" },
-    href: "#communities",
-    icon: "communities",
-  },
-  {
-    title: { ar: "المشاركة والتسجيل", en: "Participation & registration" },
-    body: {
-      ar: "ستُنشر مواعيد البرامج والتسجيل على هذا الموقع.",
-      en: "Programme dates and registration will be published on this website.",
-    },
-    cta: { ar: "سجّل الآن", en: "Register now" },
-    href: "/registration",
-    icon: "participation",
-  },
-];
-
-export const INITIATIVE_COPY = {
-  eyebrow: {
-    ar: "مبادرة مليون مستخدم سوري للذكاء الاصطناعي",
-    en: "The Million Syrian AI Users initiative",
-  } satisfies LocalText,
-  title: {
-    ar: "مليون شخص خطوة وطنية إلى الأمام",
-    en: "One million people One national step forward",
-  } satisfies LocalText,
-  body: {
-    ar: "مبادرة وطنية تمكّن مليون سوري من استخدام الذكاء الاصطناعي بثقة في العمل والدراسة والحياة اليومية.",
-    en: "A national initiative enabling one million Syrians to use AI confidently at work, in study, and in everyday life.",
-  } satisfies LocalText,
-  primary: { ar: "استكشف المبادرة", en: "Explore the initiative" } satisfies LocalText,
-  official: { ar: "البرنامج الرسمي", en: "Official programme" } satisfies LocalText,
-  target: { ar: "هدف المبادرة", en: "The initiative's goal" } satisfies LocalText,
-  reach: {
-    ar: "معرفة تصل إلى كل سورية",
-    en: "Knowledge within reach across Syria",
-  } satisfies LocalText,
-  image: "/cinematic/mobile/initiative-syria.svg",
-};
-
-export const COMMUNITIES_COPY = {
-  eyebrow: { ar: "مجتمعات الجمعية", en: "SAAE communities" } satisfies LocalText,
-  title: {
-    ar: "تسعة مجتمعات جذور تجمعنا",
-    en: "Nine communities One shared foundation",
-  } satisfies LocalText,
-  body: {
-    ar: "لكل مجتمع أسئلته وممارسوه. والمنهج المشترك يجعل الأجوبة تنتقل بينها.",
-    en: "Each community brings its own questions and its own practitioners. Shared methods let the answers travel between them.",
-  } satisfies LocalText,
-};
-
 export const NEWS_COPY = {
   eyebrow: { ar: "آخر الأخبار", en: "Latest news" } satisfies LocalText,
   title: { ar: "العمل كما يحدث", en: "The work, as it happens" } satisfies LocalText,
@@ -606,37 +472,12 @@ export const PARTNERS_COPY = {
 };
 
 export const FAQ_COPY = {
-  eyebrow: { ar: "إجابات عملية", en: "Practical answers" } satisfies LocalText,
-  title: { ar: "طريق واضح للبداية.", en: "A clear way in." } satisfies LocalText,
+  title: { ar: "أسئلة شائعة", en: "FAQ'S" } satisfies LocalText,
   body: {
     ar: "الأسئلة التي يطرحها الناس فعلاً قبل البداية.",
     en: "The questions people actually ask before they start.",
   } satisfies LocalText,
   writeToUs: { ar: "راسلنا", en: "Write to us" } satisfies LocalText,
-};
-
-export const CLOSING_COPY = {
-  eyebrow: {
-    ar: "يبدأ المستقبل المشترك بالمعرفة المشتركة.",
-    en: "A shared future starts with shared knowledge.",
-  } satisfies LocalText,
-  title: {
-    ar: "ننمو معاً في كل سورية",
-    en: "Growing together across Syria",
-  } satisfies LocalText,
-  body: {
-    ar: "من مجتمعاتنا التسعة تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
-    en: "From our nine communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.",
-  } satisfies LocalText,
-  primary: { ar: "ابدأ التعلّم", en: "Start learning" } satisfies LocalText,
-  secondary: { ar: "سجّل الآن", en: "Register now" } satisfies LocalText,
-  videoSrc: "/cinematic/mobile/roots-tree-loop.mp4",
-  videoPoster: "/cinematic/mobile/roots-tree-poster.webp",
-};
-
-export const HERO_MEDIA = {
-  videoSrc: "/cinematic/mobile/hero-tree-loop.mp4",
-  videoPoster: "/cinematic/mobile/hero-tree-poster.webp",
 };
 
 export const MICRO_COPY = {
@@ -653,8 +494,6 @@ export const MICRO_COPY = {
     ar: "روابط أقسام الموقع والمشاركة.",
     en: "Links to site sections and participation.",
   } satisfies LocalText,
-  pauseVideo: { ar: "إيقاف الفيديو مؤقتاً", en: "Pause video" } satisfies LocalText,
-  playVideo: { ar: "تشغيل الفيديو", en: "Play video" } satisfies LocalText,
   pauseLogos: { ar: "إيقاف حركة الشعارات", en: "Pause logos" } satisfies LocalText,
   playLogos: { ar: "تشغيل حركة الشعارات", en: "Play logos" } satisfies LocalText,
   scrollCue: { ar: "مرّر", en: "Scroll" } satisfies LocalText,

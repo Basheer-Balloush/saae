@@ -90,7 +90,7 @@ export function createTreeStory(scene, toWorld, color) {
   const items=[];
   /* The roots no longer get markers. They were there to say WHICH community
      the scroll had landed on, and the scroll does not choose one any more --
-     the reader does, from a card, out of nine. Six rings that point at nothing
+     the reader does, from a card, out of eight. Six rings that point at nothing
      are just six blue dots on the drawing, so the roots are lit by a rising
      band of light in the flight shader instead, which needs no geometry here.
      The fruit markers stay: those still mark real destinations. */

@@ -30,7 +30,8 @@
   /* The one place the two modes are decided. The stylesheet asks the same
      question in the same words, so the reel is tall exactly when this is true. */
   const scrubGate = window.matchMedia(
-    "(min-width: 821px) and (prefers-reduced-motion: no-preference)");
+    "(min-width: 821px) and (prefers-reduced-motion: no-preference)",
+  );
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const lerp = (from, to, t) => from + (to - from) * t;
@@ -44,13 +45,16 @@
 
     let visible = false;
 
-    new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting === visible) return;
-        visible = entry.isIntersecting;
-        (visible ? onShow : onHide)();
-      });
-    }, { rootMargin: "120px 0px" }).observe(element);
+    new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting === visible) return;
+          visible = entry.isIntersecting;
+          (visible ? onShow : onHide)();
+        });
+      },
+      { rootMargin: "120px 0px" },
+    ).observe(element);
   }
 
   /* A repeating job that only runs while its section is on screen, the tab is
@@ -61,18 +65,26 @@
     let onScreen = false;
     let enabled = false;
 
-    const stopTimer = () => { window.clearInterval(timer); timer = 0; };
+    const stopTimer = () => {
+      window.clearInterval(timer);
+      timer = 0;
+    };
 
     function sync() {
-      const run = onScreen && enabled && !holds
-        && !document.hidden && !reducedMotion.matches;
+      const run = onScreen && enabled && !holds && !document.hidden && !reducedMotion.matches;
       if (run && !timer) timer = window.setInterval(advance, delay);
       else if (!run && timer) stopTimer();
     }
 
     const api = {
-      hold() { holds += 1; sync(); },
-      release() { holds = Math.max(0, holds - 1); sync(); },
+      hold() {
+        holds += 1;
+        sync();
+      },
+      release() {
+        holds = Math.max(0, holds - 1);
+        sync();
+      },
       /* A deliberate interaction takes the wheel for a while and hands it
          back. Nothing here stops for good short of changing mode. */
       pause(ms) {
@@ -81,8 +93,14 @@
       },
       /* Off whenever the scroll is driving instead. Two motors on one carousel
          fight each other, and the reader's scroll is the one that wins. */
-      enable(state) { enabled = state; sync(); },
-      screen(state) { onScreen = state; sync(); }
+      enable(state) {
+        enabled = state;
+        sync();
+      },
+      screen(state) {
+        onScreen = state;
+        sync();
+      },
     };
 
     section.addEventListener("pointerenter", api.hold);
@@ -101,7 +119,7 @@
   function draggable(element, pitchOf, onStart, onMove, onEnd) {
     let drag = null;
 
-    element.addEventListener("pointerdown", event => {
+    element.addEventListener("pointerdown", (event) => {
       if (event.button) return;
       const pitch = pitchOf();
       if (!pitch) return;
@@ -111,7 +129,7 @@
       onStart();
     });
 
-    element.addEventListener("pointermove", event => {
+    element.addEventListener("pointermove", (event) => {
       if (!drag || drag.id !== event.pointerId) return;
       drag.travel = (event.clientX - drag.x) / drag.pitch;
       if (Math.abs(event.clientX - drag.x) > 6) drag.moved = true;
@@ -132,12 +150,16 @@
     element.addEventListener("pointerup", finish);
     element.addEventListener("pointercancel", finish);
 
-    element.addEventListener("click", event => {
-      if (element.dataset.suppressClick !== "1") return;
-      element.dataset.suppressClick = "0";
-      event.preventDefault();
-      event.stopPropagation();
-    }, true);
+    element.addEventListener(
+      "click",
+      (event) => {
+        if (element.dataset.suppressClick !== "1") return;
+        element.dataset.suppressClick = "0";
+        event.preventDefault();
+        event.stopPropagation();
+      },
+      true,
+    );
   }
 
   /* ---- The reel ---------------------------------------------------------
@@ -147,16 +169,16 @@
      leaving as it arrives; without the tail the last card and the button
      underneath it are glued together, and the reader never sees the register
      finish. */
-  const HEAD = .06;
-  const TAIL = .11;
+  const HEAD = 0.06;
+  const TAIL = 0.11;
 
   function reelScrub(reel, screen, onProgress) {
     let live = false;
     let onScreen = false;
     let frame = null;
     let stamp = 0;
-    let value = 0;    // what is painted; chases target
-    let target = 0;   // what the scroll position says
+    let value = 0; // what is painted; chases target
+    let target = 0; // what the scroll position says
 
     // How far the reel travels while its screen is stuck to the top.
     const span = () => Math.max(1, reel.offsetHeight - screen.offsetHeight);
@@ -171,7 +193,7 @@
       stamp = now;
 
       const remaining = target - value;
-      if (Math.abs(remaining) < .0002) {
+      if (Math.abs(remaining) < 0.0002) {
         value = target;
         onProgress(value);
         frame = null;
@@ -182,7 +204,7 @@
          same wheel gesture has to land in the same place on a 60Hz panel and
          on a 144Hz one. The lag is what makes the arc glide rather than
          twitch on every wheel notch. */
-      value += remaining * (1 - Math.pow(1 - .17, delta / 16.67));
+      value += remaining * (1 - Math.pow(1 - 0.17, delta / 16.67));
       onProgress(value);
       frame = requestAnimationFrame(step);
     }
@@ -217,20 +239,27 @@
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
 
-    visibility(reel, () => {
-      onScreen = true;
-      if (!live) return;
-      land();   // arrive already in the right place, never scrub into it
-      wake();
-    }, () => {
-      onScreen = false;
-      stop();
-    });
+    visibility(
+      reel,
+      () => {
+        onScreen = true;
+        if (!live) return;
+        land(); // arrive already in the right place, never scrub into it
+        wake();
+      },
+      () => {
+        onScreen = false;
+        stop();
+      },
+    );
 
     return {
       set(state) {
         live = state;
-        if (!live) { stop(); return; }
+        if (!live) {
+          stop();
+          return;
+        }
         land();
         wake();
       },
@@ -239,7 +268,7 @@
       offsetFor(t) {
         const top = reel.getBoundingClientRect().top + window.scrollY;
         return Math.round(top + (HEAD + clamp(t, 0, 1) * (1 - HEAD - TAIL)) * span());
-      }
+      },
     };
   }
 
@@ -260,18 +289,18 @@
     const last = total - 1;
 
     let live = false;
-    let pos = 0;     // fractional, and only in scrubbed mode
-    let index = -1;  // rounded; everything discrete keys off this
+    let pos = 0; // fractional, and only in scrubbed mode
+    let index = -1; // rounded; everything discrete keys off this
 
     /* The arc as a function of distance from the centre, rather than as five
        fixed stops. The numbers at 0, 1 and 2 are the ones the stylesheet used,
        so a card parked at a whole position looks exactly as it did — between
        them it now interpolates instead of jumping. */
     const KNOTS = [
-      { x: 0,    scale: 1,    turn: 0,  fade: 1,   scrim: 0   },
-      { x: .86,  scale: .845, turn: 25, fade: .68, scrim: .5  },
-      { x: 1.5,  scale: .7,   turn: 38, fade: .36, scrim: .64 },
-      { x: 1.94, scale: .62,  turn: 43, fade: .2,  scrim: .7  }
+      { x: 0, scale: 1, turn: 0, fade: 1, scrim: 0 },
+      { x: 0.86, scale: 0.845, turn: 25, fade: 0.68, scrim: 0.5 },
+      { x: 1.5, scale: 0.7, turn: 38, fade: 0.36, scrim: 0.64 },
+      { x: 1.94, scale: 0.62, turn: 43, fade: 0.2, scrim: 0.7 },
     ];
 
     function shape(distance) {
@@ -285,7 +314,7 @@
         scale: lerp(a.scale, b.scale, t),
         turn: lerp(a.turn, b.turn, t),
         fade: lerp(a.fade, b.fade, t),
-        scrim: lerp(a.scrim, b.scrim, t)
+        scrim: lerp(a.scrim, b.scrim, t),
       };
     }
 
@@ -295,7 +324,7 @@
       slides.forEach((slide, i) => {
         // Fold onto the shorter way round the ring, so the arc is symmetric
         // and the first and last cards are neighbours, not opposite ends.
-        let offset = ((i - pos) % total + total) % total;
+        let offset = (((i - pos) % total) + total) % total;
         if (offset > total / 2) offset -= total;
 
         const distance = Math.abs(offset);
@@ -304,12 +333,18 @@
         // A card is teleported across the ring at exactly half a turn out, so
         // it has to be gone by then. Held at full strength out to two, so a
         // card parked at the edge of the arc looks as it did before.
-        const edge = clamp((total / 2 - distance) / .5, 0, 1);
+        const edge = clamp((total / 2 - distance) / 0.5, 0, 1);
 
         slide.style.transform =
-          "translateX(calc(-50% + var(--card-w) * " + (side * s.x).toFixed(4) + ")) " +
-          "scale(" + s.scale.toFixed(4) + ") " +
-          "rotateY(" + (-side * s.turn).toFixed(2) + "deg)";
+          "translateX(calc(-50% + var(--card-w) * " +
+          (side * s.x).toFixed(4) +
+          ")) " +
+          "scale(" +
+          s.scale.toFixed(4) +
+          ") " +
+          "rotateY(" +
+          (-side * s.turn).toFixed(2) +
+          "deg)";
         slide.style.opacity = (s.fade * edge).toFixed(3);
         slide.style.zIndex = String(30 - Math.round(distance * 10));
         // Read by the scrim and the copy block, which are not this element.
@@ -321,12 +356,12 @@
         // The copy holds at full strength either side of the centre and is
         // gone well before the next card arrives. Ramping it straight off zero
         // reads as a flicker: a headline that is never quite settled.
-        slide.style.setProperty("--copy", clamp((.62 - distance) / .37, 0, 1).toFixed(3));
+        slide.style.setProperty("--copy", clamp((0.62 - distance) / 0.37, 0, 1).toFixed(3));
       });
     }
 
     function strip() {
-      slides.forEach(slide => {
+      slides.forEach((slide) => {
         slide.style.transform = "";
         slide.style.opacity = "";
         slide.style.zIndex = "";
@@ -344,7 +379,7 @@
       index = next;
 
       slides.forEach((slide, i) => {
-        let offset = ((i - index) % total + total) % total;
+        let offset = (((i - index) % total) + total) % total;
         if (offset > total / 2) offset -= total;
         slide.dataset.pos = String(offset);
 
@@ -366,15 +401,16 @@
     }
 
     // Stepped mode: whole cards, CSS geometry, wrapping at both ends.
-    const go = next => setIndex(((next % total) + total) % total);
+    const go = (next) => setIndex(((next % total) + total) % total);
 
-    const scrub = newsReel && newsScreen
-      ? reelScrub(newsReel, newsScreen, progress => {
-          pos = progress * last;
-          paint();
-          setIndex(Math.round(pos));
-        })
-      : null;
+    const scrub =
+      newsReel && newsScreen
+        ? reelScrub(newsReel, newsScreen, (progress) => {
+            pos = progress * last;
+            paint();
+            setIndex(Math.round(pos));
+          })
+        : null;
 
     const player = autoplay(newsFlow, 5600, () => go(index + 1));
     const took = () => player.pause(9000);
@@ -392,19 +428,19 @@
       go(next);
     }
 
-    const stepBy = by => goTo(live ? clamp(index + by, 0, last) : index + by);
+    const stepBy = (by) => goTo(live ? clamp(index + by, 0, last) : index + by);
 
-    newsFlow.querySelectorAll(".flow-arrow").forEach(button => {
+    newsFlow.querySelectorAll(".flow-arrow").forEach((button) => {
       button.addEventListener("click", () => stepBy(Number(button.dataset.step)));
     });
 
-    dots.forEach(dot => {
+    dots.forEach((dot) => {
       dot.addEventListener("click", () => goTo(Number(dot.dataset.go)));
     });
 
     // Click an off-centre card to bring it in. The centre card keeps its own
     // link, so this never steals the one click that matters.
-    newsTrack.addEventListener("click", event => {
+    newsTrack.addEventListener("click", (event) => {
       const slide = event.target.closest(".news-slide");
       if (!slide || slide.dataset.pos === "0") return;
       goTo(slides.indexOf(slide));
@@ -412,7 +448,7 @@
 
     // Scoped to the carousel, never to the window: everywhere else on this
     // page the arrow keys belong to the scroll, which runs a very long way.
-    newsFlow.addEventListener("keydown", event => {
+    newsFlow.addEventListener("keydown", (event) => {
       if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
       event.preventDefault();
       stepBy(event.key === "ArrowRight" ? 1 : -1);
@@ -423,11 +459,11 @@
       () => (live ? 0 : slides[0].offsetWidth),
       () => {},
       () => {},
-      travel => {
-        if (Math.abs(travel) < .18) return;
+      (travel) => {
+        if (Math.abs(travel) < 0.18) return;
         took();
         go(index - Math.sign(travel));
-      }
+      },
     );
 
     function setMode(scrubbed) {
@@ -435,14 +471,21 @@
       newsFlow.classList.toggle("is-scrubbed", live);
       player.enable(!live);
       if (scrub) scrub.set(live);
-      if (!live) { strip(); go(Math.max(0, index)); }
+      if (!live) {
+        strip();
+        go(Math.max(0, index));
+      }
     }
 
     setIndex(0);
     setMode(scrubGate.matches);
-    scrubGate.addEventListener("change", event => setMode(event.matches));
+    scrubGate.addEventListener("change", (event) => setMode(event.matches));
 
-    visibility(newsFlow, () => player.screen(true), () => player.screen(false));
+    visibility(
+      newsFlow,
+      () => player.screen(true),
+      () => player.screen(false),
+    );
   }
 
   /* ---- Partners ---------------------------------------------------------
@@ -467,22 +510,25 @@
     /* Just before the fade starts. Until then the button is not merely
        transparent but hidden, because a link at opacity zero is still in the
        tab order. */
-    const READY = .85;
+    const READY = 0.85;
     const partnerMarks = Array.from(partnerScreen.querySelectorAll(".partner-mark"));
     // CSS calc() cannot reliably multiply two custom properties (for example
     // --i * --step) in Safari and Chromium. Compute the resulting time here,
     // then give each paused mark an ordinary, browser-supported delay.
-    const partnerStep = Number.parseFloat(
-      getComputedStyle(partnerMarks[0] || partnerScreen).getPropertyValue("--step")
-    ) || .02364;
+    const partnerStep =
+      Number.parseFloat(
+        getComputedStyle(partnerMarks[0] || partnerScreen).getPropertyValue("--step"),
+      ) || 0.02364;
 
-    function paintPartnerMarks(progress) {
-      partnerMarks.forEach((mark, index) => {
-        mark.style.setProperty("--partner-delay", `${(index * partnerStep - progress).toFixed(4)}s`);
+     function paintPartnerMarks(progress) {
+       partnerMarks.forEach((mark, index) => {
+         // Keep the tested property expression stable for the legacy bundle.
+         // prettier-ignore
+         mark.style.setProperty("--partner-delay", `${(index * partnerStep - progress).toFixed(4)}s`);
       });
     }
 
-    const scrub = reelScrub(partnerReel, partnerScreen, progress => {
+    const scrub = reelScrub(partnerReel, partnerScreen, (progress) => {
       partnerScreen.style.setProperty("--t", progress.toFixed(4));
       paintPartnerMarks(progress);
       partnerOutro.classList.toggle("is-ready", progress >= READY);
@@ -494,7 +540,7 @@
       // Handing --t back to the stylesheet is what restores the still.
       if (!scrubbed) {
         partnerScreen.style.removeProperty("--t");
-        paintPartnerMarks(.5);
+         paintPartnerMarks(.5);
         partnerOutro.classList.remove("is-ready");
       }
 
@@ -502,7 +548,7 @@
     }
 
     setPartnerMode(scrubGate.matches);
-    scrubGate.addEventListener("change", event => setPartnerMode(event.matches));
+    scrubGate.addEventListener("change", (event) => setPartnerMode(event.matches));
   }
 
   /* ---- FAQ --------------------------------------------------------------
@@ -510,18 +556,20 @@
      trigger and .is-open on each item, with the first answer open. That means
      the section is readable with scripting off, where every answer simply
      stays where the CSS put it. All this adds is the toggling. */
-  const faqTriggers = Array.from(document.querySelectorAll(".faq-trigger"));
+  const faqTriggers = Array.from(document.querySelectorAll(".faq-trigger")).filter(
+    (trigger) => !trigger.closest(".hp-faq-scroll-card"),
+  );
 
   if (faqTriggers.length) {
     const setFaqOpen = (activeTrigger, open) => {
-      faqTriggers.forEach(trigger => {
+      faqTriggers.forEach((trigger) => {
         const isOpen = trigger === activeTrigger && open;
         trigger.setAttribute("aria-expanded", String(isOpen));
         trigger.closest(".faq-item")?.classList.toggle("is-open", isOpen);
       });
     };
 
-    faqTriggers.forEach(trigger => {
+    faqTriggers.forEach((trigger) => {
       const item = trigger.closest(".faq-item");
       if (!item) return;
 
@@ -532,7 +580,7 @@
 
       // On a desktop pointer, the answer previews as soon as the reader
       // reaches its row. Touch devices retain the intentional tap behaviour.
-      item.addEventListener("pointerenter", event => {
+      item.addEventListener("pointerenter", (event) => {
         if (event.pointerType === "mouse") setFaqOpen(trigger, true);
       });
     });
@@ -545,32 +593,40 @@
      The class is applied before observing. This lets CSS establish the hidden
      starting state first, instead of allowing the page-load fade to finish on
      text that is still several screens below the reader. */
-  const scrollText = Array.from(document.querySelectorAll(
-    "main :is(p, h1, h2, h3, h4, h5, h6, a, button, dt, dd, small, label, time), footer :is(p, h1, h2, h3, h4, h5, h6, a, button, dt, dd, small, label, time)"
-  )).filter(element => (
-    element.textContent.trim()
-    && !element.closest(".hero-section, .hero-static, .site-loader, .language-wash, [data-react-i18n]")
-    && !element.classList.contains("sr-only")
-  ));
+  const scrollText = Array.from(
+    document.querySelectorAll(
+      "main :is(p, h1, h2, h3, h4, h5, h6, a, button, dt, dd, small, label, time), footer :is(p, h1, h2, h3, h4, h5, h6, a, button, dt, dd, small, label, time)",
+    ),
+  ).filter(
+    (element) =>
+      element.textContent.trim() &&
+      !element.closest(
+        ".hero-section, .hero-static, .site-loader, .language-wash, [data-react-i18n]",
+      ) &&
+      !element.classList.contains("sr-only"),
+  );
 
-  scrollText.forEach(element => element.classList.add("scroll-text-reveal"));
+  scrollText.forEach((element) => element.classList.add("scroll-text-reveal"));
 
   if ("IntersectionObserver" in window) {
-    const textObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add("is-text-visible");
-        textObserver.unobserve(entry.target);
-      });
-    }, { threshold: .08, rootMargin: "0px 0px -8%" });
+    const textObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-text-visible");
+          textObserver.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -8%" },
+    );
 
     const syncTextMotion = () => {
       textObserver.disconnect();
       if (reducedMotion.matches) {
-        scrollText.forEach(element => element.classList.add("is-text-visible"));
+        scrollText.forEach((element) => element.classList.add("is-text-visible"));
         return;
       }
-      scrollText.forEach(element => {
+      scrollText.forEach((element) => {
         if (!element.classList.contains("is-text-visible")) textObserver.observe(element);
       });
     };
@@ -578,6 +634,6 @@
     syncTextMotion();
     reducedMotion.addEventListener("change", syncTextMotion);
   } else {
-    scrollText.forEach(element => element.classList.add("is-text-visible"));
+    scrollText.forEach((element) => element.classList.add("is-text-visible"));
   }
 })();

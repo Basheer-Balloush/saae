@@ -6,7 +6,8 @@ import { AssistantChatModal } from "./AssistantChatModal";
 
 const DISMISS_KEY = "saae-assistant-greeting-dismissed";
 
-export function AssistantFab() {
+/** hideTrigger keeps the chat (opened by "assistant:open") but drops the round button. */
+export function AssistantFab({ hideTrigger = false }: { hideTrigger?: boolean }) {
   const { t, dir } = useLang();
   const [open, setOpen] = useState(false);
   const [prefill, setPrefill] = useState<string | null>(null);
@@ -41,7 +42,11 @@ export function AssistantFab() {
 
   const dismissGreeting = () => {
     setShowGreeting(false);
-    try { sessionStorage.setItem(DISMISS_KEY, "1"); } catch {}
+    try {
+      sessionStorage.setItem(DISMISS_KEY, "1");
+    } catch {
+      // The greeting can still be dismissed when storage is unavailable.
+    }
   };
 
   return (
@@ -49,7 +54,7 @@ export function AssistantFab() {
       <div
         className={`fixed bottom-6 z-40 flex items-end gap-3 ${
           isRtl ? "right-6 flex-row-reverse" : "left-6 flex-row-reverse"
-        }`}
+        } ${hideTrigger ? "hidden" : ""}`}
       >
         <AnimatePresence>
           {showGreeting && !open && (
@@ -74,7 +79,10 @@ export function AssistantFab() {
               </button>
               <button
                 type="button"
-                onClick={() => { dismissGreeting(); setOpen(true); }}
+                onClick={() => {
+                  dismissGreeting();
+                  setOpen(true);
+                }}
                 className="block w-full text-start leading-snug"
               >
                 {t.assistant.greeting}
@@ -91,7 +99,10 @@ export function AssistantFab() {
 
         <motion.button
           type="button"
-          onClick={() => { dismissGreeting(); setOpen((v) => !v); }}
+          onClick={() => {
+            dismissGreeting();
+            setOpen((v) => !v);
+          }}
           aria-label={t.assistant.cta}
           initial={{ opacity: 0, scale: 0.6, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -108,8 +119,7 @@ export function AssistantFab() {
             aria-hidden
             className="absolute inset-0 rounded-full opacity-60"
             style={{
-              background:
-                "radial-gradient(closest-side, rgba(4,128,144,0.45), transparent 70%)",
+              background: "radial-gradient(closest-side, rgba(4,128,144,0.45), transparent 70%)",
               animation: "pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
             }}
           />
@@ -141,7 +151,15 @@ export function AssistantFab() {
         </motion.button>
       </div>
 
-      <AssistantChatModal open={open} onClose={() => { setOpen(false); setPrefill(null); }} prefill={prefill} onPrefillConsumed={() => setPrefill(null)} />
+      <AssistantChatModal
+        open={open}
+        onClose={() => {
+          setOpen(false);
+          setPrefill(null);
+        }}
+        prefill={prefill}
+        onPrefillConsumed={() => setPrefill(null)}
+      />
     </>
   );
 }
