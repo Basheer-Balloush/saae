@@ -266,9 +266,7 @@
     color: inherit;
     font: inherit;
     text-align: start;
-    cursor: pointer;
   }
-  .pillar-trigger:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: 5px; border-radius: 4px; }
   .pillar-n { color: var(--olive-lift); font-size: .78rem; font-weight: 800; letter-spacing: .14em; }
   .pillar-word {
     margin: 0;
