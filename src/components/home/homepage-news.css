@@ -87,8 +87,14 @@ html.hero-opening-ready .hn-root .hn-intro-copy .hn-intro-heading { animation: n
   /* The cover sits under the heading and the navigation, not in the middle of
      a full screen: the stage is anchored to the top and tucked up under the
      intro, so no empty screen opens between the words and the picture. */
-  .hn-expansion { height: 130svh; margin-top: -72px; }
-  .hn-sticky { position: sticky; top: 0; height: 100svh; min-height: 0; grid-template-rows: auto; place-items: start center; padding: 96px 16px 0; overflow: clip; }
+  .hn-expansion { height: 150svh; margin-top: -72px; }
+  .hn-sticky { position: sticky; top: 0; height: 100svh; min-height: 0; grid-template-rows: auto; place-items: start center; padding: 96px 16px 24px; overflow: clip; }
+  /* A portrait phone has no room for a 3:2 cover to fill, so the stage takes
+     the whole screen under the navigation and the photo is cropped to it; the
+     cover grows from its top edge, so it starts right under the heading. */
+  .hn-media-stage { width: 100%; height: calc(100svh - 120px); aspect-ratio: auto; }
+  .hn-media { transform-origin: top center; }
+  .hn-media img { object-fit: cover; }
   .hn-display span { font-size: 52px; }
 }
 @media (prefers-reduced-motion: reduce) {

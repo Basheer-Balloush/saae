@@ -28,7 +28,7 @@ function sequenceIndex(progress: number) {
   return index;
 }
 
-function FaqSequence({ lang }: { lang: Locale }) {
+export function FaqSequence({ lang }: { lang: Locale }) {
   const parentProgress = useContainerScrollProgress();
   const fallbackProgress = useMotionValue(0);
   const progress = parentProgress ?? fallbackProgress;

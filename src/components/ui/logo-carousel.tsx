@@ -33,8 +33,8 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled;
 };
 
-const distributeLogos = (allLogos: Logo[], columnCount: number): Logo[][] => {
-  const shuffled = shuffleArray(allLogos);
+const distributeLogos = (allLogos: Logo[], columnCount: number, shuffle = true): Logo[][] => {
+  const shuffled = shuffle ? shuffleArray(allLogos) : [...allLogos];
   const columns: Logo[][] = Array.from({ length: columnCount }, () => []);
   shuffled.forEach((logo, index) => {
     columns[index % columnCount].push(logo);
@@ -42,7 +42,11 @@ const distributeLogos = (allLogos: Logo[], columnCount: number): Logo[][] => {
   const maxLength = Math.max(...columns.map((col) => col.length));
   columns.forEach((col) => {
     while (col.length < maxLength) {
-      col.push(shuffled[Math.floor(Math.random() * shuffled.length)]);
+      col.push(
+        shuffle
+          ? shuffled[Math.floor(Math.random() * shuffled.length)]
+          : shuffled[col.length % shuffled.length],
+      );
     }
   });
   return columns;
@@ -148,11 +152,14 @@ interface LogoCarouselProps {
 
 export function LogoCarousel({ columnCount = 2, logos, className }: LogoCarouselProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const [logoSets, setLogoSets] = useState<Logo[][]>([]);
+  // The server and the first client render show the logos in order; the
+  // shuffle happens after mount, so the two agree and the markup has logos.
+  const [logoSets, setLogoSets] = useState<Logo[][]>(() =>
+    logos.length ? distributeLogos(logos, columnCount, false) : [],
+  );
   const [onScreen, setOnScreen] = useState(false);
   const [pageVisible, setPageVisible] = useState(true);
 
-  // Shuffled after mount, so the server and the first client render agree.
   useEffect(() => {
     setLogoSets(logos.length ? distributeLogos(logos, columnCount) : []);
   }, [logos, columnCount]);

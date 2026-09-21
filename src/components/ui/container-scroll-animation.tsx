@@ -18,7 +18,8 @@ type ContainerScrollProps = {
   children: ReactNode;
   className?: string;
   cardClassName?: string;
-  layout?: "stacked" | "split";
+  /** "column": the split's pinned beats, with the card under the title (phones). */
+  layout?: "stacked" | "split" | "column";
   introHeight?: number;
 };
 
@@ -77,11 +78,11 @@ export function ContainerScroll({
       // The split FAQ starts when its section reaches the viewport. Using the
       // viewport-bottom trigger here made a hash jump begin halfway through
       // the title movement instead of showing the title centered first.
-      const start = layout === "split" ? 0 : window.innerHeight * 0.92;
-      const end =
-        layout === "split"
-          ? Math.min(-1, window.innerHeight - element.offsetHeight)
-          : -window.innerHeight * 0.15;
+      const pinned = layout !== "stacked";
+      const start = pinned ? 0 : window.innerHeight * 0.92;
+      const end = pinned
+        ? Math.min(-1, window.innerHeight - element.offsetHeight)
+        : -window.innerHeight * 0.15;
       const distance = start - rect.top;
       const totalDistance = start - end;
       // Keep the entrance at its original distance when adding a longer reading phase.

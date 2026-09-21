@@ -9,17 +9,12 @@ import {
   Linkedin,
   Mail,
   MapPin,
-  Minus,
   Network,
-  Pause,
   Phone,
-  Play,
-  Plus,
   Rocket,
 } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import MotionButton from "@/components/ui/motion-button";
-import { ContainerScrollItem } from "@/components/ui/container-scroll-animation";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import { HomepageNews } from "./HomepageNews";
 import "./homepage-partners.css";
@@ -28,9 +23,12 @@ import "./mobile-home.css";
 import { MobileTreeHero } from "./MobileTreeHero";
 import { MobileRadialNav } from "./MobileRadialNav";
 import { MobileMissionReel } from "./MobileMissionReel";
+import { MobileSectionGuide } from "./MobileSectionGuide";
+import { FaqSequence } from "./DesktopFaqScroll";
+import { IPhoneMockup } from "@/components/ui/iphone-mockup";
+import { LogoCarousel, type Logo } from "@/components/ui/logo-carousel";
 import {
   CONTACT,
-  FAQS,
   FAQ_COPY,
   FOOTER_CLAIM,
   FOOTER_DISCOVER,
@@ -62,23 +60,6 @@ function SocialIcon({ name }: { name: string }) {
   return <Linkedin size={20} aria-hidden="true" />;
 }
 
-function PartnerLogo({ partner, decorative = false }: { partner: Partner; decorative?: boolean }) {
-  const logo = partner.lightLogo ?? partner.logo;
-  return logo ? (
-    <img
-      src={logo}
-      alt={decorative ? "" : partner.name}
-      width={320}
-      height={160}
-      style={{ maxHeight: partner.height }}
-      loading="lazy"
-      decoding="async"
-    />
-  ) : (
-    <span>{partner.name}</span>
-  );
-}
-
 export function MobileHomeView({
   lang,
   onToggleLang,
@@ -96,14 +77,13 @@ export function MobileHomeView({
   partnersFailed?: boolean;
 }) {
   const visiblePartners = partnersFailed ? [] : partners;
-  const partnerRows = [
-    visiblePartners.slice(0, Math.ceil(visiblePartners.length / 2)),
-    visiblePartners.slice(Math.ceil(visiblePartners.length / 2)),
-  ].filter((row) => row.length);
+  // A partner's light logo (made for dark backgrounds) where it has one, as on the desktop.
+  const partnerLogos: Logo[] = visiblePartners.flatMap((p) => {
+    const src = p.lightLogo ?? p.logo;
+    return src ? [{ id: p.id, name: p.name, src, scale: p.height / 96 }] : [];
+  });
   const dir = lang === "ar" ? "rtl" : "ltr";
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [motionReady, setMotionReady] = useState(false);
-  const [logosPaused, setLogosPaused] = useState(false);
 
   const wordmark =
     lang === "ar"
@@ -142,170 +122,110 @@ export function MobileHomeView({
         <MobileTreeHero lang={lang === "ar" ? "ar" : "en"} sentinelRef={heroSentinelRef} />
 
         <div className="mh-chapters">
-          {/* The news pins and slides out as "how we work" slides in (MobileMissionReel). */}
+          <HomepageNews news={news} newsFailed={newsFailed} lang={lang} />
+
+          {/* As on the desktop, partners pin and slide out as "how we work" slides in (MobileMissionReel). */}
           <div className="mh-handoff">
             <div className="mh-handoff-out" ref={handoffOutRef}>
-              <HomepageNews news={news} newsFailed={newsFailed} lang={lang} />
+            <section
+              className="mh-section hn-root hp-partners mh-partners"
+              id="partners"
+              aria-labelledby="mh-partners-title"
+            >
+              <div className="hn-tech-details" aria-hidden="true"><span /><span /></div>
+              <div className="mh-wrap mh-partners-head">
+                <h2 className="hn-intro-heading hp-heading" id="mh-partners-title">
+                  {lang === "ar" ? "شركاء " : "Partners in "}<span className="hn-headline-accent">{lang === "ar" ? "النجاح" : "Success"}</span>
+                </h2>
+                <p className="mh-section-p">{pick(PARTNERS_COPY.body, lang)}</p>
+              </div>
+              {visiblePartners.length ? (
+                <>
+                  {/* The desktop's logo carousel: each column swaps its logo in place. */}
+                  <LogoCarousel columnCount={3} logos={partnerLogos} className="mh-partner-carousel" />
+                  {/* The carousel's logos are pictures; their names are here for readers. */}
+                  <ul className="mh-sr-only" aria-label={pick(PARTNERS_COPY.title, lang)}>
+                    {partnerLogos.map((logo) => (
+                      <li key={logo.id}>{logo.name}</li>
+                    ))}
+                  </ul>
+                  {/* A partner without a logo keeps its name on screen. */}
+                  {visiblePartners.some((p) => !(p.lightLogo ?? p.logo)) && (
+                    <ul className="mh-partner-names">
+                      {visiblePartners
+                        .filter((p) => !(p.lightLogo ?? p.logo))
+                        .map((p) => (
+                          <li key={p.id}>
+                            <span>{p.name}</span>
+                          </li>
+                        ))}
+                    </ul>
+                  )}
+                </>
+              ) : (
+                <p className="mh-wrap" role="status">
+                  {partnersFailed
+                    ? lang === "ar"
+                      ? "تعذّر تحميل الشركاء. يرجى المحاولة مرة أخرى."
+                      : "Partners could not be loaded. Please try again."
+                    : lang === "ar"
+                      ? "لا يوجد شركاء لعرضهم حالياً."
+                      : "No partners to display yet."}
+                </p>
+              )}
+              <div className="mh-wrap">
+                <div className="hp-actions"><MotionButton href="/partners" label={pick(PARTNERS_COPY.allPartners, lang)} className="hn-show-all" /></div>
+              </div>
+            </section>
             </div>
             <div className="mh-handoff-runway" aria-hidden="true" />
           </div>
 
           <MobileMissionReel lang={lang} outRef={handoffOutRef} />
 
-          <section
-            className={`mh-section hn-root hp-partners${logosPaused ? " mh-is-paused" : ""}`}
-            id="partners"
-            aria-labelledby="mh-partners-title"
-          >
-            <div className="hn-tech-details" aria-hidden="true"><span /><span /></div>
-            <div className="mh-wrap mh-partners-head">
-              <div>
-                <h2 className="hn-intro-heading hp-heading" id="mh-partners-title">
-                  {lang === "ar" ? "شركاء " : "Partners in "}<span className="hn-headline-accent">{lang === "ar" ? "النجاح" : "Success"}</span>
-                </h2>
-                <p className="mh-section-p">{pick(PARTNERS_COPY.body, lang)}</p>
-              </div>
-              {visiblePartners.length > 0 && (
-                <button
-                  type="button"
-                  className="mh-round-btn mh-marquee-toggle"
-                  aria-pressed={logosPaused}
-                  aria-label={
-                    logosPaused
-                      ? pick(MICRO_COPY.playLogos, lang)
-                      : pick(MICRO_COPY.pauseLogos, lang)
-                  }
-                  onClick={() => setLogosPaused((v) => !v)}
-                >
-                  {logosPaused ? (
-                    <Play size={20} aria-hidden="true" />
-                  ) : (
-                    <Pause size={20} aria-hidden="true" />
-                  )}
-                </button>
-              )}
-            </div>
-            {visiblePartners.length ? (
-              <>
-                <div className="mh-marquee" aria-label={pick(PARTNERS_COPY.title, lang)}>
-                  {partnerRows.map((row, rowIndex) => (
-                    <div
-                      key={rowIndex}
-                      className={`mh-marquee-row${rowIndex ? " mh-row-reverse" : ""}`}
-                    >
-                      <div className="mh-marquee-track">
-                        {[0, 1].map((copy) => (
-                          <ul
-                            key={copy}
-                            className="mh-logo-list"
-                            aria-hidden={copy === 1 ? "true" : undefined}
-                          >
-                            {row.map((p) => (
-                              <li key={p.id} className="mh-logo-chip">
-                                <PartnerLogo partner={p} decorative={copy === 1} />
-                              </li>
-                            ))}
-                          </ul>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <ul className="mh-partner-static" aria-label={pick(PARTNERS_COPY.title, lang)}>
-                  {visiblePartners.map((p) => (
-                    <li key={p.id} className="mh-logo-chip">
-                      <PartnerLogo partner={p} />
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : (
-              <p className="mh-wrap" role="status">
-                {partnersFailed
-                  ? lang === "ar"
-                    ? "تعذّر تحميل الشركاء. يرجى المحاولة مرة أخرى."
-                    : "Partners could not be loaded. Please try again."
-                  : lang === "ar"
-                    ? "لا يوجد شركاء لعرضهم حالياً."
-                    : "No partners to display yet."}
-              </p>
-            )}
-            <div className="mh-wrap">
-              <div className="hp-actions"><MotionButton href="/partners" label={pick(PARTNERS_COPY.allPartners, lang)} className="hn-show-all" /></div>
-            </div>
-          </section>
 
-          <section className="mh-section hn-root hp-faq" id="faq" aria-labelledby="mh-faq-title">
+          <section className="mh-section hn-root hp-faq mh-faq" id="faq" aria-labelledby="mh-faq-title">
             <div className="hn-tech-details" aria-hidden="true"><span /><span /></div>
+            {/* The desktop's FAQ: the title, a phone rising in under it, then one
+                question at a time on its screen as the reader scrolls. */}
             <ContainerScroll
-              className="mh-faq-scroll"
-              cardClassName="mh-faq-scroll-card"
+              className="hp-faq-scroll mh-faq-scroll"
+              cardClassName="hp-faq-scroll-card"
+              layout="column"
+              introHeight={900}
               titleComponent={
-                <div className="mh-faq-scroll-heading">
-                  <h2 className="mh-section-h" id="mh-faq-title">
+                <div className="faq-intro">
+                  <h2 className="photo-head" id="mh-faq-title">
                     {pick(FAQ_COPY.title, lang)}
                   </h2>
                 </div>
               }
             >
-              <div className="mh-wrap mh-faq-scroll-content">
-                <ul className="mh-faq-list">
-                  {FAQS.map((f, i) => {
-                    const open = openFaq === i;
-                    return (
-                      <ContainerScrollItem
-                        key={pick(f.question, lang)}
-                        index={i}
-                        total={FAQS.length}
-                        className="mh-faq-item"
-                      >
-                        <h3 className="mh-faq-h">
-                          <button
-                            type="button"
-                            className="mh-faq-q"
-                            aria-expanded={open}
-                            aria-controls={`mh-faq-a-${i}`}
-                            id={`mh-faq-q-${i}`}
-                            onClick={() => setOpenFaq(open ? null : i)}
-                          >
-                            <span>{pick(f.question, lang)}</span>
-                            <span className="mh-faq-icon" aria-hidden="true">
-                              {open ? <Minus size={20} /> : <Plus size={20} />}
-                            </span>
-                          </button>
-                        </h3>
-                        <div
-                          className={open ? "mh-faq-panel mh-is-open" : "mh-faq-panel"}
-                          id={`mh-faq-a-${i}`}
-                          role="region"
-                          aria-labelledby={`mh-faq-q-${i}`}
-                          inert={!open}
-                        >
-                          <p className="mh-faq-a">
-                            {pick(f.answer, lang)}
-                            {f.answerLink ? (
-                              <>
-                                {" "}
-                                <a href={f.answerLink.href}>{pick(f.answerLink.text, lang)}</a>.
-                              </>
-                            ) : null}
-                          </p>
-                        </div>
-                      </ContainerScrollItem>
-                    );
-                  })}
-                </ul>
-                <MotionButton
-                  variant="secondary"
-                  label={pick(FAQ_COPY.writeToUs, lang)}
-                  href="/contact#write"
-                  classes="w-full justify-center"
-                />
-              </div>
+              <IPhoneMockup
+                model="15-pro"
+                islandTop={20}
+                color="#163a43"
+                screenBg="#061820"
+                className="hp-faq-device"
+                style={{ width: "100%" }}
+                frameStyle={{
+                  width: "100%",
+                  height: "auto",
+                  aspectRatio: "420 / 720",
+                  border: "1px solid rgba(114, 214, 223, .55)",
+                }}
+                screenStyle={{ position: "absolute", inset: 12, width: "auto", height: "auto" }}
+                safeAreaOverrides={{ left: 16, right: 16 }}
+                shadow="0 18px 42px rgba(0, 0, 0, .35), 0 0 30px rgba(0, 139, 157, .16)"
+              >
+                <FaqSequence lang={lang} />
+              </IPhoneMockup>
             </ContainerScroll>
           </section>
         </div>
       </main>
+
+      <MobileSectionGuide lang={lang === "ar" ? "ar" : "en"} />
 
       <footer className="mh-footer">
         <div className="mh-wrap">
