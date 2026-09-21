@@ -153,7 +153,12 @@ export function MobileMissionReel({
         {MISSION_COPY.title[lang]}
       </h2>
       <div className="mh-mission-reel" ref={reelRef}>
-        <div className="mh-mission-sticky" ref={stageRef}>
+        {/* hn-root and the circuit traces: the desktop reel's ground (#061820). */}
+        <div className="mh-mission-sticky hn-root" ref={stageRef}>
+          <div className="hn-tech-details" aria-hidden="true">
+            <span />
+            <span />
+          </div>
           <div className="mh-mission-words" aria-hidden="true">
             {WORDS[lang].map((word, i) => (
               <span

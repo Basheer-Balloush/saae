@@ -756,8 +756,9 @@
   scroll-margin-block-start: 0;
 }
 .mobile-home .mh-mission-sticky {
+  isolation: isolate;
   pointer-events: auto;
-  background: var(--mh-canvas);
+  background: #061820;
 }
 .mobile-home .mh-mission-reel {
   position: relative;
@@ -1020,9 +1021,10 @@
   place-items: start center;
   padding-block-start: 104px;
 }
+/* Lifted clear of Abu Al-Joud, who stands in the bottom corner. */
 .mobile-home .cs-scroll-column .cs-scroll-card {
-  inset-block: auto 24px;
-  inline-size: min(300px, 74vw, calc((100svh - 250px) * 420 / 720));
+  inset-block: auto 112px;
+  inline-size: min(280px, 68vw, calc((100svh - 320px) * 420 / 720));
 }
 @media (prefers-reduced-motion: reduce) {
   .mobile-home .mh-faq-scroll.cs-scroll-column {
