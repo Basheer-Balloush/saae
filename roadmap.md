@@ -7,3 +7,4 @@
 - [x] Verify English/Arabic desktop, tablet, mobile, keyboard/touch behavior, reduced motion, and preview health.
 - [x] Reuse the Home screen footer on the existing About page without changing other sections.
 - [x] Place each LEARN, RESEARCH, and BUILD description opposite its title on wider screens while preserving RTL/LTR.
+- [x] Remove the About statistics subtitle and the trailing period from its heading in both languages.
