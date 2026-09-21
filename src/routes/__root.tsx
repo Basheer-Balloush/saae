@@ -340,8 +340,9 @@ function RootComponent() {
                 <Outlet />
               </motion.div>
             </AnimatePresence>
+            {/* The homepage's Abu Al-Joud opens the chat there, on every screen size. */}
             {!isAms && !isLms && !isAdmin && (
-              <AssistantFab hideDesktopTrigger={location.pathname === "/"} />
+              <AssistantFab hideTrigger={location.pathname === "/"} />
             )}
             <Toaster richColors position="top-center" />
           </ConfirmProvider>
