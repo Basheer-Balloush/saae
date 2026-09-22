@@ -1,3 +1,10 @@
+/* Every page carries its own static footer in its markup and a mount point
+   directly above it. Once the motion footer has portalled in, the static one
+   steps aside; if the chunk never loads, it stays and the page still has a
+   footer. The class is what each page's mount point carries, so one rule
+   covers the whole site; the two ids are the original homepage and about
+   mounts, kept so their markup keeps working. */
+.motion-footer-root:not(:empty) + .home-footer-fallback,
 #home-motion-footer-root:not(:empty) + .home-footer-fallback,
 #about-motion-footer-root:not(:empty) + .home-footer-fallback {
   display: none;

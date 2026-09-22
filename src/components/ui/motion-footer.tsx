@@ -66,7 +66,7 @@ const LINKS = {
   ],
   programmes: [
     { ar: "منصة التعلم", en: "Learning platform", href: "/learning-management-system" },
-    { ar: "مجتمعات الجمعية", en: "SAAE communities", href: "/#communities" },
+    { ar: "مجتمعات الجمعية", en: "SAAE communities", href: "/about#communities" },
     { ar: "مبادرة المليون", en: "Million-user initiative", href: "/one-million-initiative-home" },
     { ar: "التسجيل", en: "Registration", href: "/registration" },
   ],
