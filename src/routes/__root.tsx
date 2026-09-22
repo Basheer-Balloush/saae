@@ -9,7 +9,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { createIsomorphicFn } from "@tanstack/react-start";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -292,19 +292,80 @@ function ScrollRestoration() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* Back and Forward return to where the visitor was; any other arrival (a
+     link, a reload) starts at the top. A page like the homepage is not its
+     full height when it first shows -- the desktop film builds its sections a
+     moment later, the phone's runways are sized by script -- so the position
+     is re-applied until the page is tall enough to hold it and has stayed
+     there briefly, and given up the moment the visitor scrolls themselves. */
+  const poppedRef = useRef(false);
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.hash) return;
-    const key = "saae-scroll-positions";
+    const onPop = () => {
+      poppedRef.current = true;
+    };
+    window.addEventListener("popstate", onPop);
+    // A whole-page Back (from a page outside the app) arrives as a load.
+    const entry = performance.getEntriesByType?.("navigation")[0] as
+      | PerformanceNavigationTiming
+      | undefined;
+    if (entry?.type === "back_forward") poppedRef.current = true;
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  useEffect(() => {
+    const popped = poppedRef.current;
+    poppedRef.current = false;
+    if (window.location.hash) return;
     let saved = 0;
-    try {
-      const m = JSON.parse(sessionStorage.getItem(key) || "{}");
-      saved = typeof m[location.pathname] === "number" ? m[location.pathname] : 0;
-    } catch {
-      // Start at the top if the stored scroll position is unavailable.
+    if (popped) {
+      try {
+        const m = JSON.parse(sessionStorage.getItem("saae-scroll-positions") || "{}");
+        saved = typeof m[location.pathname] === "number" ? m[location.pathname] : 0;
+      } catch {
+        // Start at the top if the stored scroll position is unavailable.
+      }
     }
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: saved, left: 0, behavior: "auto" });
-    });
+    type Engine = { scrollTo: (y: number, o?: { immediate?: boolean }) => void };
+    const go = (y: number) => {
+      const engine = (window as Window & { saaeScroll?: Engine }).saaeScroll;
+      if (engine) engine.scrollTo(y, { immediate: true });
+      else window.scrollTo({ top: y, left: 0, behavior: "auto" });
+    };
+    if (saved <= 0) {
+      requestAnimationFrame(() => go(0));
+      return;
+    }
+    const w = window as Window & { saaeRestoreTarget?: number };
+    w.saaeRestoreTarget = saved;
+    const started = performance.now();
+    let settledSince = 0;
+    let timer = 0;
+    let stopped = false;
+    const stop = () => {
+      stopped = true;
+      window.clearTimeout(timer);
+      if (w.saaeRestoreTarget === saved) delete w.saaeRestoreTarget;
+      for (const type of ["wheel", "touchstart", "keydown", "pointerdown"] as const)
+        window.removeEventListener(type, stop);
+    };
+    for (const type of ["wheel", "touchstart", "keydown", "pointerdown"] as const)
+      window.addEventListener(type, stop, { passive: true });
+    const attempt = () => {
+      if (stopped) return;
+      const now = performance.now();
+      const room = document.documentElement.scrollHeight - window.innerHeight;
+      if (room >= saved - 2) {
+        if (Math.abs(window.scrollY - saved) > 2) {
+          go(saved);
+          settledSince = 0;
+        } else if (!settledSince) settledSince = now;
+        else if (now - settledSince > 1200) return stop();
+      }
+      if (now - started > 8000) return stop();
+      timer = window.setTimeout(attempt, 100);
+    };
+    attempt();
+    return stop;
   }, [location.pathname]);
 
   return null;

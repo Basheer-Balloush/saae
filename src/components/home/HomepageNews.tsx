@@ -5,6 +5,7 @@ import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import MotionButton from "@/components/ui/motion-button";
 import { NEWS_COPY, type Locale, type NewsEntry } from "./mobile-home-content";
 import "./homepage-news.css";
+import { resizedImage, resizedSrcSet } from "@/lib/image-url";
 
 type Props = { news: NewsEntry[]; newsFailed?: boolean; lang: Locale; embedded?: boolean };
 const pick = (value: { ar: string; en: string }, lang: Locale) => value[lang];
@@ -30,7 +31,7 @@ export function HomepageNews({ news, newsFailed = false, lang, embedded = false 
           <div className="hn-story-grid">
             {stories.map((item, i) => (
               <article className="hn-story" key={item.id}>
-                <a className="hn-story-photo" href={item.href} tabIndex={-1} aria-hidden="true"><img src={item.image} alt="" width={800} height={500} loading="lazy" decoding="async" /></a>
+                <a className="hn-story-photo" href={item.href} tabIndex={-1} aria-hidden="true"><img src={resizedImage(item.image, 720)} srcSet={resizedSrcSet(item.image)} sizes="(max-width: 767px) 92vw, 34vw" alt="" width={800} height={500} loading="lazy" decoding="async" /></a>
                 <div className="hn-story-meta"><span dir="ltr">{String(i + 1).padStart(2, "0")}</span><time dateTime={item.dateTime}>{pick(item.date, lang)}</time></div>
                 <h3><a href={item.href}>{pick(item.headline, lang)}<Arrow size={18} aria-hidden="true" /></a></h3>
                 <p>{pick(item.excerpt, lang)}</p>

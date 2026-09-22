@@ -1396,7 +1396,8 @@ const staticGateStrings = [
          exists once playback starts. Deep links still work, because an explicit
          hash is a destination the visitor asked for. */
       if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-      if (!location.hash) window.scrollTo(0, 0);
+      if (!location.hash && !(window as Window & { saaeRestoreTarget?: number }).saaeRestoreTarget)
+        window.scrollTo(0, 0);
 
       __raf(() => __raf(() => {
         syncHeroMode();

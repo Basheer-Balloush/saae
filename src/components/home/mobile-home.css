@@ -201,8 +201,10 @@
 }
 .mobile-home .mh-hero.mh-tree-hero {
   min-block-size: 0;
-  /* Desktop runs 21 screens; a thumb covers ground faster than a wheel. */
-  block-size: 1300svh;
+  /* Desktop runs 21 screens. A thumb covers ground faster than a wheel, but
+     at 1300svh a flick on a 120Hz iPhone ran the whole story by in a second;
+     1800 gives each of the six beats three screens of scroll. */
+  block-size: 1800svh;
   overflow: visible;
   background: var(--mh-canvas);
 }
@@ -795,7 +797,7 @@
 }
 .mobile-home .mh-mission-reel {
   position: relative;
-  block-size: 410svh;
+  block-size: 470svh;
 }
 .mobile-home .mh-mission-sticky {
   position: sticky;
@@ -1048,7 +1050,7 @@
    top of the pinned screen and the phone rises in under it, then shows one
    question at a time as the reader scrolls. */
 .mobile-home .mh-faq-scroll.cs-scroll-column {
-  min-block-size: 500svh;
+  min-block-size: 640svh;
 }
 .mobile-home .cs-scroll-column .cs-scroll-header {
   place-items: start center;

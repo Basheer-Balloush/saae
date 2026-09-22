@@ -1,4 +1,5 @@
 import { communityLabel } from "@/lib/communityCategories";
+import { resizedImage, resizedSrcSet } from "@/lib/image-url";
 import type { NewsEntry } from "@/components/home/mobile-home-content";
 
 /**
@@ -147,10 +148,17 @@ function categoryHtml(key: string): string {
 
 /* ----------------------------------------------------------- news cards -- */
 
+/* Resized copies from Supabase's image endpoint (src/lib/image-url.ts): the
+   uploads are full camera size, which a phone stalls decoding. */
+function srcSetAttr(src: string, widths?: number[]): string {
+  const set = resizedSrcSet(src, widths);
+  return set ? ` srcset="${escapeHtml(set)}"` : "";
+}
+
 function cardImageHtml(row: NewsCardRow, className?: string): string {
   const cls = className ? ` class="${className}"` : "";
   const src = httpsUrl(row.image_url) ?? FALLBACK_IMAGE;
-  return `<img${cls} src="${escapeHtml(src)}" alt="${escapeHtml(titles(row).en)}" loading="lazy" decoding="async" draggable="false">`;
+  return `<img${cls} src="${escapeHtml(resizedImage(src, 720))}"${srcSetAttr(src)} sizes="(max-width: 767px) 92vw, 33vw" alt="${escapeHtml(titles(row).en)}" loading="lazy" decoding="async" draggable="false">`;
 }
 
 function cardMetaHtml(row: NewsCardRow): string {
@@ -408,7 +416,7 @@ export function renderArticle(article: NewsArticleRow, related: RelatedNewsRow[]
   ].join("\n");
 
   const coverHtml = cover
-    ? `<figure class="article-cover reveal">\n  <img src="${escapeHtml(cover)}" alt="${escapeHtml(title.en)}" decoding="async">\n</figure>`
+    ? `<figure class="article-cover reveal">\n  <img src="${escapeHtml(resizedImage(cover, 1600))}"${srcSetAttr(cover, [720, 1080, 1600])} sizes="(max-width: 767px) 100vw, 80vw" alt="${escapeHtml(title.en)}" decoding="async">\n</figure>`
     : "";
 
   const bodyEn = article.content_en || article.content || article.excerpt_en || article.excerpt || "";
@@ -480,7 +488,7 @@ export function renderArticle(article: NewsArticleRow, related: RelatedNewsRow[]
               `    <li>`,
               `      <a class="related-card reveal" style="--tint: ${TINTS[(i + 1) % TINTS.length]}" href="${newsHref(r.id)}">`,
               `        <div class="related-media">`,
-              `          <img src="${escapeHtml(src)}" alt="${escapeHtml(t.en)}" loading="lazy" decoding="async">`,
+              `          <img src="${escapeHtml(resizedImage(src, 720))}"${srcSetAttr(src)} sizes="(max-width: 767px) 92vw, 33vw" alt="${escapeHtml(t.en)}" loading="lazy" decoding="async">`,
               `          <span class="related-veil" aria-hidden="true"></span>`,
               `        </div>`,
               `        <div class="related-copy">`,

@@ -295,7 +295,9 @@ describe("mobile homepage rendered output", () => {
     for (const markup of [arMarkup(), enMarkup()]) {
       const newsSection = markup.match(/<section\b[^>]*\bid="news"[\s\S]*?<\/section>/)?.[0];
       expect(newsSection).toBeDefined();
-      for (const story of NEWS) expect(newsSection).toContain(story.image);
+      // Stored photos are served resized (src/lib/image-url.ts): match the object path.
+      for (const story of NEWS)
+        expect(newsSection).toContain(story.image.split("/object/public/").pop());
       const outsideNews = markup.replace(newsSection!, "");
       for (const src of localAssets(outsideNews)) {
         expect(nonNewsAssets.has(src), `unreviewed asset outside news: ${src}`).toBe(true);

@@ -181,7 +181,8 @@ function useTreeJourney(
         return;
       }
       const target = readProgress();
-      eased += (target - eased) * Math.min(1, dt * 6);
+      // Time-based, so a 120Hz phone eases at the same pace as a 60Hz one.
+      eased += (target - eased) * Math.min(1, dt * 4.5);
       if (Math.abs(target - eased) < 0.0003) eased = target;
       paint(eased);
       if (eased !== target) frame = requestAnimationFrame(tick);
