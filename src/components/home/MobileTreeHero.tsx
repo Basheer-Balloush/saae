@@ -31,6 +31,7 @@ type HeroInstance = {
   startEntrance: () => void;
   setCommunity?: (index: number) => void;
   setCalm?: (y: number, w: number) => void;
+  setRoom?: (captionTop: number) => void;
 };
 
 /* The desktop schedule (home-inline.js CAPTION_CUES / heroBeatThresholds),
@@ -118,17 +119,42 @@ function useTreeJourney(
       return clamp01(-rect.top / Math.max(1, rect.height - view));
     };
 
+    /* Where each caption starts, in px from the top of the stage. Captions
+       differ in height, and so does the stage from phone to phone; the scene
+       fits its subject above whichever caption is showing, and the scrim
+       darkens everything from just above it down. */
+    let captionTops: number[] = [];
+    const measure = () => {
+      captionTops = (bandRefs.current ?? []).map((el) => {
+        if (!el) return 0;
+        const bands = el.parentElement as HTMLElement | null;
+        return (bands?.offsetTop ?? 0) + el.offsetTop;
+      });
+    };
+
     const paint = (p: number) => {
       section.style.setProperty("--mh-tree-t", p.toFixed(4));
+      let topSum = 0;
+      let weight = 0;
       bandRefs.current?.forEach((el, i) => {
         if (!el) return;
         const o = bandOpacity(i, p);
+        if (captionTops[i]) {
+          topSum += captionTops[i] * (o + 1e-4);
+          weight += o + 1e-4;
+        }
         el.style.opacity = o.toFixed(3);
         // Leaves upward, the way the camera pulls away; arrives from just below.
         const exit = CUES[i].exit;
         const lift = exit && p > exit[0] ? -22 * (1 - o) : 14 * (1 - o);
         el.style.transform = `translateY(${lift.toFixed(1)}px)`;
       });
+      if (weight) {
+        const top = topSum / weight;
+        const view = stage?.offsetHeight || window.innerHeight;
+        section.style.setProperty("--mh-caption-h", `${Math.round(view - top)}px`);
+        instanceRef.current?.setRoom?.(top);
+      }
       const next = bandAt(p);
       if (next !== bandNow) {
         bandNow = next;
@@ -192,6 +218,7 @@ function useTreeJourney(
     const canvas = section.querySelector<HTMLCanvasElement>("canvas");
     let canvasSize = "";
     const onResize = () => {
+      measure();
       const size = canvas ? `${canvas.clientWidth}x${canvas.clientHeight}` : "";
       if (size !== canvasSize) {
         canvasSize = size;
@@ -200,10 +227,22 @@ function useTreeJourney(
       schedule();
     };
 
+    // Captions change height with the language, the fonts and the community card.
+    const sizes =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(() => {
+            measure();
+            paint(eased);
+          });
+    bandRefs.current?.forEach((el) => el && sizes?.observe(el));
+    measure();
+
     section.addEventListener("saae:hero-ready", onReady);
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", onResize, { passive: true });
-    paint(readProgress());
+    eased = readProgress();
+    paint(eased);
 
     /* A fresh URL per mount, so returning to the homepage boots a new scene on
        the new canvas; three.js and the other imports stay cached. */
@@ -223,6 +262,7 @@ function useTreeJourney(
 
     return () => {
       disposed = true;
+      sizes?.disconnect();
       window.clearTimeout(fallback);
       window.clearTimeout(openingTimer);
       if (frame) cancelAnimationFrame(frame);

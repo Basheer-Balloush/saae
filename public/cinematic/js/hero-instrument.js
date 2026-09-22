@@ -1021,11 +1021,9 @@ async function createScene(canvas) {
      changed and nothing on screen had. */
   function phaseOf(p) { return p < .836 ? 0 : 3 + treeStoryState(p).map; }
 
-  /* The centred layout's canvas height in CSS pixels. The captions under the
-     subject take a fixed height, so the room above them is a smaller share of
-     a short phone's screen than of a tall one's; the subject is sized to that
-     room rather than to the whole screen. */
-  let viewPxH = 844;
+  /* The centred layout's canvas height, and where the page's caption starts,
+     in CSS pixels from the top: the subject is sized to the room above it. */
+  let viewPxH = 844, captionTop = null;
   function resize() {
     const w2 = canvas.clientWidth || window.innerWidth;
     const h2 = canvas.clientHeight || window.innerHeight;
@@ -1127,13 +1125,20 @@ async function createScene(canvas) {
       /* The subject takes the upper part of the screen and the caption the
          lower. Negative lowers the camera, which raises the subject; the
          close-ups and pictograms rise further to clear the taller captions. */
-      const LOWERED = -.2 - .14 * Math.max(state.entry, contentMix);
+      /* The subject fits the space between the navigation (96px) and the top
+         of the caption the page is showing, which it reports through
+         setRoom: that space differs from phone to phone, and on the same
+         phone with Safari's toolbars up or down. Negative lowers the camera,
+         which raises the subject into the middle of that space; the opening
+         tree sits a little lower than the close-ups and pictograms. */
+      const capTop = captionTop ?? viewPxH * .52;
+      const avail = Math.max(80, capTop - 96);
+      const mid = (96 + capTop) / 2 / viewPxH;
+      const room = Math.max(.85, Math.min(2.4, (.443 * viewPxH) / avail));
+      const LOWERED = -(1 - 2 * mid) + .14 * (1 - Math.max(state.entry, contentMix));
       const treeFit = Math.max(1, (treeBox.w * 1.3) / (2 * halfFov * camera.aspect * 29.6));
       const treeZ = state.zoom * treeFit;
       const contentZ = 8.0 / (camera.aspect * .84 * 2 * halfFov);
-      /* 1 on an iPhone 12 (844px tall); further back on shorter phones, a
-         little closer on taller ones. 400px is the captions' share. */
-      const room = Math.max(.9, Math.min(1.45, (viewPxH * 444) / (844 * Math.max(200, viewPxH - 400))));
       const storyZ = (treeZ + (contentZ - treeZ) * contentMix) * push * room;
       const mapViewH = Math.max(mapBox.h / .8, (mapBox.w + 3.4) / (camera.aspect * .9));
       const mapZC = mapViewH / (2 * halfFov);
@@ -1328,6 +1333,7 @@ async function createScene(canvas) {
       contentNextAttribute.needsUpdate = true;
       communitySwitchAt = performance.now();
     },
+    setRoom(top) { captionTop = top > 0 ? top : null; if (idleRunning) progressDirty = true; },
     setCalm(y, w) { centredCalm.y = y; centredCalm.w = Math.max(0, Math.min(1, w)); },
     setPointer(x, y, s) { pointerStrength = s; if (s > 0) pointer.set(x, y, 0); },
     /* Signed, and expected in roughly -1..1; the page normalises its own
