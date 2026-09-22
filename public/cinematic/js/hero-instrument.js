@@ -27,6 +27,10 @@ const TIERS = {
      them into a white smear; sized for the tree, the country thins out into
      scattered confetti. Equal density is the thing that has to hold. */
   high: { ground: 0.105, shape: 0.118, rays: 72, dpr: 2.0 },
+  /* The phone homepage's centred layout: a sparser ground and a lower pixel
+     ratio. On a phone's dense screen the difference does not show; the fill
+     rate it saves does. */
+  phone: { ground: 0.22, shape: 0.19, rays: 38, dpr: 1.25 },
   mid:  { ground: 0.130, shape: 0.145, rays: 54, dpr: 1.75 },
   low:  { ground: 0.170, shape: 0.190, rays: 38, dpr: 1.5 }
 };
@@ -622,17 +626,19 @@ function pickTier() {
 }
 
 async function createScene(canvas) {
+  /* The phone homepage runs the same scene in a centred, portrait layout: no
+     caption lane beside the subject, the tree in the middle of the screen, the
+     phone tier, and a lattice tall enough to fill a phone. It also drops
+     multisampling -- points gain nothing from it on a dense screen, and it is
+     the most expensive thing a phone GPU does here. */
+  const centred = canvas.closest("[data-hero-layout='centred']") !== null;
   let gl = null;
   try {
-    gl = canvas.getContext("webgl2", { alpha: true, antialias: true, powerPreference: "high-performance" });
+    gl = canvas.getContext("webgl2", { alpha: true, antialias: !centred, powerPreference: "high-performance" });
   } catch (_) { gl = null; }
   if (!gl) throw new Error("no WebGL2 context");
 
-  /* The phone homepage runs the same scene in a centred, portrait layout: no
-     caption lane beside the subject, the tree in the middle of the screen, the
-     light tier, and a lattice tall enough to fill a phone. */
-  const centred = canvas.closest("[data-hero-layout='centred']") !== null;
-  const tierName = centred ? "low" : pickTier();
+  const tierName = centred ? "phone" : pickTier();
   const tier = TIERS[tierName];
   const PITCH = tier.shape;
 
@@ -817,7 +823,7 @@ async function createScene(canvas) {
     aRand[i * 2 + 1] = h - Math.floor(h);
   }
 
-  const renderer = new THREE.WebGLRenderer({ canvas, context: gl, alpha: true, antialias: true });
+  const renderer = new THREE.WebGLRenderer({ canvas, context: gl, alpha: true, antialias: !centred });
   renderer.setClearColor(0x000000, 0);
   renderer.setClearAlpha(0);
   const dpr = Math.min(window.devicePixelRatio || 1, tier.dpr);
@@ -1230,13 +1236,22 @@ async function createScene(canvas) {
   function idleWanted() {
     return onScreen && !breathPinned && !document.hidden;
   }
+  /* On the phone the page hands scroll progress in through setProgress and
+     this loop draws it, so a scrolling frame is drawn once rather than twice
+     (once by the page, once here). While nothing moves, the ambient drift is
+     drawn at half rate: it is slow enough that 30fps reads the same. */
+  let progressDirty = false, lastIdleDraw = 0;
   function startIdle() {
     if (idleRunning || !idleWanted()) return;
     idleRunning = true;
-    const step = () => {
+    const step = now => {
       if (!idleRunning) return;
       if (!idleWanted()) { stopIdle(); return; }
-      render(lastProgress);
+      if (!centred || progressDirty || now - lastIdleDraw >= 32) {
+        progressDirty = false;
+        lastIdleDraw = now;
+        render(lastProgress);
+      }
       idleFrame = requestAnimationFrame(step);
     };
     idleFrame = requestAnimationFrame(step);
@@ -1271,6 +1286,11 @@ async function createScene(canvas) {
 
   return {
     render, resize, dispose, setBand() {},
+    setProgress(progress) {
+      lastProgress = clamp01(progress);
+      if (idleRunning) progressDirty = true;
+      else render(lastProgress);
+    },
     communities: COMMUNITY_COUNT,
     setCommunity(indexOrIcon) {
       const next = typeof indexOrIcon === "string"
