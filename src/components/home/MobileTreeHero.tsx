@@ -108,9 +108,14 @@ function useTreeJourney(
     let disposed = false;
     let fellBack = false;
 
+    /* Measured from the sticky stage (100svh), not innerHeight: on iPhones
+       innerHeight grows and shrinks as Safari's toolbar hides and shows, and
+       the progress would jump each time it did. */
+    const stage = section.querySelector<HTMLElement>(".mh-tree-stage");
     const readProgress = () => {
       const rect = section.getBoundingClientRect();
-      return clamp01(-rect.top / Math.max(1, rect.height - window.innerHeight));
+      const view = stage?.offsetHeight || window.innerHeight;
+      return clamp01(-rect.top / Math.max(1, rect.height - view));
     };
 
     const paint = (p: number) => {
@@ -171,6 +176,7 @@ function useTreeJourney(
         return;
       }
       instanceRef.current = arrived;
+      if (canvas) canvasSize = `${canvas.clientWidth}x${canvas.clientHeight}`;
       arrived.resize();
       arrived.startEntrance();
       setMode("live");
@@ -179,8 +185,18 @@ function useTreeJourney(
       schedule();
     };
 
+    /* Safari fires resize every time its toolbar hides or shows, which is
+       every time a scroll starts. The canvas is sized by the 100svh stage, so
+       it has not changed; resizing it anyway reallocates the scene's buffers
+       and drops a frame. Only a real change (rotation) resizes the scene. */
+    const canvas = section.querySelector<HTMLCanvasElement>("canvas");
+    let canvasSize = "";
     const onResize = () => {
-      instanceRef.current?.resize();
+      const size = canvas ? `${canvas.clientWidth}x${canvas.clientHeight}` : "";
+      if (size !== canvasSize) {
+        canvasSize = size;
+        instanceRef.current?.resize();
+      }
       schedule();
     };
 

@@ -1021,10 +1021,16 @@ async function createScene(canvas) {
      changed and nothing on screen had. */
   function phaseOf(p) { return p < .836 ? 0 : 3 + treeStoryState(p).map; }
 
+  /* The centred layout's canvas height in CSS pixels. The captions under the
+     subject take a fixed height, so the room above them is a smaller share of
+     a short phone's screen than of a tall one's; the subject is sized to that
+     room rather than to the whole screen. */
+  let viewPxH = 844;
   function resize() {
     const w2 = canvas.clientWidth || window.innerWidth;
     const h2 = canvas.clientHeight || window.innerHeight;
     camera.aspect = w2 / h2;
+    viewPxH = h2;
     camera.fov = h2 > w2 ? 54 : 38;
     camera.updateProjectionMatrix();
     renderer.setSize(w2, h2, false);
@@ -1125,7 +1131,10 @@ async function createScene(canvas) {
       const treeFit = Math.max(1, (treeBox.w * 1.3) / (2 * halfFov * camera.aspect * 29.6));
       const treeZ = state.zoom * treeFit;
       const contentZ = 8.0 / (camera.aspect * .84 * 2 * halfFov);
-      const storyZ = (treeZ + (contentZ - treeZ) * contentMix) * push;
+      /* 1 on an iPhone 12 (844px tall); further back on shorter phones, a
+         little closer on taller ones. 400px is the captions' share. */
+      const room = Math.max(.9, Math.min(1.45, (viewPxH * 444) / (844 * Math.max(200, viewPxH - 400))));
+      const storyZ = (treeZ + (contentZ - treeZ) * contentMix) * push * room;
       const mapViewH = Math.max(mapBox.h / .8, (mapBox.w + 3.4) / (camera.aspect * .9));
       const mapZC = mapViewH / (2 * halfFov);
       const storyY = focus.y * state.entry + storyZ * halfFov * LOWERED;

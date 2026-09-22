@@ -1135,6 +1135,43 @@
   }
 }
 
+/* ---- Screen sizes ------------------------------------------------------
+   Everything above is laid out for a 390x844 iPhone. On short phones (SE,
+   mini, most Androids under 740px tall) Abu Al-Joud's card keeps only its
+   title, so it covers less of the section; on tall ones (Plus, Pro Max) the
+   FAQ phone grows into the extra room. */
+@media (max-height: 740px) {
+  .mobile-home .mh-section-guide-body {
+    display: none;
+  }
+  .mobile-home .mh-section-guide-title {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  .mobile-home .mh-section-guide-card {
+    margin-block-end: 14px;
+    padding: 9px 12px;
+  }
+  .mobile-home .mh-section-guide-figure img {
+    inline-size: 52px;
+  }
+  .mobile-home .mh-hero-guide-figure {
+    inline-size: 50px;
+  }
+  .mobile-home .cs-scroll-column .cs-scroll-header {
+    padding-block-start: 88px;
+  }
+  .mobile-home .cs-scroll-column .cs-scroll-card {
+    inset-block-end: 92px;
+    inline-size: min(280px, 68vw, calc((100svh - 270px) * 420 / 720));
+  }
+}
+@media (min-height: 880px) {
+  .mobile-home .cs-scroll-column .cs-scroll-card {
+    inline-size: min(330px, 74vw, calc((100svh - 330px) * 420 / 720));
+  }
+}
+
 /* ---- MotionButton theme ------------------------------------------------
    SAAE palette for the phone surfaces (all dark): paper pill with an ink
    label, turquoise fill, paper on the fill. Secondary rests quiet with a

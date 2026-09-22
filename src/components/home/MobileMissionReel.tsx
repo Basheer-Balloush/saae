@@ -63,10 +63,19 @@ export function MobileMissionReel({
        over both so its stage is pinned from the moment the section pins. All
        in pixels from the real screen height, so the three always agree. */
     const section = reel.parentElement;
+    /* The screen height is the sticky stage's (100svh), not innerHeight: on
+       iPhones innerHeight changes as Safari's toolbar hides and shows, and the
+       runway would be resized mid-scroll each time, against a stage that
+       stayed the same size. */
+    const viewHeight = () => stage.offsetHeight || window.innerHeight;
+    let pinned = "";
     const pinOut = () => {
       const out = outRef?.current;
       if (!out || !section || reduced) return;
-      const view = window.innerHeight;
+      const view = viewHeight();
+      const key = `${view}:${out.offsetHeight}`;
+      if (key === pinned) return;
+      pinned = key;
       const handoff = view * HANDOFF;
       out.style.top = `${Math.min(0, view - out.offsetHeight)}px`;
       const runway = out.nextElementSibling as HTMLElement | null;
@@ -77,7 +86,7 @@ export function MobileMissionReel({
 
     const paint = () => {
       frame = 0;
-      const view = window.innerHeight;
+      const view = viewHeight();
       const rect = reel.getBoundingClientRect();
       const into = -rect.top;
       const handoff = reduced ? 0 : view * HANDOFF;
