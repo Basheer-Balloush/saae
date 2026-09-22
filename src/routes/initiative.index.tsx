@@ -1,6 +1,14 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import pageHtml from "@/components/cinematic/html/initiative.html?raw";
+import { getInitiativeStats, getTopDonors } from "@/lib/initiative.functions";
+import {
+  renderDonors,
+  renderNote,
+  renderSeatsCovered,
+  type Donor,
+} from "@/components/initiative/live-leaderboard";
 import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
 import { WaitlistDialog } from "@/components/initiative/WaitlistDialog";
 import { DirectPaymentDialog } from "@/components/initiative/DirectPaymentDialog";
@@ -37,12 +45,82 @@ export const Route = createFileRoute("/initiative/")({
   component: Page,
 });
 
+/* How often the board re-reads the records while the page is open, matching
+   the interval the older initiative home page already polls on. */
+const REFRESH_MS = 30000;
+const TOP_SPONSORS = 5;
+
+const currentLang = (): "ar" | "en" => (document.documentElement.lang === "en" ? "en" : "ar");
+
+/**
+ * Replaces the prototype's hand-written sponsor snapshot with the live
+ * donation records.
+ *
+ * The snapshot stays in the markup and is what renders on the server, so the
+ * band is never empty on first paint and never shifts. It is only replaced
+ * once real rows arrive; if the read fails the snapshot simply stays, with its
+ * own "snapshot" note intact and honest.
+ */
+function useLiveSponsors() {
+  const donorsFn = useServerFn(getTopDonors);
+  const statsFn = useServerFn(getInitiativeStats);
+  /* Held so a language switch, or whichever of the two reads lands second, can
+     repaint from what is already known instead of re-reading the records. */
+  const latest = useRef<Donor[] | null>(null);
+  const funded = useRef<number | null>(null);
+
+  const paint = useCallback(() => {
+    const donors = latest.current;
+    /* The total is only painted alongside live rows: on its own it would
+       contradict the snapshot still underneath it. */
+    if (!donors) return;
+    const lang = currentLang();
+    if (!renderDonors(document, donors, lang)) return;
+    renderNote(document, lang);
+    if (funded.current !== null) renderSeatsCovered(document, funded.current);
+  }, []);
+
+  useEffect(() => {
+    let live = true;
+
+    const read = () => {
+      donorsFn({ data: { limit: TOP_SPONSORS } })
+        .then((rows) => {
+          if (!live) return;
+          latest.current = rows as Donor[];
+          paint();
+        })
+        .catch(() => {});
+      statsFn()
+        .then((stats) => {
+          if (!live) return;
+          funded.current = stats.totalFunded;
+          paint();
+        })
+        .catch(() => {});
+    };
+
+    read();
+    const timer = setInterval(read, REFRESH_MS);
+    /* initiative.js re-applies its own translations on this event; the rows
+       carry no data-i18n keys, but the note and the empty state are ours to
+       re-paint. */
+    window.addEventListener("saae:languagechange", paint);
+    return () => {
+      live = false;
+      clearInterval(timer);
+      window.removeEventListener("saae:languagechange", paint);
+    };
+  }, [donorsFn, statsFn, paint]);
+}
+
 function Page() {
   /* The page's pay, waitlist and sponsor buttons open the same forms as the
      original initiative page, so what people submit is saved. Their hrefs
      point at that page for new-tab clicks and before this script runs. */
   const [open, setOpen] = useState<Action | null>(null);
   const [lang, setLang] = useState<"ar" | "en">("en");
+  useLiveSponsors();
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
