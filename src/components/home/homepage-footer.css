@@ -1,6 +1,7 @@
 #home-motion-footer-root:not(:empty) + .home-footer-fallback,
 #about-motion-footer-root:not(:empty) + .home-footer-fallback,
-#partners-motion-footer-root:not(:empty) + .home-footer-fallback {
+#partners-motion-footer-root:not(:empty) + .home-footer-fallback,
+#contact-motion-footer-root:not(:empty) + .home-footer-fallback {
   display: none;
 }
 
@@ -211,7 +212,21 @@
 
 [dir="rtl"] .hmf-assistant-copy h2 {
   letter-spacing: 0;
-  line-height: 1.22;
+  line-height: 1.35;
+  overflow: visible;
+}
+
+/* Arabic display glyphs extend above and below the Latin font box. Give the
+   photo-filled title its own paint space so the hamza and letter terminals
+   remain fully visible instead of being clipped by background-clip:text. */
+[dir="rtl"] .hmf-assistant-copy .hmf-title {
+  display: inline-block;
+  width: max-content;
+  max-width: 100%;
+  padding-block: .16em .2em;
+  padding-inline: .08em;
+  white-space: nowrap;
+  text-wrap: nowrap;
 }
 
 .hmf-intro {
