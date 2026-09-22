@@ -54,12 +54,6 @@ export interface PartnerEntry {
   logo: string;
 }
 
-export interface HomeLink {
-  label: LocalText;
-  href: string;
-  external?: boolean;
-}
-
 /** Exact approved opening headline — do not rephrase. */
 export const OPENING_HEADLINE: LocalText = {
   ar: "ذكاء وريادة لوطن ينهض",
@@ -318,83 +312,6 @@ export const DESKTOP_HREF_EQUIVALENTS: Readonly<Record<string, string>> = {
   "/about#standing-h": "#hero-sec",
 };
 
-/** Footer link groups. */
-export const FOOTER_EXPLORE: HomeLink[] = [
-  { label: { ar: "الرئيسية", en: "Home" }, href: "/" },
-  { label: { ar: "عن الجمعية", en: "About SAAE" }, href: "/about" },
-  { label: { ar: "الأخبار", en: "News" }, href: "/news" },
-  { label: { ar: "الشركاء", en: "Partners" }, href: "/partners" },
-  { label: { ar: "المبادرة", en: "Initiative" }, href: "/initiative" },
-  { label: { ar: "تواصل معنا", en: "Contact" }, href: "/contact" },
-];
-
-export const FOOTER_OFFICIAL: HomeLink[] = [
-  {
-    label: { ar: "مبادرة المليون مستخدم", en: "The million-user initiative" },
-    href: "/one-million-initiative-home",
-  },
-  { label: { ar: "التسجيل", en: "Registration" }, href: "/registration" },
-  { label: { ar: "منصة التعلّم", en: "Learning platform" }, href: "/learning-management-system" },
-  { label: { ar: "أدوات الذكاء الاصطناعي", en: "AI tools" }, href: "/resources/ai-tools" },
-];
-
-/** Footer "Explore" anchor group (in-page + local). */
-export const FOOTER_DISCOVER: HomeLink[] = [
-  { label: { ar: "المجتمعات", en: "Communities" }, href: "/about#communities-h" },
-  { label: { ar: "الإنجازات", en: "Achievements" }, href: "#hero-sec" },
-  { label: { ar: "الأخبار", en: "News" }, href: "#news" },
-  { label: { ar: "الشركاء", en: "Partners" }, href: "#partners" },
-  { label: { ar: "إجابات", en: "Answers" }, href: "#faq" },
-];
-
-export const SOCIAL_LINKS: (HomeLink & { labelEn: string })[] = [
-  {
-    label: { ar: "الجمعية على إنستغرام", en: "SAAE on Instagram" },
-    labelEn: "Instagram",
-    href: "https://www.instagram.com/saae_sy/",
-    external: true,
-  },
-  {
-    label: { ar: "الجمعية على فيسبوك", en: "SAAE on Facebook" },
-    labelEn: "Facebook",
-    href: "https://www.facebook.com/share/18SQ11hcct/",
-    external: true,
-  },
-  {
-    label: { ar: "الجمعية على لينكدإن", en: "SAAE on LinkedIn" },
-    labelEn: "LinkedIn",
-    href: "https://www.linkedin.com/company/syrian-association-for-ai-entrepreneurship/",
-    external: true,
-  },
-];
-
-export const CONTACT = {
-  address: {
-    ar: "دمشق - بجانب وزارة التعليم العالي والبحث العلمي",
-    en: "Damascus, beside the Ministry of Higher Education and Scientific Research",
-  } satisfies LocalText,
-  mapsHref: "https://maps.app.goo.gl/bKMSHXkmkr5U3tZh6",
-  mapImage: "/cinematic/images/saae-map.png",
-  mapAlt: {
-    ar: "خريطة تُظهر مقر الجمعية السورية في دمشق",
-    en: "Map showing the SAAE headquarters in Damascus",
-  } satisfies LocalText,
-  email: "mailto:info@aisyria.org",
-  phone: "tel:+963930763547",
-  phoneDisplay: "+963 930 763 547",
-  attributionHref: "https://www.openstreetmap.org/copyright",
-};
-
-export const FOOTER_CLAIM: LocalText = {
-  ar: "أول منظمة رسمية في سورية مكرّسة للذكاء الاصطناعي والابتكار والتفكير الريادي — تمكّن المواهب السورية لإعادة بناء بلدنا والارتقاء به.",
-  en: "Syria's first official AI organisation — empowering Syrian talent to rebuild and uplift our country.",
-};
-
-export const FOOTER_RIGHTS: LocalText = {
-  ar: "جميع الحقوق محفوظة للجمعية السورية للذكاء الاصطناعي وريادة الأعمال 2026 ©",
-  en: "© 2026 Syrian Association for AI & Entrepreneurship. All rights reserved.",
-};
-
 /* ------------------------------------------------------------------ */
 /* v3 ("The living tree") additions. Copy below is either verbatim     */
 /* from home.html / language.js or the microcopy listed in the brief.  */
@@ -462,29 +379,4 @@ export const FAQ_COPY = {
 
 export const MICRO_COPY = {
   skip: { ar: "انتقل إلى المحتوى الرئيسي", en: "Skip to main content" } satisfies LocalText,
-  newTab: { ar: "، يفتح في علامة تبويب جديدة", en: ", opens in a new tab" } satisfies LocalText,
-  pauseLogos: { ar: "إيقاف حركة الشعارات", en: "Pause logos" } satisfies LocalText,
-  playLogos: { ar: "تشغيل حركة الشعارات", en: "Play logos" } satisfies LocalText,
-  scrollCue: { ar: "مرّر", en: "Scroll" } satisfies LocalText,
-  prev: { ar: "السابق", en: "Previous" } satisfies LocalText,
-  next: { ar: "التالي", en: "Next" } satisfies LocalText,
-  footerAssociation: { ar: "الجمعية", en: "Association" } satisfies LocalText,
-  footerTakePart: { ar: "شارك", en: "Take part" } satisfies LocalText,
-  footerExplore: { ar: "استكشف", en: "Explore" } satisfies LocalText,
-  followUs: { ar: "تابعنا", en: "Follow SAAE" } satisfies LocalText,
-  backToTop: { ar: "العودة إلى الأعلى", en: "Back to top" } satisfies LocalText,
-  footerEyebrow: {
-    ar: "الخطوة التالية تبدأ من هنا",
-    en: "The next step starts here",
-  } satisfies LocalText,
-  footerInvite: {
-    ar: "ساهم في تشكيل ما يمكن لسورية أن تفعله بالذكاء الاصطناعي.",
-    en: "Help shape what Syria can do with AI.",
-  } satisfies LocalText,
-  contactTitle: { ar: "تواصل مع الجمعية", en: "Reach SAAE" } satisfies LocalText,
-  visitUs: { ar: "زورونا", en: "Visit us" } satisfies LocalText,
-  openMaps: {
-    ar: "افتح موقع الجمعية في الخرائط",
-    en: "Open SAAE location in Maps",
-  } satisfies LocalText,
 };

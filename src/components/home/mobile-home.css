@@ -1338,194 +1338,6 @@
   text-align: center;
 }
 
-/* ---- Footer ---- */
-.mobile-home .mh-footer {
-  background:
-    radial-gradient(120% 300px at 50% 0, rgba(105, 143, 63, 0.18), transparent 70%), var(--mh-deep);
-  border-block-start: 1px solid var(--mh-line);
-  padding-block: 36px calc(96px + env(safe-area-inset-bottom, 0px));
-}
-
-.mobile-home .mh-footer-top {
-  margin-block-end: 20px;
-}
-
-.mobile-home .mh-footer-logo {
-  display: block;
-  block-size: 56px;
-  inline-size: auto;
-  max-inline-size: 70%;
-  object-fit: contain;
-  margin-block-end: 12px;
-}
-
-.mobile-home .mh-footer-claim {
-  margin-block: 0;
-  max-inline-size: 40ch;
-  color: var(--mh-ink-muted);
-  font-size: 0.98rem;
-  line-height: 1.85;
-}
-
-.mobile-home .mh-footer-cols {
-  display: grid;
-  gap: 16px;
-  margin-block-end: 16px;
-  padding-block-start: 16px;
-  border-block-start: 1px solid var(--mh-line);
-}
-
-@media (min-width: 340px) {
-  .mobile-home .mh-footer-cols {
-    grid-template-columns: 1fr 1fr;
-  }
-  .mobile-home .mh-footer-discover {
-    grid-column: 1 / -1;
-  }
-}
-
-.mobile-home .mh-footer-discover ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.mobile-home .mh-footer-discover a {
-  border: 1px solid var(--mh-line);
-  border-radius: 999px;
-  padding-inline: 14px;
-}
-
-.mobile-home .mh-footer-cols h2 {
-  margin-block: 0 6px;
-  color: var(--mh-turquoise-lift);
-  font-size: 1rem;
-  font-weight: 900;
-}
-
-.mobile-home .mh-footer-cols ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.mobile-home .mh-footer-cols a {
-  display: inline-flex;
-  align-items: center;
-  min-block-size: 44px;
-  font-weight: 600;
-  text-decoration: none;
-  color: var(--mh-type);
-}
-
-.mobile-home .mh-contact-card {
-  padding-block-start: 16px;
-  border-block-start: 1px solid var(--mh-line);
-}
-
-.mobile-home .mh-map-link {
-  display: block;
-  min-block-size: 44px;
-}
-
-.mobile-home .mh-map-link img {
-  display: block;
-  inline-size: 100%;
-  block-size: auto;
-  max-block-size: 150px;
-  object-fit: cover;
-  border: 1px solid var(--mh-line);
-  border-radius: 22px;
-  margin-block-end: 12px;
-}
-
-.mobile-home .mh-contact-list {
-  list-style: none;
-  margin-block: 0 10px;
-  padding: 0;
-  display: grid;
-  gap: 2px;
-}
-
-.mobile-home .mh-contact-list a {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-block-size: 44px;
-  font-weight: 700;
-  color: var(--mh-type);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.mobile-home .mh-social-list {
-  list-style: none;
-  margin-block: 0 10px;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.mobile-home .mh-social-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-inline-size: 44px;
-  min-block-size: 44px;
-  border: 1px solid var(--mh-line);
-  border-radius: 50%;
-  color: var(--mh-type);
-  text-decoration: none;
-}
-
-.mobile-home .mh-attr {
-  margin-block: 0 12px;
-  color: var(--mh-ink-muted);
-  font-size: 0.85rem;
-}
-
-.mobile-home .mh-attr a {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.mobile-home .mh-rights-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-block-start: 12px;
-  padding-block-start: 12px;
-  border-block-start: 1px solid var(--mh-line);
-}
-
-.mobile-home .mh-rights {
-  margin: 0;
-  flex: 1 1 auto;
-  color: var(--mh-ink-muted);
-  font-size: 0.88rem;
-  line-height: 1.8;
-}
-
-.mobile-home .mh-to-top {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  min-inline-size: 44px;
-  min-block-size: 44px;
-  border: 1px solid var(--mh-line);
-  border-radius: 50%;
-  background: var(--mh-glass, rgba(12, 48, 58, 0.72));
-  color: var(--mh-type);
-  text-decoration: none;
-}
-
-.mobile-home .mh-footer .mh-wrap {
-  display: flex;
-  flex-direction: column;
-}
-
 /* Explicit heading rhythm: the global 1.08 would crush wrapped Arabic. */
 .mobile-home .mh-news-head {
   line-height: 1.5;
@@ -1556,4 +1368,103 @@
   .mobile-home .mh-wrap {
     max-inline-size: 560px;
   }
+}
+
+/* ---- Footer ------------------------------------------------------------
+   The desktop homepage's footer (MotionFooter, styled by homepage-footer.css)
+   stacked for the phone. On the desktop it is a fixed panel the page lifts
+   off; a phone's screen is too short to hold it all, so here it scrolls in
+   like any other section, with the same marquee, giant SAAE, Abu Al-Joud,
+   links and contact details. */
+.mobile-home .hmf-reveal {
+  height: auto;
+  min-height: 0;
+}
+.mobile-home .hmf-footer {
+  position: relative;
+  display: block;
+  min-height: 0;
+}
+.mobile-home .hmf-marquee {
+  top: 22px;
+}
+.mobile-home .hmf-marquee-group span {
+  padding-inline: 18px;
+}
+.mobile-home .hmf-shell {
+  display: block;
+  width: calc(100% - 2 * var(--mh-gutter, 20px));
+  height: auto;
+  padding: 104px 0 calc(20px + env(safe-area-inset-bottom, 0px));
+}
+.mobile-home .hmf-assistant-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+.mobile-home .hmf-assistant-copy h2 {
+  font-size: clamp(2.3rem, 11.5vw, 3.1rem);
+  line-height: 1.15;
+}
+.mobile-home .hmf-intro {
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+.mobile-home .hmf-actions {
+  margin-top: 20px;
+}
+.mobile-home .hmf-assistant-character {
+  width: 100%;
+  min-height: 0;
+  padding-block-start: 12px;
+}
+.mobile-home .hmf-assistant-character img {
+  width: min(210px, 56vw);
+}
+.mobile-home .hmf-character-halo {
+  inset: 22% 18% 4%;
+}
+/* The bubble sits beside him, over the halo, and needs no blur behind it. */
+.mobile-home .hmf-character-prompt {
+  inset-inline: auto 0;
+  bottom: 16%;
+  max-width: 150px;
+  padding: 9px 11px;
+  font-size: 0.72rem;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: rgba(3, 25, 31, 0.94);
+}
+.mobile-home .hmf-information {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 16px;
+  margin-block-start: 18px;
+  padding-block: 24px;
+}
+.mobile-home .hmf-identity,
+.mobile-home .hmf-contact {
+  grid-column: 1 / -1;
+}
+.mobile-home .hmf-identity img {
+  width: 180px;
+}
+/* The desktop sheet drops the contact column under 1080px; the phone has
+   the room for it below the links. */
+.mobile-home .hmf-contact {
+  display: grid;
+}
+.mobile-home .hmf-link-column a,
+.mobile-home .hmf-contact a {
+  font-size: 0.85rem;
+}
+.mobile-home .hmf-link-column h3 {
+  font-size: 0.82rem;
+}
+.mobile-home .hmf-giant-word {
+  bottom: -3vw;
+  font-size: 40vw;
+}
+.mobile-home .hmf-bottom {
+  gap: 14px;
 }
