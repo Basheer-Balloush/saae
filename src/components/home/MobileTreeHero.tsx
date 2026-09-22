@@ -32,6 +32,7 @@ type HeroInstance = {
   setCommunity?: (index: number) => void;
   setCalm?: (y: number, w: number) => void;
   setRoom?: (captionTop: number) => void;
+  warmup?: () => void;
 };
 
 /* The desktop schedule (home-inline.js CAPTION_CUES / heroBeatThresholds),
@@ -81,7 +82,103 @@ function supportsWebGl2(): boolean {
   }
 }
 
-let mountCount = 0;
+/* The scene script, loaded once per visit: returning to the homepage calls
+   window.saaeHeroBoot() for the new canvas rather than downloading the script
+   again under a fresh URL. */
+const HERO_SCRIPT_SRC = "/cinematic/js/hero-instrument.js";
+type HeroWindow = Window & { saaeHeroBoot?: () => Promise<HeroInstance | null> };
+
+/* Everything the scene needs before it can form without stalling, fetched up
+   front behind the loading screen: the precomputed tree and country (the
+   heaviest, so the bar weighs it most), the scene's modules, the Cairo cuts
+   it rasterises text in, and Abu Al-Joud's poses. All best-effort: a file
+   that fails or is slow only moves the bar on; the scene still boots and
+   fetches what it lacks itself. */
+const PHONE_POINTS_URL = "/cinematic/points/hero-phone.bin";
+const HERO_MODULE_URLS = [
+  HERO_SCRIPT_SRC,
+  "/cinematic/js/three.module.min.js",
+  "/cinematic/js/three.core.min.js",
+  "/cinematic/js/fruit-content.js",
+  "/cinematic/js/community-content.js",
+  "/cinematic/js/syria-outline.js",
+  "/cinematic/js/tree-story.js",
+  "/cinematic/js/syria-network.js",
+  "/cinematic/js/syria-cities.js",
+];
+const HERO_FONT_LOADS: Array<[string, string]> = [
+  ["600 44px Cairo", "Damascus"],
+  ["600 44px Cairo", "دمشق حلب الحسكة القامشلي"],
+  ["900 50px Cairo", "متدرّب شريك مجتمعات مستخدم سوري للذكاء الاصطناعي"],
+  ["900 143px Cairo", "1,000,000"],
+];
+const HERO_IMAGE_URLS = [
+  "/cinematic/images/initiative-tree.svg",
+  "/cinematic/images/abu-al-joud-comic-welcome.webp",
+  "/cinematic/images/abu-al-joud-comic-curious.webp",
+  "/cinematic/images/abu-al-joud-comic-celebrate.webp",
+  "/cinematic/images/abu-al-joud-comic-vision.webp",
+];
+const PRELOAD_TIMEOUT_MS = 8000;
+
+function fetchTimeout(url: string, ms: number): Promise<void> {
+  const controller = typeof AbortController === "undefined" ? null : new AbortController();
+  const timer = window.setTimeout(() => controller?.abort(), ms);
+  return fetch(url, { cache: "force-cache", signal: controller?.signal })
+    .then((res) => res.arrayBuffer())
+    .then(() => undefined)
+    .finally(() => window.clearTimeout(timer));
+}
+
+function imageTimeout(url: string, ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const timer = window.setTimeout(resolve, ms);
+    const done = () => {
+      window.clearTimeout(timer);
+      resolve();
+    };
+    img.onload = () => (img.decode ? img.decode().then(done, done) : done());
+    img.onerror = done;
+    img.src = url;
+  });
+}
+
+function preloadHeroAssets(onTick: (share: number) => void): Promise<void> {
+  const jobs: Array<[number, () => Promise<unknown>]> = [
+    [4, () => fetchTimeout(PHONE_POINTS_URL, PRELOAD_TIMEOUT_MS)],
+    ...HERO_MODULE_URLS.map(
+      (url) => [1, () => fetchTimeout(url, PRELOAD_TIMEOUT_MS)] as [number, () => Promise<unknown>],
+    ),
+    ...HERO_FONT_LOADS.map(
+      ([font, text]) =>
+        [
+          0.5,
+          () =>
+            Promise.race([
+              document.fonts?.load(font, text) ?? Promise.resolve(),
+              new Promise((r) => window.setTimeout(r, PRELOAD_TIMEOUT_MS)),
+            ]),
+        ] as [number, () => Promise<unknown>],
+    ),
+    ...HERO_IMAGE_URLS.map(
+      (url) =>
+        [0.6, () => imageTimeout(url, PRELOAD_TIMEOUT_MS)] as [number, () => Promise<unknown>],
+    ),
+  ];
+  const total = jobs.reduce((sum, [weight]) => sum + weight, 0);
+  let done = 0;
+  return Promise.all(
+    jobs.map(([weight, job]) =>
+      job()
+        .catch(() => undefined)
+        .then(() => {
+          done += weight;
+          onTick(done / total);
+        }),
+    ),
+  ).then(() => undefined);
+}
 
 function useTreeJourney(
   sectionRef: RefObject<HTMLElement | null>,
@@ -91,6 +188,7 @@ function useTreeJourney(
   const [mode, setMode] = useState<TreeMode>("loading");
   const [band, setBand] = useState(0);
   const [openingReady, setOpeningReady] = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -207,8 +305,12 @@ function useTreeJourney(
       arrived.resize();
       arrived.startEntrance();
       setMode("live");
-      // The tree forms first; the opening headline follows once it has.
-      openingTimer = window.setTimeout(() => setOpeningReady(true), 1700);
+      // The tree forms first; the opening headline follows once it has, and
+      // the shapes still to come are built in idle time after that.
+      openingTimer = window.setTimeout(() => {
+        setOpeningReady(true);
+        arrived.warmup?.();
+      }, 1700);
       schedule();
     };
 
@@ -245,21 +347,47 @@ function useTreeJourney(
     eased = readProgress();
     paint(eased);
 
-    /* A fresh URL per mount, so returning to the homepage boots a new scene on
-       the new canvas; three.js and the other imports stay cached. */
-    const script = document.createElement("script");
-    script.type = "module";
-    script.src = `/cinematic/js/hero-instrument.js?phone=${++mountCount}`;
-    document.head.appendChild(script);
-
-    // No scene in time (slow download, lost context): the drawn tree and all captions.
-    const fallback = window.setTimeout(() => {
-      if (!instanceRef.current && !disposed) {
-        fellBack = true;
-        setMode("static");
-        setOpeningReady(true);
+    /* The loading screen holds the page until the scene's files are in, so a
+       slow phone forms the scene once, in one go, instead of stuttering
+       through it while the reader is already scrolling. Then the scene boots:
+       by calling the already-loaded module again if this is a return visit,
+       or by loading it once. */
+    let script: HTMLScriptElement | null = null;
+    let fallback = 0;
+    const boot = () => {
+      if (disposed) return;
+      // No scene in time (lost context, a phone that cannot build it): the
+      // drawn tree and all captions.
+      fallback = window.setTimeout(() => {
+        if (!instanceRef.current && !disposed) {
+          fellBack = true;
+          setMode("static");
+          setOpeningReady(true);
+        }
+      }, 9000);
+      const w = window as HeroWindow;
+      if (w.saaeHeroBoot) {
+        w.saaeHeroBoot()
+          .then((instance) => {
+            if (instance) return;
+            // Nothing to boot here (reduced motion, no scene): settle now.
+            if (!disposed && !instanceRef.current) {
+              fellBack = true;
+              setMode("static");
+              setOpeningReady(true);
+            }
+          })
+          .catch(() => undefined);
+        return;
       }
-    }, 9000);
+      script = document.createElement("script");
+      script.type = "module";
+      script.src = HERO_SCRIPT_SRC;
+      document.head.appendChild(script);
+    };
+    preloadHeroAssets((share) => {
+      if (!disposed) setLoadProgress(share);
+    }).then(boot);
 
     return () => {
       disposed = true;
@@ -272,7 +400,7 @@ function useTreeJourney(
       window.removeEventListener("resize", onResize);
       instanceRef.current?.dispose();
       instanceRef.current = null;
-      script.remove();
+      script?.remove();
     };
   }, [sectionRef, bandRefs, instanceRef]);
 
@@ -286,7 +414,7 @@ function useTreeJourney(
     });
   }, [mode, bandRefs]);
 
-  return { mode, band, openingReady };
+  return { mode, band, openingReady, loadProgress };
 }
 
 const COPY = {
@@ -339,6 +467,7 @@ const COPY = {
     action: { ar: "استكشف المبادرة", en: "Explore the initiative" },
   },
   cue: { ar: "مرّر للبدء", en: "Scroll to begin" },
+  loading: { ar: "جاري تجهيز المشهد…", en: "Preparing the scene…" },
 } as const;
 
 /* Abu Al-Joud's line for each beat, the same as the desktop guide's. */
@@ -525,7 +654,11 @@ export function MobileTreeHero({
   const sectionRef = useRef<HTMLElement | null>(null);
   const bandRefs = useRef<Array<HTMLElement | null>>([]);
   const instanceRef = useRef<HeroInstance | null>(null);
-  const { mode, band, openingReady } = useTreeJourney(sectionRef, bandRefs, instanceRef);
+  const { mode, band, openingReady, loadProgress } = useTreeJourney(
+    sectionRef,
+    bandRefs,
+    instanceRef,
+  );
 
   const [community, setCommunity] = useState(0);
   const [browsed, setBrowsed] = useState(false);
@@ -650,6 +783,21 @@ export function MobileTreeHero({
         </p>
         <HeroGuide lang={lang} band={band} />
       </div>
+      {mode === "loading" ? (
+        <div className="mh-hero-loader" role="status" aria-live="polite">
+          <img
+            className="mh-hero-loader-mark"
+            src="/cinematic/images/logo-tree-transparent.png"
+            alt=""
+            width={96}
+            height={98}
+          />
+          <div className="mh-hero-loader-bar" aria-hidden="true">
+            <span style={{ transform: `scaleX(${Math.max(0.04, loadProgress).toFixed(3)})` }} />
+          </div>
+          <p className="mh-hero-loader-text">{pick(COPY.loading)}</p>
+        </div>
+      ) : null}
     </section>
   );
 }
