@@ -6,7 +6,8 @@
    mounts, kept so their markup keeps working. */
 .motion-footer-root:not(:empty) + .home-footer-fallback,
 #home-motion-footer-root:not(:empty) + .home-footer-fallback,
-#about-motion-footer-root:not(:empty) + .home-footer-fallback {
+#about-motion-footer-root:not(:empty) + .home-footer-fallback,
+#partners-motion-footer-root:not(:empty) + .home-footer-fallback {
   display: none;
 }
 
@@ -192,14 +193,16 @@
   font-family: "Cairo", Arial, sans-serif;
   font-size: clamp(2.8rem, 4.7vw, 5.2rem);
   font-weight: 900;
-  line-height: 1.08;
+  line-height: 1.18;
   letter-spacing: 0;
+  overflow: visible;
   text-shadow: 0 0 36px rgba(114, 220, 230, 0.13);
 }
 
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
   .hmf-assistant-copy .hmf-title {
-    padding-block: 0;
+    display: block;
+    padding-block: 0.12em 0.16em;
     padding-inline: 0.06em;
     background-image:
       linear-gradient(180deg, rgba(198, 237, 243, 0.88), rgba(160, 218, 227, 0.9)),
@@ -215,6 +218,7 @@
 
 [dir="rtl"] .hmf-assistant-copy h2 {
   letter-spacing: 0;
+  line-height: 1.22;
 }
 
 .hmf-intro {
