@@ -1713,7 +1713,9 @@
          of a sentence. Deep links still work: an explicit hash is a destination
          the visitor asked for. */
       if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-      if (!location.hash) window.scrollTo(0, 0);
+      /* Except coming Back to the page: the app is putting the visitor back
+         where they left it (__root.tsx ScrollRestoration). */
+      if (!location.hash && !window.saaeRestoreTarget) window.scrollTo(0, 0);
 
       buildCommunityPips();
 
