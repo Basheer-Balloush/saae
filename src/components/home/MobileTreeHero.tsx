@@ -25,6 +25,7 @@ export type TreeMode = "loading" | "live" | "static";
 
 type HeroInstance = {
   render: (progress: number) => void;
+  setProgress?: (progress: number) => void;
   resize: () => void;
   dispose: () => void;
   startEntrance: () => void;
@@ -131,7 +132,9 @@ function useTreeJourney(
       const instance = instanceRef.current;
       if (instance) {
         instance.setCalm?.(-0.5, 0.6);
-        instance.render(p);
+        // The scene's own frame loop draws it: one draw per frame, not two.
+        if (instance.setProgress) instance.setProgress(p);
+        else instance.render(p);
       }
     };
 
@@ -139,6 +142,13 @@ function useTreeJourney(
       frame = 0;
       const dt = Math.min(0.1, (now - lastTime) / 1000);
       lastTime = now;
+      // Below the hero there is nothing to draw: the rest of the page scrolls
+      // without the scene or the captions doing any work.
+      const rect = section.getBoundingClientRect();
+      if (rect.bottom <= 0 || rect.top >= window.innerHeight) {
+        eased = readProgress();
+        return;
+      }
       const target = readProgress();
       eased += (target - eased) * Math.min(1, dt * 6);
       if (Math.abs(target - eased) < 0.0003) eased = target;
