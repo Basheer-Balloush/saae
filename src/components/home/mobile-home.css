@@ -330,9 +330,7 @@
   padding: 12px 14px 10px;
   border: 1px solid rgba(184, 232, 240, 0.2);
   border-radius: 18px;
-  background: color-mix(in srgb, var(--mh-panel) 78%, transparent);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--mh-panel) 94%, transparent);
   animation: mh-fade-up 420ms var(--mh-ease) both;
 }
 .mobile-home .mh-tree-card-icon {
@@ -499,9 +497,7 @@
   border: 1px solid rgba(184, 232, 240, 0.28);
   border-radius: 16px;
   border-end-end-radius: 4px;
-  background: color-mix(in srgb, var(--mh-panel) 90%, transparent);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--mh-panel) 96%, transparent);
   color: var(--mh-type);
   font-size: 0.8rem;
   line-height: 1.45;
@@ -715,6 +711,18 @@
    MobileRadialNav renders the desktop's tree button and language pill, styled
    by navigation.css. That sheet shrinks the pill to a bare globe under 680px;
    the homepage keeps the label, as the desktop does. */
+/* No backdrop blur over the scrolling page: iPhone Safari recomputes a blur
+   under a fixed element on every scroll frame, which is where the scroll
+   stutter came from. The scrim's gradient and a near-solid pill do the work. */
+.mobile-home .radial-nav::before {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.mobile-home .radial-language {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: rgba(2, 29, 36, 0.94) !important;
+}
 .mobile-home .radial-language {
   width: auto !important;
   min-width: 44px !important;
@@ -1066,9 +1074,7 @@
   padding: 12px 14px;
   border: 1.5px solid rgba(119, 224, 232, 0.6);
   border-radius: 10px;
-  background: color-mix(in srgb, var(--mh-canvas) 94%, transparent);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--mh-canvas) 97%, transparent);
   box-shadow: 0 14px 34px rgba(3, 16, 19, 0.55);
   opacity: 0;
   transform: translateY(10px) scale(0.96);
