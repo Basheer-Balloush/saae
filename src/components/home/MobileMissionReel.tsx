@@ -88,7 +88,8 @@ export function MobileMissionReel({
       const runway = out.nextElementSibling as HTMLElement | null;
       if (runway) runway.style.blockSize = `${handoff}px`;
       section.style.marginBlockStart = `${-(handoff + view)}px`;
-      reel.style.blockSize = `${view * 3 + handoff}px`;
+      // A screen and a third per step: a flick should not skip one.
+      reel.style.blockSize = `${view * 4 + handoff}px`;
     };
 
     const paint = () => {
