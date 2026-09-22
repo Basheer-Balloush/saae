@@ -215,6 +215,15 @@ main section { padding-block: var(--initiative-gap); }
 .sponsor-name { display: flex; align-items: center; gap: 16px; }
 .sponsor-name i { width: 46px; aspect-ratio: 1; display: grid; place-items: center; color: #06232a; border-radius: 50%; background: linear-gradient(135deg, var(--initiative-cyan), var(--initiative-turquoise)); font-size: .66rem; font-style: normal; font-weight: 800; flex: none; }
 .sponsor-name strong { color: var(--initiative-paper); font-size: .95rem; }
+/* A sponsor whose logo we hold shows it inside the same 46px disc. The partner
+   logos are 320x320 with transparency, so the disc takes the warm off-white the
+   partners page uses behind them and the mark is contained, never cropped.
+   Sponsors we have no logo for keep the gradient-and-initials badge, which is
+   also what a logo that fails to load falls back to: the img carries an inline
+   onerror that restores data-initials, so it survives the markup being
+   re-injected in a way a listener added from a script would not. */
+.sponsor-name i:has(img) { background: #f4f2ee; padding: 5px; }
+.sponsor-name i img { inline-size: 100%; block-size: 100%; border-radius: 50%; object-fit: contain; }
 .impact { display: grid; grid-template-columns: minmax(80px, 1fr) 64px; align-items: center; gap: 18px; }
 .impact b { height: 5px; display: block; overflow: hidden; border-radius: 999px; background: rgba(231, 241, 240, .1); }
 .impact b::after { content: ""; display: block; width: var(--impact); height: 100%; background: linear-gradient(90deg, var(--initiative-turquoise), var(--initiative-green)); transform: scaleX(0); transform-origin: left; transition: transform 1200ms var(--initiative-ease) 250ms; }
