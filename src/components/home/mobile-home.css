@@ -535,6 +535,66 @@
   }
 }
 
+/* The loading screen: the scene's files come in behind it, so a slower phone
+   forms the scene once instead of stuttering through it while the reader is
+   already scrolling. The page does not scroll while it is up; it leaves the
+   moment the scene is live, or the drawn tree takes over. */
+html:has(.mobile-home .mh-hero-loader) {
+  overflow: hidden;
+}
+.mobile-home .mh-hero-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 22px;
+  padding: 24px;
+  background: var(--mh-canvas, #03191f);
+  color: var(--mh-type);
+  text-align: center;
+}
+.mobile-home .mh-hero-loader-mark {
+  inline-size: 84px;
+  block-size: auto;
+  animation: mh-loader-breathe 2.4s ease-in-out infinite;
+}
+.mobile-home .mh-hero-loader-bar {
+  inline-size: min(220px, 60vw);
+  block-size: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(184, 232, 240, 0.16);
+}
+.mobile-home .mh-hero-loader-bar span {
+  display: block;
+  block-size: 100%;
+  background: var(--mh-turquoise-lift, #72dce6);
+  transform-origin: left center;
+  transition: transform 260ms ease-out;
+}
+.mobile-home[dir="rtl"] .mh-hero-loader-bar span {
+  transform-origin: right center;
+}
+.mobile-home .mh-hero-loader-text {
+  margin: 0;
+  color: var(--mh-ink-muted, #92afb4);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+@keyframes mh-loader-breathe {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(0.97);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* No scene (reduced motion, no WebGL2, or it never arrived): no runway. The
    drawn tree heads a column holding all six captions, every one of them live. */
 .mobile-home .mh-hero.mh-tree-hero[data-tree="static"] {
