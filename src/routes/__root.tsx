@@ -334,7 +334,7 @@ function ScrollRestoration() {
 
   useEffect(() => {
     const state = pending.current;
-    const target = state.target ?? 0;
+    const target = location.pathname === "/contact" ? 0 : state.target ?? 0;
     state.target = null;
     type Engine = { scrollTo: (y: number, o?: { immediate?: boolean }) => void };
     const go = (y: number) => {

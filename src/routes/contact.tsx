@@ -51,7 +51,7 @@ export const Route = createFileRoute("/contact")({
       { name: "theme-color", content: "#144248" },
     ],
     links: [
-      { rel: "stylesheet", href: "/cinematic/css/contact.css" },
+      { rel: "stylesheet", href: "/cinematic/css/contact.css?v=contact-spacing-9" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
       { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
     ],
@@ -65,6 +65,21 @@ function Page() {
      reach contact_messages exactly as the previous React form did. Field caps
      mirror that form's validation. */
   useEffect(() => {
+    let secondFrame = 0;
+    let settleTimer = 0;
+    let finalSettleTimer = 0;
+    if (!window.location.hash) {
+      const showContactFromTop = () => window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      showContactFromTop();
+      const firstFrame = requestAnimationFrame(() => {
+        showContactFromTop();
+        secondFrame = requestAnimationFrame(showContactFromTop);
+      });
+      settleTimer = window.setTimeout(showContactFromTop, 180);
+      finalSettleTimer = window.setTimeout(showContactFromTop, 900);
+      secondFrame = firstFrame;
+    }
+
     window.saaeContactSubmit = async (submission) => {
       const row = {
         full_name: cap(submission.full_name, 100),
@@ -84,6 +99,9 @@ function Page() {
       if (error) throw new Error(error.message);
     };
     return () => {
+      cancelAnimationFrame(secondFrame);
+      window.clearTimeout(settleTimer);
+      window.clearTimeout(finalSettleTimer);
       delete window.saaeContactSubmit;
     };
   }, []);
