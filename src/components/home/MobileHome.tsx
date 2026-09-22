@@ -1,21 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { Partner } from "@/features/website/partners/data";
-import {
-  ArrowUp,
-  ArrowUpLeft,
-  BookOpen,
-  Facebook,
-  Instagram,
-  Linkedin,
-  Mail,
-  MapPin,
-  Network,
-  Phone,
-  Rocket,
-} from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import MotionButton from "@/components/ui/motion-button";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
+import { MotionFooter } from "@/components/ui/motion-footer";
+import "./homepage-footer.css";
 import { HomepageNews } from "./HomepageNews";
 import "./homepage-partners.css";
 import { DESKTOP_HOME_QUERY } from "@/hooks/useHeroCapability";
@@ -29,36 +18,15 @@ import { IPhoneMockup } from "@/components/ui/iphone-mockup";
 import { ScaledDevice } from "./ScaledDevice";
 import { LogoCarousel, type Logo } from "@/components/ui/logo-carousel";
 import {
-  CONTACT,
   FAQ_COPY,
-  FOOTER_CLAIM,
-  FOOTER_DISCOVER,
-  FOOTER_EXPLORE,
-  FOOTER_OFFICIAL,
-  FOOTER_RIGHTS,
   MICRO_COPY,
-  OPENING,
   PARTNERS_COPY,
-  SOCIAL_LINKS,
-  type HomeLink,
   type Locale,
   type NewsEntry,
 } from "./mobile-home-content";
 
 function pick<T extends { ar: string; en: string }>(t: T, lang: Locale): string {
   return lang === "ar" ? t.ar : t.en;
-}
-
-function extProps(link: HomeLink) {
-  return link.external
-    ? ({ target: "_blank", rel: "noopener noreferrer" } as const)
-    : ({} as const);
-}
-
-function SocialIcon({ name }: { name: string }) {
-  if (name === "Instagram") return <Instagram size={20} aria-hidden="true" />;
-  if (name === "Facebook") return <Facebook size={20} aria-hidden="true" />;
-  return <Linkedin size={20} aria-hidden="true" />;
 }
 
 export function MobileHomeView({
@@ -85,12 +53,6 @@ export function MobileHomeView({
   });
   const dir = lang === "ar" ? "rtl" : "ltr";
   const [motionReady, setMotionReady] = useState(false);
-
-  const wordmark =
-    lang === "ar"
-      ? "/cinematic/mobile/saae-wordmark-ar-light.webp"
-      : "/cinematic/mobile/saae-wordmark-en-light.webp";
-  const wordmarkSize = lang === "ar" ? { width: 480, height: 162 } : { width: 480, height: 165 };
 
   const heroSentinelRef = useRef<HTMLDivElement | null>(null);
   const handoffOutRef = useRef<HTMLDivElement | null>(null);
@@ -232,135 +194,9 @@ export function MobileHomeView({
 
       <MobileSectionGuide lang={lang === "ar" ? "ar" : "en"} />
 
-      <footer className="mh-footer">
-        <div className="mh-wrap">
-          <div className="mh-footer-top">
-            <img
-              src={wordmark}
-              alt={pick(OPENING.eyebrow, lang)}
-              width={wordmarkSize.width}
-              height={wordmarkSize.height}
-              loading="lazy"
-              decoding="async"
-              className="mh-footer-logo"
-            />
-            <p className="mh-footer-claim">{pick(FOOTER_CLAIM, lang)}</p>
-          </div>
-          <div className="mh-footer-cols">
-            <nav aria-labelledby="mh-foot-assoc">
-              <h2 id="mh-foot-assoc">{pick(MICRO_COPY.footerAssociation, lang)}</h2>
-              <ul>
-                {FOOTER_EXPLORE.map((l) => (
-                  <li key={l.href}>
-                    <a href={l.href}>{pick(l.label, lang)}</a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-            <nav aria-labelledby="mh-foot-part">
-              <h2 id="mh-foot-part">{pick(MICRO_COPY.footerTakePart, lang)}</h2>
-              <ul>
-                {FOOTER_OFFICIAL.map((l) => (
-                  <li key={l.href + pick(l.label, lang)}>
-                    <a href={l.href} {...extProps(l)}>
-                      {pick(l.label, lang)}
-                      {l.external ? (
-                        <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
-                      ) : null}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-            <nav aria-labelledby="mh-foot-explore" className="mh-footer-discover">
-              <h2 id="mh-foot-explore">{pick(MICRO_COPY.footerExplore, lang)}</h2>
-              <ul>
-                {FOOTER_DISCOVER.map((l) => (
-                  <li key={l.href + pick(l.label, lang)}>
-                    <a href={l.href}>{pick(l.label, lang)}</a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
-          <div className="mh-contact-card">
-            <h2 className="mh-sr-only">{pick(MICRO_COPY.contactTitle, lang)}</h2>
-            <a
-              href={CONTACT.mapsHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={pick(MICRO_COPY.openMaps, lang)}
-              className="mh-map-link"
-            >
-              <img
-                src={CONTACT.mapImage}
-                alt={pick(CONTACT.mapAlt, lang)}
-                width={696}
-                height={339}
-                loading="lazy"
-                decoding="async"
-              />
-            </a>
-            <ul className="mh-contact-list">
-              <li>
-                <a href={CONTACT.mapsHref} target="_blank" rel="noopener noreferrer">
-                  <MapPin size={18} aria-hidden="true" />
-                  {pick(CONTACT.address, lang)}
-                  <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
-                </a>
-              </li>
-              <li>
-                <a href={CONTACT.email}>
-                  <Mail size={18} aria-hidden="true" />
-                  <span dir="ltr">info@aisyria.org</span>
-                </a>
-              </li>
-              <li>
-                <a href={CONTACT.phone}>
-                  <Phone size={18} aria-hidden="true" />
-                  <span dir="ltr">{CONTACT.phoneDisplay}</span>
-                </a>
-              </li>
-              <li>
-                <a href={CONTACT.mapsHref} target="_blank" rel="noopener noreferrer">
-                  {pick(MICRO_COPY.visitUs, lang)}
-                  <ArrowUpLeft size={16} aria-hidden="true" className="mh-flip" />
-                  <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
-                </a>
-              </li>
-            </ul>
-            <ul className="mh-social-list" aria-label={pick(MICRO_COPY.followUs, lang)}>
-              {SOCIAL_LINKS.map((s) => (
-                <li key={s.href}>
-                  <a
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={pick(s.label, lang)}
-                    className="mh-social-btn"
-                  >
-                    <SocialIcon name={s.labelEn} />
-                    <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <p className="mh-attr">
-              ©{" "}
-              <a href={CONTACT.attributionHref} target="_blank" rel="noopener noreferrer">
-                OpenStreetMap
-                <span className="mh-sr-only">{pick(MICRO_COPY.newTab, lang)}</span>
-              </a>
-            </p>
-          </div>
-          <div className="mh-rights-row">
-            <p className="mh-rights">{pick(FOOTER_RIGHTS, lang)}</p>
-            <a className="mh-to-top" href="#hero-sec" aria-label={pick(MICRO_COPY.backToTop, lang)}>
-              <ArrowUp size={20} aria-hidden="true" />
-            </a>
-          </div>
-        </div>
-      </footer>
+      {/* The desktop homepage's footer (DesktopMotionFooter), stacked for the
+          phone in mobile-home.css. */}
+      <MotionFooter locale={lang === "ar" ? "ar" : "en"} />
     </div>
   );
 }

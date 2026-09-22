@@ -28,6 +28,7 @@
   };
   const setOpen = (next, returnFocus = false) => {
     open = Boolean(next);
+    if (open && !orbitFrame) orbitFrame = requestAnimationFrame(animateOrbit);
     nav.classList.toggle("is-open", open);
     document.documentElement.classList.toggle("radial-nav-open", open);
     toggle?.setAttribute("aria-expanded", String(open));
@@ -38,8 +39,18 @@
     if (open) window.setTimeout(() => items?.querySelector("a")?.focus({ preventScroll: true }), 90);
     if (!open && returnFocus) toggle?.focus({ preventScroll: true });
   };
+  /* The scrim behind the hub and the language button (navigation.css) shows
+     once the page has left its top, where it would sit over the headline. */
+  const syncScrolled = () => {
+    document.documentElement.classList.toggle("nav-scrolled", window.scrollY > 24);
+  };
+  window.addEventListener("scroll", syncScrolled, { passive: true });
+  syncScrolled();
+  /* The orbit runs only while the menu is open: a frame loop left running on
+     every page kept the phone drawing 60 times a second for nothing. */
   const animateOrbit = time => {
-    if (open) {
+    if (!open) { orbitFrame = 0; return; }
+    {
       const radius = window.matchMedia("(max-width: 680px), (max-height: 620px)").matches ? 112 : 140;
       const angleOffset = time * 0.00012;
       orbitItems.forEach((item, index) => {
@@ -59,6 +70,5 @@
   window.addEventListener("saae:languagechange", syncLanguage);
   new MutationObserver(syncLanguage).observe(document.documentElement, { attributes:true, attributeFilter:["lang","dir"] });
   setOpen(false);
-  orbitFrame = requestAnimationFrame(animateOrbit);
   window.addEventListener("pagehide", () => cancelAnimationFrame(orbitFrame), { once:true });
 })();

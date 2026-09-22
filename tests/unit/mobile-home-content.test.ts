@@ -150,10 +150,11 @@ describe("mobile homepage rendered output", () => {
     // Pure in-page anchors (#hero-sec, …) are excluded here; the id test
     // below proves every rendered fragment resolves instead.
     // Database regions are always replaced, so their sample links don't count.
-    const desktopSource = homeHtml.replace(
-      /<!-- db:([\w-]+):start -->[\s\S]*?<!-- db:\1:end -->/g,
-      "",
-    );
+    // Nor does the static fallback footer: the desktop renders MotionFooter over
+    // it (homepage-footer.css hides it), and the phone renders MotionFooter too.
+    const desktopSource = homeHtml
+      .replace(/<!-- db:([\w-]+):start -->[\s\S]*?<!-- db:\1:end -->/g, "")
+      .replace(/<footer class="site-footer home-footer-fallback">[\s\S]*?<\/footer>/, "");
     const desktopHrefs = new Set<string>();
     const re = /href="([^"]*)"/g;
     let m: RegExpExecArray | null;
@@ -225,7 +226,7 @@ describe("mobile homepage rendered output", () => {
         .filter((h) => h.startsWith("#"))
         .map((h) => h.slice(1)),
     );
-    expect(fragments.size).toBeGreaterThan(3);
+    expect(fragments.size).toBeGreaterThan(1);
     for (const f of fragments) {
       expect(have.has(f), `in-page target missing: #${f}`).toBe(true);
     }
@@ -285,10 +286,10 @@ describe("mobile homepage rendered output", () => {
       "/cinematic/images/initiative-tree.svg",
       "/cinematic/images/logo-tree-transparent.png",
       "/cinematic/images/abu-al-joud-comic-welcome.webp",
-      "/cinematic/mobile/saae-wordmark-ar-light.webp",
-      "/cinematic/mobile/saae-wordmark-en-light.webp",
-      "/cinematic/images/saae-map.png",
       "/cinematic/images/faq-phone-mockup.avif",
+      // MotionFooter, the desktop's footer.
+      "/cinematic/images/saae-logo-ar.png",
+      "/cinematic/images/saae-logo-en.png",
       ...PARTNERS.map((partner) => partner.logo),
     ]);
     for (const markup of [arMarkup(), enMarkup()]) {

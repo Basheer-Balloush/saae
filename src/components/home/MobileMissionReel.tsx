@@ -33,8 +33,14 @@ const CAPTIONS = {
   ],
 } as const;
 
-/* The hand-off's length, as a share of the screen height: the desktop's 1.1. */
-const HANDOFF = 1.1;
+/* The hand-off's runway, as a share of the screen height. The slide itself
+   is not scrubbed by the scroll as on the desktop: on an iPhone the page
+   scrolls on its own thread and a transform written from scroll events lands
+   a frame or more behind it, so a scrubbed slide stutters and jumps under a
+   flick. Instead the slide plays as a timed CSS transition once the reader is
+   ARRIVE of the way down the runway, and reverses if they scroll back. */
+const HANDOFF = 0.7;
+const ARRIVE = 0.25;
 
 const clamp = (x: number, a: number, b: number) => Math.max(a, Math.min(b, x));
 
@@ -57,6 +63,7 @@ export function MobileMissionReel({
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const steps = MISSION_STEPS.length;
     let frame = 0;
+    let isArrived: boolean | null = null;
 
     /* The outgoing section pins with its bottom on the screen's bottom edge,
        the runway after it is the hand-off's length, and the reel is pulled up
@@ -92,13 +99,14 @@ export function MobileMissionReel({
       const handoff = reduced ? 0 : view * HANDOFF;
 
       // The hand-off: out to the right, in from the left, as on the desktop.
+      // Only a class changes here; mobile-home.css runs the slide.
       const entry = handoff ? clamp(into / handoff, 0, 1) : 1;
-      stage.style.transform =
-        entry < 1 ? `translate3d(${((entry - 1) * 100).toFixed(2)}%, 0, 0)` : "";
-      stage.style.visibility = entry > 0 ? "visible" : "hidden";
-      const out = outRef?.current;
-      if (out)
-        out.style.transform = entry > 0 ? `translate3d(${(entry * 100).toFixed(2)}%, 0, 0)` : "";
+      const arrived = entry >= ARRIVE;
+      if (arrived !== isArrived) {
+        isArrived = arrived;
+        stage.classList.toggle("mh-is-arrived", arrived);
+        outRef?.current?.classList.toggle("mh-is-left", arrived);
+      }
 
       // The steps: the same arithmetic as the desktop reel in home-inline.js,
       // over the part of the runway that follows the hand-off.
@@ -148,9 +156,10 @@ export function MobileMissionReel({
       window.removeEventListener("resize", onResize);
       const out = outRef?.current;
       if (out) {
-        out.style.transform = "";
+        out.classList.remove("mh-is-left");
         out.style.top = "";
       }
+      stage.classList.remove("mh-is-arrived");
       if (section) section.style.marginBlockStart = "";
       reel.style.blockSize = "";
     };
