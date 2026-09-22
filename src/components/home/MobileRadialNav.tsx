@@ -73,6 +73,18 @@ export function MobileRadialNav({
     return () => document.documentElement.classList.remove("radial-nav-open");
   }, [open]);
 
+  // The scrim behind the buttons (navigation.css) shows once the page scrolls.
+  useEffect(() => {
+    const root = document.documentElement;
+    const sync = () => root.classList.toggle("nav-scrolled", window.scrollY > 24);
+    sync();
+    window.addEventListener("scroll", sync, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", sync);
+      root.classList.remove("nav-scrolled");
+    };
+  }, []);
+
   // Outside tap and Escape close it; the first item takes focus as it opens.
   useEffect(() => {
     if (!open) return;
