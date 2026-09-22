@@ -26,6 +26,7 @@ import { MobileMissionReel } from "./MobileMissionReel";
 import { MobileSectionGuide } from "./MobileSectionGuide";
 import { FaqSequence } from "./DesktopFaqScroll";
 import { IPhoneMockup } from "@/components/ui/iphone-mockup";
+import { ScaledDevice } from "./ScaledDevice";
 import { LogoCarousel, type Logo } from "@/components/ui/logo-carousel";
 import {
   CONTACT,
@@ -201,25 +202,29 @@ export function MobileHomeView({
                 </div>
               }
             >
-              <IPhoneMockup
-                model="15-pro"
-                islandTop={20}
-                color="#163a43"
-                screenBg="#061820"
-                className="hp-faq-device"
-                style={{ width: "100%" }}
-                frameStyle={{
-                  width: "100%",
-                  height: "auto",
-                  aspectRatio: "420 / 720",
-                  border: "1px solid rgba(114, 214, 223, .55)",
-                }}
-                screenStyle={{ position: "absolute", inset: 12, width: "auto", height: "auto" }}
-                safeAreaOverrides={{ left: 16, right: 16 }}
-                shadow="0 18px 42px rgba(0, 0, 0, .35), 0 0 30px rgba(0, 139, 157, .16)"
-              >
-                <FaqSequence lang={lang} />
-              </IPhoneMockup>
+              {/* Laid out at the size it reads well at (an iPhone 12's), then
+                  scaled to the room each phone's screen leaves. */}
+              <ScaledDevice width={265} height={454}>
+                <IPhoneMockup
+                  model="15-pro"
+                  islandTop={20}
+                  color="#163a43"
+                  screenBg="#061820"
+                  className="hp-faq-device"
+                  style={{ width: "100%" }}
+                  frameStyle={{
+                    width: "100%",
+                    height: "auto",
+                    aspectRatio: "420 / 720",
+                    border: "1px solid rgba(114, 214, 223, .55)",
+                  }}
+                  screenStyle={{ position: "absolute", inset: 12, width: "auto", height: "auto" }}
+                  safeAreaOverrides={{ left: 16, right: 16 }}
+                  shadow="0 18px 42px rgba(0, 0, 0, .35), 0 0 30px rgba(0, 139, 157, .16)"
+                >
+                  <FaqSequence lang={lang} />
+                </IPhoneMockup>
+              </ScaledDevice>
             </ContainerScroll>
           </section>
         </div>
