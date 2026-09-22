@@ -1024,34 +1024,6 @@ async function createScene(canvas) {
   /* The centred layout's canvas height, and where the page's caption starts,
      in CSS pixels from the top: the subject is sized to the room above it. */
   let viewPxH = 844, captionTop = null;
-  /* The phone scene watches its own frame rate. A phone that cannot keep up
-     (frames averaging slower than ~45 per second over a second and a half of
-     drawing) gets the scene at a lower resolution, one step at a time, down
-     to a floor; a phone that keeps up is never touched. It never steps back
-     up, so the picture does not flicker between two resolutions. */
-  let qualityScale = 1;
-  const QUALITY_STEPS = [1, .8, .64];
-  // The first seconds (shaders compiling, images decoding, the tree forming)
-  // are slow on every phone; they are not counted.
-  let slowGaps = [], lastStep = 0;
-  const watchFrom = performance.now() + 3000;
-  function watchFrame(now) {
-    if (!centred || qualityScale === QUALITY_STEPS[QUALITY_STEPS.length - 1]) return;
-    if (now < watchFrom) return;
-    const gap = now - (watchFrame.last || now);
-    watchFrame.last = now;
-    // A long pause is the tab or the page idling, not the scene being slow.
-    if (gap <= 0 || gap > 250) return;
-    slowGaps.push(gap);
-    if (slowGaps.length < 90) return;
-    const mean = slowGaps.reduce((a, b) => a + b, 0) / slowGaps.length;
-    slowGaps = [];
-    if (mean > 22 && now - lastStep > 1500) {
-      lastStep = now;
-      qualityScale = QUALITY_STEPS[QUALITY_STEPS.indexOf(qualityScale) + 1];
-      resize();
-    }
-  }
   function resize() {
     const w2 = canvas.clientWidth || window.innerWidth;
     const h2 = canvas.clientHeight || window.innerHeight;
@@ -1060,7 +1032,7 @@ async function createScene(canvas) {
     camera.fov = h2 > w2 ? 54 : 38;
     camera.updateProjectionMatrix();
     renderer.setSize(w2, h2, false);
-    const r = Math.min(window.devicePixelRatio || 1, tier.dpr) * qualityScale;
+    const r = Math.min(window.devicePixelRatio || 1, tier.dpr);
     flightU.uPixelRatio.value = r;
     groundU.uPixelRatio.value = r;
     renderer.setPixelRatio(r);
@@ -1289,7 +1261,6 @@ async function createScene(canvas) {
     const step = now => {
       if (!idleRunning) return;
       if (!idleWanted()) { stopIdle(); return; }
-      watchFrame(now);
       if (!centred || progressDirty || now - lastIdleDraw >= 32) {
         progressDirty = false;
         lastIdleDraw = now;
@@ -1300,7 +1271,6 @@ async function createScene(canvas) {
     idleFrame = requestAnimationFrame(step);
   }
   function stopIdle() {
-    watchFrame.last = 0;
     idleRunning = false;
     cancelAnimationFrame(idleFrame);
     idleFrame = 0;
@@ -1370,7 +1340,6 @@ async function createScene(canvas) {
        spring velocity before it gets here because only the page knows what
        counts as fast for the length of hero it is running. */
     setVelocity(v) { scrollSpeed = Math.max(-1, Math.min(1, v)); },
-    get quality() { return qualityScale; },
     tier: tierName, points: gCount + K, flightPoints: K, cols: gCols, rows: gRows,
     rays: network.links, cities: network.count,
     pinBreath(on) {
