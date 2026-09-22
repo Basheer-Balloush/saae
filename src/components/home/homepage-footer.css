@@ -480,6 +480,12 @@
 
 .hmf-link-column a,
 .hmf-contact a {
+  /* 0.75rem at 1.65 leaves a 20px-tall link — under the 24px WCAG 2.2 AA
+     minimum. The type stays as it is; only the touch box grows. The column's
+     7px grid gap keeps neighbouring targets from meeting. */
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 24px;
   color: var(--hmf-muted);
   font-size: 0.75rem;
   line-height: 1.65;
