@@ -16,6 +16,39 @@ import { createSyriaNetwork } from "./syria-network.js";
 
 const TREE_URL = "../images/initiative-tree.svg";
 
+/* The phone's tree and country, precomputed by
+   scripts/generate-hero-phone-points.mjs so a phone does not rasterise,
+   sample and sort them at load. The file carries the hash of its inputs; a
+   missing, short or mismatched file makes the phone compute them itself, as
+   the desktop always does. After changing the tree SVG, syria-outline.js,
+   the low tier's pitch or the dot floor, re-run the script and paste the hash
+   it prints here. */
+const PHONE_POINTS_URL = "../points/hero-phone.bin";
+const PHONE_POINTS_EXPECTED = 0x5ee7f602;
+
+async function tryLoadPhonePoints() {
+  try {
+    const res = await fetch(new URL(PHONE_POINTS_URL, import.meta.url).href, { cache: "force-cache" });
+    if (!res.ok) return null;
+    const buf = await res.arrayBuffer();
+    if (buf.byteLength < 32) return null;
+    const v = new DataView(buf);
+    const magic = String.fromCharCode(v.getUint8(0), v.getUint8(1), v.getUint8(2), v.getUint8(3));
+    if (magic !== "SAAE" || v.getUint32(4, true) !== 1 || v.getUint32(8, true) !== PHONE_POINTS_EXPECTED) return null;
+    const K = v.getUint32(12, true);
+    if (!K || buf.byteLength !== 32 + K * 4 * 4 * 2) return null;
+    return {
+      K,
+      treeW: v.getUint32(16, true), treeH: v.getUint32(20, true),
+      syriaW: v.getUint32(24, true), syriaH: v.getUint32(28, true),
+      S0: new Float32Array(buf, 32, K * 4),
+      S4: new Float32Array(buf, 32 + K * 16, K * 4)
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
 const TIERS = {
   /* One pitch for every shape, so the whole journey is drawn on a single dot
      matrix at a single density. Shapes then differ only in how many dots they
@@ -27,10 +60,6 @@ const TIERS = {
      them into a white smear; sized for the tree, the country thins out into
      scattered confetti. Equal density is the thing that has to hold. */
   high: { ground: 0.105, shape: 0.118, rays: 72, dpr: 2.0 },
-  /* The phone homepage's centred layout: a sparser ground and a lower pixel
-     ratio. On a phone's dense screen the difference does not show; the fill
-     rate it saves does. */
-  phone: { ground: 0.22, shape: 0.19, rays: 38, dpr: 1.25 },
   mid:  { ground: 0.130, shape: 0.145, rays: 54, dpr: 1.75 },
   low:  { ground: 0.170, shape: 0.190, rays: 38, dpr: 1.5 }
 };
@@ -111,6 +140,28 @@ function textMask(text, sizePx) {
   x.fillStyle = "#fff";
   x.fillText(text, c.width / 2, c.height / 2);
   return maskFromCanvas(c);
+}
+
+/* syriaMask's projection without drawing anything: the size, the outline and
+   the lon/lat mapping, which is all the scene needs once the country's dots
+   are precomputed. */
+function syriaProjection(ring, heightPx) {
+  const k = Math.cos(SYRIA_LAT0 * Math.PI / 180);
+  const proj = ring.map(([lon, lat]) => [lon * k, lat]);
+  const xs = proj.map(p => p[0]), ys = proj.map(p => p[1]);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const aspect = (maxX - minX) / (maxY - minY);
+  const pad = 0.03;
+  const h = heightPx;
+  const w = Math.round(heightPx * aspect);
+  const toX = x => ((x - minX) / (maxX - minX) * (1 - pad * 2) + pad) * w;
+  const toY = y => (1 - ((y - minY) / (maxY - minY) * (1 - pad * 2) + pad)) * h;
+  return {
+    w, h, aspect,
+    outline: proj.map(([px, py]) => [toX(px), toY(py)]),
+    project: (lon, lat) => [toX(lon * k), toY(lat)]
+  };
 }
 
 function syriaMask(ring, heightPx) {
@@ -628,23 +679,32 @@ function pickTier() {
 async function createScene(canvas) {
   /* The phone homepage runs the same scene in a centred, portrait layout: no
      caption lane beside the subject, the tree in the middle of the screen, the
-     phone tier, and a lattice tall enough to fill a phone. It also drops
-     multisampling -- points gain nothing from it on a dense screen, and it is
-     the most expensive thing a phone GPU does here. */
+     light tier, and a lattice tall enough to fill a phone. */
   const centred = canvas.closest("[data-hero-layout='centred']") !== null;
   let gl = null;
   try {
-    gl = canvas.getContext("webgl2", { alpha: true, antialias: !centred, powerPreference: "high-performance" });
+    gl = canvas.getContext("webgl2", { alpha: true, antialias: true, powerPreference: "high-performance" });
   } catch (_) { gl = null; }
   if (!gl) throw new Error("no WebGL2 context");
 
-  const tierName = centred ? "phone" : pickTier();
+  const tierName = centred ? "low" : pickTier();
   const tier = TIERS[tierName];
   const PITCH = tier.shape;
 
-  const treeImage = await loadImage(new URL(TREE_URL, import.meta.url).href);
-  const treeAlpha = alphaOf(treeImage, 512, Math.round(512 * treeImage.naturalHeight / treeImage.naturalWidth));
-  const syria = syriaMask(SYRIA_RING, 620);
+  /* The phone takes the tree and the country precomputed when it can; see
+     PHONE_POINTS_URL. Everything else is built the same way on both paths. */
+  let pre = centred ? await tryLoadPhonePoints() : null;
+  let treeAlpha = null, syria = null;
+  if (pre) {
+    syria = syriaProjection(SYRIA_RING, 620);
+    if (syria.w !== pre.syriaW || syria.h !== pre.syriaH) pre = null;
+  }
+  if (!pre) {
+    const treeImage = await loadImage(new URL(TREE_URL, import.meta.url).href);
+    treeAlpha = alphaOf(treeImage, 512, Math.round(512 * treeImage.naturalHeight / treeImage.naturalWidth));
+    syria = syriaMask(SYRIA_RING, 620);
+  }
+  const treeDims = pre ? { w: pre.treeW, h: pre.treeH } : treeAlpha;
 
   /* The numeral is rasterised in the page's own face, so it waits for the
      webfont rather than falling back to Arial on a cold load. */
@@ -661,7 +721,7 @@ async function createScene(canvas) {
     x0: SUBJECT_X - w / 2, x1: SUBJECT_X + w / 2,
     y0: -h / 2, y1: h / 2, w, h
   });
-  const treeBox = box(SUBJECT_H * 1.10 * (treeAlpha.w / treeAlpha.h), SUBJECT_H * 1.10);
+  const treeBox = box(SUBJECT_H * 1.10 * (treeDims.w / treeDims.h), SUBJECT_H * 1.10);
 
   const mapBox = box(SUBJECT_H * 1.19 * syria.aspect, SUBJECT_H * 1.19);
 
@@ -673,101 +733,119 @@ async function createScene(canvas) {
      distance from this point. */
   const [ox, oy] = mapToWorld(...syria.project(ORIGIN_LON, ORIGIN_LAT));
 
-  /* ---- beat 1, the mark ---- */
-  const R0 = sampleShape(treeBox, PITCH, (x, y, u, v, cu, cv) => {
-    const c = coverage(treeAlpha, u, v, cu, cv);
-    return c > 0.28 ? c : 0;
-  });
+  let K, S0, S1, S2, S3, S4, numShapes;
+  if (pre) {
+    /* Slots 1-3 and the counter frames are all the tree, expanded with the
+       same key, so they are the tree's buffer. */
+    K = pre.K;
+    S0 = pre.S0; S4 = pre.S4;
+    S1 = S2 = S3 = S0;
+    numShapes = [S0, S0];
+  } else {
+    /* ---- beat 1, the mark ---- */
+    const R0 = sampleShape(treeBox, PITCH, (x, y, u, v, cu, cv) => {
+      const c = coverage(treeAlpha, u, v, cu, cv);
+      return c > 0.28 ? c : 0;
+    });
 
-  const R1 = R0, R2 = R0, R3 = R0;
-  const numFrames = [R0, R0];
-  const NUM_FRAMES = 2;
+    const R1 = R0, R2 = R0, R3 = R0;
+    const numFrames = [R0, R0];
 
-  /* ---- beat 5, the country ---- */
-  const R4 = sampleShape(mapBox, PITCH, (x, y, u, v, cu, cv) => {
-    const c = coverage(syria, u, v, cu, cv);
-    return c > 0.5 ? 1 : 0;
-  });
+    /* ---- beat 5, the country ---- */
+    const R4 = sampleShape(mapBox, PITCH, (x, y, u, v, cu, cv) => {
+      const c = coverage(syria, u, v, cu, cv);
+      return c > 0.5 ? 1 : 0;
+    });
 
-  /* An even, restrained field keeps every region equally present and lets
-     city beacons and traveling light read clearly above the dots. */
-  for (let i = 0; i < R4.length; i += 3) R4[i + 2] = 0.46;
+    /* An even, restrained field keeps every region equally present and lets
+       city beacons and traveling light read clearly above the dots. */
+    for (let i = 0; i < R4.length; i += 3) R4[i + 2] = 0.46;
 
-  /* K is the largest shape's own cell count: one buffer has to serve all five,
-     and the country claims the most. The counter's frames are measured too, so
-     a wide one can never overrun the buffer everything shares. */
-  const RAW = [R0, R1, R2, R3, R4];
-  /* The floor exists for the fruit pictograms, which are the only shapes that
-     have to render TYPE. The geometric shapes read fine at the country's
-     natural density; letterforms do not, and the pictograms were being held to
-     a budget set by a shape that has no small detail in it. Dots above a
-     shape's own count are parked at zero weight and never drawn, so the floor
-     costs the other four nothing but buffer and buys the type another step of
-     resolution. Keep it modest: this is one draw call shared with the ground
-     lattice. */
-  const K = Math.max(22000, ...RAW.concat(numFrames).map(r => r.length / 3));
+    /* K is the largest shape's own cell count: one buffer has to serve all five,
+       and the country claims the most. The counter's frames are measured too, so
+       a wide one can never overrun the buffer everything shares. */
+    const RAW = [R0, R1, R2, R3, R4];
+    /* The floor exists for the fruit pictograms, which are the only shapes that
+       have to render TYPE. The geometric shapes read fine at the country's
+       natural density; letterforms do not, and the pictograms were being held to
+       a budget set by a shape that has no small detail in it. Dots above a
+       shape's own count are parked at zero weight and never drawn, so the floor
+       costs the other four nothing but buffer and buys the type another step of
+       resolution. Keep it modest: this is one draw call shared with the ground
+       lattice. */
+    K = Math.max(22000, ...RAW.concat(numFrames).map(r => r.length / 3));
 
-  /* What each shape's reveal follows. This is the whole difference between a
-     shape appearing and a shape being drawn. */
-  const KEYS = [
-    (x, y) => y,                            // the mark grows from its roots up
-    (x, y) => y,
-    (x, y) => y,
-    (x, y) => y,
-    (x, y) => Math.hypot(x - ox, y - oy)    // the country floods from the origin
-  ];
-  const [S0, S1, S2, S3, S4] = RAW.map((r, i) => expand(r, K, KEYS[i]));
-  /* Every counter frame gets the same treatment as any other shape, and the
-     same reveal key, so a frame can be dropped straight into the numeral slot. */
-  const numShapes = numFrames.map(r => expand(r, K, KEYS[2]));
+    /* What each shape's reveal follows. This is the whole difference between a
+       shape appearing and a shape being drawn. */
+    const KEYS = [
+      (x, y) => y,                            // the mark grows from its roots up
+      (x, y) => y,
+      (x, y) => y,
+      (x, y) => y,
+      (x, y) => Math.hypot(x - ox, y - oy)    // the country floods from the origin
+    ];
+    [S0, S1, S2, S3, S4] = RAW.map((r, i) => expand(r, K, KEYS[i]));
+    /* Every counter frame gets the same treatment as any other shape, and the
+       same reveal key, so a frame can be dropped straight into the numeral slot. */
+    numShapes = numFrames.map(r => expand(r, K, KEYS[2]));
+  }
 
   const fruitWorld = FRUITS.map(([x,y]) => new THREE.Vector2(
     treeBox.x0+x/301.81*treeBox.w, treeBox.y1-y/339*treeBox.h));
-  const fruitShapes = {};
-  /* x0, x1, y0, y1 of the learning screen's progress bar, in world units. */
-  const fillRect = new THREE.Vector4(0, 0, 0, 0);
-  for (const lang of ["en","ar"]) {
-    fruitShapes[lang] = fruitWorld.map((centre,index) => {
-      const mask = fruitContentMask(index,lang);
-      const w = 8.0, h = w/mask.aspect;
-      const area = { x0:centre.x-w/2, x1:centre.x+w/2,
-        y0:centre.y-h/2, y1:centre.y+h/2, w,h };
-      /* This loop only ever makes the lattice COARSER, so wherever it starts is
-         the finest it can ever be. It started at .065 and exited on the first
-         pass, which meant every pictogram was drawn at .065 while 14,305 dots
-         were available and fewer than 1,700 were being used -- six percent of
-         the budget. One dot spanned about eight mask pixels, so a three-pixel
-         glyph stroke mostly fell between dots and the type came apart into
-         beads.
+  /* The six pictograms (three fruit beats, in each language) are built on
+     first use, not at load: each is a fine lattice scan, and building all six
+     up front was about half of createScene's cost -- time a phone spent with
+     nothing on screen. warmup() builds the current language's three in idle
+     time once the opening has formed. */
+  const fruitShapes = { en: [], ar: [] };
+  /* x0, x1, y0, y1 of the learning screen's progress bar, in world units, per
+     language (set as that pictogram is built). */
+  const fillRects = { en: null, ar: null };
+  function buildFruitShape(lang, index) {
+    const centre = fruitWorld[index];
+    const mask = fruitContentMask(index,lang);
+    const w = 8.0, h = w/mask.aspect;
+    const area = { x0:centre.x-w/2, x1:centre.x+w/2,
+      y0:centre.y-h/2, y1:centre.y+h/2, w,h };
+    /* This loop only ever makes the lattice COARSER, so wherever it starts is
+       the finest it can ever be. It started at .065 and exited on the first
+       pass, which meant every pictogram was drawn at .065 while 14,305 dots
+       were available and fewer than 1,700 were being used -- six percent of
+       the budget. One dot spanned about eight mask pixels, so a three-pixel
+       glyph stroke mostly fell between dots and the type came apart into
+       beads.
 
-         It starts fine now and coarsens only if it genuinely overflows, which
-         is what the loop was for. Each mask settles two to three times denser
-         in each direction, so a stroke is several dots wide instead of a
-         fraction of one, and the shapes are drawn rather than implied. */
-      /* The progress bar's world rectangle, worked out here because this is
-         where the mask-to-world mapping lives: scanCells reads the mask at
-         u = (x - x0)/w with v measured DOWN from the top, so a mask pixel maps
-         to x0 + (px/mw)*w across and y1 - (py/mh)*h down. Padded by a fortieth
-         of a world unit, which is a third of the gap to the rounded box that
-         surrounds the bar, so the test cannot catch the box's own strokes. */
-      if (mask.fillBar) {
-        const b = mask.fillBar, pad = .025;
-        fillRect.set(
-          area.x0 + (b.x0 / mask.w) * area.w - pad,
-          area.x0 + (b.x1 / mask.w) * area.w + pad,
-          area.y1 - (b.y1 / mask.h) * area.h - pad,
-          area.y1 - (b.y0 / mask.h) * area.h + pad);
-      }
-      let pitch=.018, raw;
-      do {
-        raw=sampleShape(area,pitch,(x,y,u,v,cu,cv)=>{
-          const weight=coverage(mask,u,v,cu,cv);
-          return weight>.25?Math.max(.44,weight*.55):0;
-        });
-        pitch*=1.15;
-      } while(raw.length/3>K);
-      return expand(raw,K,(x,y)=>x);
-    });
+       It starts fine now and coarsens only if it genuinely overflows, which
+       is what the loop was for. Each mask settles two to three times denser
+       in each direction, so a stroke is several dots wide instead of a
+       fraction of one, and the shapes are drawn rather than implied. */
+    /* The progress bar's world rectangle, worked out here because this is
+       where the mask-to-world mapping lives: scanCells reads the mask at
+       u = (x - x0)/w with v measured DOWN from the top, so a mask pixel maps
+       to x0 + (px/mw)*w across and y1 - (py/mh)*h down. Padded by a fortieth
+       of a world unit, which is a third of the gap to the rounded box that
+       surrounds the bar, so the test cannot catch the box's own strokes. */
+    if (mask.fillBar) {
+      const b = mask.fillBar, pad = .025;
+      const fillRect = fillRects[lang] = new THREE.Vector4();
+      fillRect.set(
+        area.x0 + (b.x0 / mask.w) * area.w - pad,
+        area.x0 + (b.x1 / mask.w) * area.w + pad,
+        area.y1 - (b.y1 / mask.h) * area.h - pad,
+        area.y1 - (b.y0 / mask.h) * area.h + pad);
+    }
+    let pitch=.018, raw;
+    do {
+      raw=sampleShape(area,pitch,(x,y,u,v,cu,cv)=>{
+        const weight=coverage(mask,u,v,cu,cv);
+        return weight>.25?Math.max(.44,weight*.55):0;
+      });
+      pitch*=1.15;
+    } while(raw.length/3>K);
+    return expand(raw,K,(x,y)=>x);
+  }
+  function ensureFruit(lang, index) {
+    return fruitShapes[lang][index] || (fruitShapes[lang][index] = buildFruitShape(lang, index));
   }
 
   /* ---- the communities -------------------------------------------------
@@ -823,7 +901,7 @@ async function createScene(canvas) {
     aRand[i * 2 + 1] = h - Math.floor(h);
   }
 
-  const renderer = new THREE.WebGLRenderer({ canvas, context: gl, alpha: true, antialias: !centred });
+  const renderer = new THREE.WebGLRenderer({ canvas, context: gl, alpha: true, antialias: true });
   renderer.setClearColor(0x000000, 0);
   renderer.setClearAlpha(0);
   const dpr = Math.min(window.devicePixelRatio || 1, tier.dpr);
@@ -905,13 +983,15 @@ async function createScene(canvas) {
   numB.setUsage(THREE.DynamicDrawUsage);
   flightGeo.setAttribute("aS2", numA);
   flightGeo.setAttribute("aN2", numB);
-  const contentAttribute = new THREE.BufferAttribute(new Float32Array(fruitShapes.en[0]),4);
+  /* The tree until a pictogram is wanted: contentMix is 0 at the start, so
+     this buffer is not drawn, and no pictogram has to be built to boot. */
+  const contentAttribute = new THREE.BufferAttribute(S0.slice(),4);
   contentAttribute.setUsage(THREE.DynamicDrawUsage);
   flightGeo.setAttribute("aContent",contentAttribute);
   /* The pictogram being moved TO during a community swap. It holds a copy of
      aContent whenever nothing is swapping, so the shader's mix is a no-op and
      costs one lerp per dot rather than a branch. */
-  const contentNextAttribute = new THREE.BufferAttribute(new Float32Array(fruitShapes.en[0]),4);
+  const contentNextAttribute = new THREE.BufferAttribute(S0.slice(),4);
   contentNextAttribute.setUsage(THREE.DynamicDrawUsage);
   flightGeo.setAttribute("aContentB",contentNextAttribute);
   let contentKey = "en:0";
@@ -1191,7 +1271,7 @@ async function createScene(canvas) {
     if (nextContentKey !== contentKey && !communitySwitchAt) {
       contentAttribute.array.set(communityOn
         ? communityShape(communityShown)
-        : fruitShapes[contentLanguage][state.contentIndex]);
+        : ensureFruit(contentLanguage, state.contentIndex));
       contentAttribute.needsUpdate = true;
       contentKey = nextContentKey;
       /* Nothing is swapping at the moment the current shape changes, so the
@@ -1217,7 +1297,7 @@ async function createScene(canvas) {
     flightU.uFill.value = (!communityOn && state.contentIndex === 0 && contentMix > 0)
       ? clamp01(state.hold / .82)
       : -1;
-    flightU.uFillRect.value.copy(fillRect);
+    if (fillRects[contentLanguage]) flightU.uFillRect.value.copy(fillRects[contentLanguage]);
     flightU.uContentOrigin.value.copy(communityOn ? communityWorld : fruitWorld[state.contentIndex]);
     story.update(state, breathPinned ? 0 : performance.now()/1000, entrance);
 
@@ -1252,20 +1332,14 @@ async function createScene(canvas) {
   }
   /* On the phone the page hands scroll progress in through setProgress and
      this loop draws it, so a scrolling frame is drawn once rather than twice
-     (once by the page, once here). While nothing moves, the ambient drift is
-     drawn at half rate: it is slow enough that 30fps reads the same. */
-  let progressDirty = false, lastIdleDraw = 0;
+     (once by the page, once here). */
   function startIdle() {
     if (idleRunning || !idleWanted()) return;
     idleRunning = true;
-    const step = now => {
+    const step = () => {
       if (!idleRunning) return;
       if (!idleWanted()) { stopIdle(); return; }
-      if (!centred || progressDirty || now - lastIdleDraw >= 32) {
-        progressDirty = false;
-        lastIdleDraw = now;
-        render(lastProgress);
-      }
+      render(lastProgress);
       idleFrame = requestAnimationFrame(step);
     };
     idleFrame = requestAnimationFrame(step);
@@ -1276,7 +1350,34 @@ async function createScene(canvas) {
     idleFrame = 0;
   }
 
+  /* Builds the shapes still to come -- the current language's three
+     pictograms and the eight community icons -- in the phone's idle moments,
+     one at a time, so none of them is built in the middle of a scroll. A shape
+     that fails is skipped; the rest still build. Stops if the scene is
+     disposed. */
+  let dead = false;
+  function warmup() {
+    const lang = document.documentElement.lang === "ar" ? "ar" : "en";
+    const tasks = [0, 1, 2].map(i => () => ensureFruit(lang, i))
+      .concat(COMMUNITY_ICONS.map(icon => () => communityShape(icon)));
+    const idle = typeof window.requestIdleCallback === "function"
+      ? cb => window.requestIdleCallback(cb, { timeout: 2000 })
+      : cb => window.setTimeout(() => cb({ timeRemaining: () => 8, didTimeout: false }), 80);
+    const run = deadline => {
+      if (dead) return;
+      /* One shape per slice unless the browser says there is room for more;
+         a slice that timed out still does one, so the queue always drains. */
+      do {
+        const task = tasks.shift();
+        try { task(); } catch (error) { console.warn("SAAE hero warmup:", error); }
+      } while (tasks.length && !deadline.didTimeout && deadline.timeRemaining() > 8);
+      if (tasks.length) idle(run);
+    };
+    if (tasks.length) idle(run);
+  }
+
   function dispose() {
+    dead = true;
     stopIdle();
     if (seen) seen.disconnect();
     document.removeEventListener("visibilitychange", onVisibility);
@@ -1299,11 +1400,10 @@ async function createScene(canvas) {
   resize();
 
   return {
-    render, resize, dispose, setBand() {},
+    render, resize, dispose, warmup, setBand() {},
     setProgress(progress) {
       lastProgress = clamp01(progress);
-      if (idleRunning) progressDirty = true;
-      else render(lastProgress);
+      if (!idleRunning) render(lastProgress);
     },
     communities: COMMUNITY_COUNT,
     setCommunity(indexOrIcon) {
@@ -1333,14 +1433,14 @@ async function createScene(canvas) {
       contentNextAttribute.needsUpdate = true;
       communitySwitchAt = performance.now();
     },
-    setRoom(top) { captionTop = top > 0 ? top : null; if (idleRunning) progressDirty = true; },
+    setRoom(top) { captionTop = top > 0 ? top : null; },
     setCalm(y, w) { centredCalm.y = y; centredCalm.w = Math.max(0, Math.min(1, w)); },
     setPointer(x, y, s) { pointerStrength = s; if (s > 0) pointer.set(x, y, 0); },
     /* Signed, and expected in roughly -1..1; the page normalises its own
        spring velocity before it gets here because only the page knows what
        counts as fast for the length of hero it is running. */
     setVelocity(v) { scrollSpeed = Math.max(-1, Math.min(1, v)); },
-    tier: tierName, points: gCount + K, flightPoints: K, cols: gCols, rows: gRows,
+    tier: tierName, precomputed: Boolean(pre), points: gCount + K, flightPoints: K, cols: gCols, rows: gRows,
     rays: network.links, cities: network.count,
     pinBreath(on) {
       breathPinned = !!on;
@@ -1398,23 +1498,28 @@ const STATIC_GATES = [
   "(prefers-reduced-motion: reduce)"
 ];
 
-(async function boot() {
+/* Booting is a function the page can call again. The phone homepage loads
+   this module once (a module URL runs once per document) and, when the reader
+   comes back to the homepage, calls saaeHeroBoot() for the new canvas instead
+   of downloading the script again under a fresh URL. The desktop page still
+   gets the automatic boot below. Resolves to the instance, or null. */
+window.saaeHeroBoot = async function saaeHeroBoot() {
   const canvas = document.getElementById("hero-canvas");
   const heroSection = document.getElementById("hero-sec");
-  if (!canvas || !heroSection) return;
+  if (!canvas || !heroSection) return null;
   /* The phone page asks for the centred layout and takes the scene on phones;
      only reduced motion keeps it static there. */
   const gates = heroSection.dataset.heroLayout === "centred"
     ? ["(prefers-reduced-motion: reduce)"]
     : STATIC_GATES;
-  if (gates.some(q => window.matchMedia(q).matches)) return;
+  if (gates.some(q => window.matchMedia(q).matches)) return null;
 
   let instance = null;
   try {
     instance = await createScene(canvas);
   } catch (error) {
     console.warn("SAAE hero scene unavailable:", error);
-    return;
+    return null;
   }
 
   canvas.addEventListener("webglcontextlost", event => {
@@ -1427,4 +1532,6 @@ const STATIC_GATES = [
   window.saaeHero = instance;
   document.documentElement.setAttribute("data-hero", "live");
   heroSection.dispatchEvent(new CustomEvent("saae:hero-ready", { detail: instance }));
-})();
+  return instance;
+};
+window.saaeHeroBoot();

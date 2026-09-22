@@ -256,112 +256,134 @@ function FormValidationHandler() {
   return null;
 }
 
+const SCROLL_POSITIONS = "saae-scroll-positions";
+
+function readScrollPositions(): Record<string, number> {
+  try {
+    return JSON.parse(sessionStorage.getItem(SCROLL_POSITIONS) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+/* Back and Forward return to where the visitor was; any other arrival (a
+   link, a reload) starts at the top.
+
+   Two things make this harder than it looks. On Back the address changes to
+   the page being returned to while the page being left is still on screen,
+   and Safari scrolls during its back animation: anything recorded in that
+   moment would overwrite the position being returned to (with the article's
+   0, which is how Back kept landing at the top on iPhones). So the position
+   is read the instant Back is pressed and nothing is recorded until it has
+   been put back. And a page like the homepage is not its full height when it
+   first shows (the desktop film builds its sections a moment later, the
+   phone's runways are sized by script), so the position is re-applied until
+   the page can hold it and it has stayed put, and given up only when the
+   visitor actually scrolls. */
 function ScrollRestoration() {
   const location = useLocation();
+  const pending = useRef<{ target: number | null; paused: boolean; release: number }>({
+    target: null,
+    paused: false,
+    release: 0,
+  });
+
   useEffect(() => {
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
     }
-    const key = "saae-scroll-positions";
-    const read = (): Record<string, number> => {
-      try {
-        return JSON.parse(sessionStorage.getItem(key) || "{}");
-      } catch {
-        return {};
-      }
+    const state = pending.current;
+    const hold = () => {
+      state.paused = true;
+      state.target = readScrollPositions()[window.location.pathname] ?? 0;
+      // Back within one page (a hash) never re-renders it: don't stay paused.
+      window.clearTimeout(state.release);
+      state.release = window.setTimeout(() => {
+        state.paused = false;
+      }, 16000);
     };
-    const write = (m: Record<string, number>) => {
-      try {
-        sessionStorage.setItem(key, JSON.stringify(m));
-      } catch {
-        // Scroll restoration remains optional when session storage is blocked.
-      }
-    };
-    let ticking = false;
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const m = read();
-        m[window.location.pathname] = window.scrollY;
-        write(m);
-        ticking = false;
-      });
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  /* Back and Forward return to where the visitor was; any other arrival (a
-     link, a reload) starts at the top. A page like the homepage is not its
-     full height when it first shows -- the desktop film builds its sections a
-     moment later, the phone's runways are sized by script -- so the position
-     is re-applied until the page is tall enough to hold it and has stayed
-     there briefly, and given up the moment the visitor scrolls themselves. */
-  const poppedRef = useRef(false);
-  useEffect(() => {
-    const onPop = () => {
-      poppedRef.current = true;
-    };
-    window.addEventListener("popstate", onPop);
     // A whole-page Back (from a page outside the app) arrives as a load.
     const entry = performance.getEntriesByType?.("navigation")[0] as
-      | PerformanceNavigationTiming
-      | undefined;
-    if (entry?.type === "back_forward") poppedRef.current = true;
-    return () => window.removeEventListener("popstate", onPop);
+      PerformanceNavigationTiming | undefined;
+    if (entry?.type === "back_forward") hold();
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking || state.paused) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        if (state.paused) return;
+        const m = readScrollPositions();
+        m[window.location.pathname] = window.scrollY;
+        try {
+          sessionStorage.setItem(SCROLL_POSITIONS, JSON.stringify(m));
+        } catch {
+          // Scroll restoration remains optional when session storage is blocked.
+        }
+      });
+    };
+    window.addEventListener("popstate", hold);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("popstate", hold);
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(state.release);
+    };
   }, []);
 
   useEffect(() => {
-    const popped = poppedRef.current;
-    poppedRef.current = false;
-    if (window.location.hash) return;
-    let saved = 0;
-    if (popped) {
-      try {
-        const m = JSON.parse(sessionStorage.getItem("saae-scroll-positions") || "{}");
-        saved = typeof m[location.pathname] === "number" ? m[location.pathname] : 0;
-      } catch {
-        // Start at the top if the stored scroll position is unavailable.
-      }
-    }
+    const state = pending.current;
+    const target = state.target ?? 0;
+    state.target = null;
     type Engine = { scrollTo: (y: number, o?: { immediate?: boolean }) => void };
     const go = (y: number) => {
       const engine = (window as Window & { saaeScroll?: Engine }).saaeScroll;
       if (engine) engine.scrollTo(y, { immediate: true });
       else window.scrollTo({ top: y, left: 0, behavior: "auto" });
     };
-    if (saved <= 0) {
-      requestAnimationFrame(() => go(0));
+    const resume = () => {
+      window.clearTimeout(state.release);
+      state.paused = false;
+    };
+    if (window.location.hash) return resume();
+    if (target <= 0) {
+      requestAnimationFrame(() => {
+        go(0);
+        resume();
+      });
       return;
     }
+
     const w = window as Window & { saaeRestoreTarget?: number };
-    w.saaeRestoreTarget = saved;
+    w.saaeRestoreTarget = target;
     const started = performance.now();
     let settledSince = 0;
     let timer = 0;
     let stopped = false;
+    // Scrolling is the visitor taking over; a tap is not.
+    const cancelOn = ["wheel", "touchmove", "keydown"] as const;
     const stop = () => {
+      if (stopped) return;
       stopped = true;
       window.clearTimeout(timer);
-      if (w.saaeRestoreTarget === saved) delete w.saaeRestoreTarget;
-      for (const type of ["wheel", "touchstart", "keydown", "pointerdown"] as const)
-        window.removeEventListener(type, stop);
+      if (w.saaeRestoreTarget === target) delete w.saaeRestoreTarget;
+      for (const type of cancelOn) window.removeEventListener(type, stop);
+      resume();
     };
-    for (const type of ["wheel", "touchstart", "keydown", "pointerdown"] as const)
-      window.addEventListener(type, stop, { passive: true });
+    for (const type of cancelOn) window.addEventListener(type, stop, { passive: true });
     const attempt = () => {
       if (stopped) return;
       const now = performance.now();
       const room = document.documentElement.scrollHeight - window.innerHeight;
-      if (room >= saved - 2) {
-        if (Math.abs(window.scrollY - saved) > 2) {
-          go(saved);
+      if (room >= target - 2) {
+        if (Math.abs(window.scrollY - target) > 2) {
+          go(target);
           settledSince = 0;
         } else if (!settledSince) settledSince = now;
         else if (now - settledSince > 1200) return stop();
       }
-      if (now - started > 8000) return stop();
+      if (now - started > 15000) return stop();
       timer = window.setTimeout(attempt, 100);
     };
     attempt();
