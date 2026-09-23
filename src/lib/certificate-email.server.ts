@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer'
 import { getSiteUrl, sendTransactionalEmail, assertEmailRecipientAllowed } from '@/lib/email-delivery.server'
 import * as React from 'react'
 import { render } from '@react-email/components'
