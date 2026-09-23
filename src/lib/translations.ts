@@ -13,7 +13,7 @@ type Dict = {
   };
   communities: {
     eyebrow: string; title: string; subtitle: string; cta: string; discover: string;
-    cards: Record<"data" | "architecture" | "medical" | "research" | "software" | "economy" | "trainers" | "media" | "quality", { title: string; desc: string }>;
+    cards: Record<"data" | "architecture" | "medical" | "research" | "software" | "economy" | "trainers" | "media", { title: string; desc: string }>;
   };
   achievements: { eyebrow: string; title: string; body: string; stats: { value: string; label: string }[] };
   partners: { eyebrow: string; title: string };
@@ -138,10 +138,6 @@ export const translations: Record<Lang, Dict> = {
         media: {
           title: "Media Community",
           desc: "A community of journalists and content creators covering AI and SAAE's stories.",
-        },
-        quality: {
-          title: "Quality Entrepreneurship Community",
-          desc: "A community dedicated to quality standards and entrepreneurial excellence in building sustainable ventures.",
         },
       },
     },
@@ -306,10 +302,6 @@ export const translations: Record<Lang, Dict> = {
         media: {
           title: "المجتمع الإعلامي",
           desc: "مجتمعٌ يجمع الصحفيين وصنّاع المحتوى لتغطية الذكاء الاصطناعي وقصص الجمعية.",
-        },
-        quality: {
-          title: "مجتمع الجودة الريادي",
-          desc: "مجتمعٌ مهتمٌّ بمعايير الجودة والتميز الريادي في بناء مشاريع مستدامة.",
         },
       },
     },

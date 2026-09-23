@@ -1,13 +1,13 @@
+// Same order as the homepage community cards, so each page's "NN / 08" matches.
 export const COMMUNITY_KEYS = [
+  "software",
   "data",
   "architecture",
   "medical",
   "research",
-  "software",
   "economy",
   "trainers",
   "media",
-  "quality",
 ] as const;
 
 export type CommunityKey = (typeof COMMUNITY_KEYS)[number];
@@ -21,7 +21,6 @@ export const COMMUNITY_LABELS_AR: Record<CommunityKey, string> = {
   economy: "مجتمع الاقتصاد الذكي",
   trainers: "مجتمع المدربين",
   media: "المجتمع الإعلامي",
-  quality: "مجتمع الجودة الريادي",
 };
 
 export const COMMUNITY_LABELS_EN: Record<CommunityKey, string> = {
@@ -33,7 +32,6 @@ export const COMMUNITY_LABELS_EN: Record<CommunityKey, string> = {
   economy: "Smart Economy Community",
   trainers: "Trainers Community",
   media: "Media Community",
-  quality: "Quality Entrepreneurship Community",
 };
 
 // News-only extra categories (not full communities with their own pages)
