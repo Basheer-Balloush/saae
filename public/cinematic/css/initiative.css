@@ -124,31 +124,32 @@ main section { padding-block: var(--initiative-gap); }
 .hero-tree-canvas { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; pointer-events: none; }
 @keyframes tree-float { from { transform: translateY(-10px); } to { transform: translateY(12px); } }
 
-/* ------------------------------------------------ PROGRESS (the light chapter) */
-.progress-preview { position: relative; overflow: hidden; color: var(--initiative-ink); background:
-    radial-gradient(640px 320px at 10% -4%, rgba(4, 128, 144, .09), transparent 70%),
-    radial-gradient(560px 300px at 90% 104%, rgba(168, 207, 126, .14), transparent 70%),
-    linear-gradient(rgba(4, 128, 144, .055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(4, 128, 144, .055) 1px, transparent 1px),
-    #fff;
-  background-size: auto, auto, 44px 44px, 44px 44px, auto; }
+/* ------------------------------------------------ PROGRESS
+   Keep this chapter on the same continuous dark ground as the Home journey. */
+.progress-preview { position: relative; overflow: hidden; color: #e7f1f0; background:
+    radial-gradient(640px 320px at 10% -4%, rgba(184, 232, 240, .07), transparent 70%),
+    radial-gradient(560px 300px at 90% 104%, rgba(4, 128, 144, .12), transparent 70%),
+    linear-gradient(rgba(184, 232, 240, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(184, 232, 240, .035) 1px, transparent 1px),
+    rgba(3, 25, 31, .3);
+  background-size: auto, auto, 72px 72px, 72px 72px, auto; }
 .progress-preview::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, var(--initiative-turquoise), var(--initiative-green), transparent 75%); }
-.progress-preview .head p { color: #53666a; }
+.progress-preview .head p { color: rgba(231, 241, 240, .68); }
 .progress-grid { display: grid; grid-template-columns: minmax(280px, .85fr) minmax(0, 1fr); gap: clamp(28px, 4vw, 56px); align-items: center; }
 .progress-preview { padding-block: clamp(48px, 6vw, 84px); }
 .progress-dial { position: relative; width: min(100%, 350px); aspect-ratio: 1; justify-self: center; }
 .progress-dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .progress-dial circle { fill: none; stroke-width: 9; }
-.dial-track { stroke: rgba(4, 128, 144, .12); }
+.dial-track { stroke: rgba(184, 232, 240, .13); }
 
 .dial-center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
-.dial-center strong { color: var(--initiative-ink); font-size: clamp(2.6rem, 5.4vw, 4.2rem); font-weight: 900; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
-.dial-center span { color: #64797b; font-size: .68rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-.metric-strip { display: grid; align-content: center; margin: 0; border: 0; border-inline-start: 1px solid rgba(18, 33, 38, .18); padding-inline-start: clamp(22px, 3vw, 44px); }
-.metric-strip article { min-height: 0; display: grid; align-content: center; gap: 5px; padding: 14px 0; border: 0; border-block-end: 1px solid rgba(18, 33, 38, .14); }
+.dial-center strong { color: var(--initiative-paper); font-size: clamp(2.6rem, 5.4vw, 4.2rem); font-weight: 900; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.dial-center span { color: var(--initiative-muted); font-size: .68rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.metric-strip { display: grid; align-content: center; margin: 0; border: 0; border-inline-start: 1px solid var(--initiative-border); padding-inline-start: clamp(22px, 3vw, 44px); }
+.metric-strip article { min-height: 0; display: grid; align-content: center; gap: 5px; padding: 14px 0; border: 0; border-block-end: 1px solid var(--initiative-border); }
 .metric-strip article:last-child { border-block-end: 0; }
-.metric-strip span { color: #5d7073; font-size: .7rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
-.metric-strip strong { color: var(--initiative-ink); font-size: clamp(1.6rem, 2.8vw, 2.4rem); line-height: 1; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+.metric-strip span { color: var(--initiative-muted); font-size: .7rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.metric-strip strong { color: var(--initiative-paper); font-size: clamp(1.6rem, 2.8vw, 2.4rem); line-height: 1; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
 
 /* ------------------------------------------------ BLUEPRINT */
 .blueprint-board { display: grid; grid-template-columns: minmax(270px, .36fr) minmax(0, 1fr); min-height: 600px; margin-top: 8px; border: 1px solid var(--initiative-border); background: rgba(12, 48, 58, .42); box-shadow: 0 30px 80px rgba(0, 8, 12, .3); }
@@ -271,7 +272,7 @@ main section { padding-block: var(--initiative-gap); }
 .closing-copy .eyebrow { text-align: center; }
 
 .metric-strip article { transition: transform 320ms var(--initiative-ease), box-shadow 320ms ease, background-color 320ms ease; }
-.metric-strip article:hover { background: #fff; box-shadow: 0 20px 50px rgba(18, 33, 38, .1); transform: translateY(-6px); }
+.metric-strip article:hover { background: rgba(184, 232, 240, .055); box-shadow: 0 20px 50px rgba(0, 8, 12, .24); transform: translateY(-6px); }
 /* ------------------------------------------------ LINE PREVIEW + SPOTLIGHT PATHS */
 .participation-paths { perspective: 1200px; }
 .path-card { transform-style: preserve-3d; will-change: transform; }
@@ -386,7 +387,7 @@ html[dir="rtl"] .footer-col-title { letter-spacing: 0; word-spacing: .12em; }
   .hero-actions { display: grid; }
   .action { width: 100%; }
   .metric-strip { grid-template-columns: 1fr; }
-  .metric-strip article { border-inline-end: 0; border-block-end: 1px solid rgba(18, 33, 38, .16); }
+  .metric-strip article { border-inline-end: 0; border-block-end: 1px solid var(--initiative-border); }
   .metric-strip article:last-child { border-block-end: 0; }
   .blueprint-panels { padding: 34px 24px; }
   .blueprint-tabs button { min-height: 112px; padding: 16px 12px; }
@@ -425,13 +426,13 @@ html[dir="rtl"] .footer-col-title { letter-spacing: 0; word-spacing: .12em; }
 .progress-dial[data-focus="waitlist"] .seg-waitlist { stroke-width: 15; }
 .metric-strip article[data-seg] { cursor: pointer; border-radius: 6px; }
 .metric-strip article[data-seg]:focus-visible { outline: 2px solid var(--initiative-teal); outline-offset: 4px; }
-.metric-strip article[data-seg][aria-pressed="true"] { background: #fff; box-shadow: 0 20px 50px rgba(18, 33, 38, .1); }
+.metric-strip article[data-seg][aria-pressed="true"] { background: rgba(184, 232, 240, .055); box-shadow: 0 20px 50px rgba(0, 8, 12, .24); }
 .metric-strip article > span:first-child { display: flex; align-items: center; gap: 10px; }
 .metric-strip article[data-seg] > span:first-child::before { content: ""; width: 10px; height: 10px; flex: none; border-radius: 50%; background: #5d7073; }
 .metric-strip article[data-seg="sponsored"] > span:first-child::before { background: var(--initiative-turquoise); }
 .metric-strip article[data-seg="waitlist"] > span:first-child::before { background: var(--initiative-green); }
-.seg-share { display: flex; align-items: baseline; gap: 8px; font-style: normal; color: #5d7073; font-size: .66rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
-.seg-share b { color: var(--initiative-teal); font-size: .88rem; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.seg-share { display: flex; align-items: baseline; gap: 8px; font-style: normal; color: var(--initiative-muted); font-size: .66rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.seg-share b { color: var(--initiative-cyan); font-size: .88rem; letter-spacing: 0; font-variant-numeric: tabular-nums; }
 
 /* SAAE photo-fill for the hero H1, every section head and the closing
    headline — each section title is painted with the event collage, like the
