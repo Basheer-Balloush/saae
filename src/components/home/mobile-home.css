@@ -1116,10 +1116,50 @@ html:has(.mobile-home .mh-hero-loader) {
   place-items: start center;
   padding-block-start: 104px;
 }
-/* Lifted clear of Abu Al-Joud, who stands in the bottom corner. */
+/* Lifted clear of Abu Al-Joud, who stands in the bottom corner. Sized in
+   the iPhone 17 Pro Max's 270 : 566 so the whole phone fits under the title. */
 .mobile-home .cs-scroll-column .cs-scroll-card {
   inset-block: auto 112px;
-  inline-size: min(280px, 68vw, calc((100svh - 320px) * 420 / 720));
+  inline-size: min(270px, 66vw, calc((100svh - 330px) * 270 / 566));
+}
+/* The phone's metal edge: the Action button and volume keys on the left,
+   the side button and Camera Control on the right. */
+.mobile-home .mh-faq-device {
+  position: relative;
+}
+.mobile-home .mh-faq-device::before,
+.mobile-home .mh-faq-device::after {
+  content: "";
+  position: absolute;
+  inline-size: 2.5px;
+  pointer-events: none;
+}
+/* Action button, volume up, volume down. */
+.mobile-home .mh-faq-device::before {
+  left: -2px;
+  inset-block-start: 105px;
+  block-size: 140px;
+  border-radius: 2px 0 0 2px;
+  background: linear-gradient(
+    #3a6c76 0 17px,
+    transparent 17px 45px,
+    #3a6c76 45px 85px,
+    transparent 85px 100px,
+    #3a6c76 100px 140px
+  );
+}
+/* Side button, then Camera Control lower down. */
+.mobile-home .mh-faq-device::after {
+  right: -2px;
+  inset-block-start: 165px;
+  block-size: 200px;
+  border-radius: 0 2px 2px 0;
+  background: linear-gradient(#3a6c76 0 70px, transparent 70px 160px, #2f5b64 160px 200px);
+}
+.mobile-home .mh-faq-device [data-iphone-home-indicator] {
+  inline-size: 30% !important;
+  block-size: 4px !important;
+  inset-block-end: 6px !important;
 }
 @media (prefers-reduced-motion: reduce) {
   .mobile-home .mh-faq-scroll.cs-scroll-column {

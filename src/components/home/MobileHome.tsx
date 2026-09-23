@@ -164,25 +164,39 @@ export function MobileHomeView({
                 </div>
               }
             >
-              {/* Laid out at the size it reads well at (an iPhone 12's), then
-                  scaled to the room each phone's screen leaves. */}
-              <ScaledDevice width={265} height={454}>
+              {/* An iPhone 17 Pro Max (78 x 163.4 mm): a thin black bezel inside
+                  the metal band, the island and corners in its proportions. Laid
+                  out at one size, then scaled to the room each phone's screen
+                  leaves. */}
+              <ScaledDevice width={270} height={566}>
                 <IPhoneMockup
                   model="15-pro"
-                  islandTop={20}
-                  color="#163a43"
+                  islandTop={9}
+                  islandWidth={74}
+                  islandHeight={22}
+                  islandRadius={11}
+                  color="#04090b"
                   screenBg="#061820"
-                  className="hp-faq-device"
-                  style={{ width: "100%" }}
+                  className="hp-faq-device mh-faq-device"
+                  style={{ width: "100%", height: "100%" }}
                   frameStyle={{
                     width: "100%",
-                    height: "auto",
-                    aspectRatio: "420 / 720",
-                    border: "1px solid rgba(114, 214, 223, .55)",
+                    height: "100%",
+                    padding: 0,
+                    borderRadius: 44,
+                    border: "2.5px solid #2d5a63",
+                    background: "#04090b",
                   }}
-                  screenStyle={{ position: "absolute", inset: 12, width: "auto", height: "auto" }}
-                  safeAreaOverrides={{ left: 16, right: 16 }}
-                  shadow="0 18px 42px rgba(0, 0, 0, .35), 0 0 30px rgba(0, 139, 157, .16)"
+                  screenStyle={{
+                    position: "absolute",
+                    inset: 6,
+                    width: "auto",
+                    height: "auto",
+                    borderRadius: 36,
+                  }}
+                  safeAreaOverrides={{ top: 46, bottom: 26, left: 14, right: 14 }}
+                  statusBar={{ inset: 14, fontSize: 10 }}
+                  shadow="inset 0 0 0 1px rgba(160, 230, 238, .35), 0 0 0 1px rgba(0, 0, 0, .6), 0 22px 48px rgba(0, 0, 0, .45), 0 0 34px rgba(0, 139, 157, .18)"
                 >
                   <FaqSequence lang={lang} />
                 </IPhoneMockup>
