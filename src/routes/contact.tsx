@@ -51,7 +51,7 @@ export const Route = createFileRoute("/contact")({
       { name: "theme-color", content: "#144248" },
     ],
     links: [
-      { rel: "stylesheet", href: "/cinematic/css/contact.css?v=contact-spacing-9" },
+      { rel: "stylesheet", href: "/cinematic/css/contact.css?v=contact-circuit-2" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
       { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
     ],
