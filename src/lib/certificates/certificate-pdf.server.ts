@@ -1,11 +1,11 @@
 /* Turns a certificate into a stored PDF.
  *
  * The page comes from renderCertificateHtml; Cloudflare's Browser Rendering
- * prints it (REST API, so no browser package in the Worker). That browser
- * loads the template image from the live site (/lms/certificates/template.png).
- * The Cairo fonts are embedded in the page instead: the site serves them
- * without cross-origin headers, and the renderer's page has no origin of its
- * own, so a linked font would be dropped for a fallback face.
+ * prints it (REST API, so no browser package in the Worker). The template
+ * image and the Cairo fonts are fetched here and embedded in the page: the
+ * renderer's page has no origin of its own, the site serves fonts without
+ * cross-origin headers (a linked font would be dropped for a fallback face),
+ * and a local dev server is out of the renderer's reach.
  *
  * A PDF is made once per certificate and stored in the private
  * lms-certificates bucket as <certificate id>.pdf. It is made again only when
@@ -18,28 +18,29 @@ import { renderCertificateHtml, type CertificateGender } from "./certificate-htm
 
 export const CERTIFICATE_BUCKET = "lms-certificates";
 
-const fontCache = new Map<string, Promise<string>>();
+const assetCache = new Map<string, Promise<string>>();
 
-function fontDataUrl(url: string): Promise<string> {
-  let cached = fontCache.get(url);
+function dataUrl(url: string, type: string): Promise<string> {
+  let cached = assetCache.get(url);
   if (!cached) {
     cached = fetch(url).then(async (res) => {
-      if (!res.ok) throw new Error(`certificate_font_unavailable ${res.status}`);
-      return `data:font/ttf;base64,${Buffer.from(await res.arrayBuffer()).toString("base64")}`;
+      if (!res.ok) throw new Error(`certificate_asset_unavailable ${res.status} ${url}`);
+      return `data:${type};base64,${Buffer.from(await res.arrayBuffer()).toString("base64")}`;
     });
-    cached.catch(() => fontCache.delete(url));
-    fontCache.set(url, cached);
+    cached.catch(() => assetCache.delete(url));
+    assetCache.set(url, cached);
   }
   return cached;
 }
 
 async function assetUrls() {
   const base = (process.env.CERTIFICATE_ASSETS_URL || getSiteUrl()).replace(/\/$/, "");
-  const [regular, bold] = await Promise.all([
-    fontDataUrl(`${base}/cinematic/fonts/cairo-arabic-400.ttf`),
-    fontDataUrl(`${base}/cinematic/fonts/cairo-arabic-700.ttf`),
+  const [templateUrl, regular, bold] = await Promise.all([
+    dataUrl(`${base}/lms/certificates/template.png`, "image/png"),
+    dataUrl(`${base}/cinematic/fonts/cairo-arabic-400.ttf`, "font/ttf"),
+    dataUrl(`${base}/cinematic/fonts/cairo-arabic-700.ttf`, "font/ttf"),
   ]);
-  return { templateUrl: `${base}/lms/certificates/template.png`, fontUrls: { regular, bold } };
+  return { templateUrl, fontUrls: { regular, bold } };
 }
 
 export async function renderCertificatePdf(html: string): Promise<Uint8Array> {
