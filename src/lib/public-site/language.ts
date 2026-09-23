@@ -62,6 +62,7 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
     "The full record": "السجل الكامل",
     "All news stories": "جميع الأخبار",
     "Read the story": "اقرأ القصة",
+    "Read the news": "اقرأ الخبر",
     "Full story coming soon": "القصة الكاملة قريباً",
     "More updates coming soon": "المزيد من التحديثات قريباً",
     "The million-user initiative goes to national television": "مبادرة المليون مستخدم تصل إلى التلفزيون الوطني",

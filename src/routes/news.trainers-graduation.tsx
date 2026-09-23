@@ -3,7 +3,7 @@ import pageHtml from "@/components/cinematic/html/news-trainers-graduation.html?
 import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
 
 const SCRIPTS: CinematicScript[] = [
-  { src: "/cinematic/js/news-trainers-graduation-inline.js" },
+  { src: "/cinematic/js/news-trainers-graduation-inline.js?v=gallery-controls-2" },
   { src: "/cinematic/js/language.js" },
   { src: "/cinematic/js/navigation.js" },
 ];

@@ -57,9 +57,9 @@
 :is(#hero-sec .button-link, .motion-button)::after { content: none; }
 :is(#hero-sec .button-link, .motion-button) .circle {
   position: absolute;
-  inset-block: .25rem;
+  inset-block: var(--motion-circle-inset, .25rem);
   inset-inline-start: .25rem;
-  width: 3rem;
+  width: var(--motion-circle-size, 3rem);
   border-radius: 999px;
   background: linear-gradient(135deg, var(--saae-turquoise, #008b9d), #047383);
   transition: width 500ms ease;
@@ -72,17 +72,17 @@
   position: absolute;
   inset-inline-start: .25rem;
   top: 50%;
-  width: 3rem;
-  height: 3rem;
-  margin-top: -1.5rem;
+  width: var(--motion-icon-size, 3rem);
+  height: var(--motion-icon-size, 3rem);
+  margin-top: var(--motion-icon-offset, -1.5rem);
   display: grid;
   place-items: center;
   color: var(--paper, #fefdfc);
   transition: transform 500ms ease;
 }
 :is(#hero-sec .button-link, .motion-button) .motion-icon svg {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: var(--motion-arrow-size, 1.5rem);
+  height: var(--motion-arrow-size, 1.5rem);
   fill: none;
   stroke: currentColor;
 }

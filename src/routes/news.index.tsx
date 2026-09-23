@@ -11,7 +11,7 @@ import {
 } from "@/lib/cinematic-db-content";
 
 const SCRIPTS: CinematicScript[] = [
-  { src: "/cinematic/js/news-inline.js" },
+  { src: "/cinematic/js/news-inline.js?v=news-circuit-4" },
   { src: "/cinematic/js/language.js" },
   { src: "/cinematic/js/navigation.js" },
   { src: "/cinematic/js/text-effect.js" },
@@ -35,9 +35,9 @@ export const Route = createFileRoute("/news/")({
   head: () => ({
     meta: [{ title: "News | SAAE" }, { name: "theme-color", content: "#144248" }],
     links: [
-      { rel: "stylesheet", href: "/cinematic/css/news-inline.css" },
+      { rel: "stylesheet", href: "/cinematic/css/news-inline.css?v=news-icons-6" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
-      { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
+      { rel: "stylesheet", href: "/cinematic/css/motion-button.css?v=news-icons-6" },
       { rel: "stylesheet", href: "/cinematic/css/db-content.css" },
     ],
   }),

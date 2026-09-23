@@ -78,6 +78,34 @@ export type MemberRow = {
 const FALLBACK_IMAGE = "/cinematic/images/event-initiative.jpg";
 const TINTS = ["4, 128, 144", "105, 143, 63", "249, 156, 0"];
 const HOME_NEWS_LIMIT = 4;
+/* Short, listing-only headlines for the published news cards. Article pages
+   continue to use the full titles from the database. */
+const NEWS_LIST_HEADLINES: Record<string, { en: string; ar: string }> = {
+  "3d1ad0d0-55da-4343-9d71-046dfc27a027": {
+    en: "Million Syrian Users initiative on Syrian TV",
+    ar: "تطورات مبادرة «مليون مستخدم سوري» على قناة السورية",
+  },
+  "d00e3f20-8d09-43e0-a4d5-a16f60af4e22": {
+    en: "Million Syrian AI Users initiative launches",
+    ar: "إطلاق مبادرة تدريب مليون مستخدم سوري",
+  },
+  "859c1adc-24ab-4129-a8f0-d6e4fe5d85ea": {
+    en: "Syria's first AI symposium opens",
+    ar: "الندوة السورية الأولى للذكاء الاصطناعي",
+  },
+  "6a20d591-18f7-4e40-9fe0-07317cec708e": {
+    en: "Syria's first AI trainers graduate",
+    ar: "تخريج أول مدربي الذكاء الاصطناعي",
+  },
+  "38accff9-cee7-45fb-99f6-2ada9f829da6": {
+    en: "Greater Aleppo project at BUILDEX",
+    ar: "مشروع حلب الكبرى في معرض بيلدكس",
+  },
+  "08108acd-4d78-4c56-9c01-858e56a28c9d": {
+    en: "Archathon: Syria's smart architecture marathon",
+    ar: "إطلاق أركاثون للعمارة الذكية",
+  },
+};
 const CALENDAR_SVG =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const PREV_SVG =
@@ -133,6 +161,10 @@ function titles(row: { title: string; title_ar: string | null; title_en: string 
   return { en: row.title_en || row.title, ar: row.title_ar || row.title };
 }
 
+function newsListTitles(row: NewsCardRow) {
+  return NEWS_LIST_HEADLINES[row.id] ?? titles(row);
+}
+
 function newsHref(id: string): string {
   return `/news/${encodeURIComponent(id)}`;
 }
@@ -184,6 +216,10 @@ function motionLinkHtml(href: string, labelHtml: string, className: string): str
 /* "Read the story" stays the only text in its span so language.js translates it. */
 function readStoryHtml(id: string): string {
   return motionLinkHtml(newsHref(id), "Read the story", "news-cta");
+}
+
+function readNewsHtml(id: string): string {
+  return motionLinkHtml(newsHref(id), "Read the news", "news-cta");
 }
 
 /* The phone homepage draws its cards in React, so it takes plain bilingual
@@ -270,6 +306,7 @@ export function applyHomeNews(html: string, fragments: HomeNewsFragments | null)
 export function renderNewsListHtml(rows: NewsCardRow[], failed = false): string {
   if (failed || rows.length === 0) return newsStatusHtml(failed);
   const [first, ...rest] = rows;
+  const firstTitle = newsListTitles(first);
   const featured = [
     `<article class="featured reveal" style="--tint: ${TINTS[0]}">`,
     `  <div class="featured-media">`,
@@ -278,9 +315,8 @@ export function renderNewsListHtml(rows: NewsCardRow[], failed = false): string 
     `  </div>`,
     `  <div class="featured-copy">`,
     `    ${cardMetaHtml(first)}`,
-    `    <h2 class="featured-headline">${bilingualHtml(titles(first).en, titles(first).ar)}</h2>`,
-    `    ${cardExcerptHtml(first)}`,
-    `    ${readStoryHtml(first.id)}`,
+    `    <h2 class="featured-headline">${bilingualHtml(firstTitle.en, firstTitle.ar)}</h2>`,
+    `    ${readNewsHtml(first.id)}`,
     `  </div>`,
     `</article>`,
   ].join("\n");
@@ -295,9 +331,8 @@ export function renderNewsListHtml(rows: NewsCardRow[], failed = false): string 
         `      <span class="story-veil" aria-hidden="true"></span>`,
         `      <div class="story-copy">`,
         `        ${cardMetaHtml(row)}`,
-        `        <h3 class="story-headline">${bilingualHtml(titles(row).en, titles(row).ar)}</h3>`,
-        `        ${cardExcerptHtml(row)}`,
-        `        ${readStoryHtml(row.id)}`,
+        `        <h3 class="story-headline">${bilingualHtml(newsListTitles(row).en, newsListTitles(row).ar)}</h3>`,
+        `        ${readNewsHtml(row.id)}`,
         `      </div>`,
         `    </div>`,
         `  </article>`,
