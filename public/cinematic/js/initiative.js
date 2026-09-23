@@ -26,7 +26,16 @@
     payModalTitle: "ادفع وابدأ", payModalCopy: "ادفع $1 لمقعدك وابدأ الكورس فوراً. سنُرسل بوابة الدفع قريباً.",
     fullName: "الاسم الكامل", email: "البريد الإلكتروني", phone: "الهاتف", continueToPay: "متابعة إلى الدفع",
     closeDialog: "إغلاق النافذة", paySuccessTitle: "تم حجز مقعدك.",
-    paySuccessCopy: "سنرسل رابط الدفع إلى بريدك فور افتتاح البوابة.", doneClose: "تم"
+    paySuccessCopy: "سنرسل رابط الدفع إلى بريدك فور افتتاح البوابة.", doneClose: "تم",
+    /* /initiative/sponsors */
+    skipSponsors: "تخطَّ إلى الداعمين", backToInitiative: "مليون مستخدم ذكاء اصطناعي سوري", directoryEyebrow: "الداعمون والمساهمون",
+    directoryTitleA: "كل مقعد", directoryTitleB: "فتحه أحدهم.",
+    directoryLede: "الشركات والأفراد الذين موّلوا تعلّم السوريين للذكاء الاصطناعي. كل مقعد يفتحونه هو متعلّم يبدأ مجاناً.",
+    statSponsors: "الداعمون", statSeats: "المقاعد المفتوحة", statAmount: "إجمالي المساهمات", contributed: "المساهمة",
+    directoryListTitle: "جميع الداعمين حسب المقاعد المفتوحة", directoryNote: "مباشرة من سجلّ تبرعات المبادرة.",
+    directoryClosingEyebrow: "مكان اسمك هنا", directoryClosingA: "مقعد واحد", directoryClosingB: "يبدأ به متعلّم واحد.",
+    directoryClosingCopy: "يمكن للشركات والأفراد فتح مقاعد للمنتظرين في القائمة، ويُذكر كل منهم هنا.",
+    backToInitiativeShort: "العودة إلى المبادرة"
   };
 
   const english = new Map();

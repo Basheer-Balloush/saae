@@ -48,6 +48,7 @@ import { Route as LearningManagementSystemForgotPasswordRouteImport } from './ro
 import { Route as LearningManagementSystemCatalogRouteImport } from './routes/learning-management-system.catalog'
 import { Route as LearningManagementSystemAdminRouteImport } from './routes/learning-management-system.admin'
 import { Route as JoinTokenRouteImport } from './routes/join.$token'
+import { Route as InitiativeSponsorsRouteImport } from './routes/initiative.sponsors'
 import { Route as InitiativeClaimRouteImport } from './routes/initiative.claim'
 import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
 import { Route as EventSignupTokenRouteImport } from './routes/event-signup.$token'
@@ -328,6 +329,11 @@ const LearningManagementSystemAdminRoute =
 const JoinTokenRoute = JoinTokenRouteImport.update({
   id: '/join/$token',
   path: '/join/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InitiativeSponsorsRoute = InitiativeSponsorsRouteImport.update({
+  id: '/initiative/sponsors',
+  path: '/initiative/sponsors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InitiativeClaimRoute = InitiativeClaimRouteImport.update({
@@ -748,6 +754,7 @@ export interface FileRoutesByFullPath {
   '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
+  '/initiative/sponsors': typeof InitiativeSponsorsRoute
   '/join/$token': typeof JoinTokenRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
@@ -852,6 +859,7 @@ export interface FileRoutesByTo {
   '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
+  '/initiative/sponsors': typeof InitiativeSponsorsRoute
   '/join/$token': typeof JoinTokenRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
@@ -957,6 +965,7 @@ export interface FileRoutesById {
   '/event-signup/$token': typeof EventSignupTokenRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
+  '/initiative/sponsors': typeof InitiativeSponsorsRoute
   '/join/$token': typeof JoinTokenRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteWithChildren
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
@@ -1068,6 +1077,7 @@ export interface FileRouteTypes {
     | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
+    | '/initiative/sponsors'
     | '/join/$token'
     | '/learning-management-system/admin'
     | '/learning-management-system/catalog'
@@ -1172,6 +1182,7 @@ export interface FileRouteTypes {
     | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
+    | '/initiative/sponsors'
     | '/join/$token'
     | '/learning-management-system/catalog'
     | '/learning-management-system/forgot-password'
@@ -1276,6 +1287,7 @@ export interface FileRouteTypes {
     | '/event-signup/$token'
     | '/forms/$slug'
     | '/initiative/claim'
+    | '/initiative/sponsors'
     | '/join/$token'
     | '/learning-management-system/admin'
     | '/learning-management-system/catalog'
@@ -1375,6 +1387,7 @@ export interface RootRouteChildren {
   EventSignupTokenRoute: typeof EventSignupTokenRoute
   FormsSlugRoute: typeof FormsSlugRoute
   InitiativeClaimRoute: typeof InitiativeClaimRoute
+  InitiativeSponsorsRoute: typeof InitiativeSponsorsRoute
   JoinTokenRoute: typeof JoinTokenRoute
   NewsIdRoute: typeof NewsIdRoute
   NewsBuildexAleppoRoute: typeof NewsBuildexAleppoRoute
@@ -1663,6 +1676,13 @@ declare module '@tanstack/react-router' {
       path: '/join/$token'
       fullPath: '/join/$token'
       preLoaderRoute: typeof JoinTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/initiative/sponsors': {
+      id: '/initiative/sponsors'
+      path: '/initiative/sponsors'
+      fullPath: '/initiative/sponsors'
+      preLoaderRoute: typeof InitiativeSponsorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/initiative/claim': {
@@ -2501,6 +2521,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventSignupTokenRoute: EventSignupTokenRoute,
   FormsSlugRoute: FormsSlugRoute,
   InitiativeClaimRoute: InitiativeClaimRoute,
+  InitiativeSponsorsRoute: InitiativeSponsorsRoute,
   JoinTokenRoute: JoinTokenRoute,
   NewsIdRoute: NewsIdRoute,
   NewsBuildexAleppoRoute: NewsBuildexAleppoRoute,

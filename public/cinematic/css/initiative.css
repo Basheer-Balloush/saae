@@ -224,11 +224,38 @@ section { padding-block: var(--initiative-gap); }
 .impact { display: grid; grid-template-columns: minmax(80px, 1fr) 64px; align-items: center; gap: 18px; }
 .impact b { height: 5px; display: block; overflow: hidden; border-radius: 999px; background: rgba(231, 241, 240, .1); }
 .impact b::after { content: ""; display: block; width: var(--impact); height: 100%; background: linear-gradient(90deg, var(--initiative-turquoise), var(--initiative-green)); transform: scaleX(0); transform-origin: left; transition: transform 1200ms var(--initiative-ease) 250ms; }
-.leaderboard.is-visible .impact b::after { transform: scaleX(1); }
+/* The band is what the reveal observer marks visible; the board inside it never
+   receives is-visible itself, so keying the fill to the board left every bar
+   empty. */
+.sponsor-band.is-visible .impact b::after { transform: scaleX(1); }
 .impact strong { color: var(--initiative-paper); font-size: 1rem; text-align: end; font-variant-numeric: tabular-nums; }
 .leaderboard-note { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 20px; padding: 24px clamp(24px, 4vw, 56px) clamp(24px, 3vw, 36px); color: rgba(231, 241, 240, .55); font-size: .7rem; }
 .leaderboard-note a { color: var(--initiative-cyan); font-weight: 800; text-decoration: none; border-block-end: 1px solid rgba(184, 232, 240, .3); padding-block-end: 2px; }
 .leaderboard-note a:hover { color: #fff; border-color: var(--initiative-cyan); }
+
+/* ------------------------------------------------ SPONSOR DIRECTORY (/initiative/sponsors) */
+.directory-hero { position: relative; overflow: hidden; isolation: isolate; padding: clamp(150px, 16vw, 190px) 0 clamp(56px, 7vw, 96px); }
+.directory-hero .hero-copy { max-width: none; }
+.directory-hero h1 { max-width: 16ch; font-size: clamp(3rem, 7vw, 6.4rem); line-height: .95; text-wrap: balance; }
+.directory-back { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; margin-bottom: 26px; color: var(--initiative-cyan); font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-decoration: none; }
+.directory-back:hover { color: #fff; }
+.directory-back:focus-visible { outline: 2px solid var(--initiative-lift); outline-offset: 4px; border-radius: 4px; }
+html[dir="rtl"] .directory-back-arrow { transform: scaleX(-1); }
+.directory-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: clamp(40px, 5vw, 64px) 0 0; border-block: 1px solid var(--initiative-border); }
+.directory-stats div { padding: clamp(20px, 2.6vw, 30px) clamp(16px, 2.4vw, 32px); }
+.directory-stats div + div { border-inline-start: 1px solid var(--initiative-border); }
+.directory-stats dt { color: var(--initiative-cyan); font-size: .68rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.directory-stats dd { margin: 10px 0 0; color: var(--initiative-paper); font-size: clamp(2.2rem, 4.4vw, 3.8rem); font-weight: 900; line-height: 1; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+.directory-list { padding-block-start: 0; }
+.leaderboard-full .leaderboard-head, .leaderboard-full li { grid-template-columns: 84px minmax(220px, .9fr) minmax(200px, 1fr) 110px; }
+.leaderboard-full .leaderboard-head span:last-child { text-align: end; }
+.sponsor-id { display: grid; gap: 2px; min-width: 0; }
+.sponsor-id strong { overflow-wrap: anywhere; }
+.sponsor-id small { color: rgba(231, 241, 240, .5); font-size: .7rem; }
+.sponsor-amount { color: var(--initiative-green); font-size: .95rem; font-weight: 800; text-align: end; font-variant-numeric: tabular-nums; }
+.rank-mark.rank-number { font-size: .8rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.directory-page .closing-section { min-height: 72svh; }
+.directory-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 14px; }
 
 /* ------------------------------------------------ PARTICIPATE */
 .participation-paths { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2.4vw, 28px); margin-top: 8px; }
@@ -408,6 +435,14 @@ html[dir="rtl"] .footer-col-title { letter-spacing: 0; word-spacing: .12em; }
   .rank-mark { width: 32px; height: 32px; }
   .rank-mark svg { width: 16px; height: 16px; }
   .impact { grid-column: 2; }
+  .leaderboard-full li { grid-template-columns: 34px 1fr; }
+  .sponsor-amount { grid-column: 2; text-align: start; font-size: .85rem; }
+  .directory-hero { padding: 120px 0 56px; }
+  .directory-stats { grid-template-columns: minmax(0, 1fr); }
+  .directory-stats div { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 16px 0; }
+  .directory-stats div + div { border-inline-start: 0; border-block-start: 1px solid var(--initiative-border); }
+  .directory-stats dd { margin: 0; font-size: 2rem; }
+  .directory-actions { display: grid; }
   .leaderboard-note { flex-direction: column; }
   .path-visual { height: 124px; }
   .closing-copy h2 { font-size: clamp(3.2rem, 17vw, 5.4rem); }

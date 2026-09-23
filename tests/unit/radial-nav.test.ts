@@ -84,13 +84,14 @@ describe("page actions", () => {
     expect(count(home, 'href="/learning-management-system"')).toBeGreaterThanOrEqual(2);
   });
 
-  it("wires the initiative buttons to the real forms, not the placeholder pay dialog", () => {
+  it("wires the initiative buttons to the real forms, not the placeholder pay dialog or the old initiative pages", () => {
     const html = page("initiative.html");
     expect(count(html, 'data-initiative-action="pay"')).toBe(2);
     expect(count(html, 'data-initiative-action="waitlist"')).toBe(1);
     expect(count(html, 'data-initiative-action="donate"')).toBe(1);
     expect(html).not.toContain("data-pay-open");
     expect(html).not.toContain('id="pay-modal"');
-    expect(html).toContain('href="/one-million-initiative-donors"');
+    expect(html).toContain('href="/initiative/sponsors"');
+    expect(html).not.toContain("/one-million-initiative");
   });
 });

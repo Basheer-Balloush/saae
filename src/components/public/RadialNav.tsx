@@ -64,7 +64,7 @@ const items: Item[] = [
     ),
   },
   {
-    to: "/one-million-initiative-home",
+    to: "/initiative",
     en: "Initiative",
     ar: "المبادرة",
     angle: 252,

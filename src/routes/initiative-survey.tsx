@@ -244,7 +244,7 @@ function SurveyPage() {
             تم استلام إجاباتك بنجاح، وسنعتمد عليها لبناء أفضل تجربة تعليمية لك ضمن مبادرة مليون مستخدم ذكاء اصطناعي
             سوري.
           </p>
-          <Link to="/one-million-initiative-home">
+          <Link to="/initiative">
             <Button className="mt-8">العودة لصفحة المبادرة</Button>
           </Link>
         </div>

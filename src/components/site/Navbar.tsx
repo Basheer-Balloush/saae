@@ -181,10 +181,10 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
               );
             })}
             {(() => {
-              const isInitiative = location.pathname.startsWith("/one-million-initiative");
+              const isInitiative = (location.pathname.startsWith("/initiative") || location.pathname.startsWith("/one-million-initiative"));
               return (
                 <Link
-                  to="/one-million-initiative-home"
+                  to="/initiative"
                   className={cn(
                     "relative inline-flex min-h-[44px] items-center px-3 py-2.5 text-sm font-semibold transition-colors",
                     isInitiative
@@ -284,7 +284,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                 );
               })}
             <Link
-              to="/one-million-initiative-home"
+              to="/initiative"
               onClick={() => setOpen(false)}
               className="flex min-h-[44px] items-center rounded-md px-4 py-3 text-sm font-semibold text-amber-600 dark:text-amber-400 hover:bg-muted"
             >
