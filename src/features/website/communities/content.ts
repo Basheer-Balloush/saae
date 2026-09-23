@@ -38,10 +38,6 @@ export const MISSION: Record<CommunityKey, { ar: string; en: string }> = {
     ar: "نُوصِل رسالة الجمعية ومجتمعاتها إلى الجمهور السوري والعربي عبر محتوىً إعلاميٍّ موثوق يواكب ثورة الذكاء الاصطناعي.",
     en: "Carrying SAAE's message and its communities to Syrian and Arab audiences through trusted media content that keeps pace with the AI revolution.",
   },
-  quality: {
-    ar: "نبني ثقافةً رياديةً قائمةً على معايير الجودة والتميز المؤسسي لضمان استدامة المشاريع وتأثيرها.",
-    en: "Building an entrepreneurial culture rooted in quality standards and institutional excellence to ensure project sustainability and impact.",
-  },
 };
 
 export const DETAILS: Record<CommunityKey, DetailBlock[]> = {
@@ -229,29 +225,6 @@ export const DETAILS: Record<CommunityKey, DetailBlock[]> = {
       },
     },
   ],
-  quality: [
-    {
-      label: { ar: "المحور", en: "Focus" },
-      text: {
-        ar: "تطوير معايير الجودة الريادية وضمان استدامة المشاريع الناشئة في البيئة السورية.",
-        en: "Developing entrepreneurial quality standards and ensuring the sustainability of startups in the Syrian environment.",
-      },
-    },
-    {
-      label: { ar: "المنصّة", en: "Platform" },
-      text: {
-        ar: "تجمع رواد الأعمال والمختصّين لبناء منهجيات عملٍ ومراجعة أداءٍ تضمن التميز المؤسسي.",
-        en: "Connects entrepreneurs and specialists to build operational methodologies and performance reviews that ensure institutional excellence.",
-      },
-    },
-    {
-      label: { ar: "الهدف", en: "Objective" },
-      text: {
-        ar: "تأسيس ثقافة الجودة في ريادة الأعمال السورية وتقديم أدواتٍ قابلةٍ للتطبيق في الميدان.",
-        en: "Establishing a quality culture in Syrian entrepreneurship and providing tools applicable in the field.",
-      },
-    },
-  ],
 };
 
 export const DEFAULT_METRICS: Metric[] = [
@@ -291,10 +264,6 @@ export const METRICS_BY_KEY: Record<CommunityKey, Metric[]> = {
     { value: "+40", label: { ar: "صانع محتوى", en: "Content Creators" } },
     { value: "+200", label: { ar: "مادة إعلامية منشورة", en: "Published Media Pieces" } },
   ],
-  quality: [
-    { value: "+25", label: { ar: "مشروع ناشئ مدعوم", en: "Supported Startups" } },
-    { value: "+60", label: { ar: "أداة جودة مطوَّرة", en: "Quality Tools Developed" } },
-  ],
 };
 
 /* The homepage community card's names and one-line promises
@@ -308,7 +277,6 @@ export const SHORT_NAME: Record<CommunityKey, Bilingual> = {
   economy: { en: "Smart Economy", ar: "الاقتصاد الذكي" },
   trainers: { en: "Trainers", ar: "المدربين" },
   media: { en: "Media", ar: "الإعلام" },
-  quality: { en: "Quality Entrepreneurship", ar: "الجودة الريادية" },
 };
 
 export const TAGLINE: Record<CommunityKey, Bilingual> = {
@@ -329,5 +297,4 @@ export const TAGLINE: Record<CommunityKey, Bilingual> = {
   economy: { en: "Turn innovation into opportunity.", ar: "حوّل الابتكار إلى فرص." },
   trainers: { en: "Equip the people who teach others.", ar: "تجهيز من يعلّمون غيرهم." },
   media: { en: "Make knowledge clear and accessible.", ar: "جعل المعرفة واضحة ومتاحة." },
-  quality: { en: "Raise the standard for new ventures.", ar: "رفع معيار المشاريع الناشئة." },
 };
