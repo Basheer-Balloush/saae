@@ -1534,4 +1534,10 @@ window.saaeHeroBoot = async function saaeHeroBoot() {
   heroSection.dispatchEvent(new CustomEvent("saae:hero-ready", { detail: instance }));
   return instance;
 };
-window.saaeHeroBoot();
+/* The desktop page loads this module at its plain URL and gets the boot here.
+   The phone page loads it as "?phone" and boots it itself, when its loading
+   screen is done. The two URLs keep the two pages from sharing one module
+   run: a browser runs a module URL once per visit, so when the phone page
+   (shown first, before the page knows it is on a desktop) had loaded the
+   plain URL, the desktop page's copy never ran and its tree never started. */
+if (!new URL(import.meta.url).searchParams.has("phone")) window.saaeHeroBoot();
