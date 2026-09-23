@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp, Loader2, ClipboardList } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -13,6 +13,7 @@ import { FileUploader } from "@/components/lms/FileUploader";
 import { toast } from "sonner";
 import type { Lang } from "@/lib/translations";
 import { confirmDialog } from "@/hooks/useConfirm";
+import { InstructorPageHeader } from "@/components/lms-skin/InstructorWorkspace";
 
 export const Route = createFileRoute("/learning-management-system/instructor/assignments/$courseId")({
   head: () => ({ meta: [{ title: "LMS · Manage Assignments" }] }),
@@ -138,33 +139,36 @@ function InstructorAssignments() {
   };
 
   if (authLoading || authorized === null) {
-    return <p className="text-center py-20 text-muted-foreground">{t(lang, "جاري التحميل...", "Loading...‎")}</p>;
+    return (
+      <p className="id-empty" role="status">
+        <Loader2 aria-hidden="true" className="id-spinner" />
+        {t(lang, "جاري التحميل...", "Loading...‎")}
+      </p>
+    );
   }
   if (!authorized) {
     return (
-      <div className="text-center py-20">
-        <p className="text-muted-foreground">{t(lang, "غير مصرّح", "Unauthorized")}</p>
-        <Button className="mt-4" onClick={() => navigate({ to: "/learning-management-system/instructor" })}>
+      <div className="id-empty" role="alert">
+        <p>{t(lang, "غير مصرّح", "Unauthorized")}</p>
+        <button type="button" className="id-clear" onClick={() => navigate({ to: "/learning-management-system/instructor" })}>
           {t(lang, "العودة", "Go back")}
-        </Button>
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8" dir={isRtl ? "rtl" : "ltr"}>
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <Link to="/learning-management-system/instructor/courses/$id" params={{ id: courseId }} className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-            <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+    <div className="id-page" dir={isRtl ? "rtl" : "ltr"}>
+      <InstructorPageHeader
+        back={
+          <Link to="/learning-management-system/instructor/courses/$id" params={{ id: courseId }} className="id-back">
+            <ArrowLeft aria-hidden="true" />
             {t(lang, "العودة للدورة", "Back to course")}
           </Link>
-          <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
-            <ClipboardList className="h-6 w-6" />
-            {t(lang, "إدارة الوظائف", "Manage Assignments")}
-          </h1>
-        </div>
-      </div>
+        }
+        title={t(lang, "إدارة الوظائف", "Manage Assignments")}
+        meta={<p>{t(lang, "أنشئ وظائف الدورة وقيّم تسليمات الطلاب.", "Create course assignments and grade student submissions.")}</p>}
+      />
 
       {/* Create form */}
       <div className="mt-6 rounded-2xl border border-border bg-card p-4 sm:p-6">

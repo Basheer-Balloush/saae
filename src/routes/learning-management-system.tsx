@@ -5,7 +5,7 @@ import { useSingleDeviceSession } from "@/hooks/useSingleDeviceSession";
 import { LmsNavbar } from "@/components/lms/LmsNavbar";
 import { LmsFooter } from "@/components/lms/LmsFooter";
 import { LmsSkinShell } from "@/components/lms-skin/LmsSkinShell";
-import { isSkinnedLmsPath } from "@/components/lms-skin/skin";
+import { isInstructorLmsPath, isSkinnedLmsPath } from "@/components/lms-skin/skin";
 
 export const Route = createFileRoute("/learning-management-system")({
   head: () => ({
@@ -36,7 +36,7 @@ function LmsLayout() {
         role={role}
         isAuthed={!!user}
         onSignOut={handleSignOut}
-        mainSiteFooter={pathname.replace(/\/+$/, "") === "/learning-management-system/instructor"}
+        mainSiteFooter={isInstructorLmsPath(pathname)}
       >
         <Outlet />
       </LmsSkinShell>

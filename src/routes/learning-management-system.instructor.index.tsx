@@ -37,13 +37,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import {
+  InstructorPageHeader,
+  InstructorStatusBadge,
+} from "@/components/lms-skin/InstructorWorkspace";
 
 export const Route = createFileRoute("/learning-management-system/instructor/")({
-  head: () => ({
-    meta: [{ title: "LMS · Instructor" }],
-    links: [...LMS_SKIN_LINKS, { rel: "stylesheet", href: "/lms/css/instructor-dashboard.css" }],
-  }),
+  head: () => ({ meta: [{ title: "LMS · Instructor" }] }),
   component: InstructorHome,
 });
 
@@ -230,134 +230,121 @@ function InstructorHome() {
   ];
 
   return (
-    <div className="instructor-dashboard">
-      <Link
-        to="/learning-management-system"
-        className="id-brand"
-        aria-label={lang === "ar" ? "الرئيسية — SAAE" : "SAAE home"}
-      >
-        <img
-          src={
-            lang === "ar"
-              ? "/cinematic/images/saae-logo-ar.png"
-              : "/cinematic/images/saae-logo-en.png"
-          }
-          alt=""
-        />
-      </Link>
-      <header className="id-header">
-        <div className="id-heading">
-          <span className="id-eyebrow">{lang === "ar" ? "لوحة المدرّب" : "INSTRUCTOR"}</span>
-          <h1>{lang === "ar" ? "مساحة عمل المدرّب" : "Instructor workspace"}</h1>
+    <>
+      <InstructorPageHeader
+        title={lang === "ar" ? "مساحة عمل المدرّب" : "Instructor workspace"}
+        meta={
           <p>
             {lang === "ar"
               ? "أدر دوراتك والحضور من مكان واحد."
               : "Manage your courses and attendance in one place."}
           </p>
-        </div>
-        <div className="id-header-actions">
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <button type="button" className="id-button id-button-primary">
-                <Plus aria-hidden="true" />
-                {lang === "ar" ? "دورة جديدة" : "New course"}
-              </button>
-            </DialogTrigger>
-            <DialogContent className="dark id-create-dialog">
-              <DialogHeader>
-                <DialogTitle>{lang === "ar" ? "دورة جديدة" : "New course"}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={onCreate} noValidate className="space-y-3">
-                <div>
-                  <Label htmlFor="id-title-ar">
-                    {lang === "ar" ? "العنوان (عربي)" : "Title (Arabic)"}
-                  </Label>
-                  <Input
-                    id="id-title-ar"
-                    dir="rtl"
-                    ref={(el) => {
-                      fieldRefs.current.title_ar = el;
-                    }}
-                    aria-invalid={!!errors.title_ar}
-                    value={form.title_ar}
-                    onChange={(e) => setForm({ ...form, title_ar: e.target.value })}
-                  />
-                  {errors.title_ar && (
-                    <p className="mt-1 text-xs text-destructive">{errors.title_ar}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="id-title-en">
-                    {lang === "ar" ? "العنوان (إنجليزي)" : "Title (English)"}
-                  </Label>
-                  <Input
-                    id="id-title-en"
-                    dir="ltr"
-                    ref={(el) => {
-                      fieldRefs.current.title_en = el;
-                    }}
-                    aria-invalid={!!errors.title_en}
-                    value={form.title_en}
-                    onChange={(e) => setForm({ ...form, title_en: e.target.value })}
-                  />
-                  {errors.title_en && (
-                    <p className="mt-1 text-xs text-destructive">{errors.title_en}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="id-description-ar">
-                    {lang === "ar" ? "الوصف (عربي)" : "Description (Arabic)"}
-                  </Label>
-                  <Textarea
-                    id="id-description-ar"
-                    dir="rtl"
-                    rows={3}
-                    ref={(el) => {
-                      fieldRefs.current.description_ar = el;
-                    }}
-                    aria-invalid={!!errors.description_ar}
-                    value={form.description_ar}
-                    onChange={(e) => setForm({ ...form, description_ar: e.target.value })}
-                  />
-                  {errors.description_ar && (
-                    <p className="mt-1 text-xs text-destructive">{errors.description_ar}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="id-description-en">
-                    {lang === "ar" ? "الوصف (إنجليزي)" : "Description (English)"}
-                  </Label>
-                  <Textarea
-                    id="id-description-en"
-                    dir="ltr"
-                    rows={3}
-                    ref={(el) => {
-                      fieldRefs.current.description_en = el;
-                    }}
-                    aria-invalid={!!errors.description_en}
-                    value={form.description_en}
-                    onChange={(e) => setForm({ ...form, description_en: e.target.value })}
-                  />
-                  {errors.description_en && (
-                    <p className="mt-1 text-xs text-destructive">{errors.description_en}</p>
-                  )}
-                </div>
-                <Button type="submit" className="w-full" disabled={creating}>
-                  {creating && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-                  {lang === "ar" ? "إنشاء" : "Create"}
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
-          <Link
-            to="/learning-management-system/instructor/profile"
-            className="id-button id-button-secondary"
-          >
-            <Edit3 aria-hidden="true" />
-            {lang === "ar" ? "تعديل الملف الشخصي" : "Edit profile"}
-          </Link>
-        </div>
-      </header>
+        }
+        actions={
+          <>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <button type="button" className="id-button id-button-primary">
+                  <Plus aria-hidden="true" />
+                  {lang === "ar" ? "دورة جديدة" : "New course"}
+                </button>
+              </DialogTrigger>
+              <DialogContent className="dark id-create-dialog">
+                <DialogHeader>
+                  <DialogTitle>{lang === "ar" ? "دورة جديدة" : "New course"}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={onCreate} noValidate className="space-y-3">
+                  <div>
+                    <Label htmlFor="id-title-ar">
+                      {lang === "ar" ? "العنوان (عربي)" : "Title (Arabic)"}
+                    </Label>
+                    <Input
+                      id="id-title-ar"
+                      dir="rtl"
+                      ref={(el) => {
+                        fieldRefs.current.title_ar = el;
+                      }}
+                      aria-invalid={!!errors.title_ar}
+                      value={form.title_ar}
+                      onChange={(e) => setForm({ ...form, title_ar: e.target.value })}
+                    />
+                    {errors.title_ar && (
+                      <p className="mt-1 text-xs text-destructive">{errors.title_ar}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="id-title-en">
+                      {lang === "ar" ? "العنوان (إنجليزي)" : "Title (English)"}
+                    </Label>
+                    <Input
+                      id="id-title-en"
+                      dir="ltr"
+                      ref={(el) => {
+                        fieldRefs.current.title_en = el;
+                      }}
+                      aria-invalid={!!errors.title_en}
+                      value={form.title_en}
+                      onChange={(e) => setForm({ ...form, title_en: e.target.value })}
+                    />
+                    {errors.title_en && (
+                      <p className="mt-1 text-xs text-destructive">{errors.title_en}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="id-description-ar">
+                      {lang === "ar" ? "الوصف (عربي)" : "Description (Arabic)"}
+                    </Label>
+                    <Textarea
+                      id="id-description-ar"
+                      dir="rtl"
+                      rows={3}
+                      ref={(el) => {
+                        fieldRefs.current.description_ar = el;
+                      }}
+                      aria-invalid={!!errors.description_ar}
+                      value={form.description_ar}
+                      onChange={(e) => setForm({ ...form, description_ar: e.target.value })}
+                    />
+                    {errors.description_ar && (
+                      <p className="mt-1 text-xs text-destructive">{errors.description_ar}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="id-description-en">
+                      {lang === "ar" ? "الوصف (إنجليزي)" : "Description (English)"}
+                    </Label>
+                    <Textarea
+                      id="id-description-en"
+                      dir="ltr"
+                      rows={3}
+                      ref={(el) => {
+                        fieldRefs.current.description_en = el;
+                      }}
+                      aria-invalid={!!errors.description_en}
+                      value={form.description_en}
+                      onChange={(e) => setForm({ ...form, description_en: e.target.value })}
+                    />
+                    {errors.description_en && (
+                      <p className="mt-1 text-xs text-destructive">{errors.description_en}</p>
+                    )}
+                  </div>
+                  <Button type="submit" className="w-full" disabled={creating}>
+                    {creating && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
+                    {lang === "ar" ? "إنشاء" : "Create"}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+            <Link
+              to="/learning-management-system/instructor/profile"
+              className="id-button id-button-secondary"
+            >
+              <Edit3 aria-hidden="true" />
+              {lang === "ar" ? "تعديل الملف الشخصي" : "Edit profile"}
+            </Link>
+          </>
+        }
+      />
 
       <section className="id-stats" aria-label={lang === "ar" ? "ملخص الدورات" : "Course summary"}>
         <div className="id-stat">
@@ -493,7 +480,7 @@ function InstructorHome() {
                     </Link>
                   </h3>
                   <div className="id-badges">
-                    <StatusBadge status={course.status} />
+                    <InstructorStatusBadge status={course.status} />
                     {user && course.instructor_id !== user.id && (
                       <span className="id-co-taught">
                         {lang === "ar" ? "تدريس مشترك" : "Co-taught"}
@@ -554,18 +541,6 @@ function InstructorHome() {
           </div>
         )}
       </section>
-    </div>
+    </>
   );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const { lang } = useLang();
-  const map: Record<string, { cls: string; label: string }> = {
-    draft: { cls: "id-status-draft", label: lang === "ar" ? "مسودّة" : "Draft" },
-    pending: { cls: "id-status-pending", label: lang === "ar" ? "بانتظار المراجعة" : "Pending" },
-    published: { cls: "id-status-published", label: lang === "ar" ? "منشورة" : "Published" },
-    rejected: { cls: "id-status-rejected", label: lang === "ar" ? "مرفوضة" : "Rejected" },
-  };
-  const m = map[status] ?? map.draft;
-  return <span className={`id-status ${m.cls}`}>{m.label}</span>;
 }

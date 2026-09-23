@@ -4,8 +4,8 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { InstructorPageHeader } from "@/components/lms-skin/InstructorWorkspace";
 
 export const Route = createFileRoute("/learning-management-system/instructor/quiz-results/$courseId")({
   head: () => ({ meta: [{ title: "LMS · Quiz Results" }] }),
@@ -77,55 +77,52 @@ function QuizResultsPage() {
   const quizTitle = (id: string) => quizzes.find((q) => q.id === id)?.title ?? "—";
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <Link to="/learning-management-system/instructor/courses/$id" params={{ id: courseId }}
-            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary">
-            <ArrowLeft className="h-3.5 w-3.5" />
+    <div className="id-page">
+      <InstructorPageHeader
+        back={
+          <Link to="/learning-management-system/instructor/courses/$id" params={{ id: courseId }} className="id-back">
+            <ArrowLeft aria-hidden="true" />
             {lang === "ar" ? "العودة إلى الدورة" : "Back to course"}
           </Link>
-          <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-foreground">
-            {lang === "ar" ? "نتائج الاختبارات" : "Quiz results"}
-          </h1>
-          <div className="mt-1 flex items-center gap-2 flex-wrap">
-            <p className="text-sm text-muted-foreground">{title}</p>
+        }
+        title={lang === "ar" ? "نتائج الاختبارات" : "Quiz results"}
+        meta={
+          <p className="id-meta-row">
+            <span>{title}</span>
             {course && (
-              course.delivery_mode === "online" ? (
-                <span className="rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 px-2 py-0.5 text-xs font-semibold">
-                  {lang === "ar" ? "أونلاين" : "Online"}
-                </span>
-              ) : (
-                <span className="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-xs font-semibold">
-                  {lang === "ar" ? "حضوري" : "In-person"}
-                </span>
-              )
+              <span className="id-co-taught">
+                {course.delivery_mode === "online"
+                  ? (lang === "ar" ? "أونلاين" : "Online")
+                  : (lang === "ar" ? "حضوري" : "In-person")}
+              </span>
             )}
-          </div>
-        </div>
-        {quizzes.length > 1 && (
-          <Select value={selectedQuiz} onValueChange={setSelectedQuiz}>
-            <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{lang === "ar" ? "كل الاختبارات" : "All quizzes"}</SelectItem>
-              {quizzes.map((q) => (<SelectItem key={q.id} value={q.id}>{q.title}</SelectItem>))}
-            </SelectContent>
-          </Select>
-        )}
-      </div>
+          </p>
+        }
+        actions={
+          quizzes.length > 1 && (
+            <Select value={selectedQuiz} onValueChange={setSelectedQuiz}>
+              <SelectTrigger className="w-56" aria-label={lang === "ar" ? "الاختبار" : "Quiz"}><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{lang === "ar" ? "كل الاختبارات" : "All quizzes"}</SelectItem>
+                {quizzes.map((q) => (<SelectItem key={q.id} value={q.id}>{q.title}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          )
+        }
+      />
 
       {loading ? (
-        <div className="mt-16 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline mx-2" />{lang === "ar" ? "جارٍ التحميل..." : "Loading..."}</div>
+        <p className="id-empty" role="status"><Loader2 aria-hidden="true" className="id-spinner" />{lang === "ar" ? "جارٍ التحميل..." : "Loading..."}</p>
       ) : quizzes.length === 0 ? (
-        <p className="mt-16 text-center text-muted-foreground">
+        <p className="id-empty">
           {lang === "ar" ? "لا توجد اختبارات لهذه الدورة." : "No quizzes for this course."}
         </p>
       ) : filtered.length === 0 ? (
-        <p className="mt-16 text-center text-muted-foreground">
+        <p className="id-empty">
           {lang === "ar" ? "لا توجد محاولات بعد." : "No attempts yet."}
         </p>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-border bg-card">
+        <div className="id-panel id-table-wrap">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
               <tr>
@@ -145,7 +142,7 @@ function QuizResultsPage() {
                   <td className="px-3 py-2 text-center">{a.attempt_number}</td>
                   <td className="px-3 py-2 text-center font-mono">{Number(a.score).toFixed(1)}%</td>
                   <td className="px-3 py-2 text-center">
-                    <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${a.passed ? "bg-emerald-500/15 text-emerald-600" : "bg-destructive/15 text-destructive"}`}>
+                    <span className={`id-status ${a.passed ? "id-status-published" : "id-status-rejected"}`}>
                       {a.passed ? (lang === "ar" ? "ناجح" : "Passed") : (lang === "ar" ? "راسب" : "Failed")}
                     </span>
                   </td>

@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList, ArrowRight, FileText } from "lucide-react";
+import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList, ArrowLeft, FileText } from "lucide-react";
 import { CoursePrice } from "@/components/lms/CoursePrice";
 import { supabase } from "@/integrations/supabase/client";
 import { useCourseParticipantNames } from "@/hooks/useCourseParticipantNames";
@@ -22,6 +22,7 @@ import { createBunnyUpload, setLessonBunnyVideo, refreshBunnyLessonStatus } from
 import * as tus from "tus-js-client";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import { CourseCoInstructors } from "@/components/lms/CourseCoInstructors";
+import { InstructorPageHeader, InstructorStatusBadge } from "@/components/lms-skin/InstructorWorkspace";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/ui/upload-progress";
 import {
@@ -201,7 +202,14 @@ function CourseBuilder() {
     },
   });
 
-  if (!course) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
+  if (!course) {
+    return (
+      <p className="id-empty" role="status">
+        <Loader2 aria-hidden="true" className="id-spinner" />
+        {tr.loading}
+      </p>
+    );
+  }
 
   const update = (patch: Partial<Course>) => setCourse({ ...course, ...patch });
 
@@ -613,60 +621,43 @@ function CourseBuilder() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-8">
+    <div className="id-page space-y-6">
       {participants.error && <div role="alert" className="rounded-xl border border-border p-3 text-sm">{lang === "ar" ? "تعذّر تحميل أسماء المشاركين." : "Could not load participant names."} <Button variant="outline" size="sm" onClick={participants.retry}>{lang === "ar" ? "إعادة المحاولة" : "Retry"}</Button></div>}
-      {/* Header bar */}
-      <div className="rounded-2xl border border-border bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm px-4 sm:px-5 py-4">
-        <button
-          onClick={() => navigate({ to: "/learning-management-system/instructor" })}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
-        >
-          <ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" />
-          {lang === "ar" ? "كل الدورات" : "All courses"}
-        </button>
-        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-foreground truncate">
-              {lang === "ar" ? "تحرير الدورة" : "Edit course"}
-            </h1>
-            <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-              <span>{lang === "ar" ? "الحالة" : "Status"}:</span>
-              <span className="inline-flex items-center rounded-full border border-border bg-background px-2 py-0.5 font-semibold text-foreground">
-                {lang === "ar"
-                  ? (({ draft: "مسودة", pending: "قيد المراجعة", published: "منشورة", rejected: "مرفوضة", archived: "مؤرشفة" } as Record<string, string>)[course.status] ?? course.status)
-                  : course.status}
-              </span>
-            </div>
-          </div>
-          <div className="flex gap-2 shrink-0 flex-wrap">
-            {course.status === "published" ? (
-              <Button onClick={() => saveCourse()} variant="outline" disabled={saving}>
-                {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
+      <InstructorPageHeader
+        back={
+          <Link to="/learning-management-system/instructor" className="id-back">
+            <ArrowLeft aria-hidden="true" />
+            {lang === "ar" ? "كل الدورات" : "All courses"}
+          </Link>
+        }
+        title={lang === "ar" ? "تحرير الدورة" : "Edit course"}
+        meta={
+          <p className="id-meta-row">
+            <span>{lang === "ar" ? "الحالة:" : "Status:"}</span>
+            <InstructorStatusBadge status={course.status} />
+          </p>
+        }
+        actions={
+          <>
+            {course.status !== "pending" && (
+              <button type="button" className="id-button id-button-secondary" onClick={() => saveCourse()} disabled={saving}>
+                {saving ? <Loader2 aria-hidden="true" className="id-spinner" /> : <Save aria-hidden="true" />}
                 {lang === "ar" ? "حفظ" : "Save"}
-              </Button>
-            ) : course.status === "pending" ? (
-              <span className="inline-flex items-center rounded-md border border-amber-400/50 bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 text-xs text-amber-900 dark:text-amber-200">
-                {lang === "ar" ? "بانتظار المراجعة" : "Pending review"}
-              </span>
-            ) : (
-              <>
-              <Button onClick={() => saveCourse()} variant="outline" disabled={saving}>
-                {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Save className="h-4 w-4 mx-1" />}
-                {lang === "ar" ? "حفظ" : "Save"}
-              </Button>
-              <Button onClick={async () => { if (await saveCourse({ requireComplete: true })) await submitForReview(); }} disabled={saving}>
-                {saving ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Send className="h-4 w-4 mx-1" />}
-                {lang === "ar" ? "إرسال للمراجعة" : "Submit for review"}
-              </Button>
-              </>
+              </button>
             )}
-            <Button variant="destructive" onClick={() => setConfirmDeleteCourse(true)} disabled={deletingCourse}>
-              <Trash2 className="h-4 w-4 mx-1" />
+            {course.status !== "published" && course.status !== "pending" && (
+              <button type="button" className="id-button id-button-primary" onClick={async () => { if (await saveCourse({ requireComplete: true })) await submitForReview(); }} disabled={saving}>
+                {saving ? <Loader2 aria-hidden="true" className="id-spinner" /> : <Send aria-hidden="true" />}
+                {lang === "ar" ? "إرسال للمراجعة" : "Submit for review"}
+              </button>
+            )}
+            <button type="button" className="id-button id-button-danger" onClick={() => setConfirmDeleteCourse(true)} disabled={deletingCourse}>
+              <Trash2 aria-hidden="true" />
               {lang === "ar" ? "حذف الدورة" : "Delete course"}
-            </Button>
-          </div>
-        </div>
-      </div>
+            </button>
+          </>
+        }
+      />
 
       <DraftNotice show={courseDraft.restored} onDiscard={courseDraft.discard} />
 

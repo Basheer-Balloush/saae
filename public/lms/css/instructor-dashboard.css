@@ -1,5 +1,36 @@
-/* Instructor dashboard only. Reuse the LMS shell and the site's existing
-   circuit asset; the main site footer follows the shell. */
+/* The instructor workspace: dashboard, course editor, assignments, quiz
+   results and profile. Reuse the LMS shell and the site's existing circuit
+   asset; the main site footer follows the shell. */
+
+/* The workspace palette, as the shared components' tokens. Set on the page
+   and on the body too, so dialogs, menus and toasts (portalled outside the
+   shell) take the same colours. */
+.lms-skin .instructor-dashboard,
+body:has(.lms-skin .instructor-dashboard) {
+  --background: #082831;
+  --foreground: #e7f1f0;
+  --card: rgba(4, 28, 36, 0.79);
+  --card-foreground: #e7f1f0;
+  --popover: #082831;
+  --popover-foreground: #e7f1f0;
+  --primary: #087d8c;
+  --primary-foreground: #fff;
+  --muted: rgba(119, 224, 232, 0.07);
+  --muted-foreground: #aac6ca;
+  --accent: rgba(119, 224, 232, 0.12);
+  --accent-foreground: #f6faf9;
+  --border: rgba(119, 224, 232, 0.24);
+  --input: rgba(119, 224, 232, 0.38);
+  --ring: #77e0e8;
+  color-scheme: dark;
+  /* The site's body colour is resolved on the root, so name it again here
+     for the text that dialogs inherit. */
+  color: var(--foreground);
+}
+.lms-skin .instructor-dashboard {
+  --background: #041b22;
+}
+
 .lms-skin:has(.instructor-dashboard) .ambient {
   background: #061820;
 }
@@ -80,10 +111,40 @@
   font-size: clamp(2rem, 3.6vw, 3.2rem);
   line-height: 1.18;
 }
-.lms-skin .id-heading p {
+.lms-skin .id-meta {
   margin-top: 8px;
   color: #acc7cb;
   font-size: 1rem;
+}
+.lms-skin .id-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+.lms-skin .id-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 14px;
+  color: #a9f0f4;
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.lms-skin .id-back:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lms-skin .id-back svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+html[dir="rtl"] .lms-skin .id-back svg {
+  transform: scaleX(-1);
 }
 .lms-skin .id-header-actions {
   flex: none;
@@ -133,6 +194,19 @@
 }
 .lms-skin .id-button-secondary:hover {
   background: rgba(14, 88, 98, 0.5);
+}
+.lms-skin .id-button-danger {
+  color: #fff;
+  border-color: #e0747c;
+  background: #a61f2b;
+}
+.lms-skin .id-button-danger:hover {
+  background: #c42835;
+  border-color: #ffb3b8;
+}
+.lms-skin .id-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .lms-skin .id-stats {
@@ -460,6 +534,72 @@
   }
 }
 
+/* Inner pages: the course editor, assignments, quiz results and profile.
+   Their forms and tables use the shared components, which take the palette
+   above. The LMS sheets style bare sections and headings for the public
+   pages; hand those back to the page's own utility classes here. */
+.lms-skin .id-page {
+  max-width: 1120px;
+  margin-inline: auto;
+}
+.lms-skin .id-page-narrow {
+  max-width: 860px;
+}
+.lms-skin .id-page section {
+  padding-block: revert-layer;
+}
+.lms-skin .id-page :is(h2, h3, h4) {
+  color: revert-layer;
+  font-weight: revert-layer;
+  letter-spacing: revert-layer;
+  line-height: revert-layer;
+}
+.lms-skin .id-page .id-header {
+  margin-bottom: 30px;
+}
+.lms-skin .id-page input[type="checkbox"] {
+  accent-color: #0a9aad;
+}
+.lms-skin .id-panel-body {
+  padding: 26px 28px;
+}
+.lms-skin .id-form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+.lms-skin .id-table-wrap {
+  overflow-x: auto;
+}
+.lms-skin .id-notice {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  max-width: 640px;
+  margin: 40px auto 0;
+  padding: 40px 28px;
+  text-align: center;
+}
+.lms-skin .id-notice h1 {
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+.lms-skin .id-notice p {
+  color: #b2cbd0;
+  line-height: 1.8;
+}
+.lms-skin .id-alert {
+  max-width: 860px;
+  margin: 0 auto 26px;
+  padding: 14px 18px;
+  border: 1px solid #a87724;
+  border-radius: 12px;
+  background: rgba(81, 64, 20, 0.72);
+  color: #ffe4ab;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
 .lms-skin .instructor-dashboard :is(a, button, input):focus-visible,
 .id-create-dialog :is(button, input, textarea):focus-visible {
   outline: 2px solid #b8f4f5;
@@ -581,6 +721,9 @@
   .lms-skin .id-course-list {
     grid-template-columns: 1fr;
     padding: 0 12px 12px;
+  }
+  .lms-skin .id-panel-body {
+    padding: 20px 16px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

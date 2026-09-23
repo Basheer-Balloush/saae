@@ -1,6 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Upload } from "lucide-react";
+import { ArrowLeft, Loader2, Save, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/ui/upload-progress";
+import { InstructorPageHeader } from "@/components/lms-skin/InstructorWorkspace";
 
 export const Route = createFileRoute("/learning-management-system/instructor/profile")({
   head: () => ({ meta: [{ title: "LMS · Instructor profile" }] }),
@@ -121,18 +122,29 @@ function InstructorProfileEdit() {
     navigate({ to: "/learning-management-system/instructor" });
   };
 
-  if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
+  if (loading) {
+    return (
+      <p className="id-empty" role="status">
+        <Loader2 aria-hidden="true" className="id-spinner" />
+        {tr.loading}
+      </p>
+    );
+  }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 sm:px-6 py-8 sm:py-12">
-      <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-        {ar ? "الملف الشخصي للمدرّب" : "Instructor profile"}
-      </h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {ar ? "هذه المعلومات تظهر للطلاب على صفحات الدورات." : "This information shows to students on course pages."}
-      </p>
+    <div className="id-page id-page-narrow">
+      <InstructorPageHeader
+        back={
+          <Link to="/learning-management-system/instructor" className="id-back">
+            <ArrowLeft aria-hidden="true" />
+            {ar ? "لوحة المدرّب" : "Instructor dashboard"}
+          </Link>
+        }
+        title={ar ? "الملف الشخصي للمدرّب" : "Instructor profile"}
+        meta={<p>{ar ? "هذه المعلومات تظهر للطلاب على صفحات الدورات." : "This information shows to students on course pages."}</p>}
+      />
 
-      <form onSubmit={onSave} className="mt-8 space-y-5">
+      <form onSubmit={onSave} className="id-panel id-panel-body space-y-5">
         <div className="flex items-center gap-4">
           {avatarUrl ? (
             <img src={avatarUrl} alt="avatar" className="h-20 w-20 rounded-2xl object-cover border border-border" />
@@ -190,10 +202,12 @@ function InstructorProfileEdit() {
         </div>
 
 
-        <Button type="submit" disabled={saving} className="w-full sm:w-auto">
-          {saving && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-          {ar ? "حفظ" : "Save"}
-        </Button>
+        <div className="id-form-actions">
+          <button type="submit" disabled={saving} className="id-button id-button-primary">
+            {saving ? <Loader2 aria-hidden="true" className="id-spinner" /> : <Save aria-hidden="true" />}
+            {ar ? "حفظ" : "Save"}
+          </button>
+        </div>
       </form>
     </div>
   );
