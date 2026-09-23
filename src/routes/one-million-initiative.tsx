@@ -618,7 +618,7 @@ function GeographySection({
 }) {
   const count = SYRIA_CITIES.length;
   const radius = 42; // percentage of container
-  const labelOffset = 9; // outward offset for labels
+  const labelOffset = 6; // outward offset for labels, kept inside the page on phones
   const points = SYRIA_CITIES.map((_, i) => {
     const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
     return {
@@ -637,10 +637,10 @@ function GeographySection({
         {/* Cities network visual */}
         <div className="relative animate-fade-in">
           <div className="pointer-events-none absolute inset-0 -z-10">
-            <div className="absolute left-1/4 top-1/4 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
-            <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-secondary/20 blur-3xl" />
+            <div className="absolute left-1/4 top-1/4 h-40 w-40 rounded-full bg-primary/20 blur-3xl sm:h-64 sm:w-64" />
+            <div className="absolute bottom-1/4 right-1/4 h-40 w-40 rounded-full bg-secondary/20 blur-3xl sm:h-64 sm:w-64" />
           </div>
-          <div className="relative mx-auto aspect-square w-full max-w-md">
+          <div className="relative mx-auto aspect-square w-[86%] max-w-md">
             {/* Concentric rings — now SVG circles with tech pulse */}
             <svg
               className="absolute inset-0 h-full w-full overflow-visible text-primary"
