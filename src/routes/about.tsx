@@ -1,7 +1,9 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import pageHtml from "@/components/cinematic/html/about.html?raw";
 import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
+import { useLang } from "@/lib/i18n";
+import { applyPublicLanguage } from "@/lib/public-site/language";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MEMBER_COLUMNS,
@@ -28,7 +30,21 @@ export const Route = createFileRoute("/about")({
     return { members: renderMembersHtml((data ?? []) as MemberRow[]) };
   },
   head: () => ({
-    meta: [{ title: "About | SAAE" }, { name: "theme-color", content: "#144248" }],
+    meta: [
+      { title: "About SAAE | AI, Education & Entrepreneurship in Syria" },
+      {
+        name: "description",
+        content: "Learn how SAAE connects AI education, research, communities and entrepreneurship to build practical capability across Syria.",
+      },
+      { property: "og:title", content: "About SAAE | AI, Education & Entrepreneurship in Syria" },
+      {
+        property: "og:description",
+        content: "Meet the Syrian association turning AI knowledge into practical skills, research and public value.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "theme-color", content: "#144248" },
+    ],
     links: [
       { rel: "stylesheet", href: "/cinematic/css/about-inline.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
@@ -40,6 +56,16 @@ export const Route = createFileRoute("/about")({
 
 function Page() {
   const { members } = Route.useLoaderData();
+  const { lang } = useLang();
   const html = useMemo(() => applyMembers(pageHtml, members), [members]);
-  return <CinematicPage html={html} scripts={SCRIPTS} />;
+
+  useEffect(() => {
+    applyPublicLanguage(lang);
+  }, [lang, html]);
+
+  return (
+    <>
+      <CinematicPage html={html} scripts={SCRIPTS} />
+    </>
+  );
 }

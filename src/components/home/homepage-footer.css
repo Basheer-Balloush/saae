@@ -1,4 +1,13 @@
-#home-motion-footer-root:not(:empty) + .home-footer-fallback {
+/* Every page carries its own static footer in its markup and a mount point
+   directly above it. Once the motion footer has portalled in, the static one
+   steps aside; if the chunk never loads, it stays and the page still has a
+   footer. The class is what each page's mount point carries, so one rule
+   covers the whole site; the two ids are the original homepage and about
+   mounts, kept so their markup keeps working. */
+.motion-footer-root:not(:empty) + .home-footer-fallback,
+#home-motion-footer-root:not(:empty) + .home-footer-fallback,
+#about-motion-footer-root:not(:empty) + .home-footer-fallback,
+#partners-motion-footer-root:not(:empty) + .home-footer-fallback {
   display: none;
 }
 
@@ -184,14 +193,16 @@
   font-family: "Cairo", Arial, sans-serif;
   font-size: clamp(2.8rem, 4.7vw, 5.2rem);
   font-weight: 900;
-  line-height: 1.08;
+  line-height: 1.18;
   letter-spacing: 0;
+  overflow: visible;
   text-shadow: 0 0 36px rgba(114, 220, 230, 0.13);
 }
 
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
   .hmf-assistant-copy .hmf-title {
-    padding-block: 0;
+    display: block;
+    padding-block: 0.12em 0.16em;
     padding-inline: 0.06em;
     background-image:
       linear-gradient(180deg, rgba(198, 237, 243, 0.88), rgba(160, 218, 227, 0.9)),
@@ -207,6 +218,21 @@
 
 [dir="rtl"] .hmf-assistant-copy h2 {
   letter-spacing: 0;
+  line-height: 1.35;
+  overflow: visible;
+}
+
+/* Arabic display glyphs extend above and below the Latin font box. Give the
+   photo-filled title its own paint space so the hamza and letter terminals
+   remain fully visible instead of being clipped by background-clip:text. */
+[dir="rtl"] .hmf-assistant-copy .hmf-title {
+  display: inline-block;
+  width: max-content;
+  max-width: 100%;
+  padding-block: .16em .2em;
+  padding-inline: .08em;
+  white-space: nowrap;
+  text-wrap: nowrap;
 }
 
 .hmf-intro {
@@ -479,6 +505,12 @@
 
 .hmf-link-column a,
 .hmf-contact a {
+  /* 0.75rem at 1.65 leaves a 20px-tall link — under the 24px WCAG 2.2 AA
+     minimum. The type stays as it is; only the touch box grows. The column's
+     7px grid gap keeps neighbouring targets from meeting. */
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 24px;
   color: var(--hmf-muted);
   font-size: 0.75rem;
   line-height: 1.65;
@@ -573,6 +605,95 @@
   }
   .hmf-identity img {
     width: 190px;
+  }
+}
+
+@media (max-width: 700px) {
+  .hmf-reveal {
+    height: auto;
+    min-height: 0;
+    clip-path: none;
+  }
+
+  .hmf-footer {
+    position: relative;
+    inset: auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .hmf-marquee {
+    top: 30px;
+  }
+
+  .hmf-shell {
+    display: block;
+    width: min(100% - 32px, 560px);
+    height: auto;
+    padding: 112px 0 22px;
+  }
+
+  .hmf-assistant-intro {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    width: 100%;
+  }
+
+  .hmf-assistant-copy {
+    max-width: none;
+  }
+
+  .hmf-assistant-copy h2 {
+    font-size: clamp(2.35rem, 12vw, 3.5rem);
+  }
+
+  .hmf-intro {
+    max-width: none;
+    font-size: 0.94rem;
+  }
+
+  .hmf-assistant-character {
+    min-height: 330px;
+    width: min(330px, 92vw);
+  }
+
+  .hmf-assistant-character img {
+    width: min(245px, 76%);
+  }
+
+  .hmf-character-prompt {
+    inset-inline-end: 0;
+    right: auto;
+    bottom: 9%;
+  }
+
+  .hmf-information {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 20px;
+    margin-top: 28px;
+    padding-block: 28px;
+  }
+
+  .hmf-identity {
+    grid-column: 1 / -1;
+  }
+
+  .hmf-identity img {
+    width: min(210px, 70%);
+  }
+
+  .hmf-contact {
+    display: grid;
+    grid-column: 1 / -1;
+  }
+
+  .hmf-bottom {
+    margin-top: 4px;
+  }
+
+  .hmf-giant-word {
+    bottom: 1%;
+    font-size: clamp(8rem, 42vw, 12rem);
   }
 }
 

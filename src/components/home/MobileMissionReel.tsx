@@ -64,17 +64,40 @@ export function MobileMissionReel({
     const steps = MISSION_STEPS.length;
     let frame = 0;
     let isArrived: boolean | null = null;
+    let index = -1;
 
     /* The outgoing section pins with its bottom on the screen's bottom edge,
        the runway after it is the hand-off's length, and the reel is pulled up
        over both so its stage is pinned from the moment the section pins. All
        in pixels from the real screen height, so the three always agree. */
     const section = reel.parentElement;
-    /* The screen height is the sticky stage's (100svh), not innerHeight: on
-       iPhones innerHeight changes as Safari's toolbar hides and shows, and the
-       runway would be resized mid-scroll each time, against a stage that
-       stayed the same size. */
-    const viewHeight = () => stage.offsetHeight || window.innerHeight;
+    /* The screen height, held steady. On a phone the browser's toolbar shows
+       and hides as the reader scrolls and stops, and every change re-laid
+       out this section under a finger that had stopped: the stage, the
+       runway and so the step the scroll lands on all moved, and near a step
+       change the copy flipped back and forth. So the stage is given a fixed
+       height in pixels, measured once for the screen's width, and it only
+       ever grows (to the toolbar-hidden height), never shrinks back. A new
+       width (rotation) measures again. */
+    let lockedWidth = 0;
+    let lockedHeight = 0;
+    const viewHeight = () => {
+      const width = window.innerWidth;
+      if (width !== lockedWidth) {
+        lockedWidth = width;
+        lockedHeight = 0;
+        stage.style.blockSize = "";
+      }
+      // The stage's own 100svh before it is held, the visible height after.
+      const natural = lockedHeight
+        ? Math.max(560, window.innerHeight)
+        : stage.offsetHeight || window.innerHeight;
+      if (natural > lockedHeight + 1) {
+        lockedHeight = natural;
+        stage.style.blockSize = `${natural}px`;
+      }
+      return lockedHeight;
+    };
     let pinned = "";
     const pinOut = () => {
       const out = outRef?.current;
@@ -115,7 +138,13 @@ export function MobileMissionReel({
         ? 0
         : clamp((into - handoff) / Math.max(1, rect.height - view - handoff), 0, 1);
       const scaled = clamp(progress, 0, 0.9999) * steps;
-      const index = Math.min(steps - 1, Math.floor(scaled));
+      /* A step only changes once the scroll is clearly past its boundary, so
+         a finger resting on the boundary cannot flip the copy back and forth. */
+      const raw = Math.min(steps - 1, Math.floor(scaled));
+      const margin = 0.04;
+      if (index < 0 || Math.abs(raw - index) > 1) index = raw;
+      else if (raw > index && scaled - raw > margin) index = raw;
+      else if (raw < index && index - scaled > margin) index = raw;
       const wordPos = clamp(scaled, 0.5, steps - 0.5);
       wordRefs.current.forEach((word, i) => {
         if (!word) return;
@@ -126,13 +155,15 @@ export function MobileMissionReel({
             : 0
           : clamp((0.78 - Math.abs(offset)) / 0.56, 0, 1);
         word.style.setProperty("--word-t", strength.toFixed(3));
-        word.style.setProperty("--word-y", (clamp(offset, -1, 1) * 150).toFixed(1));
+        // Whole pixels: sub-pixel steps re-render the giant word as it settles.
+        word.style.setProperty("--word-y", String(Math.round(clamp(offset, -1, 1) * 150)));
       });
       itemRefs.current.forEach((item, i) => {
         if (!item) return;
         item.classList.toggle("is-current", reduced || i === index);
         item.classList.toggle("is-past", !reduced && i < index);
-        if (i === index) item.style.setProperty("--mission-local", (scaled - index).toFixed(4));
+        if (i === index)
+          item.style.setProperty("--mission-local", clamp(scaled - index, 0, 1).toFixed(4));
       });
     };
     const schedule = () => {
@@ -161,6 +192,7 @@ export function MobileMissionReel({
         out.style.top = "";
       }
       stage.classList.remove("mh-is-arrived");
+      stage.style.blockSize = "";
       if (section) section.style.marginBlockStart = "";
       reel.style.blockSize = "";
     };

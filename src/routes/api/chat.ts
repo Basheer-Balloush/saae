@@ -2,9 +2,18 @@ import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
-import { createChatModel } from "@/lib/ai-gateway";
-import { noCourseFallback, providerBusyMessage, toCourseOptions, ORG_EMAIL, ORG_PHONE, type CatalogRow } from "@/lib/chat-intake";
-
+import {
+  createChatModelForRequest,
+  withLovableAiGatewayRunIdHeader,
+} from "@/lib/ai-gateway.server";
+import {
+  noCourseFallback,
+  providerBusyMessage,
+  toCourseOptions,
+  ORG_EMAIL,
+  ORG_PHONE,
+  type CatalogRow,
+} from "@/lib/chat-intake";
 
 // --- In-memory sliding-window rate limiter (per-instance) ---
 const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
@@ -12,7 +21,9 @@ const RATE_LIMIT_MAX = 15; // 15 requests per minute
 const RATE_LIMIT_HOUR_WINDOW_MS = 3_600_000; // 1 hour
 const RATE_LIMIT_HOUR_MAX = 120; // 120 requests per hour
 
-interface RateEntry { timestamps: number[] }
+interface RateEntry {
+  timestamps: number[];
+}
 const rateMap = new Map<string, RateEntry>();
 
 function isRateLimited(key: string): { limited: boolean; retryAfter?: number } {
@@ -27,7 +38,10 @@ function isRateLimited(key: string): { limited: boolean; retryAfter?: number } {
   // Check hour window
   if (entry.timestamps.length >= RATE_LIMIT_HOUR_MAX) {
     const oldest = entry.timestamps[entry.timestamps.length - RATE_LIMIT_HOUR_MAX];
-    return { limited: true, retryAfter: Math.ceil((oldest + RATE_LIMIT_HOUR_WINDOW_MS - now) / 1000) };
+    return {
+      limited: true,
+      retryAfter: Math.ceil((oldest + RATE_LIMIT_HOUR_WINDOW_MS - now) / 1000),
+    };
   }
   // Check minute window
   const recent = entry.timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
@@ -220,26 +234,36 @@ type ChatBody = ChatRequestBody & {
   lang?: unknown;
 };
 
-async function upsertConversation(sessionId: string, lang: string | null, userAgent: string | null) {
-  // upsert by session_id, return id
-  const { data, error } = await supabaseAdmin
-    .from("chat_conversations")
-    .upsert(
-      {
-        session_id: sessionId,
-        lang,
-        user_agent: userAgent,
-        last_message_at: new Date().toISOString(),
-      },
-      { onConflict: "session_id" },
-    )
-    .select("id")
-    .single();
-  if (error) {
-    console.error("[chat] upsert conversation failed", error.message);
+async function upsertConversation(
+  sessionId: string,
+  lang: string | null,
+  userAgent: string | null,
+) {
+  // Transcript logging is best-effort: never fail the chat reply when the
+  // admin client is unconfigured (e.g. local dev without a service-role key).
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("chat_conversations")
+      .upsert(
+        {
+          session_id: sessionId,
+          lang,
+          user_agent: userAgent,
+          last_message_at: new Date().toISOString(),
+        },
+        { onConflict: "session_id" },
+      )
+      .select("id")
+      .single();
+    if (error) {
+      console.error("[chat] upsert conversation failed", error.message);
+      return null;
+    }
+    return data?.id ?? null;
+  } catch (err) {
+    console.error("[chat] conversation logging unavailable", err);
     return null;
   }
-  return data?.id ?? null;
 }
 
 async function persistMessage(
@@ -248,17 +272,21 @@ async function persistMessage(
   content: string,
   parts: unknown,
 ) {
-  const { error } = await supabaseAdmin.from("chat_messages").insert({
-    conversation_id: conversationId,
-    role,
-    content,
-    parts: (parts as never) ?? null,
-  });
-  if (error) console.error("[chat] persist message failed", error.message);
-  await supabaseAdmin
-    .from("chat_conversations")
-    .update({ last_message_at: new Date().toISOString() })
-    .eq("id", conversationId);
+  try {
+    const { error } = await supabaseAdmin.from("chat_messages").insert({
+      conversation_id: conversationId,
+      role,
+      content,
+      parts: (parts as never) ?? null,
+    });
+    if (error) console.error("[chat] persist message failed", error.message);
+    await supabaseAdmin
+      .from("chat_conversations")
+      .update({ last_message_at: new Date().toISOString() })
+      .eq("id", conversationId);
+  } catch (err) {
+    console.error("[chat] message logging unavailable", err);
+  }
 }
 
 async function retrieveKnowledge(question: string): Promise<string> {
@@ -298,8 +326,17 @@ export const Route = createFileRoute("/api/chat")({
     handlers: {
       POST: async ({ request }: { request: Request }) => {
         // Fail before persisting user messages if the provider is not configured.
-        let model: ReturnType<typeof createChatModel>;
-        try { model = createChatModel(); } catch {
+        // Prefers Lovable AI Gateway; falls back to the direct OpenRouter provider.
+        let chat: ReturnType<typeof createChatModelForRequest>;
+        try {
+          chat = createChatModelForRequest(request);
+        } catch (err) {
+          console.error(
+            "[chat] provider init failed",
+            err,
+            "hasLovableKey:",
+            Boolean(process.env["LOVABLE_API_KEY"]),
+          );
           return new Response("Chat is temporarily unavailable", { status: 503 });
         }
         // Rate limit by IP + session (or just IP if no session)
@@ -309,7 +346,9 @@ export const Route = createFileRoute("/api/chat")({
           "unknown";
         const bodyRaw = (await request.json()) as ChatBody;
         const sessionId =
-          typeof bodyRaw.sessionId === "string" && bodyRaw.sessionId.length >= 6 && bodyRaw.sessionId.length <= 128
+          typeof bodyRaw.sessionId === "string" &&
+          bodyRaw.sessionId.length >= 6 &&
+          bodyRaw.sessionId.length <= 128
             ? bodyRaw.sessionId
             : "no-session";
         const rateKey = `${clientIp}:${sessionId}`;
@@ -341,9 +380,7 @@ export const Route = createFileRoute("/api/chat")({
             return new Response("Invalid message role", { status: 400 });
           }
           const contentStr =
-            typeof m.content === "string"
-              ? m.content
-              : JSON.stringify(m.content ?? m.parts ?? "");
+            typeof m.content === "string" ? m.content : JSON.stringify(m.content ?? m.parts ?? "");
           if (contentStr.length > MAX_CONTENT_CHARS) {
             return new Response("Message content too long", { status: 400 });
           }
@@ -354,7 +391,9 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const chatSessionId =
-          typeof bodyRaw.sessionId === "string" && bodyRaw.sessionId.length >= 6 && bodyRaw.sessionId.length <= 128
+          typeof bodyRaw.sessionId === "string" &&
+          bodyRaw.sessionId.length >= 6 &&
+          bodyRaw.sessionId.length <= 128
             ? bodyRaw.sessionId
             : null;
         const lang = typeof bodyRaw.lang === "string" ? bodyRaw.lang.slice(0, 8) : null;
@@ -366,7 +405,11 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         // Persist the latest user message (if last is from user)
-        const last = messages[messages.length - 1] as { role?: string; content?: unknown; parts?: unknown };
+        const last = messages[messages.length - 1] as {
+          role?: string;
+          content?: unknown;
+          parts?: unknown;
+        };
         const lastUserText = extractTextFromMessage(last);
         if (conversationId && last?.role === "user" && lastUserText) {
           await persistMessage(conversationId, "user", lastUserText, last.parts ?? null);
@@ -378,29 +421,40 @@ export const Route = createFileRoute("/api/chat")({
           extraContext = await retrieveKnowledge(lastUserText);
         }
 
-
         // Ensure a conversation exists so leads can be linked even if sessionId was missing
         if (!conversationId) {
-          const fallbackSession = chatSessionId ?? `auto_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+          const fallbackSession =
+            chatSessionId ?? `auto_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
           conversationId = await upsertConversation(fallbackSession, lang, userAgent);
         }
 
         // Rebuild trusted conversation history from DB (server-side only) so that
         // clients cannot fabricate prior `assistant`/`system` turns to bypass the
         // system prompt. The client only supplies new user turns.
-        const { data: history } = await supabaseAdmin
-          .from("chat_messages")
-          .select("role, content, parts")
-          .eq("conversation_id", conversationId as string)
-          .in("role", ["user", "assistant"])
-          .order("created_at", { ascending: true })
-          .limit(50);
+        // Best-effort: without storage the turn proceeds with the new user message only.
+        let history: Array<{ role: string; content: string | null; parts: unknown }> | null = null;
+        if (conversationId) {
+          try {
+            const res = await supabaseAdmin
+              .from("chat_messages")
+              .select("role, content, parts")
+              .eq("conversation_id", conversationId as string)
+              .in("role", ["user", "assistant"])
+              .order("created_at", { ascending: true })
+              .limit(50);
+            history = res.data as typeof history;
+          } catch (err) {
+            console.error("[chat] history unavailable", err);
+          }
+        }
 
-        const trustedMessages: UIMessage[] = ((history ?? []) as Array<{
-          role: string;
-          content: string | null;
-          parts: unknown;
-        }>)
+        const storedMessages: UIMessage[] = (
+          (history ?? []) as Array<{
+            role: string;
+            content: string | null;
+            parts: unknown;
+          }>
+        )
           // A turn that produced no text (a failed generation, a tool call that
           // errored) must not be replayed: providers reject a message with empty
           // content, which would break every later message in the conversation.
@@ -408,10 +462,18 @@ export const Route = createFileRoute("/api/chat")({
           .map((m, i) => ({
           id: `db-${i}`,
           role: m.role as "user" | "assistant",
-          parts: Array.isArray(m.parts) && m.parts.length > 0
-            ? (m.parts as UIMessage["parts"])
-            : [{ type: "text", text: m.content ?? "" }],
+          parts:
+            Array.isArray(m.parts) && m.parts.length > 0
+              ? (m.parts as UIMessage["parts"])
+              : [{ type: "text", text: m.content ?? "" }],
         }));
+
+        // If transcript storage is unavailable, fall back to the current user turn
+        // so the model always receives a non-empty prompt.
+        const trustedMessages: UIMessage[] =
+          storedMessages.length > 0
+            ? storedMessages
+            : [{ id: "live-0", role: "user", parts: [{ type: "text", text: lastUserText }] }];
 
         const tools = {
           find_courses: tool({
@@ -436,7 +498,10 @@ export const Route = createFileRoute("/api/chat")({
               // A topic with no match should not end the journey: fall back to the
               // whole catalogue rather than telephoning the visitor away.
               if (rows.length === 0 && (input.topic || input.level)) {
-                const { data: all } = await supabaseAdmin.rpc("lms_list_catalog_public", { _limit: 12, _offset: 0 });
+                const { data: all } = await supabaseAdmin.rpc("lms_list_catalog_public", {
+                  _limit: 12,
+                  _offset: 0,
+                });
                 rows = (all ?? []) as unknown as CatalogRow[];
               }
               const courses = toCourseOptions(rows, lang === "en" ? "en" : "ar");
@@ -456,7 +521,10 @@ export const Route = createFileRoute("/api/chat")({
               who: z.enum(["student", "professional", "company", "trainer"]).nullable().optional(),
               field: z.string().nullable().optional(),
               ai_level: z.enum(["beginner", "basics", "working"]).nullable().optional(),
-              intent: z.enum(["opportunity", "academic", "business", "collaboration"]).nullable().optional(),
+              intent: z
+                .enum(["opportunity", "academic", "business", "collaboration"])
+                .nullable()
+                .optional(),
               can_offer: z.string().nullable().optional(),
               weekly_hours: z.enum(["lt2", "2to5", "gt5"]).nullable().optional(),
               blocker: z.string().nullable().optional(),
@@ -498,10 +566,15 @@ export const Route = createFileRoute("/api/chat")({
                 .select("id")
                 .single();
               if (error) {
-                console.error("[chat] save_visitor_profile failed", error.message, { conversationId });
+                console.error("[chat] save_visitor_profile failed", error.message, {
+                  conversationId,
+                });
                 return { ok: false, error: error.message };
               }
-              console.log("[chat] visitor_profile saved", { id: (data as { id?: string } | null)?.id, conversationId });
+              console.log("[chat] visitor_profile saved", {
+                id: (data as { id?: string } | null)?.id,
+                conversationId,
+              });
               return { ok: true, id: (data as { id?: string } | null)?.id };
             },
           }),
@@ -535,7 +608,9 @@ export const Route = createFileRoute("/api/chat")({
                 .select("id")
                 .single();
               if (error) {
-                console.error("[chat] submit_individual_lead failed", error.message, { conversationId });
+                console.error("[chat] submit_individual_lead failed", error.message, {
+                  conversationId,
+                });
                 return { ok: false, error: error.message };
               }
               console.log("[chat] individual_lead saved", { id: data?.id, conversationId });
@@ -583,7 +658,9 @@ export const Route = createFileRoute("/api/chat")({
                 .select("id")
                 .single();
               if (error) {
-                console.error("[chat] submit_company_lead failed", error.message, { conversationId });
+                console.error("[chat] submit_company_lead failed", error.message, {
+                  conversationId,
+                });
                 return { ok: false, error: error.message };
               }
               console.log("[chat] company_lead saved", { id: data?.id, conversationId });
@@ -593,7 +670,7 @@ export const Route = createFileRoute("/api/chat")({
         };
 
         const result = streamText({
-          model,
+          model: chat.model,
           system: SYSTEM_PROMPT + extraContext,
           tools,
           // Every step and every retry is another provider call, and the provider
@@ -602,9 +679,10 @@ export const Route = createFileRoute("/api/chat")({
           maxRetries: 1,
           stopWhen: stepCountIs(12),
           messages: await convertToModelMessages(trustedMessages),
+          ...(chat.providerOptions ? { providerOptions: chat.providerOptions } : {}),
         });
 
-        return result.toUIMessageStreamResponse({
+        const response = result.toUIMessageStreamResponse({
           originalMessages: trustedMessages,
           // The visitor should read why the answer stopped, not a raw provider error.
           onError: (error) => {
@@ -627,6 +705,8 @@ export const Route = createFileRoute("/api/chat")({
             await persistMessage(conversationId, "assistant", text, parts);
           },
         });
+
+        return chat.gateway ? withLovableAiGatewayRunIdHeader(response, chat.gateway) : response;
       },
     },
   },

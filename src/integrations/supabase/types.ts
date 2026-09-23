@@ -3984,14 +3984,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      lms_remove_course_instructor: { Args: { _course_id: string; _instructor_id: string }; Returns: undefined }
-      lms_my_teaching_course_ids: { Args: never; Returns: string[] }
-      lms_get_course_assignments: { Args: { _course_id: string }; Returns: { instructor_user_id: string; can_edit: boolean; can_grade: boolean; can_manage_enrollments: boolean }[] }
-
-      lms_get_course_participant_names: { Args: { _course_id: string }; Returns: { user_id: string; full_name: string | null }[] }
-      has_ams_portal_access: { Args: never; Returns: boolean }
-      lms_set_user_role: { Args: { _user_id: string; _role: "admin" | "lms_instructor" | "lms_student" }; Returns: undefined }
-
       _ams_derive_session_dates: {
         Args: { _count: number; _lms_course_id: string }
         Returns: {
@@ -4225,6 +4217,7 @@ export type Database = {
         }[]
       }
       has_ams_access: { Args: { _user_id: string }; Returns: boolean }
+      has_ams_portal_access: { Args: never; Returns: boolean }
       has_lms_course_capability: {
         Args: { _cap: string; _course_id: string; _user_id: string }
         Returns: boolean
@@ -4375,6 +4368,32 @@ export type Database = {
         Args: { _course_id: string; _student_id: string }
         Returns: Json
       }
+      lms_get_course_assignments: {
+        Args: { _course_id: string }
+        Returns: {
+          added_by: string | null
+          can_edit: boolean
+          can_grade: boolean
+          can_manage_enrollments: boolean
+          course_id: string
+          created_at: string
+          instructor_user_id: string
+          role: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "lms_course_instructors"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      lms_get_course_participant_names: {
+        Args: { _course_id: string }
+        Returns: {
+          full_name: string
+          user_id: string
+        }[]
+      }
       lms_get_quiz_for_attempt: { Args: { _quiz_id: string }; Returns: Json }
       lms_get_quiz_questions: {
         Args: { _quiz_id: string }
@@ -4470,6 +4489,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      lms_my_teaching_course_ids: { Args: never; Returns: string[] }
       lms_ops_health_summary: { Args: never; Returns: Json }
       lms_process_payout: {
         Args: { _approve: boolean; _payout_id: string }
@@ -4627,6 +4647,10 @@ export type Database = {
         Args: { _admin_notes?: string; _request_id: string }
         Returns: undefined
       }
+      lms_remove_course_instructor: {
+        Args: { _course_id: string; _instructor_id: string }
+        Returns: undefined
+      }
       lms_request_payout: {
         Args: { _amount: number; _method?: string; _notes?: string }
         Returns: string
@@ -4637,6 +4661,13 @@ export type Database = {
           _mode: Database["public"]["Enums"]["lms_delivery_mode"]
         }
         Returns: Json
+      }
+      lms_set_user_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
       }
       lms_slugify: { Args: { _input: string }; Returns: string }
       lms_submit_enrollment_request: {
@@ -4683,6 +4714,16 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      read_email_batch_with_metadata: {
+        Args: { batch_size: number; queue_name: string; vt: number }
+        Returns: unknown[]
+        SetofOptions: {
+          from: "*"
+          to: "message_record"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       remove_trainer_application_file: {
         Args: { p_file_id: string }

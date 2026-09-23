@@ -151,7 +151,14 @@ function useActiveGuideContext() {
       frame = 0;
       const assistantSection = document.getElementById("assistant-chatbot-section");
       if (assistantSection) {
-        const assistantRect = assistantSection.getBoundingClientRect();
+        // The motion footer is fixed to the viewport while its outer reveal
+        // wrapper remains in normal document flow.  Its intro can therefore
+        // have an on-screen rect even while it is fully transparent and the
+        // footer is still far below the viewport.  Use the reveal wrapper for
+        // the visibility check so the floating guide is only suppressed when
+        // the user has actually reached the footer.
+        const assistantHost = assistantSection.closest<HTMLElement>("#site-footer");
+        const assistantRect = (assistantHost ?? assistantSection).getBoundingClientRect();
         const assistantIsVisible =
           assistantRect.top < window.innerHeight * 0.92 &&
           assistantRect.bottom > window.innerHeight * 0.08;

@@ -24,6 +24,7 @@
     "test:plans": "node --test tests/offline/*.test.mjs"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3",
     "@ai-sdk/openai-compatible": "^2.0.47",
     "@ai-sdk/react": "^3.0.179",
     "@capacitor/android": "^8.4.1",
@@ -104,7 +105,7 @@
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.4.1",
     "@eslint/js": "^9.32.0",
-    "@lovable.dev/vite-tanstack-config": "2.13.1",
+    "@lovable.dev/vite-tanstack-config": "2.23.1",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

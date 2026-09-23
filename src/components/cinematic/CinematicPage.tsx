@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef } from "react";
+import { Suspense, lazy, memo, useEffect, useMemo, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { withSiteChrome } from "./radial-nav";
 import { installCinematicScrollSafety } from "./scroll-safety";
@@ -113,6 +113,17 @@ export function appendCinematicScripts(scripts: CinematicScript[], onEachSettled
   return { added, cancel };
 }
 
+/* The shared site footer. Every cinematic page's markup carries a
+   .motion-footer-root above its own static footer, so rendering this once here
+   gives the whole cinematic site the same footer instead of each page
+   repeating the wiring. It portals into that mount, or renders nothing when a
+   page has none, and is loaded on demand so it stays off the first paint. */
+const MotionFooterLazy = lazy(() =>
+  import("@/components/home/DesktopMotionFooter").then((m) => ({
+    default: m.DesktopMotionFooter,
+  })),
+);
+
 /** Renders a prototype page's static markup and boots its vanilla scripts in order. */
 function CinematicPageImpl({ html, scripts, htmlClass, bodyClass, htmlAttrs }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -173,7 +184,14 @@ function CinematicPageImpl({ html, scripts, htmlClass, bodyClass, htmlAttrs }: P
     };
   }, [html, scripts, htmlClass, bodyClass, htmlAttrs]);
 
-  return <div ref={mountRef} className="cinematic" dangerouslySetInnerHTML={inner} />;
+  return (
+    <>
+      <div ref={mountRef} className="cinematic" dangerouslySetInnerHTML={inner} />
+      <Suspense fallback={null}>
+        <MotionFooterLazy />
+      </Suspense>
+    </>
+  );
 }
 
 /* A page that re-renders for its own reasons (a dialog opening, say) must not
