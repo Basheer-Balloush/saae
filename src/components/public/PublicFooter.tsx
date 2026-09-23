@@ -6,7 +6,7 @@ const explore = [
   { to: "/about", en: "About SAAE", ar: "عن الجمعية" },
   { to: "/news", en: "News", ar: "الأخبار" },
   { to: "/partners", en: "Partners", ar: "الشركاء" },
-  { to: "/one-million-initiative-home", en: "Initiative", ar: "المبادرة" },
+  { to: "/initiative", en: "Initiative", ar: "المبادرة" },
   { to: "/contact", en: "Contact", ar: "تواصل معنا" },
 ] as const;
 
@@ -34,7 +34,7 @@ export function PublicFooter() {
                 : "Help shape what Syria can do with AI."}
             </p>
           </div>
-          <Link className="button-link" to="/one-million-initiative-home">
+          <Link className="button-link" to="/initiative">
             {isArabic ? "اكتشف المبادرة" : "Explore the initiative"}
             <svg viewBox="0 0 20 20" aria-hidden="true">
               <path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />

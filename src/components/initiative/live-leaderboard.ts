@@ -29,7 +29,7 @@ const RANK_MEDAL =
 const RANK_DOT =
   '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
 
-const rankMark = (index: number): string =>
+export const rankMark = (index: number): string =>
   index === 0 ? RANK_STAR : index <= 2 ? RANK_MEDAL : RANK_DOT;
 
 const numberFormat = new Intl.NumberFormat("en-US");

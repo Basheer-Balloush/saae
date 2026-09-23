@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { labelAr: "الرئيسية", labelEn: "Home", href: "/" },
   { labelAr: "من نحن", labelEn: "About", href: "/about" },
   { labelAr: "الأخبار", labelEn: "News", href: "/news" },
-  { labelAr: "المبادرة", labelEn: "Initiative", href: "/one-million-initiative-home" },
+  { labelAr: "المبادرة", labelEn: "Initiative", href: "/initiative" },
   { labelAr: "منصة التعليم", labelEn: "Learning platform", href: "/learning-management-system" },
   { labelAr: "تواصل معنا", labelEn: "Contact", href: "/contact" },
 ] as const;

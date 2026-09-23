@@ -28,10 +28,10 @@ export function CinematicHero() {
       <nav className="ribbon-pages" aria-label="Site pages">
         <Link to="/about">About</Link>
         <Link to="/partners">Partners</Link>
-        <Link to="/one-million-initiative-home">Initiative</Link>
+        <Link to="/initiative">Initiative</Link>
         <Link to="/contact">Contact</Link>
       </nav>
-      <Link className="ribbon-cta" to="/one-million-initiative-home">
+      <Link className="ribbon-cta" to="/initiative">
         Explore the initiative
         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </Link>
@@ -92,7 +92,7 @@ export function CinematicHero() {
                 <p className="eyebrow">The Million Syrian AI Users initiative</p>
                 <h2>One million people One national step forward</h2>
                 <p>A national initiative enabling one million Syrians to use AI confidently at work, in study, and in everyday life.</p>
-                <Link className="button-link" to="/one-million-initiative-home">
+                <Link className="button-link" to="/initiative">
                   Explore the initiative
                   <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </Link>
@@ -160,7 +160,7 @@ export function CinematicHero() {
           <h2 className="photo-head">Build Syria's AI future.</h2>
           <p>Practical AI learning, research and entrepreneurship, connected for people across Syria.</p>
           <div className="static-actions">
-            <Link className="button-link" to="/one-million-initiative-home">
+            <Link className="button-link" to="/initiative">
               Explore the initiative
               <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </Link>

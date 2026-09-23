@@ -261,7 +261,7 @@ describe("mobile homepage rendered output", () => {
         "/news": "src/routes/news.index.tsx",
         "/learning-management-system": "src/routes/learning-management-system.tsx",
         "/resources/ai-tools": "src/routes/resources.ai-tools.tsx",
-        "/one-million-initiative-home": "src/routes/one-million-initiative-home.tsx",
+        "/initiative/sponsors": "src/routes/initiative.sponsors.tsx",
         "/registration": "src/routes/registration.tsx",
         "/learning-management-system/catalog": "src/routes/learning-management-system.catalog.tsx",
       };

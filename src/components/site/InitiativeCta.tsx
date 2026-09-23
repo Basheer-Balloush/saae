@@ -34,7 +34,7 @@ export function InitiativeCta() {
         >
           <div className="shrink-0">
             <a
-              href="/one-million-initiative-home"
+              href="/initiative"
               className="group inline-flex items-center gap-3 rounded-full bg-secondary px-7 py-3.5 text-base font-bold text-secondary-foreground transition-all hover:-translate-y-0.5"
             >
               {isRtl ? (
