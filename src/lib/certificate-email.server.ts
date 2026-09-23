@@ -16,6 +16,7 @@ export async function sendCertificateIssuedEmail(input: {
   courseName: string
   serial: string
   lang: Lang
+  pdf?: Uint8Array
 }) {
   assertEmailRecipientAllowed(input.to)
 
@@ -33,5 +34,5 @@ export async function sendCertificateIssuedEmail(input: {
   const html = await render(element)
   const text = await render(element, { plainText: true })
 
-  await sendTransactionalEmail({ to: input.to, subject: input.lang === 'ar' ? `مبروك! تم إصدار شهادتك (${input.serial})` : `Your certificate ${input.serial} is ready`, html, text })
+  await sendTransactionalEmail({ to: input.to, subject: input.lang === 'ar' ? `مبروك! تم إصدار شهادتك (${input.serial})` : `Your certificate ${input.serial} is ready`, html, text, attachments: input.pdf ? [{ filename: `${input.serial}.pdf`, content: Buffer.from(input.pdf).toString('base64') }] : undefined })
 }
