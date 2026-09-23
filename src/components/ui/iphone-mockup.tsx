@@ -26,6 +26,8 @@ export interface IPhoneMockupProps {
   safeArea?: boolean;
   safeAreaOverrides?: Partial<{ top: number; bottom: number; left: number; right: number }>;
   showHomeIndicator?: boolean;
+  /** iOS status bar either side of the island: the time, then signal, Wi-Fi and battery. */
+  statusBar?: boolean | { time?: string; top?: number; inset?: number; fontSize?: number };
   innerShadow?: boolean;
   style?: CSSProperties;
   className?: string;
@@ -106,6 +108,77 @@ function shade(hex: string, percent: number) {
     .join("")}`;
 }
 
+function StatusBar({
+  time = "9:41",
+  top,
+  height,
+  inset = 22,
+  fontSize = 11,
+}: {
+  time?: string;
+  top: number;
+  height: number;
+  inset?: number;
+  fontSize?: number;
+}) {
+  const icon = Math.round(fontSize * 0.95);
+  return (
+    <div
+      aria-hidden
+      dir="ltr"
+      style={{
+        position: "absolute",
+        top,
+        left: inset,
+        right: inset,
+        height,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        color: "#fff",
+        fontFamily: '-apple-system, "SF Pro Text", system-ui, sans-serif',
+        fontSize,
+        fontWeight: 600,
+        letterSpacing: "-0.01em",
+        zIndex: 3,
+        pointerEvents: "none",
+      }}
+    >
+      <span style={{ minWidth: "3.2em", textAlign: "center" }}>{time}</span>
+      <span style={{ display: "flex", alignItems: "center", gap: Math.round(icon * 0.3) }}>
+        <svg width={icon * 1.15} height={icon * 0.72} viewBox="0 0 18 11" fill="currentColor">
+          <rect x="0" y="7" width="3" height="4" rx="1" />
+          <rect x="5" y="5" width="3" height="6" rx="1" />
+          <rect x="10" y="2.5" width="3" height="8.5" rx="1" />
+          <rect x="15" y="0" width="3" height="11" rx="1" />
+        </svg>
+        <svg width={icon * 1.05} height={icon * 0.76} viewBox="0 0 16 11.5" fill="currentColor">
+          <path d="M8 2.3c2.3 0 4.4.9 6 2.4l1.2-1.2A10.2 10.2 0 0 0 8 .6C5.2.6 2.7 1.7.8 3.5L2 4.7a8.6 8.6 0 0 1 6-2.4Z" />
+          <path d="M8 5.7c1.4 0 2.6.5 3.6 1.4l1.2-1.2A6.8 6.8 0 0 0 8 4c-1.9 0-3.5.7-4.8 1.9l1.2 1.2c1-.9 2.2-1.4 3.6-1.4Z" />
+          <path d="M8 9.1c.5 0 1 .2 1.3.5L8 11 6.7 9.6c.3-.3.8-.5 1.3-.5Z" />
+        </svg>
+        <svg width={icon * 1.9} height={icon * 0.9} viewBox="0 0 27 13" fill="none">
+          <rect
+            x="0.5"
+            y="0.5"
+            width="23"
+            height="12"
+            rx="3.8"
+            stroke="currentColor"
+            strokeOpacity=".4"
+          />
+          <rect x="2" y="2" width="20" height="9" rx="2.5" fill="currentColor" />
+          <path
+            d="M25 4.5v4c.8-.3 1.4-1.1 1.4-2s-.6-1.7-1.4-2Z"
+            fill="currentColor"
+            fillOpacity=".45"
+          />
+        </svg>
+      </span>
+    </div>
+  );
+}
+
 export function IPhoneMockup({
   model = "14-pro",
   color = "space-black",
@@ -130,6 +203,7 @@ export function IPhoneMockup({
   safeArea = true,
   safeAreaOverrides,
   showHomeIndicator = true,
+  statusBar = false,
   innerShadow = true,
   style,
   className,
@@ -256,12 +330,20 @@ export function IPhoneMockup({
               }}
             />
           )}
+          {statusBar && (
+            <StatusBar
+              {...(typeof statusBar === "object" ? statusBar : {})}
+              top={(typeof statusBar === "object" ? statusBar.top : undefined) ?? islandTop}
+              height={finalIslandH || 20}
+            />
+          )}
           <div data-iphone-content style={contentStyle}>
             {children}
           </div>
           {showHomeIndicator && (
             <div
               aria-hidden
+              data-iphone-home-indicator
               style={{
                 position: "absolute",
                 bottom: 8,
