@@ -275,11 +275,18 @@ html {
     border-color: var(--color-border);
   }
 
+  /* No page may scroll sideways on any screen. iOS also stops enlarging text
+     on its own when a phone turns to landscape. */
   html {
     scroll-behavior: smooth;
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
+    overflow-x: clip;
+    overflow-wrap: break-word;
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);

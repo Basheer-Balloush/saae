@@ -494,6 +494,16 @@ html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="4"] 
   }
 }
 
+/* In Arabic the hero headline stands on the right, where the opening card
+   sits; on shorter screens the headline reaches down into it, so the card
+   takes the left side instead. */
+@media (max-height: 820px) {
+  html[dir="rtl"] .section-guide[data-guide-context="comic"][data-guide-band="0"] {
+    right: auto;
+    left: clamp(40px, 8vw, 200px);
+  }
+}
+
 @media (max-width: 899px) {
   .section-guide {
     display: none;

@@ -695,6 +695,59 @@
   }
 }
 
+/* Phones held sideways: the whole screen goes to the conversation. */
+@media (max-height: 520px) {
+  .assistant-chat-overlay {
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .assistant-chat-shell {
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .assistant-chat-header {
+    min-height: 56px;
+    padding-block: 6px;
+  }
+
+  .assistant-chat-kicker,
+  .assistant-chat-status,
+  .assistant-chat-subtitle,
+  .assistant-chat-composer > p {
+    display: none;
+  }
+
+  .assistant-chat-body {
+    padding-block: 14px;
+  }
+
+  .assistant-chat-welcome {
+    display: block;
+    min-height: auto;
+  }
+
+  .assistant-chat-portrait {
+    display: none;
+  }
+
+  .assistant-chat-intro h2 {
+    font-size: 22px;
+  }
+
+  .assistant-chat-suggestions {
+    margin-top: 12px;
+  }
+
+  .assistant-chat-composer {
+    padding-block: 8px max(8px, env(safe-area-inset-bottom));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .assistant-chat-suggestion,
   .assistant-chat-icon-button,

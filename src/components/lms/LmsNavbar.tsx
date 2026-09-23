@@ -73,11 +73,11 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
           : "bg-transparent",
       )}
     >
-      <div className="flex w-full items-center justify-between gap-6 px-6 py-3 lg:px-10">
+      <div className="flex w-full items-center justify-between gap-3 px-4 py-3 sm:gap-6 sm:px-6 lg:px-10">
         {/* Logo: SAAE variants like the main site */}
         <Link
           to="/learning-management-system"
-          className="relative flex items-center gap-3"
+          className="relative flex min-w-0 items-center gap-3"
           aria-label="SAAE Training and Learning Platform"
         >
           {(() => {
@@ -98,7 +98,7 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
                 src={v.src}
                 alt={v.alt}
                 className={cn(
-                  "h-10 w-auto sm:h-11 transition-opacity duration-150",
+                  "h-9 w-auto sm:h-11 transition-opacity duration-150",
                   v.show ? "opacity-100" : "opacity-0 absolute inset-0 pointer-events-none",
                 )}
                 fetchPriority="high"
@@ -179,7 +179,7 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
 
       {/* Mobile menu — same pattern as site Navbar */}
       {open && (
-        <div className="border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
+        <div className="max-h-[calc(100dvh-4.5rem)] overflow-y-auto overscroll-contain border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
             {links.map((l) => (
               <Link

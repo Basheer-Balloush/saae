@@ -697,9 +697,12 @@ html[dir="rtl"] .contact-heading-section h1 { line-height: 1.32; letter-spacing:
   html[dir="rtl"] .hero .ghost-contact {
     left: auto;
     right: 0;
-    font-size: clamp(62px, 17vw, 120px);
+    font-size: clamp(40px, 15.5vw, 120px);
     transform: translateY(-118%);
   }
+  /* The ghost word stays inside the column on the narrowest phones. */
+  .hero .markstage { overflow-x: clip; }
+  .hero .ghost-contact { max-width: none; font-size: clamp(40px, 15.5vw, 132px); }
 }
 
 @media (max-width: 768px) {

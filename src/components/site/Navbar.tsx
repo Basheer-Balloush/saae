@@ -232,7 +232,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
       </div>
 
       {open && (
-        <div className="border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
+        <div className="max-h-[calc(100dvh-4.5rem)] overflow-y-auto overscroll-contain border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
             {!minimal &&
               sections.map((s) => {

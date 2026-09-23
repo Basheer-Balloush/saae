@@ -52,14 +52,14 @@ export function AmsNavbar({ onSignOut, showSignOut, extra }: Props) {
       )}
     >
       <div className="flex w-full items-center justify-between gap-2 px-3 py-3 sm:gap-6 sm:px-6 lg:px-10">
-        <div className="relative flex h-10 sm:h-11 items-center shrink-0" aria-label="SAAIE">
+        <div className="relative flex h-8 min-w-0 items-center min-[360px]:h-10 sm:h-11" aria-label="SAAIE">
           {variants.map((v, i) => (
             <img
               key={i}
               src={v.src}
               alt={v.alt}
               className={cn(
-                "h-10 w-auto sm:h-11 transition-opacity duration-150",
+                "h-8 w-auto max-w-full object-contain min-[360px]:h-10 sm:h-11 transition-opacity duration-150",
                 v.show ? "opacity-100 relative" : "opacity-0 absolute inset-y-0 start-0 pointer-events-none",
               )}
               fetchPriority="high"
@@ -68,14 +68,14 @@ export function AmsNavbar({ onSignOut, showSignOut, extra }: Props) {
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <button
             onClick={toggleLang}
             className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary"
             aria-label="Toggle language"
           >
             <Globe className="h-3.5 w-3.5" />
-            {t.nav.langToggle}
+            <span className="hidden min-[360px]:inline">{t.nav.langToggle}</span>
           </button>
           <button
             onClick={toggleTheme}
