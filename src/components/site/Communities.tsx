@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Database, Building2, Stethoscope, FlaskConical, Code2, TrendingUp, GraduationCap, Newspaper, ArrowUpRight, Award } from "lucide-react";
+import { Database, Building2, Stethoscope, FlaskConical, Code2, TrendingUp, GraduationCap, Newspaper, ArrowUpRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import type { CommunityKey } from "@/lib/communityCategories";
@@ -17,7 +17,6 @@ export function Communities() {
     { icon: TrendingUp, ...c.economy, key: "economy" },
     { icon: GraduationCap, ...c.trainers, key: "trainers" },
     { icon: Newspaper, ...c.media, key: "media" },
-    { icon: Award, ...c.quality, key: "quality" },
   ];
 
   const isRtl = dir === "rtl";

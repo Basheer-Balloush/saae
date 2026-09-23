@@ -13,6 +13,4 @@ export const COMMUNITY_ICON_SVG: Record<CommunityKey, string> = {
   trainers:
     '<circle cx="12" cy="6" r="3"/><path d="M5 21v-2.5C5 15.5 8.1 14 12 14s7 1.5 7 4.5V21M12 14v7M8 18h8"/>',
   media: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3V9"/>',
-  quality:
-    '<path d="m12 3 2 4 4.5.7-3.2 3.2.8 4.6-4.1-2.1-4.1 2.1.8-4.6L5.5 7.7 10 7l2-4Z"/><path d="M7 16v5l5-2 5 2v-5"/>',
 };
