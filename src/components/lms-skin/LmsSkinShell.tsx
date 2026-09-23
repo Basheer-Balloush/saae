@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { GraduationCap, LayoutDashboard, LogOut, Presentation } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
@@ -21,28 +21,46 @@ type Props = {
   role: LmsRole;
   isAuthed: boolean;
   onSignOut: () => void;
+  mainSiteFooter?: boolean;
   children: ReactNode;
 };
 
+const MainSiteFooter = lazy(() =>
+  import("./LmsMainFooter").then((module) => ({ default: module.LmsMainFooter })),
+);
+
 /** Moaz's LMS chrome: ambient ground, language switch, tubelight menu and footer. */
-export function LmsSkinShell({ role, isAuthed, onSignOut, children }: Props) {
+export function LmsSkinShell({
+  role,
+  isAuthed,
+  onSignOut,
+  mainSiteFooter = false,
+  children,
+}: Props) {
   const { lang } = useLang();
   /* "dark" puts the shared components (buttons, fields, reviews) on the
      site's dark palette; lms-db.css tints its tokens to the LMS petrol. */
   return (
-    <div className="lms-skin dark">
-      <a className="skip-link" href="#main-content">
-        {lang === "ar" ? "تخطَّ إلى المحتوى" : "Skip to content"}
-      </a>
-      <div className="ambient" aria-hidden="true">
-        <span className="orb-petrol" />
-        <span className="orb-olive" />
+    <>
+      <div className="lms-skin dark">
+        <a className="skip-link" href="#main-content">
+          {lang === "ar" ? "تخطَّ إلى المحتوى" : "Skip to content"}
+        </a>
+        <div className="ambient" aria-hidden="true">
+          <span className="orb-petrol" />
+          <span className="orb-olive" />
+        </div>
+        <LanguageSwitch />
+        <TubeNav role={role} isAuthed={isAuthed} onSignOut={onSignOut} />
+        <main id="main-content">{children}</main>
+        {!mainSiteFooter && <SkinFooter />}
       </div>
-      <LanguageSwitch />
-      <TubeNav role={role} isAuthed={isAuthed} onSignOut={onSignOut} />
-      <main id="main-content">{children}</main>
-      <SkinFooter />
-    </div>
+      {mainSiteFooter && (
+        <Suspense fallback={null}>
+          <MainSiteFooter />
+        </Suspense>
+      )}
+    </>
   );
 }
 
@@ -91,13 +109,25 @@ function TubeNav({ role, isAuthed, onSignOut }: Omit<Props, "children">) {
     { to: "/learning-management-system/verify", label: tr.verifyCertificate, icon: <IconVerify /> },
   ];
   if (isAuthed) {
-    links.push({ to: "/learning-management-system/student", label: tr.navMyCourses, icon: <IconStudent /> });
+    links.push({
+      to: "/learning-management-system/student",
+      label: tr.navMyCourses,
+      icon: <IconStudent />,
+    });
   }
   if (role === "lms_instructor" || role === "admin") {
-    links.push({ to: "/learning-management-system/instructor", label: tr.navInstructor, icon: <Presentation /> });
+    links.push({
+      to: "/learning-management-system/instructor",
+      label: tr.navInstructor,
+      icon: <Presentation />,
+    });
   }
   if (role === "admin") {
-    links.push({ to: "/learning-management-system/admin", label: tr.navAdmin, icon: <LayoutDashboard /> });
+    links.push({
+      to: "/learning-management-system/admin",
+      label: tr.navAdmin,
+      icon: <LayoutDashboard />,
+    });
   }
 
   /* The lamp spans the active item, measured from the pill's padding edge. */
@@ -181,11 +211,19 @@ function TubeNav({ role, isAuthed, onSignOut }: Omit<Props, "children">) {
           </button>
         ) : (
           <>
-            <Link to="/learning-management-system/login" className="tube-auth tube-login" onClick={close}>
+            <Link
+              to="/learning-management-system/login"
+              className="tube-auth tube-login"
+              onClick={close}
+            >
               <IconLogin />
               <span className="tube-auth-label">{tr.signIn}</span>
             </Link>
-            <Link to="/learning-management-system/signup" className="tube-auth tube-signup" onClick={close}>
+            <Link
+              to="/learning-management-system/signup"
+              className="tube-auth tube-signup"
+              onClick={close}
+            >
               <IconSignup />
               <span className="tube-auth-label">{tr.signUp}</span>
             </Link>
@@ -196,7 +234,9 @@ function TubeNav({ role, isAuthed, onSignOut }: Omit<Props, "children">) {
         className="radial-nav-toggle"
         type="button"
         aria-expanded={open}
-        aria-label={open ? (ar ? "إغلاق التنقل" : "Close navigation") : ar ? "فتح التنقل" : "Open navigation"}
+        aria-label={
+          open ? (ar ? "إغلاق التنقل" : "Close navigation") : ar ? "فتح التنقل" : "Open navigation"
+        }
         onClick={() => setOpen((v) => !v)}
       >
         <img className="radial-nav-tree" src="/cinematic/images/logo-tree-transparent.png" alt="" />
@@ -211,7 +251,16 @@ const SOCIALS = [
     href: "https://www.instagram.com/saae_sy?igsh=ZjE0eXN0Y3hlODNz",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <rect
+          x="3"
+          y="3"
+          width="18"
+          height="18"
+          rx="5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
         <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
         <circle cx="17.2" cy="6.8" r="1.25" fill="currentColor" />
       </svg>
@@ -279,10 +328,16 @@ function SkinFooter() {
             decoding="async"
           />
           <p className="footer-name">
-            {ar ? "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" : "Syrian Association for AI & Entrepreneurship"}
+            {ar
+              ? "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال"
+              : "Syrian Association for AI & Entrepreneurship"}
           </p>
           <p className="footer-location">
-            <a href="https://maps.app.goo.gl/bKMSHXkmkr5U3tZh6" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://maps.app.goo.gl/bKMSHXkmkr5U3tZh6"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               {ar
                 ? "دمشق، بجانب وزارة التعليم العالي والبحث العلمي"
                 : "Damascus, beside the Ministry of Higher Education and Scientific Research"}
@@ -320,7 +375,10 @@ function SkinFooter() {
               </a>
             </li>
           </ul>
-          <ul className="footer-social" aria-label={ar ? "الجمعية على منصات التواصل" : "SAAE on social platforms"}>
+          <ul
+            className="footer-social"
+            aria-label={ar ? "الجمعية على منصات التواصل" : "SAAE on social platforms"}
+          >
             {SOCIALS.map(({ label, href, icon }) => (
               <li key={href}>
                 <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
