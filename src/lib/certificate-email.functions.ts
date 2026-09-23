@@ -54,13 +54,33 @@ export const sendCertificateEmail = createServerFn({ method: 'POST' })
     // Load course name
     const { data: course } = await supabaseAdmin
       .from('lms_courses')
-      .select('title_ar, title_en')
+      .select('title_ar, title_en, certificate_pdf_enabled')
       .eq('id', data.courseId)
       .maybeSingle()
     const courseName =
       data.lang === 'ar'
         ? (course?.title_ar || course?.title_en || 'Course')
         : (course?.title_en || course?.title_ar || 'Course')
+
+    // With the course's certificate switch on, attach the PDF when the name and
+    // wording to print are known. Any problem making it leaves the email as it was.
+    let pdf: Uint8Array | undefined
+    if (course?.certificate_pdf_enabled) {
+      try {
+        const { ensureCertificatePdf, CERTIFICATE_BUCKET } = await import('./certificates/certificate-pdf.server')
+        const admin = supabaseAdmin as never as import('@supabase/supabase-js').SupabaseClient
+        const result = await ensureCertificatePdf(admin, cert.id)
+        if (result.status === 'ready') {
+          pdf = result.pdf
+          if (!pdf) {
+            const { data: file } = await admin.storage.from(CERTIFICATE_BUCKET).download(result.path)
+            if (file) pdf = new Uint8Array(await file.arrayBuffer())
+          }
+        }
+      } catch (e) {
+        console.error('certificate pdf for email failed', e instanceof Error ? e.message : e)
+      }
+    }
 
     try {
       const { sendCertificateIssuedEmail } = await import('./certificate-email.server')
@@ -70,6 +90,7 @@ export const sendCertificateEmail = createServerFn({ method: 'POST' })
         courseName,
         serial: cert.serial,
         lang: data.lang,
+        pdf,
       })
       await supabaseAdmin
         .from('lms_certificates')

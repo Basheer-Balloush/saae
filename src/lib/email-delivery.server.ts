@@ -18,7 +18,8 @@ export function assertEmailRecipientAllowed(to: string): void {
   }
   if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) throw new Error('EMAIL_CONFIGURATION_MISSING');
 }
-export type EmailPayload = { to: string; subject: string; html?: string; text?: string; idempotencyKey?: string };
+export type EmailAttachment = { filename: string; content: string /* base64 */ };
+export type EmailPayload = { to: string; subject: string; html?: string; text?: string; idempotencyKey?: string; attachments?: EmailAttachment[] };
 export async function sendTransactionalEmail(input: EmailPayload): Promise<void> {
   assertEmailRecipientAllowed(input.to);
   const response = await fetch('https://api.resend.com/emails', {
@@ -27,7 +28,7 @@ export async function sendTransactionalEmail(input: EmailPayload): Promise<void>
       'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       ...(input.idempotencyKey ? { 'Idempotency-Key': `saae-${new URL(process.env.SUPABASE_URL!).hostname}-${input.idempotencyKey}` } : {}),
     },
-    body: JSON.stringify({ from: process.env.EMAIL_FROM, to: [input.to], subject: input.subject, html: input.html, text: input.text }),
+    body: JSON.stringify({ from: process.env.EMAIL_FROM, to: [input.to], subject: input.subject, html: input.html, text: input.text, ...(input.attachments?.length ? { attachments: input.attachments } : {}) }),
     signal: AbortSignal.timeout(15_000),
   });
   if (!response.ok) {

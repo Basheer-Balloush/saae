@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
+import { useServerFn } from "@tanstack/react-start";
+import { previewCourseCertificate } from "@/lib/certificates/certificate-pdf.functions";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Trash2, Save, Send, Loader2, Image as ImageIcon, ClipboardList, ArrowRight, FileText } from "lucide-react";
 import { CoursePrice } from "@/components/lms/CoursePrice";
@@ -61,6 +63,7 @@ type Course = {
   location_ar: string | null; location_en: string | null;
   duration_hours: number | null;
   delivery_mode: "onsite" | "online";
+  certificate_pdf_enabled: boolean;
 };
 type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
 type LessonAttachment = { name: string; url: string; path?: string };
@@ -71,7 +74,7 @@ type Category = { id: string; name_ar: string; name_en: string | null };
 // saveCourse, plus section and lesson texts (those save on blur).
 const COURSE_DRAFT_FIELDS = [
   "slug", "title_ar", "title_en", "description_ar", "description_en", "cover_url", "level",
-  "price", "sale_price", "is_free", "enrollment_open", "enrollment_deadline", "max_students",
+  "price", "sale_price", "is_free", "enrollment_open", "enrollment_deadline", "max_students", "certificate_pdf_enabled",
   "start_date", "end_date", "schedule_days", "schedule_time_from", "schedule_time_to",
   "location_ar", "location_en", "duration_hours",
 ] as const satisfies readonly (keyof Course)[];
@@ -290,6 +293,7 @@ function CourseBuilder() {
       level: course.level as "beginner" | "intermediate" | "advanced",
       cover_url: course.cover_url,
       enrollment_open: course.enrollment_open, enrollment_deadline: course.enrollment_deadline, max_students: course.max_students,
+      certificate_pdf_enabled: course.certificate_pdf_enabled,
       start_date: course.start_date, end_date: course.end_date,
       schedule_days: course.schedule_days, schedule_time_from: course.schedule_time_from, schedule_time_to: course.schedule_time_to,
       location_ar: course.location_ar, location_en: course.location_en,
@@ -919,6 +923,14 @@ function CourseBuilder() {
         </p>
       </section>
 
+      <CertificateSettings
+        courseId={course.id}
+        lang={lang}
+        enabled={course.certificate_pdf_enabled}
+        datesReady={Boolean(course.start_date && course.end_date)}
+        onToggle={(v) => update({ certificate_pdf_enabled: v })}
+      />
+
       {/* Schedule & location */}
       <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
         <h2 className="font-bold text-foreground">{lang === "ar" ? "التاريخ والوقت والمكان" : "Schedule & location"}</h2>
@@ -1446,6 +1458,74 @@ function CourseBuilder() {
         />
       )}
     </div>
+  );
+}
+
+/* The PDF certificate for this course: preview it, then switch it on for students. */
+function CertificateSettings({
+  courseId, lang, enabled, datesReady, onToggle,
+}: { courseId: string; lang: "ar" | "en"; enabled: boolean; datesReady: boolean; onToggle: (v: boolean) => void }) {
+  const ar = lang === "ar";
+  const preview = useServerFn(previewCourseCertificate);
+  const [busy, setBusy] = useState<"male" | "female" | null>(null);
+
+  const download = async (gender: "male" | "female") => {
+    setBusy(gender);
+    try {
+      const res = await preview({ data: { courseId, gender } });
+      if (res.status === "course_dates_missing") {
+        toast.error(ar ? "أضف تاريخ بداية الدورة ونهايتها أولاً." : "Add the course start and end dates first.");
+        return;
+      }
+      const bytes = Uint8Array.from(atob(res.base64), (c) => c.charCodeAt(0));
+      const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+      window.open(url, "_blank", "noopener");
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (e) {
+      toast.error(toUserMessage(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
+      <h2 className="font-bold text-foreground">{ar ? "الشهادة (PDF)" : "Certificate (PDF)"}</h2>
+      <p className="text-sm text-muted-foreground">
+        {ar
+          ? "جرّب نموذج الشهادة لهذه الدورة، ثم فعّلها ليحمّل الطلاب شهاداتهم بصيغة PDF وتصلهم مرفقة بالبريد. ما دامت غير مفعّلة لا يرى الطلاب شيئاً جديداً."
+          : "Preview this course's certificate, then turn it on so students can download it as a PDF and get it attached to their email. While it is off, students see nothing new."}
+      </p>
+      {!datesReady && (
+        <p className="text-sm text-destructive">
+          {ar ? "الشهادة تحتاج تاريخ بداية الدورة ونهايتها." : "The certificate needs the course start and end dates."}
+        </p>
+      )}
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" variant="outline" disabled={!datesReady || busy !== null} onClick={() => download("male")}>
+          {busy === "male" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+          {ar ? "نموذج (طالب)" : "Preview (male)"}
+        </Button>
+        <Button type="button" variant="outline" disabled={!datesReady || busy !== null} onClick={() => download("female")}>
+          {busy === "female" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+          {ar ? "نموذج (طالبة)" : "Preview (female)"}
+        </Button>
+      </div>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <Label className="cursor-pointer" htmlFor="cert-pdf-enabled">{ar ? "تفعيل الشهادة للطلاب" : "Certificate on for students"}</Label>
+          <p className="text-xs text-muted-foreground">{ar ? "اضغط حفظ بالأعلى لتطبيق التغيير." : "Click Save above to apply."}</p>
+        </div>
+        <input
+          id="cert-pdf-enabled"
+          type="checkbox"
+          className="h-5 w-5"
+          checked={enabled}
+          disabled={!datesReady && !enabled}
+          onChange={(e) => onToggle(e.target.checked)}
+        />
+      </div>
+    </section>
   );
 }
 
