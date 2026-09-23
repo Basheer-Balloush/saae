@@ -134,6 +134,13 @@
   height: 258px;
 }
 
+/* Arabic mirrors the opening: the headline sits on the right, so the welcome
+   moves to the open corner on the left instead of crowding the headline. */
+html[dir="rtl"] .section-guide[data-guide-context="comic"][data-guide-band="0"] {
+  right: auto;
+  left: clamp(24px, 3vw, 56px);
+}
+
 .section-guide[data-guide-context="comic"][data-guide-band="2"] {
   right: clamp(88px, 13vw, 220px);
   bottom: clamp(52px, 8vh, 104px);
@@ -483,6 +490,11 @@ html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="4"] 
     width: 430px;
   }
 
+  html[dir="rtl"] .section-guide[data-guide-context="comic"][data-guide-band="0"] {
+    right: auto;
+    left: 18px;
+  }
+
   .section-guide[data-guide-context="comic"][data-guide-band="0"] .section-guide-copy {
     left: 122px;
     width: 298px;
@@ -491,16 +503,6 @@ html[lang="en"] .section-guide[data-guide-context="comic"][data-guide-band="4"] 
   .section-guide[data-guide-context="comic"][data-guide-band="0"] .community-comic-speaker {
     left: 0;
     width: 124px;
-  }
-}
-
-/* In Arabic the hero headline stands on the right, where the opening card
-   sits; on shorter screens the headline reaches down into it, so the card
-   takes the left side instead. */
-@media (max-height: 820px) {
-  html[dir="rtl"] .section-guide[data-guide-context="comic"][data-guide-band="0"] {
-    right: auto;
-    left: clamp(40px, 8vw, 200px);
   }
 }
 
