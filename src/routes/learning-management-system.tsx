@@ -23,17 +23,21 @@ function LmsLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   useSingleDeviceSession(user?.id ?? null);
 
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate({ to: "/learning-management-system" });
   };
 
-  /* Redesigned student pages get Moaz's chrome; admin and instructor
-     dashboards keep the navbar and footer below. */
+  /* Cinematic routes share the LMS ambient background, navigation, and footer.
+     Other LMS pages keep the standard navbar and footer below. */
   if (isSkinnedLmsPath(pathname)) {
     return (
-      <LmsSkinShell role={role} isAuthed={!!user} onSignOut={handleSignOut}>
+      <LmsSkinShell
+        role={role}
+        isAuthed={!!user}
+        onSignOut={handleSignOut}
+        mainSiteFooter={pathname.replace(/\/+$/, "") === "/learning-management-system/instructor"}
+      >
         <Outlet />
       </LmsSkinShell>
     );

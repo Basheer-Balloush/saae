@@ -1,6 +1,5 @@
-/* The student-facing LMS pages drawn in Moaz's "LMS React 2" design. Their
-   stylesheets load only on these routes (through each route's head), so the
-   admin and instructor dashboards keep their own look. */
+/* Routes using the cinematic LMS shell. Their stylesheets load through each
+   route's head; other LMS pages keep the standard navbar and footer. */
 
 export const LMS_SKIN_LINKS = [
   { rel: "stylesheet", href: "/lms/css/navigation.css" },
@@ -10,6 +9,7 @@ export const LMS_SKIN_LINKS = [
 
 /* Pages move here one at a time as they are redesigned. */
 const SKINNED_PATHS = [
+  /^\/learning-management-system\/instructor$/,
   /^\/learning-management-system\/student\/quiz\/[^/]+$/,
   /^\/learning-management-system$/,
   /^\/learning-management-system\/(catalog|verify)$/,
@@ -28,7 +28,16 @@ export const isSkinnedLmsPath = (pathname: string) => {
 
 /* The eight category gradients in lms.css (cat-* classes). Our category
    slugs are free text, so each category takes one by its display order. */
-const TONES = ["ai", "programming", "business", "design", "health", "education", "engineering", "research"];
+const TONES = [
+  "ai",
+  "programming",
+  "business",
+  "design",
+  "health",
+  "education",
+  "engineering",
+  "research",
+];
 
 /* A category's tone (its colour and icon) comes from its name, English or
    Arabic. A name with no match falls back to its place in the list. Order
