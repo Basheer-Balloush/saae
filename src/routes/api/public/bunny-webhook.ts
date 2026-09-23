@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { timingSafeEqual } from 'crypto'
+import { lessonStatusFromBunnyWebhook } from '@/lib/bunny-webhook-status'
 
 /**
  * Phase 6 — Bunny Stream webhook.
@@ -37,16 +38,12 @@ export const Route = createFileRoute('/api/public/bunny-webhook')({
         const guid = body.VideoGuid?.trim()
         if (!guid) return new Response('missing_guid', { status: 400 })
 
-        // Bunny status codes: 4/8 = playable; 5/6 = failed; anything else = processing.
-        const status =
-          body.Status === 4 || body.Status === 8
-            ? 'ready'
-            : body.Status === 5 || body.Status === 6
-              ? 'failed'
-              : 'processing'
+        const status = lessonStatusFromBunnyWebhook(body.Status)
+        // Captions / generated titles / unknown codes: nothing to change.
+        if (!status) return new Response('ok')
 
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-        const { error } = await supabaseAdmin
+        let update = supabaseAdmin
           .from('lms_lessons')
           .update({
             video_status: status,
@@ -55,6 +52,10 @@ export const Route = createFileRoute('/api/public/bunny-webhook')({
           })
           .eq('video_provider', 'bunny')
           .eq('video_uid', guid)
+        // Events can arrive late or out of order; a playable video never goes
+        // back to processing.
+        if (status === 'processing') update = update.neq('video_status', 'ready')
+        const { error } = await update
         if (error) {
           console.error('[bunny-webhook] update failed', error.message)
           return new Response('update_failed', { status: 500 })

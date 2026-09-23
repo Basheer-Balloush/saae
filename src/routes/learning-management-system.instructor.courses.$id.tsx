@@ -501,7 +501,8 @@ function CourseBuilder() {
         const upload = new tus.Upload(file, {
           endpoint: creds.tusEndpoint,
           retryDelays: [0, 3000, 5000, 10000, 20000],
-          parallelUploads: 4,
+          // Single stream: parallelUploads needs the TUS concatenation
+          // extension, which Bunny's endpoint does not document.
           headers: {
             AuthorizationSignature: creds.authorizationSignature,
             AuthorizationExpire: String(creds.authorizationExpire),
