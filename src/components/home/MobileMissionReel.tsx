@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { MISSION_COPY, MISSION_STEPS, type Locale } from "./mobile-home-content";
 
 /* The desktop homepage's "how we work" reel (home.html .mission-reel, driven
@@ -65,6 +65,9 @@ export function MobileMissionReel({
     let frame = 0;
     let isArrived: boolean | null = null;
     let index = -1;
+    let shown = -1;
+    let placed = "";
+    let shownLocal = -1;
 
     /* The outgoing section pins with its bottom on the screen's bottom edge,
        the runway after it is the hand-off's length, and the reel is pulled up
@@ -120,6 +123,13 @@ export function MobileMissionReel({
       const view = viewHeight();
       const rect = reel.getBoundingClientRect();
       const into = -rect.top;
+      // Before the reel, through it, after it (see .mh-is-pinned in the CSS).
+      const place = rect.top > 0 ? "before" : rect.bottom < view ? "after" : "pinned";
+      if (!reduced && place !== placed) {
+        placed = place;
+        stage.classList.toggle("mh-is-pinned", place === "pinned");
+        stage.classList.toggle("mh-is-after", place === "after");
+      }
       const handoff = reduced ? 0 : view * HANDOFF;
 
       // The hand-off: out to the right, in from the left, as on the desktop.
@@ -145,26 +155,33 @@ export function MobileMissionReel({
       if (index < 0 || Math.abs(raw - index) > 1) index = raw;
       else if (raw > index && scaled - raw > margin) index = raw;
       else if (raw < index && index - scaled > margin) index = raw;
-      const wordPos = clamp(scaled, 0.5, steps - 0.5);
-      wordRefs.current.forEach((word, i) => {
-        if (!word) return;
-        const offset = i + 0.5 - wordPos;
-        const strength = reduced
-          ? i === 0
-            ? 1
-            : 0
-          : clamp((0.78 - Math.abs(offset)) / 0.56, 0, 1);
-        word.style.setProperty("--word-t", strength.toFixed(3));
-        // Whole pixels: sub-pixel steps re-render the giant word as it settles.
-        word.style.setProperty("--word-y", String(Math.round(clamp(offset, -1, 1) * 150)));
-      });
-      itemRefs.current.forEach((item, i) => {
-        if (!item) return;
-        item.classList.toggle("is-current", reduced || i === index);
-        item.classList.toggle("is-past", !reduced && i < index);
-        if (i === index)
-          item.style.setProperty("--mission-local", clamp(scaled - index, 0, 1).toFixed(4));
-      });
+      /* Nothing here moves with the scroll frame by frame. On an iPhone the
+         page scrolls on its own thread and anything written from scroll
+         events lands a frame or more behind it, so the giant word (resized
+         and moved every frame, and redrawn from scratch each time because
+         it is gradient-filled type) lagged and jittered against the pinned
+         stage. Each step now switches as a whole and CSS transitions carry
+         the word and the copy, which the phone runs by itself. */
+      if (index !== shown) {
+        shown = index;
+        wordRefs.current.forEach((word, i) => {
+          if (!word) return;
+          word.classList.toggle("is-current", reduced ? i === 0 : i === index);
+          word.classList.toggle("is-past", !reduced && i < index);
+        });
+        itemRefs.current.forEach((item, i) => {
+          if (!item) return;
+          item.classList.toggle("is-current", reduced || i === index);
+          item.classList.toggle("is-past", !reduced && i < index);
+        });
+      }
+      // The rule beside the copy: how far through the step. A stretch, not a
+      // height, so it costs no layout; and only written when it has moved.
+      const local = Math.round(clamp(scaled - index, 0, 1) * 200) / 200;
+      if (local !== shownLocal) {
+        shownLocal = local;
+        itemRefs.current[index]?.style.setProperty("--mission-local", String(local));
+      }
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(paint);
@@ -191,7 +208,7 @@ export function MobileMissionReel({
         out.classList.remove("mh-is-left");
         out.style.top = "";
       }
-      stage.classList.remove("mh-is-arrived");
+      stage.classList.remove("mh-is-arrived", "mh-is-pinned", "mh-is-after");
       stage.style.blockSize = "";
       if (section) section.style.marginBlockStart = "";
       reel.style.blockSize = "";
@@ -219,7 +236,7 @@ export function MobileMissionReel({
                 }}
                 data-step={String(i + 1).padStart(2, "0")}
                 data-caption={CAPTIONS[lang][i]}
-                style={{ "--word-t": i === 0 ? 1 : 0 } as CSSProperties}
+                className={i === 0 ? "is-current" : undefined}
               >
                 {word}
               </span>

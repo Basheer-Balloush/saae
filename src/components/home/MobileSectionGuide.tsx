@@ -26,8 +26,9 @@ function useActiveSection(): Section | null {
         if (!el) continue;
         const rect = el.getBoundingClientRect();
         if (rect.top > line || rect.bottom < line) continue;
-        // The reel slides in over the pinned partners; it takes over halfway.
-        if (id === "mission" && -rect.top < window.innerHeight * 0.55) continue;
+        // The reel slides in over the pinned partners; it takes over as it
+        // arrives (MobileMissionReel's ARRIVE of its HANDOFF, about 0.18).
+        if (id === "mission" && -rect.top < window.innerHeight * 0.2) continue;
         next = id;
       }
       // Nothing to say over the footer or the hero.

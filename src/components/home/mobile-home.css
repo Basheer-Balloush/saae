@@ -806,8 +806,8 @@ html:has(.mobile-home .mh-hero-loader) {
 /* ---- How we work --------------------------------------------------------
    The desktop reel (home.css .mission-reel) stacked for a phone: a sticky
    stage with the giant word rolling through its top half and the step's copy
-   handing off below it (MobileMissionReel.tsx writes --word-t, --word-y and
-   --mission-local from the scroll). */
+   handing off below it (MobileMissionReel.tsx switches the step's classes
+   and writes --mission-local from the scroll). */
 /* The hand-off into it (MobileMissionReel.tsx sets the pixel sizes): the news
    pins and slides out while the reel's stage slides in over it. */
 .mobile-home .mh-handoff {
@@ -859,9 +859,23 @@ html:has(.mobile-home .mh-hero-loader) {
   position: relative;
   block-size: 470svh;
 }
+.mobile-home .mh-mission-sticky.mh-is-pinned {
+  position: fixed;
+}
+.mobile-home .mh-mission-sticky.mh-is-after {
+  inset-block: auto 0;
+}
+/* Pinned by MobileMissionReel.tsx, not by position: sticky. Safari jittered
+   the sticky stage a few pixels up and down on every scroll frame; a fixed
+   element is held by the compositor and does not. The stage sits at the top
+   of the reel before it, is fixed to the screen through it, and sits at the
+   bottom of the reel after it; only those two crossings are written from
+   the scroll. */
 .mobile-home .mh-mission-sticky {
-  position: sticky;
+  position: absolute;
   inset-block-start: 0;
+  inset-inline: 0;
+  box-sizing: border-box;
   display: grid;
   grid-template-rows: 40% 1fr;
   block-size: 100svh;
@@ -894,9 +908,25 @@ html:has(.mobile-home .mh-hero-loader) {
   color: transparent;
   -webkit-text-fill-color: transparent;
   -webkit-text-stroke: 1.5px rgba(4, 128, 144, 0.4);
-  opacity: calc(var(--word-t, 0) * 0.66);
-  transform: translate(0, calc(var(--word-y, 0) * 1px)) scale(calc(0.93 + var(--word-t, 0) * 0.07));
+  /* The next word waits below, the current one holds, a past one leaves
+     upward: a transition per step change, run by the compositor. */
+  opacity: 0;
+  transform: translate3d(0, 48%, 0);
+  transition:
+    opacity 420ms var(--mh-ease),
+    transform 820ms var(--mh-ease);
+  will-change: transform, opacity;
   transform-origin: left center;
+}
+.mobile-home .mh-mission-words span.is-current {
+  opacity: 0.66;
+  transform: none;
+  transition:
+    opacity 520ms var(--mh-ease) 120ms,
+    transform 820ms var(--mh-ease);
+}
+.mobile-home .mh-mission-words span.is-past {
+  transform: translate3d(0, -48%, 0);
 }
 .mobile-home[dir="rtl"] .mh-mission-words span {
   font-size: clamp(5.4rem, 30vw, 8.4rem);
@@ -984,10 +1014,14 @@ html:has(.mobile-home .mh-hero-loader) {
   inset-inline-start: -2px;
   inset-block-start: 0;
   inline-size: 2px;
-  block-size: calc(var(--mission-local, 0) * 100%);
+  block-size: 100%;
   background: var(--mh-turquoise);
   opacity: 0;
-  transition: opacity 460ms var(--mh-ease);
+  transform: scaleY(var(--mission-local, 0));
+  transform-origin: top;
+  transition:
+    opacity 460ms var(--mh-ease),
+    transform 120ms linear;
 }
 .mobile-home .mh-mission-item.is-current::before {
   opacity: 1;
