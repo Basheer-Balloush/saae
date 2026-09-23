@@ -85,7 +85,7 @@ function supportsWebGl2(): boolean {
 /* The scene script, loaded once per visit: returning to the homepage calls
    window.saaeHeroBoot() for the new canvas rather than downloading the script
    again under a fresh URL. */
-const HERO_SCRIPT_SRC = "/cinematic/js/hero-instrument.js";
+const HERO_SCRIPT_SRC = "/cinematic/js/hero-instrument.js?phone";
 type HeroWindow = Window & { saaeHeroBoot?: () => Promise<HeroInstance | null> };
 
 /* Everything the scene needs before it can form without stalling, fetched up
@@ -380,9 +380,13 @@ function useTreeJourney(
           .catch(() => undefined);
         return;
       }
+      // The "?phone" module does not boot itself: boot it once it has run.
       script = document.createElement("script");
       script.type = "module";
       script.src = HERO_SCRIPT_SRC;
+      script.onload = () => {
+        if (!disposed) (window as HeroWindow).saaeHeroBoot?.().catch(() => undefined);
+      };
       document.head.appendChild(script);
     };
     preloadHeroAssets((share) => {
