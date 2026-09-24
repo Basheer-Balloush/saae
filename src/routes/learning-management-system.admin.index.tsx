@@ -386,7 +386,7 @@ function AdminHome() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-background">
+    <div className="min-h-screen">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
         <header className="flex flex-wrap items-end justify-between gap-4">

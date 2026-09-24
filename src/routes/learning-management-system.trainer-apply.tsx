@@ -443,7 +443,7 @@ function TrainerApplyPage() {
             <div className="apply-bar">
               <button type="submit" className="auth-submit" disabled={submitting}>
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                {ar ? "إرسال الطلب" : "Submit application"}
+                <span>{ar ? "إرسال الطلب" : "Submit application"}</span>
               </button>
             </div>
           </form>

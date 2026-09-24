@@ -44,7 +44,7 @@ describe("quiz styling scope", () => {
     expect(isSkinnedLmsPath("/learning-management-system/student/quiz/course-123")).toBe(true);
     expect(isSkinnedLmsPath("/learning-management-system/student/player/course-123")).toBe(false);
   });
-  it("draws every instructor page in the workspace style, but not the admin", () => {
+  it("draws every instructor and LMS admin page in the LMS style", () => {
     for (const path of [
       "/learning-management-system/instructor",
       "/learning-management-system/instructor/",
@@ -56,8 +56,9 @@ describe("quiz styling scope", () => {
       expect(isSkinnedLmsPath(path)).toBe(true);
       expect(isInstructorLmsPath(path)).toBe(true);
     }
-    expect(isSkinnedLmsPath("/learning-management-system/admin")).toBe(false);
-    expect(isSkinnedLmsPath("/learning-management-system/admin/users")).toBe(false);
+    expect(isSkinnedLmsPath("/learning-management-system/admin")).toBe(true);
+    expect(isSkinnedLmsPath("/learning-management-system/admin/users")).toBe(true);
+    expect(isInstructorLmsPath("/learning-management-system/admin")).toBe(false);
     expect(isInstructorLmsPath("/learning-management-system/instructors/abc")).toBe(false);
   });
 });

@@ -78,7 +78,6 @@ function CatalogError({ reset }: { reset: () => void }) {
   return (
     <SubHero
       id="catalog-error-title"
-      eyebrow={ar ? "الكتالوج" : "Catalog"}
       titleSpans={[ar ? "تعذّر تحميل الدورات" : "Couldn't load courses"]}
       lede={ar ? "حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى." : "A connection error occurred. Please try again."}
       copyChildren={
@@ -91,7 +90,9 @@ function CatalogError({ reset }: { reset: () => void }) {
               reset();
             }}
           >
-            {ar ? "إعادة المحاولة" : "Retry"}
+            <span className="btn-content">
+              <span>{ar ? "إعادة المحاولة" : "Retry"}</span>
+            </span>
           </button>
         </p>
       }
@@ -180,7 +181,6 @@ function Catalog() {
     <>
       <SubHero
         id="catalog-title"
-        eyebrow={ar ? "الكتالوج" : "Catalog"}
         titleSpans={ar ? ["كل", "الدورات"] : ["Every", "course"]}
         lede={
           ar
@@ -202,7 +202,11 @@ function Catalog() {
                 setQ(e.target.value);
               }}
             />
-            <button type="submit">{ar ? "ابحث" : "Search"}</button>
+            <button type="submit">
+              <span className="btn-content">
+                <span>{ar ? "ابحث" : "Search"}</span>
+              </span>
+            </button>
           </form>
         }
       />
@@ -265,7 +269,9 @@ function Catalog() {
                 disabled={search.page <= 1}
                 onClick={() => goToPage(search.page - 1)}
               >
-                {ar ? "→ السابق" : "← Previous"}
+                <span className="btn-content">
+                  <span>{ar ? "السابق" : "Previous"}</span>
+                </span>
               </button>
               <span>{ar ? `صفحة ${search.page} من ${totalPages}` : `Page ${search.page} of ${totalPages}`}</span>
               <button
@@ -274,7 +280,9 @@ function Catalog() {
                 disabled={search.page >= totalPages}
                 onClick={() => goToPage(search.page + 1)}
               >
-                {ar ? "التالي ←" : "Next →"}
+                <span className="btn-content">
+                  <span>{ar ? "التالي" : "Next"}</span>
+                </span>
               </button>
             </nav>
           )}

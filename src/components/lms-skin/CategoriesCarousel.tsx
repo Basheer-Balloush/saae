@@ -173,7 +173,9 @@ export function CategoriesCarousel({
                 aria-label={`${current.name} — ${countLabel(current)}`}
                 onClick={() => onBrowse(current.id)}
               >
-                <span>{ar ? "تصفح الدورات" : "Browse courses"}</span> <span aria-hidden="true">↓</span>
+                <span className="btn-content">
+                  <span>{ar ? "تصفح الدورات" : "Browse courses"}</span>
+                </span>
               </button>
             </div>
             <ul className="cats-dots" aria-label={ar ? "اختر الفئة" : "Choose category"}>

@@ -4,7 +4,12 @@ import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 
+import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+
 export const Route = createFileRoute("/learning-management-system/admin")({
+  head: () => ({
+    links: LMS_SKIN_LINKS,
+  }),
   component: AdminLayout,
 });
 
@@ -23,5 +28,9 @@ function AdminLayout() {
   if (loading || !user || role !== "admin") {
     return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
   }
-  return <Outlet />;
+  return (
+    <div className="lms-dashboard-wrap lms-admin-shell">
+      <Outlet />
+    </div>
+  );
 }

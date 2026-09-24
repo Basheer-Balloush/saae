@@ -79,7 +79,7 @@ function LmsLogin() {
         </div>
         <button type="submit" className="auth-submit" disabled={submitting}>
           {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-          {tr.signIn}
+          <span>{tr.signIn}</span>
         </button>
       </form>
       <p className="auth-alt">

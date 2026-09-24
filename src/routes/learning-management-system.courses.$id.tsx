@@ -170,7 +170,9 @@ function CourseNotFound() {
       copyChildren={
         <p style={{ marginTop: 28 }}>
           <Link to="/learning-management-system/catalog" className="action action-primary">
-            {ar ? "تصفّح الدورات" : "Browse courses"}
+            <span className="btn-content">
+              <span>{ar ? "تصفّح الدورات" : "Browse courses"}</span>
+            </span>
           </Link>
         </p>
       }
@@ -196,7 +198,9 @@ function CourseLoadError({ reset }: { reset: () => void }) {
             className="action action-primary"
             onClick={() => { router.invalidate(); reset(); }}
           >
-            {ar ? "إعادة المحاولة" : "Retry"}
+            <span className="btn-content">
+              <span>{ar ? "إعادة المحاولة" : "Retry"}</span>
+            </span>
           </button>
         </p>
       }
@@ -322,7 +326,9 @@ function CourseDetails() {
     if (teaching.status === "loading") {
       return (
         <button type="button" className="action action-primary" disabled>
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="btn-content">
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </span>
         </button>
       );
     }
@@ -331,7 +337,9 @@ function CourseDetails() {
         <>
           <p className="enroll-hint">{ar ? "تعذّر التحقق من صلاحية التسجيل." : "Could not check enrollment eligibility."}</p>
           <button type="button" className="action action-secondary" onClick={teaching.retry}>
-            {ar ? "إعادة المحاولة" : "Retry"}
+            <span className="btn-content">
+              <span>{ar ? "إعادة المحاولة" : "Retry"}</span>
+            </span>
           </button>
         </>
       );
@@ -341,7 +349,9 @@ function CourseDetails() {
         <>
           <p className="enroll-hint">{ar ? "أنت أحد مدرّسي هذه الدورة، لذلك لا يمكنك التسجيل فيها كطالب." : "You teach this course. You cannot enroll in it as a student."}</p>
           <Link to="/learning-management-system/instructor/courses/$id" params={{ id: course.id }} className="action action-primary">
-            {ar ? "إدارة الدورة" : "Manage course"}
+            <span className="btn-content">
+              <span>{ar ? "إدارة الدورة" : "Manage course"}</span>
+            </span>
           </Link>
         </>
       );
@@ -361,7 +371,9 @@ function CourseDetails() {
                 search={{ quiz: undefined, review: undefined }}
                 className="action action-secondary"
               >
-                {tr.quizzes}
+                <span className="btn-content">
+                  <span>{tr.quizzes}</span>
+                </span>
               </Link>
             )}
           </>
@@ -369,7 +381,9 @@ function CourseDetails() {
       }
       return (
         <Link to="/learning-management-system/student/player/$courseId" params={{ courseId: course.id }} className="action action-primary">
-          {tr.goToCourse}
+          <span className="btn-content">
+            <span>{tr.goToCourse}</span>
+          </span>
         </Link>
       );
     }
@@ -402,8 +416,10 @@ function CourseDetails() {
     }
     const enrollButton = (
       <button type="button" className="action action-primary" onClick={onFreeEnroll} disabled={busy || authLoading}>
-        {(busy || authLoading) && <Loader2 className="h-4 w-4 animate-spin" />}
-        {tr.enroll}
+        <span className="btn-content">
+          {(busy || authLoading) && <Loader2 className="h-4 w-4 animate-spin" />}
+          <span>{tr.enroll}</span>
+        </span>
       </button>
     );
     if (course.is_free) return enrollButton;
@@ -424,11 +440,15 @@ function CourseDetails() {
               rows={3}
             />
             <button type="button" className="action action-primary" onClick={onManualSubmit} disabled={busy || authLoading}>
-              {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-              {ar ? "إرسال" : "Submit"}
+              <span className="btn-content">
+                {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+                <span>{ar ? "إرسال" : "Submit"}</span>
+              </span>
             </button>
             <button type="button" className="action action-secondary" onClick={() => setManualOpen(false)}>
-              {ar ? "إلغاء" : "Cancel"}
+              <span className="btn-content">
+                <span>{ar ? "إلغاء" : "Cancel"}</span>
+              </span>
             </button>
           </div>
         )}

@@ -168,7 +168,11 @@ function LmsHome() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
-              <button type="submit">{ar ? "ابحث" : "Search"}</button>
+              <button type="submit">
+                <span className="btn-content">
+                  <span>{ar ? "ابحث" : "Search"}</span>
+                </span>
+              </button>
             </form>
             <p className="lms-popular">
               <span>{ar ? "الرائج:" : "Popular:"}</span>
@@ -311,8 +315,9 @@ function LmsHome() {
           </p>
           <p className="courses-more">
             <Link className="action action-secondary" to="/learning-management-system/catalog">
-              <span>{ar ? "عرض الكتالوج الكامل" : "View the full catalog"}</span>{" "}
-              <span aria-hidden="true">{ar ? "←" : "→"}</span>
+              <span className="btn-content">
+                <span>{ar ? "عرض الكتالوج الكامل" : "View the full catalog"}</span>
+              </span>
             </Link>
           </p>
         </div>
@@ -350,12 +355,14 @@ function LmsHome() {
                 scrollToCourses();
               }}
             >
-              <span>{ar ? "تصفح الدورات" : "Browse courses"}</span>{" "}
-              <span aria-hidden="true">↓</span>
+              <span className="btn-content">
+                <span>{ar ? "تصفح الدورات" : "Browse courses"}</span>
+              </span>
             </a>
             <Link className="action action-secondary" to="/learning-management-system/signup">
-              <span>{ar ? "أنشئ حساباً" : "Create account"}</span>{" "}
-              <span aria-hidden="true">{ar ? "←" : "→"}</span>
+              <span className="btn-content">
+                <span>{ar ? "أنشئ حساباً" : "Create account"}</span>
+              </span>
             </Link>
           </div>
         </Reveal>

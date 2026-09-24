@@ -5,6 +5,7 @@ import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
 import type { LmsRole } from "@/hooks/useLmsAuth";
+import { Footer } from "@/components/site/Footer";
 import {
   IconCourses,
   IconGlobe,
@@ -25,18 +26,8 @@ type Props = {
   children: ReactNode;
 };
 
-const MainSiteFooter = lazy(() =>
-  import("./LmsMainFooter").then((module) => ({ default: module.LmsMainFooter })),
-);
-
-/** Moaz's LMS chrome: ambient ground, language switch, tubelight menu and footer. */
-export function LmsSkinShell({
-  role,
-  isAuthed,
-  onSignOut,
-  mainSiteFooter = false,
-  children,
-}: Props) {
+/** LMS chrome with homepage ambient ground, language switch, tubelight menu, and official homepage footer. */
+export function LmsSkinShell({ role, isAuthed, onSignOut, children }: Props) {
   const { lang } = useLang();
   /* "dark" puts the shared components (buttons, fields, reviews) on the
      site's dark palette; lms-db.css tints its tokens to the LMS petrol. */
@@ -53,13 +44,8 @@ export function LmsSkinShell({
         <LanguageSwitch />
         <TubeNav role={role} isAuthed={isAuthed} onSignOut={onSignOut} />
         <main id="main-content">{children}</main>
-        {!mainSiteFooter && <SkinFooter />}
       </div>
-      {mainSiteFooter && (
-        <Suspense fallback={null}>
-          <MainSiteFooter />
-        </Suspense>
-      )}
+      <Footer />
     </>
   );
 }
@@ -245,159 +231,3 @@ function TubeNav({ role, isAuthed, onSignOut }: Omit<Props, "children">) {
   );
 }
 
-const SOCIALS = [
-  {
-    label: "Instagram",
-    href: "https://www.instagram.com/saae_sy?igsh=ZjE0eXN0Y3hlODNz",
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <rect
-          x="3"
-          y="3"
-          width="18"
-          height="18"
-          rx="5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <circle cx="17.2" cy="6.8" r="1.25" fill="currentColor" />
-      </svg>
-    ),
-  },
-  {
-    label: "Facebook",
-    href: "https://www.facebook.com/share/18SQ11hcct/",
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          fill="currentColor"
-          d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5h1.65V3.6c-.3-.04-1.3-.13-2.46-.13-2.44 0-4.11 1.49-4.11 4.22V9.9H7.4V13h2.73v8z"
-        />
-      </svg>
-    ),
-  },
-  {
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/company/syrian-association-for-ai-entrepreneurship/",
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          fill="currentColor"
-          d="M6.5 9H3.6v12h2.9zM5.05 3.6a1.68 1.68 0 1 0 0 3.36 1.68 1.68 0 0 0 0-3.36M20.4 21h-2.9v-5.83c0-1.39-.03-3.18-1.94-3.18-1.94 0-2.24 1.51-2.24 3.08V21h-2.9V9h2.78v1.64h.04a3.05 3.05 0 0 1 2.74-1.5c2.94 0 3.48 1.93 3.48 4.44z"
-        />
-      </svg>
-    ),
-  },
-];
-
-function SkinFooter() {
-  const { lang } = useLang();
-  const ar = lang === "ar";
-  const tr = lmsT[lang];
-  const explore = [
-    { to: "/about", label: ar ? "عن الجمعية" : "About SAAE" },
-    { to: "/partners", label: ar ? "الشركاء" : "Partners" },
-    { to: "/initiative", label: ar ? "المبادرة" : "Initiative" },
-    { to: "/contact", label: ar ? "تواصل معنا" : "Contact" },
-    { to: "/learning-management-system/internships", label: lmsInternshipsT[lang].navInternships },
-    { to: "/learning-management-system/verify", label: tr.verifyCertificate },
-    { to: "/learning-management-system/student", label: tr.navMyCourses },
-    { to: "/learning-management-system/profile", label: tr.navProfile },
-  ];
-
-  return (
-    <footer className="site-footer">
-      <div className="page-shell footer-main">
-        <div className="footer-identity">
-          <img
-            className="footer-logo footer-logo-en"
-            src="/cinematic/images/saae-logo-en.png"
-            alt="Syrian Association for AI & Entrepreneurship"
-            width="1090"
-            height="340"
-            decoding="async"
-          />
-          <img
-            className="footer-logo footer-logo-ar"
-            src="/cinematic/images/saae-logo-ar.png"
-            alt="الجمعية السورية للذكاء الاصطناعي وريادة الأعمال"
-            width="960"
-            height="340"
-            decoding="async"
-          />
-          <p className="footer-name">
-            {ar
-              ? "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال"
-              : "Syrian Association for AI & Entrepreneurship"}
-          </p>
-          <p className="footer-location">
-            <a
-              href="https://maps.app.goo.gl/bKMSHXkmkr5U3tZh6"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {ar
-                ? "دمشق، بجانب وزارة التعليم العالي والبحث العلمي"
-                : "Damascus, beside the Ministry of Higher Education and Scientific Research"}
-            </a>
-          </p>
-          <p className="footer-claim">
-            {ar
-              ? "أول منظمة رسمية في سورية مكرّسة للذكاء الاصطناعي."
-              : "Syria’s first official organisation dedicated to artificial intelligence."}
-          </p>
-        </div>
-
-        <nav className="footer-col" aria-labelledby="lms-footer-explore">
-          <h2 className="footer-col-title" id="lms-footer-explore">
-            {ar ? "استكشف" : "Explore"}
-          </h2>
-          <ul>
-            {explore.map((l) => (
-              <li key={l.to}>
-                <Link to={l.to}>{l.label}</Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div className="footer-col footer-reach">
-          <h2 className="footer-col-title">{ar ? "تواصل مع الجمعية" : "Reach SAAE"}</h2>
-          <ul>
-            <li>
-              <a href="mailto:info@aisyria.org">info@aisyria.org</a>
-            </li>
-            <li>
-              <a href="tel:+963930763547" dir="ltr">
-                +963 930 763 547
-              </a>
-            </li>
-          </ul>
-          <ul
-            className="footer-social"
-            aria-label={ar ? "الجمعية على منصات التواصل" : "SAAE on social platforms"}
-          >
-            {SOCIALS.map(({ label, href, icon }) => (
-              <li key={href}>
-                <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
-                  {icon}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      <div className="page-shell footer-bottom">
-        <span>
-          {ar
-            ? "ستُنشر المعلومات الرسمية والبرامج والتسجيل على هذا الموقع."
-            : "Official information, programmes and registration will be published on this website."}
-        </span>
-        <span>© {new Date().getFullYear()} SAAE</span>
-      </div>
-    </footer>
-  );
-}

@@ -19,6 +19,7 @@ const SKINNED_PATHS = [
   /^\/learning-management-system\/student(\/requests)?$/,
   /^\/learning-management-system\/(profile|trainer-apply)$/,
   /^\/learning-management-system\/(certificate|instructors)\/[^/]+$/,
+  /^\/learning-management-system\/admin(\/.*)?$/,
 ];
 
 export const isSkinnedLmsPath = (pathname: string) => {

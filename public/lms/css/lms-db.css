@@ -302,8 +302,7 @@ html:not([dir="rtl"]) .lms-skin .radial-nav-toggle { inset: 36px auto auto 22px;
   }
   .lms-skin .radial-nav-item, .lms-skin .tube-auth { padding: 12px 14px; }
   .lms-skin .radial-nav-item svg, .lms-skin .tube-auth svg { width: 19px; height: 19px; }
-  .lms-skin .radial-nav-item:not([aria-current="page"]):is(:hover, :focus-visible) .radial-nav-label,
-  .lms-skin .tube-auth:is(:hover, :focus-visible) .tube-auth-label {
+  .lms-skin .radial-nav-item:not([aria-current="page"]):is(:hover, :focus-visible) .radial-nav-label, .lms-skin .tube-auth:is(:hover, :focus-visible) .tube-auth-label {
     width: auto; height: auto; overflow: visible; clip-path: none;
     top: calc(100% + 10px); left: 50%; z-index: 5; transform: translateX(-50%);
     padding: 7px 11px; border: 1px solid rgba(177, 238, 237, .26); border-radius: 9px;
@@ -386,4 +385,1224 @@ html:not([dir="rtl"]) .lms-skin .radial-nav-toggle { inset: 36px auto auto 22px;
   .lms-skin .radial-nav-items {
     width: min(calc(100vw - 560px), 1400px); min-width: fit-content; justify-content: space-evenly;
   }
+}
+
+/* =============================================================================
+   LMS MotionButtons — Unified Across the Entire LMS Platform
+   Matches the official SAAE MotionButton design & signature expanding hover animation
+   ========================================================================== */
+
+/* -----------------------------------------------------------------------------
+   Footer & Native MotionButton Isolation in LMS
+   Preserves the official Homepage Motion Footer, Abu Al-Joud 3D character,
+   and any native MotionButton instances completely untampered.
+   -------------------------------------------------------------------------- */
+.lms-skin :is(.hmf-reveal, .hmf-footer, #site-footer, .site-footer, [data-motion-footer]) :is(button, a, .hmf-assistant-character, [data-slot="motion-button"])::before, .lms-skin :is(.hmf-reveal, .hmf-footer, #site-footer, .site-footer, [data-motion-footer]) :is(button, a, .hmf-assistant-character, [data-slot="motion-button"])::after, .lms-skin :is(.hmf-reveal, .hmf-footer, #site-footer, .site-footer, [data-motion-footer]) [data-slot="motion-button"]::before, .lms-skin :is(.hmf-reveal, .hmf-footer, #site-footer, .site-footer, [data-motion-footer]) [data-slot="motion-button"]::after {
+  content: none !important;
+  display: none !important;
+}
+
+.lms-skin .hmf-assistant-character {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.lms-skin .hmf-footer-cta {
+  background: var(--motion-button-surface, #fefdfc) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 9999px !important;
+}
+
+/* Hide any hardcoded arrows in text so the signature MotionButton arrow takes over cleanly */
+.lms-skin :is(button, a, .action, .quiz-button, .auth-submit):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not([data-motion-footer] *):not(.cats-nav *):not(.cat-card *):not(.faq-list *):not(.faq-item *):not(.lms-faq *) > span[aria-hidden="true"]:not([data-slot]):not(:has(svg)), .lms-skin :is(button, a, .action, .quiz-button, .auth-submit):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not([data-motion-footer] *) > svg.lucide-arrow-right, .lms-skin :is(button, a, .action, .quiz-button, .auth-submit):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not([data-motion-footer] *) > svg.lucide-arrow-left, .lms-skin :is([role="dialog"], [role="alertdialog"]) :is(button, a, .action) > svg.lucide-arrow-right, .lms-skin :is([role="dialog"], [role="alertdialog"]) :is(button, a, .action) > svg.lucide-arrow-left {
+  display: none !important;
+}
+
+/* Base MotionButton Pill */
+.lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *),
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *) {
+  --lms-btn-h: 42px;
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: fit-content !important;
+  max-width: 100% !important;
+  min-height: var(--lms-btn-h) !important;
+  padding-block: 4px !important;
+  padding-inline-start: calc(var(--lms-btn-h) + 10px) !important;
+  padding-inline-end: 22px !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  font-family: "Cairo", "Segoe UI", Arial, sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 0.88rem !important;
+  letter-spacing: normal !important;
+  text-decoration: none !important;
+  box-shadow: 0 8px 24px rgba(0, 139, 157, 0.22) !important;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 300ms ease, border-color 300ms ease, background-color 300ms ease !important;
+  cursor: pointer !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+  isolation: isolate !important;
+}
+
+/* Full-width MotionButtons */
+.lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  button.inline-flex,
+  button[type="submit"],
+  .lms-motion-btn
+).w-full,
+  .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  button.inline-flex,
+  button[type="submit"],
+  .lms-motion-btn
+)[class*="w-full"],
+  .lms-skin .auth-submit,
+  .lms-skin .auth-secondary,
+  .lms-skin .enroll-actions .action,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(button, a).w-full {
+  width: 100% !important;
+  display: flex !important;
+  padding-inline: calc(var(--lms-btn-h) + 10px) !important;
+}
+
+/* Size Variants */
+.lms-skin :is(
+  button.h-8,
+  button.text-xs,
+  button[size="sm"],
+  a.text-xs,
+  a[size="sm"],
+  .req-side .action
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *),
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(button.h-8, button.text-xs, button[size="sm"]) {
+  --lms-btn-h: 34px !important;
+  font-size: 0.8rem !important;
+  padding-inline-start: calc(var(--lms-btn-h) + 8px) !important;
+  padding-inline-end: 16px !important;
+}
+
+.lms-skin :is(
+  button.h-10,
+  button.h-11,
+  button.min-h-14,
+  button[size="lg"],
+  .action:not(.text-xs):not([size="sm"]),
+  .auth-submit,
+  .auth-secondary,
+  .lms-closing-actions .action,
+  .enroll-actions .action
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *),
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(button.h-10, button.h-11, button[size="lg"]) {
+  --lms-btn-h: 50px !important;
+  font-size: 0.94rem !important;
+  padding-inline-start: calc(var(--lms-btn-h) + 12px) !important;
+  padding-inline-end: 26px !important;
+}
+
+.lms-skin .lms-search button {
+  --lms-btn-h: 42px !important;
+  min-height: 42px !important;
+  font-size: 0.88rem !important;
+  padding-inline-start: calc(var(--lms-btn-h) + 10px) !important;
+  padding-inline-end: 22px !important;
+  flex: none !important;
+}
+
+/* Expanding Circle Accent (at inline-start) */
+.lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *)::before,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *)::before {
+  content: "" !important;
+  position: absolute !important;
+  inset-block: 3px !important;
+  inset-inline-start: 3px !important;
+  width: calc(var(--lms-btn-h) - 6px) !important;
+  height: calc(var(--lms-btn-h) - 6px) !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, var(--motion-fill-start, #008b9d), var(--motion-fill-end, #047383)) !important;
+  transition: width 480ms cubic-bezier(0.16, 1, 0.3, 1), background 300ms ease !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+/* Arrow Icon inside Circle */
+.lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *)::after,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *)::after {
+  content: "" !important;
+  position: absolute !important;
+  inset-inline-start: 3px !important;
+  top: 50% !important;
+  width: calc(var(--lms-btn-h) - 6px) !important;
+  height: calc(var(--lms-btn-h) - 6px) !important;
+  margin-top: calc((var(--lms-btn-h) - 6px) / -2) !important;
+  background-color: var(--motion-arrow-color, #fefdfc) !important;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") no-repeat center / 16px 16px !important;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") no-repeat center / 16px 16px !important;
+  transition: transform 480ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+}
+
+/* RTL Arrow Flipping - points in reading direction (leftward) */
+html[dir="rtl"] .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *)::after,
+  html[dir="rtl"] .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *)::after {
+  transform: scaleX(-1) !important;
+}
+
+/* Label & inner content sits safely above expanding circle at z-index: 3 */
+.lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *) > *,
+  .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *) .btn-content,
+  .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *) span:not([aria-hidden="true"]),
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *) > *,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *) .btn-content,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *) span:not([aria-hidden="true"]) {
+  position: relative !important;
+  z-index: 3 !important;
+  pointer-events: none !important;
+  transition: color 300ms ease, -webkit-text-fill-color 300ms ease, transform 300ms ease !important;
+}
+
+.lms-skin .btn-content {
+  position: relative !important;
+  z-index: 3 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  max-width: 100% !important;
+  pointer-events: none !important;
+  transition: color 300ms ease, -webkit-text-fill-color 300ms ease, transform 300ms ease !important;
+}
+.lms-skin .btn-content > svg {
+  flex: none !important;
+  width: 16px !important;
+  height: 16px !important;
+  color: inherit !important;
+  transition: color 300ms ease !important;
+}
+
+/* Hover & Focus-Visible Interactions: Lift and Glow */
+.lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover,
+  .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):focus-visible,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):focus-visible {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 34px rgba(0, 139, 157, 0.42) !important;
+}
+
+/* Expansion of Circle Fill across Entire Pill on Hover */
+.lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover::before,
+  .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):focus-visible::before,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover::before,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):focus-visible::before {
+  width: calc(100% - 6px) !important;
+}
+
+/* Arrow Nudge Animation on Hover (forward in reading direction) */
+.lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover::after,
+  .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):focus-visible::after,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover::after,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):focus-visible::after {
+  transform: translateX(4px) !important;
+}
+
+html[dir="rtl"] .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover::after,
+  html[dir="rtl"] .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):focus-visible::after,
+  html[dir="rtl"] .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover::after,
+  html[dir="rtl"] .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):focus-visible::after {
+  transform: scaleX(-1) translateX(4px) !important;
+}
+
+/* Text flips to 100% crisp pure white on hover (sitting on top of the blue circle) */
+.lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover,
+  .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover *,
+  .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover > *,
+  .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover .btn-content,
+  .lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover span:not([aria-hidden="true"]),
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover * {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Active Press Effect */
+.lms-skin :is(
+  .action,
+  .auth-submit,
+  .auth-secondary,
+  .quiz-button,
+  .quiz-card-actions button,
+  .quiz-card-actions a,
+  .verify-card button,
+  .lms-search button,
+  .lms-signup,
+  .lms-login,
+  .lms-motion-btn,
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex.rounded-full,
+  a[class*="rounded-"][class*="bg-primary"],
+  a.inline-flex[class*="border"],
+  a.inline-flex[class*="rounded"],
+  a[class*="btn"],
+  button[class*="btn"],
+  .btn
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):active,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.inline-flex,
+  button[type="submit"],
+  a.inline-flex,
+  .action,
+  .lms-motion-btn
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+/* =============================================================================
+   Color Variants (Primary, Secondary/Outline, Destructive, Emerald)
+   ========================================================================== */
+
+/* Primary buttons (Default, bg-primary, submit, action-primary, auth-submit, quiz-button-primary) */
+.lms-skin :is(
+  .action-primary,
+  .auth-submit,
+  .lms-search button,
+  .lms-signup,
+  .quiz-button-primary,
+  button.bg-primary,
+  button[type="submit"],
+  a[class*="bg-primary"],
+  .verify-card button,
+  button:not([class*="border"]):not([class*="secondary"]):not([class*="destructive"]):not([class*="ghost"]):not([class*="emerald"]):not([variant="outline"]):not([variant="secondary"]):not([variant="destructive"]):not([variant="ghost"]):not(.action-secondary):not(.auth-secondary):not(.quiz-button-secondary)
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *),
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button.bg-primary,
+  button[type="submit"],
+  button:not([variant="outline"]):not([variant="secondary"]):not([variant="destructive"]):not([variant="ghost"]):not([class*="destructive"]):not([class*="border"])
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *) {
+  --motion-fill-start: #008b9d;
+  --motion-fill-end: #047383;
+  --motion-arrow-color: #fefdfc;
+  background: #fefdfc !important;
+  color: #1e1e1e !important;
+  border: 1px solid rgba(184, 232, 240, 0.45) !important;
+  box-shadow: 0 8px 24px rgba(0, 139, 157, 0.22) !important;
+}
+
+/* Secondary & Outline buttons */
+.lms-skin :is(
+  .action-secondary,
+  .auth-secondary,
+  .quiz-button-secondary,
+  .lms-login,
+  button[class*="border-input"],
+  button[class*="border-border"],
+  button[class*="bg-secondary"],
+  button[class*="bg-background"],
+  button[variant="outline"],
+  button[variant="secondary"],
+  button[variant="ghost"]:not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9),
+  a[class*="border-border"],
+  a.inline-flex[class*="border"],
+  a.action-secondary
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *),
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button[variant="outline"],
+  button[variant="secondary"],
+  button[variant="ghost"],
+  button[class*="border"]
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *) {
+  --motion-fill-start: #008b9d;
+  --motion-fill-end: #047383;
+  --motion-arrow-color: #fefdfc;
+  background: rgba(3, 25, 32, 0.72) !important;
+  color: #e7f1f0 !important;
+  border: 1px solid rgba(184, 232, 240, 0.35) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.lms-skin :is(
+  .action-secondary,
+  .auth-secondary,
+  .quiz-button-secondary,
+  button[class*="border-input"],
+  button[class*="border-border"],
+  button[class*="bg-secondary"],
+  button[class*="bg-background"],
+  button[variant="outline"],
+  a[class*="border-border"],
+  a.inline-flex[class*="border"]
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button[variant="outline"],
+  button[variant="secondary"],
+  button[variant="ghost"],
+  button[class*="border"]
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover {
+  border-color: #77e0e8 !important;
+}
+
+/* Destructive buttons (Delete, Reject, is-danger) */
+.lms-skin :is(
+  .action.is-danger,
+  button[class*="bg-destructive"],
+  button[class*="text-destructive"],
+  button.destructive,
+  button[variant="destructive"]
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *),
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button[class*="bg-destructive"],
+  button[class*="text-destructive"],
+  button.destructive,
+  button[variant="destructive"]
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *) {
+  --motion-fill-start: #e11d48;
+  --motion-fill-end: #9f1239;
+  --motion-arrow-color: #ffffff;
+  background: rgba(225, 29, 72, 0.14) !important;
+  color: #fecdd3 !important;
+  border: 1px solid rgba(244, 63, 94, 0.45) !important;
+  box-shadow: 0 8px 24px rgba(225, 29, 72, 0.2) !important;
+}
+
+.lms-skin :is(
+  .action.is-danger,
+  button[class*="bg-destructive"],
+  button[class*="text-destructive"],
+  button.destructive,
+  button[variant="destructive"]
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover,
+  .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) :is(
+  button[class*="bg-destructive"],
+  button[class*="text-destructive"],
+  button.destructive,
+  button[variant="destructive"]
+):not([role="tab"]):not([data-radix-dialog-close]):not(.dialog-close):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover {
+  box-shadow: 0 14px 34px rgba(225, 29, 72, 0.42) !important;
+  border-color: #fb7185 !important;
+}
+
+/* Emerald WhatsApp & Success buttons */
+.lms-skin :is(
+  button[class*="bg-emerald"],
+  a[class*="bg-emerald"]
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *) {
+  --motion-fill-start: #059669;
+  --motion-fill-end: #047857;
+  --motion-arrow-color: #ffffff;
+  background: #fefdfc !important;
+  color: #064e3b !important;
+  border: 1px solid rgba(16, 185, 129, 0.45) !important;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.22) !important;
+}
+
+.lms-skin :is(
+  button[class*="bg-emerald"],
+  a[class*="bg-emerald"]
+):not([role="tab"]):not(aside nav button):not(aside ul li button):not(.radial-nav-toggle):not(.radial-language):not(.radial-nav-item):not(.tube-auth):not([data-radix-dialog-close]):not(.dialog-close):not(.course-filters button):not(.lms-popular button):not(.lms-reset):not(.quiz-text-button):not(.quiz-option):not(.quiz-question-dot):not([class*="hover:underline"]):not([size="icon"]):not(.h-8.w-8):not(.h-9.w-9):not(:has(> svg:only-child)):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not(.site-footer *):not([data-motion-footer] *):not(.hmf-assistant-character):not([data-slot="motion-button"]):not([data-slot="motion-button"] *):not(.cats-nav):not(.cats-nav *):not(.cats-dots *):not(.cats-stage *):not(.cat-card):not(.cat-card *):not(.faq-list *):not(.faq-item):not(.faq-item *):not(.lms-faq *):not(.faq-accordion *):hover {
+  box-shadow: 0 14px 34px rgba(16, 185, 129, 0.42) !important;
+}
+
+/* Icon-only Buttons (Circle with glow) */
+.lms-skin :is(button.h-9.w-9, button.h-8.w-8, button[size="icon"], button:has(> svg:only-child)):not(.radial-nav-toggle):not(.radial-language):not([data-radix-dialog-close]):not(.dialog-close):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not([data-motion-footer] *) {
+  border-radius: 999px !important;
+  transition: transform 250ms ease, box-shadow 250ms ease, background-color 250ms ease !important;
+}
+
+.lms-skin :is(button.h-9.w-9, button.h-8.w-8, button[size="icon"], button:has(> svg:only-child)):not(.radial-nav-toggle):not(.radial-language):not([data-radix-dialog-close]):not(.dialog-close):not(.hmf-reveal *):not(.hmf-footer *):not(#site-footer *):not([data-motion-footer] *):hover {
+  transform: scale(1.08) !important;
+  box-shadow: 0 0 16px rgba(119, 224, 232, 0.35) !important;
+}
+
+/* Disabled State across all LMS buttons */
+.lms-skin :is(
+  button, a, .action, .auth-submit, .auth-secondary, .quiz-button
+):disabled, .lms-skin :is(
+  button, a, .action, .auth-submit, .auth-secondary, .quiz-button
+)[aria-disabled="true"], .lms-skin :is([role="dialog"], [role="alertdialog"], [data-radix-portal]) button:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* =============================================================================
+   Preserved LMS Components: Category Carousel, FAQ Accordion, Verify Certificate
+   ========================================================================== */
+
+/* 1. Category Carousel Navigation Buttons & Cards */
+.lms-skin .cats-nav button {
+  width: 46px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  min-width: 46px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: 1px solid var(--lms-border) !important;
+  border-radius: 50% !important;
+  background: rgba(4, 30, 36, 0.72) !important;
+  color: var(--lms-cyan) !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  backdrop-filter: blur(6px) !important;
+  transition: border-color 200ms ease, background-color 200ms ease, transform 200ms var(--lms-ease) !important;
+}
+.lms-skin .cats-nav button::before,
+.lms-skin .cats-nav button::after {
+  display: none !important;
+  content: none !important;
+}
+.lms-skin .cats-nav button span,
+.lms-skin .cats-nav button span[aria-hidden="true"] {
+  display: inline-block !important;
+  color: inherit !important;
+  font-size: 1.25rem !important;
+  line-height: 1 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+html[dir="rtl"] .lms-skin .cats-nav button span,
+html[dir="rtl"] .lms-skin .cats-nav button span[aria-hidden="true"] {
+  display: inline-block !important;
+  transform: scaleX(-1) !important;
+}
+.lms-skin .cats-nav button:hover {
+  border-color: var(--lms-cyan) !important;
+  background: rgba(184, 232, 240, 0.18) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Category Cards in 3D Carousel: Dark Petrol Surface & Deep Turquoise Bottom */
+.lms-skin .cat-card button {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(184, 232, 240, 0.2) !important;
+  border-radius: 26px !important;
+  background: linear-gradient(170deg, rgba(14, 56, 68, 0.96), rgba(4, 23, 28, 0.97)) !important;
+  color: inherit !important;
+  box-shadow: 0 24px 60px rgba(1, 12, 16, 0.55) !important;
+  transform: none !important;
+}
+.lms-skin .cat-card button::before,
+.lms-skin .cat-card button::after {
+  display: none !important;
+  content: none !important;
+}
+.lms-skin .cat-card.is-front button {
+  border-color: rgba(119, 224, 232, 0.65) !important;
+  box-shadow: 0 30px 70px rgba(0, 139, 157, 0.45), 0 0 0 1px rgba(119, 224, 232, 0.25) !important;
+}
+.lms-skin .cat-card button:hover {
+  border-color: var(--lms-lift) !important;
+  box-shadow: 0 30px 70px rgba(0, 139, 157, 0.45) !important;
+  transform: none !important;
+}
+.lms-skin .cat-body {
+  display: grid !important;
+  gap: 6px !important;
+  padding: 18px 20px 20px !important;
+  background: linear-gradient(180deg, #06232a, #03161a) !important;
+  border-top: 1px solid rgba(184, 232, 240, 0.12) !important;
+}
+.lms-skin .cat-body b {
+  color: var(--lms-paper, #e8f7f9) !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+}
+.lms-skin .cat-body span {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  color: var(--lms-muted, #7ba0a6) !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+}
+.lms-skin .cat-go {
+  display: inline-block !important;
+  color: var(--lms-lift, #77e0e8) !important;
+  font-size: 1.05rem !important;
+}
+
+/* 2. FAQ Accordion: Sleek Translucent Dark Petrol Cards */
+.lms-skin .faq-list {
+  display: grid !important;
+  gap: 12px !important;
+}
+.lms-skin .faq-item {
+  border: 1px solid var(--lms-border) !important;
+  border-radius: 16px !important;
+  background: rgba(12, 48, 58, 0.45) !important;
+  overflow: hidden !important;
+  transition: border-color 240ms ease, background-color 240ms ease !important;
+}
+.lms-skin .faq-item:hover,
+.lms-skin .faq-item:has(button[aria-expanded="true"]) {
+  border-color: rgba(184, 232, 240, 0.4) !important;
+  background: rgba(12, 48, 58, 0.65) !important;
+}
+.lms-skin .faq-item button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 20px 24px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--lms-paper) !important;
+  font: inherit !important;
+  font-size: 1.02rem !important;
+  font-weight: 800 !important;
+  text-align: start !important;
+  cursor: pointer !important;
+  transform: none !important;
+  overflow: visible !important;
+}
+.lms-skin .faq-item button::before,
+.lms-skin .faq-item button::after {
+  display: none !important;
+  content: none !important;
+}
+.lms-skin .faq-item button:hover {
+  color: var(--lms-lift) !important;
+  background: transparent !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.lms-skin .faq-item button > span:first-child {
+  color: inherit !important;
+  -webkit-text-fill-color: initial !important;
+}
+.lms-skin .faq-item button:hover > span:first-child {
+  color: var(--lms-lift) !important;
+  -webkit-text-fill-color: var(--lms-lift) !important;
+}
+.lms-skin .faq-mark,
+.lms-skin .faq-item button > .faq-mark {
+  flex: none !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  background: rgba(0, 139, 157, 0.2) !important;
+  color: var(--lms-lift) !important;
+  font-size: 1.3rem !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: transform 300ms var(--lms-ease), background-color 240ms ease, color 240ms ease !important;
+}
+.lms-skin .faq-item button[aria-expanded="true"] .faq-mark {
+  transform: rotate(45deg) !important;
+  background: var(--lms-turquoise) !important;
+  color: #06232a !important;
+}
+.lms-skin .faq-panel {
+  display: block !important;
+}
+.lms-skin .faq-panel[hidden] {
+  display: none !important;
+}
+.lms-skin .faq-panel p {
+  padding: 0 24px 24px !important;
+  color: rgba(231, 241, 240, 0.72) !important;
+  line-height: 1.85 !important;
+}
+
+/* 3. Verify Certificate Button: Precise 56px MotionButton Pill */
+.lms-skin .verify-card button {
+  --lms-btn-h: 56px !important;
+  height: 56px !important;
+  min-height: 56px !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding-block: 4px !important;
+  padding-inline-start: calc(var(--lms-btn-h) + 14px) !important;
+  padding-inline-end: 28px !important;
+  font-size: 1.05rem !important;
+  border-radius: 999px !important;
+}
+.lms-skin .verify-card button::before {
+  inset-block: 3px !important;
+  inset-inline-start: 3px !important;
+  width: calc(var(--lms-btn-h) - 6px) !important;
+  height: calc(var(--lms-btn-h) - 6px) !important;
+}
+.lms-skin .verify-card button::after {
+  inset-inline-start: 3px !important;
+  top: 50% !important;
+  width: calc(var(--lms-btn-h) - 6px) !important;
+  height: calc(var(--lms-btn-h) - 6px) !important;
+  margin-top: calc((var(--lms-btn-h) - 6px) / -2) !important;
+}
+.lms-skin .verify-card button:hover::before,
+.lms-skin .verify-card button:focus-visible::before {
+  width: calc(100% - 6px) !important;
+  height: calc(var(--lms-btn-h) - 6px) !important;
+}
+html[dir="rtl"] .lms-skin .verify-card button:hover::after,
+html[dir="rtl"] .lms-skin .verify-card button:focus-visible::after {
+  transform: scaleX(-1) translateX(4px) !important;
+}
+.lms-skin .verify-card button:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
