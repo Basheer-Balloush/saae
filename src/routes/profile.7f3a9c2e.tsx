@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Download, Facebook, Linkedin, Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLang } from "@/lib/i18n";
 import "@/components/profile-card/profile-card.css";
-
-type CardLanguage = "ar" | "en";
 
 const COPY = {
   ar: {
@@ -55,9 +54,9 @@ export const Route = createFileRoute("/profile/7f3a9c2e")({
 });
 
 function ProfileCardPage() {
-  const [language, setLanguage] = useState<CardLanguage>("ar");
-  const isArabic = language === "ar";
-  const copy = COPY[language];
+  const { lang, setLang } = useLang();
+  const isArabic = lang === "ar";
+  const copy = COPY[lang];
   const contactHref = useMemo(() => {
     const lines = [
       "BEGIN:VCARD",
@@ -69,13 +68,8 @@ function ProfileCardPage() {
     return `data:text/vcard;charset=utf-8,${encodeURIComponent(lines.join("\r\n"))}`;
   }, [isArabic]);
 
-  useEffect(() => {
-    document.documentElement.lang = language;
-    document.documentElement.dir = isArabic ? "rtl" : "ltr";
-  }, [isArabic, language]);
-
   return (
-    <main className="profile-card-page" dir={isArabic ? "rtl" : "ltr"} lang={language}>
+    <main className="profile-card-page" dir={isArabic ? "rtl" : "ltr"} lang={lang}>
       <article className="profile-card-shell">
         <header className="profile-card-header">
           <Button
@@ -83,7 +77,7 @@ function ProfileCardPage() {
             variant="ghost"
             className="profile-card-language"
             aria-label={copy.switchLanguage}
-            onClick={() => setLanguage(isArabic ? "en" : "ar")}
+            onClick={() => setLang(isArabic ? "en" : "ar")}
           >
             {isArabic ? "EN" : "ع"}
           </Button>
