@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import ministryMark from "@/assets/profile-card-upload/org-ar.svg.asset.json";
 import portrait from "@/assets/profile-card-upload/portrait-circle.png.asset.json";
 import signature from "@/assets/profile-card-upload/signature.png.asset.json";
-import starTop from "@/assets/profile-card-upload/star-tr.png.asset.json";
-import starBottom from "@/assets/profile-card-upload/star-bl.png.asset.json";
 import "@/components/profile-card/profile-card.css";
 
 type CardLanguage = "ar" | "en";
@@ -129,12 +127,10 @@ function ProfileCardPage() {
         </Button>
       </header>
 
-      <img className="profile-star profile-star-tr" src={starTop.url} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      <img className="profile-star profile-star-bl" src={starBottom.url} alt="" aria-hidden="true" loading="lazy" decoding="async" />
 
       <section className="profile-card-layout">
         <div className="profile-portrait">
-          <img src={portrait.url} alt={copy.name} fetchPriority="high" decoding="async" width={324} height={324} />
+          <img src={portrait.url} alt={copy.name} />
         </div>
 
         <div className="profile-info">
