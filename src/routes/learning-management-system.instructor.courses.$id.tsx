@@ -1511,6 +1511,10 @@ function CertificateSettings({
         toast.error(ar ? "أضف تاريخ بداية الدورة ونهايتها أولاً." : "Add the course start and end dates first.");
         return;
       }
+      if (res.status === "error") {
+        toast.error(`${ar ? "تعذّر إنشاء الشهادة" : "Certificate failed"}: ${res.message}`, { duration: 20_000 });
+        return;
+      }
       const bytes = Uint8Array.from(atob(res.base64), (c) => c.charCodeAt(0));
       const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
       window.open(url, "_blank", "noopener");

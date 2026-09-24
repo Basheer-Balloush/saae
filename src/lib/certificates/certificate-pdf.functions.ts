@@ -66,7 +66,15 @@ export const getCertificatePdfLink = createServerFn({ method: "POST" })
         );
     }
 
-    const result = await ensureCertificatePdf(admin, cert.id, { name: data.name, gender: data.gender });
+    let result: Awaited<ReturnType<typeof ensureCertificatePdf>>;
+    try {
+      result = await ensureCertificatePdf(admin, cert.id, { name: data.name, gender: data.gender });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      console.error("certificate pdf failed", message);
+      // Students get the generic message; admins the real reason.
+      return { status: "error" as const, message: isAdmin ? message.slice(0, 400) : null };
+    }
     if (result.status !== "ready") return result;
 
     const { data: signed, error } = await admin.storage
@@ -122,11 +130,19 @@ export const previewCourseCertificate = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { renderCoursePreviewPdf } = await import("./certificate-pdf.server");
-    const pdf = await renderCoursePreviewPdf(
-      supabaseAdmin as never as import("@supabase/supabase-js").SupabaseClient,
-      data.courseId,
-      data.gender,
-    );
+    let pdf: Uint8Array | "course_dates_missing";
+    try {
+      pdf = await renderCoursePreviewPdf(
+        supabaseAdmin as never as import("@supabase/supabase-js").SupabaseClient,
+        data.courseId,
+        data.gender,
+      );
+    } catch (e) {
+      // Admins only: the real reason, so a failed preview can be diagnosed.
+      const message = e instanceof Error ? e.message : String(e);
+      console.error("certificate preview failed", message);
+      return { status: "error" as const, message: message.slice(0, 400) };
+    }
     if (pdf === "course_dates_missing") return { status: "course_dates_missing" as const };
     return { status: "ready" as const, base64: Buffer.from(pdf).toString("base64") };
   });

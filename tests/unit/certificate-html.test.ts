@@ -17,6 +17,11 @@ describe("certificate page", () => {
     expect(formatCourseDate("2026-07-26T00:00:00+00:00")).toBe("26/7/2026");
   });
 
+  it("reads dates in Postgres's own text form too", () => {
+    expect(formatCourseDate("2026-09-25 00:00:00+00")).toBe("25/9/2026");
+    expect(formatCourseDate("2026-09-25T00:00:00+00")).toBe("25/9/2026");
+  });
+
   it("writes the issue date as the day it was in Damascus", () => {
     // 22:30 UTC on 31 July is already 1 August in Damascus.
     expect(formatIssueDate("2026-07-31T22:30:00Z")).toBe("1/8/2026");
