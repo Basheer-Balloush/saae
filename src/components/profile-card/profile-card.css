@@ -84,23 +84,6 @@
   outline-offset: 2px;
 }
 
-.profile-star {
-  position: absolute;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.profile-star-tr {
-  inset-block-start: var(--profile-bar-height);
-  inset-inline-end: 0;
-  inline-size: clamp(92px, 12vw, 190px);
-}
-
-.profile-star-bl {
-  inset-block-end: 0;
-  inset-inline-start: 0;
-  inline-size: clamp(100px, 14vw, 230px);
-}
 
 .profile-card-layout {
   position: relative;
@@ -330,9 +313,6 @@
     margin-block-start: 28px;
   }
 
-  .profile-star-bl {
-    inline-size: clamp(90px, 9vw, 150px);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
