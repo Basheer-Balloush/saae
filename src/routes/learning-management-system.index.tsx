@@ -5,7 +5,7 @@ import { useLang } from "@/lib/i18n";
 import type { CourseCardData } from "@/components/lms/CourseCard";
 import { loadAllPublicCourses } from "@/lib/lms-public-catalog";
 import { SkinCourseCard } from "@/components/lms-skin/SkinCourseCard";
-import { CategoriesGrid } from "@/components/lms-skin/CategoriesGrid";
+import { CategoriesCarousel } from "@/components/lms-skin/CategoriesCarousel";
 import { FaqAccordion } from "@/components/lms-skin/FaqAccordion";
 import { Counter, Reveal } from "@/components/lms-skin/Reveal";
 import { IconSearch } from "@/components/lms-skin/icons";
@@ -262,8 +262,8 @@ function LmsHome() {
         </div>
       </section>
 
-      {/* CATEGORIES — tile grid; a tile filters the courses below. */}
-      <CategoriesGrid
+      {/* CATEGORIES — 3D carousel; Browse filters the courses below. */}
+      <CategoriesCarousel
         categories={carousel}
         onBrowse={(id) => {
           setFilter(id);

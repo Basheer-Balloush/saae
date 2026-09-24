@@ -1376,10 +1376,110 @@ html[dir="rtl"] .lms-skin :is(
 }
 
 /* =============================================================================
-   Preserved LMS Components: FAQ Accordion, Verify Certificate
+   Preserved LMS Components: Category Carousel, FAQ Accordion, Verify Certificate
    ========================================================================== */
 
-/* 1. (Category carousel overrides removed: categories are a tile grid now, styled in lms.css.) */
+/* 1. Category Carousel Navigation Buttons & Cards */
+.lms-skin .cats-nav button {
+  width: 46px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  min-width: 46px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: 1px solid var(--lms-border) !important;
+  border-radius: 50% !important;
+  background: rgba(4, 30, 36, 0.72) !important;
+  color: var(--lms-cyan) !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  backdrop-filter: blur(6px) !important;
+  transition: border-color 200ms ease, background-color 200ms ease, transform 200ms var(--lms-ease) !important;
+}
+.lms-skin .cats-nav button::before,
+.lms-skin .cats-nav button::after {
+  display: none !important;
+  content: none !important;
+}
+.lms-skin .cats-nav button span,
+.lms-skin .cats-nav button span[aria-hidden="true"] {
+  display: inline-block !important;
+  color: inherit !important;
+  font-size: 1.25rem !important;
+  line-height: 1 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+html[dir="rtl"] .lms-skin .cats-nav button span,
+html[dir="rtl"] .lms-skin .cats-nav button span[aria-hidden="true"] {
+  display: inline-block !important;
+  transform: scaleX(-1) !important;
+}
+.lms-skin .cats-nav button:hover {
+  border-color: var(--lms-cyan) !important;
+  background: rgba(184, 232, 240, 0.18) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Category Cards in 3D Carousel: Dark Petrol Surface & Deep Turquoise Bottom */
+.lms-skin .cat-card button {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(184, 232, 240, 0.2) !important;
+  border-radius: 26px !important;
+  background: linear-gradient(170deg, rgba(14, 56, 68, 0.96), rgba(4, 23, 28, 0.97)) !important;
+  color: inherit !important;
+  box-shadow: 0 24px 60px rgba(1, 12, 16, 0.55) !important;
+  transform: none !important;
+}
+.lms-skin .cat-card button::before,
+.lms-skin .cat-card button::after {
+  display: none !important;
+  content: none !important;
+}
+.lms-skin .cat-card.is-front button {
+  border-color: rgba(119, 224, 232, 0.65) !important;
+  box-shadow: 0 30px 70px rgba(0, 139, 157, 0.45), 0 0 0 1px rgba(119, 224, 232, 0.25) !important;
+}
+.lms-skin .cat-card button:hover {
+  border-color: var(--lms-lift) !important;
+  box-shadow: 0 30px 70px rgba(0, 139, 157, 0.45) !important;
+  transform: none !important;
+}
+.lms-skin .cat-body {
+  display: grid !important;
+  gap: 6px !important;
+  padding: 18px 20px 20px !important;
+  background: linear-gradient(180deg, #06232a, #03161a) !important;
+  border-top: 1px solid rgba(184, 232, 240, 0.12) !important;
+}
+.lms-skin .cat-body b {
+  color: var(--lms-paper, #e8f7f9) !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+}
+.lms-skin .cat-body span {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  color: var(--lms-muted, #7ba0a6) !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+}
+.lms-skin .cat-go {
+  display: inline-block !important;
+  color: var(--lms-lift, #77e0e8) !important;
+  font-size: 1.05rem !important;
+}
 
 /* 2. FAQ Accordion: Sleek Translucent Dark Petrol Cards */
 .lms-skin .faq-list {
