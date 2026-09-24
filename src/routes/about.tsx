@@ -2,7 +2,6 @@ import { useEffect, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import pageHtml from "@/components/cinematic/html/about.html?raw";
 import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
-import { DesktopMotionFooter } from "@/components/home/DesktopMotionFooter";
 import { useLang } from "@/lib/i18n";
 import { applyPublicLanguage } from "@/lib/public-site/language";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,7 +66,6 @@ function Page() {
   return (
     <>
       <CinematicPage html={html} scripts={SCRIPTS} />
-      <DesktopMotionFooter targetSelector="#about-motion-footer-root" />
     </>
   );
 }

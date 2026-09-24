@@ -183,7 +183,6 @@ function InternshipDetail() {
     <>
       <SubHero
         id="intern-detail-title"
-        eyebrow={t.internshipsTitle}
         titleSpans={[title]}
         titleClassName="course-page-title"
         lede={summary ?? undefined}
@@ -253,7 +252,9 @@ function InternshipDetail() {
               <div className="enroll-actions">
                 {open ? (
                   <a className="action action-primary" href={applyHref}>
-                    {user ? t.internshipApply : t.internshipApplyLoginRequired}
+                    <span className="btn-content">
+                      <span>{user ? t.internshipApply : t.internshipApplyLoginRequired}</span>
+                    </span>
                   </a>
                 ) : (
                   <div className="enroll-note is-closed">{closedNote}</div>
@@ -273,14 +274,15 @@ function SlugNotFound() {
   return (
     <SubHero
       id="intern-missing-title"
-      eyebrow={t.internshipsTitle}
       titleSpans={[lang === "ar" ? "الفرصة غير متاحة" : "Opportunity unavailable"]}
       titleClassName="course-page-title"
       lede={t.internshipsEmpty}
       copyChildren={
         <p style={{ marginTop: 28 }}>
           <Link to="/learning-management-system/internships" className="action action-primary">
-            {t.internshipsTitle}
+            <span className="btn-content">
+              <span>{t.internshipsTitle}</span>
+            </span>
           </Link>
         </p>
       }
@@ -294,13 +296,14 @@ function SlugError({ reset }: { error: Error; reset: () => void }) {
   return (
     <SubHero
       id="intern-error-title"
-      eyebrow={t.internshipsTitle}
       titleSpans={[t.errorLoad]}
       titleClassName="course-page-title"
       copyChildren={
         <p style={{ marginTop: 28 }}>
           <button type="button" className="action action-primary" onClick={reset}>
-            {t.errorRetry}
+            <span className="btn-content">
+              <span>{t.errorRetry}</span>
+            </span>
           </button>
         </p>
       }

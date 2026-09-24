@@ -1810,6 +1810,7 @@
     }
 
     .mission-words span::before {
+      display: none;
       content: attr(data-step);
       position: absolute;
       z-index: -1;
@@ -2774,7 +2775,7 @@
     .faq-trigger {
       width: 100%;
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
       gap: clamp(14px, 2vw, 26px);
       padding: clamp(20px, 2.4vw, 30px) clamp(4px, 1vw, 14px);
@@ -2790,6 +2791,7 @@
     .faq-trigger:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: -3px; }
 
     .faq-num {
+      display: none;
       color: var(--olive-lift);
       font-size: .74rem;
       font-weight: 800;
@@ -2850,7 +2852,7 @@
     .faq-answer p {
       max-width: 62ch;
       margin: 0;
-      padding: 0 clamp(4px, 1vw, 14px) clamp(24px, 2.6vw, 34px) calc(clamp(14px, 2vw, 26px) + 22px);
+      padding: 0 clamp(4px, 1vw, 14px) clamp(24px, 2.6vw, 34px) clamp(14px, 2vw, 26px);
       color: var(--ink-muted);
       font-size: 1.02rem;
       line-height: 1.68;
@@ -3358,7 +3360,7 @@
       padding-left: clamp(4px, 1vw, 14px);
     }
     html[dir="rtl"] .faq-answer p {
-      padding-right: calc(clamp(14px, 2vw, 26px) + 22px);
+      padding-right: clamp(14px, 2vw, 26px);
       padding-left: clamp(4px, 1vw, 14px);
       text-align: right;
     }

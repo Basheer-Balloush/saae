@@ -27,9 +27,9 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
     "Grow Syria's AI future with SAAE": "ابنِ مستقبل الذكاء الاصطناعي في سورية مع الجمعية",
     "As the page scrolls, the story moves from accessible knowledge to practical skills, connected people, public value, and the Million Syrian AI Users initiative.": "بينما تتنقل في الصفحة، تنتقل القصة من المعرفة المتاحة إلى المهارات العملية، والناس المتصلين، والقيمة العامة، ومبادرة مليون مستخدم سوري للذكاء الاصطناعي.",
     "Loading cinematic scene": "جارٍ تحميل المشهد السينمائي",
-    "Intelligence and entrepreneurship for a nation on the rise.": "ذكاء وريادة لوطن ينهض",
+    "Intelligence and entrepreneurship for a nation on the rise": "ذكاء وريادة لوطن ينهض",
     "The learning platform": "منصة التعلّم",
-    "Structured pathways, not scattered tutorials.": "مسارات منظمة، لا دروس متفرقة.",
+    "Structured pathways, not scattered tutorials": "مسارات منظمة، لا دروس متفرقة",
     "Certified training tracks that build professional and technical skill, open to anyone in Syria.": "مسارات تدريب معتمدة تبني مهارات مهنية وتقنية، ومتاحة للجميع في سورية.",
     "Ask about learning": "استفسر عن التعلّم",
     "The Million Syrian AI Users initiative": "مبادرة مليون مستخدم سوري للذكاء الاصطناعي",
@@ -43,7 +43,7 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
     "communities": "مجتمعات",
     "SAAE communities": "مجتمعات الجمعية",
     "Building Syria's Digital Future": "نبني المستقبل الرقمي لسورية",
-    "Build Syria's AI future.": "نبني مستقبل الذكاء الاصطناعي في سورية.",
+    "Build Syria's AI future": "نبني مستقبل الذكاء الاصطناعي في سورية",
     "Practical AI learning, research and entrepreneurship, connected for people across Syria.": "تعلّم وبحث وريادة أعمال عملية في الذكاء الاصطناعي، متصلة بالناس في كل سورية.",
     "A shared future starts with shared knowledge.": "يبدأ المستقبل المشترك بالمعرفة المشتركة.",
     "Training rooms, national broadcasts and public launches — the running record of what SAAE is building, newest first.": "قاعات تدريب وبث وطني وإطلاقات عامة — سجل متجدد لما تبنيه الجمعية، الأحدث أولاً.",
@@ -72,7 +72,7 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
     "The first cohort completed 100 hours of training and began carrying practical AI knowledge into rooms of their own.": "أتمّت الدفعة الأولى 100 ساعة تدريب وبدأت بنقل المعرفة العملية بالذكاء الاصطناعي إلى بيئات عملها.",
     "The Greater Aleppo plan shown at BUILDEX": "عرض مخطط حلب الكبرى في معرض بيلدكس",
     "SAAE joined Aleppo Governorate’s pavilion with a draft master plan that puts spatial survey, community consultation and open urban data on one map.": "شاركت الجمعية في جناح محافظة حلب بمسودة مخطط رئيسي يجمع المسح المكاني والمشاورة المجتمعية والبيانات الحضرية المفتوحة في خريطة واحدة.",
-    "Everything SAAE has published.": "كل ما نشرته الجمعية.",
+    "Everything SAAE has published": "كل ما نشرته الجمعية",
     "Every announcement, in date order, with the Arabic originals, on the official site.": "سيظهر كل إعلان هنا حسب التاريخ، مع نسخته العربية الأصلية.",
     "19 July 2026": "19 تموز 2026",
     "25 June 2026": "25 حزيران 2026",
@@ -92,14 +92,14 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
     "01 / TRAIN": "01 / درّب",
     "02 / APPLY": "02 / طبّق",
     "03 / BUILD": "03 / ابنِ",
-    "Put AI into working hands.": "ضع الذكاء الاصطناعي بين أيدٍ منتجة.",
+    "Put AI into working hands": "ضع الذكاء الاصطناعي بين أيدٍ منتجة",
     "Courses, workshops and trainer programmes turn AI from a headline into a skill that students, professionals and educators can use on Monday morning.": "تحوّل الدورات وورش العمل وبرامج إعداد المدربين الذكاء الاصطناعي من عنوان إلى مهارة يستخدمها الطلاب والمهنيون والمعلّمون في عملهم.",
-    "Prove it on real problems.": "أثبت فاعليته في مشكلات حقيقية.",
+    "Prove it on real problems": "أثبت فاعليته في مشكلات حقيقية",
     "Specialists put those methods to work on Syrian questions in health, data, media, software and the shape of its cities, and publish what holds.": "يوظف المتخصصون هذه الأساليب في قضايا سورية ضمن الصحة والبيانات والإعلام والبرمجيات والمدن، وينشرون ما يثبت أثره.",
-    "Turn capability into enterprise.": "حوّل القدرة إلى مشروع.",
+    "Turn capability into enterprise": "حوّل القدرة إلى مشروع",
     "Entrepreneurship and institutional partnership carry proven work into companies, services and public capacity that outlast the programme that started them.": "تنقل ريادة الأعمال والشراكات المؤسسية العمل المثبت إلى شركات وخدمات وقدرات عامة تستمر بعد انتهاء البرنامج.",
     "Practical answers": "إجابات عملية",
-    "A clear way in.": "طريق واضح للبداية.",
+    "A clear way in": "طريق واضح للبداية",
     "The questions people actually ask before they start.": "الأسئلة التي يطرحها الناس فعلاً قبل البداية.",
     "Who is SAAE for?": "لمن تناسب الجمعية؟",
     "Students, educators, professionals, founders and institutions that want practical contact with AI — not only people who already work in technology.": "للطلاب والمعلّمين والمهنيين ورواد الأعمال والمؤسسات الراغبة بتجربة عملية مع الذكاء الاصطناعي، لا للعاملين في التقنية فقط.",
@@ -262,12 +262,12 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
     "٢٥ حزيران ٢٠٢٦": "25 June 2026",
     "١٠ حزيران ٢٠٢٦": "10 June 2026",
     "مبادرة مليون مستخدم ذكاء اصطناعي سوري": "One million Syrian AI users",
-    "مليون إنسان. خطوة وطنية واحدة نحو الأمام.": "One million people. One national step forward.",
+    "مليون إنسان. خطوة وطنية واحدة نحو الأمام": "One million people. One national step forward",
     "انضم إلى المبادرة": "Join the initiative",
     /* TV interview article. */
     "مجتمع المدربين": "Trainer community",
-    "رئيس مجلس إدارة الجمعية السورية للذكاء الاصطناعي وريادة الأعمال يستعرض تطورات مبادرة \"مليون مستخدم سوري\" على شاشة قناة السورية.": "The chairman of the Syrian Association for AI & Entrepreneurship reviews developments of the \"Million Syrian Users\" initiative on Syria TV.",
-    "رئيس مجلس إدارة الجمعية يستعرض تطورات مبادرة \"مليون مستخدم سوري\" على شاشة قناة السورية.": "The association chairman reviews developments of the \"Million Syrian Users\" initiative on Syria TV.",
+    "رئيس مجلس إدارة الجمعية السورية للذكاء الاصطناعي وريادة الأعمال يستعرض تطورات مبادرة \"مليون مستخدم سوري\" على شاشة قناة السورية": "The chairman of the Syrian Association for AI & Entrepreneurship reviews developments of the \"Million Syrian Users\" initiative on Syria TV",
+    "رئيس مجلس إدارة الجمعية يستعرض تطورات مبادرة \"مليون مستخدم سوري\" على شاشة قناة السورية": "The association chairman reviews developments of the \"Million Syrian Users\" initiative on Syria TV",
     "استضافت شاشة قناة السورية ضمن فقرة \"إشراقة الصباح\" رئيس مجلس إدارة الجمعية السورية للذكاء الاصطناعي وريادة الأعمال، الأستاذ أحمد غسان المنجد.": "Syria TV hosted the chairman of the Syrian Association for AI & Entrepreneurship, Mr. Ahmad Ghassan Al-Munajjid, on its \"Ishraqat Al-Sabah\" morning segment.",
     "وخُصص اللقاء الإعلامي للحديث بشكل موسع عن مبادرة مليون مستخدم ذكاء اصطناعي سوري، حيث قدّم الأستاذ المنجد شرحاً وافياً حول المبادرة وتطوراتها.": "The interview focused on the million Syrian AI users initiative, with Mr. Al-Munajjid presenting a detailed account of the initiative and its progress.",
     "أبرز محاور اللقاء:": "Key topics of the meeting:",
@@ -280,9 +280,6 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
     "رؤية التحول الرقمي:": "The digital transformation vision:",
     "التأكيد على دور المبادرة كجزء من رؤية استراتيجية متكاملة تسهم في تسريع عجلة التحول الرقمي وبناء وتطوير القدرات الوطنية.": "An emphasis on the initiative’s role within an integrated strategic vision that accelerates digital transformation and builds national capability.",
     "وتأتي هذه المشاركة لتؤكد التزام الجمعية بوضع المجتمع السوري في صورة التطورات التكنولوجية، وتمكينه ليكون جزءاً فاعلاً في المستقبل الرقمي.": "This appearance underlines the association’s commitment to keeping Syrian society informed of technological developments and empowering it to take an active part in the digital future.",
-    "إطلاق مبادرة \"تدريب مليون مستخدم ذكاء اصطناعي سوري\" لتعزيز التحول الرقمي وبناء القدرات الوطنية.": "Launching the \"Training one million Syrian AI users\" initiative to advance digital transformation and build national capability.",
-    "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال تحتفل بتخريج أول مدربي الذكاء الاصطناعي في سوريا.": "Syria’s first AI trainers graduate.",
-    "بيلدكس | جناح محافظة حلب | مشروع حلب الكبرى.": "The Greater Aleppo plan shown at BUILDEX.",
     /* Initiative-launch article. */
     "إطلاق مبادرة \"تدريب مليون مستخدم ذكاء اصطناعي سوري\" لتعزيز التحول الرقمي وبناء القدرات الوطنية": "Launching the \"Training one million Syrian AI users\" initiative to advance digital transformation and build national capability",
     "في خطوة وطنية تهدف إلى تسريع مسيرة التحول الرقمي، أُطلقت مبادرة \"تدريب مليون مستخدم ذكاء اصطناعي سوري\" لتكون واحدة من أكبر المبادرات التعليمية والتقنية الهادفة إلى نشر ثقافة الذكاء الاصطناعي في سوريا وتمكين المجتمع من الاستفادة من تطبيقاته في مختلف مجالات الحياة والعمل.": "In a national step to accelerate digital transformation, the \"Training one million Syrian AI users\" initiative was launched as one of the largest educational and technical initiatives for spreading AI culture across Syria and enabling society to benefit from its applications in all areas of life and work.",
@@ -442,7 +439,7 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
     const title = document.querySelector("[data-hero-opening-title]");
     if (!title) return;
     if (lang === "ar") title.innerHTML = '<span class="hero-opening-line">ذكاء</span><span class="hero-opening-line">وريادة</span><span class="hero-opening-line">لوطن</span><span class="hero-opening-line">ينهض</span>';
-    else title.innerHTML = '<span class="hero-opening-line">Intelligence and entrepreneurship for a nation on the rise.</span>';
+    else title.innerHTML = '<span class="hero-opening-line">Intelligence and entrepreneurship for a nation on the rise</span>';
   };
 
   /* Desktop playback deliberately holds window.scrollY at zero. The hero adds

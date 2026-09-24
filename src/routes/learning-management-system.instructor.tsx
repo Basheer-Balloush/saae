@@ -5,7 +5,12 @@ import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 
+import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+
 export const Route = createFileRoute("/learning-management-system/instructor")({
+  head: () => ({
+    links: LMS_SKIN_LINKS,
+  }),
   component: InstructorLayout,
 });
 
@@ -67,7 +72,7 @@ function InstructorLayout() {
     );
   }
   return (
-    <>
+    <div className="lms-dashboard-wrap lms-instructor-shell">
       {approved && !profileComplete && location.pathname === PROFILE_PATH && (
         <div className="mx-auto max-w-2xl px-4 sm:px-6 pt-6">
           <div className="rounded-2xl border border-amber-400/50 bg-amber-50 dark:bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
@@ -78,6 +83,6 @@ function InstructorLayout() {
         </div>
       )}
       <Outlet />
-    </>
+    </div>
   );
 }

@@ -57,7 +57,7 @@ export interface PartnerEntry {
 /** Exact approved opening headline — do not rephrase. */
 export const OPENING_HEADLINE: LocalText = {
   ar: "ذكاء وريادة لوطن ينهض",
-  en: "Intelligence and entrepreneurship for a nation on the rise.",
+  en: "Intelligence and entrepreneurship for a nation on the rise",
 };
 
 export const OPENING = {
@@ -134,24 +134,24 @@ export const COMMUNITIES: CommunityEntry[] = [
 /** Mission: train, apply, build. No numerical claims live here. */
 export const MISSION_STEPS: MissionStep[] = [
   {
-    index: { ar: "01 / درّب", en: "01 / TRAIN" },
-    title: { ar: "ضع الذكاء الاصطناعي بين أيدٍ منتجة.", en: "Put AI into working hands." },
+    index: { ar: "درّب", en: "TRAIN" },
+    title: { ar: "ضع الذكاء الاصطناعي بين أيدٍ منتجة", en: "Put AI into working hands" },
     body: {
       ar: "تحوّل الدورات وورش العمل وبرامج إعداد المدربين الذكاء الاصطناعي من عنوان إلى مهارة يستخدمها الطلاب والمهنيون والمعلّمون في عملهم.",
       en: "Courses, workshops and trainer programmes turn AI from a headline into a skill that students, professionals and educators can use on Monday morning.",
     },
   },
   {
-    index: { ar: "02 / طبّق", en: "02 / APPLY" },
-    title: { ar: "أثبت فاعليته في مشكلات حقيقية.", en: "Prove it on real problems." },
+    index: { ar: "طبّق", en: "APPLY" },
+    title: { ar: "أثبت فاعليته في مشكلات حقيقية", en: "Prove it on real problems" },
     body: {
       ar: "يوظف المتخصصون هذه الأساليب في قضايا سورية ضمن الصحة والبيانات والإعلام والبرمجيات والمدن، وينشرون ما يثبت أثره.",
       en: "Specialists put those methods to work on Syrian questions in health, data, media, software and the shape of its cities, and publish what holds.",
     },
   },
   {
-    index: { ar: "03 / ابنِ", en: "03 / BUILD" },
-    title: { ar: "حوّل القدرة إلى مشروع.", en: "Turn capability into enterprise." },
+    index: { ar: "ابنِ", en: "BUILD" },
+    title: { ar: "حوّل القدرة إلى مشروع", en: "Turn capability into enterprise" },
     body: {
       ar: "تنقل ريادة الأعمال والشراكات المؤسسية العمل المثبت إلى شركات وخدمات وقدرات عامة تستمر بعد انتهاء البرنامج.",
       en: "Entrepreneurship and institutional partnership carry proven work into companies, services and public capacity that outlast the programme that started them.",

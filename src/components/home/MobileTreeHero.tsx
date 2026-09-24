@@ -538,7 +538,7 @@ const COMMUNITY_ICONS = [
 
 const OPENING_LINES = {
   ar: ["ذكاء", "وريادة", "لوطن", "ينهض"],
-  en: ["Intelligence", "and entrepreneurship", "for a nation", "on the rise."],
+  en: ["Intelligence", "and entrepreneurship", "for a nation", "on the rise"],
 } as const;
 
 /** Abu Al-Joud: a line for each beat, shown for a few seconds as the beat arrives. */

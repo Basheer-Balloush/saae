@@ -83,8 +83,10 @@ function CertificatePage() {
         copyChildren={
           <p className="cert-print" style={{ marginTop: 26 }}>
             <button type="button" className="action action-secondary" onClick={() => window.print()}>
-              <Printer className="h-4 w-4" />
-              {tr.printCertificate}
+              <span className="btn-content">
+                <Printer className="h-4 w-4" />
+                <span>{tr.printCertificate}</span>
+              </span>
             </button>
           </p>
         }

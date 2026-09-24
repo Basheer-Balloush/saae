@@ -33,12 +33,6 @@ const DesktopPartnerCarouselLazy = React.lazy(() =>
   })),
 );
 
-const DesktopMotionFooterLazy = React.lazy(() =>
-  import("@/components/home/DesktopMotionFooter").then((m) => ({
-    default: m.DesktopMotionFooter,
-  })),
-);
-
 const DesktopSectionGuideLazy = React.lazy(() =>
   import("@/components/home/DesktopSectionGuide").then((m) => ({
     default: m.DesktopSectionGuide,
@@ -148,9 +142,6 @@ function DesktopHome({
         <DesktopSectionGuideLazy />
       </Suspense>
       <DesktopFaqScroll />
-      <Suspense fallback={null}>
-        <DesktopMotionFooterLazy />
-      </Suspense>
     </>
   );
 }

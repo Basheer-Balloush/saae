@@ -234,7 +234,6 @@ export function MobileMissionReel({
                 ref={(el) => {
                   wordRefs.current[i] = el;
                 }}
-                data-step={String(i + 1).padStart(2, "0")}
                 data-caption={CAPTIONS[lang][i]}
                 className={i === 0 ? "is-current" : undefined}
               >

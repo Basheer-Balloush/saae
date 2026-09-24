@@ -81,7 +81,12 @@ p { margin: 0; }
 @keyframes language-loader-out { to { opacity: 0; transform: scale(.97); filter: blur(2px); } }
 
 main { position: relative; z-index: 1; }
-section { padding-block: var(--initiative-gap); }
+/* Scoped to main: a bare `section` selector also matched the toast region
+   React renders at the end of <body>, which is a <section>, giving an empty
+   overlay 2x164px of padding and a blank strip below the footer. Every section
+   of this page is inside <main>, and at (0,0,2) this still loses to the
+   class-based overrides below, as the bare selector did. */
+main section { padding-block: var(--initiative-gap); }
 
 /* Section heads: eyebrow, display title, standfirst, rule. */
 .head { max-width: 880px; margin-bottom: clamp(44px, 6vw, 84px); }
@@ -413,7 +418,7 @@ html[dir="rtl"] .footer-col-title { letter-spacing: 0; word-spacing: .12em; }
   .footer-main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 660px) {
-  section { padding-block: clamp(64px, 16vw, 96px); }
+  main section { padding-block: clamp(64px, 16vw, 96px); }
   .initiative-hero { min-height: auto; padding: 132px 20px 90px; }
   .hero-tree-stage { min-height: 340px; }
   .ghost-million { top: 96px; }

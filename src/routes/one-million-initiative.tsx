@@ -428,8 +428,8 @@ function GoalsGrid({ goals }: { goals: ReadonlyArray<{ title: string; body: stri
           className="group rounded-3xl border border-border bg-card p-7 transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-soft"
         >
           <div className="flex items-start gap-4">
-            <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-primary/10 text-base font-bold text-primary">
-              {String(i + 1).padStart(2, "0")}
+            <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Target className="h-5 w-5" />
             </span>
             <div>
               <h3 className="text-lg font-bold text-foreground">{g.title}</h3>
@@ -576,10 +576,7 @@ function Collaboration({
             key={i}
             className="rounded-3xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-soft"
           >
-            <span className="text-5xl font-bold text-primary/20">
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <h3 className="mt-2 text-xl font-bold">{it.title}</h3>
+            <h3 className="text-xl font-bold">{it.title}</h3>
             <p className="mt-4 text-sm leading-loose text-muted-foreground">
               {it.body}
             </p>

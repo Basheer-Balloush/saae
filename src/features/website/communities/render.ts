@@ -39,7 +39,6 @@ export type CommunityPageData = {
 export const COMMUNITY_NEWS_COLUMNS =
   "id,title,title_ar,title_en,excerpt,excerpt_ar,excerpt_en,category,published_at,image_url";
 
-const pad = (n: number) => String(n).padStart(2, "0");
 const b = (t: Bilingual) => bilingualHtml(t.en, t.ar);
 const ARROW =
   '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -60,8 +59,8 @@ function titleHtml(short: Bilingual): string {
   const line = (text: string, accent = false) =>
     `<span class="community-title-line${accent ? " community-title-accent" : ""}">${escapeHtml(text)}</span>`;
   return (
-    `<span data-db-lang="en">${line(short.en)}${line("Community.", true)}</span>` +
-    `<span data-db-lang="ar" dir="rtl">${line("مجتمع", true)}${line(`${short.ar}.`)}</span>`
+    `<span data-db-lang="en">${line(short.en)}${line("Community", true)}</span>` +
+    `<span data-db-lang="ar" dir="rtl">${line("مجتمع", true)}${line(`${short.ar}`)}</span>`
   );
 }
 
@@ -100,7 +99,7 @@ const CHEVRON =
 function pagerLinkHtml(n: CommunityNeighbour, dir: "prev" | "next"): string {
   const label =
     dir === "prev" ? bilingualHtml("Previous", "السابق") : bilingualHtml("Next", "التالي");
-  return `<a class="community-pager-link is-${dir}" href="/communities/${encodeURIComponent(n.key)}" rel="${dir}"><span class="community-pager-dir">${CHEVRON}${label}</span><span class="community-pager-name"><b dir="ltr">${pad(n.index)}</b> ${b(n.name)}</span></a>`;
+  return `<a class="community-pager-link is-${dir}" href="/communities/${encodeURIComponent(n.key)}" rel="${dir}"><span class="community-pager-dir">${CHEVRON}${label}</span><span class="community-pager-name">${b(n.name)}</span></a>`;
 }
 
 /* The contact/About composition: light two-tone copy beside a mark stage,
@@ -111,7 +110,7 @@ function heroHtml(p: CommunityPageData): string {
     `  <span class="hero-glow hero-glow-a" aria-hidden="true"></span>`,
     `  <span class="hero-glow hero-glow-b" aria-hidden="true"></span>`,
     `  <div class="community-hero-copy">`,
-    `    <p class="community-label">${bilingualHtml("SAAE communities", "مجتمعات SAAE")}<span class="community-label-n" dir="ltr">${pad(p.index)} / ${pad(p.total)}</span></p>`,
+    `    <p class="community-label">${bilingualHtml("SAAE communities", "مجتمعات SAAE")}</p>`,
     `    <h1 class="community-title">${titleHtml(p.shortName)}</h1>`,
     `    <p class="community-tagline">${b(p.tagline)}</p>`,
     `    <p class="community-intro">${b(p.mission)}</p>`,
@@ -119,7 +118,6 @@ function heroHtml(p: CommunityPageData): string {
     `  </div>`,
     `  <div class="community-markstage" aria-hidden="true">`,
     `    <span class="community-ghost">${bilingualHtml("COMMUNITY", "مجتمع")}</span>`,
-    `    <p class="photo-head community-mark">${pad(p.index)}</p>`,
     `    ${rootsSvg(p)}`,
     `  </div>`,
     `  <nav class="community-pager">`,

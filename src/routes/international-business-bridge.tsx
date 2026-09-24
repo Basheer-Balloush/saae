@@ -225,9 +225,6 @@ function IbbPage() {
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="flex-1 pt-1.5 text-base sm:text-lg leading-relaxed">
-                    <span className={`${l === "ar" ? "ml-2" : "mr-2"} text-sm font-semibold text-primary tabular-nums`}>
-                      {String(i + 1).padStart(2, "0")}.
-                    </span>
                     {text}
                   </div>
                 </li>

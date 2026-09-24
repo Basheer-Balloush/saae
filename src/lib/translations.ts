@@ -143,7 +143,7 @@ export const translations: Record<Lang, Dict> = {
     },
     achievements: {
       eyebrow: "Our impact",
-      title: "Building Syria's future, line by line.",
+      title: "Building Syria's future, line by line",
       body: "Through education, open research, and entrepreneurship, we are rebuilding technological capacity across Syria — empowering a generation of students, researchers, and founders with the tools, mentorship, and confidence to shape what comes next.",
       stats: [
         { value: "5,000+", label: "Learners" },
@@ -307,7 +307,7 @@ export const translations: Record<Lang, Dict> = {
     },
     achievements: {
       eyebrow: "أثرنا",
-      title: "نبني مستقبل سورية سطراً بسطر.",
+      title: "نبني مستقبل سورية سطراً بسطر",
       body: "من خلال التعليم والبحث المفتوح وريادة الأعمال، نعيد بناء القدرة التكنولوجية في سورية، ونمكّن جيلاً من الطلاب والباحثين والمؤسسين بالأدوات والإرشاد والثقة لصياغة ما هو قادم.",
       stats: [
         { value: "+5,000", label: "متدرب" },

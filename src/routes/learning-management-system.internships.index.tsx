@@ -66,7 +66,6 @@ function PublicInternshipsList() {
     <>
       <SubHero
         id="intern-title"
-        eyebrow={t.internshipsTitle}
         titleSpans={ar ? ["تدرّب", "على عمل حقيقي"] : ["Train", "on real work"]}
         lede={t.internshipsSubtitle}
         copyChildren={
@@ -89,7 +88,11 @@ function PublicInternshipsList() {
               aria-label={ar ? "ابحث في الفرص المتاحة" : "Search opportunities"}
               dir="auto"
             />
-            <button type="submit">{ar ? "ابحث" : "Search"}</button>
+            <button type="submit">
+              <span className="btn-content">
+                <span>{ar ? "ابحث" : "Search"}</span>
+              </span>
+            </button>
           </form>
         }
       />
@@ -106,7 +109,9 @@ function PublicInternshipsList() {
             <div className="state-box">
               <p>{t.errorLoad}</p>
               <button type="button" className="action action-secondary" onClick={() => void refetch()}>
-                {t.errorRetry}
+                <span className="btn-content">
+                  <span>{t.errorRetry}</span>
+                </span>
               </button>
             </div>
           )}
@@ -126,11 +131,15 @@ function PublicInternshipsList() {
               {totalPages > 1 && (
                 <nav className="lms-pager" aria-label="Pagination">
                   <button type="button" className="action action-secondary" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
-                    {ar ? "→ السابق" : "← Previous"}
+                    <span className="btn-content">
+                      <span>{ar ? "السابق" : "Previous"}</span>
+                    </span>
                   </button>
                   <span>{ar ? `الصفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}</span>
                   <button type="button" className="action action-secondary" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
-                    {ar ? "التالي ←" : "Next →"}
+                    <span className="btn-content">
+                      <span>{ar ? "التالي" : "Next"}</span>
+                    </span>
                   </button>
                 </nav>
               )}

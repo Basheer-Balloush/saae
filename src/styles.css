@@ -615,3 +615,26 @@ html {
     margin-inline: auto;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Tap-target floor (WCAG 2.2 AA 2.5.8, Target Size Minimum: 24x24 CSS px).
+   The public pages' footer and contact links set a small type size at a
+   tight line height, which leaves them 18-20px tall on a phone. That footer
+   markup is repeated in each cinematic page's own stylesheet, so rather than
+   patch every copy, the floor is set once here, in the one stylesheet every
+   public page loads. Only the touch box grows: the type is untouched, and
+   inline-flex keeps each link on its own line exactly as before.
+   :any-link limits it to real links, so an anchor used as a plain label is
+   not stretched. The map credit ("(c) OpenStreetMap contributors") is left
+   as it is, under the rule's inline exception for a target inside a
+   sentence.
+--------------------------------------------------------------------------- */
+footer.site-footer .footer-col a:any-link,
+footer.site-footer .map-lines a:any-link,
+footer.site-footer .map-visit:any-link,
+.map-note a:any-link,
+.aside-highlight > a:any-link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 24px;
+}

@@ -1,7 +1,13 @@
+/* Every page carries its own static footer in its markup and a mount point
+   directly above it. Once the motion footer has portalled in, the static one
+   steps aside; if the chunk never loads, it stays and the page still has a
+   footer. The class is what each page's mount point carries, so one rule
+   covers the whole site; the two ids are the original homepage and about
+   mounts, kept so their markup keeps working. */
+.motion-footer-root:not(:empty) + .home-footer-fallback,
 #home-motion-footer-root:not(:empty) + .home-footer-fallback,
 #about-motion-footer-root:not(:empty) + .home-footer-fallback,
-#partners-motion-footer-root:not(:empty) + .home-footer-fallback,
-#contact-motion-footer-root:not(:empty) + .home-footer-fallback {
+#partners-motion-footer-root:not(:empty) + .home-footer-fallback {
   display: none;
 }
 
@@ -212,21 +218,7 @@
 
 [dir="rtl"] .hmf-assistant-copy h2 {
   letter-spacing: 0;
-  line-height: 1.35;
-  overflow: visible;
-}
-
-/* Arabic display glyphs extend above and below the Latin font box. Give the
-   photo-filled title its own paint space so the hamza and letter terminals
-   remain fully visible instead of being clipped by background-clip:text. */
-[dir="rtl"] .hmf-assistant-copy .hmf-title {
-  display: inline-block;
-  width: max-content;
-  max-width: 100%;
-  padding-block: .16em .2em;
-  padding-inline: .08em;
-  white-space: nowrap;
-  text-wrap: nowrap;
+  line-height: 1.22;
 }
 
 .hmf-intro {
@@ -499,6 +491,12 @@
 
 .hmf-link-column a,
 .hmf-contact a {
+  /* 0.75rem at 1.65 leaves a 20px-tall link — under the 24px WCAG 2.2 AA
+     minimum. The type stays as it is; only the touch box grows. The column's
+     7px grid gap keeps neighbouring targets from meeting. */
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 24px;
   color: var(--hmf-muted);
   font-size: 0.75rem;
   line-height: 1.65;
@@ -604,6 +602,7 @@
     height: auto;
     min-height: 0;
     clip-path: none;
+    overflow-x: clip;
   }
 
   .hmf-footer {
@@ -679,7 +678,8 @@
 
   .hmf-assistant-character {
     min-height: 330px;
-    width: min(330px, 92vw);
+    width: min(330px, 100%);
+    max-width: 100%;
   }
 
   .hmf-assistant-character img {
@@ -719,6 +719,30 @@
   .hmf-giant-word {
     bottom: 1%;
     font-size: clamp(8rem, 42vw, 12rem);
+  }
+}
+
+@media (max-width: 380px) {
+  .hmf-shell {
+    width: min(100% - 24px, 560px);
+    padding: 96px 0 20px;
+  }
+  .hmf-assistant-copy h2 {
+    font-size: clamp(2rem, 10vw, 2.35rem);
+  }
+  .hmf-assistant-character {
+    min-height: 290px;
+    width: 100%;
+    max-width: 290px;
+  }
+  .hmf-assistant-character img {
+    width: min(210px, 75%);
+  }
+  .hmf-giant-word {
+    font-size: clamp(6.5rem, 36vw, 9rem);
+  }
+  .hmf-information {
+    gap: 24px 16px;
   }
 }
 

@@ -85,13 +85,14 @@ function ApplyPage() {
     return (
       <SubHero
         id="apply-error-title"
-        eyebrow={t.internshipsTitle}
         titleSpans={[loadErr]}
         titleClassName="course-page-title"
         copyChildren={
           <p style={{ marginTop: 28 }}>
             <Link to="/learning-management-system/internships" className="action action-primary">
-              {t.internshipsTitle}
+              <span className="btn-content">
+                <span>{t.internshipsTitle}</span>
+              </span>
             </Link>
           </p>
         }
@@ -170,7 +171,6 @@ function ApplyPage() {
     <>
       <SubHero
         id="apply-title"
-        eyebrow={t.internshipsTitle}
         titleSpans={[t.applyReviewTitle]}
         titleClassName="course-page-title"
         lede={t.applyReviewNotice}
@@ -314,14 +314,10 @@ function ApplyPage() {
 
           <div className="apply-bar">
             <button type="button" className="auth-submit" disabled={cannotApply || submitting} onClick={onSubmit}>
-              {submitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {t.applySubmitting}
-                </>
-              ) : (
-                t.applySubmit
-              )}
+              <span className="btn-content">
+                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                <span>{submitting ? t.applySubmitting : t.applySubmit}</span>
+              </span>
             </button>
           </div>
         </div>
@@ -367,7 +363,9 @@ function BlockNotice({
         ctx.missing_required_profile_fields.length > 0 ||
         ctx.cv_missing) && (
         <Link to="/learning-management-system/profile" className="action action-secondary">
-          {t.applyProfileIncompleteAction}
+          <span className="btn-content">
+            <span>{t.applyProfileIncompleteAction}</span>
+          </span>
         </Link>
       )}
     </div>

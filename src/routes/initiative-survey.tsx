@@ -324,7 +324,7 @@ function SurveyPage() {
             </div>
           </Section>
 
-          <Section title="١. من أين سمعت عن المبادرة؟">
+          <Section title="من أين سمعت عن المبادرة؟">
             <RadioList
               value={form.heard_from}
               onChange={(v) => setForm({ ...form, heard_from: v })}
@@ -339,7 +339,7 @@ function SurveyPage() {
             )}
           </Section>
 
-          <Section title="٢. كيف تصف علاقتك الحالية بأدوات الذكاء الاصطناعي؟">
+          <Section title="كيف تصف علاقتك الحالية بأدوات الذكاء الاصطناعي؟">
             <RadioList
               value={form.ai_relationship}
               onChange={(v) => setForm({ ...form, ai_relationship: v })}
@@ -358,7 +358,7 @@ function SurveyPage() {
             )}
           </Section>
 
-          <Section title="٣. ما أكثر ما ترغب بتعلّمه؟ (اختر حتى 3 خيارات)">
+          <Section title="ما أكثر ما ترغب بتعلّمه؟ (اختر حتى 3 خيارات)">
             <div className="space-y-2">
               {INTERESTS.map((opt) => {
                 const checked = form.learning_interests.includes(opt);
@@ -382,7 +382,7 @@ function SurveyPage() {
             )}
           </Section>
 
-          <Section title="٤. ما أكبر عائق يمنعك من التعلّم بجدية؟">
+          <Section title="ما أكبر عائق يمنعك من التعلّم بجدية؟">
             <RadioList
               value={form.biggest_obstacle}
               onChange={(v) => setForm({ ...form, biggest_obstacle: v })}
@@ -397,7 +397,7 @@ function SurveyPage() {
             )}
           </Section>
 
-          <Section title="٥. ما الطريقة الأنسب لك للتعلّم؟">
+          <Section title="ما الطريقة الأنسب لك للتعلّم؟">
             <RadioList
               value={form.learning_method}
               onChange={(v) => setForm({ ...form, learning_method: v })}
@@ -412,11 +412,11 @@ function SurveyPage() {
             )}
           </Section>
 
-          <Section title="٦. ما الجهاز الذي ستستخدمه غالبًا؟">
+          <Section title="ما الجهاز الذي ستستخدمه غالبًا؟">
             <RadioList value={form.device} onChange={(v) => setForm({ ...form, device: v })} options={DEVICES} />
           </Section>
 
-          <Section title="٧. مدى التزامك بإكمال مسار كامل؟">
+          <Section title="مدى التزامك بإكمال مسار كامل؟">
             <div className="flex items-center justify-between gap-3">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
@@ -439,7 +439,7 @@ function SurveyPage() {
             </div>
           </Section>
 
-          <Section title="٨. السبب الأساسي للتسجيل في مبادرة مليون مستخدم ذكاء اصطناعي سوري؟">
+          <Section title="السبب الأساسي للتسجيل في مبادرة مليون مستخدم ذكاء اصطناعي سوري؟">
             <RadioList
               value={form.main_motivation}
               onChange={(v) => setForm({ ...form, main_motivation: v })}
@@ -454,7 +454,7 @@ function SurveyPage() {
             )}
           </Section>
 
-          <Section title="٩. ما وضعك الحالي؟">
+          <Section title="ما وضعك الحالي؟">
             <RadioList
               value={form.current_status}
               onChange={(v) => setForm({ ...form, current_status: v })}
@@ -506,7 +506,7 @@ function SurveyPage() {
             )}
           </Section>
 
-          <Section title="١٠. هل لديك ملاحظة أو اقتراح أو سؤال؟">
+          <Section title="هل لديك ملاحظة أو اقتراح أو سؤال؟">
             <Textarea
               rows={4}
               value={form.extra_notes}

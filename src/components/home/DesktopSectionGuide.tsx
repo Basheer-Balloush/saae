@@ -20,7 +20,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
   ar: [
     {
       ...SHARED.ar,
-      section: "01 / البداية",
+      section: "البداية",
       greeting: "أهلاً، أنا أبو الجود. سأرافقك في هذه الرحلة.",
       title: "ذكاء وريادة لوطن ينهض",
       body: "نبدأ من رؤية الجمعية: معرفة وتقنية وريادة أعمال تتحول إلى قدرة عملية تبني مستقبل سورية.",
@@ -29,7 +29,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
     },
     {
       ...SHARED.ar,
-      section: "02 / مجتمعات الجمعية",
+      section: "مجتمعات الجمعية",
       greeting: "هنا تبدأ جذور المعرفة والتخصص.",
       title: "تسعة مجتمعات، أساس واحد",
       body: "تجمع مجتمعاتنا الخبراء والمهتمين في البيانات والصحة والمدن والبرمجيات وغيرها، ليعمل كل تخصص ضمن شبكة واحدة.",
@@ -38,7 +38,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
     },
     {
       ...SHARED.ar,
-      section: "03 / المنصة التعليمية",
+      section: "المنصة التعليمية",
       greeting: "ومن هذه الجذور ينمو التعلّم.",
       title: "تعلّم ينمو من مجتمعاتنا",
       body: "مسارات ودورات تدريبية معتمدة تنقل المعرفة من الفكرة إلى مهارات مهنية وتقنية قابلة للتطبيق.",
@@ -47,7 +47,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
     },
     {
       ...SHARED.ar,
-      section: "04 / إنجازات الجمعية",
+      section: "إنجازات الجمعية",
       greeting: "الأثر يظهر في الأرقام والناس.",
       title: "مجتمع يتجاوز 5,000 متعلم",
       body: "أكثر من 120 دورة، وثلاثون شريكاً استراتيجياً، وتسعة مجتمعات تعمل معاً لتوسيع أثر المعرفة.",
@@ -56,7 +56,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
     },
     {
       ...SHARED.ar,
-      section: "05 / مبادرة المليون",
+      section: "مبادرة المليون",
       greeting: "وهنا تتحول الرؤية إلى خطوة وطنية.",
       title: "مليون شخص، خطوة إلى الأمام",
       body: "مبادرة وطنية لتمكين مليون سوري من استخدام الذكاء الاصطناعي بثقة في العمل والدراسة والحياة اليومية.",
@@ -65,7 +65,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
     },
     {
       ...SHARED.ar,
-      section: "06 / إلى كل سورية",
+      section: "إلى كل سورية",
       greeting: "وتصل الرحلة من دمشق إلى كل سورية.",
       title: "ننمو معاً في كل سورية",
       body: "تحمل المجتمعات والمبادرات المعرفة إلى الناس في مختلف المحافظات، لتصبح التقنية فرصة مشتركة للجميع.",
@@ -76,7 +76,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
   en: [
     {
       ...SHARED.en,
-      section: "01 / The beginning",
+      section: "The beginning",
       greeting: "Hello, I am Abu Al-Joud. I will guide you through this journey.",
       title: "Intelligence and entrepreneurship for a nation on the rise",
       body: "We begin with SAAE's vision: knowledge, technology and entrepreneurship becoming practical capability for Syria's future.",
@@ -85,7 +85,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
     },
     {
       ...SHARED.en,
-      section: "02 / SAAE communities",
+      section: "SAAE communities",
       greeting: "The roots of knowledge and expertise begin here.",
       title: "Nine communities, one foundation",
       body: "Our communities connect specialists across data, health, cities, software and more, working together as one network.",
@@ -94,7 +94,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
     },
     {
       ...SHARED.en,
-      section: "03 / Learning platform",
+      section: "Learning platform",
       greeting: "Learning grows from those roots.",
       title: "Learning, grown from our communities",
       body: "Certified learning paths turn knowledge into professional and technical skills that people can put to work.",
@@ -103,7 +103,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
     },
     {
       ...SHARED.en,
-      section: "04 / SAAE achievements",
+      section: "SAAE achievements",
       greeting: "Impact becomes visible through people and results.",
       title: "A community of 5,000+ learners",
       body: "More than 120 courses, 30 strategic partners and nine communities work together to broaden the reach of practical knowledge.",
@@ -112,7 +112,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
     },
     {
       ...SHARED.en,
-      section: "05 / Million-user initiative",
+      section: "Million-user initiative",
       greeting: "Here, the vision becomes a national step.",
       title: "One million people, one step forward",
       body: "A national initiative enabling one million Syrians to use AI confidently at work, in study and in everyday life.",
@@ -121,7 +121,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
     },
     {
       ...SHARED.en,
-      section: "06 / Across Syria",
+      section: "Across Syria",
       greeting: "The journey reaches from Damascus across Syria.",
       title: "Growing together across Syria",
       body: "Communities and initiatives carry knowledge across the country, making technology a shared opportunity for everyone.",

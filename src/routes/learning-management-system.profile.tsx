@@ -141,7 +141,7 @@ function ProfilePage() {
         copyChildren={
           <p style={{ marginTop: 26 }}>
             <button type="button" className="action action-primary" onClick={load}>
-              <RefreshCw className="h-4 w-4" /> {t.errorRetry}
+              <RefreshCw className="h-4 w-4" /> <span>{t.errorRetry}</span>
             </button>
           </p>
         }
@@ -337,7 +337,7 @@ function IdentityCard({
         <div className="form-actions span-2">
           <button type="submit" className="action action-primary" disabled={saving}>
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {t.profileSave}
+            <span>{t.profileSave}</span>
           </button>
         </div>
       </form>
@@ -413,12 +413,12 @@ function AvatarCard({
       <div className="card-actions">
         <button type="button" className="action action-secondary" onClick={onPick} disabled={busy === "upload"}>
           {busy === "upload" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-          {fileId ? (ar ? "تغيير الصورة" : "Change photo") : ar ? "رفع صورة" : "Upload photo"}
+          <span>{fileId ? (ar ? "تغيير الصورة" : "Change photo") : ar ? "رفع صورة" : "Upload photo"}</span>
         </button>
         {fileId && (
           <button type="button" className="action action-secondary is-danger" onClick={onClear} disabled={busy === "clear"}>
             {busy === "clear" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-            {ar ? "إزالة" : "Remove"}
+            <span>{ar ? "إزالة" : "Remove"}</span>
           </button>
         )}
       </div>
@@ -503,17 +503,17 @@ function CvCard({
       <div className="cv-actions">
         <button type="button" className="action action-primary" onClick={onPick} disabled={busy === "upload"}>
           {busy === "upload" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-          {fileId ? t.profileReplaceCv : t.profileUploadCv}
+          <span>{fileId ? t.profileReplaceCv : t.profileUploadCv}</span>
         </button>
         {fileId && (
           <>
             <button type="button" className="action action-secondary" onClick={onView} disabled={busy === "view"}>
               {busy === "view" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {t.profileViewCv}
+              <span>{t.profileViewCv}</span>
             </button>
             <button type="button" className="action action-secondary is-danger" onClick={onClear} disabled={busy === "clear"}>
               {busy === "clear" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-              {ar ? "إزالة" : "Remove"}
+              <span>{ar ? "إزالة" : "Remove"}</span>
             </button>
           </>
         )}
@@ -732,7 +732,8 @@ function ApplicationsCard({ lang }: { lang: "ar" | "en" }) {
                   <span className={`status ${statusClass(r.status)}`}>{statusLabel(r.status)}</span>
                   {canWithdraw(r.status) && (
                     <button type="button" className="action action-secondary" onClick={() => onWithdraw(r.id)} disabled={busy === r.id}>
-                      {busy === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : t.applyWithdraw}
+                      {busy === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+                      <span>{t.applyWithdraw}</span>
                     </button>
                   )}
                 </span>

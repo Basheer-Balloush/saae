@@ -78,7 +78,6 @@ function VerifyPage() {
     <>
       <SubHero
         id="verify-title"
-        eyebrow={ar ? "الشهادات" : "Certificates"}
         titleSpans={ar ? ["تحقّق", "من أي شهادة"] : ["Verify", "any certificate"]}
         lede={
           ar
@@ -106,8 +105,10 @@ function VerifyPage() {
             onChange={(e) => setSerial(e.target.value)}
           />
           <button type="submit" disabled={!canSubmit}>
-            {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-            {tr.verify}
+            <span className="btn-content">
+              {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+              <span>{tr.verify}</span>
+            </span>
           </button>
         </form>
       </SubHero>
@@ -149,8 +150,10 @@ function VerifyPage() {
               <AlertTriangle aria-hidden="true" />
               {tr.verifyError}
               <button type="button" className="action action-secondary" onClick={() => void run()} disabled={!canSubmit}>
-                <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                {tr.verifyRetry}
+                <span className="btn-content">
+                  <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                  <span>{tr.verifyRetry}</span>
+                </span>
               </button>
             </div>
           )}

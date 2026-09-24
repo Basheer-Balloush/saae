@@ -21,9 +21,6 @@ export function FaqSection() {
                     aria-expanded="true"
                     aria-controls="faq-a1"
                   >
-                    <span className="faq-num" aria-hidden="true">
-                      01
-                    </span>
                     <span className="faq-question">Who is SAAE for?</span>
                     <span className="faq-sign" aria-hidden="true"></span>
                   </button>
@@ -47,9 +44,6 @@ export function FaqSection() {
                     aria-expanded="false"
                     aria-controls="faq-a2"
                   >
-                    <span className="faq-num" aria-hidden="true">
-                      02
-                    </span>
                     <span className="faq-question">Do I need technical experience?</span>
                     <span className="faq-sign" aria-hidden="true"></span>
                   </button>
@@ -73,9 +67,6 @@ export function FaqSection() {
                     aria-expanded="false"
                     aria-controls="faq-a3"
                   >
-                    <span className="faq-num" aria-hidden="true">
-                      03
-                    </span>
                     <span className="faq-question">How do I take part?</span>
                     <span className="faq-sign" aria-hidden="true"></span>
                   </button>
@@ -99,9 +90,6 @@ export function FaqSection() {
                     aria-expanded="false"
                     aria-controls="faq-a4"
                   >
-                    <span className="faq-num" aria-hidden="true">
-                      04
-                    </span>
                     <span className="faq-question">Can an organisation work with SAAE?</span>
                     <span className="faq-sign" aria-hidden="true"></span>
                   </button>
@@ -125,9 +113,6 @@ export function FaqSection() {
                     aria-expanded="false"
                     aria-controls="faq-a5"
                   >
-                    <span className="faq-num" aria-hidden="true">
-                      05
-                    </span>
                     <span className="faq-question">Where will updates be published?</span>
                     <span className="faq-sign" aria-hidden="true"></span>
                   </button>

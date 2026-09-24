@@ -71,7 +71,8 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
     >
       <div className="flex w-full items-center justify-between gap-3 px-4 py-3 sm:gap-6 sm:px-6 lg:px-10">
         <a
-          href="/#home"
+          /* There is no #home anchor on any page; the logo goes to the top of home. */
+          href="/"
           className="relative flex min-w-0 shrink-0 items-center"
           aria-label="SAAIE — Syrian Association for AI & Entrepreneurship"
         >
@@ -174,7 +175,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                 );
               }
               return (
-                <a key={s} href={`/#${s}`} className={linkClass}>
+                <a key={s} href={s === "home" ? "/" : `/#${s}`} className={linkClass}>
                   {t.nav[s]}
                   {underline}
                 </a>
@@ -275,7 +276,7 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
                 return (
                   <a
                     key={s}
-                    href={`/#${s}`}
+                    href={s === "home" ? "/" : `/#${s}`}
                     onClick={() => setOpen(false)}
                     className="flex min-h-[44px] items-center rounded-md px-4 py-3 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
                   >

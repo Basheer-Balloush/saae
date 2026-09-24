@@ -56,9 +56,6 @@ export function FaqSequence({ lang }: { lang: Locale }) {
             >
               <h3 className="faq-heading">
                 <span className="faq-trigger">
-                  <span className="faq-num" aria-hidden="true">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
                   <span className="faq-question">{pick(faq.question, lang)}</span>
                 </span>
               </h3>

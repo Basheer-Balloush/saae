@@ -943,6 +943,7 @@ html:has(.mobile-home .mh-hero-loader) {
   transform-origin: right center;
 }
 .mobile-home .mh-mission-words span::before {
+  display: none;
   content: attr(data-step);
   position: absolute;
   z-index: -1;

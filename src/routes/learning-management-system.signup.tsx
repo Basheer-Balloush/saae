@@ -165,7 +165,7 @@ function LmsSignup() {
           {result.confirmationRequired && (
             <button type="button" className="auth-secondary" onClick={onResend} disabled={resending}>
               {resending && <Loader2 className="h-4 w-4 animate-spin" />}
-              {ar ? "إعادة إرسال رابط التأكيد" : "Resend confirmation email"}
+              <span>{ar ? "إعادة إرسال رابط التأكيد" : "Resend confirmation email"}</span>
             </button>
           )}
 
@@ -242,7 +242,7 @@ function LmsSignup() {
             </fieldset>
             <button type="submit" className="auth-submit" disabled={submitting}>
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {tr.signUp}
+              <span>{tr.signUp}</span>
             </button>
           </form>
           <p className="auth-alt">

@@ -20,10 +20,10 @@ export function CinematicHero() {
         <span className="ribbon-org">Syrian Association for AI &amp; Entrepreneurship</span>
       </a>
       <nav className="ribbon-nav" aria-label="Landing page sections">
-        <a href="#news"><span>01</span>News</a>
-        <a href="#partners"><span>02</span>Partners</a>
-        <a href="#mission"><span>03</span>How we work</a>
-        <a href="#faq"><span>04</span>Answers</a>
+        <a href="#news">News</a>
+        <a href="#partners">Partners</a>
+        <a href="#mission">How we work</a>
+        <a href="#faq">Answers</a>
       </nav>
       <nav className="ribbon-pages" aria-label="Site pages">
         <Link to="/about">About</Link>
@@ -73,13 +73,13 @@ export function CinematicHero() {
             <article className="hero-band is-active" data-band="0">
               <div className="hero-card-copy">
                 <p className="eyebrow">Syrian Association for AI &amp; Entrepreneurship</p>
-                <h2 data-hero-opening-title><span className="hero-opening-line">Intelligence and entrepreneurship for a nation on the rise.</span></h2>
+                <h2 data-hero-opening-title><span className="hero-opening-line">Intelligence and entrepreneurship for a nation on the rise</span></h2>
               </div>
             </article>
             <article className="hero-band" data-band="1" aria-hidden="true">
               <div className="hero-card-copy">
                 <p className="eyebrow">The learning platform</p>
-                <h2>Structured pathways, not scattered tutorials.</h2>
+                <h2>Structured pathways, not scattered tutorials</h2>
                 <p>Certified training tracks that build professional and technical skill, open to anyone in Syria.</p>
                 <Link className="button-link" to="/contact" hash="write">
                   Ask about learning
@@ -157,7 +157,7 @@ export function CinematicHero() {
         <img className="static-frame" id="static-frame" alt="The SAAE Tree of Knowledge connected through illuminated roots" width="1280" height="720" decoding="async" fetchPriority="high" />
         <div className="page-shell static-copy">
           <p className="eyebrow">Syrian Association for AI &amp; Entrepreneurship</p>
-          <h2 className="photo-head">Build Syria's AI future.</h2>
+          <h2 className="photo-head">Build Syria's AI future</h2>
           <p>Practical AI learning, research and entrepreneurship, connected for people across Syria.</p>
           <div className="static-actions">
             <Link className="button-link" to="/initiative">

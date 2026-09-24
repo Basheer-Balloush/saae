@@ -99,9 +99,6 @@ export function QuizMenu({ list, courseId, ar, onBack }: Props) {
             return (
               <article key={q.id} className={`quiz-menu-card${q.has_passed ? " is-passed" : ""}`}>
                 <div className="quiz-card-top">
-                  <span className="quiz-card-index" aria-hidden="true">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
                   <span
                     className={`quiz-status${q.has_passed ? " is-passed" : exhausted ? " is-locked" : ""}`}
                   >

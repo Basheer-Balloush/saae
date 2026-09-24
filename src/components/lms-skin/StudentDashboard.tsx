@@ -175,7 +175,6 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
     <>
       <SubHero
         id="student-title"
-        eyebrow={ar ? "لوحة الطالب" : "Student dashboard"}
         titleSpans={[tr.myCourses]}
         lede={
           ar
@@ -250,7 +249,9 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
               <div className="state-box">
                 <p>{tr.noEnrollments}</p>
                 <Link to="/learning-management-system/catalog" className="action action-primary">
-                  {tr.heroBrowse}
+                  <span className="btn-content">
+                    <span>{tr.heroBrowse}</span>
+                  </span>
                 </Link>
               </div>
             ) : (
@@ -320,7 +321,9 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
               <div className="state-box">
                 <p>{ar ? "لا توجد طلبات بعد" : "No requests yet"}</p>
                 <Link to="/learning-management-system/catalog" className="action action-secondary">
-                  {ar ? "تصفح الدورات" : "Browse courses"}
+                  <span className="btn-content">
+                    <span>{ar ? "تصفح الدورات" : "Browse courses"}</span>
+                  </span>
                 </Link>
               </div>
             ) : (
@@ -353,7 +356,10 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
                         </span>
                         {r.status === "pending" && (
                           <button type="button" className="action action-secondary" onClick={() => cancel(r.id)} disabled={busy === r.id}>
-                            {busy === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : ar ? "إلغاء" : "Cancel"}
+                            <span className="btn-content">
+                              {busy === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                              <span>{ar ? "إلغاء" : "Cancel"}</span>
+                            </span>
                           </button>
                         )}
                         {r.status === "approved" && (
@@ -362,7 +368,9 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
                             params={{ courseId: r.course_id }}
                             className="action action-primary"
                           >
-                            {ar ? "ابدأ التعلّم" : "Start learning"}
+                            <span className="btn-content">
+                              <span>{ar ? "ابدأ التعلّم" : "Start learning"}</span>
+                            </span>
                           </Link>
                         )}
                       </span>

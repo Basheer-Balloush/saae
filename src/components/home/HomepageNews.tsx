@@ -32,7 +32,7 @@ export function HomepageNews({ news, newsFailed = false, lang, embedded = false 
             {stories.map((item, i) => (
               <article className="hn-story" key={item.id}>
                 <a className="hn-story-photo" href={item.href} tabIndex={-1} aria-hidden="true"><img src={resizedImage(item.image, 720)} srcSet={resizedSrcSet(item.image)} sizes="(max-width: 767px) 92vw, 34vw" alt="" width={800} height={500} loading="eager" fetchPriority="low" decoding="async" /></a>
-                <div className="hn-story-meta"><span dir="ltr">{String(i + 1).padStart(2, "0")}</span><time dateTime={item.dateTime}>{pick(item.date, lang)}</time></div>
+                <div className="hn-story-meta"><time dateTime={item.dateTime}>{pick(item.date, lang)}</time></div>
                 <h3><a href={item.href}>{pick(item.headline, lang)}<Arrow size={18} aria-hidden="true" /></a></h3>
                 <p>{pick(item.excerpt, lang)}</p>
                 <div className="hn-story-action">

@@ -32,7 +32,7 @@ export const SHARED = {
 const NEWS_COPY: Record<Locale, GuideCopy> = {
   ar: {
     ...SHARED.ar,
-    section: "07 / آخر الأخبار",
+    section: "آخر الأخبار",
     greeting: "والآن، دعني أعرّفك على آخر ما يحدث.",
     title: "العمل كما يحدث",
     body: "هنا تتابع أحدث أخبار الجمعية ومبادراتها وفعالياتها، من الفكرة الأولى حتى الأثر الذي نصنعه معاً.",
@@ -41,7 +41,7 @@ const NEWS_COPY: Record<Locale, GuideCopy> = {
   },
   en: {
     ...SHARED.en,
-    section: "07 / Latest news",
+    section: "Latest news",
     greeting: "Now let me show you what is happening.",
     title: "The work, as it happens",
     body: "Follow SAAE's latest news, initiatives and events here, from the first idea to the impact we create together.",
@@ -55,7 +55,7 @@ export const SECTION_COPY: Record<Exclude<GuideContext, "hero">, Record<Locale, 
   partners: {
     ar: {
       ...SHARED.ar,
-      section: "08 / شركاء النجاح",
+      section: "شركاء النجاح",
       greeting: "هنا يكبر الأثر بالتعاون.",
       title: "شراكات تحمل المعرفة أبعد",
       body: "تلتقي الجامعات والوزارات والشركات ومنظمات المجتمع مع الجمعية لتوسيع التدريب والمشاريع التطبيقية.",
@@ -64,7 +64,7 @@ export const SECTION_COPY: Record<Exclude<GuideContext, "hero">, Record<Locale, 
     },
     en: {
       ...SHARED.en,
-      section: "08 / Success partners",
+      section: "Success partners",
       greeting: "Here, impact grows through collaboration.",
       title: "Partnerships carry knowledge further",
       body: "Universities, ministries, companies and civil society groups work with SAAE to expand training and applied projects.",
@@ -75,7 +75,7 @@ export const SECTION_COPY: Record<Exclude<GuideContext, "hero">, Record<Locale, 
   mission: {
     ar: {
       ...SHARED.ar,
-      section: "09 / كيف نعمل",
+      section: "كيف نعمل",
       greeting: "هنا تتحول المعرفة إلى فعل.",
       title: "درّب، طبّق، وابنِ",
       body: "تعرض هذه المرحلة طريقة عمل الجمعية: تدريب عملي، تطبيق معرفي، وبناء قدرات يمكن استخدامها مباشرة.",
@@ -84,7 +84,7 @@ export const SECTION_COPY: Record<Exclude<GuideContext, "hero">, Record<Locale, 
     },
     en: {
       ...SHARED.en,
-      section: "09 / How we work",
+      section: "How we work",
       greeting: "Here, knowledge turns into action.",
       title: "Train, apply, and build",
       body: "This section shows how SAAE works: practical training, applied knowledge and capability people can use immediately.",
@@ -95,7 +95,7 @@ export const SECTION_COPY: Record<Exclude<GuideContext, "hero">, Record<Locale, 
   faq: {
     ar: {
       ...SHARED.ar,
-      section: "10 / الأسئلة الشائعة",
+      section: "الأسئلة الشائعة",
       greeting: "إذا خطر لك سؤال، فهذه نقطة البداية.",
       title: "إجابات واضحة قبل البداية",
       body: "هنا تجد أهم الأسئلة حول التسجيل والدورات والمجتمعات والشراكات، بإجابات مباشرة تساعدك على اختيار خطوتك التالية.",
@@ -104,7 +104,7 @@ export const SECTION_COPY: Record<Exclude<GuideContext, "hero">, Record<Locale, 
     },
     en: {
       ...SHARED.en,
-      section: "10 / FAQ",
+      section: "FAQ",
       greeting: "If a question comes to mind, start here.",
       title: "Clear answers before you begin",
       body: "Find direct answers about registration, courses, communities and partnerships so you can choose your next step.",
