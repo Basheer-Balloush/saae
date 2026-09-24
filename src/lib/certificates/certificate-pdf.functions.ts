@@ -6,7 +6,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const gender = z.enum(["male", "female"]);
 
 async function isLmsAdmin(supabase: { rpc: Function }, userId: string): Promise<boolean> {
-  const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "lms_admin" });
+  // admin or lms_admin, the same as the LMS pages' own admin check.
+  const { data } = await supabase.rpc("is_lms_admin", { _user_id: userId });
   return Boolean(data);
 }
 
@@ -116,11 +117,8 @@ export const previewCourseCertificate = createServerFn({ method: "POST" })
     z.object({ courseId: z.string().uuid(), gender }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { data: isInstructor } = await context.supabase.rpc("is_course_instructor", {
-      _user_id: context.userId,
-      _course_id: data.courseId,
-    });
-    if (!isInstructor && !(await isLmsAdmin(context.supabase, context.userId))) throw new Error("forbidden");
+    // Admins only while the PDF certificate is being tested.
+    if (!(await isLmsAdmin(context.supabase, context.userId))) throw new Error("forbidden");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { renderCoursePreviewPdf } = await import("./certificate-pdf.server");
