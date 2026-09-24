@@ -410,7 +410,7 @@
 }
 
 .assistant-chat-message-content p,
-.assistant-chat-typing {
+.assistant-chat-processing {
   margin: 0;
   padding: 12px 14px;
   border: 1px solid var(--assistant-line);
@@ -428,17 +428,21 @@
   background: var(--assistant-cyan);
 }
 
-.assistant-chat-typing {
+.assistant-chat-processing {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   color: var(--assistant-muted);
 }
 
-.assistant-chat-typing svg {
+.assistant-chat-processing svg {
   width: 15px;
   height: 15px;
   color: var(--assistant-cyan);
+}
+
+.assistant-chat-processing span {
+  display: inline-block;
 }
 
 .assistant-chat-error {

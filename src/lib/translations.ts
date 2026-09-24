@@ -24,7 +24,7 @@ type Dict = {
       lead: { title: string; desc: string };
       suggestions: { title: string; desc: string };
     };
-    chat: { name: string; status: string; user: string; bot: string; typing: string };
+    chat: { name: string; status: string; user: string; bot: string; typing: string; thinking: string; analyzing: string };
     greeting: string;
   };
   footer: {
@@ -183,6 +183,8 @@ export const translations: Record<Lang, Dict> = {
         user: "How can my company partner with the association?",
         bot: "Great question! I can connect you with our partnerships team. Could I get your company name and email?",
         typing: "Abu Al-Joud is typing…",
+        thinking: "Abu Al-Joud is thinking…",
+        analyzing: "Abu Al-Joud is analyzing…",
       },
       greeting: "Need help? Chat with Abu Al-Joud 👋",
     },
@@ -347,6 +349,8 @@ export const translations: Record<Lang, Dict> = {
         user: "كيف يمكن لشركتي أن تصبح شريكاً للجمعية؟",
         bot: "سؤال ممتاز! يسعدني توصيلك بفريق الشراكات. هل يمكنني أخذ اسم شركتك وبريدك الإلكتروني؟",
         typing: "أبو الجود يكتب…",
+        thinking: "أبو الجود يفكّر…",
+        analyzing: "أبو الجود يحلّل…",
       },
       greeting: "بحاجة لمساعدة؟ تحدّث مع أبو الجود 👋",
     },

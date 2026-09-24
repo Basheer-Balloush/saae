@@ -1,13 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ArrowUp,
-  Building2,
-  GraduationCap,
-  Handshake,
-  Loader2,
-  X,
-} from "lucide-react";
+import { ArrowUp, Building2, GraduationCap, Handshake, Loader2, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { loadChatSession, saveChatSession, type ChatSession } from "@/lib/chat-session";
@@ -74,6 +67,10 @@ export function AssistantChatModal({
   }, [messages, sessionId]);
 
   const isLoading = status === "submitted" || status === "streaming";
+  const [processingStage, setProcessingStage] = useState<"thinking" | "analyzing">("thinking");
+  const lastMessage = messages[messages.length - 1];
+  const visibleMessages =
+    status === "streaming" && lastMessage?.role === "assistant" ? messages.slice(0, -1) : messages;
   const suggestions = [
     {
       icon: GraduationCap,
@@ -88,6 +85,17 @@ export function AssistantChatModal({
       text: isRtl ? "أخبرني عن الجمعية" : "Tell me about the association",
     },
   ];
+
+  useEffect(() => {
+    if (!isLoading) {
+      setProcessingStage("thinking");
+      return;
+    }
+
+    setProcessingStage("thinking");
+    const id = window.setTimeout(() => setProcessingStage("analyzing"), 1800);
+    return () => window.clearTimeout(id);
+  }, [isLoading]);
 
   useEffect(() => {
     if (!open) return;
@@ -259,15 +267,20 @@ export function AssistantChatModal({
 
               {messages.length > 0 && (
                 <div className="assistant-chat-thread">
-                  {messages.map((message, index) => {
+                  {visibleMessages.map((message, index) => {
                     const raw = message.parts
                       .map((part) => (part.type === "text" ? part.text : ""))
                       .join("");
                     const isUser = message.role === "user";
-                    const { text, choices } = isUser ? { text: raw, choices: [] } : parseChoices(raw);
+                    const { text, choices } = isUser
+                      ? { text: raw, choices: [] }
+                      : parseChoices(raw);
                     // Only the newest question's buttons stay live; earlier ones are history.
                     const showChoices =
-                      !isUser && choices.length > 0 && index === messages.length - 1 && !isLoading;
+                      !isUser &&
+                      choices.length > 0 &&
+                      index === visibleMessages.length - 1 &&
+                      !isLoading;
                     return (
                       <motion.div
                         key={message.id}
@@ -288,7 +301,11 @@ export function AssistantChatModal({
                             {isUser
                               ? text
                               : formatMessage(text).map((seg, si) =>
-                                  seg.bold ? <strong key={si}>{seg.text}</strong> : <span key={si}>{seg.text}</span>,
+                                  seg.bold ? (
+                                    <strong key={si}>{seg.text}</strong>
+                                  ) : (
+                                    <span key={si}>{seg.text}</span>
+                                  ),
                                 )}
                           </p>
                           {showChoices && (
@@ -315,9 +332,19 @@ export function AssistantChatModal({
                       <span className="assistant-chat-message-avatar" aria-hidden="true">
                         <img src="/cinematic/images/abu-al-joud-3d.webp" alt="" />
                       </span>
-                      <div className="assistant-chat-typing">
-                        <Loader2 aria-hidden="true" />
-                        {a.chat.typing}
+                      <div className="assistant-chat-processing" role="status" aria-live="polite">
+                        <Loader2 className="animate-spin" aria-hidden="true" />
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.span
+                            key={processingStage}
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {a.chat[processingStage]}
+                          </motion.span>
+                        </AnimatePresence>
                       </div>
                     </div>
                   )}
