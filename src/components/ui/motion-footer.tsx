@@ -300,14 +300,14 @@ export function MotionFooter({ locale = "ar" }: { locale?: MotionFooterLocale })
               ))}
             </nav>
 
-            <address className="hmf-contact">
+            <address className="hmf-contact" dir="ltr">
               <a
                 href="https://maps.app.goo.gl/bKMSHXkmkr5U3tZh6"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <MapPin aria-hidden="true" />
-                <span>{copy.location}</span>
+                <span dir={locale === "ar" ? "rtl" : "ltr"}>{copy.location}</span>
               </a>
               <a href="mailto:info@aisyria.org">
                 <Mail aria-hidden="true" />
