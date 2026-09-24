@@ -129,12 +129,12 @@ function ProfileCardPage() {
         </Button>
       </header>
 
-      <img className="profile-star profile-star-tr" src={starTop.url} alt="" aria-hidden="true" />
-      <img className="profile-star profile-star-bl" src={starBottom.url} alt="" aria-hidden="true" />
+      <img className="profile-star profile-star-tr" src={starTop.url} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <img className="profile-star profile-star-bl" src={starBottom.url} alt="" aria-hidden="true" loading="lazy" decoding="async" />
 
       <section className="profile-card-layout">
         <div className="profile-portrait">
-          <img src={portrait.url} alt={copy.name} />
+          <img src={portrait.url} alt={copy.name} fetchPriority="high" decoding="async" width={324} height={324} />
         </div>
 
         <div className="profile-info">
