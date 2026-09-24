@@ -402,6 +402,7 @@ function RootComponent() {
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/super-admin") ||
     location.pathname.startsWith("/learning-management-system/admin");
+  const isStandaloneProfile = location.pathname.startsWith("/profile/");
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -424,7 +425,7 @@ function RootComponent() {
               </motion.div>
             </AnimatePresence>
             {/* The homepage's Abu Al-Joud opens the chat there, on every screen size. */}
-            {!isAms && !isLms && !isAdmin && (
+            {!isAms && !isLms && !isAdmin && !isStandaloneProfile && (
               <AssistantFab hideTrigger={location.pathname === "/"} />
             )}
             <Toaster richColors position="top-center" />
