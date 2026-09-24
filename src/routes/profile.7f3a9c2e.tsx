@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 const ministryMark = { url: "/profile-card/org-ar.svg" };
-const portrait = { url: "/profile-card/portrait-circle.png" };
+const portrait = { url: "/profile-card/portrait-minister.jpeg" };
 const signature = { url: "/profile-card/signature.png" };
 import "@/components/profile-card/profile-card.css";
 
