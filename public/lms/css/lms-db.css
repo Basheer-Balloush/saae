@@ -601,7 +601,10 @@ html:not([dir="rtl"]) .lms-skin .radial-nav-toggle { inset: 36px auto auto 22px;
   border-radius: 999px !important;
   background: linear-gradient(135deg, var(--motion-fill-start, #008b9d), var(--motion-fill-end, #047383)) !important;
   transition: width 480ms cubic-bezier(0.16, 1, 0.3, 1), background 300ms ease !important;
-  z-index: 1 !important;
+  /* Below the label. The pill isolates, so -1 still paints over its own
+     background, and a label that is bare text (not in a span) stays visible
+     when the fill grows across it on hover. */
+  z-index: -1 !important;
   pointer-events: none !important;
 }
 
