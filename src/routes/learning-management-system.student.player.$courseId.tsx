@@ -1,27 +1,33 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toUserMessage } from "@/lib/safe-error";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CheckCircle2, PlayCircle, Circle, Paperclip, Award } from "lucide-react";
+import { CheckCircle2, Circle, FileText, Lock, Paperclip, PlayCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { QAPanel } from "@/components/lms/QAPanel";
 import { AssignmentsPanel } from "@/components/lms/AssignmentsPanel";
+import { LessonVideo } from "@/components/lms/player/LessonVideo";
+import { useLessonWatch } from "@/hooks/useLessonWatch";
+import { watchedSeconds } from "@/lib/lesson-watch";
 import { getBunnyPlayback } from "@/lib/bunny-stream.functions";
-import Hls from "hls.js";
 import { isOnsite } from "@/lib/lms-course-destination";
+import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/student/player/$courseId")({
-  head: () => ({ meta: [{ title: "Player — SAAE Training and Learning Platform" }] }),
+  head: () => ({
+    meta: [{ title: "Lesson — SAAE Training and Learning Platform" }],
+    links: [...LMS_SKIN_LINKS, { rel: "stylesheet", href: "/lms/css/player.css" }],
+  }),
   component: Player,
 });
 
 type Section = { id: string; title: string; title_ar: string | null; title_en: string | null; display_order: number };
 type Lesson = { id: string; section_id: string; title: string; title_ar: string | null; title_en: string | null; video_url: string | null; video_provider: string; video_uid: string | null; video_ready: boolean; video_status: string; content_md: string | null; content_md_ar: string | null; content_md_en: string | null; attachments: unknown; display_order: number };
+type CourseRow = { instructor_id: string; delivery_mode: string | null; title_ar: string; title_en: string | null };
 
 const pick = (lang: "ar" | "en", ar: string | null | undefined, en: string | null | undefined, fallback: string) => {
   if (lang === "en") return en || ar || fallback;
@@ -29,12 +35,25 @@ const pick = (lang: "ar" | "en", ar: string | null | undefined, en: string | nul
 };
 type Progress = { lesson_id: string; is_completed: boolean };
 
+const hasVideo = (l: Lesson) => (l.video_provider === "bunny" ? !!l.video_uid : !!l.video_url);
+
+/** 75 -> "1:15", 3725 -> "1:02:05". */
+const clock = (s: number) => {
+  const t = Math.max(0, Math.round(s));
+  const h = Math.floor(t / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const sec = String(t % 60).padStart(2, "0");
+  return h ? `${h}:${String(m).padStart(2, "0")}:${sec}` : `${m}:${sec}`;
+};
+
 function Player() {
   const { courseId } = Route.useParams();
   const navigate = useNavigate();
   const { user, role } = useLmsAuth();
   const { lang } = useLang();
+  const ar = lang === "ar";
   const tr = lmsT[lang];
+  const [course, setCourse] = useState<CourseRow | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [progress, setProgress] = useState<Progress[]>([]);
@@ -42,23 +61,25 @@ function Player() {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [isEmbedSrc, setIsEmbedSrc] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [courseInstructorId, setCourseInstructorId] = useState<string | null>(null);
+  const [finishing, setFinishing] = useState(false);
+  const topRef = useRef<HTMLDivElement | null>(null);
+  const finishRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: course } = await supabase
+      const { data: courseData } = await supabase
         .from("lms_courses")
-        .select("instructor_id,delivery_mode")
+        .select("instructor_id,delivery_mode,title_ar,title_en")
         .eq("id", courseId)
         .maybeSingle();
-      const courseRow = course as { instructor_id: string; delivery_mode: string | null } | null;
+      const courseRow = courseData as CourseRow | null;
       // Onsite courses have no online lessons: send deep links to the onsite course page.
       if (courseRow && isOnsite(courseRow.delivery_mode)) {
         navigate({ to: "/learning-management-system/courses/$id", params: { id: courseId }, replace: true });
         return;
       }
-      setCourseInstructorId(courseRow?.instructor_id ?? null);
+      setCourse(courseRow);
 
       const { data: secs } = await supabase.from("lms_sections")
         .select("id,title,title_ar,title_en,display_order").eq("course_id", courseId).order("display_order");
@@ -77,9 +98,13 @@ function Player() {
           if (sa !== sb) return sa - sb;
           return a.display_order - b.display_order;
         });
+        const prog = (prs as Progress[]) ?? [];
         setLessons(list);
-        setProgress((prs as Progress[]) ?? []);
-        if (list.length) setCurrentId(list[0].id);
+        setProgress(prog);
+        // Pick up where the student left off: the first lesson not yet completed.
+        const doneIds = new Set(prog.filter((p) => p.is_completed).map((p) => p.lesson_id));
+        const resume = list.find((l) => !doneIds.has(l.id)) ?? list[0];
+        if (resume) setCurrentId(resume.id);
       }
       setLoading(false);
     })();
@@ -87,11 +112,13 @@ function Player() {
 
   const current = useMemo(() => lessons.find((l) => l.id === currentId) ?? null, [lessons, currentId]);
   const isDone = (id: string) => progress.find((p) => p.lesson_id === id)?.is_completed === true;
-  const isRtl = lang === "ar";
   const currentTitle = current ? pick(lang, current.title_ar, current.title_en, current.title) : "";
   const currentContent = current ? pick(lang, current.content_md_ar, current.content_md_en, current.content_md ?? "") : "";
+  const courseTitle = course ? pick(lang, course.title_ar, course.title_en, "") : "";
 
-  // Resolve playback source for the current lesson (Bunny HLS or legacy Supabase signed URL)
+  const watch = useLessonWatch(user?.id, current?.id);
+
+  // Resolve playback source for the current lesson (Bunny embed or legacy Supabase signed URL)
   useEffect(() => {
     let active = true;
     setVideoSrc(null);
@@ -132,88 +159,67 @@ function Player() {
     return () => { active = false; };
   }, [current]);
 
-  // Attach HLS source to <video> when current lesson is a Bunny stream
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !videoSrc) return;
-    const isHls = videoSrc.includes(".m3u8");
-    if (!isHls) { video.src = videoSrc; return; }
-    // Safari supports HLS natively
-    if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = videoSrc;
-      return;
-    }
-    if (Hls.isSupported()) {
-      const hls = new Hls({ enableWorker: true });
-      hls.loadSource(videoSrc);
-      hls.attachMedia(video);
-      return () => { hls.destroy(); };
-    }
-    // Fallback
-    video.src = videoSrc;
-  }, [videoSrc]);
+    if (!currentTitle) return;
+    document.title = `${currentTitle} — ${courseTitle || (ar ? "منصة التعلّم" : "SAAE Training and Learning Platform")}`;
+  }, [currentTitle, courseTitle, ar]);
 
-  const markCompleteRef = useRef<() => void>(() => {});
+  const index = current ? lessons.findIndex((l) => l.id === current.id) : -1;
+  const prevLesson = index > 0 ? lessons[index - 1] : null;
+  const nextLesson = index >= 0 && index < lessons.length - 1 ? lessons[index + 1] : null;
+  const doneCount = lessons.filter((l) => isDone(l.id)).length;
+  const coursePct = lessons.length ? Math.round((doneCount / lessons.length) * 100) : 0;
 
-  // Auto-complete for streamed (Bunny) iframe lessons via player.js postMessage protocol
-  useEffect(() => {
-    if (!current || !isEmbedSrc || !videoSrc) return;
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-    const listenerId = `saae-${current.id}`;
+  const done = current ? isDone(current.id) : false;
+  const videoLesson = current ? hasVideo(current) : false;
+  // A lesson with a video can be finished only once the video has been watched.
+  const canFinish = !!current && !done && (!videoLesson || watch.unlocked);
 
-    const send = (msg: Record<string, unknown>) => {
-      try { iframe.contentWindow?.postMessage(JSON.stringify({ context: "player.js", ...msg }), "*"); } catch { /* noop */ }
-    };
-    const onReady = () => {
-      send({ method: "addEventListener", value: "ended", listener: listenerId });
-    };
-    const onMessage = (e: MessageEvent) => {
-      try {
-        const origin = e.origin || "";
-        if (!/mediadelivery\.net|b-cdn\.net/i.test(origin)) return;
-        const data = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
-        if (!data || data.context !== "player.js") return;
-        if (data.event === "ready") onReady();
-        if (data.event === "ended") markCompleteRef.current?.();
-      } catch { /* ignore non-JSON messages */ }
-    };
-    window.addEventListener("message", onMessage);
-    // Ask for a ready ping in case we missed it
-    send({ method: "addEventListener", value: "ready", listener: listenerId });
-    // Also proactively subscribe (some player.js impls accept before ready)
-    onReady();
-    return () => { window.removeEventListener("message", onMessage); };
-  }, [current, isEmbedSrc, videoSrc]);
-
+  const goTo = (id: string) => {
+    setCurrentId(id);
+    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const markComplete = async () => {
-    if (!user || !current) return;
+    if (!user || !current || done || finishing) return;
+    if (videoLesson && !watch.isWatchedNow()) return;
+    setFinishing(true);
     const { error } = await supabase.from("lms_lesson_progress").upsert({
       lesson_id: current.id,
       student_id: user.id,
       is_completed: true,
       completed_at: new Date().toISOString(),
     }, { onConflict: "lesson_id,student_id" });
+    setFinishing(false);
     if (error) { toast.error(toUserMessage(error)); return; }
-    setProgress((p) => {
-      const next = p.filter((x) => x.lesson_id !== current.id);
-      next.push({ lesson_id: current.id, is_completed: true });
-      return next;
-    });
-    toast.success(tr.completed);
-    const idx = lessons.findIndex((l) => l.id === current.id);
-    if (idx >= 0 && idx < lessons.length - 1) setCurrentId(lessons[idx + 1].id);
+    setProgress((p) => [...p.filter((x) => x.lesson_id !== current.id), { lesson_id: current.id, is_completed: true }]);
+    toast.success(ar ? "أحسنت! اكتمل الدرس." : "Lesson completed.");
+    if (nextLesson) goTo(nextLesson.id);
   };
-  markCompleteRef.current = markComplete;
 
+  if (loading) {
+    return (
+      <div className="player-page page-shell" dir={ar ? "rtl" : "ltr"}>
+        <p className="state-box" role="status">{tr.loading}</p>
+      </div>
+    );
+  }
 
-  if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
+  if (!current) {
+    return (
+      <div className="player-page page-shell" dir={ar ? "rtl" : "ltr"}>
+        <div className="state-box">
+          <p>{ar ? "لا توجد دروس في هذه الدورة بعد." : "This course has no lessons yet."}</p>
+          <Link to="/learning-management-system/student" className="action action-secondary">
+            {ar ? "العودة إلى دوراتي" : "Back to my courses"}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const safeHref = (url: string) => (/^https?:\/\//i.test(url) ? url : "#");
-  const attachments = Array.isArray(current?.attachments) ? (current!.attachments as { name: string; url?: string; path?: string }[]) : [];
+  const attachments = Array.isArray(current.attachments) ? (current.attachments as { name: string; url?: string; path?: string }[]) : [];
 
   const openAttachment = async (a: { name: string; url?: string; path?: string }) => {
     if (a.path) {
@@ -225,124 +231,241 @@ function Player() {
     if (a.url) window.open(safeHref(a.url), "_blank", "noopener,noreferrer");
   };
 
+  const section = sections.find((s) => s.id === current.section_id);
+  const sectionTitle = section ? pick(lang, section.title_ar, section.title_en, section.title) : "";
+  const watchedPct = Math.floor(watch.fraction * 100);
+  const duration = watch.progress.duration;
+  const watched = Math.min(duration, watchedSeconds(watch.progress.spans));
+
+  const finishState = done ? "done" : !videoLesson ? "free" : watch.unlocked ? "ready" : "locked";
+  const finishNote =
+    finishState === "done"
+      ? ar ? "أكملت هذا الدرس." : "You have completed this lesson."
+      : finishState === "free"
+        ? ar ? "لا يحتوي هذا الدرس على فيديو. أنهِه بعد مراجعة المحتوى." : "This lesson has no video. Finish it once you have gone through the content."
+        : finishState === "ready"
+          ? ar ? "أحسنت! شاهدت الفيديو كاملاً، يمكنك الآن إنهاء الدرس." : "Well done: you watched the whole video. You can finish the lesson now."
+          : !videoSrc
+            ? ar ? "يُفتح زر الإنهاء بعد مشاهدة الفيديو كاملاً، حين يصبح متاحاً." : "“Finish lesson” unlocks once the video is available and watched in full."
+            : watchedPct > 0
+              ? ar ? `شاهدت ${watchedPct}% من الفيديو. أكمل المشاهدة لفتح زر الإنهاء.` : `You have watched ${watchedPct}% of the video. Keep watching to unlock “Finish lesson”.`
+              : ar ? "شاهد الفيديو حتى النهاية لفتح زر إنهاء الدرس." : "Watch the video to the end to unlock “Finish lesson”.";
+
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 grid lg:grid-cols-[1fr_320px] gap-6">
-      <div>
-        <div className="aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center">
-          {current && videoSrc && isEmbedSrc ? (
-            <iframe
-              key={current.id}
-              ref={iframeRef}
-              src={videoSrc}
-              title={currentTitle}
-              allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer"
-              className="w-full h-full border-0"
-            />
-          ) : current && videoSrc ? (
-            <video
-              key={current.id}
-              ref={videoRef}
-              controls
-              controlsList="nodownload"
-              playsInline
-              onEnded={markComplete}
-              className="w-full h-full"
-            />
-          ) : current && current.video_provider === "bunny" && current.video_uid && current.video_status !== "ready" ? (
-            <div className="text-white/85 text-sm px-6 text-center">
-              {current.video_status === "failed"
-                ? (lang === "ar" ? "تعذّر معالجة الفيديو. يرجى إبلاغ المدرّب." : "Video processing failed. Please notify the instructor.")
-                : (lang === "ar" ? "الفيديو قيد المعالجة، سيصبح جاهزاً خلال دقائق." : "Video is processing — it will be ready in a few minutes.")}
-            </div>
-          ) : (
-            <div className="text-white/85 text-sm">{tr.selectLesson}</div>
-          )}
+    <div className="player-page page-shell" dir={ar ? "rtl" : "ltr"} ref={topRef}>
+      <header className="player-head">
+        <nav className="course-crumbs" aria-label={ar ? "مسار التنقل" : "Breadcrumb"}>
+          <Link to="/learning-management-system/student">{ar ? "دوراتي" : "My courses"}</Link>
+          <span aria-hidden="true">/</span>
+          <span>{courseTitle}</span>
+        </nav>
+        <div className="player-head-row">
+          <div className="player-head-copy">
+            <p className="player-eyebrow">
+              {sectionTitle ? <span>{sectionTitle}</span> : null}
+              <span>{ar ? `الدرس ${index + 1} من ${lessons.length}` : `Lesson ${index + 1} of ${lessons.length}`}</span>
+            </p>
+            <h1 className="player-title">{currentTitle}</h1>
+          </div>
+          <Link
+            to="/learning-management-system/student/quiz/$courseId"
+            params={{ courseId }}
+            search={{ quiz: undefined, review: undefined }}
+            className="action action-secondary player-quiz-link"
+          >
+            {tr.quizzes}
+          </Link>
+        </div>
+      </header>
+
+      <div className="player-layout">
+        <div className="player-stage-wrap">
+          <div className="player-stage">
+            {videoSrc ? (
+              <LessonVideo
+                key={current.id}
+                title={currentTitle}
+                src={videoSrc}
+                embed={isEmbedSrc}
+                onTime={watch.report}
+                onBreak={watch.interrupt}
+                onEnded={() => finishRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })}
+              />
+            ) : (
+              <div className="player-stage-note">
+                {videoLesson ? (
+                  current.video_provider === "bunny" && current.video_status === "failed" ? (
+                    ar ? "تعذّر تجهيز الفيديو. يرجى إبلاغ المدرّب." : "The video could not be processed. Please tell the instructor."
+                  ) : current.video_provider === "bunny" && current.video_status !== "ready" ? (
+                    ar ? "الفيديو قيد التجهيز، وسيصبح جاهزاً خلال دقائق." : "The video is being processed and will be ready in a few minutes."
+                  ) : (
+                    ar ? "جارٍ تحميل الفيديو…" : "Loading the video…"
+                  )
+                ) : (
+                  <>
+                    <FileText aria-hidden="true" />
+                    <span>{ar ? "درس مقروء: تجد محتواه أدناه." : "A reading lesson: the content is below."}</span>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
-        {current && (
-          <>
-            <div className="mt-4 flex items-start justify-between gap-3 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-foreground">{currentTitle}</h1>
-              <div className="flex gap-2">
-                <Link to="/learning-management-system/student/quiz/$courseId" params={{ courseId }} search={{ quiz: undefined, review: undefined }}>
-                  <Button variant="outline" size="sm"><Award className="h-4 w-4 mx-1" />{tr.quizzes}</Button>
-                </Link>
-                <Button onClick={markComplete} disabled={isDone(current.id)} size="sm">
-                  <CheckCircle2 className="h-4 w-4 mx-1" />
-                  {isDone(current.id) ? tr.completed : tr.markCompleted}
-                </Button>
+        <section ref={finishRef} className={cn("player-finish", `is-${finishState}`)} aria-label={ar ? "إنهاء الدرس" : "Finish the lesson"}>
+          <div className="player-finish-copy">
+            <p className="player-finish-note" role="status" aria-live="polite">
+              {finishState === "done" ? <CheckCircle2 aria-hidden="true" /> : finishState === "locked" ? <Lock aria-hidden="true" /> : null}
+              <span>{finishNote}</span>
+            </p>
+            {videoLesson && !done ? (
+              <div className="player-meter">
+                <div
+                  className="player-meter-track"
+                  role="progressbar"
+                  aria-label={ar ? "نسبة المشاهدة" : "Watched"}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={watchedPct}
+                >
+                  <span style={{ inlineSize: `${watchedPct}%` }} />
+                </div>
+                <span className="player-meter-time">
+                  {duration > 0 ? `${clock(watched)} / ${clock(duration)}` : "0:00"}
+                </span>
               </div>
+            ) : null}
+          </div>
+          {done ? (
+            nextLesson ? (
+              <button type="button" className="action action-primary" onClick={() => goTo(nextLesson.id)}>
+                {ar ? "الدرس التالي" : "Next lesson"}
+              </button>
+            ) : (
+              <span className="player-done-chip">
+                <CheckCircle2 aria-hidden="true" />
+                {tr.completed}
+              </span>
+            )
+          ) : (
+            <button type="button" className="action action-primary" onClick={markComplete} disabled={!canFinish || finishing}>
+              {ar ? "إنهاء الدرس" : "Finish lesson"}
+            </button>
+          )}
+        </section>
+
+        <nav className="player-steps" aria-label={ar ? "التنقل بين الدروس" : "Lesson navigation"}>
+          {prevLesson ? (
+            <button type="button" className="lms-reset" onClick={() => goTo(prevLesson.id)}>
+              {ar ? "الدرس السابق" : "Previous lesson"}
+            </button>
+          ) : <span />}
+          {nextLesson && !done ? (
+            <button type="button" className="lms-reset" onClick={() => goTo(nextLesson.id)}>
+              {ar ? "تخطَّ إلى الدرس التالي" : "Skip to next lesson"}
+            </button>
+          ) : null}
+        </nav>
+
+        <aside className="player-outline" aria-label={ar ? "محتوى الدورة" : "Course content"}>
+          <div className="player-outline-head">
+            <h2>{ar ? "محتوى الدورة" : "Course content"}</h2>
+            <p>
+              {ar ? `أكملت ${doneCount} من ${lessons.length} دروس` : `${doneCount} of ${lessons.length} lessons completed`}
+            </p>
+            <div
+              className="player-meter-track"
+              role="progressbar"
+              aria-label={ar ? "تقدّمك في الدورة" : "Course progress"}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={coursePct}
+            >
+              <span style={{ inlineSize: `${coursePct}%` }} />
             </div>
+          </div>
+          <div className="player-outline-body">
+            {sections.map((s) => {
+              const sectionLessons = lessons.filter((l) => l.section_id === s.id);
+              if (!sectionLessons.length) return null;
+              const sectionDone = sectionLessons.filter((l) => isDone(l.id)).length;
+              return (
+                <div key={s.id} className="player-outline-section">
+                  <h3>
+                    <span>{pick(lang, s.title_ar, s.title_en, s.title)}</span>
+                    <small>{sectionDone}/{sectionLessons.length}</small>
+                  </h3>
+                  <ul>
+                    {sectionLessons.map((l) => {
+                      const lessonDone = isDone(l.id);
+                      const active = l.id === current.id;
+                      const n = lessons.findIndex((x) => x.id === l.id) + 1;
+                      return (
+                        <li key={l.id}>
+                          <button
+                            type="button"
+                            className={cn("player-lesson", active && "is-active", lessonDone && "is-done")}
+                            aria-current={active ? "step" : undefined}
+                            onClick={() => goTo(l.id)}
+                          >
+                            {lessonDone ? <CheckCircle2 aria-hidden="true" /> : active ? <PlayCircle aria-hidden="true" /> : <Circle aria-hidden="true" />}
+                            <span className="player-lesson-text">
+                              <span className="player-lesson-title">{n}. {pick(lang, l.title_ar, l.title_en, l.title)}</span>
+                              <small>
+                                {lessonDone
+                                  ? tr.completed
+                                  : hasVideo(l)
+                                    ? ar ? "فيديو" : "Video"
+                                    : ar ? "قراءة" : "Reading"}
+                              </small>
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        </aside>
 
-            {currentContent && (
-              <div className="mt-4 prose prose-sm max-w-none text-foreground whitespace-pre-wrap">
-                {currentContent}
-              </div>
-            )}
+        <div className="player-panels">
+          {currentContent ? (
+            <article className="pro-card player-content">
+              <h2>{ar ? "عن هذا الدرس" : "About this lesson"}</h2>
+              <p className="course-desc">{currentContent}</p>
+            </article>
+          ) : null}
 
-            {attachments.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-sm font-bold text-foreground flex items-center gap-2"><Paperclip className="h-4 w-4" />{tr.attachments}</h3>
-                <ul className="mt-2 space-y-1.5">
-                  {attachments.map((a, i) => (
-                    <li key={i}>
-                      <button type="button" onClick={() => openAttachment(a)} className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
-                        <Paperclip className="h-3.5 w-3.5" />{a.name}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <AssignmentsPanel lessonId={current.id} user={user} lang={lang} />
-
-            <QAPanel
-              lessonId={current.id}
-              user={user}
-              isInstructor={
-                role === "admin" || (!!user && !!courseInstructorId && user.id === courseInstructorId)
-              }
-              lang={lang}
-            />
-          </>
-        )}
-      </div>
-
-      <aside dir={isRtl ? "rtl" : "ltr"} className="rounded-2xl border border-border bg-card overflow-hidden self-start lg:sticky lg:top-24 max-h-[80vh] overflow-y-auto">
-        {sections.map((s) => (
-          <div key={s.id}>
-            <div className={cn("px-4 py-2.5 bg-muted/40 font-semibold text-foreground text-sm", isRtl && "text-right")}>{pick(lang, s.title_ar, s.title_en, s.title)}</div>
-            <ul>
-              {lessons.filter((l) => l.section_id === s.id).map((l) => {
-                const done = isDone(l.id);
-                const active = l.id === currentId;
-                return (
-                  <li key={l.id}>
-                    <button
-                      onClick={() => setCurrentId(l.id)}
-                      dir={isRtl ? "rtl" : "ltr"}
-                      className={cn(
-                        "w-full flex items-start gap-2 px-4 py-2.5 text-sm text-start hover:bg-muted/50 transition-colors border-b border-border/50",
-                        isRtl && "text-right",
-                        active && "bg-primary/10 text-primary font-semibold",
-                      )}
-                    >
-                      {done ? <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" /> :
-                        active ? <PlayCircle className="h-4 w-4 mt-0.5 shrink-0" /> :
-                        <Circle className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />}
-                      <span className="flex-1">{pick(lang, l.title_ar, l.title_en, l.title)}</span>
+          {attachments.length > 0 ? (
+            <section className="pro-card player-files">
+              <h2>
+                <Paperclip aria-hidden="true" />
+                {tr.attachments}
+              </h2>
+              <ul>
+                {attachments.map((a, i) => (
+                  <li key={i}>
+                    <button type="button" className="action action-secondary" onClick={() => openAttachment(a)}>
+                      {a.name}
                     </button>
                   </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
-      </aside>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          <AssignmentsPanel lessonId={current.id} user={user} lang={lang} />
+
+          <QAPanel
+            lessonId={current.id}
+            user={user}
+            isInstructor={role === "admin" || (!!user && !!course?.instructor_id && user.id === course.instructor_id)}
+            lang={lang}
+          />
+        </div>
+      </div>
     </div>
   );
 }

@@ -42,7 +42,7 @@ describe("quiz completion", () => {
 describe("quiz styling scope", () => {
   it("uses the LMS identity for the student quiz menu and attempt route", () => {
     expect(isSkinnedLmsPath("/learning-management-system/student/quiz/course-123")).toBe(true);
-    expect(isSkinnedLmsPath("/learning-management-system/student/player/course-123")).toBe(false);
+    expect(isSkinnedLmsPath("/learning-management-system/student/player/course-123")).toBe(true);
   });
   it("draws every instructor and LMS admin page in the LMS style", () => {
     for (const path of [
