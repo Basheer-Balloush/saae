@@ -13,3 +13,5 @@
 - [x] Restyle the existing About statistics bar as responsive glass panels within the circuit-pattern visual system.
 - [x] Fix community-card descriptions stacking one word per line (text-effect word spans caught by the `.community-focus span` label rule); label now uses `.focus-label` and animation wrappers stay inline.
 - [x] Reorganize the About communities into a balanced 4/2/1-column grid with equal-height rows and no staggered layout gaps.
+- [x] Create a standalone bilingual profile card at a random-looking URL using placeholders for the portrait and contact links.
+- [x] Verify the profile card in Arabic and English on mobile and desktop.

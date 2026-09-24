@@ -15,7 +15,7 @@ import {
 import { SubHero } from "@/components/lms-skin/SubHero";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
-const detailQueryKey = (slug: string) => ["public-internship", slug] as const;
+export const detailQueryKey = (slug: string) => ["public-internship", slug] as const;
 
 export const Route = createFileRoute("/learning-management-system/internships/$slug/")({
   loader: async ({ params, context }) => {

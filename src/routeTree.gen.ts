@@ -31,6 +31,7 @@ import { Route as InitiativeIndexRouteImport } from './routes/initiative.index'
 import { Route as AttendanceManagementSystemIndexRouteImport } from './routes/attendance-management-system.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ResourcesAiToolsRouteImport } from './routes/resources.ai-tools'
+import { Route as Profile7f3a9c2eRouteImport } from './routes/profile.7f3a9c2e'
 import { Route as NewsTvInterviewRouteImport } from './routes/news.tv-interview'
 import { Route as NewsTrainersGraduationRouteImport } from './routes/news.trainers-graduation'
 import { Route as NewsInitiativeLaunchRouteImport } from './routes/news.initiative-launch'
@@ -233,6 +234,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const ResourcesAiToolsRoute = ResourcesAiToolsRouteImport.update({
   id: '/resources/ai-tools',
   path: '/resources/ai-tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Profile7f3a9c2eRoute = Profile7f3a9c2eRouteImport.update({
+  id: '/profile/7f3a9c2e',
+  path: '/profile/7f3a9c2e',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NewsTvInterviewRoute = NewsTvInterviewRouteImport.update({
@@ -772,6 +778,7 @@ export interface FileRoutesByFullPath {
   '/news/initiative-launch': typeof NewsInitiativeLaunchRoute
   '/news/trainers-graduation': typeof NewsTrainersGraduationRoute
   '/news/tv-interview': typeof NewsTvInterviewRoute
+  '/profile/7f3a9c2e': typeof Profile7f3a9c2eRoute
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
@@ -874,6 +881,7 @@ export interface FileRoutesByTo {
   '/news/initiative-launch': typeof NewsInitiativeLaunchRoute
   '/news/trainers-graduation': typeof NewsTrainersGraduationRoute
   '/news/tv-interview': typeof NewsTvInterviewRoute
+  '/profile/7f3a9c2e': typeof Profile7f3a9c2eRoute
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin': typeof AdminIndexRoute
   '/attendance-management-system': typeof AttendanceManagementSystemIndexRoute
@@ -983,6 +991,7 @@ export interface FileRoutesById {
   '/news/initiative-launch': typeof NewsInitiativeLaunchRoute
   '/news/trainers-graduation': typeof NewsTrainersGraduationRoute
   '/news/tv-interview': typeof NewsTvInterviewRoute
+  '/profile/7f3a9c2e': typeof Profile7f3a9c2eRoute
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
@@ -1095,6 +1104,7 @@ export interface FileRouteTypes {
     | '/news/initiative-launch'
     | '/news/trainers-graduation'
     | '/news/tv-interview'
+    | '/profile/7f3a9c2e'
     | '/resources/ai-tools'
     | '/admin/'
     | '/attendance-management-system/'
@@ -1197,6 +1207,7 @@ export interface FileRouteTypes {
     | '/news/initiative-launch'
     | '/news/trainers-graduation'
     | '/news/tv-interview'
+    | '/profile/7f3a9c2e'
     | '/resources/ai-tools'
     | '/admin'
     | '/attendance-management-system'
@@ -1305,6 +1316,7 @@ export interface FileRouteTypes {
     | '/news/initiative-launch'
     | '/news/trainers-graduation'
     | '/news/tv-interview'
+    | '/profile/7f3a9c2e'
     | '/resources/ai-tools'
     | '/admin/'
     | '/attendance-management-system/'
@@ -1394,6 +1406,7 @@ export interface RootRouteChildren {
   NewsInitiativeLaunchRoute: typeof NewsInitiativeLaunchRoute
   NewsTrainersGraduationRoute: typeof NewsTrainersGraduationRoute
   NewsTvInterviewRoute: typeof NewsTvInterviewRoute
+  Profile7f3a9c2eRoute: typeof Profile7f3a9c2eRoute
   ResourcesAiToolsRoute: typeof ResourcesAiToolsRoute
   InitiativeIndexRoute: typeof InitiativeIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
@@ -1557,6 +1570,13 @@ declare module '@tanstack/react-router' {
       path: '/resources/ai-tools'
       fullPath: '/resources/ai-tools'
       preLoaderRoute: typeof ResourcesAiToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile/7f3a9c2e': {
+      id: '/profile/7f3a9c2e'
+      path: '/profile/7f3a9c2e'
+      fullPath: '/profile/7f3a9c2e'
+      preLoaderRoute: typeof Profile7f3a9c2eRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/news/tv-interview': {
@@ -2528,6 +2548,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewsInitiativeLaunchRoute: NewsInitiativeLaunchRoute,
   NewsTrainersGraduationRoute: NewsTrainersGraduationRoute,
   NewsTvInterviewRoute: NewsTvInterviewRoute,
+  Profile7f3a9c2eRoute: Profile7f3a9c2eRoute,
   ResourcesAiToolsRoute: ResourcesAiToolsRoute,
   InitiativeIndexRoute: InitiativeIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
