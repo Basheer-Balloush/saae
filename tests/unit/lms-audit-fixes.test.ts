@@ -62,6 +62,16 @@ describe("login return address", () => {
     expect(currentLmsReturn()).toBe("/learning-management-system/student/player/x?l=2");
   });
 
+  it("keeps the existing target instead of nesting /login", () => {
+    vi.stubGlobal("window", {
+      location: {
+        pathname: "/learning-management-system/login",
+        search: "?redirect=%2Flearning-management-system%2Fstudent",
+      },
+    });
+    expect(currentLmsReturn()).toBe("/learning-management-system/student");
+  });
+
   it("refuses anything outside the LMS", () => {
     vi.stubGlobal("window", { location: { pathname: "/admin", search: "" } });
     expect(currentLmsReturn()).toBeUndefined();

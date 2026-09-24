@@ -18,8 +18,18 @@ export const lmsRedirectSearchSchema = (raw: Record<string, unknown>): { redirec
   redirect: safeLmsRedirect(raw?.redirect),
 });
 
-/** The current LMS page as a login return target, so sign-in lands back here. */
+const AUTH_PAGE = /^\/learning-management-system\/(login|signup|forgot-password|reset-password)\/?$/;
+
+/**
+ * The current LMS page as a login return target, so sign-in lands back here.
+ * A guard can fire again after the URL has already become /login; then keep
+ * the return target that is already there instead of nesting /login in it.
+ */
 export function currentLmsReturn(): string | undefined {
   if (typeof window === "undefined") return undefined;
-  return safeLmsRedirect(`${window.location.pathname}${window.location.search}`);
+  const { pathname, search } = window.location;
+  if (AUTH_PAGE.test(pathname)) {
+    return safeLmsRedirect(new URLSearchParams(search).get("redirect") ?? undefined);
+  }
+  return safeLmsRedirect(`${pathname}${search}`);
 }
