@@ -31,3 +31,15 @@ export function lessonStatusFromBunnyWebhook(status: unknown): LessonVideoStatus
       return null;
   }
 }
+
+/**
+ * Stream API video object `status` → lesson video status (used when we ask
+ * Bunny directly instead of waiting for the webhook):
+ *   0 Created, 1 Uploaded, 2 Processing, 3 Transcoding, 4 Finished, 5 Error,
+ *   6 UploadFailed, 7 JitSegmenting, 8 JitPlaylistsCreated.
+ */
+export function lessonStatusFromBunnyVideo(status: unknown): LessonVideoStatus {
+  if (status === 4 || status === 8) return "ready";
+  if (status === 5 || status === 6) return "failed";
+  return "processing";
+}

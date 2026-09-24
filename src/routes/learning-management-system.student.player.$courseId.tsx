@@ -99,10 +99,17 @@ function Player() {
     (async () => {
       if (!current) return;
       if (current.video_provider === "bunny" && current.video_uid) {
-        if (current.video_status && current.video_status !== "ready") return;
         try {
+          // The server checks Bunny itself when the lesson still reads as
+          // processing, so a missed webhook does not hide a finished video.
           const res = await getBunnyPlayback({ data: { lessonId: current.id } });
           if (!active) return;
+          if (!res.playbackUrl) {
+            if (res.status !== current.video_status) {
+              setLessons((curr) => curr.map((x) => x.id === current.id ? { ...x, video_status: res.status, video_ready: false } : x));
+            }
+            return;
+          }
           setVideoSrc(res.playbackUrl);
           setIsEmbedSrc(true);
         } catch (e) {

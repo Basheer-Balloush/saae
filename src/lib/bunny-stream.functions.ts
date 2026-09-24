@@ -2,30 +2,64 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createHash } from "crypto";
+import { lessonStatusFromBunnyVideo, type LessonVideoStatus } from "@/lib/bunny-webhook-status";
 
 /**
  * Bunny Stream integration.
  *
- * Two server functions:
+ * Server functions:
  *  - createBunnyUpload: instructor-only. Creates a Bunny video and returns TUS upload credentials.
  *  - getBunnyPlayback: any enrolled student. Returns a short-lived signed embed URL.
+ *  - setLessonBunnyVideo / refreshBunnyLessonStatus: instructor-only bookkeeping.
  *
- * Secrets required (all server-only):
- *   BUNNY_STREAM_LIBRARY_ID
- *   BUNNY_STREAM_API_KEY
- *   BUNNY_STREAM_CDN_HOSTNAME       (e.g. vz-abc123-xyz.b-cdn.net)
- *   BUNNY_STREAM_TOKEN_KEY          (Token Authentication Key from Library security settings)
+ * Secrets (all server-only):
+ *   BUNNY_STREAM_LIBRARY_ID         upload, status, playback
+ *   BUNNY_STREAM_API_KEY            upload, status (the library's Stream API key)
+ *   BUNNY_STREAM_TOKEN_KEY          playback (Token Authentication Key from Library security settings)
+ *
+ * Errors that the instructor page must explain carry a `bunny_…` prefix; see
+ * `bunnyErrorMessage` in `bunny-errors.ts`.
  */
 
-function getBunnyEnv() {
-  const libraryId = process.env.BUNNY_STREAM_LIBRARY_ID;
-  const apiKey = process.env.BUNNY_STREAM_API_KEY;
-  const cdnHostname = process.env.BUNNY_STREAM_CDN_HOSTNAME;
-  const tokenKey = process.env.BUNNY_STREAM_TOKEN_KEY;
-  if (!libraryId || !apiKey || !cdnHostname || !tokenKey) {
-    throw new Error("Bunny Stream is not configured (missing secrets)");
+type BunnySecret = "BUNNY_STREAM_LIBRARY_ID" | "BUNNY_STREAM_API_KEY" | "BUNNY_STREAM_TOKEN_KEY";
+
+// Values pasted into a secrets UI often carry a trailing newline or space,
+// which silently breaks both the AccessKey header and the SHA-256 signatures.
+function readBunnySecrets<K extends BunnySecret>(names: K[]): Record<K, string> {
+  const out = {} as Record<K, string>;
+  const missing: string[] = [];
+  for (const name of names) {
+    const value = process.env[name]?.trim();
+    if (value) out[name] = value;
+    else missing.push(name);
   }
-  return { libraryId, apiKey, cdnHostname, tokenKey };
+  if (missing.length) {
+    console.error("[Bunny] missing secrets:", missing.join(", "));
+    throw new Error(`bunny_not_configured: ${missing.join(", ")}`);
+  }
+  return out;
+}
+
+function getBunnyApiEnv() {
+  const env = readBunnySecrets(["BUNNY_STREAM_LIBRARY_ID", "BUNNY_STREAM_API_KEY"]);
+  return { libraryId: env.BUNNY_STREAM_LIBRARY_ID, apiKey: env.BUNNY_STREAM_API_KEY };
+}
+
+function getBunnyPlaybackEnv() {
+  const env = readBunnySecrets(["BUNNY_STREAM_LIBRARY_ID", "BUNNY_STREAM_TOKEN_KEY"]);
+  return { libraryId: env.BUNNY_STREAM_LIBRARY_ID, tokenKey: env.BUNNY_STREAM_TOKEN_KEY };
+}
+
+async function fetchBunnyVideoStatus(libraryId: string, apiKey: string, videoId: string): Promise<LessonVideoStatus> {
+  const res = await fetch(`https://video.bunnycdn.com/library/${libraryId}/videos/${videoId}`, {
+    headers: { AccessKey: apiKey, Accept: "application/json" },
+  });
+  if (!res.ok) {
+    console.error("[Bunny] get video failed", res.status, await res.text());
+    throw new Error(`bunny_api_error: get video HTTP ${res.status}`);
+  }
+  const body = (await res.json()) as { status?: number };
+  return lessonStatusFromBunnyVideo(body.status);
 }
 
 /**
@@ -44,7 +78,7 @@ export const createBunnyUpload = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { libraryId, apiKey } = getBunnyEnv();
+    const { libraryId, apiKey } = getBunnyApiEnv();
 
     // Verify the user is the instructor of this lesson's course (or an admin).
     const { data: lesson, error: lessonErr } = await supabase
@@ -86,10 +120,16 @@ export const createBunnyUpload = createServerFn({ method: "POST" })
     if (!createRes.ok) {
       const txt = await createRes.text();
       console.error("[Bunny] create video failed", createRes.status, txt);
-      throw new Error("Failed to create Bunny video");
+      // 401 = wrong API key (the account key is not the library key),
+      // 404 = wrong library id.
+      throw new Error(`bunny_api_error: create video HTTP ${createRes.status}`);
     }
-    const created = (await createRes.json()) as { guid: string };
+    const created = (await createRes.json()) as { guid?: string };
     const videoId = created.guid;
+    if (!videoId) {
+      console.error("[Bunny] create video returned no guid", created);
+      throw new Error("bunny_api_error: create video returned no guid");
+    }
 
     // 2) Build TUS authorization signature.
     //    signature = sha256(libraryId + apiKey + expirationTime + videoId)
@@ -119,13 +159,13 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { libraryId, tokenKey } = getBunnyEnv();
+    const { libraryId, tokenKey } = getBunnyPlaybackEnv();
 
     // Load the lesson + course context.
     const { data: lesson, error } = await supabase
       .from("lms_lessons")
       .select(
-        "id, video_provider, video_uid, lms_sections!inner(course_id, lms_courses!inner(instructor_id))",
+        "id, video_provider, video_uid, video_status, lms_sections!inner(course_id, lms_courses!inner(instructor_id))",
       )
       .eq("id", data.lessonId)
       .maybeSingle();
@@ -134,6 +174,7 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
     const l = lesson as unknown as {
       video_provider: string;
       video_uid: string | null;
+      video_status: string;
       lms_sections: {
         course_id: string;
         lms_courses: { instructor_id: string };
@@ -164,6 +205,29 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
       if (!enr) throw new Error("Forbidden: not enrolled");
     }
 
+    // The webhook can be missing or late. Before telling the viewer the video
+    // is still processing, ask Bunny, and record a finished encode so the
+    // next viewer does not have to.
+    if (l.video_status !== "ready") {
+      let status: LessonVideoStatus = l.video_status === "failed" ? "failed" : "processing";
+      try {
+        const { apiKey } = getBunnyApiEnv();
+        status = await fetchBunnyVideoStatus(libraryId, apiKey, l.video_uid);
+      } catch (e) {
+        console.error("[Bunny] playback status check failed", e);
+      }
+      if (status !== "ready") return { status, playbackUrl: null, expires: null };
+      // Students cannot update lessons under RLS; the service role write is
+      // limited to this lesson and the identifier we just verified.
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error: upErr } = await supabaseAdmin
+        .from("lms_lessons")
+        .update({ video_status: "ready", video_ready: true, video_status_error: null })
+        .eq("id", data.lessonId)
+        .eq("video_uid", l.video_uid);
+      if (upErr) console.error("[Bunny] could not record ready status", upErr.message);
+    }
+
     // Bunny Stream embed token authentication. Direct HLS URLs are blocked when
     // "Block direct url file access" is enabled, so students must use the
     // secure iframe player instead of the raw CDN playlist.
@@ -173,7 +237,7 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
       .digest("hex");
 
     const playbackUrl = `https://iframe.mediadelivery.net/embed/${libraryId}/${l.video_uid}?token=${token}&expires=${expires}`;
-    return { playbackUrl, expires };
+    return { status: "ready" as const, playbackUrl, expires };
   });
 
 /**
@@ -247,7 +311,7 @@ export const refreshBunnyLessonStatus = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ lessonId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { libraryId, apiKey } = getBunnyEnv();
+    const { libraryId, apiKey } = getBunnyApiEnv();
 
     const { data: lesson, error } = await supabase
       .from("lms_lessons")
@@ -272,25 +336,12 @@ export const refreshBunnyLessonStatus = createServerFn({ method: "POST" })
       return { status: l.video_status, changed: false };
     }
 
-    const res = await fetch(`https://video.bunnycdn.com/library/${libraryId}/videos/${l.video_uid}`, {
-      headers: { AccessKey: apiKey, Accept: "application/json" },
-    });
-    if (!res.ok) throw new Error(`Bunny fetch failed (${res.status})`);
-    const body = (await res.json()) as { status?: number; guid?: string };
-
-    // Bunny status codes: 0 Created, 1 Uploaded, 2 Processing, 3 Transcoding,
-    // 4 Finished, 5 Error, 6 UploadFailed, 7 JitSegmenting, 8 JitPlaylistsCreated.
-    const s =
-      body.status === 4 || body.status === 8
-        ? "ready"
-        : body.status === 5 || body.status === 6
-          ? "failed"
-          : "processing";
+    const s = await fetchBunnyVideoStatus(libraryId, apiKey, l.video_uid);
 
     // Guard against stale identifiers: only update the row that still matches.
     const { data: updated, error: upErr } = await supabase
       .from("lms_lessons")
-      .update({ video_status: s, video_ready: s === "ready" })
+      .update({ video_status: s, video_ready: s === "ready", video_status_error: null })
       .eq("id", data.lessonId)
       .eq("video_uid", l.video_uid)
       .select("id")

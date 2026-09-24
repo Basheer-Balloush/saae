@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { lessonStatusFromBunnyWebhook } from "../../src/lib/bunny-webhook-status";
+import {
+  lessonStatusFromBunnyVideo,
+  lessonStatusFromBunnyWebhook,
+} from "../../src/lib/bunny-webhook-status";
 
 describe("Bunny webhook status", () => {
   it("marks the lesson playable when encoding finishes or the first resolution is ready", () => {
@@ -18,5 +21,15 @@ describe("Bunny webhook status", () => {
 
   it("ignores captions, generated titles and unknown codes", () => {
     for (const s of [9, 10, 42, undefined, "3"]) expect(lessonStatusFromBunnyWebhook(s)).toBeNull();
+  });
+});
+
+describe("Bunny video object status", () => {
+  it("maps Stream API codes, which differ from webhook codes", () => {
+    expect(lessonStatusFromBunnyVideo(4)).toBe("ready");
+    expect(lessonStatusFromBunnyVideo(8)).toBe("ready");
+    expect(lessonStatusFromBunnyVideo(5)).toBe("failed");
+    expect(lessonStatusFromBunnyVideo(6)).toBe("failed");
+    for (const s of [0, 1, 2, 3, 7, undefined]) expect(lessonStatusFromBunnyVideo(s)).toBe("processing");
   });
 });

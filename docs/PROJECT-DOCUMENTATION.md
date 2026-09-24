@@ -760,11 +760,12 @@ Used for instructor video upload, secure playback, status refresh, and webhook-b
 
 Required secret names:
 
-- `BUNNY_STREAM_LIBRARY_ID`
-- `BUNNY_STREAM_API_KEY`
-- `BUNNY_STREAM_CDN_HOSTNAME`
-- `BUNNY_STREAM_TOKEN_KEY`
-- `BUNNY_WEBHOOK_SECRET`
+- `BUNNY_STREAM_LIBRARY_ID` — upload, status and playback
+- `BUNNY_STREAM_API_KEY` — upload and status; the video library's API key (Stream → library → API), not the account key
+- `BUNNY_STREAM_TOKEN_KEY` — playback (library Security → Token Authentication Key)
+- `BUNNY_WEBHOOK_SECRET` — webhook readiness updates
+
+`BUNNY_STREAM_CDN_HOSTNAME` is no longer read: playback goes through the signed iframe, not the CDN.
 
 ### 11.4 Maps
 
@@ -818,7 +819,6 @@ The service-role key is server-only and is not available for client code. Ordina
 
 - `BUNNY_STREAM_LIBRARY_ID`
 - `BUNNY_STREAM_API_KEY`
-- `BUNNY_STREAM_CDN_HOSTNAME`
 - `BUNNY_STREAM_TOKEN_KEY`
 - `BUNNY_WEBHOOK_SECRET`
 
@@ -973,10 +973,10 @@ An attempts count must equal persisted real submissions, not quiz opens or faile
 
 Check:
 
-1. All Bunny server secrets exist.
+1. All Bunny server secrets exist. The instructor page names any missing secret, a rejected API key (401/403) or a wrong library id (404) in its error message.
 2. Lesson has `video_provider='bunny'` and a valid `video_uid`.
 3. Upload finished at Bunny.
-4. Webhook secret/path is correct, or run status refresh.
+4. Webhook secret/path is correct. Without it, the instructor page polls Bunny every 20 seconds while a lesson is processing, and student playback checks Bunny before reporting "processing".
 5. `video_status` and `video_ready` are consistent.
 6. Playback caller is enrolled, instructor, or admin.
 7. Signed embed URL has not expired.

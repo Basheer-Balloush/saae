@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { QuizBuilder } from "@/components/lms/QuizBuilder";
 import { CourseFormBuilder } from "@/components/lms/CourseFormBuilder";
 import { createBunnyUpload, setLessonBunnyVideo, refreshBunnyLessonStatus } from "@/lib/bunny-stream.functions";
+import { bunnyErrorMessage } from "@/lib/bunny-errors";
 import * as tus from "tus-js-client";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
 import { CourseCoInstructors } from "@/components/lms/CourseCoInstructors";
@@ -201,6 +202,30 @@ function CourseBuilder() {
       setLessons((prev) => prev.map((l) => (d.lessons[l.id] ? { ...l, ...d.lessons[l.id] } : l)));
     },
   });
+
+  // Bunny's webhook is the main signal that encoding finished, but when it is
+  // missing or late the lesson would sit at "processing" forever. While any
+  // lesson is processing, ask Bunny directly every 20 seconds.
+  const processingLessonIds = lessons
+    .filter((l) => l.video_provider === "bunny" && l.video_uid && (l.video_status === "processing" || l.video_status === "uploading"))
+    .map((l) => l.id)
+    .join(",");
+  useEffect(() => {
+    if (!processingLessonIds) return;
+    let cancelled = false;
+    const timer = window.setInterval(async () => {
+      for (const lessonId of processingLessonIds.split(",")) {
+        try {
+          const r = await refreshBunnyLessonStatus({ data: { lessonId } });
+          if (cancelled || r.status === "processing") continue;
+          setLessons((curr) => curr.map((x) => x.id === lessonId ? { ...x, video_status: r.status, video_ready: r.status === "ready" } : x));
+        } catch (e) {
+          console.warn("[bunny status poll]", e);
+        }
+      }
+    }, 20_000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [processingLessonIds]);
 
   if (!course) {
     return (
@@ -489,7 +514,7 @@ function CourseBuilder() {
       toast.info(lang === "ar" ? "جاري تجهيز الرفع..." : "Preparing upload...");
 
       const creds = await createBunnyUpload({
-        data: { lessonId: lesson.id, title: lesson.title || file.name },
+        data: { lessonId: lesson.id, title: (lesson.title || lesson.title_ar || lesson.title_en || file.name).slice(0, 255) },
       });
 
       const startedAt = Date.now();
@@ -511,8 +536,11 @@ function CourseBuilder() {
           },
           metadata: {
             filetype: file.type || "video/mp4",
-            title: lesson.title || file.name,
+            title: lesson.title || lesson.title_ar || lesson.title_en || file.name,
           },
+          // Every attempt creates a fresh Bunny video, so an old upload URL
+          // for the same file must never be reused.
+          storeFingerprintForResuming: false,
           onError: (err) => reject(err),
           onProgress: (sent, total) => {
             const now = Date.now();
@@ -563,9 +591,16 @@ function CourseBuilder() {
         void _omit;
         return rest;
       });
-      toast.error(toUserMessage(e));
+      toast.error(bunnyErrorMessage(e, lang));
     }
   };
+
+  const videoStatusLabel = (status: string) =>
+    status === "ready"
+      ? (lang === "ar" ? "الفيديو جاهز" : "Video ready")
+      : status === "failed"
+        ? (lang === "ar" ? "فشلت معالجة الفيديو على Bunny" : "Bunny failed to process the video")
+        : (lang === "ar" ? "ما زال الفيديو قيد المعالجة" : "The video is still processing");
 
   const MAX_ATTACHMENT_BYTES = 50 * 1024 * 1024;
   const uploadAttachments = async (lesson: Lesson, files: FileList | null) => {
@@ -1161,7 +1196,12 @@ function CourseBuilder() {
                           <span>{lang === "ar" ? "اختر فيديو" : "Choose video"}</span>
                           <input type="file" accept="video/*" className="hidden"
                             disabled={videoProgress[l.id] !== undefined}
-                            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(l, f); }} />
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              // Clear the input so picking the same file again (after a failure) fires onChange.
+                              e.target.value = "";
+                              if (f) uploadVideo(l, f);
+                            }} />
                         </label>
                         {videoProgress[l.id] === undefined && l.video_provider === "bunny" && l.video_uid && l.video_status === "ready" && (
                           <span className="text-emerald-600">
@@ -1180,8 +1220,8 @@ function CourseBuilder() {
                                 try {
                                   const r = await refreshBunnyLessonStatus({ data: { lessonId: l.id } });
                                   setLessons((curr) => curr.map((x) => x.id === l.id ? { ...x, video_status: r.status, video_ready: r.status === "ready" } : x));
-                                  toast.success(lang === "ar" ? `الحالة: ${r.status}` : `Status: ${r.status}`);
-                                } catch (e) { toast.error(toUserMessage(e)); }
+                                  toast.success(videoStatusLabel(r.status));
+                                } catch (e) { toast.error(bunnyErrorMessage(e, lang)); }
                               }}
                             >
                               {lang === "ar" ? "تحديث الحالة" : "Refresh status"}
@@ -1200,7 +1240,8 @@ function CourseBuilder() {
                                 try {
                                   const r = await refreshBunnyLessonStatus({ data: { lessonId: l.id } });
                                   setLessons((curr) => curr.map((x) => x.id === l.id ? { ...x, video_status: r.status, video_ready: r.status === "ready" } : x));
-                                } catch (e) { toast.error(toUserMessage(e)); }
+                                  toast.success(videoStatusLabel(r.status));
+                                } catch (e) { toast.error(bunnyErrorMessage(e, lang)); }
                               }}
                             >
                               {lang === "ar" ? "إعادة الفحص" : "Recheck"}
