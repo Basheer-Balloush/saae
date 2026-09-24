@@ -70,7 +70,7 @@ const SOCIALS: SocialLink[] = [
   },
 ];
 
-export const Route = createFileRoute("/profile/7f3a9c2e")({
+export const Route = createFileRoute("/profile/minister-of-finance")({
   validateSearch: (search: Record<string, unknown>): { lang: CardLanguage } => ({
     lang: search.lang === "en" ? "en" : "ar",
   }),
@@ -121,7 +121,7 @@ function ProfileCardPage() {
           )}
         </div>
         <Button asChild variant="ghost" className="profile-lang-btn">
-          <Link to="/profile/7f3a9c2e" search={{ lang: isArabic ? "en" : "ar" }} aria-label={copy.switchLanguage}>
+          <Link to="/profile/minister-of-finance" search={{ lang: isArabic ? "en" : "ar" }} aria-label={copy.switchLanguage}>
             {isArabic ? "EN" : "ع"}
           </Link>
         </Button>
