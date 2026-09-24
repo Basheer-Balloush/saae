@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Download, Facebook, Linkedin, Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLang } from "@/lib/i18n";
 import "@/components/profile-card/profile-card.css";
+
+type CardLanguage = "ar" | "en";
 
 const COPY = {
   ar: {
@@ -33,6 +34,9 @@ const SOCIALS = [
 ] as const;
 
 export const Route = createFileRoute("/profile/7f3a9c2e")({
+  validateSearch: (search: Record<string, unknown>): { lang: CardLanguage } => ({
+    lang: search.lang === "en" ? "en" : "ar",
+  }),
   head: () => ({
     meta: [
       { title: "بطاقة تعريف رسمية | Official Profile Card" },
@@ -54,7 +58,7 @@ export const Route = createFileRoute("/profile/7f3a9c2e")({
 });
 
 function ProfileCardPage() {
-  const { lang, setLang } = useLang();
+  const { lang } = Route.useSearch();
   const isArabic = lang === "ar";
   const copy = COPY[lang];
   const contactHref = useMemo(() => {
@@ -68,18 +72,23 @@ function ProfileCardPage() {
     return `data:text/vcard;charset=utf-8,${encodeURIComponent(lines.join("\r\n"))}`;
   }, [isArabic]);
 
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = isArabic ? "rtl" : "ltr";
+  }, [isArabic, lang]);
+
   return (
     <main className="profile-card-page" dir={isArabic ? "rtl" : "ltr"} lang={lang}>
       <article className="profile-card-shell">
         <header className="profile-card-header">
           <Button
-            type="button"
+            asChild
             variant="ghost"
             className="profile-card-language"
-            aria-label={copy.switchLanguage}
-            onClick={() => setLang(isArabic ? "en" : "ar")}
           >
-            {isArabic ? "EN" : "ع"}
+            <a href={isArabic ? "?lang=en" : "?lang=ar"} aria-label={copy.switchLanguage}>
+              {isArabic ? "EN" : "ع"}
+            </a>
           </Button>
           <p className="profile-card-ministry">{copy.ministry}</p>
         </header>
