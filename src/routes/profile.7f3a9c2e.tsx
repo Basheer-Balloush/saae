@@ -50,7 +50,7 @@ function EmailMark() {
 
 type SocialLink = {
   label: string;
-  Mark: () => JSX.Element;
+  Mark: ComponentType;
   href?: string;
   external?: boolean;
 };
