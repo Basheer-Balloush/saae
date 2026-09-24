@@ -16,4 +16,4 @@
 - [x] Create a standalone bilingual profile card at a random-looking URL using placeholders for the portrait and contact links.
 - [x] Verify the profile card in Arabic and English on mobile and desktop.
 
-- [ ] Replace /profile/7f3a9c2e with the uploaded Portfolio code, scoped to this page only.
+- [x] Replace /profile/7f3a9c2e with the uploaded Portfolio code, scoped to this page only.
