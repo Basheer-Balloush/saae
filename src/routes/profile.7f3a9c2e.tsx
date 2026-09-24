@@ -100,6 +100,8 @@ function ProfileCardPage() {
       "VERSION:3.0",
       `FN:${isArabic ? "محمد يسر برنية" : "Mohammed Yisr Barnieh"}`,
       `TITLE:${isArabic ? "وزير المالية في الجمهورية العربية السورية" : "Minister of Finance of the Syrian Arab Republic"}`,
+      "EMAIL;TYPE=WORK;PREF=1:minister@mof.gov.sy",
+      "EMAIL;TYPE=WORK:minister.office@mof.gov.sy",
       "END:VCARD",
     ];
     return `data:text/vcard;charset=utf-8,${encodeURIComponent(lines.join("\r\n"))}`;
