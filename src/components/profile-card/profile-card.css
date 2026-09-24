@@ -170,12 +170,17 @@
 
 .profile-card-role {
   max-inline-size: 520px;
-  margin: 34px 0 0;
+  margin: 28px 0 0;
   color: var(--profile-maroon);
-  font-size: clamp(1.3rem, 4.5vw, 2rem);
-  font-weight: 600;
-  line-height: 1.65;
+  font-family: "Cairo", "Noto Sans Arabic", sans-serif;
+  font-size: clamp(1.45rem, 5vw, 2.2rem);
+  font-weight: 500;
+  line-height: 1.7;
   text-wrap: balance;
+}
+
+.profile-card-role strong {
+  font-weight: 700;
 }
 
 .profile-card-actions {

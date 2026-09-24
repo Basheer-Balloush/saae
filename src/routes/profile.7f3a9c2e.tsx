@@ -12,7 +12,7 @@ const COPY = {
   ar: {
     ministry: <>الجمهورية العربية السورية<br />وزارة المالية</>,
     name: "محمد يسر برنية",
-    role: <>المسمى الوظيفي<br />في الجمهورية العربية السورية</>,
+    role: <><strong>وزير المالية</strong><br /><span>في الجمهورية العربية السورية</span></>,
     photo: "مكان الصورة",
     save: "حفظ جهة الاتصال",
     switchLanguage: "عرض البطاقة باللغة الإنجليزية",
@@ -88,7 +88,7 @@ function ProfileCardPage() {
       "BEGIN:VCARD",
       "VERSION:3.0",
       `FN:${isArabic ? "محمد يسر برنية" : "Mohammad Yusr Barnieh"}`,
-      `TITLE:${isArabic ? "المسمى الوظيفي" : "Official Title"}`,
+      `TITLE:${isArabic ? "وزير المالية في الجمهورية العربية السورية" : "Official Title"}`,
       "END:VCARD",
     ];
     return `data:text/vcard;charset=utf-8,${encodeURIComponent(lines.join("\r\n"))}`;
