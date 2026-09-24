@@ -15,3 +15,5 @@
 - [x] Reorganize the About communities into a balanced 4/2/1-column grid with equal-height rows and no staggered layout gaps.
 - [x] Create a standalone bilingual profile card at a random-looking URL using placeholders for the portrait and contact links.
 - [x] Verify the profile card in Arabic and English on mobile and desktop.
+
+- [x] Replace /profile/7f3a9c2e with the uploaded Portfolio code, scoped to this page only.

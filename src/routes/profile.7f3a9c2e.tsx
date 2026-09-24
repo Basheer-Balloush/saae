@@ -1,50 +1,51 @@
 import { useEffect, useMemo } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import arabicNameArtwork from "@/assets/mohammad-yusr-barnieh-name-v2.png.asset.json";
-import profilePhoto from "@/assets/official-profile-photo.jpeg.asset.json";
+import ministryMark from "@/assets/profile-card-upload/org-ar.svg.asset.json";
+import portrait from "@/assets/profile-card-upload/portrait.webp.asset.json";
+import signature from "@/assets/profile-card-upload/signature.png.asset.json";
+import starTop from "@/assets/profile-card-upload/star-tr.png.asset.json";
+import starBottom from "@/assets/profile-card-upload/star-bl.png.asset.json";
 import "@/components/profile-card/profile-card.css";
 
 type CardLanguage = "ar" | "en";
 
 const COPY = {
   ar: {
-    ministry: <>الجمهورية العربية السورية<br />وزارة المالية</>,
     name: "محمد يسر برنية",
-    role: <><strong>وزير المالية</strong><br /><span>في الجمهورية العربية السورية</span></>,
-    photo: "مكان الصورة",
+    role: "وزير الماليـــة",
+    roleSub: "فـي الجمهوريـة العربيـة السوريـة",
     save: "حفظ جهة الاتصال",
     switchLanguage: "عرض البطاقة باللغة الإنجليزية",
   },
   en: {
-    ministry: <>Syrian Arab Republic<br />Ministry of Finance</>,
-    name: "Full Name",
-    role: <>Official Title<br />Syrian Arab Republic</>,
-    photo: "Photo placeholder",
-    save: "Save contact",
-    switchLanguage: "View this card in Arabic",
+    name: "Mohammed Yisr Barnieh",
+    role: "Minister of Finance",
+    roleSub: "of the Syrian Arab Republic",
+    save: "Save Contact",
+    switchLanguage: "عرض البطاقة باللغة العربية",
   },
 } as const;
 
 function FacebookMark() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4.3A24 24 0 0 0 14.4 4C11.8 4 10 5.6 10 8.6V11H7v4h3v7h4v-7h3l.5-4H14V8.8c0-.7.2-.8 1-.8Z" /></svg>;
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-7.6h2.6l.4-3h-3V8.5c0-.87.25-1.46 1.5-1.46h1.6V4.36A21 21 0 0 0 14.27 4.2c-2.3 0-3.87 1.4-3.87 3.98v2.22H7.8v3h2.6V21Z" /></svg>;
 }
 
 function XMark() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h4.7l4.2 5.6L17.8 3H20l-6.1 7.1L21 21h-4.7l-4.8-6.4L6 21H3.8l6.7-7.9L4 3Zm3.6 1.7 9.6 14.6h1.9L9.5 4.7H7.6Z" /></svg>;
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M3 3h5.2L21 21h-5.2Z" /><path d="M20.5 3 13.4 11M10.6 13 3.5 21" /></svg>;
 }
 
 function LinkedInMark() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.4 8.4H2.2V22h3.2V8.4ZM3.8 2A1.9 1.9 0 1 0 3.8 5.8 1.9 1.9 0 0 0 3.8 2ZM21.8 14.2c0-4.1-2.2-6-5.1-6-2.4 0-3.4 1.3-4 2.2v-2H9.5V22h3.2v-6.7c0-1.8.3-3.5 2.6-3.5 2.2 0 2.3 2.1 2.3 3.6V22h3.2l1-7.8Z" /></svg>;
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45Z" /></svg>;
 }
 
 function WhatsAppMark() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12 2a9.7 9.7 0 0 0-8.3 14.7L2.3 22l5.5-1.4A9.8 9.8 0 1 0 12 2Zm0 17.7a8 8 0 0 1-4.1-1.1l-.3-.2-3.2.8.9-3.1-.2-.3A8 8 0 1 1 12 19.7Zm4.4-6c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.3 0-.5.1-.6l.5-.6c.1-.2.1-.3.2-.5 0-.1 0-.3-.1-.4l-.8-2c-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.5.7.2 1.3.2 1.8.1.5-.1 1.4-.6 1.6-1.2.2-.6.2-1.1.1-1.2-.1-.1-.3-.2-.5-.3Z" clipRule="evenodd" /></svg>;
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.18-1.41-.07-.13-.27-.2-.57-.35M12.05 21.79h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.9-9.88 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.89 9.88m8.41-18.3A11.82 11.82 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89 0-3.18-1.24-6.16-3.48-8.41" /></svg>;
 }
 
 function EmailMark() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm0 3.2v8.5h18V8.2l-7.7 6.2a2 2 0 0 1-2.6 0L3 8.2Zm1.1-1.5 7.9 6.4 7.9-6.4H4.1Z" /></svg>;
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v.4l-10 6.2L2 6.4V6a1 1 0 0 1 1-1Zm-1 3.7 9.5 5.9a1 1 0 0 0 1 0L22 8.7V18a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1Z" /></svg>;
 }
 
 const SOCIALS = [
@@ -61,19 +62,13 @@ export const Route = createFileRoute("/profile/7f3a9c2e")({
   }),
   head: () => ({
     meta: [
-      { title: "بطاقة تعريف رسمية | Official Profile Card" },
-      {
-        name: "description",
-        content: "بطاقة تعريف رسمية قابلة للمشاركة وحفظ معلومات الاتصال.",
-      },
-      { property: "og:title", content: "بطاقة تعريف رسمية" },
-      {
-        property: "og:description",
-        content: "بطاقة تعريف رسمية قابلة للمشاركة وحفظ معلومات الاتصال.",
-      },
+      { title: "وزارة المالية | محمد يسر برنية" },
+      { name: "description", content: "محمد يسر برنية — وزير المالية في الجمهورية العربية السورية" },
+      { property: "og:title", content: "وزارة المالية | محمد يسر برنية" },
+      { property: "og:description", content: "محمد يسر برنية — وزير المالية في الجمهورية العربية السورية" },
       { property: "og:type", content: "profile" },
       { name: "twitter:card", content: "summary" },
-      { name: "theme-color", content: "#431719" },
+      { name: "theme-color", content: "#391716" },
     ],
   }),
   component: ProfileCardPage,
@@ -87,8 +82,8 @@ function ProfileCardPage() {
     const lines = [
       "BEGIN:VCARD",
       "VERSION:3.0",
-      `FN:${isArabic ? "محمد يسر برنية" : "Mohammad Yusr Barnieh"}`,
-      `TITLE:${isArabic ? "وزير المالية في الجمهورية العربية السورية" : "Official Title"}`,
+      `FN:${isArabic ? "محمد يسر برنية" : "Mohammed Yisr Barnieh"}`,
+      `TITLE:${isArabic ? "وزير المالية في الجمهورية العربية السورية" : "Minister of Finance of the Syrian Arab Republic"}`,
       "END:VCARD",
     ];
     return `data:text/vcard;charset=utf-8,${encodeURIComponent(lines.join("\r\n"))}`;
@@ -100,62 +95,56 @@ function ProfileCardPage() {
   }, [isArabic, lang]);
 
   return (
-    <main className="profile-card-page" dir={isArabic ? "rtl" : "ltr"} lang={lang}>
-      <article className="profile-card-shell">
-        <header className="profile-card-header">
-          <Button
-            asChild
-            variant="ghost"
-            className="profile-card-language"
-          >
-            <a href={isArabic ? "?lang=en" : "?lang=ar"} aria-label={copy.switchLanguage}>
-              {isArabic ? "EN" : "ع"}
+    <main className="profile-page" dir={isArabic ? "rtl" : "ltr"} lang={lang}>
+      <header className="profile-topbar">
+        <div className="profile-org">
+          {isArabic ? (
+            <img src={ministryMark.url} alt="الجمهورية العربية السورية — وزارة المالية" />
+          ) : (
+            <span className="profile-org-en">Syrian Arab Republic<br />Ministry of Finance</span>
+          )}
+        </div>
+        <Button asChild variant="ghost" className="profile-lang-btn">
+          <Link to="/profile/7f3a9c2e" search={{ lang: isArabic ? "en" : "ar" }} aria-label={copy.switchLanguage}>
+            {isArabic ? "EN" : "ع"}
+          </Link>
+        </Button>
+      </header>
+
+      <img className="profile-star profile-star-tr" src={starTop.url} alt="" aria-hidden="true" />
+      <img className="profile-star profile-star-bl" src={starBottom.url} alt="" aria-hidden="true" />
+
+      <section className="profile-card-layout">
+        <div className="profile-portrait">
+          <img src={portrait.url} alt={copy.name} />
+        </div>
+
+        <div className="profile-info">
+          <h1 className="profile-signature">
+            {isArabic ? <img src={signature.url} alt={copy.name} /> : copy.name}
+          </h1>
+
+          <p className="profile-role">
+            <strong>{copy.role}</strong>
+            <span>{copy.roleSub}</span>
+          </p>
+
+          <Button asChild className="profile-save-btn">
+            <a href={contactHref} download="Mohammed-Yisr-Barnieh.vcf">
+              <span>{copy.save}</span>
+              <Download aria-hidden="true" />
             </a>
           </Button>
-          <p className="profile-card-ministry">{copy.ministry}</p>
-        </header>
 
-        <div className="profile-card-content">
-          <span className="profile-card-star profile-card-star-top" aria-hidden="true" />
-          <span className="profile-card-star profile-card-star-bottom" aria-hidden="true" />
-
-          <div className="profile-card-portrait">
-            <img src={profilePhoto.url} alt={isArabic ? "الصورة الشخصية الرسمية" : "Official portrait"} />
-          </div>
-
-          <h1 className={`profile-card-name${isArabic ? " profile-card-name-ar" : ""}`}>
-            {isArabic ? (
-              <img src={arabicNameArtwork.url} alt={copy.name} />
-            ) : (
-              copy.name
-            )}
-          </h1>
-          <p className="profile-card-role">{copy.role}</p>
-
-          <div className="profile-card-actions">
-            <Button asChild className="profile-card-save">
-              <a href={contactHref} download="contact.vcf">
-                <Download aria-hidden="true" />
-                <span>{copy.save}</span>
+          <nav className="profile-social" aria-label={isArabic ? "روابط التواصل" : "Contact links"}>
+            {SOCIALS.map(({ label, Mark }) => (
+              <a key={label} href="#" aria-label={`${label} — ${isArabic ? "رابط مؤقت" : "placeholder link"}`} onClick={(event) => event.preventDefault()}>
+                <Mark />
               </a>
-            </Button>
-
-            <div className="profile-card-socials" aria-label={isArabic ? "روابط التواصل" : "Contact links"}>
-              {SOCIALS.map(({ label, Mark }) => (
-                <a
-                  key={label}
-                  className="profile-card-social"
-                  href="#"
-                  aria-label={`${label} — ${isArabic ? "رابط مؤقت" : "placeholder link"}`}
-                  onClick={(event) => event.preventDefault()}
-                >
-                  <Mark />
-                </a>
-              ))}
-            </div>
-          </div>
+            ))}
+          </nav>
         </div>
-      </article>
+      </section>
     </main>
   );
 }
