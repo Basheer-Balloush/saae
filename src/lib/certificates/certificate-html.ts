@@ -33,8 +33,16 @@ const escapeHtml = (s: string) =>
 /* Course dates are calendar days stored at midnight UTC: read them in UTC so
    no timezone moves them a day. The issue date is a real moment, shown as
    the day it was in Damascus. Written d/m/yyyy, as on the printed certificates. */
+/* Accepts PostgREST's "2026-07-26T00:00:00+00:00" and Postgres's own
+   "2026-07-26 00:00:00+00", so a date never prints as NaN. */
+function parseTimestamp(value: string): Date {
+  const d = new Date(value.trim().replace(" ", "T").replace(/([+-]\d\d)$/, "$1:00"));
+  if (Number.isNaN(d.getTime())) throw new Error(`certificate_bad_date ${value}`);
+  return d;
+}
+
 export function formatCourseDate(iso: string): string {
-  const d = new Date(iso);
+  const d = parseTimestamp(iso);
   return `${d.getUTCDate()}/${d.getUTCMonth() + 1}/${d.getUTCFullYear()}`;
 }
 
@@ -44,7 +52,7 @@ export function formatIssueDate(iso: string): string {
     day: "numeric",
     month: "numeric",
     year: "numeric",
-  }).formatToParts(new Date(iso));
+  }).formatToParts(parseTimestamp(iso));
   const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
   return `${Number(get("day"))}/${Number(get("month"))}/${get("year")}`;
 }
