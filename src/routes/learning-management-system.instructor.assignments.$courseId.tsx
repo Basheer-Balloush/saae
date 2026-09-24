@@ -16,7 +16,7 @@ import { confirmDialog } from "@/hooks/useConfirm";
 import { InstructorPageHeader } from "@/components/lms-skin/InstructorWorkspace";
 
 export const Route = createFileRoute("/learning-management-system/instructor/assignments/$courseId")({
-  head: () => ({ meta: [{ title: "LMS · Manage Assignments" }] }),
+  head: () => ({ meta: [{ title: "Manage Assignments — SAAE Training and Learning Platform" }] }),
   component: InstructorAssignments,
 });
 

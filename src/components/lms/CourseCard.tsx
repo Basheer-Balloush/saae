@@ -5,6 +5,7 @@ import { lmsT } from "@/lib/lms-i18n";
 import { CoursePrice } from "@/components/lms/CoursePrice";
 import { isCourseEnded } from "@/lib/lms-course-ended";
 import { cn } from "@/lib/utils";
+import { resizedImage, resizedSrcSet } from "@/lib/image-url";
 
 export type CourseCardData = {
   id: string;
@@ -44,7 +45,9 @@ export function CourseCard({ course }: { course: CourseCardData }) {
         {ended && <CourseEndedStamp />}
         {course.cover_url ? (
           <img
-            src={course.cover_url}
+            src={resizedImage(course.cover_url, 720)}
+            srcSet={resizedSrcSet(course.cover_url, [480, 720, 1080])}
+            sizes="(max-width: 700px) 92vw, 380px"
             alt={title}
             className={cn(
               "w-full h-full object-cover group-hover:scale-105 transition-transform",

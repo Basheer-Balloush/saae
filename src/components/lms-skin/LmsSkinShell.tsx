@@ -160,11 +160,21 @@ function TubeNav({ role, isAuthed, onSignOut }: Omit<Props, "children">) {
     };
   }, [open]);
 
+  // Once the page scrolls, navigation.css fades a band in behind the fixed
+  // logo and language buttons so headings no longer collide with them.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const close = () => setOpen(false);
 
   return (
     <nav
-      className={`radial-nav${open ? " is-open" : ""}`}
+      className={`radial-nav${open ? " is-open" : ""}${scrolled ? " is-scrolled" : ""}`}
       ref={navRef}
       aria-label={ar ? "تنقّل منصة التعلّم" : "Learning platform navigation"}
     >

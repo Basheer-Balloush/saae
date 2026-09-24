@@ -12,7 +12,7 @@ import { grantRoleByEmail, getEmailsForUsers } from "@/lib/lms-admin-users.funct
 import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/admin/users")({
-  head: () => ({ meta: [{ title: "LMS · Users" }] }),
+  head: () => ({ meta: [{ title: "Users — SAAE Training and Learning Platform" }] }),
   component: UsersPage,
 });
 

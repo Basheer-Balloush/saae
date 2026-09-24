@@ -14,6 +14,7 @@ import {
 } from "@/lib/lms-internships-public.functions";
 import { SubHero } from "@/components/lms-skin/SubHero";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { resizedImage, resizedSrcSet } from "@/lib/image-url";
 
 export const detailQueryKey = (slug: string) => ["public-internship", slug] as const;
 
@@ -203,7 +204,7 @@ function InternshipDetail() {
       >
         {d.cover_url ? (
           <div className="course-hero-cover">
-            <img src={d.cover_url} alt="" />
+            <img src={resizedImage(d.cover_url, 1080)} srcSet={resizedSrcSet(d.cover_url, [720, 1080, 1440])} sizes="(max-width: 700px) 92vw, 560px" alt="" />
           </div>
         ) : null}
       </SubHero>
@@ -290,7 +291,7 @@ function SlugNotFound() {
   );
 }
 
-function SlugError({ reset }: { error: Error; reset: () => void }) {
+function SlugError({ reset }: { reset: () => void }) {
   const { lang } = useLang();
   const t = lmsInternshipsT[lang];
   return (

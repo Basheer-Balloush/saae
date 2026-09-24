@@ -13,6 +13,7 @@ import { isCourseEnded } from "@/lib/lms-course-ended";
 import { SubHero } from "./SubHero";
 import { Counter } from "./Reveal";
 import { IconCategoryAI, IconCertificate } from "./icons";
+import { resizedImage, resizedSrcSet } from "@/lib/image-url";
 
 type CourseRow = {
   id: string;
@@ -264,7 +265,7 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
                   return (
                     <li key={r.id} className="study-card">
                       <span className="course-thumb cat-ai" aria-hidden="true">
-                        {r.course.cover_url ? <img src={r.course.cover_url} alt="" /> : <IconCategoryAI />}
+                        {r.course.cover_url ? <img src={resizedImage(r.course.cover_url, 720)} alt="" loading="lazy" decoding="async" /> : <IconCategoryAI />}
                         {ended ? <span className="course-ended">{tr.courseEndedShort}</span> : null}
                       </span>
                       <span className="study-body">

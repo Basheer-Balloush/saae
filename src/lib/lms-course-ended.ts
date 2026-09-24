@@ -28,3 +28,14 @@ export function isCourseEnded(course: CourseEndedInput): boolean {
 
   return end < today;
 }
+
+/**
+ * Open courses first, ended ones after, keeping the catalog order inside each
+ * group, so visitors see what they can still join before the archive.
+ */
+export function sortOpenFirst<T extends CourseEndedInput>(courses: readonly T[]): T[] {
+  return courses
+    .map((course, index) => ({ course, index, ended: isCourseEnded(course) }))
+    .sort((a, b) => Number(a.ended) - Number(b.ended) || a.index - b.index)
+    .map((entry) => entry.course);
+}

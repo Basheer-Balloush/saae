@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { InstructorPageHeader } from "@/components/lms-skin/InstructorWorkspace";
 
 export const Route = createFileRoute("/learning-management-system/instructor/quiz-results/$courseId")({
-  head: () => ({ meta: [{ title: "LMS · Quiz Results" }] }),
+  head: () => ({ meta: [{ title: "Quiz Results — SAAE Training and Learning Platform" }] }),
   component: QuizResultsPage,
 });
 

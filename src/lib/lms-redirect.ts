@@ -17,3 +17,9 @@ export function safeLmsRedirect(value: unknown): string | undefined {
 export const lmsRedirectSearchSchema = (raw: Record<string, unknown>): { redirect?: string } => ({
   redirect: safeLmsRedirect(raw?.redirect),
 });
+
+/** The current LMS page as a login return target, so sign-in lands back here. */
+export function currentLmsReturn(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  return safeLmsRedirect(`${window.location.pathname}${window.location.search}`);
+}

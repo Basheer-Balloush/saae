@@ -17,7 +17,7 @@ import { sendCertificateEmail } from "@/lib/certificate-email.functions";
 
 export const Route = createFileRoute("/learning-management-system/student/quiz/$courseId")({
   head: () => ({
-    meta: [{ title: "LMS · Quizzes" }],
+    meta: [{ title: "Quizzes — SAAE Training and Learning Platform" }],
     links: [...LMS_SKIN_LINKS, { rel: "stylesheet", href: "/lms/css/quiz.css" }],
   }),
   validateSearch: (search: Record<string, unknown>) => ({

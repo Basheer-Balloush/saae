@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/learning-management-system/admin/analytics")({
-  head: () => ({ meta: [{ title: "LMS · Analytics" }] }),
+  head: () => ({ meta: [{ title: "Analytics — SAAE Training and Learning Platform" }] }),
   component: Analytics,
 });
 

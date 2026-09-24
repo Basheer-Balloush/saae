@@ -9,7 +9,7 @@ import { IconCertificate } from "@/components/lms-skin/icons";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/verify")({
-  head: () => ({ meta: [{ title: "LMS · Verify certificate" }], links: LMS_SKIN_LINKS }),
+  head: () => ({ meta: [{ title: "Verify certificate — SAAE Training and Learning Platform" }], links: LMS_SKIN_LINKS }),
   component: VerifyPage,
 });
 

@@ -5,11 +5,13 @@ import { useLang } from "@/lib/i18n";
 import type { CourseCardData } from "@/components/lms/CourseCard";
 import { loadAllPublicCourses } from "@/lib/lms-public-catalog";
 import { SkinCourseCard } from "@/components/lms-skin/SkinCourseCard";
-import { CategoriesCarousel } from "@/components/lms-skin/CategoriesCarousel";
+import { CategoriesGrid } from "@/components/lms-skin/CategoriesGrid";
 import { FaqAccordion } from "@/components/lms-skin/FaqAccordion";
 import { Counter, Reveal } from "@/components/lms-skin/Reveal";
 import { IconSearch } from "@/components/lms-skin/icons";
 import { LMS_SKIN_LINKS, categoryTone } from "@/components/lms-skin/skin";
+import { FilterChips } from "@/components/lms-skin/FilterChips";
+import { sortOpenFirst } from "@/lib/lms-course-ended";
 
 type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
 type HomeCourse = CourseCardData & { category_id?: string | null };
@@ -98,9 +100,17 @@ function LmsHome() {
   );
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
 
+  // Open courses first: most of the archive has ended.
+  const ordered = useMemo(() => sortOpenFirst(courses), [courses]);
+  // Only categories that actually have courses become filters.
+  const filterCategories = useMemo(
+    () => categories.filter((c) => (coursesByCategory[c.id] ?? 0) > 0),
+    [categories, coursesByCategory],
+  );
+
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return courses.filter((c) => {
+    return ordered.filter((c) => {
       if (filter !== "all" && c.category_id !== filter) return false;
       if (!q) return true;
       const cat = c.category_id ? categoryById.get(c.category_id) : undefined;
@@ -108,15 +118,16 @@ function LmsHome() {
         .toLowerCase()
         .includes(q);
     });
-  }, [courses, filter, query, categoryById]);
+  }, [ordered, filter, query, categoryById]);
 
   const scrollToCourses = () => coursesRef.current?.scrollIntoView({ behavior: "smooth" });
 
-  const carousel = categories.map((c, i) => ({
+  // Same categories as the chips, so "Browse" always lands on a real filter.
+  const carousel = filterCategories.map((c) => ({
     id: c.id,
     name: catName(c),
     count: coursesByCategory[c.id] ?? 0,
-    tone: categoryTone(i, `${c.name_en ?? ""} ${c.name_ar}`),
+    tone: toneById.get(c.id) ?? "ai",
   }));
 
   return (
@@ -251,8 +262,8 @@ function LmsHome() {
         </div>
       </section>
 
-      {/* CATEGORIES — 3D carousel; Browse filters the courses below. */}
-      <CategoriesCarousel
+      {/* CATEGORIES — tile grid; a tile filters the courses below. */}
+      <CategoriesGrid
         categories={carousel}
         onBrowse={(id) => {
           setFilter(id);
@@ -276,25 +287,19 @@ function LmsHome() {
                 : "Real courses from the SAAE catalog — certified on completion."}
             </p>
           </div>
-          <div
-            className="course-filters"
-            role="group"
-            aria-label={ar ? "تصفية الدورات" : "Filter courses"}
-          >
-            {[
-              { id: "all", label: ar ? "الكل" : "All" },
-              ...categories.map((c) => ({ id: c.id, label: catName(c) })),
-            ].map((f) => (
-              <button
-                key={f.id}
-                type="button"
-                aria-pressed={filter === f.id}
-                onClick={() => setFilter(f.id)}
-              >
-                <span>{f.label}</span>
-              </button>
-            ))}
-          </div>
+          <FilterChips
+            label={ar ? "تصفية الدورات حسب الفئة" : "Filter courses by category"}
+            value={filter}
+            onChange={setFilter}
+            options={[
+              { value: "all", label: ar ? "الكل" : "All", count: courses.length },
+              ...filterCategories.map((c) => ({
+                value: c.id,
+                label: catName(c),
+                count: coursesByCategory[c.id] ?? 0,
+              })),
+            ]}
+          />
           <p className="course-count" role="status">
             <b>{shown.length}</b>{" "}
             <span>{ar ? "دورة" : shown.length === 1 ? "course" : "courses"}</span>

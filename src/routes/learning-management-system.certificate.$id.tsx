@@ -10,9 +10,18 @@ import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { SubHero } from "@/components/lms-skin/SubHero";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { currentLmsReturn } from "@/lib/lms-redirect";
 
 export const Route = createFileRoute("/learning-management-system/certificate/$id")({
-  head: () => ({ meta: [{ title: "LMS · Certificate" }], links: LMS_SKIN_LINKS }),
+  head: () => ({
+    meta: [
+      { title: "Certificate — SAAE Training and Learning Platform" },
+      // Owner-only page: search engines would only ever see the sign-in state.
+      { name: "robots", content: "noindex" },
+    ],
+    links: LMS_SKIN_LINKS,
+  }),
   component: CertificatePage,
 });
 
@@ -27,10 +36,20 @@ function CertificatePage() {
   const { lang } = useLang();
   const ar = lang === "ar";
   const tr = lmsT[lang];
+  const { user, loading: authLoading } = useLmsAuth();
   const [cert, setCert] = useState<Cert | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Certificates are readable by their owner only (RLS); anyone else checks a
+  // serial on /verify. Wait for the session before querying.
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      setCert(null);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     (async () => {
       const { data: c } = await supabase.from("lms_certificates")
         .select("id, serial, issued_at, course_id, student_id").eq("id", id).maybeSingle();
@@ -42,22 +61,33 @@ function CertificatePage() {
         setCert({
           id: c.id, serial: c.serial, issued_at: c.issued_at,
           course: course as { title_ar: string; title_en: string | null } | null,
-          student_name: ins?.full_name ?? "Student",
+          // Students have no lms_instructors row: fall back to the account name.
+          student_name:
+            ins?.full_name ||
+            (user.user_metadata as { full_name?: string } | null)?.full_name ||
+            (ar ? "الطالب" : "Student"),
         });
+      } else {
+        setCert(null);
       }
       setLoading(false);
     })();
-  }, [id]);
+  }, [id, user, authLoading, ar]);
 
   const crumbs = (
     <nav className="course-crumbs" aria-label={ar ? "أنت هنا" : "You are here"}>
-      <Link to="/learning-management-system/student">{tr.myCourses}</Link>
+      {user ? (
+        <Link to="/learning-management-system/student">{tr.myCourses}</Link>
+      ) : (
+        <Link to="/learning-management-system/verify">{ar ? "التحقق من شهادة" : "Verify a certificate"}</Link>
+      )}
       <span aria-hidden="true">/</span>
       <span>{tr.certificate}</span>
     </nav>
   );
 
-  if (loading || !cert) {
+  if (loading || authLoading || !cert) {
+    const busy = loading || authLoading;
     return (
       <SubHero
         id="cert-title"
@@ -65,9 +95,41 @@ function CertificatePage() {
         titleClassName="course-page-title"
         before={crumbs}
         copyChildren={
-          <p className="state-box" style={{ marginTop: 28 }}>
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : ar ? "الشهادة غير موجودة" : "Not found"}
-          </p>
+          <div className="state-box cert-state" style={{ marginTop: 28 }}>
+            {busy ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                <p>
+                  {user
+                    ? ar
+                      ? "لم نجد هذه الشهادة في حسابك."
+                      : "This certificate isn't in your account."
+                    : ar
+                      ? "سجّل الدخول لعرض شهادتك. للتحقق من شهادة شخص آخر استخدم رقمها التسلسلي."
+                      : "Sign in to view your certificate. To check someone else's, use its serial number."}
+                </p>
+                <p className="cert-state-actions">
+                  {!user ? (
+                    <Link
+                      className="action action-primary"
+                      to="/learning-management-system/login"
+                      search={{ redirect: currentLmsReturn() }}
+                    >
+                      <span className="btn-content">
+                        <span>{tr.signIn}</span>
+                      </span>
+                    </Link>
+                  ) : null}
+                  <Link className="action action-secondary" to="/learning-management-system/verify">
+                    <span className="btn-content">
+                      <span>{ar ? "التحقق برقم الشهادة" : "Verify by serial"}</span>
+                    </span>
+                  </Link>
+                </p>
+              </>
+            )}
+          </div>
         }
       />
     );

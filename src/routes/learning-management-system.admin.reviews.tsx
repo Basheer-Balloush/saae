@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/admin/reviews")({
-  head: () => ({ meta: [{ title: "LMS · Admin · Reviews" }] }),
+  head: () => ({ meta: [{ title: "Admin · Reviews — SAAE Training and Learning Platform" }] }),
   component: AdminReviews,
 });
 

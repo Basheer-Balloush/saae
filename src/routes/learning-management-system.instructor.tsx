@@ -6,6 +6,7 @@ import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { currentLmsReturn } from "@/lib/lms-redirect";
 
 /* Every instructor page shares the workspace look: the LMS shell's
    stylesheets plus the dashboard sheet, loaded once for the whole subtree. */
@@ -30,7 +31,7 @@ function InstructorLayout() {
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      navigate({ to: "/learning-management-system/login" });
+      navigate({ to: "/learning-management-system/login", search: { redirect: currentLmsReturn() } });
       return;
     }
     (async () => {

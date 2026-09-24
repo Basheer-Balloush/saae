@@ -16,7 +16,7 @@ import Hls from "hls.js";
 import { isOnsite } from "@/lib/lms-course-destination";
 
 export const Route = createFileRoute("/learning-management-system/student/player/$courseId")({
-  head: () => ({ meta: [{ title: "LMS · Player" }] }),
+  head: () => ({ meta: [{ title: "Player — SAAE Training and Learning Platform" }] }),
   component: Player,
 });
 

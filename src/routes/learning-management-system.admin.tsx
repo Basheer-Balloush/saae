@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
+import { currentLmsReturn } from "@/lib/lms-redirect";
 
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
@@ -21,7 +22,7 @@ function AdminLayout() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) navigate({ to: "/learning-management-system/login" });
+    if (!user) navigate({ to: "/learning-management-system/login", search: { redirect: currentLmsReturn() } });
     else if (role !== "admin") navigate({ to: "/learning-management-system" });
   }, [loading, user, role, navigate]);
 

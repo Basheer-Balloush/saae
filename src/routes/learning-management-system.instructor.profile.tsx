@@ -16,7 +16,7 @@ import { UploadProgress } from "@/components/ui/upload-progress";
 import { InstructorPageHeader } from "@/components/lms-skin/InstructorWorkspace";
 
 export const Route = createFileRoute("/learning-management-system/instructor/profile")({
-  head: () => ({ meta: [{ title: "LMS · Instructor profile" }] }),
+  head: () => ({ meta: [{ title: "Instructor profile — SAAE Training and Learning Platform" }] }),
   component: InstructorProfileEdit,
 });
 

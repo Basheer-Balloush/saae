@@ -43,7 +43,7 @@ import {
 } from "@/components/lms-skin/InstructorWorkspace";
 
 export const Route = createFileRoute("/learning-management-system/instructor/")({
-  head: () => ({ meta: [{ title: "LMS · Instructor" }] }),
+  head: () => ({ meta: [{ title: "Instructor — SAAE Training and Learning Platform" }] }),
   component: InstructorHome,
 });
 

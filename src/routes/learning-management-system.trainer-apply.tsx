@@ -9,6 +9,7 @@ import { useLang } from "@/lib/i18n";
 import { toUserMessage } from "@/lib/safe-error";
 import { Checkbox } from "@/components/ui/checkbox";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
+import { currentLmsReturn } from "@/lib/lms-redirect";
 import {
   submitTrainerApplication,
   attachTrainerApplicationFile,
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/learning-management-system/trainer-apply"
   ssr: false,
   head: () => ({
     meta: [
-      { title: "LMS · طلب اعتماد كمدرّب / Trainer application" },
+      { title: "طلب اعتماد كمدرّب / Trainer application — SAAE Training and Learning Platform" },
       {
         name: "description",
         content:
@@ -115,7 +116,7 @@ function TrainerApplyPage() {
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      navigate({ to: "/learning-management-system/login" });
+      navigate({ to: "/learning-management-system/login", search: { redirect: currentLmsReturn() } });
       return;
     }
     (async () => {

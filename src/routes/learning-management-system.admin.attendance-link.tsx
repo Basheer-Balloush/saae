@@ -10,7 +10,7 @@ import { toUserMessage } from "@/lib/safe-error";
 import { confirmDialog } from "@/hooks/useConfirm";
 
 export const Route = createFileRoute("/learning-management-system/admin/attendance-link")({
-  head: () => ({ meta: [{ title: "LMS · Attendance Link" }] }),
+  head: () => ({ meta: [{ title: "Attendance Link — SAAE Training and Learning Platform" }] }),
   component: AttendanceLinkPage,
 });
 

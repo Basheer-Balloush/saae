@@ -80,7 +80,7 @@ const EMPTY_CATEGORY = { name_ar: "", name_en: "", slug: "" };
 const EMPTY_NEW_COURSE = { title_ar: "", title_en: "", description_ar: "", description_en: "", instructor_id: "" };
 
 export const Route = createFileRoute("/learning-management-system/admin/")({
-  head: () => ({ meta: [{ title: "LMS · Admin" }] }),
+  head: () => ({ meta: [{ title: "Admin — SAAE Training and Learning Platform" }] }),
   component: AdminHome,
 });
 

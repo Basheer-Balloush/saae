@@ -31,7 +31,7 @@ function normalizePhone(raw: string): string {
 }
 
 export const Route = createFileRoute("/learning-management-system/admin/enrollment-requests")({
-  head: () => ({ meta: [{ title: "LMS · Enrollment requests" }] }),
+  head: () => ({ meta: [{ title: "Enrollment requests — SAAE Training and Learning Platform" }] }),
   component: AdminEnrollmentRequests,
 });
 

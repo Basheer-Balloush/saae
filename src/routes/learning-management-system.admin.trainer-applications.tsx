@@ -20,7 +20,7 @@ export const Route = createFileRoute("/learning-management-system/admin/trainer-
   beforeLoad: requireAdminBeforeLoad,
   head: () => ({
     meta: [
-      { title: "LMS · طلبات اعتماد المدربين" },
+      { title: "طلبات اعتماد المدربين — SAAE Training and Learning Platform" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

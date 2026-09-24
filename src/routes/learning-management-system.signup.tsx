@@ -17,7 +17,7 @@ import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
 
 export const Route = createFileRoute("/learning-management-system/signup")({
-  head: () => ({ meta: [{ title: "LMS · Sign up" }], links: LMS_SKIN_LINKS }),
+  head: () => ({ meta: [{ title: "Sign up — SAAE Training and Learning Platform" }], links: LMS_SKIN_LINKS }),
   validateSearch: (raw: Record<string, unknown>) => lmsRedirectSearchSchema(raw),
   component: LmsSignup,
 });

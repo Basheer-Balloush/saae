@@ -13,6 +13,7 @@ import { EnrollmentFormDialog } from "@/components/lms/EnrollmentFormDialog";
 import { SubHero } from "@/components/lms-skin/SubHero";
 import { IconCategoryAI } from "@/components/lms-skin/icons";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { resizedImage, resizedSrcSet } from "@/lib/image-url";
 
 
 type Course = {
@@ -482,19 +483,26 @@ function CourseDetails() {
               ) : null}
               {isFinished ? <span className="tag-free">{tr.courseFinished}</span> : null}
             </span>
-            <p className="course-meta course-hero-meta">
-              <span>
-                <b>{Number(course.students_count ?? 0)}</b> {tr.students}
-              </span>
-              <span>
-                ★ <b>{Number(course.rating_avg).toFixed(1)}</b>
-              </span>
-            </p>
+            {/* Only real numbers: "0 students · ★ 0.0" undersells a new course. */}
+            {Number(course.students_count ?? 0) > 0 || Number(course.rating_avg ?? 0) > 0 ? (
+              <p className="course-meta course-hero-meta">
+                {Number(course.students_count ?? 0) > 0 ? (
+                  <span>
+                    <b>{Number(course.students_count)}</b> {tr.students}
+                  </span>
+                ) : null}
+                {Number(course.rating_avg ?? 0) > 0 ? (
+                  <span>
+                    ★ <b>{Number(course.rating_avg).toFixed(1)}</b>
+                  </span>
+                ) : null}
+              </p>
+            ) : null}
           </>
         }
       >
         <div className="course-hero-cover">
-          {course.cover_url ? <img src={course.cover_url} alt={title} /> : <IconCategoryAI />}
+          {course.cover_url ? <img src={resizedImage(course.cover_url, 1080)} srcSet={resizedSrcSet(course.cover_url, [720, 1080, 1440])} sizes="(max-width: 700px) 92vw, 560px" alt={title} /> : <IconCategoryAI />}
         </div>
       </SubHero>
 

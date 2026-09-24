@@ -8,9 +8,13 @@ import type { CourseCardData } from "@/components/lms/CourseCard";
 import { SkinCourseCard } from "@/components/lms-skin/SkinCourseCard";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 import { loadPublicInstructorCourses } from "@/lib/lms-public-catalog";
+import { resizedImage } from "@/lib/image-url";
 
 export const Route = createFileRoute("/learning-management-system/instructors/$id")({
-  head: () => ({ meta: [{ title: "LMS · Instructor" }], links: LMS_SKIN_LINKS }),
+  head: () => ({
+    meta: [{ title: "Instructor — SAAE Training and Learning Platform" }],
+    links: LMS_SKIN_LINKS,
+  }),
   component: InstructorProfile,
 });
 
@@ -90,6 +94,13 @@ function InstructorProfile() {
     };
   }, [id, navigate]);
 
+  // The profile loads client-side, so name the tab once it arrives.
+  useEffect(() => {
+    if (!ins) return;
+    const who = (ar ? ins.full_name_ar : ins.full_name_en) || ins.full_name;
+    document.title = `${who} — ${ar ? "منصة التعلّم | الجمعية" : "SAAE Training and Learning Platform"}`;
+  }, [ins, ar]);
+
   if (loading || errored || !ins) {
     return (
       <section className="profile-cover">
@@ -103,8 +114,10 @@ function InstructorProfile() {
               ) : (
                 "Could not load profile. Please try again."
               )
+            ) : ar ? (
+              "لم نجد هذا المدرّب."
             ) : (
-              "404"
+              "Instructor not found."
             )}
           </p>
         </div>
@@ -113,9 +126,9 @@ function InstructorProfile() {
   }
 
   const totalStudents = courses.reduce((s, c) => s + Number(c.students_count ?? 0), 0);
-  const avgRating = courses.length
-    ? (courses.reduce((s, c) => s + Number(c.rating_avg), 0) / courses.length).toFixed(1)
-    : "0.0";
+  // Average over rated courses only; unrated ones would drag it toward 0.
+  const rated = courses.map((c) => Number(c.rating_avg ?? 0)).filter((r) => r > 0);
+  const avgRating = rated.length ? (rated.reduce((s, r) => s + r, 0) / rated.length).toFixed(1) : null;
 
   const name = (lang === "ar" ? ins.full_name_ar : ins.full_name_en) || ins.full_name;
   const sp = (lang === "ar" ? ins.specialty_ar : ins.specialty_en) || ins.specialty;
@@ -136,11 +149,13 @@ function InstructorProfile() {
         <div className="page-shell profile-head">
           <div className="profile-id">
             <span className="profile-avatar" aria-hidden="true">
-              {ins.avatar_url ? <img src={ins.avatar_url} alt="" /> : initials}
+              {ins.avatar_url ? <img src={resizedImage(ins.avatar_url, 320)} alt="" /> : initials}
             </span>
             <span className="profile-who">
               <span className="profile-name-row">
-                <strong id="instructor-name">{name}</strong>
+                <h1 className="profile-name-heading">
+                  <strong id="instructor-name">{name}</strong>
+                </h1>
               </span>
               {sp && <span className="profile-role">{sp}</span>}
             </span>
@@ -185,7 +200,7 @@ function InstructorProfile() {
             <div>
               <dt>{tr.reviews}</dt>
               <dd>
-                <b>★ {avgRating}</b>
+                <b>{avgRating ? `★ ${avgRating}` : "—"}</b>
               </dd>
             </div>
           </dl>

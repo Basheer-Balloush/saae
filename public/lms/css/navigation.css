@@ -19,6 +19,10 @@
 .lms-skin .radial-language .language-switch-icon,.lms-skin .radial-language svg { width:17px !important; height:17px !important; flex:0 0 auto; animation:none !important; }
 
 .lms-skin .radial-nav { position:fixed; inset:0; z-index:101; pointer-events:none; }
+/* Scrolled: a soft band behind the fixed logo + language buttons, so content
+   passes under them instead of colliding (LmsSkinShell adds .is-scrolled). */
+.lms-skin .radial-nav::before { content:""; position:absolute; inset:0 0 auto 0; height:132px; background:linear-gradient(to bottom,rgba(4,22,29,.94) 0%,rgba(4,22,29,.8) 52%,rgba(4,22,29,0) 100%); opacity:0; transition:opacity .25s ease; pointer-events:none; }
+.lms-skin .radial-nav.is-scrolled::before { opacity:1; }
 .lms-skin .radial-nav-toggle {
   position:fixed; inset:36px 22px auto auto; z-index:3; width:68px; height:68px; display:grid; place-items:center; padding:0; overflow:hidden;
   pointer-events:auto;
@@ -185,6 +189,7 @@ html[dir="rtl"] .lms-skin .radial-nav-toggle { inset:36px auto auto 22px; }
   html[dir="rtl"] .lms-skin .radial-language { inset:34px auto auto 96px !important; }
   html[dir="rtl"] .lms-skin .radial-nav-toggle { inset:25px auto auto 15px; }
   .lms-skin .radial-nav-toggle { inset:25px 15px auto auto; width:60px; height:60px; }
+  .lms-skin .radial-nav::before { height:112px; }
   .lms-skin .radial-nav-tree { width:42px; height:45px; }
   .lms-skin .radial-nav-items {
     top:98px; left:10px; right:10px;

@@ -14,6 +14,7 @@ import {
 import { SubHero } from "@/components/lms-skin/SubHero";
 import { IconSearch } from "@/components/lms-skin/icons";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { resizedImage, resizedSrcSet } from "@/lib/image-url";
 
 export const Route = createFileRoute("/learning-management-system/internships/")({
   head: () => ({
@@ -175,7 +176,7 @@ function InternshipCard({ item, lang }: { item: PublicInternshipCard; lang: "ar"
   return (
     <li className="opp-card is-link">
       <Link to="/learning-management-system/internships/$slug" params={{ slug: item.slug }}>
-        {item.cover_url ? <img className="opp-cover" src={item.cover_url} alt="" loading="lazy" /> : null}
+        {item.cover_url ? <img className="opp-cover" src={resizedImage(item.cover_url, 720)} srcSet={resizedSrcSet(item.cover_url, [480, 720, 1080])} sizes="(max-width: 700px) 92vw, 380px" alt="" loading="lazy" decoding="async" /> : null}
         <span className="opp-body">
           <span className="opp-tag">{ar ? "فرصة تدريب" : "Internship"}</span>
           <h3 dir="auto">{title}</h3>

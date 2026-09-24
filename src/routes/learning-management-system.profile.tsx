@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, RefreshCw, Trash2, Upload, User as UserIcon } from "lucide-react";
+import { currentLmsReturn } from "@/lib/lms-redirect";
 
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -109,7 +110,7 @@ function ProfilePage() {
   // Redirect logged-out users to LMS login
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate({ to: "/learning-management-system/login" });
+      navigate({ to: "/learning-management-system/login", search: { redirect: currentLmsReturn() } });
     }
   }, [authLoading, user, navigate]);
 

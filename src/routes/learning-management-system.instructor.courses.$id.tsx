@@ -49,7 +49,7 @@ import {
 } from "@/lib/lms-course-fields";
 
 export const Route = createFileRoute("/learning-management-system/instructor/courses/$id")({
-  head: () => ({ meta: [{ title: "LMS · Edit course" }] }),
+  head: () => ({ meta: [{ title: "Edit course — SAAE Training and Learning Platform" }] }),
   component: CourseBuilder,
 });
 

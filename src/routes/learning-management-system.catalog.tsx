@@ -8,6 +8,9 @@ import { SkinCourseCard } from "@/components/lms-skin/SkinCourseCard";
 import { SubHero } from "@/components/lms-skin/SubHero";
 import { IconSearch } from "@/components/lms-skin/icons";
 import { LMS_SKIN_LINKS, categoryTone } from "@/components/lms-skin/skin";
+import { FilterChips } from "@/components/lms-skin/FilterChips";
+import { loadAllPublicCourses } from "@/lib/lms-public-catalog";
+import { sortOpenFirst } from "@/lib/lms-course-ended";
 import {
   PAGE_SIZE,
   parseCatalogSearch,
@@ -22,6 +25,10 @@ type CatalogCourse = CourseCardData & { category_id?: string | null };
 type LoaderData = {
   courses: CatalogCourse[];
   categories: Category[];
+  /** Published courses per category id, across the whole catalog. */
+  categoryCounts: Record<string, number>;
+  /** Card tone per category id, from the full list so colours match the LMS home. */
+  tones: Record<string, string>;
   total: number;
 };
 
@@ -30,7 +37,7 @@ export const Route = createFileRoute("/learning-management-system/catalog")({
   loaderDeps: ({ search }) => parseCatalogSearch(search as Record<string, unknown>),
   loader: async ({ deps }): Promise<LoaderData> => {
     // Bounded, server-side filtered + paginated public list.
-    const [{ data: cs, error }, { data: cats }] = await Promise.all([
+    const [{ data: cs, error }, { data: cats }, everyCourse] = await Promise.all([
       supabase.rpc("lms_list_catalog_public", {
         _limit: PAGE_SIZE,
         _offset: (deps.page - 1) * PAGE_SIZE,
@@ -40,12 +47,27 @@ export const Route = createFileRoute("/learning-management-system/catalog")({
         _price: deps.price || undefined,
       }),
       supabase.from("lms_categories").select("id,name_ar,name_en,slug").order("display_order"),
+      // Counts for the category chips; a failure only costs the counts.
+      loadAllPublicCourses().catch(() => null),
     ]);
     if (error) throw new Error("catalog_load_failed");
     const rows = (cs as unknown as (CatalogCourse & { total_count: number })[]) ?? [];
+    const categoryCounts: Record<string, number> = {};
+    for (const c of (everyCourse as unknown as CatalogCourse[] | null) ?? []) {
+      if (c.category_id) categoryCounts[c.category_id] = (categoryCounts[c.category_id] ?? 0) + 1;
+    }
+    const allCategories = (cats as unknown as Category[]) ?? [];
     return {
-      courses: rows,
-      categories: (cats as unknown as Category[]) ?? [],
+      // Open courses first within the page: most of the archive has ended.
+      courses: sortOpenFirst(rows),
+      // Hide empty categories, unless the counts failed to load.
+      categories: everyCourse
+        ? allCategories.filter((c) => (categoryCounts[c.id] ?? 0) > 0)
+        : allCategories,
+      categoryCounts,
+      tones: Object.fromEntries(
+        allCategories.map((c, i) => [c.id, categoryTone(i, `${c.name_en ?? ""} ${c.name_ar}`)]),
+      ),
       total: Number(rows[0]?.total_count ?? 0),
     };
   },
@@ -108,9 +130,8 @@ function Catalog() {
   const search = parseCatalogSearch(Route.useSearch() as Record<string, unknown>);
   const navigate = useNavigate({ from: Route.fullPath });
 
-  const { courses, categories, total } = data;
+  const { courses, categories, categoryCounts, tones, total } = data;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const toneById = new Map(categories.map((c: Category, i: number) => [c.id, categoryTone(i, `${c.name_en ?? ""} ${c.name_ar}`)]));
 
   // Search box: local state mirrors the URL, debounced back into it.
   const [q, setQ] = useState(search.q);
@@ -147,13 +168,21 @@ function Catalog() {
 
   const hasFilters = !!(search.q || search.category || search.level || search.price);
 
-  const filterRows: { key: "category" | "level" | "price"; label: string; options: { value: string; label: string }[] }[] = [
+  const filterRows: {
+    key: "category" | "level" | "price";
+    label: string;
+    options: { value: string; label: string; count?: number }[];
+  }[] = [
     {
       key: "category",
       label: tr.filterCategory,
       options: [
         { value: "all", label: tr.all },
-        ...categories.map((c: Category) => ({ value: c.slug, label: ar ? c.name_ar : c.name_en || c.name_ar })),
+        ...categories.map((c: Category) => ({
+          value: c.slug,
+          label: ar ? c.name_ar : c.name_en || c.name_ar,
+          count: categoryCounts[c.id],
+        })),
       ],
     },
     {
@@ -214,26 +243,16 @@ function Catalog() {
       <section className="lms-section lms-courses" aria-label={tr.catalogTitle}>
         <div className="page-shell">
           <div className="catalog-filters">
-            {filterRows.map((row) => {
-              const current = search[row.key] || "all";
-              return (
-                <div key={row.key} className="course-filters" role="group" aria-label={row.label}>
-                  <span className="filter-label" aria-hidden="true">
-                    {row.label}
-                  </span>
-                  {row.options.map((o) => (
-                    <button
-                      key={o.value}
-                      type="button"
-                      aria-pressed={current === o.value}
-                      onClick={() => setFilter(row.key, o.value)}
-                    >
-                      <span>{o.label}</span>
-                    </button>
-                  ))}
-                </div>
-              );
-            })}
+            {filterRows.map((row) => (
+              <FilterChips
+                key={row.key}
+                label={row.label}
+                showLabel
+                options={row.options}
+                value={search[row.key] || "all"}
+                onChange={(v) => setFilter(row.key, v)}
+              />
+            ))}
           </div>
 
           <p className="lms-count" role="status">
@@ -256,7 +275,7 @@ function Catalog() {
           ) : (
             <ul className="course-grid">
               {courses.map((c: CatalogCourse) => (
-                <SkinCourseCard key={c.id} course={c} tone={toneById.get(c.category_id ?? "") ?? "ai"} />
+                <SkinCourseCard key={c.id} course={c} tone={tones[c.category_id ?? ""] ?? "ai"} />
               ))}
             </ul>
           )}
