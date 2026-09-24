@@ -1505,22 +1505,42 @@ function CertificateSettings({
 
   const download = async (gender: "male" | "female") => {
     setBusy(gender);
+    /* Browsers (Safari above all) only let a page open a tab during the click
+       itself, and the PDF takes seconds; so the tab opens now, waiting, and
+       gets the PDF when it is ready. If no tab could open, it downloads. */
+    const tab = window.open("", "_blank");
+    tab?.document.write(
+      `<p style="font-family:sans-serif;padding:24px">${ar ? "جارٍ تجهيز نموذج الشهادة…" : "Preparing the certificate preview…"}</p>`,
+    );
+    const fail = (message: string) => {
+      tab?.close();
+      toast.error(message, { duration: 20_000 });
+    };
     try {
       const res = await preview({ data: { courseId, gender } });
       if (res.status === "course_dates_missing") {
-        toast.error(ar ? "أضف تاريخ بداية الدورة ونهايتها أولاً." : "Add the course start and end dates first.");
+        fail(ar ? "أضف تاريخ بداية الدورة ونهايتها أولاً." : "Add the course start and end dates first.");
         return;
       }
       if (res.status === "error") {
-        toast.error(`${ar ? "تعذّر إنشاء الشهادة" : "Certificate failed"}: ${res.message}`, { duration: 20_000 });
+        fail(`${ar ? "تعذّر إنشاء الشهادة" : "Certificate failed"}: ${res.message}`);
         return;
       }
       const bytes = Uint8Array.from(atob(res.base64), (c) => c.charCodeAt(0));
       const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
-      window.open(url, "_blank", "noopener");
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      if (tab && !tab.closed) {
+        tab.location.href = url;
+      } else {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `certificate-preview-${gender}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 5 * 60_000);
     } catch (e) {
-      toast.error(toUserMessage(e));
+      fail(toUserMessage(e));
     } finally {
       setBusy(null);
     }
