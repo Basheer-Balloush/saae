@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Download, Facebook, Linkedin, Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import arabicNameArtwork from "@/assets/mohammad-yusr-barnieh-name.png.asset.json";
+import arabicNameArtwork from "@/assets/mohammad-yusr-barnieh-name-v2.png.asset.json";
 import profilePhoto from "@/assets/official-profile-photo.jpeg.asset.json";
 import "@/components/profile-card/profile-card.css";
 
