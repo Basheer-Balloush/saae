@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ministryMark from "@/assets/profile-card-upload/org-ar.svg.asset.json";
-import portrait from "@/assets/profile-card-upload/portrait-official.png.asset.json";
+import portrait from "@/assets/profile-card-upload/portrait-circle.png.asset.json";
 import signature from "@/assets/profile-card-upload/signature.png.asset.json";
 import starTop from "@/assets/profile-card-upload/star-tr.png.asset.json";
 import starBottom from "@/assets/profile-card-upload/star-bl.png.asset.json";
