@@ -950,13 +950,14 @@ function CourseBuilder() {
         </p>
       </section>
 
-      <CertificateSettings
+      {/* Admins only while the PDF certificate is being tested; instructors get it once it is signed off. */}
+      {isAdmin && <CertificateSettings
         courseId={course.id}
         lang={lang}
         enabled={course.certificate_pdf_enabled}
         datesReady={Boolean(course.start_date && course.end_date)}
         onToggle={(v) => update({ certificate_pdf_enabled: v })}
-      />
+      />}
 
       {/* Schedule & location */}
       <section className="rounded-2xl border border-border bg-card p-5 space-y-4">
