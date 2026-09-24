@@ -153,11 +153,27 @@ function ProfileCardPage() {
           </Button>
 
           <nav className="profile-social" aria-label={isArabic ? "روابط التواصل" : "Contact links"}>
-            {SOCIALS.map(({ label, Mark }) => (
-              <a key={label} href="#" aria-label={`${label} — ${isArabic ? "رابط مؤقت" : "placeholder link"}`} onClick={(event) => event.preventDefault()}>
-                <Mark />
-              </a>
-            ))}
+            {SOCIALS.map(({ label, Mark, href, external }) =>
+              href ? (
+                <a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                >
+                  <Mark />
+                </a>
+              ) : (
+                <a
+                  key={label}
+                  href="#"
+                  aria-label={`${label} — ${isArabic ? "رابط مؤقت" : "placeholder link"}`}
+                  onClick={(event) => event.preventDefault()}
+                >
+                  <Mark />
+                </a>
+              ),
+            )}
           </nav>
         </div>
       </section>
