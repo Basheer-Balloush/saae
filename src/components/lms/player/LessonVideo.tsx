@@ -82,13 +82,19 @@ export function LessonVideo({ title, src, embed, onTime, onBreak, onEnded }: Pro
           break;
       }
     };
-    // The player announces "ready" once; asking again after load covers a missed one.
-    const onLoad = () => post("addEventListener", "ready");
+    /* The player announces "ready" once, and replays it when asked. Ask on
+       load and twice more, in case both fired before this effect ran;
+       otherwise the finish button could stay locked for the whole lesson. */
+    const askReady = () => {
+      if (!subscribed) post("addEventListener", "ready");
+    };
     window.addEventListener("message", onMessage);
-    iframe.addEventListener("load", onLoad);
+    iframe.addEventListener("load", askReady);
+    const retries = [1500, 5000].map((ms) => window.setTimeout(askReady, ms));
     return () => {
       window.removeEventListener("message", onMessage);
-      iframe.removeEventListener("load", onLoad);
+      iframe.removeEventListener("load", askReady);
+      retries.forEach((id) => window.clearTimeout(id));
     };
   }, [embed, src]);
 
