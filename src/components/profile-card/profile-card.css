@@ -171,7 +171,7 @@
 .profile-card-role {
   max-inline-size: 520px;
   margin: 28px 0 0;
-  color: var(--profile-maroon);
+  color: #7a1f2b;
   font-family: "Cairo", "Noto Sans Arabic", sans-serif;
   inline-size: 100%;
   font-size: clamp(1.1rem, 4.4vw, 2.2rem);
