@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Download, Facebook, Linkedin, Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import profilePhoto from "@/assets/official-profile-photo.jpeg.asset.json";
 import "@/components/profile-card/profile-card.css";
 
 type CardLanguage = "ar" | "en";
@@ -97,8 +98,8 @@ function ProfileCardPage() {
           <span className="profile-card-star profile-card-star-top" aria-hidden="true" />
           <span className="profile-card-star profile-card-star-bottom" aria-hidden="true" />
 
-          <div className="profile-card-portrait" role="img" aria-label={copy.photo}>
-            <span>{copy.photo}</span>
+          <div className="profile-card-portrait">
+            <img src={profilePhoto.url} alt={isArabic ? "الصورة الشخصية الرسمية" : "Official portrait"} />
           </div>
 
           <h1 className="profile-card-name">{copy.name}</h1>
