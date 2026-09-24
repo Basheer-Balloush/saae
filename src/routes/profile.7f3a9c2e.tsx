@@ -2,9 +2,9 @@ import { useEffect, useMemo, type ComponentType } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ministryMark from "@/assets/profile-card-upload/org-ar.svg.asset.json";
-import portrait from "@/assets/profile-card-upload/portrait-circle.png.asset.json";
-import signature from "@/assets/profile-card-upload/signature.png.asset.json";
+const ministryMark = { url: "/profile-card/org-ar.svg" };
+const portrait = { url: "/profile-card/portrait-circle.png" };
+const signature = { url: "/profile-card/signature.png" };
 import "@/components/profile-card/profile-card.css";
 
 type CardLanguage = "ar" | "en";

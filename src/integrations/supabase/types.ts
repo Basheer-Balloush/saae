@@ -2118,11 +2118,6 @@ export type Database = {
           course_id: string
           email_error: string | null
           id: string
-          pdf_error: string | null
-          pdf_generated_at: string | null
-          pdf_path: string | null
-          recipient_gender: string | null
-          recipient_name: string | null
           issued_at: string
           sent_at: string | null
           serial: string
@@ -2132,11 +2127,6 @@ export type Database = {
           course_id: string
           email_error?: string | null
           id?: string
-          pdf_error?: string | null
-          pdf_generated_at?: string | null
-          pdf_path?: string | null
-          recipient_gender?: string | null
-          recipient_name?: string | null
           issued_at?: string
           sent_at?: string | null
           serial: string
@@ -2146,11 +2136,6 @@ export type Database = {
           course_id?: string
           email_error?: string | null
           id?: string
-          pdf_error?: string | null
-          pdf_generated_at?: string | null
-          pdf_path?: string | null
-          recipient_gender?: string | null
-          recipient_name?: string | null
           issued_at?: string
           sent_at?: string | null
           serial?: string
@@ -3434,8 +3419,6 @@ export type Database = {
         Row: {
           avatar_file_id: string | null
           biography: string | null
-          certificate_name: string | null
-          gender: string | null
           created_at: string
           cv_file_id: string | null
           full_name: string | null
@@ -3448,8 +3431,6 @@ export type Database = {
         Insert: {
           avatar_file_id?: string | null
           biography?: string | null
-          certificate_name?: string | null
-          gender?: string | null
           created_at?: string
           cv_file_id?: string | null
           full_name?: string | null
@@ -3462,8 +3443,6 @@ export type Database = {
         Update: {
           avatar_file_id?: string | null
           biography?: string | null
-          certificate_name?: string | null
-          gender?: string | null
           created_at?: string
           cv_file_id?: string | null
           full_name?: string | null
