@@ -48,13 +48,29 @@ function EmailMark() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v.4l-10 6.2L2 6.4V6a1 1 0 0 1 1-1Zm-1 3.7 9.5 5.9a1 1 0 0 0 1 0L22 8.7V18a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1Z" /></svg>;
 }
 
-const SOCIALS = [
+type SocialLink = {
+  label: string;
+  Mark: () => JSX.Element;
+  href?: string;
+  external?: boolean;
+};
+
+const SOCIALS: SocialLink[] = [
   { label: "Facebook", Mark: FacebookMark },
   { label: "X", Mark: XMark },
-  { label: "LinkedIn", Mark: LinkedInMark },
+  {
+    label: "LinkedIn",
+    Mark: LinkedInMark,
+    href: "https://sy.linkedin.com/in/yisr-barnieh-3846a88a",
+    external: true,
+  },
   { label: "WhatsApp", Mark: WhatsAppMark },
-  { label: "Email", Mark: EmailMark },
-] as const;
+  {
+    label: "Email",
+    Mark: EmailMark,
+    href: "mailto:minister@mof.gov.sy",
+  },
+];
 
 export const Route = createFileRoute("/profile/7f3a9c2e")({
   validateSearch: (search: Record<string, unknown>): { lang: CardLanguage } => ({
