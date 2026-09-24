@@ -71,6 +71,13 @@
       "when": 1789816176757,
       "tag": "0009_add_missing_course_and_queue_rpcs",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790256720799,
+      "tag": "0010_course_certificate_pdf_switch",
+      "breakpoints": true
     }
   ]
 }

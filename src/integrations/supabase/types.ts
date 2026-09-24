@@ -2423,6 +2423,7 @@ export type Database = {
           approval_whatsapp_message_ar: string | null
           approval_whatsapp_message_en: string | null
           category_id: string | null
+          certificate_pdf_enabled: boolean
           cover_url: string | null
           created_at: string
           delivery_mode: Database["public"]["Enums"]["lms_delivery_mode"]
@@ -2463,6 +2464,7 @@ export type Database = {
           approval_whatsapp_message_ar?: string | null
           approval_whatsapp_message_en?: string | null
           category_id?: string | null
+          certificate_pdf_enabled?: boolean
           cover_url?: string | null
           created_at?: string
           delivery_mode?: Database["public"]["Enums"]["lms_delivery_mode"]
@@ -2503,6 +2505,7 @@ export type Database = {
           approval_whatsapp_message_ar?: string | null
           approval_whatsapp_message_en?: string | null
           category_id?: string | null
+          certificate_pdf_enabled?: boolean
           cover_url?: string | null
           created_at?: string
           delivery_mode?: Database["public"]["Enums"]["lms_delivery_mode"]
