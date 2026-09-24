@@ -2,46 +2,24 @@
  *
  * The page comes from renderCertificateHtml; Cloudflare's Browser Rendering
  * prints it (REST API, so no browser package in the Worker). The template
- * image and the Cairo fonts are fetched here and embedded in the page: the
- * renderer's page has no origin of its own, the site serves fonts without
- * cross-origin headers (a linked font would be dropped for a fallback face),
- * and a local dev server is out of the renderer's reach.
+ * image and the Cairo fonts are built into this module as data URLs and
+ * embedded in the page, so rendering fetches nothing: the renderer's page has
+ * no origin of its own, a Worker cannot reliably fetch its own domain, and a
+ * local dev server is out of the renderer's reach.
  *
  * A PDF is made once per certificate and stored in the private
  * lms-certificates bucket as <certificate id>.pdf. It is made again only when
  * the name or wording it was made with changes.
  */
-import { Buffer } from "node:buffer";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getSiteUrl } from "@/lib/email-delivery.server";
 import { renderCertificateHtml, type CertificateGender } from "./certificate-html";
+import templateUrl from "./assets/template.png?inline";
+import cairoRegular from "./assets/cairo-arabic-400.ttf?inline";
+import cairoBold from "./assets/cairo-arabic-700.ttf?inline";
 
 export const CERTIFICATE_BUCKET = "lms-certificates";
 
-const assetCache = new Map<string, Promise<string>>();
-
-function dataUrl(url: string, type: string): Promise<string> {
-  let cached = assetCache.get(url);
-  if (!cached) {
-    cached = fetch(url).then(async (res) => {
-      if (!res.ok) throw new Error(`certificate_asset_unavailable ${res.status} ${url}`);
-      return `data:${type};base64,${Buffer.from(await res.arrayBuffer()).toString("base64")}`;
-    });
-    cached.catch(() => assetCache.delete(url));
-    assetCache.set(url, cached);
-  }
-  return cached;
-}
-
-async function assetUrls() {
-  const base = (process.env.CERTIFICATE_ASSETS_URL || getSiteUrl()).replace(/\/$/, "");
-  const [templateUrl, regular, bold] = await Promise.all([
-    dataUrl(`${base}/lms/certificates/template.png`, "image/png"),
-    dataUrl(`${base}/cinematic/fonts/cairo-arabic-400.ttf`, "font/ttf"),
-    dataUrl(`${base}/cinematic/fonts/cairo-arabic-700.ttf`, "font/ttf"),
-  ]);
-  return { templateUrl, fontUrls: { regular, bold } };
-}
+const ASSETS = { templateUrl, fontUrls: { regular: cairoRegular, bold: cairoBold } };
 
 export async function renderCertificatePdf(html: string): Promise<Uint8Array> {
   const account = process.env.CLOUDFLARE_ACCOUNT_ID;
@@ -115,7 +93,7 @@ export async function ensureCertificatePdf(
     startDate: course.start_date,
     endDate: course.end_date,
     issuedAt: cert.issued_at,
-    ...(await assetUrls()),
+    ...ASSETS,
   });
 
   try {
@@ -164,7 +142,7 @@ export async function renderCoursePreviewPdf(
       startDate: course.start_date,
       endDate: course.end_date,
       issuedAt: new Date().toISOString(),
-      ...(await assetUrls()),
+      ...ASSETS,
     }),
   );
 }

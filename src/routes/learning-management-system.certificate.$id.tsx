@@ -159,6 +159,8 @@ function CertificatePdfPanel({ certificateId, ar }: { certificateId: string; ar:
       if (res.status === "ready") window.location.href = res.url;
       else if (res.status === "course_dates_missing")
         toast.error(ar ? "لم تُحدَّد تواريخ الدورة بعد. تواصل مع إدارة الدورة." : "The course dates are not set yet. Please contact the course team.");
+      else if (res.status === "error" && res.message)
+        toast.error(`${ar ? "تعذّر إنشاء الشهادة" : "Certificate failed"}: ${res.message}`, { duration: 20_000 });
       else toast.error(ar ? "تعذّر تجهيز الشهادة الآن." : "The certificate could not be prepared right now.");
     } catch (e) {
       toast.error(toUserMessage(e));
