@@ -5,6 +5,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { LmsPortalSkin } from "@/components/ui/lms-portal-skin";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -32,12 +33,9 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => {
-  const isLms =
-    typeof window !== "undefined" &&
-    window.location.pathname.startsWith("/learning-management-system");
-  const content = (
-    <>
+>(({ className, children, ...props }, ref) => (
+  <DialogPortal>
+    <LmsPortalSkin>
       <DialogOverlay />
       <DialogPrimitive.Content
         ref={ref}
@@ -53,22 +51,9 @@ const DialogContent = React.forwardRef<
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
-    </>
-  );
-
-  return (
-    <DialogPortal>
-      {isLms ? (
-        // Keep page-level LMS layout rules off the positioned dialog panel.
-        <div className="lms-dashboard-wrap lms-skin dark" style={{ display: "contents" }}>
-          {content}
-        </div>
-      ) : (
-        content
-      )}
-    </DialogPortal>
-  );
-});
+    </LmsPortalSkin>
+  </DialogPortal>
+));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
