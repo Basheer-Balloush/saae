@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Download, Facebook, Linkedin, Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import arabicNameArtwork from "@/assets/mohammad-yusr-barnieh-name-v2.png.asset.json";
 import profilePhoto from "@/assets/official-profile-photo.jpeg.asset.json";
 import "@/components/profile-card/profile-card.css";
 
@@ -10,7 +11,7 @@ type CardLanguage = "ar" | "en";
 const COPY = {
   ar: {
     ministry: <>الجمهورية العربية السورية<br />وزارة المالية</>,
-    name: "الاسم الكامل",
+    name: "محمد يسر برنية",
     role: <>المسمى الوظيفي<br />في الجمهورية العربية السورية</>,
     photo: "مكان الصورة",
     save: "حفظ جهة الاتصال",
@@ -66,7 +67,7 @@ function ProfileCardPage() {
     const lines = [
       "BEGIN:VCARD",
       "VERSION:3.0",
-      `FN:${isArabic ? "الاسم الكامل" : "Full Name"}`,
+      `FN:${isArabic ? "محمد يسر برنية" : "Mohammad Yusr Barnieh"}`,
       `TITLE:${isArabic ? "المسمى الوظيفي" : "Official Title"}`,
       "END:VCARD",
     ];
@@ -102,7 +103,13 @@ function ProfileCardPage() {
             <img src={profilePhoto.url} alt={isArabic ? "الصورة الشخصية الرسمية" : "Official portrait"} />
           </div>
 
-          <h1 className="profile-card-name">{copy.name}</h1>
+          <h1 className={`profile-card-name${isArabic ? " profile-card-name-ar" : ""}`}>
+            {isArabic ? (
+              <img src={arabicNameArtwork.url} alt={copy.name} />
+            ) : (
+              copy.name
+            )}
+          </h1>
           <p className="profile-card-role">{copy.role}</p>
 
           <div className="profile-card-actions">

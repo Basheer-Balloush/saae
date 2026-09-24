@@ -150,6 +150,24 @@
 .profile-card-name::before { margin-inline-end: .18em; }
 .profile-card-name::after { margin-inline-start: .18em; }
 
+.profile-card-name-ar {
+  inline-size: min(100%, 430px);
+  line-height: 1;
+  text-shadow: none;
+}
+
+.profile-card-name-ar::before,
+.profile-card-name-ar::after {
+  content: none;
+}
+
+.profile-card-name-ar img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  margin-inline: auto;
+}
+
 .profile-card-role {
   max-inline-size: 520px;
   margin: 34px 0 0;
