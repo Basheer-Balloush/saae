@@ -24,30 +24,44 @@ export function AssistantFab({ hideTrigger = false }: { hideTrigger?: boolean })
   }, []);
 
   useEffect(() => {
-    let observedFooter: HTMLElement | null = null;
+    let observedFooters: HTMLElement[] = [];
+    const visibleFooters = new Set<HTMLElement>();
     let footerObserver: IntersectionObserver | null = null;
 
-    const observeCurrentFooter = () => {
-      const nextFooter = document.getElementById("site-footer");
-      if (nextFooter === observedFooter) return;
+    const observeCurrentFooters = () => {
+      const nextFooters = Array.from(
+        document.querySelectorAll<HTMLElement>("#site-footer, footer.site-footer"),
+      );
+      const unchanged =
+        nextFooters.length === observedFooters.length &&
+        nextFooters.every((footer, index) => footer === observedFooters[index]);
+      if (unchanged) return;
 
       footerObserver?.disconnect();
-      observedFooter = nextFooter;
+      observedFooters = nextFooters;
+      visibleFooters.clear();
 
-      if (!nextFooter) {
+      if (nextFooters.length === 0) {
         setFooterVisible(false);
         return;
       }
 
       footerObserver = new IntersectionObserver(
-        ([entry]) => setFooterVisible(Boolean(entry?.isIntersecting)),
+        (entries) => {
+          for (const entry of entries) {
+            const footer = entry.target as HTMLElement;
+            if (entry.isIntersecting) visibleFooters.add(footer);
+            else visibleFooters.delete(footer);
+          }
+          setFooterVisible(visibleFooters.size > 0);
+        },
         { threshold: 0 },
       );
-      footerObserver.observe(nextFooter);
+      nextFooters.forEach((footer) => footerObserver?.observe(footer));
     };
 
-    observeCurrentFooter();
-    const pageObserver = new MutationObserver(observeCurrentFooter);
+    observeCurrentFooters();
+    const pageObserver = new MutationObserver(observeCurrentFooters);
     pageObserver.observe(document.body, { childList: true, subtree: true });
 
     return () => {
