@@ -76,6 +76,28 @@ function PrivateProfilePage() {
     };
   }, [fetchContact, profile.slug]);
 
+  // The portrait, shrunk to a small JPEG, becomes the saved contact's photo.
+  const [photo, setPhoto] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    const img = new Image();
+    img.onload = () => {
+      const size = 400;
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
+      const base64 = canvas.toDataURL("image/jpeg", 0.85).split(",")[1];
+      if (alive && base64) setPhoto(base64);
+    };
+    img.src = profile.portrait;
+    return () => {
+      alive = false;
+    };
+  }, [profile.portrait]);
+
   const contactHref = useMemo(() => {
     if (!contact) return undefined;
     const lines = [
@@ -85,10 +107,12 @@ function PrivateProfilePage() {
       `TITLE:${text.title}`,
       ...contact.phones.map((p) => `TEL;TYPE=${p.type}:${p.number}`),
       ...contact.emails.map((e, i) => `EMAIL;TYPE=WORK${i === 0 ? ";PREF=1" : ""}:${e}`),
+      // vCard lines are folded at 75 characters: CRLF plus one leading space.
+      ...(photo ? [`PHOTO;ENCODING=b;TYPE=JPEG:${photo}`.replace(/(.{75})(?=.)/g, "$1\r\n ")] : []),
       "END:VCARD",
     ];
     return `data:text/vcard;charset=utf-8,${encodeURIComponent(lines.join("\r\n"))}`;
-  }, [contact, text]);
+  }, [contact, text, photo]);
 
   const links = [
     { label: "X", Mark: XMark, href: profile.x, external: true },
