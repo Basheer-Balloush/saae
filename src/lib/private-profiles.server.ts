@@ -57,7 +57,7 @@ const PROFILES: { card: ProfileCard; contact: ProfileContact }[] = [
   },
   {
     card: {
-      slug: "vice-minister-of-finance-0sjkVkNguqqBcuWL",
+      slug: "deputy-minister-of-finance-Xq2mV7RtNp4yLc9s",
       portrait: "/profile-card/d6e111cce6-portrait.jpg",
       signature: "/profile-card/d6e111cce6-signature.png",
       fileName: "Mohammad-Abdelhaleem-Abazeed.vcf",
