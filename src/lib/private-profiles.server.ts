@@ -79,9 +79,9 @@ const PROFILES: { card: ProfileCard; contact: ProfileContact }[] = [
       emails: ["deputyminister@mof.gov.sy"],
       whatsapp: "963968444555",
       phones: [
-        { type: "CELL;PREF=1", number: "+963968444555" },
-        { type: "WORK,VOICE", number: "+96350005511" },
-        { type: "CELL", number: "+963950005511" },
+        { type: "WORK,VOICE;PREF=1", number: "+96350005511" },
+        { type: "WORK,VOICE", number: "+963950005511" },
+        { type: "CELL", number: "+963968444555" },
       ],
     },
   },
