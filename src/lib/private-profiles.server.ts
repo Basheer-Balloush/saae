@@ -85,6 +85,31 @@ const PROFILES: { card: ProfileCard; contact: ProfileContact }[] = [
       ],
     },
   },
+  {
+    card: {
+      slug: "communications-director-9FaMUyl0Lx4p196W",
+      portrait: "/profile-card/67bb9af009-portrait.jpg",
+      signature: "/profile-card/67bb9af009-signature.png",
+      fileName: "Mohammed-Shahhoud.vcf",
+      ar: {
+        name: "محمد شحود",
+        role: "مدير الاتصال الحكومي",
+        roleSub: "فـي وزارة الماليـة",
+        title: "مدير الاتصال الحكومي في وزارة المالية",
+      },
+      en: {
+        name: "Mohammed Shahhoud",
+        role: "Government Communications Director",
+        roleSub: "Ministry of Finance",
+        title: "Government Communications Director, Ministry of Finance",
+      },
+    },
+    contact: {
+      emails: ["pr@mof.gov.sy"],
+      whatsapp: "963989323335",
+      phones: [{ type: "CELL;PREF=1", number: "+963989323335" }],
+    },
+  },
 ];
 
 function find(slug: string) {
