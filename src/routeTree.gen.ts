@@ -65,7 +65,6 @@ import { Route as NewsInitiativeLaunchRouteImport } from './routes/news.initiati
 import { Route as NewsTrainersGraduationRouteImport } from './routes/news.trainers-graduation'
 import { Route as NewsTvInterviewRouteImport } from './routes/news.tv-interview'
 import { Route as ProfileSlugRouteImport } from './routes/profile.$slug'
-import { Route as ProfileMinisterOfFinanceRouteImport } from './routes/profile.minister-of-finance'
 import { Route as ResourcesAiToolsRouteImport } from './routes/resources.ai-tools'
 import { Route as AdminCrmIndexRouteImport } from './routes/admin.crm.index'
 import { Route as AdminCrmContactsRouteImport } from './routes/admin.crm.contacts'
@@ -419,12 +418,6 @@ const ProfileSlugRoute = ProfileSlugRouteImport.update({
   path: '/profile/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileMinisterOfFinanceRoute =
-  ProfileMinisterOfFinanceRouteImport.update({
-    id: '/profile/minister-of-finance',
-    path: '/profile/minister-of-finance',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ResourcesAiToolsRoute = ResourcesAiToolsRouteImport.update({
   id: '/resources/ai-tools',
   path: '/resources/ai-tools',
@@ -786,7 +779,6 @@ export interface FileRoutesByFullPath {
   '/news/trainers-graduation': typeof NewsTrainersGraduationRoute
   '/news/tv-interview': typeof NewsTvInterviewRoute
   '/profile/$slug': typeof ProfileSlugRoute
-  '/profile/minister-of-finance': typeof ProfileMinisterOfFinanceRoute
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
@@ -890,7 +882,6 @@ export interface FileRoutesByTo {
   '/news/trainers-graduation': typeof NewsTrainersGraduationRoute
   '/news/tv-interview': typeof NewsTvInterviewRoute
   '/profile/$slug': typeof ProfileSlugRoute
-  '/profile/minister-of-finance': typeof ProfileMinisterOfFinanceRoute
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin': typeof AdminIndexRoute
   '/attendance-management-system': typeof AttendanceManagementSystemIndexRoute
@@ -1001,7 +992,6 @@ export interface FileRoutesById {
   '/news/trainers-graduation': typeof NewsTrainersGraduationRoute
   '/news/tv-interview': typeof NewsTvInterviewRoute
   '/profile/$slug': typeof ProfileSlugRoute
-  '/profile/minister-of-finance': typeof ProfileMinisterOfFinanceRoute
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
@@ -1115,7 +1105,6 @@ export interface FileRouteTypes {
     | '/news/trainers-graduation'
     | '/news/tv-interview'
     | '/profile/$slug'
-    | '/profile/minister-of-finance'
     | '/resources/ai-tools'
     | '/admin/'
     | '/attendance-management-system/'
@@ -1219,7 +1208,6 @@ export interface FileRouteTypes {
     | '/news/trainers-graduation'
     | '/news/tv-interview'
     | '/profile/$slug'
-    | '/profile/minister-of-finance'
     | '/resources/ai-tools'
     | '/admin'
     | '/attendance-management-system'
@@ -1329,7 +1317,6 @@ export interface FileRouteTypes {
     | '/news/trainers-graduation'
     | '/news/tv-interview'
     | '/profile/$slug'
-    | '/profile/minister-of-finance'
     | '/resources/ai-tools'
     | '/admin/'
     | '/attendance-management-system/'
@@ -1420,7 +1407,6 @@ export interface RootRouteChildren {
   NewsTrainersGraduationRoute: typeof NewsTrainersGraduationRoute
   NewsTvInterviewRoute: typeof NewsTvInterviewRoute
   ProfileSlugRoute: typeof ProfileSlugRoute
-  ProfileMinisterOfFinanceRoute: typeof ProfileMinisterOfFinanceRoute
   ResourcesAiToolsRoute: typeof ResourcesAiToolsRoute
   InitiativeIndexRoute: typeof InitiativeIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
@@ -1822,13 +1808,6 @@ declare module '@tanstack/react-router' {
       path: '/profile/$slug'
       fullPath: '/profile/$slug'
       preLoaderRoute: typeof ProfileSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile/minister-of-finance': {
-      id: '/profile/minister-of-finance'
-      path: '/profile/minister-of-finance'
-      fullPath: '/profile/minister-of-finance'
-      preLoaderRoute: typeof ProfileMinisterOfFinanceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resources/ai-tools': {
@@ -2570,7 +2549,6 @@ const rootRouteChildren: RootRouteChildren = {
   NewsTrainersGraduationRoute: NewsTrainersGraduationRoute,
   NewsTvInterviewRoute: NewsTvInterviewRoute,
   ProfileSlugRoute: ProfileSlugRoute,
-  ProfileMinisterOfFinanceRoute: ProfileMinisterOfFinanceRoute,
   ResourcesAiToolsRoute: ResourcesAiToolsRoute,
   InitiativeIndexRoute: InitiativeIndexRoute,
   NewsIndexRoute: NewsIndexRoute,

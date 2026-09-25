@@ -1,8 +1,9 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getPrivateProfile } from "@/lib/private-profiles.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { getProfileCard, getProfileContact } from "@/lib/private-profiles.functions";
 import "@/components/profile-card/profile-card.css";
 
 const ministryMark = { url: "/profile-card/org-ar.svg" };
@@ -39,7 +40,7 @@ export const Route = createFileRoute("/profile/$slug")({
     lang: search.lang === "en" ? "en" : "ar",
   }),
   loader: async ({ params }) => {
-    const profile = await getPrivateProfile({ data: { slug: params.slug } });
+    const profile = await getProfileCard({ data: { slug: params.slug } });
     if (!profile) throw notFound();
     return profile;
   },
@@ -61,25 +62,40 @@ function PrivateProfilePage() {
   const copy = COPY[lang];
   const text = profile[lang];
 
+  // Contact details stay out of the server-rendered HTML; fetch them once the
+  // page is running in a real browser.
+  const fetchContact = useServerFn(getProfileContact);
+  const [contact, setContact] = useState<Awaited<ReturnType<typeof getProfileContact>>>(null);
+  useEffect(() => {
+    let alive = true;
+    fetchContact({ data: { slug: profile.slug } })
+      .then((c) => alive && setContact(c))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [fetchContact, profile.slug]);
+
   const contactHref = useMemo(() => {
+    if (!contact) return undefined;
     const lines = [
       "BEGIN:VCARD",
       "VERSION:3.0",
       `FN:${text.name}`,
       `TITLE:${text.title}`,
-      ...profile.phones.map((p) => `TEL;TYPE=${p.type}:${p.number}`),
-      `EMAIL;TYPE=WORK;PREF=1:${profile.email}`,
+      ...contact.phones.map((p) => `TEL;TYPE=${p.type}:${p.number}`),
+      ...contact.emails.map((e, i) => `EMAIL;TYPE=WORK${i === 0 ? ";PREF=1" : ""}:${e}`),
       "END:VCARD",
     ];
     return `data:text/vcard;charset=utf-8,${encodeURIComponent(lines.join("\r\n"))}`;
-  }, [profile, text]);
+  }, [contact, text]);
 
   const links = [
     { label: "X", Mark: XMark, href: profile.x, external: true },
     { label: "LinkedIn", Mark: LinkedInMark, href: profile.linkedin, external: true },
-    { label: isArabic ? "اتصال" : "Call", Mark: PhoneMark, href: `tel:${profile.phones[0].number}` },
-    { label: "WhatsApp", Mark: WhatsAppMark, href: `https://wa.me/${profile.whatsapp}`, external: true },
-    { label: "Email", Mark: EmailMark, href: `mailto:${profile.email}` },
+    { label: isArabic ? "اتصال" : "Call", Mark: PhoneMark, href: contact && `tel:${contact.phones[0].number}` },
+    { label: "WhatsApp", Mark: WhatsAppMark, href: contact && `https://wa.me/${contact.whatsapp}`, external: true },
+    { label: "Email", Mark: EmailMark, href: contact && `mailto:${contact.emails[0]}` },
   ];
 
   useEffect(() => {
@@ -125,7 +141,12 @@ function PrivateProfilePage() {
           </p>
 
           <Button asChild className="profile-save-btn">
-            <a href={contactHref} download={profile.fileName}>
+            <a
+              href={contactHref ?? "#"}
+              download={contactHref ? profile.fileName : undefined}
+              aria-disabled={!contactHref}
+              onClick={(event) => !contactHref && event.preventDefault()}
+            >
               <span>{copy.save}</span>
               <Download aria-hidden="true" />
             </a>

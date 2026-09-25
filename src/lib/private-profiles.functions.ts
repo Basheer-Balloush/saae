@@ -1,9 +1,18 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-export const getPrivateProfile = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => z.object({ slug: z.string().trim().min(1).max(120) }).parse(i))
+const SlugInput = (i: unknown) => z.object({ slug: z.string().trim().min(1).max(120) }).parse(i);
+
+export const getProfileCard = createServerFn({ method: "POST" })
+  .inputValidator(SlugInput)
   .handler(async ({ data }) => {
-    const { findPrivateProfile } = await import("./private-profiles.server");
-    return findPrivateProfile(data.slug);
+    const { findProfileCard } = await import("./private-profiles.server");
+    return findProfileCard(data.slug);
+  });
+
+export const getProfileContact = createServerFn({ method: "POST" })
+  .inputValidator(SlugInput)
+  .handler(async ({ data }) => {
+    const { findProfileContact } = await import("./private-profiles.server");
+    return findProfileContact(data.slug);
   });
