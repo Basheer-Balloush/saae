@@ -10,6 +10,7 @@ export function AssistantFab({ hideTrigger = false }: { hideTrigger?: boolean })
   const { t, dir } = useLang();
   const [open, setOpen] = useState(false);
   const [prefill, setPrefill] = useState<string | null>(null);
+  const [footerVisible, setFooterVisible] = useState(false);
   const isRtl = dir === "rtl";
 
   useEffect(() => {
@@ -22,10 +23,43 @@ export function AssistantFab({ hideTrigger = false }: { hideTrigger?: boolean })
     return () => window.removeEventListener("assistant:open", handler);
   }, []);
 
+  useEffect(() => {
+    let observedFooter: HTMLElement | null = null;
+    let footerObserver: IntersectionObserver | null = null;
+
+    const observeCurrentFooter = () => {
+      const nextFooter = document.getElementById("site-footer");
+      if (nextFooter === observedFooter) return;
+
+      footerObserver?.disconnect();
+      observedFooter = nextFooter;
+
+      if (!nextFooter) {
+        setFooterVisible(false);
+        return;
+      }
+
+      footerObserver = new IntersectionObserver(
+        ([entry]) => setFooterVisible(Boolean(entry?.isIntersecting)),
+        { threshold: 0 },
+      );
+      footerObserver.observe(nextFooter);
+    };
+
+    observeCurrentFooter();
+    const pageObserver = new MutationObserver(observeCurrentFooter);
+    pageObserver.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      pageObserver.disconnect();
+      footerObserver?.disconnect();
+    };
+  }, []);
+
   return (
     <>
       <AnimatePresence>
-        {!hideTrigger && !open && (
+        {!hideTrigger && !footerVisible && !open && (
           <motion.button
             type="button"
             className={`assistant-guide-launcher ${isRtl ? "is-rtl" : "is-ltr"}`}
