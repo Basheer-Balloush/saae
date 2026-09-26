@@ -35,6 +35,7 @@ export const Route = createFileRoute("/initiative/")({
     links: [
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
       { rel: "stylesheet", href: "/cinematic/css/initiative.css" },
+      { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
     ],
   }),
   component: Page,

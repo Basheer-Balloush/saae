@@ -94,6 +94,7 @@ export const Route = createFileRoute("/news/$id")({
         { rel: "stylesheet", href: "/cinematic/css/news-buildex-aleppo-inline.css" },
         { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
         { rel: "stylesheet", href: "/cinematic/css/db-content.css" },
+        { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
       ],
       scripts: m
         ? [

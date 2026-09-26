@@ -17,14 +17,13 @@
   <main id="main-content">
     <section class="initiative-hero" aria-labelledby="initiative-title">
       <div class="hero-grid" aria-hidden="true"></div>
-      <p class="ghost-million" aria-hidden="true">MILLION</p>
-      <div class="hero-copy">
-        <h1 id="initiative-title"><span data-i18n="oneMillion">One million</span> <span class="hero-title-rest" data-i18n="heroTitleRest">Syrian AI users.</span></h1>
+      <div class="initiative-hero-overview">
+        <p class="eyebrow" data-i18n="heroEyebrow">A national initiative for AI literacy</p>
         <p class="hero-lede" data-i18n="heroLede">Practical AI skills for careers, classrooms and daily life — open to every Syrian ready to begin.</p>
-        <div class="hero-actions" aria-label="Participation options">
-          <a class="action action-primary" href="/initiative?action=pay" data-initiative-action="pay"><span data-i18n="payOneStart">Pay $1 &amp; start</span> <span aria-hidden="true">↗</span></a>
-          <a class="action action-secondary" href="#participate"><span data-i18n="joinWaitlist">Join the waitlist</span> <span aria-hidden="true">↓</span></a>
-        </div>
+      </div>
+      <div class="hero-copy">
+        <span class="ghost-million" data-i18n="ghostMillion" aria-hidden="true">MILLION</span>
+        <h1 id="initiative-title"><span data-i18n="heroName">One Million AI Users Initiative</span></h1>
       </div>
 
 
@@ -45,21 +44,18 @@
         <h2 id="progress-title" class="sr-only" data-i18n="progressTitle">A million begins with the next person.</h2>
         <div class="progress-grid">
           <div class="progress-dial reveal" aria-label="1,224 seats currently in motion toward a goal of one million">
-            <svg viewBox="0 0 240 240" role="img" aria-hidden="true">
-              <circle class="dial-track" cx="120" cy="120" r="102"></circle>
-              <circle class="dial-seg seg-sponsored" cx="120" cy="120" r="102" stroke-dasharray="628.4 641" stroke-dashoffset="0"></circle>
-              <circle class="dial-seg seg-waitlist" cx="120" cy="120" r="102" stroke-dasharray="12.6 641" stroke-dashoffset="-628.4"></circle>
-            </svg>
+            <p class="progress-kicker" data-i18n="progressKicker">Momentum toward one million</p>
             <div class="dial-center">
               <strong data-count="1224">1,224</strong>
               <span data-i18n="seatsMotion">seats in motion</span>
             </div>
+            <div class="goal-rail" aria-hidden="true"><span></span></div>
+            <div class="goal-labels"><span data-i18n="activatedLabel">activated</span><strong data-i18n="millionGoal">1,000,000 goal</strong></div>
           </div>
           <div class="metric-strip reveal">
             <article data-seg="waitlist" role="button" tabindex="0" aria-pressed="false"><span data-i18n="waitlist">Waitlist</span><strong data-count="24">24</strong><em class="seg-share"><b>2.0%</b><span data-i18n="shareOfDial">of the dial</span></em></article>
             <article data-seg="sponsored" role="button" tabindex="0" aria-pressed="false"><span data-i18n="sponsoredSeats">Sponsored seats</span><strong data-count="1200">1,200</strong><em class="seg-share"><b>98.0%</b><span data-i18n="shareOfDial">of the dial</span></em></article>
             <article data-seg="remaining" role="button" tabindex="0" aria-pressed="false"><span data-i18n="goalRemaining">Goal remaining</span><strong data-count="998776">998,776</strong><em class="seg-share"><b>99.9%</b><span data-i18n="shareOfGoal">of the goal</span></em></article>
-          </div>
           </div>
         </div>
     </section>
@@ -67,8 +63,7 @@
     <section class="blueprint-section" id="blueprint" aria-labelledby="blueprint-title">
       <div class="page-shell">
         <div class="head reveal">
-          <h2 id="blueprint-title" data-i18n="blueprintTitle">Built to turn access into agency.</h2>
-          <p data-i18n="blueprintIntro">This is more than a course. It is a practical path from first contact with AI to confident, responsible use.</p>
+          <h2 id="blueprint-title" data-i18n="blueprintTitle">Built to turn access into agency</h2>
           <div class="rule" aria-hidden="true"></div>
         </div>
 
@@ -118,7 +113,7 @@
     <section class="sponsors-section" id="sponsors" aria-labelledby="sponsors-title">
       <div class="page-shell">
         <div class="head reveal">
-          <h2 id="sponsors-title" data-i18n="sponsorsTitle">Every sponsored seat is a start.</h2>
+          <h2 id="sponsors-title" data-i18n="sponsorsTitle">Every sponsored seat is a start</h2>
           <div class="rule" aria-hidden="true"></div>
         </div>
 
@@ -141,7 +136,11 @@
           </div>
           <div class="leaderboard-note">
             <span data-i18n="snapshotNote">Snapshot from the official initiative page · 2 September 2026</span>
-            <a href="/initiative/sponsors" data-i18n="viewAllSponsors">View all sponsors ↗</a>
+            <a class="motion-button" href="/initiative/sponsors">
+              <span class="circle" aria-hidden="true"></span>
+              <span class="motion-icon" aria-hidden="true"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+              <span class="button-text" data-i18n="viewAllSponsors">View all sponsors</span>
+            </a>
           </div>
         </div>
       </div>
@@ -150,7 +149,7 @@
     <section class="participate-section" id="participate" aria-labelledby="participate-title">
       <div class="page-shell">
         <div class="head reveal">
-          <h2 id="participate-title" data-i18n="participateTitle">Learn. Wait. Or open a seat.</h2>
+          <h2 id="participate-title" data-i18n="participateTitle">Learn, wait, or open a seat</h2>
           <div class="rule" aria-hidden="true"></div>
         </div>
 
@@ -165,7 +164,11 @@
             </div>
             <h3 data-i18n="payStart">Pay &amp; start</h3>
             <p data-i18n="payStartCopy">Begin the course immediately for one US dollar.</p>
-            <a href="/initiative?action=pay" data-i18n="startNow" data-initiative-action="pay">Start now ↗</a>
+            <a class="motion-button" href="/initiative?action=pay" data-initiative-action="pay">
+              <span class="circle" aria-hidden="true"></span>
+              <span class="motion-icon" aria-hidden="true"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+              <span class="button-text" data-i18n="startNow">Start now</span>
+            </a>
           </article>
 
           <article class="path-card path-wait reveal">
@@ -178,7 +181,11 @@
             </div>
             <h3 data-i18n="joinWaitlist">Join the waitlist</h3>
             <p data-i18n="joinWaitlistCopy">Reserve your place and wait for a sponsor to cover it.</p>
-            <a href="/initiative?action=waitlist" data-i18n="reservePlace" data-initiative-action="waitlist">Reserve a place ↗</a>
+            <a class="motion-button" href="/initiative?action=waitlist" data-initiative-action="waitlist">
+              <span class="circle" aria-hidden="true"></span>
+              <span class="motion-icon" aria-hidden="true"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+              <span class="button-text" data-i18n="reservePlace">Reserve a place</span>
+            </a>
           </article>
 
           <article class="path-card path-sponsor reveal">
@@ -191,7 +198,11 @@
             </div>
             <h3 data-i18n="sponsorSeats">Sponsor seats</h3>
             <p data-i18n="sponsorSeatsCopy">Turn corporate or personal support into immediate access for waitlisted learners.</p>
-            <a href="/initiative?action=donate" data-i18n="openSeats" data-initiative-action="donate">Open seats ↗</a>
+            <a class="motion-button" href="/initiative?action=donate" data-initiative-action="donate">
+              <span class="circle" aria-hidden="true"></span>
+              <span class="motion-icon" aria-hidden="true"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+              <span class="button-text" data-i18n="openSeats">Open seats</span>
+            </a>
           </article>
         </div>
       </div>
@@ -199,10 +210,12 @@
 
     <section class="closing-section" aria-labelledby="closing-title">
       <div class="closing-copy reveal">
-        <p class="eyebrow" data-i18n="closingEyebrow">The next person can be you</p>
-        <h2 id="closing-title"><span data-i18n="oneMillion">One million</span><br><span data-i18n="beginsOne">begins with one.</span></h2>
-        <p data-i18n="closingCopy">Take one practical step into AI — or make that step possible for someone else.</p>
-        <a class="action action-primary" href="#participate" data-i18n="joinInitiative">Join the initiative ↗</a>
+        <h2 id="closing-title"><span data-i18n="oneMillion">One million</span><br><span data-i18n="beginsOne">begins with one</span></h2>
+        <a class="motion-button closing-action" href="#participate">
+          <span class="circle" aria-hidden="true"></span>
+          <span class="motion-icon" aria-hidden="true"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+          <span class="button-text" data-i18n="joinInitiative">Join the initiative</span>
+        </a>
       </div>
     </section>
   </main>
@@ -247,5 +260,3 @@
       <span data-i18n="pageStamp">English initiative page, September 2026.</span>
     </div>
   </footer>
-
-

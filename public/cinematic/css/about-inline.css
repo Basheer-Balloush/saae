@@ -1272,8 +1272,9 @@ html[dir="rtl"] .footer-col a::before {
     grid-template-columns: minmax(0, 1fr);
   }
   .markstage {
+    order: -1;
     justify-content: flex-start;
-    margin-top: clamp(26px, 6vw, 48px);
+    margin: 0 0 clamp(26px, 6vw, 48px);
   }
   .ghost-about {
     left: -3%;

@@ -1000,7 +1000,9 @@ a:focus-visible {
     grid-template-columns: 1fr;
   }
   .markstage {
+    order: -1;
     justify-content: flex-start;
+    margin-bottom: 28px;
   }
   .ghost-about {
     left: 0;

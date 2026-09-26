@@ -21,6 +21,7 @@ export const Route = createFileRoute("/partners")({
       { rel: "stylesheet", href: "/cinematic/css/partners-inline.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
       { rel: "stylesheet", href: "/cinematic/css/db-content.css" },
+      { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
     ],
   }),
   component: Page,

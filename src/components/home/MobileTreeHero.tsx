@@ -724,7 +724,6 @@ export function MobileTreeHero({
         <div className="mh-bands mh-wrap">
           <article {...bandProps(0)}>
             <div className="mh-band-opening">
-              <p className="mh-eyebrow">{pick(OPENING.eyebrow)}</p>
               <h1 className="mh-title" id="mh-hero-title">
                 <span className="mh-sr-only">{headline}</span>
                 {/* The desktop opening's four lines (home.css .hero-opening-line):
@@ -737,26 +736,27 @@ export function MobileTreeHero({
                   ))}
                 </span>
               </h1>
+              <p className="mh-eyebrow">{pick(OPENING.eyebrow)}</p>
             </div>
           </article>
 
           <article {...bandProps(1)}>
-            <p className="mh-eyebrow">{pick(COPY.communities.eyebrow)}</p>
             <h2 className="mh-band-title">{pick(COPY.communities.title)}</h2>
+            <p className="mh-eyebrow">{pick(COPY.communities.eyebrow)}</p>
             <CommunityCard lang={lang} index={community} onSelect={selectCommunity} />
             <MotionButton label={pick(COPY.communities.action)} href="/about#communities-h" />
           </article>
 
           <article {...bandProps(2)}>
-            <p className="mh-eyebrow">{pick(COPY.learning.eyebrow)}</p>
             <h2 className="mh-band-title">{pick(COPY.learning.title)}</h2>
+            <p className="mh-eyebrow">{pick(COPY.learning.eyebrow)}</p>
             <p className="mh-band-body">{pick(COPY.learning.body)}</p>
             <MotionButton label={pick(COPY.learning.action)} href={OPENING.primary.href} />
           </article>
 
           <article {...bandProps(3)}>
-            <p className="mh-eyebrow">{pick(COPY.achievements.eyebrow)}</p>
             <h2 className="mh-band-title">{pick(COPY.achievements.title)}</h2>
+            <p className="mh-eyebrow">{pick(COPY.achievements.eyebrow)}</p>
             <dl className="mh-tree-stats">
               {ACHIEVEMENTS.map((s) => (
                 <div key={s.value}>
@@ -768,15 +768,15 @@ export function MobileTreeHero({
           </article>
 
           <article {...bandProps(4)}>
-            <p className="mh-eyebrow">{pick(COPY.million.eyebrow)}</p>
             <h2 className="mh-band-title">{pick(COPY.million.title)}</h2>
+            <p className="mh-eyebrow">{pick(COPY.million.eyebrow)}</p>
             <p className="mh-band-body">{pick(COPY.million.body)}</p>
             <MotionButton label={pick(COPY.million.action)} href={OPENING.secondary.href} />
           </article>
 
           <article {...bandProps(5)}>
-            <p className="mh-eyebrow">{pick(COPY.syria.eyebrow)}</p>
             <h2 className="mh-band-title">{pick(COPY.syria.title)}</h2>
+            <p className="mh-eyebrow">{pick(COPY.syria.eyebrow)}</p>
             <p className="mh-band-body">{pick(COPY.syria.body)}</p>
             <MotionButton label={pick(COPY.syria.action)} href={OPENING.secondary.href} />
           </article>

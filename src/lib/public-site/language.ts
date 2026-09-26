@@ -219,6 +219,7 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
     "The partner register.": "سجل الشركاء.",
     "The organisations SAAE lists publicly as partners: universities, ministries, companies and community bodies working with the association on training and applied projects.": "الجهات التي تدرجها الجمعية علناً كشركاء: جامعات ووزارات وشركات وهيئات مجتمعية تعمل معها في التدريب والمشاريع التطبيقية.",
     "Marks and names are published by SAAE and fitted to a common size. Nothing here has been redrawn.": "تنشر الجمعية الشعارات والأسماء، وقد ضُبطت على قياس موحّد. لم يُعَد رسم أي منها.",
+    "Back to home": "العودة إلى الرئيسية",
     "The partner register": "سجل الشركاء",
     "English partner register, September 2026.": "سجل الشركاء بالعربية، أيلول 2026.",
     "Damascus University": "جامعة دمشق",

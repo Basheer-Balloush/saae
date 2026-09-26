@@ -276,10 +276,10 @@
 }
 
 .mobile-home .mh-band .mh-eyebrow {
-  margin-block-end: 8px;
+  margin-block: 0 10px;
 }
 .mobile-home .mh-band-title {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   color: var(--mh-paper);
   font-size: clamp(1.4rem, min(7.4vw, 4.2svh), 2.1rem);
   font-weight: 900;
@@ -307,6 +307,9 @@
 .mobile-home .mh-tree-hero .mh-title:lang(en) {
   font-size: clamp(2rem, 9vw, 2.6rem);
   line-height: 1.15;
+}
+.mobile-home .mh-band-opening .mh-title {
+  margin-block: 0 10px;
 }
 .mobile-home .mh-band-opening {
   opacity: 0;

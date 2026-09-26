@@ -52,6 +52,12 @@
   letter-spacing: normal;
   text-transform: none;
 }
+:is(#hero-sec .button-link, .motion-button).back-link {
+  display: flex;
+  margin: clamp(40px, 6vw, 64px) auto 0;
+}
+:is(#hero-sec .button-link, .motion-button).back-link:hover,
+:is(#hero-sec .button-link, .motion-button).back-link:focus-visible { transform: none; }
 /* The sheen sweeps belong to the retired gradient treatment. */
 :is(#hero-sec .button-link, .motion-button)::before,
 :is(#hero-sec .button-link, .motion-button)::after { content: none; }

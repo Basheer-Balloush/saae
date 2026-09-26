@@ -773,6 +773,17 @@
 
   .hero-static { order: -1; }
 
+  /* Mobile reading order: lead with the title, then identify and explain it. */
+  .static-copy,
+  .hero-card-copy {
+    display: flex;
+    flex-direction: column;
+  }
+  .static-copy h2,
+  .hero-card-copy h2 { order: -2; }
+  .static-copy .eyebrow,
+  .hero-card-copy .eyebrow { order: -1; }
+
   /* 15b. The opening statement was 122px wide in Arabic.
    * html[dir="rtl"] .hero-band[data-band="0"] sets width: min(460px, 31vw) with
    * no media query -- 31vw of a 393px phone is 121.8px. The headline was

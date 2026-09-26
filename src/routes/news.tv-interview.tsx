@@ -14,6 +14,7 @@ export const Route = createFileRoute("/news/tv-interview")({
     links: [
       { rel: "stylesheet", href: "/cinematic/css/news-tv-interview-inline.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
+      { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
     ],
   }),
   component: Page,
