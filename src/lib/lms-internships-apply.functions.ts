@@ -91,9 +91,11 @@ export const getInternshipApplyContext = createServerFn({ method: "POST" })
     if (qErr) throw new Error(qErr.message);
 
     let cover_url: string | null = null;
-    if ((oppRow as any).cover_image_bucket && (oppRow as any).cover_image_path) {
-      const { data: signed } = await supabase.storage
-        .from((oppRow as any).cover_image_bucket)
+    // Covers are private files; sign server-side only for this published/closed row.
+    if ((oppRow as any).cover_image_bucket === "internship-covers" && (oppRow as any).cover_image_path) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: signed } = await supabaseAdmin.storage
+        .from("internship-covers")
         .createSignedUrl((oppRow as any).cover_image_path, 60 * 60);
       cover_url = signed?.signedUrl ?? null;
     }
