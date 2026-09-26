@@ -66,6 +66,7 @@ import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminInitiativeSurveyRouteImport } from './routes/admin.initiative-survey'
 import { Route as AdminInitiativeRouteImport } from './routes/admin.initiative'
 import { Route as AdminFormsRouteImport } from './routes/admin.forms'
+import { Route as AdminFeedbackSurveyRouteImport } from './routes/admin.feedback-survey'
 import { Route as AdminEventSurveyRouteImport } from './routes/admin.event-survey'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCrmRouteImport } from './routes/admin.crm'
@@ -434,6 +435,11 @@ const AdminInitiativeRoute = AdminInitiativeRouteImport.update({
 const AdminFormsRoute = AdminFormsRouteImport.update({
   id: '/forms',
   path: '/forms',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFeedbackSurveyRoute = AdminFeedbackSurveyRouteImport.update({
+  id: '/feedback-survey',
+  path: '/feedback-survey',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminEventSurveyRoute = AdminEventSurveyRouteImport.update({
@@ -833,6 +839,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm': typeof AdminCrmRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
+  '/admin/feedback-survey': typeof AdminFeedbackSurveyRoute
   '/admin/forms': typeof AdminFormsRouteWithChildren
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
@@ -953,6 +960,7 @@ export interface FileRoutesByTo {
   '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
+  '/admin/feedback-survey': typeof AdminFeedbackSurveyRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -1072,6 +1080,7 @@ export interface FileRoutesById {
   '/admin/crm': typeof AdminCrmRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
+  '/admin/feedback-survey': typeof AdminFeedbackSurveyRoute
   '/admin/forms': typeof AdminFormsRouteWithChildren
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
@@ -1198,6 +1207,7 @@ export interface FileRouteTypes {
     | '/admin/crm'
     | '/admin/dashboard'
     | '/admin/event-survey'
+    | '/admin/feedback-survey'
     | '/admin/forms'
     | '/admin/initiative'
     | '/admin/initiative-survey'
@@ -1318,6 +1328,7 @@ export interface FileRouteTypes {
     | '/admin/chatbot'
     | '/admin/dashboard'
     | '/admin/event-survey'
+    | '/admin/feedback-survey'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/leads'
@@ -1436,6 +1447,7 @@ export interface FileRouteTypes {
     | '/admin/crm'
     | '/admin/dashboard'
     | '/admin/event-survey'
+    | '/admin/feedback-survey'
     | '/admin/forms'
     | '/admin/initiative'
     | '/admin/initiative-survey'
@@ -1977,6 +1989,13 @@ declare module '@tanstack/react-router' {
       path: '/forms'
       fullPath: '/admin/forms'
       preLoaderRoute: typeof AdminFormsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/feedback-survey': {
+      id: '/admin/feedback-survey'
+      path: '/feedback-survey'
+      fullPath: '/admin/feedback-survey'
+      preLoaderRoute: typeof AdminFeedbackSurveyRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/event-survey': {
@@ -2554,6 +2573,7 @@ interface AdminRouteChildren {
   AdminCrmRoute: typeof AdminCrmRouteWithChildren
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEventSurveyRoute: typeof AdminEventSurveyRoute
+  AdminFeedbackSurveyRoute: typeof AdminFeedbackSurveyRoute
   AdminFormsRoute: typeof AdminFormsRouteWithChildren
   AdminInitiativeRoute: typeof AdminInitiativeRoute
   AdminInitiativeSurveyRoute: typeof AdminInitiativeSurveyRoute
@@ -2574,6 +2594,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCrmRoute: AdminCrmRouteWithChildren,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEventSurveyRoute: AdminEventSurveyRoute,
+  AdminFeedbackSurveyRoute: AdminFeedbackSurveyRoute,
   AdminFormsRoute: AdminFormsRouteWithChildren,
   AdminInitiativeRoute: AdminInitiativeRoute,
   AdminInitiativeSurveyRoute: AdminInitiativeSurveyRoute,
