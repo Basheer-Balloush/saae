@@ -214,8 +214,8 @@ export function FeedbackSurveyAdmin() {
           </button>
         }
       />
-      {err ? (
-        <ErrorNote onRetry={load} />
+      {err !== null ? (
+        <ErrorNote onRetry={load} text={err || undefined} />
       ) : !rows ? (
         <Loading />
       ) : (
