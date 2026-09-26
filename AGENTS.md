@@ -1,0 +1,1 @@
+- Feedback survey: questions live only in src/lib/feedback-survey.ts; public writes go through server functions (honeypot + IP rate limit), reads/updates only by `admin` role via RLS — keeps contact data out of public queries.

@@ -203,3 +203,7 @@ Approve & publish, Reject with a reason (a real dialog, not the browser's
 2. Are there attendance courses that are not LMS courses? If not, Attendance can live entirely inside Learning.
 3. ~~Two instructor approvals~~ decided: accreditation is the only path.
 4. Only admins can approve enrollments (the database enforces it). Should instructors be allowed to?
+
+## Digital experience survey (/feedback)
+Staff view responses at /admin/feedback-survey. Only accounts with the `admin` role can see them.
+To give a staff member access, have them sign in once, then insert a row in `user_roles` (user_id = their account id, role = 'admin') from the backend data view. No public admin sign-up exists.
