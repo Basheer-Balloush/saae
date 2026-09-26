@@ -757,7 +757,7 @@ function Detail({ row, lang, onClose, onUpdate }: { row: Row; lang: Lang; onClos
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/40" role="dialog" aria-modal="true" aria-label={t("تفاصيل الإجابة", "Response details")} onClick={onClose}>
-      <div className="h-full w-full max-w-3xl overflow-y-auto bg-[var(--cx-bg,#fff)] p-5 shadow-xl" onClick={(e) => e.stopPropagation()} style={{ background: "var(--cx-raise, #fff)" }}>
+      <div className="h-full w-full max-w-3xl overflow-y-auto p-5 shadow-xl" onClick={(e) => e.stopPropagation()} style={{ background: "var(--cx-card-solid)" }}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-[18px] font-extrabold">{t("تفاصيل الإجابة", "Response details")}</h2>
           <button type="button" className="cx-btn cx-btn-ghost h-10 w-10 p-0" onClick={onClose} aria-label={t("إغلاق", "Close")}>
