@@ -794,3 +794,13 @@ html.cx-dark [dir="rtl"] input:is([type="date"], [type="time"], [type="datetime-
 html.cx-dark [dir="rtl"] input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"])::-webkit-datetime-edit {
   text-align: right;
 }
+
+/* Buttons and inputs used by the feedback-survey dashboard */
+.cx-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 10px; font-weight: 700; font-size: 13.5px; border: 1px solid transparent; cursor: pointer; }
+.cx-btn:disabled { opacity: .55; cursor: not-allowed; }
+.cx-btn-primary { background: var(--cx-teal); color: #fff; }
+.cx-btn-primary:hover:not(:disabled) { background: var(--cx-teal-700); }
+.cx-btn-ghost { background: var(--cx-card-solid); color: var(--cx-ink); border-color: var(--cx-line); }
+.cx-btn-ghost:hover:not(:disabled) { background: var(--cx-hover); }
+.cx-input { border: 1px solid var(--cx-line); background: var(--cx-field); color: var(--cx-ink); border-radius: 10px; padding: 0 10px; font-size: 13.5px; min-width: 0; }
+.cx-input:focus-visible, .cx-btn:focus-visible { outline: 2px solid var(--cx-teal); outline-offset: 2px; }

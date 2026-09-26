@@ -405,7 +405,8 @@ function RootComponent() {
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/super-admin") ||
     location.pathname.startsWith("/learning-management-system/admin");
-  const isStandaloneProfile = location.pathname.startsWith("/profile/");
+  const isStandaloneProfile =
+    location.pathname.startsWith("/profile/") || location.pathname === "/feedback";
   /* Console pages share one frame; keeping one key stops the sidebar and its
      data from remounting on every click inside the console. */
   const isConsole =

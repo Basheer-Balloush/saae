@@ -19,6 +19,7 @@ import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-i
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
 import { Route as InternationalBusinessBridgeRouteImport } from './routes/international-business-bridge'
 import { Route as InitiativeSurveyRouteImport } from './routes/initiative-survey'
+import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as EventSurveyRouteImport } from './routes/event-survey'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
@@ -65,6 +66,7 @@ import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminInitiativeSurveyRouteImport } from './routes/admin.initiative-survey'
 import { Route as AdminInitiativeRouteImport } from './routes/admin.initiative'
 import { Route as AdminFormsRouteImport } from './routes/admin.forms'
+import { Route as AdminFeedbackSurveyRouteImport } from './routes/admin.feedback-survey'
 import { Route as AdminEventSurveyRouteImport } from './routes/admin.event-survey'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCrmRouteImport } from './routes/admin.crm'
@@ -183,6 +185,11 @@ const InternationalBusinessBridgeRoute =
 const InitiativeSurveyRoute = InitiativeSurveyRouteImport.update({
   id: '/initiative-survey',
   path: '/initiative-survey',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventSurveyRoute = EventSurveyRouteImport.update({
@@ -428,6 +435,11 @@ const AdminInitiativeRoute = AdminInitiativeRouteImport.update({
 const AdminFormsRoute = AdminFormsRouteImport.update({
   id: '/forms',
   path: '/forms',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFeedbackSurveyRoute = AdminFeedbackSurveyRouteImport.update({
+  id: '/feedback-survey',
+  path: '/feedback-survey',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminEventSurveyRoute = AdminEventSurveyRouteImport.update({
@@ -811,6 +823,7 @@ export interface FileRoutesByFullPath {
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
+  '/feedback': typeof FeedbackRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
   '/international-business-bridge': typeof InternationalBusinessBridgeRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
@@ -826,6 +839,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm': typeof AdminCrmRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
+  '/admin/feedback-survey': typeof AdminFeedbackSurveyRoute
   '/admin/forms': typeof AdminFormsRouteWithChildren
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
@@ -932,6 +946,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
+  '/feedback': typeof FeedbackRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
   '/international-business-bridge': typeof InternationalBusinessBridgeRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
@@ -945,6 +960,7 @@ export interface FileRoutesByTo {
   '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
+  '/admin/feedback-survey': typeof AdminFeedbackSurveyRoute
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -1048,6 +1064,7 @@ export interface FileRoutesById {
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
+  '/feedback': typeof FeedbackRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
   '/international-business-bridge': typeof InternationalBusinessBridgeRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
@@ -1063,6 +1080,7 @@ export interface FileRoutesById {
   '/admin/crm': typeof AdminCrmRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/event-survey': typeof AdminEventSurveyRoute
+  '/admin/feedback-survey': typeof AdminFeedbackSurveyRoute
   '/admin/forms': typeof AdminFormsRouteWithChildren
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
@@ -1173,6 +1191,7 @@ export interface FileRouteTypes {
     | '/attendance-management-system'
     | '/contact'
     | '/event-survey'
+    | '/feedback'
     | '/initiative-survey'
     | '/international-business-bridge'
     | '/learning-management-system'
@@ -1188,6 +1207,7 @@ export interface FileRouteTypes {
     | '/admin/crm'
     | '/admin/dashboard'
     | '/admin/event-survey'
+    | '/admin/feedback-survey'
     | '/admin/forms'
     | '/admin/initiative'
     | '/admin/initiative-survey'
@@ -1294,6 +1314,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/event-survey'
+    | '/feedback'
     | '/initiative-survey'
     | '/international-business-bridge'
     | '/one-million-initiative'
@@ -1307,6 +1328,7 @@ export interface FileRouteTypes {
     | '/admin/chatbot'
     | '/admin/dashboard'
     | '/admin/event-survey'
+    | '/admin/feedback-survey'
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/leads'
@@ -1409,6 +1431,7 @@ export interface FileRouteTypes {
     | '/attendance-management-system'
     | '/contact'
     | '/event-survey'
+    | '/feedback'
     | '/initiative-survey'
     | '/international-business-bridge'
     | '/learning-management-system'
@@ -1424,6 +1447,7 @@ export interface FileRouteTypes {
     | '/admin/crm'
     | '/admin/dashboard'
     | '/admin/event-survey'
+    | '/admin/feedback-survey'
     | '/admin/forms'
     | '/admin/initiative'
     | '/admin/initiative-survey'
@@ -1533,6 +1557,7 @@ export interface RootRouteChildren {
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
   EventSurveyRoute: typeof EventSurveyRoute
+  FeedbackRoute: typeof FeedbackRoute
   InitiativeSurveyRoute: typeof InitiativeSurveyRoute
   InternationalBusinessBridgeRoute: typeof InternationalBusinessBridgeRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
@@ -1635,6 +1660,13 @@ declare module '@tanstack/react-router' {
       path: '/initiative-survey'
       fullPath: '/initiative-survey'
       preLoaderRoute: typeof InitiativeSurveyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/event-survey': {
@@ -1957,6 +1989,13 @@ declare module '@tanstack/react-router' {
       path: '/forms'
       fullPath: '/admin/forms'
       preLoaderRoute: typeof AdminFormsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/feedback-survey': {
+      id: '/admin/feedback-survey'
+      path: '/feedback-survey'
+      fullPath: '/admin/feedback-survey'
+      preLoaderRoute: typeof AdminFeedbackSurveyRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/event-survey': {
@@ -2534,6 +2573,7 @@ interface AdminRouteChildren {
   AdminCrmRoute: typeof AdminCrmRouteWithChildren
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEventSurveyRoute: typeof AdminEventSurveyRoute
+  AdminFeedbackSurveyRoute: typeof AdminFeedbackSurveyRoute
   AdminFormsRoute: typeof AdminFormsRouteWithChildren
   AdminInitiativeRoute: typeof AdminInitiativeRoute
   AdminInitiativeSurveyRoute: typeof AdminInitiativeSurveyRoute
@@ -2554,6 +2594,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCrmRoute: AdminCrmRouteWithChildren,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEventSurveyRoute: AdminEventSurveyRoute,
+  AdminFeedbackSurveyRoute: AdminFeedbackSurveyRoute,
   AdminFormsRoute: AdminFormsRouteWithChildren,
   AdminInitiativeRoute: AdminInitiativeRoute,
   AdminInitiativeSurveyRoute: AdminInitiativeSurveyRoute,
@@ -2788,6 +2829,7 @@ const rootRouteChildren: RootRouteChildren = {
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
   EventSurveyRoute: EventSurveyRoute,
+  FeedbackRoute: FeedbackRoute,
   InitiativeSurveyRoute: InitiativeSurveyRoute,
   InternationalBusinessBridgeRoute: InternationalBusinessBridgeRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
