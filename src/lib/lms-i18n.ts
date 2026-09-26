@@ -165,6 +165,9 @@ export const lmsT: Record<Lang, {
   forgotSubtitle: string;
   sendResetLink: string;
   resetLinkSent: string;
+  resetNoAccount: string;
+  resetRateLimited: string;
+  resetSendFailed: string;
   resetTitle: string;
   newPassword: string;
   updatePassword: string;
@@ -330,6 +333,9 @@ export const lmsT: Record<Lang, {
     forgotSubtitle: "أدخل بريدك وسنرسل إليك رابطاً لإعادة التعيين",
     sendResetLink: "أرسل الرابط",
     resetLinkSent: "تمّ إرسال الرابط، يُرجى التحقّق من بريدك",
+    resetNoAccount: "لا يوجد حساب مرتبط بهذا البريد الإلكتروني",
+    resetRateLimited: "محاولات كثيرة، يُرجى المحاولة بعد ١٥ دقيقة",
+    resetSendFailed: "تعذّر إرسال الرابط، يُرجى المحاولة لاحقاً",
     resetTitle: "تعيين كلمة مرورٍ جديدة",
     newPassword: "كلمة المرور الجديدة",
     updatePassword: "تحديث كلمة المرور",
@@ -495,6 +501,9 @@ export const lmsT: Record<Lang, {
     forgotSubtitle: "Enter your email to receive a reset link",
     sendResetLink: "Send reset link",
     resetLinkSent: "Reset link sent — check your inbox",
+    resetNoAccount: "No account is registered with this email",
+    resetRateLimited: "Too many attempts — please try again in 15 minutes",
+    resetSendFailed: "We couldn't send the link — please try again later",
     resetTitle: "Set a new password",
     newPassword: "New password",
     updatePassword: "Update password",
