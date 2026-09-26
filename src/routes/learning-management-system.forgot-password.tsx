@@ -42,7 +42,15 @@ function ForgotPage() {
     }
     setSubmitting(true);
     try {
-      await sendPasswordReset({ data: { email: parsed.data, lang } });
+      const res = await sendPasswordReset({ data: { email: parsed.data, lang } });
+      if (!res.sent) {
+        toast.error(
+          res.reason === "not_found" ? tr.resetNoAccount
+            : res.reason === "rate_limited" ? tr.resetRateLimited
+            : tr.resetSendFailed,
+        );
+        return;
+      }
       setSent(true);
       toast.success(tr.resetLinkSent);
     } catch (err: unknown) {

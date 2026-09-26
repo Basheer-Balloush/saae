@@ -235,16 +235,15 @@ export async function sendPasswordResetWithResend(input: ResetInput) {
   const email = input.email.trim().toLowerCase()
   const redirectTo = `${getSiteUrl()}/learning-management-system/reset-password`
 
-  // Phase 7A — enumeration-safe: every code path returns the same shape.
-  // Rate-limit failures also collapse to the generic success response so
-  // an attacker cannot distinguish "known email hit" from "unknown email".
+  // Tell the user when no account uses this email. Signup already reveals
+  // registered emails ("already registered"), so hiding it here protected
+  // nothing and only told strangers a link was on its way.
   try {
     await enforceRateLimit('reset', email, 5, 900)
   } catch {
-    return { sent: true }
+    return { sent: false as const, reason: 'rate_limited' as const }
   }
 
-  try { assertEmailRecipientAllowed(email) } catch { return { sent: true } }
   const { data, error } = await supabaseAdmin.auth.admin.generateLink({
     type: 'recovery',
     email,
@@ -252,10 +251,12 @@ export async function sendPasswordResetWithResend(input: ResetInput) {
   })
 
   if (error) {
-    // Any provider error (including user-not-found) → generic response.
-    console.error('recovery generateLink failed', { message: error.message })
-    return { sent: true }
+    const notFound = error.code === 'user_not_found' || error.status === 404 || /not.*found/i.test(error.message)
+    if (!notFound) console.error('recovery generateLink failed', { message: error.message })
+    return { sent: false as const, reason: notFound ? 'not_found' as const : 'send_failed' as const }
   }
+
+  try { assertEmailRecipientAllowed(email) } catch { return { sent: false as const, reason: 'send_failed' as const } }
 
   const confirmationUrl = getActionLink(data)
   const siteName = SITE_NAMES[input.lang]
@@ -275,7 +276,8 @@ export async function sendPasswordResetWithResend(input: ResetInput) {
     })
   } catch (e) {
     console.error('recovery email send failed', { message: e instanceof Error ? e.message : String(e) })
+    return { sent: false as const, reason: 'send_failed' as const }
   }
 
-  return { sent: true }
+  return { sent: true as const }
 }
