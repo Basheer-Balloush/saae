@@ -5,7 +5,7 @@ import { useSingleDeviceSession } from "@/hooks/useSingleDeviceSession";
 import { LmsNavbar } from "@/components/lms/LmsNavbar";
 import { Footer } from "@/components/site/Footer";
 import { LmsSkinShell } from "@/components/lms-skin/LmsSkinShell";
-import { isInstructorLmsPath, isSkinnedLmsPath, LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { isConsoleLmsPath, isSkinnedLmsPath, LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 
 export const Route = createFileRoute("/learning-management-system")({
   head: () => ({
@@ -29,16 +29,14 @@ function LmsLayout() {
     navigate({ to: "/learning-management-system" });
   };
 
+  /* The admin console and the instructor workspace bring their own frame. */
+  if (isConsoleLmsPath(pathname)) return <Outlet />;
+
   /* Cinematic routes share the LMS ambient background, navigation, and footer.
      Other LMS pages keep the standard navbar and footer below. */
   if (isSkinnedLmsPath(pathname)) {
     return (
-      <LmsSkinShell
-        role={role}
-        isAuthed={!!user}
-        onSignOut={handleSignOut}
-        mainSiteFooter={isInstructorLmsPath(pathname)}
-      >
+      <LmsSkinShell role={role} isAuthed={!!user} onSignOut={handleSignOut}>
         <Outlet />
       </LmsSkinShell>
     );

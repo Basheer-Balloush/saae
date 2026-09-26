@@ -189,13 +189,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
    default ground. */
 const CINEMATIC_PATH = /^\/(about|contact|initiative|partners|news(\/[^/]+)?)?\/?$/;
 const DARK_GROUND = { backgroundColor: "#06232a", colorScheme: "dark" } as const;
+/* The admin console, the instructor workspace and the attendance app. */
+const CONSOLE_PATH =
+  /^\/(admin(\/|$)|attendance-management-system(\/|$)|learning-management-system\/(admin|instructor)(\/|$))/;
 const isDarkPath = (pathname: string) =>
-  CINEMATIC_PATH.test(pathname) || isSkinnedLmsPath(pathname);
+  CINEMATIC_PATH.test(pathname) || isSkinnedLmsPath(pathname) || CONSOLE_PATH.test(pathname);
 
 function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = useLocation({ select: (location) => location.pathname });
   const ground = isDarkPath(pathname) ? DARK_GROUND : undefined;
-  const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');var l=localStorage.getItem('saae-lang')==='en'?'en':'ar';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
+  const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');if(/^\\/(admin(\\/|$)|attendance-management-system(\\/|$)|learning-management-system\\/(admin|instructor)(\\/|$))/.test(location.pathname))document.documentElement.classList.add('cx-dark','dark');var l=localStorage.getItem('saae-lang')==='en'?'en':'ar';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning style={ground}>
       <head>
@@ -334,7 +337,7 @@ function ScrollRestoration() {
 
   useEffect(() => {
     const state = pending.current;
-    const target = location.pathname === "/contact" ? 0 : state.target ?? 0;
+    const target = location.pathname === "/contact" ? 0 : (state.target ?? 0);
     state.target = null;
     type Engine = { scrollTo: (y: number, o?: { immediate?: boolean }) => void };
     const go = (y: number) => {
@@ -403,6 +406,12 @@ function RootComponent() {
     location.pathname.startsWith("/super-admin") ||
     location.pathname.startsWith("/learning-management-system/admin");
   const isStandaloneProfile = location.pathname.startsWith("/profile/");
+  /* Console pages share one frame; keeping one key stops the sidebar and its
+     data from remounting on every click inside the console. */
+  const isConsole =
+    /^\/admin(\/|$)/.test(location.pathname) && location.pathname !== "/admin/login"
+      ? true
+      : /^\/learning-management-system\/(admin|instructor)(\/|$)/.test(location.pathname);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -415,7 +424,7 @@ function RootComponent() {
             <RouteProgress />
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
-                key={location.pathname}
+                key={isConsole ? "console" : location.pathname}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

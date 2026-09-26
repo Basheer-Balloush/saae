@@ -1,473 +1,347 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import { ArrowLeft, Download, Eye, Loader2, RotateCcw, Search } from "lucide-react";
-
-import { useLang } from "@/lib/i18n";
-import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
+import { Award, BookOpen, ChevronLeft, Download, MessageSquare, Users } from "lucide-react";
+import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { exportRowsToXlsx } from "@/lib/admin-xlsx-export";
 import {
-  adminListApplications,
   adminExportApplications,
   adminListLmsAdmins,
   type ApplicationListRow,
   type ApplicationStatus,
 } from "@/lib/lms-internships-applications-admin.functions";
 import { adminGetInternship } from "@/lib/lms-internships-admin.functions";
-import { exportRowsToXlsx } from "@/lib/admin-xlsx-export";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  EmptyState,
+  ErrorNote,
+  Loading,
+  PageHeader,
+  Panel,
+  Pill,
+  SearchInput,
+  fmtDate,
+  fmtNum,
+  useT,
+} from "@/components/console/ui";
+import { APP_STATUS_UI, PIPELINE } from "@/features/internships/shared";
 
 export const Route = createFileRoute(
   "/learning-management-system/admin/internships/$id/applications/",
 )({
+  ssr: false,
   head: () => ({
     meta: [
-      { title: "Admin — Internship Applications" },
+      { title: "Applications — Admin — SAAE" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: ApplicationsList,
+  validateSearch: (s: Record<string, unknown>): { stage?: ApplicationStatus } => ({
+    stage:
+      typeof s.stage === "string" && s.stage in APP_STATUS_UI
+        ? (s.stage as ApplicationStatus)
+        : undefined,
+  }),
+  component: ApplicationsPage,
 });
 
-const STATUSES: ApplicationStatus[] = [
-  "new",
-  "under_review",
-  "shortlisted",
-  "interview",
-  "accepted",
-  "rejected",
-  "withdrawn",
-];
-
-const PAGE_SIZE = 25;
-
-function statusLabel(s: ApplicationStatus, lang: "ar" | "en") {
-  const t = lmsInternshipsT[lang];
-  const map: Record<ApplicationStatus, string> = {
-    new: t.statusNew,
-    under_review: t.statusUnderReview,
-    shortlisted: t.statusShortlisted,
-    interview: t.statusInterview,
-    accepted: t.statusAccepted,
-    rejected: t.statusRejected,
-    withdrawn: t.statusWithdrawn,
-  };
-  return map[s];
-}
-
-function statusClass(s: ApplicationStatus) {
-  const m: Record<ApplicationStatus, string> = {
-    new: "bg-muted text-muted-foreground",
-    under_review: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
-    shortlisted: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300",
-    interview: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-    accepted: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-    rejected: "bg-destructive/10 text-destructive",
-    withdrawn: "bg-slate-500/10 text-slate-700 dark:text-slate-300",
-  };
-  return m[s];
-}
-
-function ApplicationsList() {
-  const { id: opportunityId } = Route.useParams();
-  const { lang, dir } = useLang();
-  const t = lmsInternshipsT[lang];
-
-  const listFn = useServerFn(adminListApplications);
-  const exportFn = useServerFn(adminExportApplications);
+/* Everyone who applied to one internship, laid out as a pipeline. Pick a
+   stage to see who is in it; open a person to move them along. */
+function ApplicationsPage() {
+  const { id } = Route.useParams();
+  const { stage } = Route.useSearch();
+  const nav = Route.useNavigate();
+  const { t, ar, lang } = useT();
+  const { user } = useLmsAuth();
+  const allFn = useServerFn(adminExportApplications);
   const adminsFn = useServerFn(adminListLmsAdmins);
-  const opportunityFn = useServerFn(adminGetInternship);
-
-  const [rows, setRows] = useState<ApplicationListRow[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [busy, setBusy] = useState(false);
-  const [exporting, setExporting] = useState(false);
+  const oppFn = useServerFn(adminGetInternship);
+  const [rows, setRows] = useState<ApplicationListRow[] | null>(null);
+  const [truncated, setTruncated] = useState(false);
+  const [error, setError] = useState(false);
+  const [title, setTitle] = useState("");
+  const [admins, setAdmins] = useState<{ user_id: string; email: string | null }[]>([]);
   const [q, setQ] = useState("");
-  const [debouncedQ, setDebouncedQ] = useState("");
-  const [status, setStatus] = useState<ApplicationStatus | "all">("all");
-  const [assigned, setAssigned] = useState<string | "all" | "unassigned">("all");
-  const [admins, setAdmins] = useState<Array<{ user_id: string; email: string | null }>>([]);
-  const [opportunityTitle, setOpportunityTitle] = useState<string>("");
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedQ(q), 350);
-    return () => clearTimeout(t);
-  }, [q]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedQ, status, assigned]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const list = await adminsFn();
-        setAdmins(list);
-      } catch {
-        /* ignore */
-      }
-    })();
-  }, [adminsFn]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await opportunityFn({ data: { id: opportunityId } });
-        const opp = (res as { opportunity?: { title_ar?: string; title_en?: string } } | null)
-          ?.opportunity;
-        if (opp)
-          setOpportunityTitle(
-            lang === "ar" ? (opp.title_ar ?? "") : (opp.title_en ?? opp.title_ar ?? ""),
-          );
-      } catch {
-        /* ignore */
-      }
-    })();
-  }, [opportunityFn, opportunityId, lang]);
-
-  const filterParams = useMemo(
-    () => ({
-      opportunity_id: opportunityId,
-      q: debouncedQ.trim() || undefined,
-      status: status === "all" ? undefined : status,
-      assigned_admin: assigned === "all" || assigned === "unassigned" ? undefined : assigned,
-      sort: "submitted_desc" as const,
-    }),
-    [opportunityId, debouncedQ, status, assigned],
-  );
+  const [who, setWho] = useState<string>("all");
 
   const load = useCallback(async () => {
-    setBusy(true);
-    setLoadError(null);
+    setError(false);
     try {
-      const res = await listFn({
-        data: { ...filterParams, page, page_size: PAGE_SIZE },
-      });
-      let list = res.rows;
-      if (assigned === "unassigned") list = list.filter((r) => !r.assigned_admin);
-      setRows(list);
-      setTotal(res.total);
-    } catch (err) {
-      setRows([]);
-      setTotal(0);
-      setLoadError(err instanceof Error ? err.message : t.errorLoad);
-    } finally {
-      setBusy(false);
+      const r = await allFn({ data: { opportunity_id: id, sort: "submitted_desc" } });
+      setRows(r.rows);
+      setTruncated(r.truncated);
+    } catch {
+      setError(true);
     }
-  }, [listFn, filterParams, page, assigned, t.errorLoad]);
-
+  }, [allFn, id]);
   useEffect(() => {
-    void load();
-  }, [load]);
+    load();
+    adminsFn()
+      .then(setAdmins)
+      .catch(() => {});
+    oppFn({ data: { id } })
+      .then((r) =>
+        setTitle(ar ? r.opportunity.title_ar : r.opportunity.title_en || r.opportunity.title_ar),
+      )
+      .catch(() => {});
+  }, [load, adminsFn, oppFn, id, ar]);
 
-  const resetFilters = () => {
-    setQ("");
-    setDebouncedQ("");
-    setStatus("all");
-    setAssigned("all");
-    setPage(1);
-  };
+  const counts = useMemo(() => {
+    const c = {} as Record<ApplicationStatus, number>;
+    for (const s of Object.keys(APP_STATUS_UI) as ApplicationStatus[]) c[s] = 0;
+    for (const r of rows ?? []) c[r.status]++;
+    return c;
+  }, [rows]);
 
-  const doExport = async () => {
-    setExporting(true);
-    try {
-      const res = await exportFn({ data: filterParams });
-      const list = assigned === "unassigned" ? res.rows.filter((r) => !r.assigned_admin) : res.rows;
-      if (res.truncated) toast.warning(t.adminApplicationsExportLimit);
-      await exportRowsToXlsx<ApplicationListRow>({
-        filenameBase: `internship-applications-${opportunityId.slice(0, 8)}`,
-        sheetName: "Applications",
-        rtl: lang === "ar",
-        rows: list,
-        columns: [
-          {
-            header: lang === "ar" ? "الحالة" : "Status",
-            get: (r) => statusLabel(r.status, lang),
-            width: 16,
-          },
-          {
-            header: lang === "ar" ? "الاسم" : "Full name",
-            get: (r) => r.snapshot_full_name,
-            width: 28,
-          },
-          { header: lang === "ar" ? "البريد" : "Email", get: (r) => r.snapshot_email, width: 28 },
-          { header: lang === "ar" ? "الهاتف" : "Phone", get: (r) => r.snapshot_phone, width: 18 },
-          {
-            header: lang === "ar" ? "المنظمة" : "Organization",
-            get: (r) => r.snapshot_organization,
-            width: 24,
-          },
-          {
-            header: lang === "ar" ? "المسؤول" : "Assigned admin",
-            get: (r) => r.assigned_admin_email,
-            width: 28,
-          },
-          {
-            header: lang === "ar" ? "الدورات" : "Courses",
-            type: "number",
-            get: (r) => r.courses_count,
-            width: 12,
-          },
-          {
-            header: lang === "ar" ? "الشهادات" : "Certificates",
-            type: "number",
-            get: (r) => r.certificates_count,
-            width: 14,
-          },
-          {
-            header: lang === "ar" ? "الملاحظات" : "Notes",
-            type: "number",
-            get: (r) => r.notes_count,
-            width: 12,
-          },
-          {
-            header: lang === "ar" ? "أُرسل في" : "Submitted at",
-            type: "date",
-            get: (r) => r.submitted_at,
-            width: 20,
-          },
-          {
-            header: lang === "ar" ? "المحاولة" : "Attempt",
-            type: "number",
-            get: (r) => r.attempt_number,
-            width: 10,
-          },
-        ],
-      });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.errorLoad);
-    } finally {
-      setExporting(false);
-    }
-  };
+  const shown = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    return (rows ?? []).filter((r) => {
+      if (stage && r.status !== stage) return false;
+      if (who === "none" && r.assigned_admin) return false;
+      if (who === "me" && r.assigned_admin !== user?.id) return false;
+      if (who !== "all" && who !== "none" && who !== "me" && r.assigned_admin !== who) return false;
+      return (
+        !s ||
+        [r.snapshot_full_name, r.snapshot_email, r.snapshot_phone, r.snapshot_organization].some(
+          (x) => x?.toLowerCase().includes(s),
+        )
+      );
+    });
+  }, [rows, stage, who, q, user?.id]);
 
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const setStage = (s?: ApplicationStatus) => nav({ search: { stage: s }, replace: true });
+  const label = (s: ApplicationStatus) => (ar ? APP_STATUS_UI[s].ar : APP_STATUS_UI[s].en);
+
+  const exportXlsx = () =>
+    exportRowsToXlsx<ApplicationListRow>({
+      filenameBase: `internship-applications-${id.slice(0, 8)}`,
+      sheetName: "Applications",
+      rtl: ar,
+      rows: shown,
+      columns: [
+        { header: t("الحالة", "Status"), get: (r) => label(r.status), width: 16 },
+        { header: t("الاسم", "Full name"), get: (r) => r.snapshot_full_name, width: 28 },
+        { header: t("البريد", "Email"), get: (r) => r.snapshot_email, width: 28 },
+        { header: t("الهاتف", "Phone"), get: (r) => r.snapshot_phone, width: 18 },
+        { header: t("الجهة", "Organisation"), get: (r) => r.snapshot_organization, width: 24 },
+        { header: t("المسؤول", "Assigned admin"), get: (r) => r.assigned_admin_email, width: 28 },
+        { header: t("الدورات", "Courses"), type: "number", get: (r) => r.courses_count, width: 12 },
+        {
+          header: t("الشهادات", "Certificates"),
+          type: "number",
+          get: (r) => r.certificates_count,
+          width: 14,
+        },
+        { header: t("الملاحظات", "Notes"), type: "number", get: (r) => r.notes_count, width: 12 },
+        {
+          header: t("أُرسل في", "Submitted at"),
+          type: "date",
+          get: (r) => r.submitted_at,
+          width: 20,
+        },
+        {
+          header: t("المحاولة", "Attempt"),
+          type: "number",
+          get: (r) => r.attempt_number,
+          width: 10,
+        },
+      ],
+    });
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8" dir={dir}>
-      <header className="mb-6">
-        <Link
-          to="/learning-management-system/admin/internships"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-3"
-        >
-          <ArrowLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-          {lang === "ar" ? "العودة إلى الفرص" : "Back to opportunities"}
-        </Link>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              {t.adminApplicationsTitle}
-            </h1>
-            {opportunityTitle && (
-              <p className="text-sm text-muted-foreground mt-1" dir="auto">
-                {opportunityTitle}
-              </p>
-            )}
+    <div>
+      <PageHeader
+        back={{
+          to: "/learning-management-system/admin/internships/$id/edit",
+          params: { id },
+          label: title || t("الفرصة", "Internship"),
+        }}
+        eyebrow={t("منصّة التعلّم · فرصة تدريب", "Learning · Internship")}
+        title={t("الطلبات", "Applications")}
+        description={title || undefined}
+        actions={
+          <Button variant="outline" onClick={exportXlsx} disabled={!shown.length}>
+            <Download className="h-4 w-4" />
+            {t("تصدير Excel", "Export Excel")}
+          </Button>
+        }
+      />
+
+      {error ? (
+        <ErrorNote onRetry={load} />
+      ) : rows === null ? (
+        <Loading />
+      ) : (
+        <>
+          {truncated && (
+            <p className="mb-3 rounded-xl bg-[var(--cx-orange-50)] px-4 py-2 text-[13px] text-[var(--cx-orange-ink)]">
+              {t("تُعرض أول 5000 طلب فقط.", "Only the first 5,000 applications are shown.")}
+            </p>
+          )}
+
+          <div className="mb-5 grid gap-2 sm:grid-cols-3 lg:grid-cols-[repeat(5,minmax(0,1fr))_auto]">
+            {PIPELINE.map((s, i) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setStage(stage === s ? undefined : s)}
+                data-active={stage === s}
+                className="cx-card relative p-3.5 text-start transition-all hover:border-[var(--cx-teal-100)] data-[active=true]:border-[var(--cx-teal)] data-[active=true]:shadow-[0_0_0_3px_var(--cx-teal-50)]"
+              >
+                <div className="text-[26px] font-extrabold leading-none tabular-nums">
+                  {fmtNum(counts[s], lang)}
+                </div>
+                <div className="mt-1.5 text-[13px] font-bold text-[var(--cx-ink-2)]">
+                  {label(s)}
+                </div>
+                {i < PIPELINE.length - 1 && (
+                  <ChevronLeft
+                    className="absolute -end-2.5 top-1/2 z-10 hidden h-4 w-4 -translate-y-1/2 text-[var(--cx-faint)] lg:block ltr:rotate-180"
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            ))}
+            <div className="flex gap-2 sm:col-span-3 lg:col-span-1 lg:flex-col">
+              {(["rejected", "withdrawn"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setStage(stage === s ? undefined : s)}
+                  data-active={stage === s}
+                  className="flex flex-1 items-center justify-between gap-3 rounded-xl border border-[var(--cx-line)] px-3 py-1.5 text-[12.5px] font-bold text-[var(--cx-muted)] hover:border-[var(--cx-teal-100)] data-[active=true]:border-[var(--cx-teal)] data-[active=true]:text-[var(--cx-ink)]"
+                >
+                  {label(s)}
+                  <span className="tabular-nums">{fmtNum(counts[s], lang)}</span>
+                </button>
+              ))}
+            </div>
           </div>
-          <Button variant="outline" onClick={doExport} disabled={exporting || total === 0}>
-            {exporting ? (
-              <Loader2 className="h-4 w-4 animate-spin mx-1" />
+
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[14px] font-extrabold">
+                {stage ? label(stage) : t("كل الطلبات", "All applications")}
+              </span>
+              <span className="text-[13px] text-[var(--cx-muted)]">
+                · {fmtNum(shown.length, lang)}
+              </span>
+              {stage && (
+                <button
+                  type="button"
+                  onClick={() => setStage(undefined)}
+                  className="text-[12.5px] font-bold text-[var(--cx-teal)] hover:underline"
+                >
+                  {t("عرض الكل", "Show all")}
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                className="h-10 rounded-[10px] border border-[var(--cx-line)] bg-[var(--cx-field)] px-3 text-[14px]"
+                value={who}
+                onChange={(e) => setWho(e.target.value)}
+                aria-label={t("المسؤول", "Assigned to")}
+              >
+                <option value="all">{t("كل المسؤولين", "Anyone")}</option>
+                <option value="me">{t("المُسندة لي", "Assigned to me")}</option>
+                <option value="none">{t("غير مُسندة", "Unassigned")}</option>
+                {admins.map((a) => (
+                  <option key={a.user_id} value={a.user_id}>
+                    {a.email ?? a.user_id.slice(0, 8)}
+                  </option>
+                ))}
+              </select>
+              <SearchInput
+                value={q}
+                onChange={setQ}
+                placeholder={t("اسم، بريد، هاتف أو جهة", "Name, email, phone or organisation")}
+              />
+            </div>
+          </div>
+
+          <Panel flush>
+            {shown.length === 0 ? (
+              <EmptyState
+                icon={Users}
+                title={
+                  rows.length
+                    ? t("لا أحد هنا", "Nobody here")
+                    : t("لم يتقدّم أحد بعد", "No one has applied yet")
+                }
+              />
             ) : (
-              <Download className="h-4 w-4 mx-1" />
-            )}
-            {t.adminApplicationsExport}
-          </Button>
-        </div>
-      </header>
-
-      <Card className="p-4 mb-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[220px]">
-            <Search
-              className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ${dir === "rtl" ? "right-3" : "left-3"}`}
-            />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder={t.adminApplicationsSearch}
-              className={dir === "rtl" ? "pr-9" : "pl-9"}
-              dir="auto"
-            />
-          </div>
-          <Select value={status} onValueChange={(v) => setStatus(v as ApplicationStatus | "all")}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={t.adminApplicationsFilterStatus} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{lang === "ar" ? "كل الحالات" : "All statuses"}</SelectItem>
-              {STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {statusLabel(s, lang)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={assigned} onValueChange={(v) => setAssigned(v)}>
-            <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder={t.adminApplicationsFilterAssigned} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{lang === "ar" ? "كل المسؤولين" : "All admins"}</SelectItem>
-              <SelectItem value="unassigned">
-                {lang === "ar" ? "غير مُسند" : "Unassigned"}
-              </SelectItem>
-              {admins.map((a) => (
-                <SelectItem key={a.user_id} value={a.user_id}>
-                  {a.email ?? (lang === "ar" ? "مشرف بدون بريد" : "Admin (no email)")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button variant="ghost" size="sm" onClick={resetFilters}>
-            <RotateCcw className="h-4 w-4 mx-1" />
-            {lang === "ar" ? "تصفير" : "Reset"}
-          </Button>
-        </div>
-      </Card>
-
-      <Card className="overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{lang === "ar" ? "الاسم" : "Name"}</TableHead>
-              <TableHead>{lang === "ar" ? "التواصل" : "Contact"}</TableHead>
-              <TableHead>{t.adminApplicationsFilterStatus}</TableHead>
-              <TableHead>{t.adminApplicationsFilterAssigned}</TableHead>
-              <TableHead className="text-center">{lang === "ar" ? "الدورات" : "Courses"}</TableHead>
-              <TableHead className="text-center">{lang === "ar" ? "الشهادات" : "Certs"}</TableHead>
-              <TableHead className="text-center">{lang === "ar" ? "ملاحظات" : "Notes"}</TableHead>
-              <TableHead>{lang === "ar" ? "أُرسل" : "Submitted"}</TableHead>
-              <TableHead className={dir === "rtl" ? "text-left" : "text-right"}>
-                {lang === "ar" ? "إجراءات" : "Actions"}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {busy && rows.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={9} className="text-center py-10">
-                  <Loader2 className="h-5 w-5 animate-spin inline" />
-                </TableCell>
-              </TableRow>
-            )}
-            {!busy && loadError && (
-              <TableRow>
-                <TableCell colSpan={9} className="py-10">
-                  <div className="flex flex-col items-center gap-3 text-center">
-                    <p className="text-sm font-medium text-destructive">{t.errorLoad}</p>
-                    <p className="text-xs text-muted-foreground max-w-md break-words">
-                      {loadError}
-                    </p>
-                    <Button variant="outline" size="sm" onClick={() => void load()}>
-                      <RotateCcw className="h-4 w-4 mx-1" />
-                      {lang === "ar" ? "إعادة المحاولة" : "Retry"}
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-            {!busy && !loadError && rows.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={9} className="text-center py-10 text-muted-foreground">
-                  {lang === "ar" ? "لا توجد طلبات" : "No applications"}
-                </TableCell>
-              </TableRow>
-            )}
-            {rows.map((r) => (
-              <TableRow key={r.id}>
-                <TableCell className="font-medium max-w-[200px] truncate" dir="auto">
-                  {r.snapshot_full_name || "—"}
-                </TableCell>
-                <TableCell className="text-xs max-w-[220px]">
-                  <div className="truncate" dir="ltr">
-                    {r.snapshot_email || "—"}
-                  </div>
-                  <div className="truncate text-muted-foreground" dir="ltr">
-                    {r.snapshot_phone || ""}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className={statusClass(r.status)}>
-                    {statusLabel(r.status, lang)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-xs" dir="ltr">
-                  {r.assigned_admin_email ?? (
-                    <span className="text-muted-foreground italic">
-                      {lang === "ar" ? "غير مُسند" : "Unassigned"}
-                    </span>
-                  )}
-                </TableCell>
-                <TableCell className="text-center">{r.courses_count}</TableCell>
-                <TableCell className="text-center">{r.certificates_count}</TableCell>
-                <TableCell className="text-center">{r.notes_count}</TableCell>
-                <TableCell className="text-xs" dir="ltr">
-                  {new Date(r.submitted_at).toLocaleDateString(lang)}
-                </TableCell>
-                <TableCell className={dir === "rtl" ? "text-left" : "text-right"}>
-                  <Button variant="ghost" size="sm" asChild>
+              <ul className="divide-y divide-[var(--cx-line-2)]">
+                {shown.map((r) => (
+                  <li key={r.id}>
                     <Link
                       to="/learning-management-system/admin/internships/$id/applications/$appId"
-                      params={{ id: r.opportunity_id ?? opportunityId, appId: r.id }}
-                      aria-label={lang === "ar" ? "عرض الطلب" : "View application"}
+                      params={{ id, appId: r.id }}
+                      className="flex flex-wrap items-center gap-3 px-5 py-3.5 transition-colors hover:bg-[var(--cx-hover)]"
                     >
-                      <Eye className="h-4 w-4 mx-1" />
-                      {lang === "ar" ? "عرض" : "View"}
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--cx-teal-50)] text-[15px] font-extrabold text-[var(--cx-teal)]">
+                        {(r.snapshot_full_name || "?").trim().slice(0, 1).toUpperCase()}
+                      </span>
+                      <span className="min-w-[180px] flex-1">
+                        <span className="block font-bold" dir="auto">
+                          {r.snapshot_full_name || "—"}
+                          {r.attempt_number > 1 && (
+                            <span className="ms-2 text-[11.5px] font-semibold text-[var(--cx-muted)]">
+                              #{r.attempt_number}
+                            </span>
+                          )}
+                        </span>
+                        <span
+                          className="block truncate text-[12.5px] text-[var(--cx-muted)]"
+                          dir="auto"
+                        >
+                          {[r.snapshot_organization, r.snapshot_email]
+                            .filter(Boolean)
+                            .join(" · ") || "—"}
+                        </span>
+                      </span>
+                      <span className="flex items-center gap-3 text-[12.5px] text-[var(--cx-muted)]">
+                        <span
+                          className="inline-flex items-center gap-1"
+                          title={t("دورات", "Courses")}
+                        >
+                          <BookOpen className="h-3.5 w-3.5" />
+                          {fmtNum(r.courses_count, lang)}
+                        </span>
+                        <span
+                          className="inline-flex items-center gap-1"
+                          title={t("شهادات", "Certificates")}
+                        >
+                          <Award className="h-3.5 w-3.5" />
+                          {fmtNum(r.certificates_count, lang)}
+                        </span>
+                        <span
+                          className="inline-flex items-center gap-1"
+                          title={t("ملاحظات", "Notes")}
+                        >
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          {fmtNum(r.notes_count, lang)}
+                        </span>
+                      </span>
+                      <span
+                        className="w-[150px] truncate text-[12.5px] text-[var(--cx-muted)]"
+                        dir="ltr"
+                      >
+                        {r.assigned_admin_email ?? t("غير مُسند", "Unassigned")}
+                      </span>
+                      <span className="flex w-[160px] items-center justify-end gap-2">
+                        <span className="text-[12px] text-[var(--cx-muted)]">
+                          {fmtDate(r.submitted_at, lang)}
+                        </span>
+                        <Pill tone={APP_STATUS_UI[r.status].tone}>{label(r.status)}</Pill>
+                      </span>
                     </Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
-
-      {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">
-            {lang === "ar"
-              ? `الصفحة ${page} من ${totalPages} — ${total} طلب`
-              : `Page ${page} of ${totalPages} — ${total} applications`}
-          </span>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1 || busy}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              {lang === "ar" ? "السابق" : "Previous"}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= totalPages || busy}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              {lang === "ar" ? "التالي" : "Next"}
-            </Button>
-          </div>
-        </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+        </>
       )}
     </div>
   );

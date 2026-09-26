@@ -3,478 +3,409 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-  Edit,
-  Eye,
-  EyeOff,
-  Loader2,
-  Plus,
-  Search,
-  Trash2,
-  Users,
-  Lock,
-  Archive,
-  ArchiveRestore,
+  Briefcase,
+  CalendarClock,
+  ChevronLeft,
+  ChevronRight,
   Link2,
+  Loader2,
+  Pencil,
+  Plus,
+  Users,
 } from "lucide-react";
-
-import { useLang } from "@/lib/i18n";
-import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
 import {
   adminListInternships,
-  adminSetInternshipStatus,
-  adminDeleteInternship,
+  adminUpsertInternship,
   type AdminInternshipRow,
 } from "@/lib/lms-internships-admin.functions";
-import { LIFECYCLE, type Lifecycle } from "@/lib/lms-internships-admin";
+import type { Lifecycle } from "@/lib/lms-internships-admin";
 import { Button } from "@/components/ui/button";
-import { IconActionButton } from "@/components/admin/IconActionButton";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  EmptyState,
+  ErrorNote,
+  Field,
+  Loading,
+  PageHeader,
+  Panel,
+  Pill,
+  SearchInput,
+  Seg,
+  fmtDate,
+  fmtNum,
+  useT,
+} from "@/components/console/ui";
+import { LIFECYCLE_UI, deadlineText, internshipError } from "@/features/internships/shared";
 
 export const Route = createFileRoute("/learning-management-system/admin/internships/")({
+  ssr: false,
   head: () => ({
     meta: [
-      { title: "Admin — Internship Opportunities" },
+      { title: "Internships — Admin — SAAE" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: AdminInternshipsList,
+  validateSearch: (s: Record<string, unknown>): { new?: 1 } => ({
+    new: s.new === 1 || s.new === "1" ? 1 : undefined,
+  }),
+  component: InternshipsPage,
 });
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 24;
+type Filter = "active" | Lifecycle;
 
-function AdminInternshipsList() {
-  const { lang, dir } = useLang();
-  const t = lmsInternshipsT[lang];
-  const navigate = useNavigate();
-
+/* Internship opportunities as cards: where each one stands, how many applied,
+   and the two things you do most (read applications, edit). */
+function InternshipsPage() {
+  const { t, ar, lang } = useT();
+  const search = Route.useSearch();
+  const nav = Route.useNavigate();
   const listFn = useServerFn(adminListInternships);
-  const setStatusFn = useServerFn(adminSetInternshipStatus);
-  const deleteFn = useServerFn(adminDeleteInternship);
-
-  const [rows, setRows] = useState<AdminInternshipRow[]>([]);
+  const [rows, setRows] = useState<AdminInternshipRow[] | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [status, setStatus] = useState<Lifecycle | "all">("all");
+  const [filter, setFilter] = useState<Filter>("active");
   const [q, setQ] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [pending, setPending] = useState<string | null>(null);
-  const [toDelete, setToDelete] = useState<AdminInternshipRow | null>(null);
-  const [toRestore, setToRestore] = useState<AdminInternshipRow | null>(null);
+  const [error, setError] = useState(false);
 
   const load = useCallback(async () => {
-    setBusy(true);
+    setError(false);
     try {
       const res = await listFn({
         data: {
           q: q.trim() || undefined,
-          status: status === "all" ? undefined : status,
+          status: filter === "active" ? undefined : filter,
           page,
           page_size: PAGE_SIZE,
           sort: "updated_desc",
         },
       });
-      setRows(res.rows);
+      // "Current" hides the archive; the server has no "not archived" filter.
+      setRows(filter === "active" ? res.rows.filter((r) => r.status !== "archived") : res.rows);
       setTotal(res.total);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t.errorLoad);
-    } finally {
-      setBusy(false);
+    } catch {
+      setError(true);
     }
-  }, [listFn, page, q, status, t.errorLoad]);
-
+  }, [listFn, q, filter, page]);
   useEffect(() => {
-    void load();
-  }, [load]);
+    const id = setTimeout(load, q ? 300 : 0);
+    return () => clearTimeout(id);
+  }, [load, q]);
 
-  const onStatusChange = async (row: AdminInternshipRow, next: Lifecycle) => {
-    setPending(row.id);
-    try {
-      await setStatusFn({ data: { id: row.id, status: next } });
-      toast.success(t.profileSaved);
-      await load();
-    } catch (err) {
-      toast.error(mapErr(err, lang));
-    } finally {
-      setPending(null);
-    }
-  };
-
-  const confirmRestore = async () => {
-    if (!toRestore) return;
-    const row = toRestore;
-    setToRestore(null);
-    await onStatusChange(row, "draft");
-  };
-
-  const confirmDelete = async () => {
-    if (!toDelete) return;
-    setPending(toDelete.id);
-    try {
-      await deleteFn({ data: { id: toDelete.id } });
-      toast.success(t.profileSaved);
-      setToDelete(null);
-      await load();
-    } catch (err) {
-      toast.error(mapErr(err, lang));
-    } finally {
-      setPending(null);
-    }
-  };
-
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8" dir={dir}>
-      <header className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            {t.adminInternshipsTitle}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {lang === "ar"
-              ? "إدارة فرص التدريب: إنشاء، نشر، إخفاء، إغلاق أو أرشفة."
-              : "Create, publish, hide, close, or archive internship opportunities."}
-          </p>
-        </div>
-        <Button
-          onClick={() => navigate({ to: "/learning-management-system/admin/internships/new" })}
-        >
-          <Plus className="h-4 w-4 mx-1" /> {t.adminInternshipsNew}
-        </Button>
-      </header>
+    <div>
+      <PageHeader
+        eyebrow={t("منصّة التعلّم", "Learning")}
+        title={t("فرص التدريب", "Internships")}
+        description={t(
+          "فرص تدريب يتقدّم لها الطلاب من الموقع. افتح أي فرصة لقراءة الطلبات أو تعديلها.",
+          "Internships students apply to on the site. Open one to read its applications or edit it.",
+        )}
+        actions={
+          <Button onClick={() => nav({ search: { new: 1 } })}>
+            <Plus className="h-4 w-4" />
+            {t("فرصة جديدة", "New internship")}
+          </Button>
+        }
+      />
 
-      <Card className="p-4 mb-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search
-              className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ${dir === "rtl" ? "right-3" : "left-3"}`}
-            />
-            <Input
-              value={q}
-              onChange={(e) => {
-                setQ(e.target.value);
-                setPage(1);
-              }}
-              placeholder={lang === "ar" ? "بحث بالعنوان أو الرابط" : "Search title or slug"}
-              className={dir === "rtl" ? "pr-9" : "pl-9"}
-              dir="auto"
-            />
-          </div>
-          <Select
-            value={status}
-            onValueChange={(v) => {
-              setStatus(v as Lifecycle | "all");
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{lang === "ar" ? "كل الحالات" : "All statuses"}</SelectItem>
-              {LIFECYCLE.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {lifecycleLabel(s, lang)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </Card>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <Seg
+          value={filter}
+          onChange={(v) => {
+            setFilter(v);
+            setPage(1);
+          }}
+          options={[
+            { value: "active", label: t("الحالية", "Current") },
+            {
+              value: "published",
+              label: ar ? LIFECYCLE_UI.published.ar : LIFECYCLE_UI.published.en,
+            },
+            { value: "draft", label: ar ? LIFECYCLE_UI.draft.ar : LIFECYCLE_UI.draft.en },
+            { value: "closed", label: ar ? LIFECYCLE_UI.closed.ar : LIFECYCLE_UI.closed.en },
+            { value: "archived", label: t("الأرشيف", "Archive") },
+          ]}
+        />
+        <SearchInput
+          value={q}
+          onChange={(v) => {
+            setQ(v);
+            setPage(1);
+          }}
+          placeholder={t("ابحث بالعنوان أو الرابط", "Search title or link")}
+        />
+      </div>
 
-      <Card className="overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{lang === "ar" ? "العنوان" : "Title"}</TableHead>
-              <TableHead>{t.adminInternshipsSlug}</TableHead>
-              <TableHead>{t.adminInternshipsStatus}</TableHead>
-              <TableHead className="text-center">{t.adminInternshipsApplicationsCount}</TableHead>
-              <TableHead>{t.adminInternshipsDeadline}</TableHead>
-              <TableHead>{t.adminInternshipsUpdated}</TableHead>
-              <TableHead className={dir === "rtl" ? "text-left" : "text-right"}>
-                {lang === "ar" ? "الإجراءات" : "Actions"}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {busy && rows.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-10">
-                  <Loader2 className="h-5 w-5 animate-spin inline" />
-                </TableCell>
-              </TableRow>
-            )}
-            {!busy && rows.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
-                  {lang === "ar" ? "لا توجد فرص بعد" : "No opportunities yet"}
-                </TableCell>
-              </TableRow>
-            )}
-            {rows.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell className="font-medium max-w-[280px]">
-                  <Link
-                    to="/learning-management-system/admin/internships/$id/edit"
-                    params={{ id: row.id }}
-                    className="hover:text-primary truncate block"
-                    dir="auto"
-                  >
-                    {lang === "ar" ? row.title_ar : row.title_en || row.title_ar}
-                  </Link>
-                </TableCell>
-                <TableCell className="text-xs text-muted-foreground" dir="ltr">
-                  {row.slug}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={row.status} lang={lang} />
-                </TableCell>
-                <TableCell className="text-center">
-                  <Link
-                    to="/learning-management-system/admin/internships/$id/applications"
-                    params={{ id: row.id }}
-                    className="text-primary hover:underline"
-                  >
-                    <span className="inline-flex items-center gap-1">
-                      <Users className="h-3.5 w-3.5" /> {row.applications_count}
+      {error ? (
+        <ErrorNote onRetry={load} />
+      ) : rows === null ? (
+        <Loading />
+      ) : rows.length === 0 ? (
+        <Panel>
+          <EmptyState
+            icon={Briefcase}
+            title={t("لا توجد فرص هنا", "No internships here")}
+            action={
+              <Button onClick={() => nav({ search: { new: 1 } })}>
+                <Plus className="h-4 w-4" />
+                {t("أنشئ فرصة", "Create one")}
+              </Button>
+            }
+          />
+        </Panel>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {rows.map((r) => {
+            const st = LIFECYCLE_UI[r.status];
+            const dl = r.status === "published" ? deadlineText(r.deadline_at, ar) : null;
+            return (
+              <article key={r.id} className="cx-card flex flex-col p-5">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--cx-teal-50)] text-[var(--cx-teal)]">
+                    <Briefcase className="h-5 w-5" />
+                  </span>
+                  <Pill tone={st.tone}>{ar ? st.ar : st.en}</Pill>
+                </div>
+                <Link
+                  to="/learning-management-system/admin/internships/$id/edit"
+                  params={{ id: r.id }}
+                  className="mt-3 line-clamp-2 text-[16px] font-extrabold hover:text-[var(--cx-teal)]"
+                  dir="auto"
+                >
+                  {ar ? r.title_ar : r.title_en || r.title_ar}
+                </Link>
+                <div className="mt-1 font-mono text-[12px] text-[var(--cx-muted)]" dir="ltr">
+                  /internships/{r.slug}
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-[var(--cx-ink-2)]">
+                  {dl ? (
+                    <span
+                      className={`inline-flex items-center gap-1.5 ${dl.soon ? "font-bold text-[var(--cx-orange-ink)]" : ""}`}
+                    >
+                      <CalendarClock className="h-4 w-4" />
+                      {dl.text}
                     </span>
-                  </Link>
-                </TableCell>
-                <TableCell className="text-xs" dir="ltr">
-                  {row.deadline_at ? new Date(row.deadline_at).toLocaleDateString(lang) : "—"}
-                </TableCell>
-                <TableCell className="text-xs" dir="ltr">
-                  {new Date(row.updated_at).toLocaleDateString(lang)}
-                </TableCell>
-                <TableCell className={dir === "rtl" ? "text-left" : "text-right"}>
-                  <div className="inline-flex items-center gap-1">
-                    {row.status === "draft" || row.status === "hidden" ? (
-                      <ActionBtn
-                        icon={Eye}
-                        label={t.adminInternshipsPublish}
-                        onClick={() => onStatusChange(row, "published")}
-                        pending={pending === row.id}
-                      />
-                    ) : null}
-                    {row.status === "published" && (
-                      <ActionBtn
-                        icon={EyeOff}
-                        label={t.adminInternshipsHide}
-                        onClick={() => onStatusChange(row, "hidden")}
-                        pending={pending === row.id}
-                      />
-                    )}
-                    {(row.status === "published" || row.status === "hidden") && (
-                      <ActionBtn
-                        icon={Lock}
-                        label={t.adminInternshipsClose}
-                        onClick={() => onStatusChange(row, "closed")}
-                        pending={pending === row.id}
-                      />
-                    )}
-                    {row.status === "archived" ? (
-                      <ActionBtn
-                        icon={ArchiveRestore}
-                        label={t.adminInternshipsRestore}
-                        onClick={() => setToRestore(row)}
-                        pending={pending === row.id}
-                      />
-                    ) : (
-                      <ActionBtn
-                        icon={Archive}
-                        label={t.adminInternshipsArchive}
-                        onClick={() => onStatusChange(row, "archived")}
-                        pending={pending === row.id}
-                      />
-                    )}
-                    <IconActionButton
-                      icon={Link2}
-                      label={lang === "ar" ? "رابط التسجيل الخارجي" : "External sign-up link"}
-                      onClick={() =>
-                        navigate({
-                          to: "/learning-management-system/admin/internships/$id/signups",
-                          params: { id: row.id },
-                        })
-                      }
-                    />
-                    <IconActionButton
-                      icon={Edit}
-                      label={lang === "ar" ? "تحرير" : "Edit"}
-                      onClick={() =>
-                        navigate({
-                          to: "/learning-management-system/admin/internships/$id/edit",
-                          params: { id: row.id },
-                        })
-                      }
-                    />
-                    <IconActionButton
-                      icon={Trash2}
-                      label={t.adminInternshipsDelete}
-                      className="text-destructive"
-                      onClick={() => setToDelete(row)}
-                    />
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
-
-      {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">
-            {lang === "ar" ? `الصفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
-          </span>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1 || busy}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              {lang === "ar" ? "السابق" : "Previous"}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= totalPages || busy}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              {lang === "ar" ? "التالي" : "Next"}
-            </Button>
-          </div>
+                  ) : r.deadline_at ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <CalendarClock className="h-4 w-4" />
+                      {fmtDate(r.deadline_at, lang)}
+                    </span>
+                  ) : null}
+                  <span className="text-[var(--cx-muted)]">
+                    {t("عُدّلت", "Edited")} {fmtDate(r.updated_at, lang)}
+                  </span>
+                </div>
+                <div className="flex-1" />
+                <div className="mt-4 grid grid-cols-[1fr_auto_auto] gap-2 border-t border-[var(--cx-line-2)] pt-4">
+                  <Button asChild size="sm" variant={r.applications_count ? "default" : "outline"}>
+                    <Link
+                      to="/learning-management-system/admin/internships/$id/applications"
+                      params={{ id: r.id }}
+                    >
+                      <Users className="h-4 w-4" />
+                      {t(
+                        `${fmtNum(r.applications_count, lang)} طلب`,
+                        `${fmtNum(r.applications_count, lang)} applications`,
+                      )}
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    size="icon"
+                    variant="outline"
+                    className="h-9 w-9"
+                    aria-label={t("رابط التسجيل الخارجي", "External sign-up link")}
+                  >
+                    <Link
+                      to="/learning-management-system/admin/internships/$id/signups"
+                      params={{ id: r.id }}
+                      title={t("رابط التسجيل الخارجي", "External sign-up link")}
+                    >
+                      <Link2 className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    size="icon"
+                    variant="outline"
+                    className="h-9 w-9"
+                    aria-label={t("تعديل", "Edit")}
+                  >
+                    <Link
+                      to="/learning-management-system/admin/internships/$id/edit"
+                      params={{ id: r.id }}
+                      title={t("تعديل", "Edit")}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
 
-      <AlertDialog open={!!toRestore} onOpenChange={(o) => !o && setToRestore(null)}>
-        <AlertDialogContent dir={dir}>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t.adminInternshipsRestore}</AlertDialogTitle>
-            <AlertDialogDescription>{t.adminInternshipsRestoreConfirm}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{lang === "ar" ? "إلغاء" : "Cancel"}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRestore}>
-              {t.adminInternshipsRestore}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {pages > 1 && (
+        <div className="mt-5 flex items-center justify-center gap-3 text-[13px]">
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => p - 1)}
+            aria-label={t("السابق", "Previous")}
+          >
+            {ar ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
+          <span className="text-[var(--cx-muted)]">
+            {fmtNum(page, lang)} / {fmtNum(pages, lang)}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={page >= pages}
+            onClick={() => setPage((p) => p + 1)}
+            aria-label={t("التالي", "Next")}
+          >
+            {ar ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </div>
+      )}
 
-      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
-        <AlertDialogContent dir={dir}>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t.adminInternshipsDelete}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {lang === "ar"
-                ? "سيتم الحذف نهائيًا فقط إذا لم يكن هناك أي طلبات مرتبطة. وإلا استخدم الأرشفة."
-                : "This permanently deletes the opportunity only if it has no applications. Otherwise use Archive."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{lang === "ar" ? "إلغاء" : "Cancel"}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t.adminInternshipsDelete}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <NewInternshipDialog
+        open={search.new === 1}
+        onClose={() => nav({ search: {}, replace: true })}
+      />
     </div>
   );
 }
 
-function ActionBtn({
-  icon: Icon,
-  label,
-  onClick,
-  pending,
-}: {
-  icon: typeof Eye;
-  label: string;
-  onClick: () => void;
-  pending: boolean;
-}) {
-  return <IconActionButton icon={Icon} label={label} onClick={onClick} pending={pending} />;
-}
+const toSlug = (s: string) =>
+  s
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80);
 
-export function StatusBadge({ status, lang }: { status: Lifecycle; lang: "ar" | "en" }) {
-  const map: Record<Lifecycle, string> = {
-    draft: "bg-muted text-muted-foreground",
-    published: "bg-primary/10 text-primary",
-    hidden: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-    closed: "bg-slate-500/10 text-slate-700 dark:text-slate-300",
-    archived: "bg-destructive/10 text-destructive",
+/** Three fields to start; everything else is filled on the internship's own page. */
+function NewInternshipDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t, ar } = useT();
+  const navigate = useNavigate();
+  const saveFn = useServerFn(adminUpsertInternship);
+  const [titleAr, setTitleAr] = useState("");
+  const [titleEn, setTitleEn] = useState("");
+  const [slug, setSlug] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const create = async () => {
+    const s = slug || toSlug(titleEn);
+    if (!titleAr.trim() || !titleEn.trim())
+      return void toast.error(
+        t("العنوان مطلوب بالعربية والإنجليزية", "The title is needed in Arabic and English"),
+      );
+    if (s.length < 3) return void toast.error(t("الرابط قصير جداً", "The link is too short"));
+    setSaving(true);
+    try {
+      const res = await saveFn({
+        data: {
+          title_ar: titleAr.trim(),
+          title_en: titleEn.trim(),
+          slug: s,
+          status: "draft",
+          questions: [],
+        } as never,
+      });
+      toast.success(t("أُنشئت الفرصة كمسودّة", "Created as a draft"));
+      navigate({
+        to: "/learning-management-system/admin/internships/$id/edit",
+        params: { id: res.id },
+      });
+    } catch (e) {
+      toast.error(internshipError(e, ar));
+    } finally {
+      setSaving(false);
+    }
   };
+
   return (
-    <Badge variant="outline" className={map[status]}>
-      {lifecycleLabel(status, lang)}
-    </Badge>
+    <Dialog open={open} onOpenChange={(v) => !v && !saving && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{t("فرصة تدريب جديدة", "New internship")}</DialogTitle>
+          <DialogDescription>
+            {t(
+              "ابدأ بالاسم. التفاصيل والأسئلة في الخطوة التالية.",
+              "Start with the name. Details and questions come next.",
+            )}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Field label={t("العنوان بالعربية", "Title in Arabic")}>
+            <Input
+              autoFocus
+              dir="rtl"
+              value={titleAr}
+              maxLength={200}
+              onChange={(e) => setTitleAr(e.target.value)}
+            />
+          </Field>
+          <Field label={t("العنوان بالإنجليزية", "Title in English")}>
+            <Input
+              dir="ltr"
+              value={titleEn}
+              maxLength={200}
+              onChange={(e) => {
+                setTitleEn(e.target.value);
+                if (!slugTouched) setSlug(toSlug(e.target.value));
+              }}
+            />
+          </Field>
+          <Field
+            label={t("الرابط", "Link")}
+            hint={t("أحرف إنجليزية صغيرة وأرقام وشرطات", "Lowercase letters, numbers and dashes")}
+          >
+            <div
+              className="flex items-center rounded-md border border-[var(--cx-line)] bg-[var(--cx-field)] ps-3"
+              dir="ltr"
+            >
+              <span className="shrink-0 text-[13px] text-[var(--cx-muted)]">/internships/</span>
+              <input
+                className="h-9 min-w-0 flex-1 bg-transparent px-1 text-[14px] outline-none"
+                value={slug}
+                maxLength={80}
+                onChange={(e) => {
+                  setSlugTouched(true);
+                  setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
+                }}
+              />
+            </div>
+          </Field>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={saving}>
+            {t("إلغاء", "Cancel")}
+          </Button>
+          <Button onClick={create} disabled={saving}>
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {t("إنشاء ومتابعة", "Create and continue")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
-}
-
-export function lifecycleLabel(s: Lifecycle, lang: "ar" | "en"): string {
-  const t = lmsInternshipsT[lang];
-  switch (s) {
-    case "draft":
-      return t.lifecycleDraft;
-    case "published":
-      return t.lifecyclePublished;
-    case "hidden":
-      return t.lifecycleHidden;
-    case "closed":
-      return t.lifecycleClosed;
-    case "archived":
-      return t.lifecycleArchived;
-  }
-}
-
-export function mapErr(err: unknown, lang: "ar" | "en"): string {
-  const msg = err instanceof Error ? err.message : String(err);
-  const AR = lang === "ar";
-  if (msg.includes("slug_taken")) return AR ? "هذا الرابط مستخدم مسبقًا" : "Slug is already in use";
-  if (msg.includes("has_applications"))
-    return AR
-      ? "لا يمكن الحذف: توجد طلبات مرتبطة. استخدم الأرشفة."
-      : "Cannot delete: applications exist. Use Archive.";
-  if (msg.includes("question_has_answers"))
-    return AR ? "لا يمكن حذف سؤال أُجيب عليه" : "Cannot delete a question that has answers";
-  if (msg.includes("status_transition_invalid"))
-    return AR ? "لا يمكن تغيير الحالة بهذا الاتجاه" : "That status change isn't allowed";
-  if (msg.includes("date_range_invalid"))
-    return AR ? "التواريخ غير متسقة" : "Date range is invalid";
-  if (msg.includes("unauthorized")) return AR ? "لا تملك صلاحية هذا الإجراء" : "Unauthorized";
-  if (msg.includes("not_found")) return AR ? "غير موجود" : "Not found";
-  return msg;
 }
