@@ -321,10 +321,28 @@ function extractTextFromMessage(m: { content?: unknown; parts?: unknown }): stri
   return "";
 }
 
+const ALLOWED_CHAT_HOSTS = [/^(www\.)?aisyria\.org$/, /\.lovable\.app$/, /\.lovableproject\.com$/, /^localhost$/, /^127\.0\.0\.1$/];
+function isAllowedChatOrigin(request: Request): boolean {
+  const raw = request.headers.get("origin") || request.headers.get("referer");
+  if (!raw) return false;
+  try {
+    const { hostname } = new URL(raw);
+    const self = new URL(request.url).hostname;
+    return hostname === self || ALLOWED_CHAT_HOSTS.some((r) => r.test(hostname));
+  } catch {
+    return false;
+  }
+}
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
+        // Only our own website may use the assistant: reject other sites and
+        // scripts that don't identify as a browser page on an allowed origin.
+        if (!isAllowedChatOrigin(request)) {
+          return new Response("Forbidden", { status: 403 });
+        }
         // Fail before persisting user messages if the provider is not configured.
         // Prefers Lovable AI Gateway; falls back to the direct OpenRouter provider.
         let chat: ReturnType<typeof createChatModelForRequest>;
