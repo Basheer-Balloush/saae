@@ -376,8 +376,11 @@ function FeedbackPage() {
       localStorage.removeItem(DRAFT_KEY);
       setDone(true);
       requestAnimationFrame(() => topRef.current?.scrollIntoView({ block: "start" }));
-    } catch {
-      setError(tr.error);
+    } catch (e) {
+      console.error("[feedback] submit failed", e);
+      setError(
+        import.meta.env.DEV && e instanceof Error ? `${tr.error} (${e.message})` : tr.error,
+      );
     } finally {
       setSending(false);
     }
