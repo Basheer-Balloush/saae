@@ -3631,6 +3631,7 @@ export type Database = {
           full_name_ar: string
           full_name_en: string | null
           id: string
+          is_published: boolean
           photo_url: string | null
           position_ar: string
           position_en: string | null
@@ -3645,6 +3646,7 @@ export type Database = {
           full_name_ar: string
           full_name_en?: string | null
           id?: string
+          is_published?: boolean
           photo_url?: string | null
           position_ar: string
           position_en?: string | null
@@ -3659,6 +3661,7 @@ export type Database = {
           full_name_ar?: string
           full_name_en?: string | null
           id?: string
+          is_published?: boolean
           photo_url?: string | null
           position_ar?: string
           position_en?: string | null
