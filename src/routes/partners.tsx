@@ -4,7 +4,6 @@ import { loadPartners } from "@/features/website/partners/data";
 import { applyPartnerDirectory } from "@/features/website/partners/render";
 import pageHtml from "@/components/cinematic/html/partners.html?raw";
 import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
-import { DesktopMotionFooter } from "@/components/home/DesktopMotionFooter";
 
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/language.js" },
@@ -30,10 +29,5 @@ export const Route = createFileRoute("/partners")({
 function Page() {
   const partners = Route.useLoaderData();
   const html = useMemo(() => applyPartnerDirectory(pageHtml, partners), [partners]);
-  return (
-    <>
-      <CinematicPage html={html} scripts={SCRIPTS} />
-      <DesktopMotionFooter targetSelector="#partners-motion-footer-root" />
-    </>
-  );
+  return <CinematicPage html={html} scripts={SCRIPTS} />;
 }
