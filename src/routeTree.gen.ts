@@ -19,6 +19,7 @@ import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-i
 import { Route as LearningManagementSystemRouteImport } from './routes/learning-management-system'
 import { Route as InternationalBusinessBridgeRouteImport } from './routes/international-business-bridge'
 import { Route as InitiativeSurveyRouteImport } from './routes/initiative-survey'
+import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as EventSurveyRouteImport } from './routes/event-survey'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AttendanceManagementSystemRouteImport } from './routes/attendance-management-system'
@@ -183,6 +184,11 @@ const InternationalBusinessBridgeRoute =
 const InitiativeSurveyRoute = InitiativeSurveyRouteImport.update({
   id: '/initiative-survey',
   path: '/initiative-survey',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventSurveyRoute = EventSurveyRouteImport.update({
@@ -811,6 +817,7 @@ export interface FileRoutesByFullPath {
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
+  '/feedback': typeof FeedbackRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
   '/international-business-bridge': typeof InternationalBusinessBridgeRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
@@ -932,6 +939,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
+  '/feedback': typeof FeedbackRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
   '/international-business-bridge': typeof InternationalBusinessBridgeRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
@@ -1048,6 +1056,7 @@ export interface FileRoutesById {
   '/attendance-management-system': typeof AttendanceManagementSystemRouteWithChildren
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
+  '/feedback': typeof FeedbackRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
   '/international-business-bridge': typeof InternationalBusinessBridgeRoute
   '/learning-management-system': typeof LearningManagementSystemRouteWithChildren
@@ -1173,6 +1182,7 @@ export interface FileRouteTypes {
     | '/attendance-management-system'
     | '/contact'
     | '/event-survey'
+    | '/feedback'
     | '/initiative-survey'
     | '/international-business-bridge'
     | '/learning-management-system'
@@ -1294,6 +1304,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/event-survey'
+    | '/feedback'
     | '/initiative-survey'
     | '/international-business-bridge'
     | '/one-million-initiative'
@@ -1409,6 +1420,7 @@ export interface FileRouteTypes {
     | '/attendance-management-system'
     | '/contact'
     | '/event-survey'
+    | '/feedback'
     | '/initiative-survey'
     | '/international-business-bridge'
     | '/learning-management-system'
@@ -1533,6 +1545,7 @@ export interface RootRouteChildren {
   AttendanceManagementSystemRoute: typeof AttendanceManagementSystemRouteWithChildren
   ContactRoute: typeof ContactRoute
   EventSurveyRoute: typeof EventSurveyRoute
+  FeedbackRoute: typeof FeedbackRoute
   InitiativeSurveyRoute: typeof InitiativeSurveyRoute
   InternationalBusinessBridgeRoute: typeof InternationalBusinessBridgeRoute
   LearningManagementSystemRoute: typeof LearningManagementSystemRouteWithChildren
@@ -1635,6 +1648,13 @@ declare module '@tanstack/react-router' {
       path: '/initiative-survey'
       fullPath: '/initiative-survey'
       preLoaderRoute: typeof InitiativeSurveyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/event-survey': {
@@ -2788,6 +2808,7 @@ const rootRouteChildren: RootRouteChildren = {
   AttendanceManagementSystemRoute: AttendanceManagementSystemRouteWithChildren,
   ContactRoute: ContactRoute,
   EventSurveyRoute: EventSurveyRoute,
+  FeedbackRoute: FeedbackRoute,
   InitiativeSurveyRoute: InitiativeSurveyRoute,
   InternationalBusinessBridgeRoute: InternationalBusinessBridgeRoute,
   LearningManagementSystemRoute: LearningManagementSystemRouteWithChildren,
