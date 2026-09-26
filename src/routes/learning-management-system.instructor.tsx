@@ -1,15 +1,20 @@
 import { createFileRoute, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Loader2, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
+import { safeLmsRedirect } from "@/lib/lms-redirect";
+import { ConsoleShell } from "@/components/console/ConsoleShell";
+import { EmptyState } from "@/components/console/ui";
+import { Button } from "@/components/ui/button";
 
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
-
+/* Every instructor page lives in the console frame. Admins reach the same
+   pages (the course editor with its grading tab) with the LMS menu. */
 export const Route = createFileRoute("/learning-management-system/instructor")({
   head: () => ({
-    links: LMS_SKIN_LINKS,
+    meta: [{ name: "robots", content: "noindex, nofollow" }],
   }),
   component: InstructorLayout,
 });
@@ -27,11 +32,21 @@ function InstructorLayout() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { navigate({ to: "/learning-management-system/login" }); return; }
+    if (!user) {
+      navigate({
+        to: "/learning-management-system/login",
+        search: {
+          redirect: safeLmsRedirect(`${window.location.pathname}${window.location.search}`),
+        },
+      });
+      return;
+    }
     (async () => {
       const { data } = await supabase
         .from("lms_instructors")
-        .select("approved,full_name_ar,full_name_en,bio_ar,bio_en,specialty_ar,specialty_en,full_name,bio,specialty")
+        .select(
+          "approved,full_name_ar,full_name_en,bio_ar,bio_en,specialty_ar,specialty_en,full_name,bio,specialty",
+        )
         .eq("user_id", user.id)
         .maybeSingle();
       const isApproved = role === "admin" || (role === "lms_instructor" && !!data?.approved);
@@ -49,40 +64,59 @@ function InstructorLayout() {
   }, [approved, profileComplete, location.pathname, navigate]);
 
   if (loading || !user || approved === null || profileComplete === null) {
-    return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
-  }
-  if (role !== "admin" && !approved) {
     return (
-      <div className="mx-auto max-w-xl px-6 py-20 text-center">
-        <h1 className="text-xl font-bold text-foreground">
-          {lang === "ar" ? "حسابك كمدرّب قيد المراجعة" : "Your instructor account is pending review"}
-        </h1>
-        <p className="mt-3 text-muted-foreground">
-          {lang === "ar"
-            ? "لتفعيل حسابك، عليك تقديم طلب اعتماد رسمي عبر نظام معادلة المدربين (4 مراحل تقييم)."
-            : "To activate your account, submit an accreditation request through the trainer equivalence system (4 evaluation phases)."}
-        </p>
-        <a
-          href="/learning-management-system/trainer-apply"
-          className="mt-6 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
-        >
-          {lang === "ar" ? "فتح نموذج طلب الاعتماد" : "Open accreditation form"}
-        </a>
-      </div>
+      <p
+        className="flex min-h-screen items-center justify-center gap-2 text-muted-foreground"
+        role="status"
+      >
+        <Loader2 className="h-4 w-4 animate-spin" />
+        {tr.loading}
+      </p>
     );
   }
-  return (
-    <div className="lms-dashboard-wrap lms-instructor-shell">
-      {approved && !profileComplete && location.pathname === PROFILE_PATH && (
-        <div className="mx-auto max-w-2xl px-4 sm:px-6 pt-6">
-          <div className="rounded-2xl border border-amber-400/50 bg-amber-50 dark:bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
-            {lang === "ar"
-              ? "مبارك! تمّ اعتماد حسابك كمدرّب. أكمل بياناتك (الاسم بالعربية والإنجليزية، الاختصاص، ونبذة عنك) لتتمكّن من الوصول إلى لوحة المدرّب."
-              : "Congrats! Your instructor account is approved. Complete your profile (name in Arabic & English, specialty, and bio) before accessing the instructor dashboard."}
-          </div>
+
+  if (role !== "admin" && !approved) {
+    return (
+      <ConsoleShell>
+        <div className="cx-card mx-auto max-w-xl">
+          <EmptyState
+            icon={ShieldCheck}
+            title={
+              lang === "ar"
+                ? "حسابك كمدرّب قيد المراجعة"
+                : "Your instructor account is pending review"
+            }
+            text={
+              lang === "ar"
+                ? "لتفعيل حسابك، عليك تقديم طلب اعتماد رسمي عبر نظام معادلة المدربين (4 مراحل تقييم)."
+                : "To activate your account, submit an accreditation request through the trainer equivalence system (4 evaluation phases)."
+            }
+            action={
+              <Button asChild>
+                <a href="/learning-management-system/trainer-apply">
+                  {lang === "ar" ? "فتح نموذج طلب الاعتماد" : "Open accreditation form"}
+                </a>
+              </Button>
+            }
+          />
         </div>
+      </ConsoleShell>
+    );
+  }
+
+  return (
+    <ConsoleShell>
+      {approved && !profileComplete && location.pathname === PROFILE_PATH && (
+        <p
+          className="mb-5 rounded-2xl bg-[var(--cx-green-50)] px-5 py-3.5 text-[14px] font-semibold text-[var(--cx-green)]"
+          role="status"
+        >
+          {lang === "ar"
+            ? "مبارك! تمّ اعتماد حسابك كمدرّب. أكمل بياناتك (الاسم بالعربية والإنجليزية، الاختصاص، ونبذة عنك) لتتمكّن من الوصول إلى لوحة المدرّب."
+            : "Congrats! Your instructor account is approved. Complete your profile (name in Arabic & English, specialty, and bio) before accessing the instructor dashboard."}
+        </p>
       )}
       <Outlet />
-    </div>
+    </ConsoleShell>
   );
 }

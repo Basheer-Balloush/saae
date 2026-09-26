@@ -9,7 +9,6 @@ export const LMS_SKIN_LINKS = [
 
 /* Pages move here one at a time as they are redesigned. */
 const SKINNED_PATHS = [
-  /^\/learning-management-system\/instructor$/,
   /^\/learning-management-system\/student\/quiz\/[^/]+$/,
   /^\/learning-management-system$/,
   /^\/learning-management-system\/(catalog|verify)$/,
@@ -19,13 +18,17 @@ const SKINNED_PATHS = [
   /^\/learning-management-system\/student(\/requests)?$/,
   /^\/learning-management-system\/(profile|trainer-apply)$/,
   /^\/learning-management-system\/(certificate|instructors)\/[^/]+$/,
-  /^\/learning-management-system\/(instructor|admin)(\/.*)?$/,
 ];
 
 export const isSkinnedLmsPath = (pathname: string) => {
   const path = pathname.replace(/\/+$/, "");
   return SKINNED_PATHS.some((pattern) => pattern.test(path));
 };
+
+/* The admin console and the instructor workspace draw their own frame
+   (ConsoleShell), so the LMS layout leaves them bare. */
+export const isConsoleLmsPath = (pathname: string) =>
+  /^\/learning-management-system\/(admin|instructor)(\/|$)/.test(pathname);
 
 /* The eight category gradients in lms.css (cat-* classes). Our category
    slugs are free text, so each category takes one by its display order. */

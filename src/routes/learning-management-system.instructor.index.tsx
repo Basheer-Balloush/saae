@@ -1,67 +1,56 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { toUserMessage } from "@/lib/safe-error";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
-  Plus,
-  Edit3,
-  Users,
-  Loader2,
-  ClipboardCheck,
   BookOpen,
-  Check,
-  FileText,
-  Search,
+  CalendarCheck,
+  FilePen,
+  MapPin,
+  MonitorPlay,
+  Plus,
+  UserCircle,
+  Users,
 } from "lucide-react";
-import { CoursePrice } from "@/components/lms/CoursePrice";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
+import { toUserMessage } from "@/lib/safe-error";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { CoursePrice } from "@/components/lms/CoursePrice";
 import {
-  validateCourseI18n,
-  firstInvalidCourseField,
-  trimCourseI18n,
-  courseI18nWriteErrorMessage,
-  type CourseFieldErrors,
-  type RequiredCourseField,
-} from "@/lib/lms-course-fields";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+  CourseStatusPill,
+  EmptyState,
+  ErrorNote,
+  Loading,
+  PageHeader,
+  Pill,
+  SearchInput,
+  Seg,
+  StatTile,
+  fmtNum,
+  useT,
+} from "@/components/console/ui";
+import { NewCourseDialog } from "@/features/lms-console/NewCourseDialog";
 
 export const Route = createFileRoute("/learning-management-system/instructor/")({
-  head: () => ({
-    meta: [{ title: "LMS · Instructor" }],
-    links: [...LMS_SKIN_LINKS, { rel: "stylesheet", href: "/lms/css/instructor-dashboard.css" }],
-  }),
+  head: () => ({ meta: [{ title: "My courses — SAAE Training and Learning Platform" }] }),
   component: InstructorHome,
 });
 
-type AmsLink = { id: string } | { id: string }[] | null;
 type Course = {
   id: string;
   title_ar: string;
   title_en: string | null;
   status: string;
+  cover_url: string | null;
   students_count: number;
   is_free: boolean;
   price: number;
   sale_price: number | null;
   instructor_id: string;
   delivery_mode: string | null;
-  ams_courses?: AmsLink;
+  ams_courses?: { id: string } | { id: string }[] | null;
 };
-type CourseFilter = "all" | "published" | "draft" | "pending" | "rejected";
+type Filter = "all" | "published" | "draft" | "pending" | "rejected";
 
 function amsCourseId(c: Course): string | null {
   const a = c.ams_courses;
@@ -70,502 +59,277 @@ function amsCourseId(c: Course): string | null {
 }
 
 function InstructorHome() {
-  const { user, role } = useLmsAuth();
-  const { lang } = useLang();
-  const tr = lmsT[lang];
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<CourseFilter>("all");
-  const [form, setForm] = useState({
-    title_ar: "",
-    title_en: "",
-    description_ar: "",
-    description_en: "",
-  });
-  const [errors, setErrors] = useState<CourseFieldErrors>({});
-  const fieldRefs = useRef<
-    Partial<Record<RequiredCourseField, HTMLInputElement | HTMLTextAreaElement | null>>
-  >({});
+  const { t, ar, lang } = useT();
+  const { user } = useLmsAuth();
+  const [courses, setCourses] = useState<Course[] | null>(null);
+  const [error, setError] = useState(false);
+  const [q, setQ] = useState("");
+  const [filter, setFilter] = useState<Filter>("all");
+  const [newOpen, setNewOpen] = useState(false);
 
   const load = async () => {
     if (!user) return;
-    setLoading(true);
-    setLoadError(false);
-    setCourses([]);
+    setError(false);
+    setCourses(null);
     const cols =
-      "id,title_ar,title_en,status,students_count,is_free,price,sale_price,instructor_id,delivery_mode,ams_courses!ams_courses_lms_course_id_fkey(id)";
+      "id,title_ar,title_en,status,cover_url,students_count,is_free,price,sale_price,instructor_id,delivery_mode,ams_courses!ams_courses_lms_course_id_fkey(id)";
+    // Courses I own plus the ones I co-teach.
     const { data: ids, error: idError } = await supabase.rpc("lms_my_teaching_course_ids");
     if (idError) {
       toast.error(toUserMessage(idError));
-      setLoadError(true);
-      setLoading(false);
+      setError(true);
       return;
     }
-    const { data, error } = ids?.length
+    const { data, error: err } = ids?.length
       ? await supabase
           .from("lms_courses")
           .select(cols)
           .in("id", ids)
           .order("created_at", { ascending: false })
       : { data: [], error: null };
-    if (error) {
-      toast.error(toUserMessage(error));
-      setLoadError(true);
+    if (err) {
+      toast.error(toUserMessage(err));
+      setError(true);
     }
     setCourses((data as Course[]) ?? []);
-    setLoading(false);
   };
-
   useEffect(() => {
-    load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    load(); // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const onCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || creating) return;
-    const nextErrors = validateCourseI18n(form, lang);
-    setErrors(nextErrors);
-    const firstBad = firstInvalidCourseField(nextErrors);
-    if (firstBad) {
-      fieldRefs.current[firstBad]?.focus();
-      return;
+  const counts = useMemo(() => {
+    const c = { all: 0, published: 0, draft: 0, pending: 0, rejected: 0, students: 0 };
+    for (const x of courses ?? []) {
+      c.all++;
+      if (x.status in c) c[x.status as Filter]++;
+      c.students += Number(x.students_count || 0);
     }
-    const values = trimCourseI18n(form);
-    setCreating(true);
-    if (role === "admin") {
-      // Course ownership references an instructor profile, even for an admin.
-      const { data: profile, error: profileError } = await supabase
-        .from("lms_instructors")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (profileError) {
-        setCreating(false);
-        toast.error(toUserMessage(profileError));
-        return;
-      }
-      if (!profile) {
-        const { data: ownProfile } = await supabase
-          .from("lms_user_profiles")
-          .select("full_name")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        const fullName =
-          ownProfile?.full_name?.trim() ||
-          String(user.user_metadata?.full_name || user.user_metadata?.name || "").trim();
-        if (!fullName) {
-          setCreating(false);
-          toast.error(
-            lang === "ar"
-              ? "أضف اسمك في ملفك الشخصي قبل إنشاء الدورة."
-              : "Add your name to your profile before creating a course.",
-          );
-          return;
-        }
-        const { error: insertError } = await supabase
-          .from("lms_instructors")
-          .insert({ user_id: user.id, full_name: fullName, approved: false });
-        if (insertError && insertError.code !== "23505") {
-          setCreating(false);
-          toast.error(toUserMessage(insertError));
-          return;
-        }
-      }
-    }
-    const { data, error } = await supabase
-      .from("lms_courses")
-      .insert({
-        instructor_id: user.id,
-        ...values,
-      })
-      .select("id")
-      .maybeSingle();
-    setCreating(false);
-    if (error) {
-      const msg = toUserMessage(error);
-      toast.error(courseI18nWriteErrorMessage(error.message ?? msg, lang) ?? msg);
-      return;
-    }
-    setOpen(false);
-    setForm({ title_ar: "", title_en: "", description_ar: "", description_en: "" });
-    setErrors({});
-    if (data) window.location.href = `/learning-management-system/instructor/courses/${data.id}`;
-  };
+    return c;
+  }, [courses]);
 
-  const counts = {
-    published: courses.filter((c) => c.status === "published").length,
-    draft: courses.filter((c) => c.status === "draft").length,
-    pending: courses.filter((c) => c.status === "pending").length,
-    rejected: courses.filter((c) => c.status === "rejected").length,
-  };
-  const enrollments = courses.reduce(
-    (total, course) => total + Number(course.students_count || 0),
-    0,
+  const shown = (courses ?? []).filter(
+    (c) =>
+      (filter === "all" || c.status === filter) &&
+      (!q.trim() ||
+        `${c.title_ar} ${c.title_en ?? ""}`.toLowerCase().includes(q.trim().toLowerCase())),
   );
-  const search = query.trim().toLocaleLowerCase();
-  const visibleCourses = courses.filter(
-    (course) =>
-      (filter === "all" || course.status === filter) &&
-      (!search ||
-        `${course.title_ar} ${course.title_en ?? ""}`.toLocaleLowerCase().includes(search)),
-  );
-  const filters: { value: CourseFilter; label: string; count: number }[] = [
-    { value: "all", label: lang === "ar" ? "الكل" : "All", count: courses.length },
-    { value: "published", label: lang === "ar" ? "منشورة" : "Published", count: counts.published },
-    { value: "draft", label: lang === "ar" ? "مسودّات" : "Drafts", count: counts.draft },
-    { value: "pending", label: lang === "ar" ? "قيد المراجعة" : "Pending", count: counts.pending },
-    ...(counts.rejected
-      ? [
-          {
-            value: "rejected" as const,
-            label: lang === "ar" ? "مرفوضة" : "Rejected",
-            count: counts.rejected,
-          },
-        ]
-      : []),
-  ];
+  const title = (c: Course) => (ar ? c.title_ar : c.title_en || c.title_ar);
 
   return (
-    <div className="instructor-dashboard">
-      <Link
-        to="/learning-management-system"
-        className="id-brand"
-        aria-label={lang === "ar" ? "الرئيسية — SAAE" : "SAAE home"}
-      >
-        <img
-          src={
-            lang === "ar"
-              ? "/cinematic/images/saae-logo-ar.png"
-              : "/cinematic/images/saae-logo-en.png"
-          }
-          alt=""
+    <div>
+      <PageHeader
+        eyebrow={t("مساحة المدرّب", "Instructor workspace")}
+        title={t("دوراتي", "My courses")}
+        description={t(
+          "أنشئ دوراتك وأدِر محتواها وطلابها وحضورها من مكان واحد.",
+          "Create your courses and manage their content, students and attendance in one place.",
+        )}
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link to="/learning-management-system/instructor/profile">
+                <UserCircle className="h-4 w-4" />
+                {t("ملفي الشخصي", "My profile")}
+              </Link>
+            </Button>
+            <Button onClick={() => setNewOpen(true)}>
+              <Plus className="h-4 w-4" />
+              {t("دورة جديدة", "New course")}
+            </Button>
+          </>
+        }
+      />
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile
+          icon={BookOpen}
+          label={t("كل الدورات", "All courses")}
+          value={courses ? fmtNum(counts.all, lang) : "…"}
         />
-      </Link>
-      <header className="id-header">
-        <div className="id-heading">
-          <span className="id-eyebrow">{lang === "ar" ? "لوحة المدرّب" : "INSTRUCTOR"}</span>
-          <h1>{lang === "ar" ? "مساحة عمل المدرّب" : "Instructor workspace"}</h1>
-          <p>
-            {lang === "ar"
-              ? "أدر دوراتك والحضور من مكان واحد."
-              : "Manage your courses and attendance in one place."}
-          </p>
-        </div>
-        <div className="id-header-actions">
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <button type="button" className="id-button id-button-primary">
-                <Plus aria-hidden="true" />
-                {lang === "ar" ? "دورة جديدة" : "New course"}
-              </button>
-            </DialogTrigger>
-            <DialogContent className="dark id-create-dialog">
-              <DialogHeader>
-                <DialogTitle>{lang === "ar" ? "دورة جديدة" : "New course"}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={onCreate} noValidate className="space-y-3">
-                <div>
-                  <Label htmlFor="id-title-ar">
-                    {lang === "ar" ? "العنوان (عربي)" : "Title (Arabic)"}
-                  </Label>
-                  <Input
-                    id="id-title-ar"
-                    dir="rtl"
-                    ref={(el) => {
-                      fieldRefs.current.title_ar = el;
-                    }}
-                    aria-invalid={!!errors.title_ar}
-                    value={form.title_ar}
-                    onChange={(e) => setForm({ ...form, title_ar: e.target.value })}
-                  />
-                  {errors.title_ar && (
-                    <p className="mt-1 text-xs text-destructive">{errors.title_ar}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="id-title-en">
-                    {lang === "ar" ? "العنوان (إنجليزي)" : "Title (English)"}
-                  </Label>
-                  <Input
-                    id="id-title-en"
-                    dir="ltr"
-                    ref={(el) => {
-                      fieldRefs.current.title_en = el;
-                    }}
-                    aria-invalid={!!errors.title_en}
-                    value={form.title_en}
-                    onChange={(e) => setForm({ ...form, title_en: e.target.value })}
-                  />
-                  {errors.title_en && (
-                    <p className="mt-1 text-xs text-destructive">{errors.title_en}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="id-description-ar">
-                    {lang === "ar" ? "الوصف (عربي)" : "Description (Arabic)"}
-                  </Label>
-                  <Textarea
-                    id="id-description-ar"
-                    dir="rtl"
-                    rows={3}
-                    ref={(el) => {
-                      fieldRefs.current.description_ar = el;
-                    }}
-                    aria-invalid={!!errors.description_ar}
-                    value={form.description_ar}
-                    onChange={(e) => setForm({ ...form, description_ar: e.target.value })}
-                  />
-                  {errors.description_ar && (
-                    <p className="mt-1 text-xs text-destructive">{errors.description_ar}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="id-description-en">
-                    {lang === "ar" ? "الوصف (إنجليزي)" : "Description (English)"}
-                  </Label>
-                  <Textarea
-                    id="id-description-en"
-                    dir="ltr"
-                    rows={3}
-                    ref={(el) => {
-                      fieldRefs.current.description_en = el;
-                    }}
-                    aria-invalid={!!errors.description_en}
-                    value={form.description_en}
-                    onChange={(e) => setForm({ ...form, description_en: e.target.value })}
-                  />
-                  {errors.description_en && (
-                    <p className="mt-1 text-xs text-destructive">{errors.description_en}</p>
-                  )}
-                </div>
-                <Button type="submit" className="w-full" disabled={creating}>
-                  {creating && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-                  {lang === "ar" ? "إنشاء" : "Create"}
+        <StatTile
+          icon={BookOpen}
+          tone="green"
+          label={t("منشورة", "Published")}
+          value={courses ? fmtNum(counts.published, lang) : "…"}
+        />
+        <StatTile
+          icon={FilePen}
+          tone="orange"
+          label={t("مسودّات وقيد المراجعة", "Drafts & in review")}
+          value={courses ? fmtNum(counts.draft + counts.pending, lang) : "…"}
+        />
+        <StatTile
+          icon={Users}
+          tone="teal"
+          label={t("طلابي", "My students")}
+          value={courses ? fmtNum(counts.students, lang) : "…"}
+        />
+      </div>
+
+      <div className="mb-4 mt-6 flex flex-wrap items-center justify-between gap-3">
+        <Seg
+          value={filter}
+          onChange={setFilter}
+          options={[
+            { value: "all" as Filter, label: t("الكل", "All"), count: counts.all },
+            {
+              value: "published" as Filter,
+              label: t("منشورة", "Published"),
+              count: counts.published,
+            },
+            { value: "draft" as Filter, label: t("مسودّات", "Drafts"), count: counts.draft },
+            {
+              value: "pending" as Filter,
+              label: t("قيد المراجعة", "In review"),
+              count: counts.pending,
+            },
+            ...(counts.rejected
+              ? [
+                  {
+                    value: "rejected" as Filter,
+                    label: t("مرفوضة", "Rejected"),
+                    count: counts.rejected,
+                  },
+                ]
+              : []),
+          ]}
+        />
+        <SearchInput
+          value={q}
+          onChange={setQ}
+          placeholder={t("ابحث في دوراتك", "Search your courses")}
+        />
+      </div>
+
+      {error ? (
+        <ErrorNote onRetry={load} />
+      ) : courses === null ? (
+        <Loading />
+      ) : shown.length === 0 ? (
+        <div className="cx-card">
+          <EmptyState
+            icon={BookOpen}
+            title={
+              courses.length
+                ? t("لا توجد دورات مطابقة", "No matching courses")
+                : t("لم تنشئ أي دورة بعد", "You haven't created a course yet")
+            }
+            text={
+              courses.length
+                ? undefined
+                : t(
+                    "ابدأ باسم الدورة ووصفها؛ الباقي تضيفه بعد ذلك خطوة بخطوة.",
+                    "Start with the course name and description; add the rest step by step afterwards.",
+                  )
+            }
+            action={
+              courses.length ? undefined : (
+                <Button onClick={() => setNewOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                  {t("أنشئ دورتك الأولى", "Create your first course")}
                 </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
-          <Link
-            to="/learning-management-system/instructor/profile"
-            className="id-button id-button-secondary"
-          >
-            <Edit3 aria-hidden="true" />
-            {lang === "ar" ? "تعديل الملف الشخصي" : "Edit profile"}
-          </Link>
+              )
+            }
+          />
         </div>
-      </header>
-
-      <section className="id-stats" aria-label={lang === "ar" ? "ملخص الدورات" : "Course summary"}>
-        <div className="id-stat">
-          <BookOpen aria-hidden="true" />
-          <span>
-            {lang === "ar" ? "الدورات" : "Courses"}
-            <strong>{loading || loadError ? "—" : courses.length}</strong>
-          </span>
-        </div>
-        <div className="id-stat">
-          <Check aria-hidden="true" />
-          <span>
-            {lang === "ar" ? "المنشورة" : "Published"}
-            <strong>{loading || loadError ? "—" : counts.published}</strong>
-          </span>
-        </div>
-        <div className="id-stat">
-          <FileText aria-hidden="true" />
-          <span>
-            {lang === "ar" ? "المسودّات" : "Drafts"}
-            <strong>{loading || loadError ? "—" : counts.draft}</strong>
-          </span>
-        </div>
-        <div className="id-stat">
-          <Users aria-hidden="true" />
-          <span>
-            {lang === "ar" ? "التسجيلات" : "Enrollments"}
-            <strong>{loading || loadError ? "—" : enrollments}</strong>
-          </span>
-        </div>
-      </section>
-
-      <section className="id-panel" aria-labelledby="id-courses-heading">
-        <div className="id-panel-head">
-          <div>
-            <h2 id="id-courses-heading">{lang === "ar" ? "دوراتي" : "My courses"}</h2>
-            <p>
-              {lang === "ar"
-                ? "أنشئ دوراتك وعدّلها وتابع حضورها."
-                : "Create, edit, and manage your courses."}
-            </p>
-          </div>
-          {courses.length > 0 && (
-            <div className="id-controls">
-              <label className="id-search">
-                <Search aria-hidden="true" />
-                <span className="sr-only">
-                  {lang === "ar" ? "ابحث في الدورات" : "Search courses"}
-                </span>
-                <input
-                  type="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={lang === "ar" ? "ابحث في الدورات..." : "Search courses..."}
-                />
-              </label>
-              <div
-                className="id-filters"
-                role="group"
-                aria-label={lang === "ar" ? "تصفية حسب الحالة" : "Filter by status"}
-              >
-                {filters.map((item) => (
-                  <button
-                    key={item.value}
-                    type="button"
-                    aria-pressed={filter === item.value}
-                    onClick={() => setFilter(item.value)}
-                  >
-                    {item.label}
-                    <span>{item.count}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {loading ? (
-          <p className="id-empty" role="status">
-            <Loader2 aria-hidden="true" className="id-spinner" />
-            {tr.loading}
-          </p>
-        ) : loadError ? (
-          <div className="id-empty" role="alert">
-            <p>{lang === "ar" ? "تعذّر تحميل الدورات." : "Could not load your courses."}</p>
-            <button type="button" className="id-clear" onClick={load}>
-              {lang === "ar" ? "إعادة المحاولة" : "Try again"}
-            </button>
-          </div>
-        ) : courses.length === 0 ? (
-          <p className="id-empty">
-            {lang === "ar"
-              ? "ليس لديك دورات بعد. ابدأ بإنشاء دورتك الأولى."
-              : "No courses yet. Create your first course to get started."}
-          </p>
-        ) : visibleCourses.length === 0 ? (
-          <div className="id-empty">
-            <p>
-              {lang === "ar"
-                ? "لا توجد دورات تطابق البحث أو التصفية."
-                : "No courses match your search or filter."}
-            </p>
-            <button
-              type="button"
-              className="id-clear"
-              onClick={() => {
-                setQuery("");
-                setFilter("all");
-              }}
-            >
-              {lang === "ar" ? "مسح التصفية" : "Clear filters"}
-            </button>
-          </div>
-        ) : (
-          <div className="id-course-list">
-            <div className="id-list-head" aria-hidden="true">
-              <span>{lang === "ar" ? "الدورة" : "Course"}</span>
-              <span>{lang === "ar" ? "الحالة" : "Status"}</span>
-              <span>{lang === "ar" ? "الطلاب" : "Students"}</span>
-              <span>{lang === "ar" ? "السعر" : "Price"}</span>
-              <span>{lang === "ar" ? "الإجراءات" : "Actions"}</span>
-            </div>
-            {visibleCourses.map((course) => {
-              const attendanceId = amsCourseId(course);
-              return (
-                <article key={course.id} className="id-course-row">
-                  <h3>
-                    <Link
-                      to="/learning-management-system/instructor/courses/$id"
-                      params={{ id: course.id }}
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {shown.map((c) => {
+            const onsite = c.delivery_mode !== "online";
+            const amsId = amsCourseId(c);
+            const coTaught = !!user && c.instructor_id !== user.id;
+            return (
+              <article key={c.id} className="cx-card flex flex-col overflow-hidden">
+                <Link
+                  to="/learning-management-system/instructor/courses/$id"
+                  params={{ id: c.id }}
+                  className="block"
+                >
+                  {c.cover_url ? (
+                    <img
+                      src={c.cover_url}
+                      alt=""
+                      loading="lazy"
+                      className="aspect-[16/8] w-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="grid aspect-[16/8] place-items-center"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #048090 0%, #0b5560 55%, #698f3f 130%)",
+                      }}
                     >
-                      {lang === "ar" ? course.title_ar : course.title_en || course.title_ar}
-                    </Link>
-                  </h3>
-                  <div className="id-badges">
-                    <StatusBadge status={course.status} />
-                    {user && course.instructor_id !== user.id && (
-                      <span className="id-co-taught">
-                        {lang === "ar" ? "تدريس مشترك" : "Co-taught"}
-                      </span>
-                    )}
+                      <span
+                        aria-hidden="true"
+                        className="h-14 w-12 bg-white/80"
+                        style={{
+                          WebkitMask: "url(/cinematic/saae-tree.svg) center / contain no-repeat",
+                          mask: "url(/cinematic/saae-tree.svg) center / contain no-repeat",
+                        }}
+                      />
+                    </div>
+                  )}
+                </Link>
+                <div className="flex flex-1 flex-col p-4">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <CourseStatusPill status={c.status} />
+                    <Pill tone="teal" icon={onsite ? MapPin : MonitorPlay}>
+                      {onsite ? t("حضوري", "In person") : t("أونلاين", "Online")}
+                    </Pill>
+                    {coTaught && <Pill tone="gray">{t("تدريس مشترك", "Co-taught")}</Pill>}
                   </div>
-                  <span className="id-students">
-                    <Users aria-hidden="true" />
-                    {course.students_count}
-                  </span>
-                  <span className="id-price">
+                  <Link
+                    to="/learning-management-system/instructor/courses/$id"
+                    params={{ id: c.id }}
+                    className="mt-2 line-clamp-2 text-[16px] font-extrabold leading-snug text-[var(--cx-ink)] hover:text-[var(--cx-teal)]"
+                  >
+                    {title(c)}
+                  </Link>
+                  <div className="mt-2 flex items-center justify-between text-[13px] text-[var(--cx-muted)]">
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      {fmtNum(c.students_count, lang)} {t("طالب", "students")}
+                    </span>
                     <CoursePrice
-                      price={Number(course.price ?? 0)}
-                      salePrice={course.sale_price == null ? null : Number(course.sale_price)}
-                      isFree={!!course.is_free}
+                      price={Number(c.price ?? 0)}
+                      salePrice={c.sale_price == null ? null : Number(c.sale_price)}
+                      isFree={!!c.is_free}
                       lang={lang}
-                      freeLabel={tr.free}
+                      freeLabel={t("مجانية", "Free")}
                       size="sm"
                     />
-                  </span>
-                  <div className="id-row-actions">
-                    {course.delivery_mode !== "online" &&
-                      (attendanceId ? (
-                        <Link
-                          to="/attendance-management-system"
-                          search={{ course: attendanceId }}
-                          className="id-attendance"
-                        >
-                          <ClipboardCheck aria-hidden="true" />
-                          {lang === "ar" ? "تسجيل الحضور" : "Take attendance"}
-                        </Link>
-                      ) : (
-                        <span
-                          className="id-attendance-note"
-                          title={
-                            lang === "ar"
-                              ? "اطلب من الإدارة ربط الدورة بنظام الحضور."
-                              : "Ask an admin to link this course to the attendance system."
-                          }
-                        >
-                          {lang === "ar"
-                            ? "اطلب من الإدارة تفعيل الحضور"
-                            : "Ask admin to enable attendance"}
-                        </span>
-                      ))}
-                    <Link
-                      to="/learning-management-system/instructor/courses/$id"
-                      params={{ id: course.id }}
-                      className="id-edit"
-                    >
-                      <Edit3 aria-hidden="true" />
-                      {lang === "ar" ? "تعديل" : "Edit"}
-                    </Link>
                   </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
-      </section>
+                  <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--cx-line-2)] pt-3">
+                    <Button asChild size="sm" className="flex-1">
+                      <Link
+                        to="/learning-management-system/instructor/courses/$id"
+                        params={{ id: c.id }}
+                      >
+                        {t("إدارة الدورة", "Manage course")}
+                      </Link>
+                    </Button>
+                    {onsite && amsId && (
+                      <Button asChild size="sm" variant="outline">
+                        <Link
+                          to="/learning-management-system/instructor/courses/$id"
+                          params={{ id: c.id }}
+                          search={{ tab: "attendance" }}
+                        >
+                          <CalendarCheck className="h-4 w-4" />
+                          {t("الحضور", "Attendance")}
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      <NewCourseDialog open={newOpen} onOpenChange={setNewOpen} mode="instructor" />
     </div>
   );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const { lang } = useLang();
-  const map: Record<string, { cls: string; label: string }> = {
-    draft: { cls: "id-status-draft", label: lang === "ar" ? "مسودّة" : "Draft" },
-    pending: { cls: "id-status-pending", label: lang === "ar" ? "بانتظار المراجعة" : "Pending" },
-    published: { cls: "id-status-published", label: lang === "ar" ? "منشورة" : "Published" },
-    rejected: { cls: "id-status-rejected", label: lang === "ar" ? "مرفوضة" : "Rejected" },
-  };
-  const m = map[status] ?? map.draft;
-  return <span className={`id-status ${m.cls}`}>{m.label}</span>;
 }

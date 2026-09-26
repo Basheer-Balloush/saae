@@ -1,15 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
-import { LmsStudentsView } from "@/components/admin/crm/LmsStudentsView";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/* Students are managed in Learning → People. */
 export const Route = createFileRoute("/admin/crm/students")({
   ssr: false,
-  beforeLoad: requireAdminBeforeLoad,
-  head: () => ({
-    meta: [
-      { title: "LMS Students — CRM" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
-  }),
-  component: LmsStudentsView,
+  beforeLoad: () => {
+    throw redirect({ to: "/learning-management-system/admin/people", search: { tab: "students" } });
+  },
 });
