@@ -624,7 +624,13 @@ function FeedbackPage() {
                   </button>
                 )}
                 {step.kind === "review" ? (
-                  <button type="button" className="fb-btn fb-btn-primary" onClick={doSubmit} disabled={sending} aria-busy={sending}>
+                  <button
+                    type="button"
+                    className="fb-btn fb-btn-primary"
+                    onClick={doSubmit}
+                    disabled={sending || !draft.consent}
+                    aria-busy={sending}
+                  >
                     {sending ? tr.sending : tr.submit}
                   </button>
                 ) : (
