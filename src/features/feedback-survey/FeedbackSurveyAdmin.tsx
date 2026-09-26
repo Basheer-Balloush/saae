@@ -147,16 +147,30 @@ const NO_FILTERS: Filters = {
 export function FeedbackSurveyAdmin() {
   const { t, lang } = useT();
   const [rows, setRows] = useState<Row[] | null>(null);
-  const [err, setErr] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
   const [tab, setTab] = useState<"overview" | "responses" | "comments">("overview");
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
   const [openId, setOpenId] = useState<string | null>(null);
 
   const load = useCallback(() => {
-    setErr(false);
+    setErr(null);
     fetchAll()
       .then(setRows)
-      .catch(() => setErr(true));
+      .catch((e: unknown) => {
+        const detail =
+          e && typeof e === "object"
+            ? [
+                (e as { message?: string }).message,
+                (e as { details?: string }).details,
+                (e as { hint?: string }).hint,
+                (e as { code?: string }).code,
+              ]
+                .filter(Boolean)
+                .join(" · ")
+            : String(e);
+        console.error("[feedback-survey] load failed", e);
+        setErr(import.meta.env.DEV && detail ? detail : "");
+      });
   }, []);
   useEffect(load, [load]);
 
@@ -200,8 +214,8 @@ export function FeedbackSurveyAdmin() {
           </button>
         }
       />
-      {err ? (
-        <ErrorNote onRetry={load} />
+      {err !== null ? (
+        <ErrorNote onRetry={load} text={err || undefined} />
       ) : !rows ? (
         <Loading />
       ) : (

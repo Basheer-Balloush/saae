@@ -376,8 +376,11 @@ function FeedbackPage() {
       localStorage.removeItem(DRAFT_KEY);
       setDone(true);
       requestAnimationFrame(() => topRef.current?.scrollIntoView({ block: "start" }));
-    } catch {
-      setError(tr.error);
+    } catch (e) {
+      console.error("[feedback] submit failed", e);
+      setError(
+        import.meta.env.DEV && e instanceof Error ? `${tr.error} (${e.message})` : tr.error,
+      );
     } finally {
       setSending(false);
     }
@@ -624,7 +627,13 @@ function FeedbackPage() {
                   </button>
                 )}
                 {step.kind === "review" ? (
-                  <button type="button" className="fb-btn fb-btn-primary" onClick={doSubmit} disabled={sending} aria-busy={sending}>
+                  <button
+                    type="button"
+                    className="fb-btn fb-btn-primary"
+                    onClick={doSubmit}
+                    disabled={sending || !draft.consent}
+                    aria-busy={sending}
+                  >
                     {sending ? tr.sending : tr.submit}
                   </button>
                 ) : (
