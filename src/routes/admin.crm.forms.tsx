@@ -1,101 +1,10 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { Loader2 } from "lucide-react";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
-import { useLang } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
-import { ADMIN_FORMS } from "@/lib/admin-forms-registry";
-import { listDynamicFormsForCrm } from "@/lib/dynamic-forms.functions";
 
+/* Form answers moved to /admin/forms; this path keeps the built-in surveys
+   and forwards old links. */
 export const Route = createFileRoute("/admin/crm/forms")({
   ssr: false,
   beforeLoad: requireAdminBeforeLoad,
-  head: () => ({
-    meta: [
-      { title: "Form submissions — CRM" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
-  }),
-  component: FormsLayout,
+  component: () => <Outlet />,
 });
-
-type DynEntry = { id: string; slug: string; name_ar: string; name_en: string; status: string };
-
-function FormsLayout() {
-  const { lang } = useLang();
-  const ar = lang === "ar";
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const fetchForms = useServerFn(listDynamicFormsForCrm);
-  const [dyn, setDyn] = useState<DynEntry[] | null>(null);
-
-  useEffect(() => {
-    fetchForms().then((rows) => setDyn(rows as DynEntry[])).catch(() => setDyn([]));
-  }, [fetchForms]);
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-xl font-bold text-foreground">
-          {ar ? "استجابات النماذج" : "Form submissions"}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {ar
-            ? "استعرض البيانات المُجمَّعة من كل نموذج. لإنشاء أو تعديل النماذج انتقل إلى «إدارة النماذج»."
-            : "Browse data collected by each form. To create or edit forms open Forms management."}
-        </p>
-      </div>
-      <div className="flex flex-wrap items-center gap-1 rounded-full border border-border bg-card p-1 w-fit max-w-full">
-        {ADMIN_FORMS.map((f) => {
-          const to = `/admin/crm/forms/${f.slug}`;
-          const active = pathname === to;
-          return (
-            <Link
-              key={f.slug}
-              to="/admin/crm/forms/$formSlug"
-              params={{ formSlug: f.slug }}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm transition-colors",
-                active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {ar ? f.labelAr : f.labelEn}
-            </Link>
-          );
-        })}
-        {dyn === null && <Loader2 className="mx-2 h-4 w-4 animate-spin text-muted-foreground" />}
-        {dyn
-          ?.filter((f) => f.status !== "archived")
-          .map((f) => {
-            const to = `/admin/crm/forms/${f.slug}`;
-            const active = pathname === to || pathname.startsWith(to + "/");
-            return (
-              <Link
-                key={f.id}
-                to="/admin/crm/forms/$formSlug"
-                params={{ formSlug: f.slug }}
-                className={cn(
-                  "inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm transition-colors",
-                  active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {ar ? f.name_ar : f.name_en}
-                {f.status !== "published" && (
-                  <span className={cn(
-                    "rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground",
-                    ar ? "" : "uppercase",
-                  )}>
-                    {ar
-                      ? (f.status === "draft" ? "مسودة" : f.status === "hidden" ? "مخفي" : f.status === "archived" ? "مؤرشف" : f.status)
-                      : f.status}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-      </div>
-      <Outlet />
-    </div>
-  );
-}
-

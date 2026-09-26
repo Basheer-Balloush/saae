@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getUnansweredQuestions, isQuestionAnswered } from "../../src/lib/quiz-validation";
-import { isSkinnedLmsPath } from "../../src/components/lms-skin/skin";
+import { isConsoleLmsPath, isSkinnedLmsPath } from "../../src/components/lms-skin/skin";
 
 const questions = [
   { question_key: "first", choices: ["A", "B"] },
@@ -42,9 +42,24 @@ describe("quiz completion", () => {
 describe("quiz styling scope", () => {
   it("uses the LMS identity for the student quiz menu and attempt route", () => {
     expect(isSkinnedLmsPath("/learning-management-system/student/quiz/course-123")).toBe(true);
-    expect(isSkinnedLmsPath("/learning-management-system/instructor/quiz-results/course-123")).toBe(
-      false,
-    );
     expect(isSkinnedLmsPath("/learning-management-system/student/player/course-123")).toBe(false);
+  });
+  it("draws every instructor and LMS admin page in the console frame", () => {
+    for (const path of [
+      "/learning-management-system/instructor",
+      "/learning-management-system/instructor/",
+      "/learning-management-system/instructor/courses/course-123",
+      "/learning-management-system/instructor/assignments/course-123",
+      "/learning-management-system/instructor/quiz-results/course-123",
+      "/learning-management-system/instructor/profile",
+      "/learning-management-system/admin",
+      "/learning-management-system/admin/courses/course-123",
+    ]) {
+      expect(isConsoleLmsPath(path)).toBe(true);
+      expect(isSkinnedLmsPath(path)).toBe(false);
+    }
+    // The public instructor profile stays in the LMS style.
+    expect(isConsoleLmsPath("/learning-management-system/instructors/abc")).toBe(false);
+    expect(isSkinnedLmsPath("/learning-management-system/instructors/abc")).toBe(true);
   });
 });

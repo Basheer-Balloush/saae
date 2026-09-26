@@ -1,34 +1,56 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { toUserMessage } from "@/lib/safe-error";
-import { useEffect, useRef, useState } from "react";
-import { Plus, Edit3, Users, Loader2, ClipboardCheck } from "lucide-react";
-import { CoursePrice } from "@/components/lms/CoursePrice";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import {
+  BookOpen,
+  CalendarCheck,
+  FilePen,
+  MapPin,
+  MonitorPlay,
+  Plus,
+  UserCircle,
+  Users,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
+import { toUserMessage } from "@/lib/safe-error";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { CoursePrice } from "@/components/lms/CoursePrice";
 import {
-  validateCourseI18n,
-  firstInvalidCourseField,
-  trimCourseI18n,
-  courseI18nWriteErrorMessage,
-  type CourseFieldErrors,
-  type RequiredCourseField,
-} from "@/lib/lms-course-fields";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { toast } from "sonner";
+  CourseStatusPill,
+  EmptyState,
+  ErrorNote,
+  Loading,
+  PageHeader,
+  Pill,
+  SearchInput,
+  Seg,
+  StatTile,
+  fmtNum,
+  useT,
+} from "@/components/console/ui";
+import { NewCourseDialog } from "@/features/lms-console/NewCourseDialog";
 
 export const Route = createFileRoute("/learning-management-system/instructor/")({
-  head: () => ({ meta: [{ title: "LMS · Instructor" }] }),
+  head: () => ({ meta: [{ title: "My courses — SAAE Training and Learning Platform" }] }),
   component: InstructorHome,
 });
 
-type AmsLink = { id: string } | { id: string }[] | null;
-type Course = { id: string; title_ar: string; title_en: string | null; status: string; students_count: number; is_free: boolean; price: number; sale_price: number | null; instructor_id: string; delivery_mode: string | null; ams_courses?: AmsLink };
+type Course = {
+  id: string;
+  title_ar: string;
+  title_en: string | null;
+  status: string;
+  cover_url: string | null;
+  students_count: number;
+  is_free: boolean;
+  price: number;
+  sale_price: number | null;
+  instructor_id: string;
+  delivery_mode: string | null;
+  ams_courses?: { id: string } | { id: string }[] | null;
+};
+type Filter = "all" | "published" | "draft" | "pending" | "rejected";
 
 function amsCourseId(c: Course): string | null {
   const a = c.ams_courses;
@@ -37,213 +59,277 @@ function amsCourseId(c: Course): string | null {
 }
 
 function InstructorHome() {
-  const { user, role } = useLmsAuth();
-  const { lang } = useLang();
-  const tr = lmsT[lang];
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState({ title_ar: "", title_en: "", description_ar: "", description_en: "" });
-  const [errors, setErrors] = useState<CourseFieldErrors>({});
-  const fieldRefs = useRef<Partial<Record<RequiredCourseField, HTMLInputElement | HTMLTextAreaElement | null>>>({});
+  const { t, ar, lang } = useT();
+  const { user } = useLmsAuth();
+  const [courses, setCourses] = useState<Course[] | null>(null);
+  const [error, setError] = useState(false);
+  const [q, setQ] = useState("");
+  const [filter, setFilter] = useState<Filter>("all");
+  const [newOpen, setNewOpen] = useState(false);
 
   const load = async () => {
     if (!user) return;
-    setLoading(true);
-    const cols = "id,title_ar,title_en,status,students_count,is_free,price,sale_price,instructor_id,delivery_mode,ams_courses!ams_courses_lms_course_id_fkey(id)";
+    setError(false);
+    setCourses(null);
+    const cols =
+      "id,title_ar,title_en,status,cover_url,students_count,is_free,price,sale_price,instructor_id,delivery_mode,ams_courses!ams_courses_lms_course_id_fkey(id)";
+    // Courses I own plus the ones I co-teach.
     const { data: ids, error: idError } = await supabase.rpc("lms_my_teaching_course_ids");
-    if (idError) { toast.error(toUserMessage(idError)); setLoading(false); return; }
-    const { data, error } = ids?.length ? await supabase.from("lms_courses").select(cols).in("id", ids).order("created_at", { ascending: false }) : { data: [], error: null };
-    if (error) toast.error(toUserMessage(error));
-    setCourses((data as Course[]) ?? []);
-    setLoading(false);
-  };
-
-  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
-
-  const onCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || creating) return;
-    const nextErrors = validateCourseI18n(form, lang);
-    setErrors(nextErrors);
-    const firstBad = firstInvalidCourseField(nextErrors);
-    if (firstBad) { fieldRefs.current[firstBad]?.focus(); return; }
-    const values = trimCourseI18n(form);
-    setCreating(true);
-    if (role === "admin") {
-      // Course ownership references an instructor profile, even for an admin.
-      const { data: profile, error: profileError } = await supabase.from("lms_instructors").select("user_id").eq("user_id", user.id).maybeSingle();
-      if (profileError) { setCreating(false); toast.error(toUserMessage(profileError)); return; }
-      if (!profile) {
-        const { data: ownProfile } = await supabase.from("lms_user_profiles").select("full_name").eq("user_id", user.id).maybeSingle();
-        const fullName = ownProfile?.full_name?.trim() || String(user.user_metadata?.full_name || user.user_metadata?.name || "").trim();
-        if (!fullName) { setCreating(false); toast.error(lang === "ar" ? "أضف اسمك في ملفك الشخصي قبل إنشاء الدورة." : "Add your name to your profile before creating a course."); return; }
-        const { error: insertError } = await supabase.from("lms_instructors").insert({ user_id: user.id, full_name: fullName, approved: false });
-        if (insertError && insertError.code !== "23505") { setCreating(false); toast.error(toUserMessage(insertError)); return; }
-      }
-    }
-    const { data, error } = await supabase.from("lms_courses").insert({
-      instructor_id: user.id,
-      ...values,
-    }).select("id").maybeSingle();
-    setCreating(false);
-    if (error) {
-      const msg = toUserMessage(error);
-      toast.error(courseI18nWriteErrorMessage(error.message ?? msg, lang) ?? msg);
+    if (idError) {
+      toast.error(toUserMessage(idError));
+      setError(true);
       return;
     }
-    setOpen(false);
-    setForm({ title_ar: "", title_en: "", description_ar: "", description_en: "" });
-    setErrors({});
-    if (data) window.location.href = `/learning-management-system/instructor/courses/${data.id}`;
+    const { data, error: err } = ids?.length
+      ? await supabase
+          .from("lms_courses")
+          .select(cols)
+          .in("id", ids)
+          .order("created_at", { ascending: false })
+      : { data: [], error: null };
+    if (err) {
+      toast.error(toUserMessage(err));
+      setError(true);
+    }
+    setCourses((data as Course[]) ?? []);
   };
+  useEffect(() => {
+    load(); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  const counts = useMemo(() => {
+    const c = { all: 0, published: 0, draft: 0, pending: 0, rejected: 0, students: 0 };
+    for (const x of courses ?? []) {
+      c.all++;
+      if (x.status in c) c[x.status as Filter]++;
+      c.students += Number(x.students_count || 0);
+    }
+    return c;
+  }, [courses]);
+
+  const shown = (courses ?? []).filter(
+    (c) =>
+      (filter === "all" || c.status === filter) &&
+      (!q.trim() ||
+        `${c.title_ar} ${c.title_en ?? ""}`.toLowerCase().includes(q.trim().toLowerCase())),
+  );
+  const title = (c: Course) => (ar ? c.title_ar : c.title_en || c.title_ar);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tr.navInstructor}</h1>
-        <Link
-          to="/learning-management-system/instructor/profile"
-          className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs hover:border-primary hover:text-primary"
-        >
-          <Edit3 className="h-3.5 w-3.5" />
-          {lang === "ar" ? "تعديل الملف الشخصي" : "Edit profile"}
-        </Link>
-      </div>
-      <div className="flex items-center justify-between mt-4">
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mx-1" />{lang === "ar" ? "دورة جديدة" : "New course"}</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>{lang === "ar" ? "دورة جديدة" : "New course"}</DialogTitle></DialogHeader>
-            <form onSubmit={onCreate} noValidate className="space-y-3">
-              <div>
-                <Label>{lang === "ar" ? "العنوان (عربي)" : "Title (Arabic)"}</Label>
-                <Input
-                  dir="rtl"
-                  ref={(el) => { fieldRefs.current.title_ar = el; }}
-                  aria-invalid={!!errors.title_ar}
-                  value={form.title_ar}
-                  onChange={(e) => setForm({ ...form, title_ar: e.target.value })}
-                />
-                {errors.title_ar && <p className="mt-1 text-xs text-destructive">{errors.title_ar}</p>}
-              </div>
-              <div>
-                <Label>{lang === "ar" ? "العنوان (إنجليزي)" : "Title (English)"}</Label>
-                <Input
-                  dir="ltr"
-                  ref={(el) => { fieldRefs.current.title_en = el; }}
-                  aria-invalid={!!errors.title_en}
-                  value={form.title_en}
-                  onChange={(e) => setForm({ ...form, title_en: e.target.value })}
-                />
-                {errors.title_en && <p className="mt-1 text-xs text-destructive">{errors.title_en}</p>}
-              </div>
-              <div>
-                <Label>{lang === "ar" ? "الوصف (عربي)" : "Description (Arabic)"}</Label>
-                <Textarea
-                  dir="rtl"
-                  rows={3}
-                  ref={(el) => { fieldRefs.current.description_ar = el; }}
-                  aria-invalid={!!errors.description_ar}
-                  value={form.description_ar}
-                  onChange={(e) => setForm({ ...form, description_ar: e.target.value })}
-                />
-                {errors.description_ar && <p className="mt-1 text-xs text-destructive">{errors.description_ar}</p>}
-              </div>
-              <div>
-                <Label>{lang === "ar" ? "الوصف (إنجليزي)" : "Description (English)"}</Label>
-                <Textarea
-                  dir="ltr"
-                  rows={3}
-                  ref={(el) => { fieldRefs.current.description_en = el; }}
-                  aria-invalid={!!errors.description_en}
-                  value={form.description_en}
-                  onChange={(e) => setForm({ ...form, description_en: e.target.value })}
-                />
-                {errors.description_en && <p className="mt-1 text-xs text-destructive">{errors.description_en}</p>}
-              </div>
-              <Button type="submit" className="w-full" disabled={creating}>
-                {creating && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-                {lang === "ar" ? "إنشاء" : "Create"}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+    <div>
+      <PageHeader
+        eyebrow={t("مساحة المدرّب", "Instructor workspace")}
+        title={t("دوراتي", "My courses")}
+        description={t(
+          "أنشئ دوراتك وأدِر محتواها وطلابها وحضورها من مكان واحد.",
+          "Create your courses and manage their content, students and attendance in one place.",
+        )}
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link to="/learning-management-system/instructor/profile">
+                <UserCircle className="h-4 w-4" />
+                {t("ملفي الشخصي", "My profile")}
+              </Link>
+            </Button>
+            <Button onClick={() => setNewOpen(true)}>
+              <Plus className="h-4 w-4" />
+              {t("دورة جديدة", "New course")}
+            </Button>
+          </>
+        }
+      />
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile
+          icon={BookOpen}
+          label={t("كل الدورات", "All courses")}
+          value={courses ? fmtNum(counts.all, lang) : "…"}
+        />
+        <StatTile
+          icon={BookOpen}
+          tone="green"
+          label={t("منشورة", "Published")}
+          value={courses ? fmtNum(counts.published, lang) : "…"}
+        />
+        <StatTile
+          icon={FilePen}
+          tone="orange"
+          label={t("مسودّات وقيد المراجعة", "Drafts & in review")}
+          value={courses ? fmtNum(counts.draft + counts.pending, lang) : "…"}
+        />
+        <StatTile
+          icon={Users}
+          tone="teal"
+          label={t("طلابي", "My students")}
+          value={courses ? fmtNum(counts.students, lang) : "…"}
+        />
       </div>
 
-      {loading ? (
-        <p className="mt-10 text-center text-muted-foreground">{tr.loading}</p>
-      ) : courses.length === 0 ? (
-        <p className="mt-16 text-center text-muted-foreground">{lang === "ar" ? "ليس لديك دورات بعد. أنشئ أول دورة!" : "No courses yet. Create your first!"}</p>
+      <div className="mb-4 mt-6 flex flex-wrap items-center justify-between gap-3">
+        <Seg
+          value={filter}
+          onChange={setFilter}
+          options={[
+            { value: "all" as Filter, label: t("الكل", "All"), count: counts.all },
+            {
+              value: "published" as Filter,
+              label: t("منشورة", "Published"),
+              count: counts.published,
+            },
+            { value: "draft" as Filter, label: t("مسودّات", "Drafts"), count: counts.draft },
+            {
+              value: "pending" as Filter,
+              label: t("قيد المراجعة", "In review"),
+              count: counts.pending,
+            },
+            ...(counts.rejected
+              ? [
+                  {
+                    value: "rejected" as Filter,
+                    label: t("مرفوضة", "Rejected"),
+                    count: counts.rejected,
+                  },
+                ]
+              : []),
+          ]}
+        />
+        <SearchInput
+          value={q}
+          onChange={setQ}
+          placeholder={t("ابحث في دوراتك", "Search your courses")}
+        />
+      </div>
+
+      {error ? (
+        <ErrorNote onRetry={load} />
+      ) : courses === null ? (
+        <Loading />
+      ) : shown.length === 0 ? (
+        <div className="cx-card">
+          <EmptyState
+            icon={BookOpen}
+            title={
+              courses.length
+                ? t("لا توجد دورات مطابقة", "No matching courses")
+                : t("لم تنشئ أي دورة بعد", "You haven't created a course yet")
+            }
+            text={
+              courses.length
+                ? undefined
+                : t(
+                    "ابدأ باسم الدورة ووصفها؛ الباقي تضيفه بعد ذلك خطوة بخطوة.",
+                    "Start with the course name and description; add the rest step by step afterwards.",
+                  )
+            }
+            action={
+              courses.length ? undefined : (
+                <Button onClick={() => setNewOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                  {t("أنشئ دورتك الأولى", "Create your first course")}
+                </Button>
+              )
+            }
+          />
+        </div>
       ) : (
-        <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {courses.map((c) => (
-            <div key={c.id} className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary">
-            <Link to="/learning-management-system/instructor/courses/$id" params={{ id: c.id }}
-              className="block">
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-bold text-foreground line-clamp-2">{lang === "ar" ? c.title_ar : c.title_en || c.title_ar}</h3>
-                <div className="flex flex-col items-end gap-1">
-                  <StatusBadge status={c.status} />
-                  {user && c.instructor_id !== user.id && (
-                    <span className="text-[10px] font-bold rounded-full px-2 py-0.5 bg-primary/10 text-primary">
-                      {lang === "ar" ? "تدريس مشترك" : "Co-taught"}
-                    </span>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {shown.map((c) => {
+            const onsite = c.delivery_mode !== "online";
+            const amsId = amsCourseId(c);
+            const coTaught = !!user && c.instructor_id !== user.id;
+            return (
+              <article key={c.id} className="cx-card flex flex-col overflow-hidden">
+                <Link
+                  to="/learning-management-system/instructor/courses/$id"
+                  params={{ id: c.id }}
+                  className="block"
+                >
+                  {c.cover_url ? (
+                    <img
+                      src={c.cover_url}
+                      alt=""
+                      loading="lazy"
+                      className="aspect-[16/8] w-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="grid aspect-[16/8] place-items-center"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #048090 0%, #0b5560 55%, #698f3f 130%)",
+                      }}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="h-14 w-12 bg-white/80"
+                        style={{
+                          WebkitMask: "url(/cinematic/saae-tree.svg) center / contain no-repeat",
+                          mask: "url(/cinematic/saae-tree.svg) center / contain no-repeat",
+                        }}
+                      />
+                    </div>
                   )}
-                </div>
-              </div>
-              <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" />{c.students_count}</span>
-                <CoursePrice
-                  price={Number(c.price ?? 0)}
-                  salePrice={c.sale_price == null ? null : Number(c.sale_price)}
-                  isFree={!!c.is_free}
-                  lang={lang}
-                  freeLabel={tr.free}
-                  size="sm"
-                />
-                <span className="inline-flex items-center gap-1 text-primary"><Edit3 className="h-3.5 w-3.5" />{lang === "ar" ? "تعديل" : "Edit"}</span>
-              </div>
-            </Link>
-            {c.delivery_mode !== "online" && (
-              <div className="mt-4 border-t border-border pt-3">
-                {amsCourseId(c) ? (
+                </Link>
+                <div className="flex flex-1 flex-col p-4">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <CourseStatusPill status={c.status} />
+                    <Pill tone="teal" icon={onsite ? MapPin : MonitorPlay}>
+                      {onsite ? t("حضوري", "In person") : t("أونلاين", "Online")}
+                    </Pill>
+                    {coTaught && <Pill tone="gray">{t("تدريس مشترك", "Co-taught")}</Pill>}
+                  </div>
                   <Link
-                    to="/attendance-management-system"
-                    search={{ course: amsCourseId(c)! }}
-                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-primary/40 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10"
+                    to="/learning-management-system/instructor/courses/$id"
+                    params={{ id: c.id }}
+                    className="mt-2 line-clamp-2 text-[16px] font-extrabold leading-snug text-[var(--cx-ink)] hover:text-[var(--cx-teal)]"
                   >
-                    <ClipboardCheck className="h-3.5 w-3.5" />
-                    {lang === "ar" ? "تسجيل الحضور" : "Take attendance"}
+                    {title(c)}
                   </Link>
-                ) : (
-                  <p className="text-center text-[11px] text-muted-foreground">
-                    {lang === "ar"
-                      ? "الحضور غير مُفعّل لهذه الدورة — اطلب من الإدارة ربطها بنظام الحضور."
-                      : "Attendance not enabled — ask an admin to link this course to the attendance system."}
-                  </p>
-                )}
-              </div>
-            )}
-            </div>
-          ))}
+                  <div className="mt-2 flex items-center justify-between text-[13px] text-[var(--cx-muted)]">
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      {fmtNum(c.students_count, lang)} {t("طالب", "students")}
+                    </span>
+                    <CoursePrice
+                      price={Number(c.price ?? 0)}
+                      salePrice={c.sale_price == null ? null : Number(c.sale_price)}
+                      isFree={!!c.is_free}
+                      lang={lang}
+                      freeLabel={t("مجانية", "Free")}
+                      size="sm"
+                    />
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--cx-line-2)] pt-3">
+                    <Button asChild size="sm" className="flex-1">
+                      <Link
+                        to="/learning-management-system/instructor/courses/$id"
+                        params={{ id: c.id }}
+                      >
+                        {t("إدارة الدورة", "Manage course")}
+                      </Link>
+                    </Button>
+                    {onsite && amsId && (
+                      <Button asChild size="sm" variant="outline">
+                        <Link
+                          to="/learning-management-system/instructor/courses/$id"
+                          params={{ id: c.id }}
+                          search={{ tab: "attendance" }}
+                        >
+                          <CalendarCheck className="h-4 w-4" />
+                          {t("الحضور", "Attendance")}
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
+
+      <NewCourseDialog open={newOpen} onOpenChange={setNewOpen} mode="instructor" />
     </div>
   );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const { lang } = useLang();
-  const map: Record<string, { cls: string; label: string }> = {
-    draft: { cls: "bg-muted text-muted-foreground", label: lang === "ar" ? "مسودّة" : "Draft" },
-    pending: { cls: "bg-amber-500/15 text-amber-600", label: lang === "ar" ? "بانتظار المراجعة" : "Pending" },
-    published: { cls: "bg-emerald-500/15 text-emerald-600", label: lang === "ar" ? "منشورة" : "Published" },
-    rejected: { cls: "bg-destructive/15 text-destructive", label: lang === "ar" ? "مرفوضة" : "Rejected" },
-  };
-  const m = map[status] ?? map.draft;
-  return <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${m.cls}`}>{m.label}</span>;
 }

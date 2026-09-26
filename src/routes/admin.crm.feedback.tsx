@@ -1,18 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
-import { ChatFeedbackPanel } from "@/components/admin/ChatFeedbackPanel";
-import { useLang } from "@/lib/i18n";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/* Visitor feedback lives on the Chatbot page now. */
 export const Route = createFileRoute("/admin/crm/feedback")({
   ssr: false,
-  beforeLoad: requireAdminBeforeLoad,
-  head: () => ({
-    meta: [{ title: "Feedback — CRM" }, { name: "robots", content: "noindex, nofollow" }],
-  }),
-  component: FeedbackPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/admin/chatbot", search: { tab: undefined } });
+  },
 });
-
-function FeedbackPage() {
-  const { lang } = useLang();
-  return <ChatFeedbackPanel lang={lang === "ar" ? "ar" : "en"} />;
-}

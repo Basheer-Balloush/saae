@@ -1,1656 +1,439 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import {
+  ArrowLeft,
+  BookOpen,
+  CalendarCheck,
+  CheckCircle2,
+  ClipboardList,
+  GraduationCap,
+  Inbox,
+  MessageSquareHeart,
+  Newspaper,
+  Plus,
+  Star,
+  UsersRound,
+  Briefcase,
+  ShieldCheck,
+  Globe,
+  Mail,
+  type LucideIcon,
+} from "lucide-react";
 import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
-import { toUserMessage } from "@/lib/safe-error";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { useRecordDraft, useReopenDraftForm } from "@/hooks/useFormDraft";
-import { formDraftKey } from "@/lib/form-draft";
-import { DraftNotice } from "@/components/admin/DraftNotice";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
-import { Loader2, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
-import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
-import { UploadProgress } from "@/components/ui/upload-progress";
-import { useLang } from "@/lib/i18n";
-import { z } from "zod";
-import {
-  NEWS_CATEGORY_KEYS,
-  COMMUNITY_LABELS_AR,
-  COMMUNITY_LABELS_EN,
-  communityLabel,
-  type NewsCategoryKey,
-} from "@/lib/communityCategories";
-import { confirmDialog } from "@/hooks/useConfirm";
-
-
-export const ADMIN_TEXT = {
-  en: {
-    backToSite: "← Site",
-    adminTitle: "Admin Dashboard",
-    languageButton: "العربية",
-    themeButton: "Theme",
-    signOut: "Sign out",
-    noAccess: "You don't have admin access.",
-    news: "News",
-    members: "Members",
-    chatbot: "Chatbot",
-    partners: "Partners",
-    allNews: "All news",
-    newArticle: "New article",
-    cover: "Cover",
-    title: "Title",
-    category: "Category",
-    date: "Date",
-    onHome: "On home",
-    actions: "Actions",
-    noNews: "{labels.noNews}",
-    deleteNewsConfirm: "Delete this news item?",
-    deleted: "Deleted",
-    editNews: "Edit news",
-    newNewsArticle: "New news article",
-    titleEn: "Title (English)",
-    titleAr: "Title (Arabic)",
-    excerptEn: "Excerpt (English)",
-    excerptAr: "Excerpt (Arabic)",
-    contentEn: "Full content (English)",
-    contentAr: "Full content (Arabic)",
-    communityCategory: "Community (category)",
-    coverImage: "Cover image",
-    uploading: "Uploading…",
-    uploadCover: "Upload cover",
-    remove: "Remove",
-    galleryImages: "Gallery images (carousel)",
-    add: "Add",
-    videos: "Videos",
-    uploadVideos: "Upload video(s)",
-    showOnHomeTitle: "Show on home page",
-    showOnHomeHint: "Appears in the homepage news carousel.",
-    cancel: "Cancel",
-    saveChanges: "Save changes",
-    create: "Create",
-    updated: "Updated",
-    created: "Created",
-    saveFailed: "Save failed",
-    coverUploaded: "Cover uploaded",
-    photoUploaded: "Photo uploaded",
-    uploadFailed: "Upload failed",
-    imagesUploaded: (count: number) => `${count} image(s) uploaded`,
-    videosUploaded: (count: number) => `${count} video(s) uploaded`,
-    membersTitle: "Members",
-    newMember: "New member",
-    photo: "Photo",
-    name: "Name",
-    position: "Position",
-    order: "Order",
-    noMembers: "{labels.noMembers}",
-    deleteMemberConfirm: "Delete this member?",
-    editMember: "Edit member",
-    categoryBoard: "Board of Directors",
-    categoryExecutive: "Executive Members",
-    displayOrder: "Display order",
-    nameEn: "Name (English)",
-    nameAr: "Name (Arabic)",
-    positionEn: "Position (English)",
-    positionAr: "Position (Arabic)",
-    bioEn: "Bio (English)",
-    bioAr: "Bio (Arabic)",
-    uploadPhoto: "Upload photo",
-    requiredMemberFields: "Arabic name and position are required",
-  },
-  ar: {
-    backToSite: "الموقع ←",
-    adminTitle: "لوحة إدارة المحتوى",
-    languageButton: "English",
-    themeButton: "الثيم",
-    signOut: "تسجيل الخروج",
-    noAccess: "ليس لديك صلاحية دخول للوحة الإدارة.",
-    news: "الأخبار",
-    members: "الأعضاء",
-    chatbot: "الشات بوت",
-    partners: "الشركاء",
-    allNews: "كل الأخبار",
-    newArticle: "خبر جديد",
-    cover: "الغلاف",
-    title: "العنوان",
-    category: "التصنيف",
-    date: "التاريخ",
-    onHome: "في الرئيسية",
-    actions: "الإجراءات",
-    noNews: "لا توجد أخبار بعد. أنشئ أول خبر.",
-    deleteNewsConfirm: "هل تريد حذف هذا الخبر؟",
-    deleted: "تم الحذف",
-    editNews: "تعديل الخبر",
-    newNewsArticle: "خبر جديد",
-    titleEn: "العنوان (إنجليزي)",
-    titleAr: "العنوان (عربي)",
-    excerptEn: "المقتطف (إنجليزي)",
-    excerptAr: "المقتطف (عربي)",
-    contentEn: "النص الكامل (إنجليزي)",
-    contentAr: "النص الكامل (عربي)",
-    communityCategory: "المجتمع (التصنيف)",
-    coverImage: "صورة الغلاف",
-    uploading: "جارٍ الرفع…",
-    uploadCover: "رفع الغلاف",
-    remove: "إزالة",
-    galleryImages: "صور المعرض (السلايدر)",
-    add: "إضافة",
-    videos: "الفيديوهات",
-    uploadVideos: "رفع فيديوهات",
-    showOnHomeTitle: "إظهار في الصفحة الرئيسية",
-    showOnHomeHint: "يظهر ضمن سلايدر الأخبار في الصفحة الرئيسية.",
-    cancel: "إلغاء",
-    saveChanges: "حفظ التعديلات",
-    create: "إنشاء",
-    updated: "تم التحديث",
-    created: "تم الإنشاء",
-    saveFailed: "فشل الحفظ",
-    coverUploaded: "تم رفع الغلاف",
-    photoUploaded: "تم رفع الصورة",
-    uploadFailed: "فشل الرفع",
-    imagesUploaded: (count: number) => `تم رفع ${count} صورة`,
-    videosUploaded: (count: number) => `تم رفع ${count} فيديو`,
-    membersTitle: "الأعضاء",
-    newMember: "عضو جديد",
-    photo: "الصورة",
-    name: "الاسم",
-    position: "المنصب",
-    order: "الترتيب",
-    noMembers: "لا يوجد أعضاء بعد.",
-    deleteMemberConfirm: "هل تريد حذف هذا العضو؟",
-    editMember: "تعديل العضو",
-    categoryBoard: "مجلس الإدارة",
-    categoryExecutive: "الأعضاء التنفيذيون",
-    displayOrder: "ترتيب العرض",
-    nameEn: "الاسم (إنجليزي)",
-    nameAr: "الاسم (عربي)",
-    positionEn: "المنصب (إنجليزي)",
-    positionAr: "المنصب (عربي)",
-    bioEn: "النبذة (إنجليزي)",
-    bioAr: "النبذة (عربي)",
-    uploadPhoto: "رفع الصورة",
-    requiredMemberFields: "الاسم والمنصب بالعربية مطلوبان",
-  },
-} as const;
-
-type AdminLabels = (typeof ADMIN_TEXT)[keyof typeof ADMIN_TEXT];
+import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { useConsoleCounts, type ConsoleCounts } from "@/components/console/useConsoleCounts";
+import { LMS_ADMIN } from "@/components/console/nav";
+import { Panel, fmtNum, useT } from "@/components/console/ui";
 
 export const Route = createFileRoute("/admin/")({
   ssr: false,
   beforeLoad: requireAdminBeforeLoad,
   head: () => ({
-    meta: [
-      { title: "Admin Dashboard" },
-      { name: "description", content: "Private admin dashboard for managing site content, news, communities, and chatbot settings." },
-      { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: "Admin Dashboard" },
-      { property: "og:description", content: "Private admin dashboard for managing site content, news, communities, and chatbot settings." },
-    ],
+    meta: [{ title: "Admin home — SAAE" }, { name: "robots", content: "noindex, nofollow" }],
   }),
-  component: AdminDashboard,
+  component: AdminHome,
 });
 
-type NewsRow = {
-  id: string;
-  title: string;
-  title_ar: string | null;
-  title_en: string | null;
-  excerpt: string | null;
-  excerpt_ar: string | null;
-  excerpt_en: string | null;
-  content: string | null;
-  content_ar: string | null;
-  content_en: string | null;
-  image_url: string | null;
-  images: string[] | null;
-  videos: string[] | null;
-  category: string;
-  categories: string[] | null;
-  published_at: string;
-  show_on_home: boolean;
+type HubStats = {
+  news: number;
+  forms: number;
+  publishedCourses: number;
+  enrollments: number;
+  instructors: number;
+  amsCourses: number;
+  sessionsThisWeek: number;
+  registrants: number;
 };
 
-const newsSchema = z.object({
-  title_ar: z.string().trim().min(1, "Arabic title required").max(200),
-  title_en: z.string().trim().min(1, "English title required").max(200),
-  excerpt_ar: z.string().trim().max(500).optional().or(z.literal("")),
-  excerpt_en: z.string().trim().max(500).optional().or(z.literal("")),
-  content_ar: z.string().trim().max(20000).optional().or(z.literal("")),
-  content_en: z.string().trim().max(20000).optional().or(z.literal("")),
-  categories: z.array(z.enum(NEWS_CATEGORY_KEYS)).min(1, "Select at least one category"),
-  published_at: z.string().min(1),
-  show_on_home: z.boolean(),
-});
+async function headCount(q: PromiseLike<{ count: number | null; error: unknown }>) {
+  const { count, error } = await q;
+  return error ? 0 : (count ?? 0);
+}
 
-function AdminDashboard() {
-  const { isAdmin, user } = useAuth();
-  const { lang } = useLang();
-  const labels = ADMIN_TEXT[lang];
-  void COMMUNITY_LABELS_AR; void COMMUNITY_LABELS_EN;
-  const [items, setItems] = useState<NewsRow[]>([]);
-  const [editing, setEditing] = useState<NewsRow | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  useEffect(() => {
-    if (!isAdmin) return;
-    supabase
-      .from("news")
-      .select("*")
-      .order("published_at", { ascending: false })
-      .order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (error) toast.error(toUserMessage(error));
-        else setItems((data ?? []) as NewsRow[]);
-      });
-  }, [isAdmin, refreshKey]);
-
-  const refresh = () => setRefreshKey((k) => k + 1);
-
-  useReopenDraftForm({
-    userId: user?.id,
-    form: "news",
-    rows: items,
-    open: (row) => {
-      setEditing(row);
-      setShowForm(true);
+function useHubStats() {
+  return useQuery({
+    queryKey: ["admin-hub-stats"],
+    staleTime: 60_000,
+    queryFn: async (): Promise<HubStats> => {
+      const head = { count: "exact" as const, head: true };
+      const today = new Date();
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - 3);
+      const weekEnd = new Date(today);
+      weekEnd.setDate(today.getDate() + 4);
+      const d = (x: Date) => x.toISOString().slice(0, 10);
+      const [
+        news,
+        forms,
+        publishedCourses,
+        enrollments,
+        instructors,
+        amsCourses,
+        sessionsThisWeek,
+        registrants,
+      ] = await Promise.all([
+        headCount(supabase.from("news").select("id", head)),
+        headCount(supabase.from("dynamic_forms").select("id", head)),
+        headCount(supabase.from("lms_courses").select("id", head).eq("status", "published")),
+        headCount(supabase.from("lms_enrollments").select("id", head)),
+        headCount(supabase.from("lms_instructors").select("user_id", head).eq("approved", true)),
+        headCount(supabase.from("ams_courses").select("id", head)),
+        headCount(
+          supabase
+            .from("ams_sessions")
+            .select("id", head)
+            .gte("session_date", d(weekStart))
+            .lte("session_date", d(weekEnd)),
+        ),
+        headCount(supabase.from("ams_registrants").select("id", head)),
+      ]);
+      return {
+        news,
+        forms,
+        publishedCourses,
+        enrollments,
+        instructors,
+        amsCourses,
+        sessionsThisWeek,
+        registrants,
+      };
     },
   });
+}
 
-  const handleDelete = async (id: string) => {
-    if (!(await confirmDialog({ title: labels.deleteNewsConfirm, destructive: true }))) return;
-    const { error } = await supabase.from("news").delete().eq("id", id);
-    if (error) toast.error(toUserMessage(error));
-    else {
-      toast.success(labels.deleted);
-      refresh();
-    }
-  };
+type Attention = {
+  key: keyof ConsoleCounts;
+  ar: string;
+  en: string;
+  to: string;
+  icon: LucideIcon;
+  system: "cms" | "lms";
+};
 
-  const toggleHome = async (row: NewsRow, value: boolean) => {
-    const { error } = await supabase.from("news").update({ show_on_home: value }).eq("id", row.id);
-    if (error) toast.error(toUserMessage(error));
-    else {
-      setItems((prev) => prev.map((p) => (p.id === row.id ? { ...p, show_on_home: value } : p)));
-    }
-  };
+const ATTENTION: Attention[] = [
+  {
+    key: "coursesToReview",
+    ar: "دورات بانتظار المراجعة",
+    en: "Courses waiting for review",
+    to: `${LMS_ADMIN}/requests?tab=courses`,
+    icon: BookOpen,
+    system: "lms",
+  },
+  {
+    key: "enrollmentRequests",
+    ar: "طلبات تسجيل بانتظار القرار",
+    en: "Enrollment requests to decide",
+    to: `${LMS_ADMIN}/requests?tab=enrollments`,
+    icon: Inbox,
+    system: "lms",
+  },
+  {
+    key: "trainerApplications",
+    ar: "طلبات اعتماد مدرّبين جديدة",
+    en: "New instructor accreditation applications",
+    to: `${LMS_ADMIN}/requests?tab=instructors`,
+    icon: ShieldCheck,
+    system: "lms",
+  },
+  {
+    key: "internshipApplications",
+    ar: "طلبات تدريب بانتظار المراجعة",
+    en: "Internship applications to review",
+    to: `${LMS_ADMIN}/requests?tab=internships`,
+    icon: Briefcase,
+    system: "lms",
+  },
+  {
+    key: "reviewsToModerate",
+    ar: "تقييمات بانتظار الاعتماد",
+    en: "Reviews to moderate",
+    to: `${LMS_ADMIN}/requests?tab=reviews`,
+    icon: Star,
+    system: "lms",
+  },
+  {
+    key: "newMessages",
+    ar: "رسائل تواصل جديدة",
+    en: "New contact messages",
+    to: "/admin/messages",
+    icon: Mail,
+    system: "cms",
+  },
+  {
+    key: "newLeads",
+    ar: "عملاء محتملون جدد",
+    en: "New leads",
+    to: "/admin/leads",
+    icon: UsersRound,
+    system: "cms",
+  },
+  {
+    key: "chatFeedback",
+    ar: "ملاحظات محادثة لم تُعالج",
+    en: "Unhandled chat feedback",
+    to: "/admin/chatbot?tab=feedback",
+    icon: MessageSquareHeart,
+    system: "cms",
+  },
+];
+
+function AdminHome() {
+  const { t, ar, lang } = useT();
+  const { user } = useLmsAuth();
+  const { data: counts } = useConsoleCounts(true);
+  const { data: stats } = useHubStats();
+  const name =
+    (user?.user_metadata?.full_name as string | undefined) || user?.email?.split("@")[0] || "";
+  const waiting = ATTENTION.filter((a) => (counts?.[a.key] ?? 0) > 0);
+  const n = (v: number | undefined) => (stats ? fmtNum(v, lang) : "…");
+  const today = new Date().toLocaleDateString(ar ? "ar-SY" : "en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
+  const lmsWaiting = ATTENTION.filter((a) => a.system === "lms").reduce(
+    (s, a) => s + (counts?.[a.key] ?? 0),
+    0,
+  );
+  const cmsWaiting = ATTENTION.filter((a) => a.system === "cms").reduce(
+    (s, a) => s + (counts?.[a.key] ?? 0),
+    0,
+  );
 
   return (
-    <>
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">{labels.allNews} ({items.length})</h2>
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setShowForm(true);
+    <div>
+      <section
+        className="relative mb-6 overflow-hidden rounded-[20px] px-6 py-7 text-white sm:px-8"
+        style={{
+          background:
+            "radial-gradient(90% 140% at 100% 0%, rgba(119,224,232,0.28), transparent 55%), radial-gradient(70% 120% at 0% 100%, rgba(105,143,63,0.35), transparent 60%), linear-gradient(135deg, #06232a 0%, #04171c 100%)",
+        }}
+      >
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-6 end-4 h-44 w-40 opacity-[0.13]"
+          style={{
+            background: "#77e0e8",
+            WebkitMask: "url(/cinematic/saae-tree.svg) center / contain no-repeat",
+            mask: "url(/cinematic/saae-tree.svg) center / contain no-repeat",
           }}
+        />
+        <div className="text-[13px] font-semibold text-[#9fd3d7]">{today}</div>
+        <h1 className="mt-1 text-[26px] font-extrabold leading-tight sm:text-[30px]">
+          {t("أهلاً", "Welcome")}
+          {name ? `${ar ? "،" : ","} ${name}` : ""}
+        </h1>
+        <p className="mt-1.5 max-w-xl text-[14.5px] text-[#c9e3e5]">
+          {waiting.length
+            ? t(
+                `لديك ${waiting.reduce((s, a) => s + (counts?.[a.key] ?? 0), 0)} أمراً بانتظارك. ابدأ من القائمة أدناه.`,
+                `${waiting.reduce((s, a) => s + (counts?.[a.key] ?? 0), 0)} things are waiting for you. Start with the list below.`,
+              )
+            : t(
+                "لا شيء بانتظارك الآن. كل شيء محدَّث.",
+                "Nothing is waiting for you right now. Everything is up to date.",
+              )}
+        </p>
+      </section>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <SystemCard
+          to="/admin/website"
+          icon={Globe}
+          accent="#698f3f"
+          title={t("إدارة الموقع", "Website")}
+          desc={t(
+            "الأخبار، الأعضاء، الشركاء، النماذج وجهات الاتصال",
+            "News, members, partners, forms and contacts",
+          )}
+          waiting={cmsWaiting}
+          stats={[
+            {
+              label: t("رسالة جديدة", "New messages"),
+              value: counts ? fmtNum(counts.newMessages, lang) : "…",
+            },
+            {
+              label: t("عميل جديد", "New leads"),
+              value: counts ? fmtNum(counts.newLeads, lang) : "…",
+            },
+            { label: t("خبر", "News"), value: n(stats?.news) },
+          ]}
+        />
+        <SystemCard
+          to={LMS_ADMIN}
+          icon={GraduationCap}
+          accent="#048090"
+          title={t("منصّة التعلّم", "Learning platform")}
+          desc={t(
+            "الدورات، التسجيل، المدرّبون والطلاب",
+            "Courses, enrollments, instructors and students",
+          )}
+          waiting={lmsWaiting}
+          stats={[
+            { label: t("دورة منشورة", "Published"), value: n(stats?.publishedCourses) },
+            { label: t("تسجيل", "Enrollments"), value: n(stats?.enrollments) },
+            { label: t("مدرّب", "Instructors"), value: n(stats?.instructors) },
+          ]}
+        />
+        <SystemCard
+          to="/admin/attendance"
+          icon={CalendarCheck}
+          accent="#f99c00"
+          title={t("نظام الحضور", "Attendance")}
+          desc={t("الجلسات، المسجّلون وتسجيل الحضور", "Sessions, registrants and attendance")}
+          waiting={0}
+          stats={[
+            { label: t("دورة", "Courses"), value: n(stats?.amsCourses) },
+            {
+              label: t("جلسة هذا الأسبوع", "Sessions this week"),
+              value: n(stats?.sessionsThisWeek),
+            },
+            { label: t("مسجَّل", "Registrants"), value: n(stats?.registrants) },
+          ]}
+        />
+      </div>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+        <Panel
+          title={t("بانتظارك", "Needs your attention")}
+          description={t(
+            "كل ما ينتظر قراراً في الأنظمة الثلاثة",
+            "Everything waiting for a decision, across the three systems",
+          )}
+          flush
         >
-          <Plus className="h-4 w-4" /> {labels.newArticle}
-        </Button>
-      </div>
-
-      <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-card">
-        <table className="w-full min-w-[720px] text-sm">
-          <thead className="bg-muted/40 text-start text-xs uppercase tracking-wide text-muted-foreground">
-            <tr>
-              <th className="px-4 py-3 text-start">{labels.cover}</th>
-              <th className="px-4 py-3 text-start">{labels.title}</th>
-              <th className="px-4 py-3 text-start">{labels.category}</th>
-              <th className="px-4 py-3 text-start">{labels.date}</th>
-              <th className="px-4 py-3 text-start">{labels.onHome}</th>
-              <th className="px-4 py-3 text-end">{labels.actions}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                  {labels.noNews}
-                </td>
-              </tr>
-            )}
-            {items.map((row) => (
-              <tr key={row.id} className="border-t border-border">
-                <td className="px-4 py-3">
-                  {row.image_url ? (
-                    <img
-                      src={row.image_url}
-                      alt=""
-                      className="h-12 w-16 rounded object-cover bg-muted"
-                      onError={(e) => {
-                        const img = e.currentTarget;
-                        img.style.visibility = "hidden";
-                      }}
-                    />
-                  ) : (
-                    <div className="h-12 w-16 rounded bg-muted" />
-                  )}
-                </td>
-                <td className="px-4 py-3 font-medium text-foreground">{lang === "ar" ? row.title_ar || row.title_en || row.title : row.title_en || row.title_ar || row.title}</td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {(row.categories && row.categories.length > 0 ? row.categories : [row.category])
-                    .filter(Boolean)
-                    .map((c) => communityLabel(c, lang))
-                    .join(lang === "ar" ? "، " : ", ")}
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">{row.published_at}</td>
-                <td className="px-4 py-3">
-                  <Switch checked={row.show_on_home} onCheckedChange={(v) => toggleHome(row, v)} />
-                </td>
-                <td className="px-4 py-3 text-end">
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEditing(row);
-                      setShowForm(true);
-                    }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(row.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {showForm && (
-        <NewsForm
-          initial={editing}
-          draftKey={formDraftKey(user?.id, "news", editing?.id ?? "new")}
-          labels={labels}
-          lang={lang}
-          onClose={() => setShowForm(false)}
-          onSaved={() => {
-            setShowForm(false);
-            refresh();
-          }}
-        />
-      )}
-    </>
-  );
-}
-
-
-async function uploadToBucket(
-  file: File,
-  kind: "image" | "video",
-  onProgress?: (pct: number, loaded: number, total: number) => void,
-): Promise<string> {
-  const ext = (file.name.split(".").pop() || (kind === "video" ? "mp4" : "jpg"))
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-  const path = `${kind}s/${crypto.randomUUID()}.${ext || (kind === "video" ? "mp4" : "jpg")}`;
-  const { publicUrl } = await uploadToSupabaseStorage({
-    bucket: "news-images",
-    path,
-    file,
-    upsert: false,
-    contentType: file.type || undefined,
-    onProgress,
-  });
-  return publicUrl;
-}
-
-function NewsForm({
-  initial,
-  draftKey,
-  labels,
-  lang,
-  onClose,
-  onSaved,
-}: {
-  initial: NewsRow | null;
-  draftKey: string | null;
-  labels: AdminLabels;
-  lang: "en" | "ar";
-  onClose: () => void;
-  onSaved: () => void;
-}) {
-  const [titleAr, setTitleAr] = useState(initial?.title_ar ?? initial?.title ?? "");
-  const [titleEn, setTitleEn] = useState(initial?.title_en ?? initial?.title ?? "");
-  const [excerptAr, setExcerptAr] = useState(initial?.excerpt_ar ?? initial?.excerpt ?? "");
-  const [excerptEn, setExcerptEn] = useState(initial?.excerpt_en ?? initial?.excerpt ?? "");
-  const [contentAr, setContentAr] = useState(initial?.content_ar ?? initial?.content ?? "");
-  const [contentEn, setContentEn] = useState(initial?.content_en ?? initial?.content ?? "");
-  const [categories, setCategories] = useState<NewsCategoryKey[]>(() => {
-    const initArr = (initial?.categories && initial.categories.length > 0
-      ? initial.categories
-      : initial?.category
-        ? [initial.category]
-        : ["data"]) as NewsCategoryKey[];
-    return initArr.filter((c) => (NEWS_CATEGORY_KEYS as readonly string[]).includes(c));
-  });
-  const [publishedAt, setPublishedAt] = useState(
-    initial?.published_at ?? new Date().toISOString().slice(0, 10),
-  );
-  const [showOnHome, setShowOnHome] = useState(initial?.show_on_home ?? true);
-  const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
-  const [images, setImages] = useState<string[]>(initial?.images ?? []);
-  const [videos, setVideos] = useState<string[]>(initial?.videos ?? []);
-  const [saving, setSaving] = useState(false);
-
-  const draftValues = useMemo(
-    () => ({ titleAr, titleEn, excerptAr, excerptEn, contentAr, contentEn, categories, publishedAt, showOnHome, imageUrl, images, videos }),
-    [titleAr, titleEn, excerptAr, excerptEn, contentAr, contentEn, categories, publishedAt, showOnHome, imageUrl, images, videos],
-  );
-  const [loadedValues] = useState(draftValues);
-  const draft = useRecordDraft({
-    key: draftKey,
-    loaded: loadedValues,
-    current: draftValues,
-    apply: (d) => {
-      setTitleAr(d.titleAr); setTitleEn(d.titleEn);
-      setExcerptAr(d.excerptAr); setExcerptEn(d.excerptEn);
-      setContentAr(d.contentAr); setContentEn(d.contentEn);
-      setCategories(d.categories); setPublishedAt(d.publishedAt); setShowOnHome(d.showOnHome);
-      setImageUrl(d.imageUrl); setImages(d.images); setVideos(d.videos);
-    },
-  });
-
-  // Per-field upload lanes — each has independent uploading flag, progress, and error.
-  const [coverUploading, setCoverUploading] = useState(false);
-  const [galleryUploading, setGalleryUploading] = useState(false);
-  const [videoUploading, setVideoUploading] = useState(false);
-  type PctState = { pct: number; loaded: number; total: number; name: string } | null;
-  const [coverPct, setCoverPct] = useState<PctState>(null);
-  const [galleryPct, setGalleryPct] = useState<PctState>(null);
-  const [videoPct, setVideoPct] = useState<PctState>(null);
-  const [coverError, setCoverError] = useState<string | null>(null);
-  const [galleryError, setGalleryError] = useState<string | null>(null);
-  const [videoError, setVideoError] = useState<string | null>(null);
-
-  // Per-field input refs — reset value after every terminal state so re-selecting
-  // the same filename retriggers onChange.
-  const coverInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
-
-  // Per-field request-ID refs — stale responses cannot commit state.
-  const coverReqIdRef = useRef(0);
-  const galleryReqIdRef = useRef(0);
-  const videoReqIdRef = useRef(0);
-
-  // Synchronous submit guard — blocks double-click before React re-renders.
-  const submitInFlightRef = useRef(false);
-
-  const anyUploading = coverUploading || galleryUploading || videoUploading;
-
-  // Bucket has no server-side MIME/size rules — client validation is authoritative.
-  const IMAGE_MIME = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
-  const IMAGE_EXT = /\.(jpe?g|png|webp|gif)$/i;
-  const VIDEO_MIME = ["video/mp4", "video/webm", "video/quicktime"] as const;
-  const VIDEO_EXT = /\.(mp4|webm|mov)$/i;
-  const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
-  const MAX_VIDEO_BYTES = 200 * 1024 * 1024; // 200 MB
-
-  const resetInput = (ref: React.RefObject<HTMLInputElement | null>) => {
-    if (ref.current) ref.current.value = "";
-  };
-
-  const validateImage = (file: File): string | null => {
-    if (!IMAGE_MIME.includes(file.type as (typeof IMAGE_MIME)[number]) || !IMAGE_EXT.test(file.name)) {
-      return lang === "ar"
-        ? `${file.name}: نوع الصورة غير مسموح (JPG / PNG / WEBP / GIF فقط)`
-        : `${file.name}: unsupported image type (JPG / PNG / WEBP / GIF only)`;
-    }
-    if (file.size > MAX_IMAGE_BYTES) {
-      return lang === "ar"
-        ? `${file.name}: الحجم أكبر من 10 ميجابايت`
-        : `${file.name}: larger than 10 MB`;
-    }
-    return null;
-  };
-
-  const validateVideo = (file: File): string | null => {
-    if (!VIDEO_MIME.includes(file.type as (typeof VIDEO_MIME)[number]) || !VIDEO_EXT.test(file.name)) {
-      return lang === "ar"
-        ? `${file.name}: نوع الفيديو غير مسموح (MP4 / WEBM / MOV فقط)`
-        : `${file.name}: unsupported video type (MP4 / WEBM / MOV only)`;
-    }
-    if (file.size > MAX_VIDEO_BYTES) {
-      return lang === "ar"
-        ? `${file.name}: الحجم أكبر من 200 ميجابايت`
-        : `${file.name}: larger than 200 MB`;
-    }
-    return null;
-  };
-
-  const handleCoverUpload = async (file: File) => {
-    const err = validateImage(file);
-    if (err) {
-      setCoverError(err);
-      toast.error(err);
-      resetInput(coverInputRef);
-      return;
-    }
-    setCoverError(null);
-    const myReq = ++coverReqIdRef.current;
-    setCoverUploading(true);
-    setCoverPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
-    try {
-      const url = await uploadToBucket(file, "image", (pct, loaded, total) => {
-        if (myReq === coverReqIdRef.current) setCoverPct({ pct, loaded, total, name: file.name });
-      });
-      if (myReq !== coverReqIdRef.current) return; // stale — drop
-      setImageUrl(url);
-      toast.success(labels.coverUploaded);
-    } catch (e: unknown) {
-      if (myReq !== coverReqIdRef.current) return;
-      const msg = toUserMessage(e);
-      setCoverError(msg);
-      toast.error(msg);
-    } finally {
-      if (myReq === coverReqIdRef.current) {
-        setCoverUploading(false);
-        setCoverPct(null);
-      }
-      resetInput(coverInputRef);
-    }
-  };
-
-  const handleGalleryUpload = async (files: FileList) => {
-    const list = Array.from(files);
-    const rejected = list.map((f) => ({ f, err: validateImage(f) })).filter((x) => x.err);
-    const accepted = list.filter((f) => !validateImage(f));
-    if (rejected.length > 0) {
-      const msg = rejected.map((r) => r.err).join(" · ");
-      setGalleryError(msg);
-      toast.error(msg);
-    } else {
-      setGalleryError(null);
-    }
-    if (accepted.length === 0) {
-      resetInput(galleryInputRef);
-      return;
-    }
-    const myReq = ++galleryReqIdRef.current;
-    setGalleryUploading(true);
-    const uploaded: string[] = [];
-    let failure: string | null = null;
-    try {
-      for (const f of accepted) {
-        if (myReq !== galleryReqIdRef.current) return; // superseded
-        setGalleryPct({ pct: 0, loaded: 0, total: f.size, name: f.name });
-        try {
-          const url = await uploadToBucket(f, "image", (pct, loaded, total) => {
-            if (myReq === galleryReqIdRef.current) setGalleryPct({ pct, loaded, total, name: f.name });
-          });
-          if (myReq !== galleryReqIdRef.current) return;
-          uploaded.push(url);
-        } catch (e: unknown) {
-          failure = `${f.name}: ${toUserMessage(e)}`;
-          break; // retain what succeeded; report the failure
-        }
-      }
-      if (myReq !== galleryReqIdRef.current) return;
-      if (uploaded.length > 0) {
-        setImages((prev) => [...prev, ...uploaded]);
-        toast.success(labels.imagesUploaded(uploaded.length));
-      }
-      if (failure) {
-        setGalleryError(failure);
-        toast.error(failure);
-      }
-    } finally {
-      if (myReq === galleryReqIdRef.current) {
-        setGalleryUploading(false);
-        setGalleryPct(null);
-      }
-      resetInput(galleryInputRef);
-    }
-  };
-
-  const handleVideoUpload = async (files: FileList) => {
-    const list = Array.from(files);
-    const rejected = list.map((f) => ({ f, err: validateVideo(f) })).filter((x) => x.err);
-    const accepted = list.filter((f) => !validateVideo(f));
-    if (rejected.length > 0) {
-      const msg = rejected.map((r) => r.err).join(" · ");
-      setVideoError(msg);
-      toast.error(msg);
-    } else {
-      setVideoError(null);
-    }
-    if (accepted.length === 0) {
-      resetInput(videoInputRef);
-      return;
-    }
-    const myReq = ++videoReqIdRef.current;
-    setVideoUploading(true);
-    const uploaded: string[] = [];
-    let failure: string | null = null;
-    try {
-      for (const f of accepted) {
-        if (myReq !== videoReqIdRef.current) return;
-        setVideoPct({ pct: 0, loaded: 0, total: f.size, name: f.name });
-        try {
-          const url = await uploadToBucket(f, "video", (pct, loaded, total) => {
-            if (myReq === videoReqIdRef.current) setVideoPct({ pct, loaded, total, name: f.name });
-          });
-          if (myReq !== videoReqIdRef.current) return;
-          uploaded.push(url);
-        } catch (e: unknown) {
-          failure = `${f.name}: ${toUserMessage(e)}`;
-          break;
-        }
-      }
-      if (myReq !== videoReqIdRef.current) return;
-      if (uploaded.length > 0) {
-        setVideos((prev) => [...prev, ...uploaded]);
-        toast.success(labels.videosUploaded(uploaded.length));
-      }
-      if (failure) {
-        setVideoError(failure);
-        toast.error(failure);
-      }
-    } finally {
-      if (myReq === videoReqIdRef.current) {
-        setVideoUploading(false);
-        setVideoPct(null);
-      }
-      resetInput(videoInputRef);
-    }
-  };
-
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (submitInFlightRef.current || anyUploading) return;
-    const parsed = newsSchema.safeParse({
-      title_ar: titleAr,
-      title_en: titleEn,
-      excerpt_ar: excerptAr,
-      excerpt_en: excerptEn,
-      content_ar: contentAr,
-      content_en: contentEn,
-      categories,
-      published_at: publishedAt,
-      show_on_home: showOnHome,
-    });
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0].message);
-      return;
-    }
-    submitInFlightRef.current = true;
-    setSaving(true);
-    try {
-      const payload = {
-        // keep legacy mirrors for backward compatibility
-        title: parsed.data.title_en || parsed.data.title_ar,
-        excerpt: parsed.data.excerpt_en || parsed.data.excerpt_ar || null,
-        content: parsed.data.content_en || parsed.data.content_ar || null,
-        title_ar: parsed.data.title_ar,
-        title_en: parsed.data.title_en,
-        excerpt_ar: parsed.data.excerpt_ar || null,
-        excerpt_en: parsed.data.excerpt_en || null,
-        content_ar: parsed.data.content_ar || null,
-        content_en: parsed.data.content_en || null,
-        category: parsed.data.categories[0],
-        categories: parsed.data.categories,
-        published_at: parsed.data.published_at,
-        show_on_home: parsed.data.show_on_home,
-        image_url: imageUrl || null,
-        images,
-        videos,
-      };
-      if (initial) {
-        const { error } = await supabase.from("news").update(payload).eq("id", initial.id);
-        if (error) throw error;
-        toast.success(labels.updated);
-      } else {
-        const { error } = await supabase.from("news").insert(payload);
-        if (error) throw error;
-        toast.success(labels.created);
-      }
-      draft.clear();
-      onSaved();
-    } catch (err: unknown) {
-      toast.error(toUserMessage(err));
-    } finally {
-      setSaving(false);
-      submitInFlightRef.current = false;
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir={lang === "ar" ? "rtl" : "ltr"}>
-      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-border bg-card p-7 shadow-lift">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-foreground">
-            {initial ? labels.editNews : labels.newNewsArticle}
-          </h3>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="mt-5 space-y-5">
-          <DraftNotice show={draft.restored} onDiscard={draft.discard} />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="title_en">{labels.titleEn}</Label>
-              <Input id="title_en" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} required maxLength={200} />
+          {waiting.length === 0 ? (
+            <div className="flex items-center gap-3 px-5 py-6 text-[14px] text-[var(--cx-muted)]">
+              <CheckCircle2 className="h-5 w-5 text-[var(--cx-green)]" />
+              {t("لا توجد طلبات معلّقة.", "No pending items.")}
             </div>
-            <div dir="rtl">
-              <Label htmlFor="title_ar">{labels.titleAr}</Label>
-              <Input id="title_ar" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} required maxLength={200} />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="excerpt_en">{labels.excerptEn}</Label>
-              <Textarea id="excerpt_en" value={excerptEn} onChange={(e) => setExcerptEn(e.target.value)} maxLength={500} rows={3} />
-            </div>
-            <div dir="rtl">
-              <Label htmlFor="excerpt_ar">{labels.excerptAr}</Label>
-              <Textarea id="excerpt_ar" value={excerptAr} onChange={(e) => setExcerptAr(e.target.value)} maxLength={500} rows={3} />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="content_en">{labels.contentEn}</Label>
-              <Textarea id="content_en" value={contentEn} onChange={(e) => setContentEn(e.target.value)} rows={10} />
-            </div>
-            <div dir="rtl">
-              <Label htmlFor="content_ar">{labels.contentAr}</Label>
-              <Textarea id="content_ar" value={contentAr} onChange={(e) => setContentAr(e.target.value)} rows={10} />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label>{labels.communityCategory}</Label>
-              <div className="mt-2 flex flex-wrap gap-2 rounded-md border border-input bg-background p-3">
-                {NEWS_CATEGORY_KEYS.map((k) => {
-                  const checked = categories.includes(k);
-                  return (
-                    <label
-                      key={k}
-                      className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                        checked
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-card text-foreground hover:bg-accent"
-                      }`}
+          ) : (
+            <ul>
+              {waiting.map((a) => {
+                const Icon = a.icon;
+                return (
+                  <li key={a.key} className="border-b border-[var(--cx-line-2)] last:border-0">
+                    <Link
+                      to={a.to as never}
+                      className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-[var(--cx-hover)]"
                     >
-                      <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={checked}
-                        onChange={(e) => {
-                          setCategories((prev) =>
-                            e.target.checked
-                              ? Array.from(new Set([...prev, k]))
-                              : prev.filter((c) => c !== k),
-                          );
-                        }}
-                      />
-                      {communityLabel(k, lang)}
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="date">{labels.date}</Label>
-              <Input id="date" type="date" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} required />
-            </div>
+                      <span className="grid h-9 w-9 place-items-center rounded-xl bg-[var(--cx-teal-50)] text-[var(--cx-teal)]">
+                        <Icon className="h-[18px] w-[18px]" />
+                      </span>
+                      <span className="flex-1 text-[14.5px] font-bold text-[var(--cx-ink)]">
+                        {ar ? a.ar : a.en}
+                      </span>
+                      <span className="rounded-full bg-[var(--cx-badge)] px-2.5 py-0.5 text-[13px] font-extrabold text-[var(--cx-badge-ink)]">
+                        {fmtNum(counts?.[a.key], lang)}
+                      </span>
+                      <ArrowLeft className="h-4 w-4 text-[var(--cx-muted)] ltr:rotate-180" />
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Panel>
+
+        <Panel title={t("اختصارات", "Quick actions")}>
+          <div className="grid gap-2">
+            <QuickAction
+              to="/admin/news/new"
+              icon={Newspaper}
+              label={t("خبر جديد", "New news article")}
+            />
+            <QuickAction
+              to={`${LMS_ADMIN}/courses?new=1`}
+              icon={Plus}
+              label={t("دورة جديدة", "New course")}
+            />
+            <QuickAction
+              to="/admin/forms/new"
+              icon={ClipboardList}
+              label={t("نموذج جديد", "New form")}
+            />
+            <QuickAction
+              to="/admin/attendance"
+              icon={CalendarCheck}
+              label={t("تسجيل الحضور", "Take attendance")}
+            />
           </div>
-
-          <div>
-            <Label htmlFor="news-cover">{labels.coverImage}</Label>
-            <div className="mt-2 flex items-center gap-4">
-              {imageUrl ? (
-                <img src={imageUrl} alt="" className="h-20 w-28 rounded object-cover" />
-              ) : (
-                <div className="h-20 w-28 rounded bg-muted" />
-              )}
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
-                <Upload className="h-4 w-4" />
-                {coverUploading ? labels.uploading : labels.uploadCover}
-                <input
-                  id="news-cover"
-                  name="cover"
-                  ref={coverInputRef}
-                  type="file"
-                  accept={IMAGE_MIME.join(",")}
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleCoverUpload(f);
-                  }}
-                />
-              </label>
-              {imageUrl && (
-                <button
-                  type="button"
-                  className="text-xs text-destructive hover:underline"
-                  onClick={() => {
-                    setImageUrl("");
-                    setCoverError(null);
-                    resetInput(coverInputRef);
-                  }}
-                >
-                  {labels.remove}
-                </button>
-              )}
-            </div>
-            {coverPct && (
-              <div className="mt-2 max-w-sm">
-                <UploadProgress percent={coverPct.pct} loaded={coverPct.loaded} total={coverPct.total} label={coverPct.name} />
-              </div>
-            )}
-            {coverError && (
-              <p className="mt-2 text-xs text-destructive">{coverError}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="news-gallery">{labels.galleryImages}</Label>
-            <div className="mt-2 flex flex-wrap gap-3">
-              {images.map((url, i) => (
-                <div key={url} className="relative h-20 w-28">
-                  <img src={url} alt="" className="h-full w-full rounded object-cover" />
-                  <button
-                    type="button"
-                    aria-label={labels.remove}
-                    onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
-                    className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-              <label className="inline-flex h-20 w-28 cursor-pointer items-center justify-center gap-1 rounded border border-dashed border-input text-xs font-medium hover:bg-accent">
-                <Upload className="h-4 w-4" />
-                {galleryUploading ? labels.uploading : labels.add}
-                <input
-                  id="news-gallery"
-                  name="gallery[]"
-                  ref={galleryInputRef}
-                  type="file"
-                  accept={IMAGE_MIME.join(",")}
-                  multiple
-                  className="hidden"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) handleGalleryUpload(e.target.files);
-                  }}
-                />
-              </label>
-            </div>
-            {galleryPct && (
-              <div className="mt-2 max-w-sm">
-                <UploadProgress percent={galleryPct.pct} loaded={galleryPct.loaded} total={galleryPct.total} label={galleryPct.name} />
-              </div>
-            )}
-            {galleryError && (
-              <p className="mt-2 text-xs text-destructive">{galleryError}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="news-video">{labels.videos}</Label>
-            <div className="mt-2 space-y-2">
-              {videos.map((url, i) => (
-                <div key={url} className="flex items-center gap-3 rounded border border-border p-2">
-                  <video src={url} className="h-14 w-24 rounded object-cover" muted />
-                  <span className="flex-1 truncate text-xs text-muted-foreground">{url}</span>
-                  <button
-                    type="button"
-                    className="text-xs text-destructive hover:underline"
-                    onClick={() => setVideos((prev) => prev.filter((_, idx) => idx !== i))}
-                  >
-                    {labels.remove}
-                  </button>
-                </div>
-              ))}
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
-                <Upload className="h-4 w-4" />
-                {videoUploading ? labels.uploading : labels.uploadVideos}
-                <input
-                  id="news-video"
-                  name="video[]"
-                  ref={videoInputRef}
-                  type="file"
-                  accept={VIDEO_MIME.join(",")}
-                  multiple
-                  className="hidden"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) handleVideoUpload(e.target.files);
-                  }}
-                />
-              </label>
-            </div>
-            {videoPct && (
-              <div className="mt-2 max-w-sm">
-                <UploadProgress percent={videoPct.pct} loaded={videoPct.loaded} total={videoPct.total} label={videoPct.name} />
-              </div>
-            )}
-            {videoError && (
-              <p className="mt-2 text-xs text-destructive">{videoError}</p>
-            )}
-          </div>
-
-
-          <div className="flex items-center justify-between rounded-lg border border-border p-3">
-            <div>
-              <p className="text-sm font-medium text-foreground">{labels.showOnHomeTitle}</p>
-              <p className="text-xs text-muted-foreground">{labels.showOnHomeHint}</p>
-            </div>
-            <Switch checked={showOnHome} onCheckedChange={setShowOnHome} />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              {labels.cancel}
-            </Button>
-            <Button type="submit" disabled={saving || anyUploading}>
-
-              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {initial ? labels.saveChanges : labels.create}
-            </Button>
-          </div>
-        </form>
+        </Panel>
       </div>
     </div>
   );
 }
 
-/* ---------- Members admin ---------- */
-
-type MemberRow = {
-  id: string;
-  category: "board" | "executive";
-  full_name_ar: string;
-  full_name_en: string | null;
-  position_ar: string;
-  position_en: string | null;
-  bio_ar: string | null;
-  bio_en: string | null;
-  photo_url: string | null;
-  display_order: number;
-};
-
-export function MembersAdmin({ labels, lang }: { labels: AdminLabels; lang: "en" | "ar" }) {
-  const { user } = useAuth();
-  const [list, setList] = useState<MemberRow[]>([]);
-  const [editing, setEditing] = useState<MemberRow | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [bump, setBump] = useState(0);
-
-  useReopenDraftForm({
-    userId: user?.id,
-    form: "member",
-    rows: list,
-    open: (row) => {
-      setEditing(row);
-      setShowForm(true);
-    },
-  });
-
-  useEffect(() => {
-    supabase
-      .from("members")
-      .select("*")
-      .order("category", { ascending: true })
-      .order("display_order", { ascending: true })
-      .then(({ data, error }) => {
-        if (error) toast.error(toUserMessage(error));
-        else setList((data ?? []) as MemberRow[]);
-      });
-  }, [bump]);
-
-  const remove = async (id: string) => {
-    if (!(await confirmDialog({ title: labels.deleteMemberConfirm, destructive: true }))) return;
-    const { error } = await supabase.from("members").delete().eq("id", id);
-    if (error) toast.error(toUserMessage(error));
-    else { toast.success(labels.deleted); setBump((k) => k + 1); }
-  };
-
-  return (
-    <>
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">{labels.membersTitle} ({list.length})</h2>
-        <Button onClick={() => { setEditing(null); setShowForm(true); }}>
-          <Plus className="h-4 w-4" /> {labels.newMember}
-        </Button>
-      </div>
-
-      <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
-            <tr>
-              <th className="px-4 py-3">{labels.photo}</th>
-              <th className="px-4 py-3">{labels.name}</th>
-              <th className="px-4 py-3">{labels.position}</th>
-              <th className="px-4 py-3">{labels.category}</th>
-              <th className="px-4 py-3">{labels.order}</th>
-              <th className="px-4 py-3 text-right">{labels.actions}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {list.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                  {labels.noMembers}
-                </td>
-              </tr>
-            )}
-            {list.map((m) => (
-              <tr key={m.id} className="border-t border-border">
-                <td className="px-4 py-3">
-                  {m.photo_url ? (
-                    <img src={m.photo_url} alt="" className="h-10 w-10 rounded-full object-cover" />
-                  ) : (
-                    <div className="h-10 w-10 rounded-full bg-muted" />
-                  )}
-                </td>
-                <td className="px-4 py-3 font-medium text-foreground">{lang === "ar" ? m.full_name_ar || m.full_name_en : m.full_name_en || m.full_name_ar}</td>
-                <td className="px-4 py-3 text-muted-foreground">{lang === "ar" ? m.position_ar || m.position_en : m.position_en || m.position_ar}</td>
-                <td className="px-4 py-3 text-muted-foreground capitalize">{m.category === "board" ? labels.categoryBoard : labels.categoryExecutive}</td>
-                <td className="px-4 py-3 text-muted-foreground">{m.display_order}</td>
-                <td className="px-4 py-3 text-right">
-                  <Button variant="ghost" size="sm" onClick={() => { setEditing(m); setShowForm(true); }}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => remove(m.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {showForm && (
-        <MemberForm
-          initial={editing}
-          draftKey={formDraftKey(user?.id, "member", editing?.id ?? "new")}
-          labels={labels}
-          lang={lang}
-          onClose={() => setShowForm(false)}
-          onSaved={() => { setShowForm(false); setBump((k) => k + 1); }}
-        />
-      )}
-    </>
-  );
-}
-
-function MemberForm({
-  initial,
-  draftKey,
-  labels,
-  lang,
-  onClose,
-  onSaved,
+function SystemCard({
+  to,
+  icon: Icon,
+  accent,
+  title,
+  desc,
+  waiting,
+  stats,
 }: {
-  initial: MemberRow | null;
-  draftKey: string | null;
-  labels: AdminLabels;
-  lang: "en" | "ar";
-  onClose: () => void;
-  onSaved: () => void;
+  to: string;
+  icon: LucideIcon;
+  accent: string;
+  title: string;
+  desc: string;
+  waiting: number;
+  stats: { label: string; value: string }[];
 }) {
-  const [category, setCategory] = useState<"board" | "executive">(initial?.category ?? "board");
-  const [nameAr, setNameAr] = useState(initial?.full_name_ar ?? "");
-  const [nameEn, setNameEn] = useState(initial?.full_name_en ?? "");
-  const [posAr, setPosAr] = useState(initial?.position_ar ?? "");
-  const [posEn, setPosEn] = useState(initial?.position_en ?? "");
-  const [bioAr, setBioAr] = useState(initial?.bio_ar ?? "");
-  const [bioEn, setBioEn] = useState(initial?.bio_en ?? "");
-  const [photoUrl, setPhotoUrl] = useState(initial?.photo_url ?? "");
-  const [order, setOrder] = useState(initial?.display_order ?? 0);
-  const draftValues = useMemo(
-    () => ({ category, nameAr, nameEn, posAr, posEn, bioAr, bioEn, photoUrl, order }),
-    [category, nameAr, nameEn, posAr, posEn, bioAr, bioEn, photoUrl, order],
-  );
-  const [loadedValues] = useState(draftValues);
-  const draft = useRecordDraft({
-    key: draftKey,
-    loaded: loadedValues,
-    current: draftValues,
-    apply: (d) => {
-      setCategory(d.category); setNameAr(d.nameAr); setNameEn(d.nameEn);
-      setPosAr(d.posAr); setPosEn(d.posEn); setBioAr(d.bioAr); setBioEn(d.bioEn);
-      setPhotoUrl(d.photoUrl); setOrder(d.order);
-    },
-  });
-  const [uploading, setUploading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
-
-  const handlePhoto = async (file: File) => {
-    setUploading(true);
-    setUploadPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
-    try {
-      const url = await uploadToBucket(file, "image", (pct, loaded, total) =>
-        setUploadPct({ pct, loaded, total, name: file.name }),
-      );
-      setPhotoUrl(url);
-      toast.success(labels.photoUploaded);
-    } catch (err: any) {
-      toast.error(toUserMessage(err));
-    } finally {
-      setUploading(false);
-      setUploadPct(null);
-    }
-  };
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nameAr.trim() || !posAr.trim()) {
-      toast.error(labels.requiredMemberFields);
-      return;
-    }
-    setSaving(true);
-    try {
-      const payload = {
-        category,
-        full_name_ar: nameAr.trim(),
-        full_name_en: nameEn.trim() || null,
-        position_ar: posAr.trim(),
-        position_en: posEn.trim() || null,
-        bio_ar: bioAr.trim() || null,
-        bio_en: bioEn.trim() || null,
-        photo_url: photoUrl || null,
-        display_order: Number(order) || 0,
-      };
-      if (initial) {
-        const { error } = await supabase.from("members").update(payload).eq("id", initial.id);
-        if (error) throw error;
-        toast.success(labels.updated);
-      } else {
-        const { error } = await supabase.from("members").insert(payload);
-        if (error) throw error;
-        toast.success(labels.created);
-      }
-      draft.clear();
-      onSaved();
-    } catch (err: any) {
-      toast.error(toUserMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  };
-
+  const { t, lang } = useT();
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" dir={lang === "ar" ? "rtl" : "ltr"}>
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-card p-7 shadow-lift">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-foreground">
-            {initial ? labels.editMember : labels.newMember}
-          </h3>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <form onSubmit={onSubmit} className="mt-5 space-y-5">
-          <DraftNotice show={draft.restored} onDiscard={draft.discard} />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label>{labels.category}</Label>
-              <Select value={category} onValueChange={(v) => setCategory(v as "board" | "executive")}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="board">{labels.categoryBoard}</SelectItem>
-                  <SelectItem value="executive">{labels.categoryExecutive}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="order">{labels.displayOrder}</Label>
-              <Input id="order" type="number" value={order} onChange={(e) => setOrder(Number(e.target.value))} />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="name_en">{labels.nameEn}</Label>
-              <Input id="name_en" value={nameEn} onChange={(e) => setNameEn(e.target.value)} maxLength={120} />
-            </div>
-            <div dir="rtl">
-              <Label htmlFor="name_ar">{labels.nameAr}</Label>
-              <Input id="name_ar" value={nameAr} onChange={(e) => setNameAr(e.target.value)} required maxLength={120} />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="pos_en">{labels.positionEn}</Label>
-              <Input id="pos_en" value={posEn} onChange={(e) => setPosEn(e.target.value)} maxLength={120} />
-            </div>
-            <div dir="rtl">
-              <Label htmlFor="pos_ar">{labels.positionAr}</Label>
-              <Input id="pos_ar" value={posAr} onChange={(e) => setPosAr(e.target.value)} required maxLength={120} />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="bio_en">{labels.bioEn}</Label>
-              <Textarea id="bio_en" value={bioEn} onChange={(e) => setBioEn(e.target.value)} rows={4} maxLength={1000} />
-            </div>
-            <div dir="rtl">
-              <Label htmlFor="bio_ar">{labels.bioAr}</Label>
-              <Textarea id="bio_ar" value={bioAr} onChange={(e) => setBioAr(e.target.value)} rows={4} maxLength={1000} />
-            </div>
-          </div>
-
-          <div>
-            <Label>{labels.photo}</Label>
-            <div className="mt-2 flex items-center gap-4">
-              {photoUrl ? (
-                <img src={photoUrl} alt="" className="h-20 w-20 rounded-full object-cover" />
-              ) : (
-                <div className="h-20 w-20 rounded-full bg-muted" />
-              )}
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
-                <Upload className="h-4 w-4" />
-                {uploading ? labels.uploading : labels.uploadPhoto}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handlePhoto(f);
-                  }}
-                />
-              </label>
-              {photoUrl && (
-                <button type="button" className="text-xs text-destructive hover:underline" onClick={() => setPhotoUrl("")}>
-                  {labels.remove}
-                </button>
-              )}
-            </div>
-            {uploadPct && (
-              <div className="mt-2 max-w-sm">
-                <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} />
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>{labels.cancel}</Button>
-            <Button type="submit" disabled={saving || uploading}>
-              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {initial ? labels.saveChanges : labels.create}
-            </Button>
-          </div>
-        </form>
+    <Link
+      to={to as never}
+      className="cx-card group flex flex-col p-5 transition-shadow hover:shadow-lg"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <span
+          className="grid h-12 w-12 place-items-center rounded-2xl text-white"
+          style={{ background: accent }}
+        >
+          <Icon className="h-6 w-6" />
+        </span>
+        {waiting > 0 ? (
+          <span className="rounded-full bg-[var(--cx-teal-50)] px-2.5 py-1 text-[12px] font-extrabold text-[var(--cx-teal)]">
+            {t(`${fmtNum(waiting, lang)} بانتظارك`, `${fmtNum(waiting, lang)} waiting`)}
+          </span>
+        ) : (
+          <span className="rounded-full bg-[var(--cx-green-50)] px-2.5 py-1 text-[12px] font-bold text-[var(--cx-green)]">
+            {t("محدَّث", "Up to date")}
+          </span>
+        )}
       </div>
-    </div>
+      <h2 className="mt-4 text-[18px] font-extrabold text-[var(--cx-ink)]">{title}</h2>
+      <p className="mt-1 text-[13.5px] text-[var(--cx-muted)]">{desc}</p>
+      <div className="mt-4 grid grid-cols-3 gap-2 border-t border-[var(--cx-line-2)] pt-4">
+        {stats.map((s) => (
+          <div key={s.label}>
+            <div className="text-[20px] font-extrabold tabular-nums text-[var(--cx-ink)]">
+              {s.value}
+            </div>
+            <div className="text-[12px] text-[var(--cx-muted)]">{s.label}</div>
+          </div>
+        ))}
+      </div>
+      <span className="mt-4 inline-flex items-center gap-1.5 text-[13.5px] font-bold text-[var(--cx-teal)]">
+        {t("فتح", "Open")}
+        <ArrowLeft className="h-4 w-4 transition-transform ltr:rotate-180 group-hover:-translate-x-1 ltr:group-hover:translate-x-1" />
+      </span>
+    </Link>
   );
 }
 
-// ----- Partners admin -----
-
-type PartnerRow = {
-  id: string;
-  name: string;
-  logo_url: string;
-  logo_light_url: string | null;
-  size_class: string;
-  display_order: number;
-  show_on_home: boolean;
-};
-
-const SIZE_OPTIONS = ["h-16", "h-20", "h-24", "h-28", "h-32", "h-36", "h-40"] as const;
-
-async function uploadPartnerLogo(
-  file: File,
-  onProgress?: (pct: number, loaded: number, total: number) => void,
-): Promise<string> {
-  const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
-  const path = `partners/${crypto.randomUUID()}.${ext}`;
-  const { publicUrl } = await uploadToSupabaseStorage({
-    bucket: "news-images",
-    path,
-    file,
-    upsert: false,
-    contentType: file.type || undefined,
-    onProgress,
-  });
-  return publicUrl;
-}
-
-export function PartnersAdmin({ lang }: { lang: "en" | "ar" }) {
-  const ar = lang === "ar";
-  const { user } = useAuth();
-  const [rows, setRows] = useState<PartnerRow[]>([]);
-  const [editing, setEditing] = useState<PartnerRow | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [bump, setBump] = useState(0);
-
-  useReopenDraftForm({
-    userId: user?.id,
-    form: "partner",
-    rows,
-    open: (row) => {
-      setEditing(row);
-      setShowForm(true);
-    },
-  });
-
-  useEffect(() => {
-    supabase
-      .from("partners")
-      .select("*")
-      .order("display_order", { ascending: true })
-      .then(({ data, error }) => {
-        if (error) toast.error(toUserMessage(error));
-        else setRows((data ?? []) as PartnerRow[]);
-      });
-  }, [bump]);
-
-  const remove = async (id: string) => {
-    if (!(await confirmDialog({ title: ar ? "هل تريد حذف هذا الشريك؟" : "Delete this partner?", destructive: true }))) return;
-    const { error } = await supabase.from("partners").delete().eq("id", id);
-    if (error) toast.error(toUserMessage(error));
-    else { toast.success(ar ? "تم الحذف" : "Deleted"); setBump((k) => k + 1); }
-  };
-
-  const toggleHome = async (row: PartnerRow, value: boolean) => {
-    const { error } = await supabase.from("partners").update({ show_on_home: value }).eq("id", row.id);
-    if (error) toast.error(toUserMessage(error));
-    else setRows((prev) => prev.map((p) => (p.id === row.id ? { ...p, show_on_home: value } : p)));
-  };
-
+function QuickAction({ to, icon: Icon, label }: { to: string; icon: LucideIcon; label: string }) {
   return (
-    <>
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">
-          {ar ? "الشركاء" : "Partners"} ({rows.length})
-        </h2>
-        <Button onClick={() => { setEditing(null); setShowForm(true); }}>
-          <Plus className="h-4 w-4" /> {ar ? "شريك جديد" : "New partner"}
-        </Button>
-      </div>
-
-      <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-card">
-        <table className="w-full min-w-[720px] text-sm">
-          <thead className="bg-muted/40 text-start text-xs uppercase tracking-wide text-muted-foreground">
-            <tr>
-              <th className="px-4 py-3 text-start">{ar ? "اللوغو (داكن)" : "Logo (dark)"}</th>
-              <th className="px-4 py-3 text-start">{ar ? "اللوغو (فاتح)" : "Logo (light)"}</th>
-              <th className="px-4 py-3 text-start">{ar ? "الاسم" : "Name"}</th>
-              <th className="px-4 py-3 text-start">{ar ? "الحجم" : "Size"}</th>
-              <th className="px-4 py-3 text-start">{ar ? "الترتيب" : "Order"}</th>
-              <th className="px-4 py-3 text-start">{ar ? "ظاهر" : "Visible"}</th>
-              <th className="px-4 py-3 text-end">{ar ? "إجراءات" : "Actions"}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
-                  {ar ? "لا يوجد شركاء بعد." : "No partners yet."}
-                </td>
-              </tr>
-            )}
-            {rows.map((r) => (
-              <tr key={r.id} className="border-t border-border">
-                <td className="px-4 py-3">
-                  <div className="flex h-12 w-20 items-center justify-center rounded bg-zinc-900 p-1">
-                    <img src={r.logo_url} alt="" className="max-h-full max-w-full object-contain" />
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  {r.logo_light_url ? (
-                    <div className="flex h-12 w-20 items-center justify-center rounded bg-white p-1">
-                      <img src={r.logo_light_url} alt="" className="max-h-full max-w-full object-contain" />
-                    </div>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </td>
-                <td className="px-4 py-3 font-medium text-foreground">{r.name}</td>
-                <td className="px-4 py-3 text-muted-foreground">{r.size_class}</td>
-                <td className="px-4 py-3 text-muted-foreground">{r.display_order}</td>
-                <td className="px-4 py-3">
-                  <Switch checked={r.show_on_home} onCheckedChange={(v) => toggleHome(r, v)} />
-                </td>
-                <td className="px-4 py-3 text-end">
-                  <Button variant="ghost" size="sm" onClick={() => { setEditing(r); setShowForm(true); }}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => remove(r.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {showForm && (
-        <PartnerForm
-          initial={editing}
-          draftKey={formDraftKey(user?.id, "partner", editing?.id ?? "new")}
-          lang={lang}
-          onClose={() => setShowForm(false)}
-          onSaved={() => { setShowForm(false); setBump((k) => k + 1); }}
-        />
-      )}
-    </>
-  );
-}
-
-function PartnerForm({
-  initial, draftKey, lang, onClose, onSaved,
-}: {
-  initial: PartnerRow | null;
-  draftKey: string | null;
-  lang: "en" | "ar";
-  onClose: () => void;
-  onSaved: () => void;
-}) {
-  const ar = lang === "ar";
-  const [name, setName] = useState(initial?.name ?? "");
-  const [logoUrl, setLogoUrl] = useState(initial?.logo_url ?? "");
-  const [logoLightUrl, setLogoLightUrl] = useState(initial?.logo_light_url ?? "");
-  const [sizeClass, setSizeClass] = useState(initial?.size_class ?? "h-24");
-  const [displayOrder, setDisplayOrder] = useState(initial?.display_order ?? 0);
-  const [showOnHome, setShowOnHome] = useState(initial?.show_on_home ?? true);
-  const draftValues = useMemo(
-    () => ({ name, logoUrl, logoLightUrl, sizeClass, displayOrder, showOnHome }),
-    [name, logoUrl, logoLightUrl, sizeClass, displayOrder, showOnHome],
-  );
-  const [loadedValues] = useState(draftValues);
-  const draft = useRecordDraft({
-    key: draftKey,
-    loaded: loadedValues,
-    current: draftValues,
-    apply: (d) => {
-      setName(d.name); setLogoUrl(d.logoUrl); setLogoLightUrl(d.logoLightUrl);
-      setSizeClass(d.sizeClass); setDisplayOrder(d.displayOrder); setShowOnHome(d.showOnHome);
-    },
-  });
-  const [uploading, setUploading] = useState<"dark" | "light" | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [uploadPct, setUploadPct] = useState<{ which: "dark" | "light"; pct: number; loaded: number; total: number; name: string } | null>(null);
-
-  const handleUpload = async (file: File, which: "dark" | "light") => {
-    setUploading(which);
-    setUploadPct({ which, pct: 0, loaded: 0, total: file.size, name: file.name });
-    try {
-      const url = await uploadPartnerLogo(file, (pct, loaded, total) =>
-        setUploadPct({ which, pct, loaded, total, name: file.name }),
-      );
-      if (which === "dark") setLogoUrl(url);
-      else setLogoLightUrl(url);
-      toast.success(ar ? "تم رفع الصورة" : "Logo uploaded");
-    } catch (e) {
-      toast.error(toUserMessage(e));
-    } finally {
-      setUploading(null);
-      setUploadPct(null);
-    }
-  };
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !logoUrl) {
-      toast.error(ar ? "الاسم واللوغو الداكن مطلوبان" : "Name and dark logo are required");
-      return;
-    }
-    setSaving(true);
-    const payload = {
-      name: name.trim(),
-      logo_url: logoUrl,
-      logo_light_url: logoLightUrl || null,
-      size_class: sizeClass,
-      display_order: displayOrder,
-      show_on_home: showOnHome,
-    };
-    const { error } = initial
-      ? await supabase.from("partners").update(payload).eq("id", initial.id)
-      : await supabase.from("partners").insert(payload);
-    setSaving(false);
-    if (error) { toast.error(toUserMessage(error)); return; }
-    toast.success(ar ? (initial ? "تم التحديث" : "تم الإنشاء") : (initial ? "Updated" : "Created"));
-    draft.clear();
-    onSaved();
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-border bg-card p-6" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-foreground">
-            {initial ? (ar ? "تعديل شريك" : "Edit partner") : (ar ? "شريك جديد" : "New partner")}
-          </h3>
-          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <form onSubmit={submit} className="space-y-4">
-          <DraftNotice show={draft.restored} onDiscard={draft.discard} />
-          <div>
-            <Label>{ar ? "الاسم" : "Name"}</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} required />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label>{ar ? "اللوغو (للوضع الداكن)" : "Logo (for dark mode)"}</Label>
-              <div className="mt-2 flex items-center gap-3">
-                <div className="flex h-16 w-24 items-center justify-center rounded border border-border bg-zinc-900 p-1">
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="" className="max-h-full max-w-full object-contain" />
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </div>
-                <label className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-xs hover:bg-muted">
-                  {uploading === "dark" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-                  <span>{ar ? "رفع" : "Upload"}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f, "dark"); e.target.value = ""; }}
-                  />
-                </label>
-                {logoUrl && (
-                  <button type="button" className="text-xs text-destructive hover:underline" onClick={() => setLogoUrl("")}>
-                    {ar ? "إزالة" : "Remove"}
-                  </button>
-                )}
-              </div>
-              {uploadPct?.which === "dark" && (
-                <div className="mt-2"><UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} compact /></div>
-              )}
-            </div>
-
-            <div>
-              <Label>{ar ? "اللوغو (للوضع الفاتح — اختياري)" : "Logo (for light mode — optional)"}</Label>
-              <div className="mt-2 flex items-center gap-3">
-                <div className="flex h-16 w-24 items-center justify-center rounded border border-border bg-white p-1">
-                  {logoLightUrl ? (
-                    <img src={logoLightUrl} alt="" className="max-h-full max-w-full object-contain" />
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </div>
-                <label className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-input bg-background px-3 py-1.5 text-xs hover:bg-muted">
-                  {uploading === "light" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-                  <span>{ar ? "رفع" : "Upload"}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f, "light"); e.target.value = ""; }}
-                  />
-                </label>
-                {logoLightUrl && (
-                  <button type="button" className="text-xs text-destructive hover:underline" onClick={() => setLogoLightUrl("")}>
-                    {ar ? "إزالة" : "Remove"}
-                  </button>
-                )}
-              </div>
-              {uploadPct?.which === "light" && (
-                <div className="mt-2"><UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} compact /></div>
-              )}
-              <p className="mt-1 text-xs text-muted-foreground">
-                {ar ? "اتركه فارغاً لاستخدام نفس اللوغو في الوضعين." : "Leave empty to use the same logo in both modes."}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div>
-              <Label>{ar ? "الحجم" : "Size"}</Label>
-              <Select value={sizeClass} onValueChange={setSizeClass}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {SIZE_OPTIONS.map((s) => (
-                    <SelectItem key={s} value={s}>{s}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>{ar ? "ترتيب العرض" : "Display order"}</Label>
-              <Input type="number" value={displayOrder} onChange={(e) => setDisplayOrder(parseInt(e.target.value, 10) || 0)} />
-            </div>
-            <div className="flex items-end gap-2">
-              <Switch checked={showOnHome} onCheckedChange={setShowOnHome} id="partner-show" />
-              <Label htmlFor="partner-show">{ar ? "إظهار في الرئيسية" : "Show on home"}</Label>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>{ar ? "إلغاء" : "Cancel"}</Button>
-            <Button type="submit" disabled={saving || uploading !== null}>
-              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {initial ? (ar ? "حفظ التعديلات" : "Save changes") : (ar ? "إنشاء" : "Create")}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Link
+      to={to as never}
+      className="flex items-center gap-3 rounded-xl border border-[var(--cx-line)] px-3.5 py-3 text-[14px] font-bold text-[var(--cx-ink)] transition-colors hover:border-[var(--cx-teal)] hover:text-[var(--cx-teal)]"
+    >
+      <Icon className="h-[18px] w-[18px] text-[var(--cx-teal)]" />
+      {label}
+    </Link>
   );
 }

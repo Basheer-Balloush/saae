@@ -5,7 +5,7 @@ import { useSingleDeviceSession } from "@/hooks/useSingleDeviceSession";
 import { LmsNavbar } from "@/components/lms/LmsNavbar";
 import { LmsFooter } from "@/components/lms/LmsFooter";
 import { LmsSkinShell } from "@/components/lms-skin/LmsSkinShell";
-import { isSkinnedLmsPath } from "@/components/lms-skin/skin";
+import { isConsoleLmsPath, isSkinnedLmsPath } from "@/components/lms-skin/skin";
 
 export const Route = createFileRoute("/learning-management-system")({
   head: () => ({
@@ -29,8 +29,11 @@ function LmsLayout() {
     navigate({ to: "/learning-management-system" });
   };
 
-  /* Redesigned student pages get Moaz's chrome; admin and instructor
-     dashboards keep the navbar and footer below. */
+  /* The admin console and the instructor workspace bring their own frame. */
+  if (isConsoleLmsPath(pathname)) return <Outlet />;
+
+  /* Redesigned student pages get Moaz's chrome; other LMS pages keep the
+     navbar and footer below. */
   if (isSkinnedLmsPath(pathname)) {
     return (
       <LmsSkinShell role={role} isAuthed={!!user} onSignOut={handleSignOut}>

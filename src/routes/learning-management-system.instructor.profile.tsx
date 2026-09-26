@@ -1,200 +1,291 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { Camera, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
 import { toUserMessage } from "@/lib/safe-error";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/ui/upload-progress";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Field,
+  LangSwitch,
+  Loading,
+  PageHeader,
+  Panel,
+  SaveBar,
+  useT,
+} from "@/components/console/ui";
 
 export const Route = createFileRoute("/learning-management-system/instructor/profile")({
-  head: () => ({ meta: [{ title: "LMS · Instructor profile" }] }),
-  component: InstructorProfileEdit,
+  head: () => ({ meta: [{ title: "My profile — SAAE Training and Learning Platform" }] }),
+  component: InstructorProfile,
 });
 
-function InstructorProfileEdit() {
-  const { user } = useLmsAuth();
-  const { lang } = useLang();
-  const tr = lmsT[lang];
-  const ar = lang === "ar";
-  const navigate = useNavigate();
-  const fileRef = useRef<HTMLInputElement>(null);
+type P = {
+  full_name_ar: string;
+  full_name_en: string;
+  specialty_ar: string;
+  specialty_en: string;
+  bio_ar: string;
+  bio_en: string;
+  avatar_url: string | null;
+};
+const EMPTY: P = {
+  full_name_ar: "",
+  full_name_en: "",
+  specialty_ar: "",
+  specialty_en: "",
+  bio_ar: "",
+  bio_en: "",
+  avatar_url: null,
+};
 
-  const [loading, setLoading] = useState(true);
+/* What students see about the instructor on course pages, edited with a
+   live preview beside it. */
+function InstructorProfile() {
+  const { user } = useLmsAuth();
+  const { t, ar, lang } = useT();
+  const [loaded, setLoaded] = useState<P | null>(null);
+  const [p, setP] = useState<P>(EMPTY);
+  const [tl, setTl] = useState<"ar" | "en">(lang);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
-  const [fullName, setFullName] = useState("");
-  const [fullNameAr, setFullNameAr] = useState("");
-  const [fullNameEn, setFullNameEn] = useState("");
-  const [bioAr, setBioAr] = useState("");
-  const [bioEn, setBioEn] = useState("");
-  const [specialtyAr, setSpecialtyAr] = useState("");
-  const [specialtyEn, setSpecialtyEn] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [upload, setUpload] = useState<{
+    pct: number;
+    loaded: number;
+    total: number;
+    name: string;
+  } | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("lms_instructors")
-        .select("full_name,full_name_ar,full_name_en,bio,bio_ar,bio_en,specialty,specialty_ar,specialty_en,avatar_url")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (data) {
-        const d = data as Record<string, string | null>;
-        setFullName(d.full_name ?? "");
-        setFullNameAr(d.full_name_ar ?? d.full_name ?? "");
-        setFullNameEn(d.full_name_en ?? "");
-        setBioAr(d.bio_ar ?? d.bio ?? "");
-        setBioEn(d.bio_en ?? "");
-        setSpecialtyAr(d.specialty_ar ?? d.specialty ?? "");
-        setSpecialtyEn(d.specialty_en ?? "");
-        setAvatarUrl(d.avatar_url ?? null);
-      }
-      setLoading(false);
-    })();
+    supabase
+      .from("lms_instructors")
+      .select(
+        "full_name,full_name_ar,full_name_en,bio,bio_ar,bio_en,specialty,specialty_ar,specialty_en,avatar_url",
+      )
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        const d = (data ?? {}) as Record<string, string | null>;
+        const v: P = {
+          full_name_ar: d.full_name_ar ?? d.full_name ?? "",
+          full_name_en: d.full_name_en ?? "",
+          specialty_ar: d.specialty_ar ?? d.specialty ?? "",
+          specialty_en: d.specialty_en ?? "",
+          bio_ar: d.bio_ar ?? d.bio ?? "",
+          bio_en: d.bio_en ?? "",
+          avatar_url: d.avatar_url ?? null,
+        };
+        setLoaded(v);
+        setP(v);
+      });
   }, [user]);
 
-  const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (!loaded) return <Loading />;
+  const dirty = JSON.stringify(p) !== JSON.stringify(loaded);
+  const k = <B extends "full_name" | "specialty" | "bio">(b: B) =>
+    `${b}_${tl}` as `${B}_${"ar" | "en"}`;
+  const shown = (b: "full_name" | "specialty" | "bio") =>
+    ar ? p[`${b}_ar`] || p[`${b}_en`] : p[`${b}_en`] || p[`${b}_ar`];
+
+  const pick = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file || !user) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error(ar ? "حجم الصورة أكبر من 5 ميجابايت" : "Image larger than 5MB");
-      return;
-    }
-    setUploading(true);
-    setUploadPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
+    if (!file.type.startsWith("image/")) return void toast.error(t("اختر صورة", "Choose an image"));
+    if (file.size > 5 * 1024 * 1024)
+      return void toast.error(t("حجم الصورة أكبر من 5 ميجابايت", "Image larger than 5 MB"));
+    setUpload({ pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const ext =
+        (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
       const { publicUrl } = await uploadToSupabaseStorage({
         bucket: "lms-media",
-        path,
+        path: `${user.id}/avatar-${Date.now()}.${ext}`,
         file,
         upsert: true,
         contentType: file.type,
-        onProgress: (pct, loaded, total) => setUploadPct({ pct, loaded, total, name: file.name }),
+        onProgress: (pct, l, total) => setUpload({ pct, loaded: l, total, name: file.name }),
       });
-      setAvatarUrl(`${publicUrl}?v=${Date.now()}`);
-      toast.success(ar ? "تم رفع الصورة" : "Image uploaded");
+      setP((x) => ({ ...x, avatar_url: `${publicUrl}?v=${Date.now()}` }));
     } catch (err) {
       toast.error(toUserMessage(err));
     } finally {
-      setUploading(false);
-      setUploadPct(null);
+      setUpload(null);
     }
   };
 
-  const onSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !fullName.trim()) {
-      toast.error(ar ? "الاسم مطلوب" : "Name is required");
-      return;
-    }
+  const save = async () => {
+    if (!user) return;
+    const name = (p.full_name_ar || p.full_name_en).trim();
+    if (!name) return void toast.error(t("الاسم مطلوب", "Your name is required"));
     setSaving(true);
-    const payload = {
-      user_id: user.id,
-      full_name: (fullNameAr || fullNameEn || fullName).trim(),
-      full_name_ar: fullNameAr.trim() || null,
-      full_name_en: fullNameEn.trim() || null,
-      bio: (bioAr || bioEn).trim() || null,
-      bio_ar: bioAr.trim() || null,
-      bio_en: bioEn.trim() || null,
-      specialty: (specialtyAr || specialtyEn).trim() || null,
-      specialty_ar: specialtyAr.trim() || null,
-      specialty_en: specialtyEn.trim() || null,
-      avatar_url: avatarUrl,
-    };
-    const { error } = await supabase.from("lms_instructors").upsert(payload, { onConflict: "user_id" });
+    const { error } = await supabase.from("lms_instructors").upsert(
+      {
+        user_id: user.id,
+        full_name: name,
+        full_name_ar: p.full_name_ar.trim() || null,
+        full_name_en: p.full_name_en.trim() || null,
+        bio: (p.bio_ar || p.bio_en).trim() || null,
+        bio_ar: p.bio_ar.trim() || null,
+        bio_en: p.bio_en.trim() || null,
+        specialty: (p.specialty_ar || p.specialty_en).trim() || null,
+        specialty_ar: p.specialty_ar.trim() || null,
+        specialty_en: p.specialty_en.trim() || null,
+        avatar_url: p.avatar_url,
+      },
+      { onConflict: "user_id" },
+    );
     setSaving(false);
-    if (error) { toast.error(toUserMessage(error)); return; }
-    toast.success(ar ? "تم الحفظ" : "Saved");
-    navigate({ to: "/learning-management-system/instructor" });
+    if (error) return void toast.error(toUserMessage(error));
+    setLoaded(p);
+    toast.success(t("حُفظ ملفك", "Profile saved"));
   };
 
-  if (loading) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
+  const initial = (shown("full_name") || "?").trim().charAt(0).toUpperCase();
 
   return (
-    <div className="mx-auto max-w-2xl px-4 sm:px-6 py-8 sm:py-12">
-      <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-        {ar ? "الملف الشخصي للمدرّب" : "Instructor profile"}
-      </h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {ar ? "هذه المعلومات تظهر للطلاب على صفحات الدورات." : "This information shows to students on course pages."}
-      </p>
+    <div>
+      <PageHeader
+        eyebrow={t("مساحة المدرّب", "Instructor workspace")}
+        title={t("ملفي الشخصي", "My profile")}
+        description={t(
+          "يظهر للطلاب على صفحة كل دورة تدرّسها.",
+          "Students see this on the page of every course you teach.",
+        )}
+      />
 
-      <form onSubmit={onSave} className="mt-8 space-y-5">
-        <div className="flex items-center gap-4">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="avatar" className="h-20 w-20 rounded-2xl object-cover border border-border" />
-          ) : (
-            <div className="h-20 w-20 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
-              {(fullNameAr || fullNameEn || fullName || "?").charAt(0)}
-            </div>
-          )}
-          <div>
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPickFile} />
-            <Button type="button" variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin mx-2" /> : <Upload className="h-4 w-4 mx-2" />}
-              {ar ? "تغيير الصورة" : "Change photo"}
-            </Button>
-            <p className="mt-1 text-xs text-muted-foreground">{ar ? "حتى 5 ميجابايت" : "Up to 5MB"}</p>
-            {uploadPct && (
-              <div className="mt-2 max-w-xs">
-                <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <Panel
+          title={t("معلوماتك", "About you")}
+          actions={
+            <LangSwitch
+              value={tl}
+              onChange={setTl}
+              missing={{ ar: !p.full_name_ar.trim(), en: !p.full_name_en.trim() }}
+            />
+          }
+        >
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl"
+                aria-label={t("تغيير الصورة", "Change photo")}
+              >
+                {p.avatar_url ? (
+                  <img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="grid h-full w-full place-items-center bg-[var(--cx-teal-50)] text-[28px] font-extrabold text-[var(--cx-teal)]">
+                    {initial}
+                  </span>
+                )}
+                <span className="absolute inset-0 grid place-items-center bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                  {upload ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Camera className="h-5 w-5" />
+                  )}
+                </span>
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={pick}
+              />
+              <div className="text-[13px] text-[var(--cx-muted)]">
+                {t(
+                  "اضغط على الصورة لتغييرها. حتى 5 ميجابايت.",
+                  "Click the photo to change it. Up to 5 MB.",
+                )}
+                {upload && (
+                  <div className="mt-2 max-w-xs">
+                    <UploadProgress
+                      percent={upload.pct}
+                      loaded={upload.loaded}
+                      total={upload.total}
+                      label={upload.name}
+                      compact
+                    />
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+            <Field label={t("الاسم الكامل", "Full name")}>
+              <Input
+                dir={tl === "ar" ? "rtl" : "ltr"}
+                value={p[k("full_name")]}
+                onChange={(e) => setP({ ...p, [k("full_name")]: e.target.value })}
+              />
+            </Field>
+            <Field
+              label={t("الاختصاص", "Specialty")}
+              hint={t(
+                "مثال: مهندس بيانات، مدرّب ذكاء اصطناعي",
+                "For example: data engineer, AI trainer",
+              )}
+            >
+              <Input
+                dir={tl === "ar" ? "rtl" : "ltr"}
+                value={p[k("specialty")]}
+                onChange={(e) => setP({ ...p, [k("specialty")]: e.target.value })}
+              />
+            </Field>
+            <Field label={t("نبذة", "Bio")}>
+              <Textarea
+                rows={6}
+                dir={tl === "ar" ? "rtl" : "ltr"}
+                value={p[k("bio")]}
+                onChange={(e) => setP({ ...p, [k("bio")]: e.target.value })}
+              />
+            </Field>
           </div>
-        </div>
+        </Panel>
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <Label>الاسم الكامل (عربي)</Label>
-            <Input dir="rtl" required value={fullNameAr} onChange={(e) => { setFullNameAr(e.target.value); setFullName(e.target.value); }} />
+        <aside>
+          <div className="mb-2 text-[12px] font-extrabold uppercase tracking-[0.08em] text-[var(--cx-muted)]">
+            {t("كما يراك الطلاب", "How students see you")}
           </div>
-          <div>
-            <Label>Full name (English)</Label>
-            <Input dir="ltr" value={fullNameEn} onChange={(e) => setFullNameEn(e.target.value)} />
+          <div className="cx-card overflow-hidden">
+            <div className="h-16 bg-gradient-to-r from-[#048090] to-[#0b5560]" />
+            <div className="-mt-10 px-5 pb-5">
+              {p.avatar_url ? (
+                <img
+                  src={p.avatar_url}
+                  alt=""
+                  className="h-20 w-20 rounded-2xl border-4 border-[var(--cx-card-solid)] object-cover"
+                />
+              ) : (
+                <span className="grid h-20 w-20 place-items-center rounded-2xl border-4 border-[var(--cx-card-solid)] bg-[var(--cx-teal-50)] text-[28px] font-extrabold text-[var(--cx-teal)]">
+                  {initial}
+                </span>
+              )}
+              <div className="mt-3 text-[17px] font-extrabold" dir="auto">
+                {shown("full_name") || t("اسمك", "Your name")}
+              </div>
+              <div className="text-[13px] font-bold text-[var(--cx-teal)]" dir="auto">
+                {shown("specialty") || t("اختصاصك", "Your specialty")}
+              </div>
+              <p
+                className="mt-3 line-clamp-6 whitespace-pre-wrap text-[13.5px] leading-relaxed text-[var(--cx-ink-2)]"
+                dir="auto"
+              >
+                {shown("bio") ||
+                  t("نبذة قصيرة عنك وعن خبرتك.", "A short bio about you and your experience.")}
+              </p>
+            </div>
           </div>
-        </div>
+        </aside>
+      </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <Label>الاختصاص (عربي)</Label>
-            <Input dir="rtl" value={specialtyAr} onChange={(e) => setSpecialtyAr(e.target.value)} />
-          </div>
-          <div>
-            <Label>Specialty (English)</Label>
-            <Input dir="ltr" value={specialtyEn} onChange={(e) => setSpecialtyEn(e.target.value)} />
-          </div>
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <Label>نبذة (عربي)</Label>
-            <Textarea dir="rtl" rows={4} value={bioAr} onChange={(e) => setBioAr(e.target.value)} />
-          </div>
-          <div>
-            <Label>Bio (English)</Label>
-            <Textarea dir="ltr" rows={4} value={bioEn} onChange={(e) => setBioEn(e.target.value)} />
-          </div>
-        </div>
-
-
-        <Button type="submit" disabled={saving} className="w-full sm:w-auto">
-          {saving && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
-          {ar ? "حفظ" : "Save"}
-        </Button>
-      </form>
+      <SaveBar show={dirty} saving={saving} onSave={save} onDiscard={() => setP(loaded)} />
     </div>
   );
 }

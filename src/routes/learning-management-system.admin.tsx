@@ -1,10 +1,16 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
+import { safeLmsRedirect } from "@/lib/lms-redirect";
+import { ConsoleShell } from "@/components/console/ConsoleShell";
 
 export const Route = createFileRoute("/learning-management-system/admin")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex, nofollow" }],
+  }),
   component: AdminLayout,
 });
 
@@ -16,12 +22,30 @@ function AdminLayout() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) navigate({ to: "/learning-management-system/login" });
+    if (!user)
+      navigate({
+        to: "/learning-management-system/login",
+        search: {
+          redirect: safeLmsRedirect(`${window.location.pathname}${window.location.search}`),
+        },
+      });
     else if (role !== "admin") navigate({ to: "/learning-management-system" });
   }, [loading, user, role, navigate]);
 
   if (loading || !user || role !== "admin") {
-    return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
+    return (
+      <p
+        className="flex min-h-screen items-center justify-center gap-2 text-muted-foreground"
+        role="status"
+      >
+        <Loader2 className="h-4 w-4 animate-spin" />
+        {tr.loading}
+      </p>
+    );
   }
-  return <Outlet />;
+  return (
+    <ConsoleShell>
+      <Outlet />
+    </ConsoleShell>
+  );
 }
