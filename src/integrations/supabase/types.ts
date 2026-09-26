@@ -914,6 +914,158 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback_survey_answers: {
+        Row: {
+          created_at: string
+          id: string
+          not_applicable: boolean
+          question_key: string
+          rating: number | null
+          section_key: string
+          submission_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          not_applicable?: boolean
+          question_key: string
+          rating?: number | null
+          section_key: string
+          submission_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          not_applicable?: boolean
+          question_key?: string
+          rating?: number | null
+          section_key?: string
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_survey_answers_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_survey_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_survey_rate_limits: {
+        Row: {
+          hits: number
+          ip_hash: string
+          window_start: string
+        }
+        Insert: {
+          hits?: number
+          ip_hash: string
+          window_start: string
+        }
+        Update: {
+          hits?: number
+          ip_hash?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      feedback_survey_submissions: {
+        Row: {
+          age_range: string | null
+          completed: boolean
+          consent: boolean
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          device_type: string | null
+          general_notes: string | null
+          governorate: string | null
+          id: string
+          improvement_notes: string | null
+          internal_admin_note: string | null
+          lang: string
+          overall_rating: number | null
+          positive_notes: string | null
+          preferred_contact_method: string | null
+          problem_notes: string | null
+          recommendation_rating: number | null
+          requested_feature: string | null
+          review_status: Database["public"]["Enums"]["feedback_review_status"]
+          screenshot_path: string | null
+          services_used: string[]
+          submitted_at: string | null
+          survey_version: string
+          updated_at: string
+          usage_frequency: string | null
+          user_type: string | null
+          wants_contact: boolean
+        }
+        Insert: {
+          age_range?: string | null
+          completed?: boolean
+          consent?: boolean
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          device_type?: string | null
+          general_notes?: string | null
+          governorate?: string | null
+          id?: string
+          improvement_notes?: string | null
+          internal_admin_note?: string | null
+          lang?: string
+          overall_rating?: number | null
+          positive_notes?: string | null
+          preferred_contact_method?: string | null
+          problem_notes?: string | null
+          recommendation_rating?: number | null
+          requested_feature?: string | null
+          review_status?: Database["public"]["Enums"]["feedback_review_status"]
+          screenshot_path?: string | null
+          services_used?: string[]
+          submitted_at?: string | null
+          survey_version?: string
+          updated_at?: string
+          usage_frequency?: string | null
+          user_type?: string | null
+          wants_contact?: boolean
+        }
+        Update: {
+          age_range?: string | null
+          completed?: boolean
+          consent?: boolean
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          device_type?: string | null
+          general_notes?: string | null
+          governorate?: string | null
+          id?: string
+          improvement_notes?: string | null
+          internal_admin_note?: string | null
+          lang?: string
+          overall_rating?: number | null
+          positive_notes?: string | null
+          preferred_contact_method?: string | null
+          problem_notes?: string | null
+          recommendation_rating?: number | null
+          requested_feature?: string | null
+          review_status?: Database["public"]["Enums"]["feedback_review_status"]
+          screenshot_path?: string | null
+          services_used?: string[]
+          submitted_at?: string | null
+          survey_version?: string
+          updated_at?: string
+          usage_frequency?: string | null
+          user_type?: string | null
+          wants_contact?: boolean
+        }
+        Relationships: []
+      }
       individual_leads: {
         Row: {
           address: string | null
@@ -4831,6 +4983,7 @@ export type Database = {
         | "archived"
       dynamic_form_status: "draft" | "published" | "hidden" | "archived"
       event_registration_status: "pending" | "approved" | "rejected"
+      feedback_review_status: "new" | "in_review" | "contacted" | "closed"
       initiative_donation_status: "pending" | "confirmed" | "cancelled"
       initiative_donor_type: "individual" | "company"
       initiative_payment_status: "pending" | "confirmed" | "cancelled"
@@ -5032,6 +5185,7 @@ export const Constants = {
       ],
       dynamic_form_status: ["draft", "published", "hidden", "archived"],
       event_registration_status: ["pending", "approved", "rejected"],
+      feedback_review_status: ["new", "in_review", "contacted", "closed"],
       initiative_donation_status: ["pending", "confirmed", "cancelled"],
       initiative_donor_type: ["individual", "company"],
       initiative_payment_status: ["pending", "confirmed", "cancelled"],
