@@ -28,12 +28,12 @@ describe("course options offered by the assistant", () => {
     const [en] = toCourseOptions([row()], "en");
     expect(ar.title).toBe("أساسيات الذكاء الاصطناعي");
     expect(en.title).toBe("AI Foundations");
-    expect(ar.url).toBe("https://aisyria.org/learning-management-system/courses/ai-foundations");
+    expect(ar.url).toBe("https://www.aisyria.org/learning-management-system/courses/ai-foundations");
   });
 
   it("falls back to the course id when a course has no slug", () => {
     expect(courseUrl({ slug: null, id: "abc" })).toBe(
-      "https://aisyria.org/learning-management-system/courses/abc",
+      "https://www.aisyria.org/learning-management-system/courses/abc",
     );
   });
 

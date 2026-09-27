@@ -734,3 +734,33 @@
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
+
+.assistant-chat-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.assistant-chat-retry {
+  padding: 5px 12px;
+  border: 1px solid rgba(254, 202, 202, 0.45);
+  border-radius: 999px;
+  color: #fee2e2;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.assistant-chat-retry:hover {
+  background: rgba(254, 202, 202, 0.12);
+}
+
+.assistant-chat-link {
+  color: var(--assistant-cyan);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
