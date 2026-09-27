@@ -19,7 +19,7 @@ export const sendCertificateEmail = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => schema.parse(input))
   .handler(async ({ data, context }) => {
     const callerId = context.userId
-    let targetStudentId = data.studentId ?? callerId
+    const targetStudentId = data.studentId ?? callerId
 
     // Only admins may send on behalf of another student
     if (targetStudentId !== callerId) {
@@ -30,80 +30,6 @@ export const sendCertificateEmail = createServerFn({ method: 'POST' })
       if (!isAdmin) throw new Error('forbidden')
     }
 
-    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-
-    // Load the certificate (must exist and be unsent)
-    const { data: cert, error: certErr } = await supabaseAdmin
-      .from('lms_certificates')
-      .select('id, serial, sent_at, student_id, course_id')
-      .eq('course_id', data.courseId)
-      .eq('student_id', targetStudentId)
-      .maybeSingle()
-    if (certErr) throw new Error(certErr.message)
-    if (!cert) return { status: 'no_certificate' as const }
-    if (cert.sent_at) return { status: 'already_sent' as const, sentAt: cert.sent_at }
-
-    // Load recipient email + display name
-    const { data: userRow, error: userErr } = await supabaseAdmin.auth.admin.getUserById(targetStudentId)
-    if (userErr || !userRow.user?.email) throw new Error('user_not_found')
-    const email = userRow.user.email
-    const fullName =
-      (userRow.user.user_metadata as { full_name?: string } | null)?.full_name ||
-      email.split('@')[0]
-
-    // Load course name
-    const { data: course } = await supabaseAdmin
-      .from('lms_courses')
-      .select('title_ar, title_en, certificate_pdf_enabled')
-      .eq('id', data.courseId)
-      .maybeSingle()
-    const courseName =
-      data.lang === 'ar'
-        ? (course?.title_ar || course?.title_en || 'Course')
-        : (course?.title_en || course?.title_ar || 'Course')
-
-    // With the course's certificate switch on, attach the PDF when the name and
-    // wording to print are known. Any problem making it leaves the email as it was.
-    let pdf: Uint8Array | undefined
-    if (course?.certificate_pdf_enabled) {
-      try {
-        const { ensureCertificatePdf, CERTIFICATE_BUCKET } = await import('./certificates/certificate-pdf.server')
-        const admin = supabaseAdmin as never as import('@supabase/supabase-js').SupabaseClient
-        const result = await ensureCertificatePdf(admin, cert.id)
-        if (result.status === 'ready') {
-          pdf = result.pdf
-          if (!pdf) {
-            const { data: file } = await admin.storage.from(CERTIFICATE_BUCKET).download(result.path)
-            if (file) pdf = new Uint8Array(await file.arrayBuffer())
-          }
-        }
-      } catch (e) {
-        console.error('certificate pdf for email failed', e instanceof Error ? e.message : e)
-      }
-    }
-
-    try {
-      const { sendCertificateIssuedEmail } = await import('./certificate-email.server')
-      await sendCertificateIssuedEmail({
-        to: email,
-        fullName,
-        courseName,
-        serial: cert.serial,
-        lang: data.lang,
-        pdf,
-      })
-      await supabaseAdmin
-        .from('lms_certificates')
-        .update({ sent_at: new Date().toISOString(), email_error: null })
-        .eq('id', cert.id)
-        .is('sent_at', null)
-      return { status: 'sent' as const, serial: cert.serial }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e)
-      await supabaseAdmin
-        .from('lms_certificates')
-        .update({ email_error: msg.slice(0, 500) })
-        .eq('id', cert.id)
-      throw new Error(msg)
-    }
+    const { deliverCertificateEmail } = await import('./certificate-email.server')
+    return deliverCertificateEmail({ studentId: targetStudentId, courseId: data.courseId, lang: data.lang })
   })

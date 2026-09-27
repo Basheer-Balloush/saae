@@ -9,7 +9,7 @@ export const LMS_SKIN_LINKS = [
 
 /* Pages move here one at a time as they are redesigned. */
 const SKINNED_PATHS = [
-  /^\/learning-management-system\/student\/(quiz|player)\/[^/]+$/,
+  /^\/learning-management-system\/student\/(quiz|player|feedback)\/[^/]+$/,
   /^\/learning-management-system$/,
   /^\/learning-management-system\/(catalog|verify)$/,
   /^\/learning-management-system\/courses\/[^/]+$/,

@@ -14,11 +14,12 @@ import { QuizAttempt } from "@/components/lms/quiz/QuizAttempt";
 import { getUnansweredQuestions } from "@/lib/quiz-validation";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 import { sendCertificateEmail } from "@/lib/certificate-email.functions";
+import { CourseFeedbackPrompt } from "@/components/lms/CourseFeedbackPrompt";
 
 export const Route = createFileRoute("/learning-management-system/student/quiz/$courseId")({
   head: () => ({
     meta: [{ title: "Quizzes — SAAE Training and Learning Platform" }],
-    links: [...LMS_SKIN_LINKS, { rel: "stylesheet", href: "/lms/css/quiz.css" }],
+    links: [...LMS_SKIN_LINKS, { rel: "stylesheet", href: "/lms/css/quiz.css" }, { rel: "stylesheet", href: "/lms/css/feedback.css" }],
   }),
   validateSearch: (search: Record<string, unknown>) => ({
     quiz: typeof search.quiz === "string" ? search.quiz : undefined,
@@ -305,7 +306,15 @@ function QuizPage() {
           </div>
         </section>
       );
-    return <QuizMenu list={list} courseId={courseId} ar={ar} onBack={goToCourse} />;
+    return (
+      <QuizMenu
+        list={list}
+        courseId={courseId}
+        ar={ar}
+        onBack={goToCourse}
+        notice={list.some((q) => q.has_passed) ? <CourseFeedbackPrompt courseId={courseId} ar={ar} context="quiz" /> : null}
+      />
+    );
   }
 
   // ---------- Selected quiz views ----------
@@ -511,9 +520,9 @@ function QuizPage() {
               </Button>
             </Link>
           )}
-          {result.passed && !result.certificate_id && (
-            <p className="mt-4 text-sm text-muted-foreground">{tr.mustCompleteFirst}</p>
-          )}
+          {/* After a pass: the course feedback comes next, then the certificate
+              (or the lessons still to finish). */}
+          {result.passed ? <CourseFeedbackPrompt courseId={courseId} ar={ar} context="quiz" /> : null}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Button
               variant="outline"

@@ -112,6 +112,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LearningManagementSystemStudentQuizCourseIdRouteImport } from './routes/learning-management-system.student.quiz.$courseId'
+import { Route as LearningManagementSystemStudentFeedbackCourseIdRouteImport } from './routes/learning-management-system.student.feedback.$courseId'
 import { Route as LearningManagementSystemStudentPlayerCourseIdRouteImport } from './routes/learning-management-system.student.player.$courseId'
 import { Route as LearningManagementSystemInternshipsSlugApplyRouteImport } from './routes/learning-management-system.internships.$slug.apply'
 import { Route as LearningManagementSystemInstructorQuizResultsCourseIdRouteImport } from './routes/learning-management-system.instructor.quiz-results.$courseId'
@@ -692,6 +693,12 @@ const LearningManagementSystemStudentQuizCourseIdRoute =
     path: '/quiz/$courseId',
     getParentRoute: () => LearningManagementSystemStudentRoute,
   } as any)
+const LearningManagementSystemStudentFeedbackCourseIdRoute =
+  LearningManagementSystemStudentFeedbackCourseIdRouteImport.update({
+    id: '/feedback/$courseId',
+    path: '/feedback/$courseId',
+    getParentRoute: () => LearningManagementSystemStudentRoute,
+  } as any)
 const LearningManagementSystemStudentPlayerCourseIdRoute =
   LearningManagementSystemStudentPlayerCourseIdRouteImport.update({
     id: '/player/$courseId',
@@ -924,6 +931,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/internships/$slug/apply': typeof LearningManagementSystemInternshipsSlugApplyRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
   '/learning-management-system/student/quiz/$courseId': typeof LearningManagementSystemStudentQuizCourseIdRoute
+  '/learning-management-system/student/feedback/$courseId': typeof LearningManagementSystemStudentFeedbackCourseIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1040,6 +1048,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/internships/$slug/apply': typeof LearningManagementSystemInternshipsSlugApplyRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
   '/learning-management-system/student/quiz/$courseId': typeof LearningManagementSystemStudentQuizCourseIdRoute
+  '/learning-management-system/student/feedback/$courseId': typeof LearningManagementSystemStudentFeedbackCourseIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1165,6 +1174,7 @@ export interface FileRoutesById {
   '/learning-management-system/internships/$slug/apply': typeof LearningManagementSystemInternshipsSlugApplyRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
   '/learning-management-system/student/quiz/$courseId': typeof LearningManagementSystemStudentQuizCourseIdRoute
+  '/learning-management-system/student/feedback/$courseId': typeof LearningManagementSystemStudentFeedbackCourseIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1292,6 +1302,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/internships/$slug/apply'
     | '/learning-management-system/student/player/$courseId'
     | '/learning-management-system/student/quiz/$courseId'
+    | '/learning-management-system/student/feedback/$courseId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1408,6 +1419,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/internships/$slug/apply'
     | '/learning-management-system/student/player/$courseId'
     | '/learning-management-system/student/quiz/$courseId'
+    | '/learning-management-system/student/feedback/$courseId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1532,6 +1544,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/internships/$slug/apply'
     | '/learning-management-system/student/player/$courseId'
     | '/learning-management-system/student/quiz/$courseId'
+    | '/learning-management-system/student/feedback/$courseId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -2313,6 +2326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemStudentQuizCourseIdRouteImport
       parentRoute: typeof LearningManagementSystemStudentRoute
     }
+    '/learning-management-system/student/feedback/$courseId': {
+      id: '/learning-management-system/student/feedback/$courseId'
+      path: '/feedback/$courseId'
+      fullPath: '/learning-management-system/student/feedback/$courseId'
+      preLoaderRoute: typeof LearningManagementSystemStudentFeedbackCourseIdRouteImport
+      parentRoute: typeof LearningManagementSystemStudentRoute
+    }
     '/learning-management-system/student/player/$courseId': {
       id: '/learning-management-system/student/player/$courseId'
       path: '/player/$courseId'
@@ -2743,6 +2763,7 @@ interface LearningManagementSystemStudentRouteChildren {
   LearningManagementSystemStudentIndexRoute: typeof LearningManagementSystemStudentIndexRoute
   LearningManagementSystemStudentPlayerCourseIdRoute: typeof LearningManagementSystemStudentPlayerCourseIdRoute
   LearningManagementSystemStudentQuizCourseIdRoute: typeof LearningManagementSystemStudentQuizCourseIdRoute
+  LearningManagementSystemStudentFeedbackCourseIdRoute: typeof LearningManagementSystemStudentFeedbackCourseIdRoute
 }
 
 const LearningManagementSystemStudentRouteChildren: LearningManagementSystemStudentRouteChildren =
@@ -2755,6 +2776,8 @@ const LearningManagementSystemStudentRouteChildren: LearningManagementSystemStud
       LearningManagementSystemStudentPlayerCourseIdRoute,
     LearningManagementSystemStudentQuizCourseIdRoute:
       LearningManagementSystemStudentQuizCourseIdRoute,
+    LearningManagementSystemStudentFeedbackCourseIdRoute:
+      LearningManagementSystemStudentFeedbackCourseIdRoute,
   }
 
 const LearningManagementSystemStudentRouteWithChildren =

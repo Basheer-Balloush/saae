@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -24,9 +25,16 @@ export type QuizListItem = {
   attempts_used: number;
   has_passed: boolean;
 };
-type Props = { list: QuizListItem[]; courseId: string; ar: boolean; onBack: () => void };
+type Props = {
+  list: QuizListItem[];
+  courseId: string;
+  ar: boolean;
+  onBack: () => void;
+  /** Shown under the heading, e.g. the next step after the quiz. */
+  notice?: ReactNode;
+};
 
-export function QuizMenu({ list, courseId, ar, onBack }: Props) {
+export function QuizMenu({ list, courseId, ar, onBack, notice }: Props) {
   const passed = list.filter((q) => q.has_passed).length;
   const available = list.filter(
     (q) => !q.has_passed && q.attempts_used < q.max_attempts && q.question_count > 0,
@@ -65,6 +73,7 @@ export function QuizMenu({ list, courseId, ar, onBack }: Props) {
           </div>
         </dl>
       </header>
+      {notice}
       {list.length === 0 ? (
         <div className="quiz-empty">
           <ClipboardList size={36} aria-hidden="true" />

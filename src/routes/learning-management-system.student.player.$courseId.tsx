@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { QAPanel } from "@/components/lms/QAPanel";
 import { AssignmentsPanel } from "@/components/lms/AssignmentsPanel";
 import { LessonVideo } from "@/components/lms/player/LessonVideo";
+import { CourseFeedbackPrompt } from "@/components/lms/CourseFeedbackPrompt";
 import { useLessonWatch } from "@/hooks/useLessonWatch";
 import { COMPLETE_SHARE, watchedSeconds } from "@/lib/lesson-watch";
 import { compareOrder, openLessonIds, orderLessons, upNextLesson } from "@/lib/lesson-sequence";
@@ -21,7 +22,7 @@ import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 export const Route = createFileRoute("/learning-management-system/student/player/$courseId")({
   head: () => ({
     meta: [{ title: "Lesson — SAAE Training and Learning Platform" }],
-    links: [...LMS_SKIN_LINKS, { rel: "stylesheet", href: "/lms/css/player.css" }],
+    links: [...LMS_SKIN_LINKS, { rel: "stylesheet", href: "/lms/css/player.css" }, { rel: "stylesheet", href: "/lms/css/feedback.css" }],
   }),
   component: Player,
 });
@@ -382,6 +383,10 @@ function Player() {
           </Link>
         </div>
       </header>
+
+      {!preview && lessons.length > 0 && doneCount === lessons.length ? (
+        <CourseFeedbackPrompt courseId={courseId} ar={ar} context="player" />
+      ) : null}
 
       <div className="player-layout">
         <div className="player-stage-wrap">
