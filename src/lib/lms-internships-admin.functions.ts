@@ -271,11 +271,15 @@ export const adminDeleteInternship = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: any; userId: string };
     await assertLmsAdmin(supabase, userId);
-    const { count } = await supabase
+    // Deleting an internship deletes its applications too (their answers,
+    // notes, history and snapshots cascade). Admins have no DELETE policy on
+    // applications, so this step runs with the service role after the check above.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: appsError } = await supabaseAdmin
       .from("internship_applications")
-      .select("id", { count: "exact", head: true })
+      .delete()
       .eq("opportunity_id", data.id);
-    if ((count ?? 0) > 0) throw new Error("has_applications");
+    if (appsError) throw new Error(appsError.message);
     const { error } = await supabase
       .from("internship_opportunities")
       .delete()
