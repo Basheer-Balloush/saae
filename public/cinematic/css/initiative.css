@@ -810,5 +810,6 @@ html[dir="rtl"] .goal-labels { text-transform: none; }
   .directory-head { display: contents; }
   .directory-hero .directory-back { order: -3; }
   .directory-head-row { order: -2; display: block; }
+  .directory-hero h1 { font-size: clamp(2.2rem, 10vw, 3.4rem); }
   .directory-hero .eyebrow { order: -1; margin-top: 18px; }
 }
