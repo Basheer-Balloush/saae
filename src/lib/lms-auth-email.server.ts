@@ -34,8 +34,16 @@ function hashIdentifier(kind: string, value: string) {
   return createHash('sha256').update(`${kind}:${value}:${pepper}`).digest('hex')
 }
 
-async function enforceRateLimit(kind: 'signup' | 'reset' | 'resend', email: string, maxPerWindow = 5, windowSeconds = 900) {
-  const identifierHash = hashIdentifier(kind, email)
+class RateLimitedError extends Error {
+  constructor(readonly retryAfterSeconds: number) {
+    super('RATE_LIMITED')
+  }
+}
+
+// `bucket` keeps a second counter under the same kind (the SQL only accepts
+// signup/reset/resend), e.g. a short gap on top of the 15-minute window.
+async function enforceRateLimit(kind: 'signup' | 'reset' | 'resend', email: string, maxPerWindow = 5, windowSeconds = 900, bucket: string = kind) {
+  const identifierHash = hashIdentifier(bucket, email)
   const { data, error } = await supabaseAdmin.rpc('lms_auth_check_rate_limit', {
     _kind: kind,
     _identifier_hash: identifierHash,
@@ -49,7 +57,7 @@ async function enforceRateLimit(kind: 'signup' | 'reset' | 'resend', email: stri
   }
   const parsed = (data ?? {}) as { allowed?: boolean; retry_after_seconds?: number }
   if (parsed.allowed === false) {
-    throw new Error('RATE_LIMITED')
+    throw new RateLimitedError(parsed.retry_after_seconds ?? windowSeconds)
   }
 }
 
@@ -192,9 +200,12 @@ export async function createLmsAccount(input: SignupInput): Promise<CreateAccoun
 /** Back-compat alias for the previous export name. */
 export const signUpWithResendConfirmation = createLmsAccount
 
+const RESEND_GAP_SECONDS = 60
+
 /**
  * Re-send the signup confirmation link.
- * Enumeration-safe: always returns the same shape, whatever the account state.
+ * Enumeration-safe: the answer never depends on the account state; it only
+ * says when the resend limit for this email was hit.
  * No-ops when the server-side switch has confirmation disabled (accounts are
  * already active in that mode). Delegates the send to Supabase Auth so the
  * user's password is never touched; native Supabase SMTP delivers the dashboard template. Configure SMTP and
@@ -203,16 +214,20 @@ export const signUpWithResendConfirmation = createLmsAccount
 export async function resendLmsConfirmation(input: ResetInput) {
   const email = input.email.trim().toLowerCase()
 
-  if (!(await isEmailConfirmationRequired())) return { sent: true }
+  if (!(await isEmailConfirmationRequired())) return { sent: true as const }
 
+  // One resend per 60 seconds, and at most 3 per 15 minutes. The database
+  // counts atomically, so parallel clicks cannot slip past either limit.
   try {
+    await enforceRateLimit('resend', email, 1, RESEND_GAP_SECONDS, 'resend-gap')
     await enforceRateLimit('resend', email, 3, 900)
-  } catch {
-    return { sent: true }
+  } catch (err) {
+    const retryAfter = err instanceof RateLimitedError ? err.retryAfterSeconds : RESEND_GAP_SECONDS
+    return { sent: false as const, reason: 'rate_limited' as const, retryAfter }
   }
 
   // Native Supabase SMTP sends this message; enforce the staging guard first.
-  try { assertEmailRecipientAllowed(email) } catch { return { sent: true } }
+  try { assertEmailRecipientAllowed(email) } catch { return { sent: true as const } }
   const { error } = await supabaseAdmin.auth.resend({
     type: 'signup',
     email,
@@ -224,7 +239,7 @@ export async function resendLmsConfirmation(input: ResetInput) {
     console.error('resend confirmation failed', { message: error.message })
   }
 
-  return { sent: true }
+  return { sent: true as const }
 }
 
 

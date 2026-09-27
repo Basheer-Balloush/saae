@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -22,6 +22,11 @@ export const Route = createFileRoute("/learning-management-system/signup")({
   component: LmsSignup,
 });
 
+
+// Wait 60 s after signup before the first resend, then 90 s after each one.
+// The server holds its own limit; this keeps the button honest.
+const FIRST_RESEND_WAIT = 60;
+const NEXT_RESEND_WAIT = 90;
 
 const ARABIC_NAME_RE = /^[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿\s]+$/;
 
@@ -65,18 +70,48 @@ function LmsSignup() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ email: string; confirmationRequired: boolean } | null>(null);
   const [resending, setResending] = useState(false);
+  const [resendReadyAt, setResendReadyAt] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
+  // State updates land a render late, so a double click could fire twice.
+  const resendLock = useRef(false);
   const signUpUser = useServerFn(signUpLmsUser);
   const resendConfirmation = useServerFn(resendLmsConfirmationEmail);
 
+  const resendWait = Math.max(0, Math.ceil((resendReadyAt - now) / 1000));
+
+  useEffect(() => {
+    if (resendReadyAt <= Date.now()) return;
+    const id = window.setInterval(() => {
+      const t = Date.now();
+      setNow(t);
+      if (t >= resendReadyAt) window.clearInterval(id);
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [resendReadyAt]);
+
+  const startResendWait = (seconds: number) => {
+    const t = Date.now();
+    setNow(t);
+    setResendReadyAt(t + seconds * 1000);
+  };
+
   const onResend = async () => {
-    if (!result || resending) return;
+    if (!result || resendLock.current || resendReadyAt > Date.now()) return;
+    resendLock.current = true;
     setResending(true);
     try {
-      await resendConfirmation({ data: { email: result.email, lang } });
-      toast.success(lang === "ar" ? "أعدنا إرسال رابط التأكيد" : "Confirmation link sent again");
+      const res = await resendConfirmation({ data: { email: result.email, lang } });
+      if (res.sent) {
+        toast.success(lang === "ar" ? "أعدنا إرسال رابط التأكيد" : "Confirmation link sent again");
+        startResendWait(NEXT_RESEND_WAIT);
+      } else {
+        toast.error(lang === "ar" ? "طلبات كثيرة، انتظر قليلاً ثم حاول مجدداً" : "Too many requests. Please wait before trying again");
+        startResendWait(Math.max(res.retryAfter, 1));
+      }
     } catch (err: unknown) {
       toast.error(localizeAuthError(err, lang, tr.authFailed));
     } finally {
+      resendLock.current = false;
       setResending(false);
     }
   };
@@ -113,6 +148,7 @@ function LmsSignup() {
       // The server is the single source of truth for whether confirmation is required.
       const confirmationRequired = res?.confirmationRequired !== false;
       setResult({ email: res?.email ?? parsed.data.email, confirmationRequired });
+      if (confirmationRequired) startResendWait(FIRST_RESEND_WAIT);
       toast.success(confirmationRequired ? tr.signedUp : tr.signedUpConfirmed);
     } catch (err: unknown) {
       toast.error(localizeAuthError(err, lang, tr.authFailed));
@@ -163,9 +199,12 @@ function LmsSignup() {
           </p>
 
           {result.confirmationRequired && (
-            <button type="button" className="auth-secondary" onClick={onResend} disabled={resending}>
+            <button type="button" className="auth-secondary" onClick={onResend} disabled={resending || resendWait > 0}>
               {resending && <Loader2 className="h-4 w-4 animate-spin" />}
               {ar ? "إعادة إرسال رابط التأكيد" : "Resend confirmation email"}
+              {resendWait > 0 && !resending && (
+                <span dir="ltr">({Math.floor(resendWait / 60)}:{String(resendWait % 60).padStart(2, "0")})</span>
+              )}
             </button>
           )}
 
