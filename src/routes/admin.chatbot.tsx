@@ -15,6 +15,7 @@ import {
   Plus,
   RotateCcw,
   Trash2,
+  Upload,
   UserRound,
   type LucideIcon,
 } from "lucide-react";
@@ -36,6 +37,7 @@ import {
   type VisitorProfile,
 } from "@/lib/admin-chat.functions";
 import { FEEDBACK_CATEGORIES, feedbackCategoryLabel } from "@/lib/chat-feedback";
+import { splitKnowledgeSections } from "@/lib/knowledge-sections";
 import { confirmDialog } from "@/hooks/useConfirm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -917,11 +919,41 @@ function KnowledgeStream({
   const [text, setText] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // A text with "## headings" is stored as one entry per heading.
+  const sections = useMemo(() => splitKnowledgeSections(title, text), [title, text]);
+  const titleNeeded = sections.length === 1 && !/^##\s/m.test(text);
+
+  const pickFile = async (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > 200_000) {
+      toast.error(t("الملف أكبر من 200,000 حرف", "The file is over 200,000 characters"));
+      return;
+    }
+    setText(await file.text());
+    if (!title.trim()) setTitle(file.name.replace(/\.(md|markdown|txt)$/i, ""));
+  };
+
   const submit = async () => {
     setSaving(true);
     try {
-      await addFn({ data: { title: title.trim(), text: text.trim() } });
-      toast.success(t("أُضيف النص وتعلّمه البوت", "Added. The bot has learnt it."));
+      const res = await addFn({ data: { title: title.trim() || "—", text: text.trim() } });
+      if (res.failed.length > 0) {
+        toast.error(
+          t(
+            `أُضيف ${fmtNum(res.added, lang)}، وفشل ${fmtNum(res.failed.length, lang)}: ${res.failed.map((f) => f.title).join("، ")}`,
+            `Added ${res.added}, ${res.failed.length} failed: ${res.failed.map((f) => f.title).join(", ")}`,
+          ),
+        );
+      } else if (res.added > 1) {
+        toast.success(
+          t(
+            `أُضيفت ${fmtNum(res.added, lang)} نصوص وتعلّمها البوت`,
+            `Added ${res.added} texts. The bot has learnt them.`,
+          ),
+        );
+      } else {
+        toast.success(t("أُضيف النص وتعلّمه البوت", "Added. The bot has learnt it."));
+      }
       setTitle("");
       setText("");
       setAdding(false);
@@ -948,7 +980,7 @@ function KnowledgeStream({
       toast.error(toUserMessage(e));
     }
   };
-  const valid = title.trim().length > 0 && text.trim().length >= 10;
+  const valid = sections.length > 0 && (!titleNeeded || title.trim().length > 0);
 
   return (
     <div>
@@ -1027,11 +1059,24 @@ function KnowledgeStream({
               <SheetTitle>{t("نص جديد للبوت", "New text for the bot")}</SheetTitle>
               <p className="text-[13px] text-[var(--cx-muted)]">
                 {t(
-                  "اكتب بلغة واضحة. العربية والإنجليزية تعملان.",
-                  "Write it plainly. Arabic or English both work.",
+                  "اكتب بلغة واضحة. العربية والإنجليزية تعملان. لإضافة عدة نصوص مرة واحدة، ارفع ملف ‎.md‎ أو الصق نصاً يبدأ كل جزء منه بسطر ‎## العنوان‎.",
+                  "Write it plainly. Arabic or English both work. To add several texts at once, upload a .md file or paste text where each part starts with a “## Title” line.",
                 )}
               </p>
             </SheetHeader>
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-[var(--cx-line)] px-4 py-3 text-[13px] font-semibold text-[var(--cx-muted)] hover:text-[var(--cx-ink)]">
+              <Upload className="h-4 w-4" aria-hidden="true" />
+              {t("ارفع ملف ‎.md‎ أو ‎.txt‎", "Upload a .md or .txt file")}
+              <input
+                type="file"
+                accept=".md,.markdown,.txt,text/markdown,text/plain"
+                className="sr-only"
+                onChange={(e) => {
+                  void pickFile(e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+              />
+            </label>
             <Field label={t("العنوان", "Title")}>
               <Input
                 value={title}
@@ -1040,7 +1085,17 @@ function KnowledgeStream({
                 dir="auto"
               />
             </Field>
-            <Field label={t("النص", "Text")} hint={`${fmtNum(text.length, lang)} / 200,000`}>
+            <Field
+              label={t("النص", "Text")}
+              hint={
+                sections.length > 1
+                  ? t(
+                      `${fmtNum(sections.length, lang)} نصاً منفصلاً، واحد لكل عنوان ‎##‎ · ${fmtNum(text.length, lang)} / 200,000`,
+                      `${sections.length} separate texts, one per “##” heading · ${fmtNum(text.length, lang)} / 200,000`,
+                    )
+                  : `${fmtNum(text.length, lang)} / 200,000`
+              }
+            >
               <Textarea
                 rows={16}
                 value={text}
@@ -1051,7 +1106,11 @@ function KnowledgeStream({
             </Field>
             <Button className="w-full" size="lg" onClick={submit} disabled={saving || !valid}>
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {saving ? t("يتعلّمه البوت…", "The bot is learning it…") : t("إضافة", "Add")}
+              {saving
+                ? t("يتعلّمه البوت…", "The bot is learning it…")
+                : sections.length > 1
+                  ? t(`إضافة ${fmtNum(sections.length, lang)} نصوص`, `Add ${sections.length} texts`)
+                  : t("إضافة", "Add")}
             </Button>
           </div>
         </SheetContent>

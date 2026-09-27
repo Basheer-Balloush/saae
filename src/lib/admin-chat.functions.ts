@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { chunkText, embedTexts } from "@/lib/embeddings.server";
+import { splitKnowledgeSections, type KnowledgeSection } from "@/lib/knowledge-sections";
 
 async function assertAdmin(sb: SupabaseClient, userId: string) {
   const { data, error } = await sb
@@ -173,60 +174,80 @@ export const addKnowledgeText = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const sb = context.supabase;
-
-    const { data: doc, error: insErr } = await sb
-      .from("chat_knowledge_documents")
-      .insert({
-        title: data.title,
-        source_type: "text",
-        original_text: data.text,
-        status: "processing",
-        created_by: context.userId,
-      })
-      .select("id")
-      .single();
-    if (insErr || !doc) throw new Error(insErr?.message ?? "insert failed");
-
-    try {
-      const chunks = chunkText(data.text);
-      const batchSize = 64;
-      const rows: Array<{
-        document_id: string;
-        chunk_index: number;
-        content: string;
-        embedding: string;
-      }> = [];
-      for (let i = 0; i < chunks.length; i += batchSize) {
-        const batch = chunks.slice(i, i + batchSize);
-        const vectors = await embedTexts(batch);
-        for (let j = 0; j < batch.length; j++) {
-          rows.push({
-            document_id: doc.id,
-            chunk_index: i + j,
-            content: batch[j],
-            embedding: `[${vectors[j].join(",")}]`,
-          });
-        }
+    // A file or paste with "## headings" becomes one document per heading.
+    const sections = splitKnowledgeSections(data.title, data.text);
+    if (sections.length === 0) throw new Error("No text to add");
+    const added: Array<{ documentId: string; chunkCount: number }> = [];
+    const failed: Array<{ title: string; error: string }> = [];
+    for (const section of sections) {
+      try {
+        added.push(await ingestKnowledgeText(context.supabase, context.userId, section));
+      } catch (e) {
+        failed.push({ title: section.title, error: e instanceof Error ? e.message : String(e) });
       }
-      if (rows.length > 0) {
-        const { error: chunkErr } = await sb.from("chat_knowledge_chunks").insert(rows);
-        if (chunkErr) throw new Error(chunkErr.message);
-      }
-      await sb
-        .from("chat_knowledge_documents")
-        .update({ status: "ready", chunk_count: rows.length, error_message: null })
-        .eq("id", doc.id);
-      return { ok: true, documentId: doc.id, chunkCount: rows.length };
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      await sb
-        .from("chat_knowledge_documents")
-        .update({ status: "failed", error_message: msg })
-        .eq("id", doc.id);
-      throw new Error(msg);
     }
+    // Nothing stored at all: say why, the way a single failed entry always has.
+    if (added.length === 0) throw new Error(failed[0]?.error ?? "insert failed");
+    return { ok: true, added: added.length, failed };
   });
+
+async function ingestKnowledgeText(
+  sb: SupabaseClient,
+  userId: string,
+  section: KnowledgeSection,
+): Promise<{ documentId: string; chunkCount: number }> {
+  const { data: doc, error: insErr } = await sb
+    .from("chat_knowledge_documents")
+    .insert({
+      title: section.title,
+      source_type: "text",
+      original_text: section.text,
+      status: "processing",
+      created_by: userId,
+    })
+    .select("id")
+    .single();
+  if (insErr || !doc) throw new Error(insErr?.message ?? "insert failed");
+
+  try {
+    const chunks = chunkText(section.text);
+    const batchSize = 64;
+    const rows: Array<{
+      document_id: string;
+      chunk_index: number;
+      content: string;
+      embedding: string;
+    }> = [];
+    for (let i = 0; i < chunks.length; i += batchSize) {
+      const batch = chunks.slice(i, i + batchSize);
+      const vectors = await embedTexts(batch);
+      for (let j = 0; j < batch.length; j++) {
+        rows.push({
+          document_id: doc.id,
+          chunk_index: i + j,
+          content: batch[j],
+          embedding: `[${vectors[j].join(",")}]`,
+        });
+      }
+    }
+    if (rows.length > 0) {
+      const { error: chunkErr } = await sb.from("chat_knowledge_chunks").insert(rows);
+      if (chunkErr) throw new Error(chunkErr.message);
+    }
+    await sb
+      .from("chat_knowledge_documents")
+      .update({ status: "ready", chunk_count: rows.length, error_message: null })
+      .eq("id", doc.id);
+    return { documentId: doc.id, chunkCount: rows.length };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    await sb
+      .from("chat_knowledge_documents")
+      .update({ status: "failed", error_message: msg })
+      .eq("id", doc.id);
+    throw new Error(msg);
+  }
+}
 
 export const deleteKnowledgeDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
