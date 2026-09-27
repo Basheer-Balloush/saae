@@ -16,6 +16,11 @@ type Entry = { match: (low: string) => boolean; ar: string; en: string };
 
 const RULES: Entry[] = [
   {
+    match: (l) => l.includes("lesson locked"),
+    ar: "هذا الدرس مقفل — أكمل الدروس السابقة أولاً.",
+    en: "This lesson is locked — finish the earlier lessons first.",
+  },
+  {
     match: (l) => l.includes("on-site courses"),
     ar: "هذه الدورة محفوظة كدورة حضورية — غيّر نمط التقديم إلى «أونلاين» أولاً.",
     en: "This course is saved as on-site — switch the delivery mode to Online first.",

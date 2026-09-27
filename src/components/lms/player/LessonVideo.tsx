@@ -6,6 +6,8 @@ type Props = {
   src: string;
   /** Bunny Stream embed (an iframe speaking player.js) rather than a file or HLS URL. */
   embed: boolean;
+  /** Start playing as soon as it loads (when the student was moved on from the last lesson). */
+  autoplay?: boolean;
   /** Current position and length, several times a second while playing. */
   onTime: (seconds: number, duration: number | undefined) => void;
   /** Pause, seek or buffering: breaks the chain of watched time. */
@@ -15,8 +17,28 @@ type Props = {
 
 const PLAYERJS_EVENTS = ["timeupdate", "play", "pause", "seeking", "seeked", "ended"];
 
+/** Bunny's embed starts on its own with autoplay=true. The signed token
+    covers only the video and expiry, so an extra parameter keeps it valid. */
+function withAutoplay(src: string) {
+  try {
+    const url = new URL(src);
+    url.searchParams.set("autoplay", "true");
+    return url.toString();
+  } catch {
+    return src;
+  }
+}
+
 /** The lesson video. Mount it with `key={lesson.id}` so each lesson starts fresh. */
-export function LessonVideo({ title, src, embed, onTime, onBreak, onEnded }: Props) {
+export function LessonVideo({
+  title,
+  src,
+  embed,
+  autoplay = false,
+  onTime,
+  onBreak,
+  onEnded,
+}: Props) {
   const handlers = useRef({ onTime, onBreak, onEnded });
   handlers.current = { onTime, onBreak, onEnded };
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -120,7 +142,7 @@ export function LessonVideo({ title, src, embed, onTime, onBreak, onEnded }: Pro
     return (
       <iframe
         ref={iframeRef}
-        src={src}
+        src={autoplay ? withAutoplay(src) : src}
         title={title}
         allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
         allowFullScreen
@@ -135,6 +157,7 @@ export function LessonVideo({ title, src, embed, onTime, onBreak, onEnded }: Pro
       controls
       controlsList="nodownload"
       playsInline
+      autoPlay={autoplay}
       aria-label={title}
       onTimeUpdate={(e) => onTime(e.currentTarget.currentTime, e.currentTarget.duration)}
       onPlay={onBreak}

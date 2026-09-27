@@ -2,51 +2,61 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   WatchTracker,
   emptyProgress,
-  isFullyWatched,
+  hasWatchedEnough,
   loadWatch,
   saveWatch,
-  watchedFraction,
+  watchedShare,
   type WatchProgress,
 } from "@/lib/lesson-watch";
 
 const SAVE_EVERY_MS = 5000;
+const EMPTY = emptyProgress();
+
+type Shown = { lessonId: string | undefined; progress: WatchProgress };
 
 /** Tracks how much of one lesson's video this student has watched, kept in
     this browser between visits. Re-renders only when the whole percentage,
-    the length or the unlocked state changes, not on every player tick. */
+    the length or the completed state changes, not on every player tick. */
 export function useLessonWatch(userId: string | undefined, lessonId: string | undefined) {
   const trackerRef = useRef<WatchTracker | null>(null);
-  const [progress, setProgress] = useState<WatchProgress>(emptyProgress);
-  const shown = useRef({ pct: -1, duration: 0, done: false });
+  const [shown, setShown] = useState<Shown>({ lessonId: undefined, progress: EMPTY });
+  const last = useRef({
+    lessonId: undefined as string | undefined,
+    pct: -1,
+    duration: 0,
+    enough: false,
+  });
   const savedAt = useRef(0);
 
-  const publish = useCallback((p: WatchProgress, force = false) => {
+  const publish = useCallback((forLesson: string | undefined, p: WatchProgress, force = false) => {
     const next = {
-      pct: Math.floor(watchedFraction(p) * 100),
+      lessonId: forLesson,
+      pct: Math.floor(watchedShare(p) * 100),
       duration: p.duration,
-      done: isFullyWatched(p),
+      enough: hasWatchedEnough(p),
     };
-    const prev = shown.current;
+    const prev = last.current;
     if (
       force ||
+      next.lessonId !== prev.lessonId ||
       next.pct !== prev.pct ||
       next.duration !== prev.duration ||
-      next.done !== prev.done
+      next.enough !== prev.enough
     ) {
-      shown.current = next;
-      setProgress(p);
+      last.current = next;
+      setShown({ lessonId: forLesson, progress: p });
     }
   }, []);
 
   useEffect(() => {
     if (!userId || !lessonId) {
       trackerRef.current = null;
-      publish(emptyProgress(), true);
+      publish(lessonId, EMPTY, true);
       return;
     }
     const tracker = new WatchTracker(loadWatch(userId, lessonId));
     trackerRef.current = tracker;
-    publish(tracker.progress, true);
+    publish(lessonId, tracker.progress, true);
     const flush = () => saveWatch(userId, lessonId, tracker.progress);
     window.addEventListener("pagehide", flush);
     return () => {
@@ -60,7 +70,7 @@ export function useLessonWatch(userId: string | undefined, lessonId: string | un
     (seconds: number, duration: number | undefined) => {
       const tracker = trackerRef.current;
       if (!tracker || !tracker.report(seconds, duration, performance.now())) return;
-      publish(tracker.progress);
+      publish(lessonId, tracker.progress);
       const now = Date.now();
       if (userId && lessonId && now - savedAt.current > SAVE_EVERY_MS) {
         savedAt.current = now;
@@ -75,13 +85,19 @@ export function useLessonWatch(userId: string | undefined, lessonId: string | un
   /** Reads the tracker directly, for decisions made inside player events. */
   const isWatchedNow = useCallback(() => {
     const tracker = trackerRef.current;
-    return !!tracker && isFullyWatched(tracker.progress);
+    return !!tracker && hasWatchedEnough(tracker.progress);
   }, []);
+
+  // Until the effect above has loaded this lesson, report nothing watched,
+  // so the previous lesson's progress never shows against the new one.
+  const progress = shown.lessonId === lessonId ? shown.progress : EMPTY;
 
   return {
     progress,
-    unlocked: isFullyWatched(progress),
-    fraction: watchedFraction(progress),
+    /** Enough of the video has been watched to complete the lesson. */
+    enough: hasWatchedEnough(progress),
+    /** Share of the whole video watched, 0 to 1. */
+    share: watchedShare(progress),
     report,
     interrupt,
     isWatchedNow,

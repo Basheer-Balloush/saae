@@ -12,7 +12,8 @@ import { QAPanel } from "@/components/lms/QAPanel";
 import { AssignmentsPanel } from "@/components/lms/AssignmentsPanel";
 import { LessonVideo } from "@/components/lms/player/LessonVideo";
 import { useLessonWatch } from "@/hooks/useLessonWatch";
-import { watchedSeconds } from "@/lib/lesson-watch";
+import { COMPLETE_SHARE, watchedSeconds } from "@/lib/lesson-watch";
+import { compareOrder, openLessonIds, orderLessons, upNextLesson } from "@/lib/lesson-sequence";
 import { getBunnyPlayback } from "@/lib/bunny-stream.functions";
 import { isOnsite } from "@/lib/lms-course-destination";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
@@ -36,6 +37,10 @@ const pick = (lang: "ar" | "en", ar: string | null | undefined, en: string | nul
 type Progress = { lesson_id: string; is_completed: boolean };
 
 const hasVideo = (l: Lesson) => (l.video_provider === "bunny" ? !!l.video_uid : !!l.video_url);
+
+/** Seconds before a finished video moves the student on to the next lesson. */
+const ADVANCE_SECONDS = 5;
+const GOAL_PCT = Math.round(COMPLETE_SHARE * 100);
 
 /** 75 -> "1:15", 3725 -> "1:02:05". */
 const clock = (s: number) => {
@@ -62,8 +67,17 @@ function Player() {
   const [isEmbedSrc, setIsEmbedSrc] = useState(false);
   const [loading, setLoading] = useState(true);
   const [finishing, setFinishing] = useState(false);
+  // The lesson whose video just played to the end, and the lesson to start
+  // playing on arrival (after moving on from a finished one).
+  const [endedId, setEndedId] = useState<string | null>(null);
+  const [autoplayId, setAutoplayId] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
   const topRef = useRef<HTMLDivElement | null>(null);
   const finishRef = useRef<HTMLElement | null>(null);
+  const savingRef = useRef(false);
+  const autoTriedRef = useRef<string | null>(null);
+  const currentIdRef = useRef<string | null>(null);
+  currentIdRef.current = currentId;
 
   useEffect(() => {
     if (!user) return;
@@ -83,7 +97,7 @@ function Player() {
 
       const { data: secs } = await supabase.from("lms_sections")
         .select("id,title,title_ar,title_en,display_order").eq("course_id", courseId).order("display_order");
-      const orderedSecs = ((secs as Section[]) ?? []).slice().sort((a, b) => a.display_order - b.display_order);
+      const orderedSecs = ((secs as Section[]) ?? []).slice().sort(compareOrder);
       setSections(orderedSecs);
       if (orderedSecs.length) {
         const ids = orderedSecs.map((s) => s.id);
@@ -91,13 +105,7 @@ function Player() {
           supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,video_status,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids),
           supabase.from("lms_lesson_progress").select("lesson_id,is_completed").eq("student_id", user.id),
         ]);
-        const secOrder = new Map(orderedSecs.map((s, i) => [s.id, i]));
-        const list = ((lss as Lesson[]) ?? []).slice().sort((a, b) => {
-          const sa = secOrder.get(a.section_id) ?? 0;
-          const sb = secOrder.get(b.section_id) ?? 0;
-          if (sa !== sb) return sa - sb;
-          return a.display_order - b.display_order;
-        });
+        const list = orderLessons(orderedSecs, (lss as Lesson[]) ?? []);
         const prog = (prs as Progress[]) ?? [];
         setLessons(list);
         setProgress(prog);
@@ -172,30 +180,101 @@ function Player() {
 
   const done = current ? isDone(current.id) : false;
   const videoLesson = current ? hasVideo(current) : false;
-  // A lesson with a video can be finished only once the video has been watched.
-  const canFinish = !!current && !done && (!videoLesson || watch.unlocked);
+  // A lesson with a video completes once enough of it has been watched.
+  const canFinish = !!current && !done && (!videoLesson || watch.enough);
 
-  const goTo = (id: string) => {
+  // Lessons open in order: students may replay any completed lesson and play
+  // the first one not yet completed. The instructor and admins can browse all.
+  const isStaff = role === "admin" || (!!user && !!course?.instructor_id && user.id === course.instructor_id);
+  const doneIds = useMemo(
+    () => new Set(progress.filter((p) => p.is_completed).map((p) => p.lesson_id)),
+    [progress],
+  );
+  const openIds = useMemo(() => openLessonIds(lessons, doneIds), [lessons, doneIds]);
+  const isOpen = (id: string) => isStaff || openIds.has(id);
+  const lessonTitle = (l: Lesson) => pick(lang, l.title_ar, l.title_en, l.title);
+  /** Where "Next lesson" leads once `lessonId` is completed. */
+  const upNextAfter = (lessonId: string, done: ReadonlySet<string>) => {
+    if (!isStaff) return upNextLesson(lessons, lessonId, done);
+    const i = lessons.findIndex((l) => l.id === lessonId);
+    return i >= 0 ? lessons[i + 1] ?? null : null;
+  };
+  const upNext = current ? upNextAfter(current.id, doneIds) : null;
+
+  /** Opens a lesson. `unlocked` skips the lock check when the caller has just
+      completed the lesson that opens it and state has not caught up yet. */
+  const goTo = (id: string, opts: { autoplay?: boolean; unlocked?: boolean } = {}) => {
+    if (!opts.unlocked && !isOpen(id)) {
+      const blocker = lessons.find((l) => !isDone(l.id));
+      toast.info(
+        blocker
+          ? ar ? `أكمل درس «${lessonTitle(blocker)}» أولاً لفتح هذا الدرس.` : `Finish “${lessonTitle(blocker)}” first to unlock this lesson.`
+          : ar ? "هذا الدرس مقفل." : "This lesson is locked.",
+      );
+      return;
+    }
+    setEndedId(null);
+    setAutoplayId(opts.autoplay ? id : null);
     setCurrentId(id);
     topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+  const goToRef = useRef(goTo);
+  goToRef.current = goTo;
 
-  const markComplete = async () => {
-    if (!user || !current || done || finishing) return;
-    if (videoLesson && !watch.isWatchedNow()) return;
+  /** Records the current lesson as completed. `advance` moves on to the next
+      lesson afterwards; the automatic save at 90% leaves the video playing. */
+  const markComplete = async (advance: boolean) => {
+    const lesson = current;
+    if (!user || !lesson || isDone(lesson.id) || savingRef.current) return;
+    if (hasVideo(lesson) && !watch.isWatchedNow()) return;
+    const next = upNextAfter(lesson.id, new Set([...doneIds, lesson.id]));
+    savingRef.current = true;
     setFinishing(true);
     const { error } = await supabase.from("lms_lesson_progress").upsert({
-      lesson_id: current.id,
+      lesson_id: lesson.id,
       student_id: user.id,
       is_completed: true,
       completed_at: new Date().toISOString(),
     }, { onConflict: "lesson_id,student_id" });
+    savingRef.current = false;
     setFinishing(false);
     if (error) { toast.error(toUserMessage(error)); return; }
-    setProgress((p) => [...p.filter((x) => x.lesson_id !== current.id), { lesson_id: current.id, is_completed: true }]);
+    setProgress((p) => [...p.filter((x) => x.lesson_id !== lesson.id), { lesson_id: lesson.id, is_completed: true }]);
     toast.success(ar ? "أحسنت! اكتمل الدرس." : "Lesson completed.");
-    if (nextLesson) goTo(nextLesson.id);
+    if (advance && next && currentIdRef.current === lesson.id) goToRef.current(next.id, { autoplay: true, unlocked: true });
   };
+  const markRef = useRef(markComplete);
+  markRef.current = markComplete;
+
+  // Watching 90% of the video completes the lesson, once per visit to it.
+  // If the save fails, "Finish lesson" stays available to try again.
+  useEffect(() => {
+    if (!current || done || !videoLesson || !watch.enough) return;
+    if (autoTriedRef.current === current.id) return;
+    autoTriedRef.current = current.id;
+    void markRef.current(false);
+  }, [current, done, videoLesson, watch.enough]);
+
+  // When a completed lesson's video plays to the end, count down and move on.
+  const nextId = upNext?.id ?? null;
+  const advancing = !!current && endedId === current.id && done && !!nextId;
+  useEffect(() => {
+    if (!advancing || !nextId) {
+      setCountdown(null);
+      return;
+    }
+    let left = ADVANCE_SECONDS;
+    setCountdown(left);
+    const timer = window.setInterval(() => {
+      left -= 1;
+      if (left > 0) setCountdown(left);
+      else {
+        window.clearInterval(timer);
+        goToRef.current(nextId, { autoplay: true });
+      }
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [advancing, nextId]);
 
   if (loading) {
     return (
@@ -233,23 +312,32 @@ function Player() {
 
   const section = sections.find((s) => s.id === current.section_id);
   const sectionTitle = section ? pick(lang, section.title_ar, section.title_en, section.title) : "";
-  const watchedPct = Math.floor(watch.fraction * 100);
+  const watchedPct = Math.floor(watch.share * 100);
   const duration = watch.progress.duration;
   const watched = Math.min(duration, watchedSeconds(watch.progress.spans));
+  const nextTitle = upNext ? lessonTitle(upNext) : "";
 
-  const finishState = done ? "done" : !videoLesson ? "free" : watch.unlocked ? "ready" : "locked";
+  const finishState = done ? "done" : !videoLesson ? "free" : watch.enough ? "ready" : "locked";
   const finishNote =
     finishState === "done"
-      ? ar ? "أكملت هذا الدرس." : "You have completed this lesson."
+      ? countdown !== null
+        ? ar ? `أكملت هذا الدرس. ننتقل بك إلى الدرس التالي: ${nextTitle}` : `Lesson complete. Taking you to the next lesson: ${nextTitle}`
+        : upNext
+          ? ar ? `أكملت هذا الدرس. التالي: ${nextTitle}` : `Lesson complete. Up next: ${nextTitle}`
+          : doneCount === lessons.length
+            ? ar ? "أكملت جميع دروس الدورة." : "You have completed every lesson in this course."
+            : ar ? "أكملت هذا الدرس." : "You have completed this lesson."
       : finishState === "free"
         ? ar ? "لا يحتوي هذا الدرس على فيديو. أنهِه بعد مراجعة المحتوى." : "This lesson has no video. Finish it once you have gone through the content."
         : finishState === "ready"
-          ? ar ? "أحسنت! شاهدت الفيديو كاملاً، يمكنك الآن إنهاء الدرس." : "Well done: you watched the whole video. You can finish the lesson now."
+          ? finishing
+            ? ar ? `أحسنت! شاهدت ${GOAL_PCT}% من الفيديو. جارٍ حفظ إكمال الدرس…` : `Well done: you watched ${GOAL_PCT}% of the video. Saving your progress…`
+            : ar ? `شاهدت ${GOAL_PCT}% من الفيديو. اضغط «إنهاء الدرس» لحفظ تقدّمك.` : `You watched ${GOAL_PCT}% of the video. Press “Finish lesson” to save your progress.`
           : !videoSrc
-            ? ar ? "يُفتح زر الإنهاء بعد مشاهدة الفيديو كاملاً، حين يصبح متاحاً." : "“Finish lesson” unlocks once the video is available and watched in full."
+            ? ar ? `يكتمل الدرس بعد مشاهدة ${GOAL_PCT}% من الفيديو، حين يصبح متاحاً.` : `The lesson completes once ${GOAL_PCT}% of the video is watched, when the video is available.`
             : watchedPct > 0
-              ? ar ? `شاهدت ${watchedPct}% من الفيديو. أكمل المشاهدة لفتح زر الإنهاء.` : `You have watched ${watchedPct}% of the video. Keep watching to unlock “Finish lesson”.`
-              : ar ? "شاهد الفيديو حتى النهاية لفتح زر إنهاء الدرس." : "Watch the video to the end to unlock “Finish lesson”.";
+              ? ar ? `شاهدت ${watchedPct}% من الفيديو. عند ${GOAL_PCT}% يكتمل الدرس ويُفتح الدرس التالي.` : `You have watched ${watchedPct}% of the video. At ${GOAL_PCT}% the lesson completes and the next one unlocks.`
+              : ar ? `شاهد ${GOAL_PCT}% من الفيديو ليكتمل الدرس ويُفتح الدرس التالي.` : `Watch ${GOAL_PCT}% of the video to complete the lesson and unlock the next one.`;
 
   return (
     <div className="player-page page-shell" dir={ar ? "rtl" : "ltr"} ref={topRef}>
@@ -287,9 +375,13 @@ function Player() {
                 title={currentTitle}
                 src={videoSrc}
                 embed={isEmbedSrc}
+                autoplay={autoplayId === current.id}
                 onTime={watch.report}
                 onBreak={watch.interrupt}
-                onEnded={() => finishRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })}
+                onEnded={() => {
+                  setEndedId(current.id);
+                  finishRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                }}
               />
             ) : (
               <div className="player-stage-note">
@@ -327,8 +419,10 @@ function Player() {
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={watchedPct}
+                  aria-valuetext={ar ? `${watchedPct}% من ${GOAL_PCT}% المطلوبة` : `${watchedPct}% of the ${GOAL_PCT}% needed`}
                 >
                   <span style={{ inlineSize: `${watchedPct}%` }} />
+                  <i className="player-meter-goal" style={{ insetInlineStart: `${GOAL_PCT}%` }} aria-hidden="true" />
                 </div>
                 <span className="player-meter-time">
                   {duration > 0 ? `${clock(watched)} / ${clock(duration)}` : "0:00"}
@@ -337,18 +431,30 @@ function Player() {
             ) : null}
           </div>
           {done ? (
-            nextLesson ? (
-              <button type="button" className="action action-primary" onClick={() => goTo(nextLesson.id)}>
-                {ar ? "الدرس التالي" : "Next lesson"}
-              </button>
+            upNext ? (
+              <div className="player-finish-actions">
+                {countdown !== null ? (
+                  <button type="button" className="lms-reset player-stay" onClick={() => setEndedId(null)}>
+                    {ar ? "ابقَ هنا" : "Stay here"}
+                  </button>
+                ) : null}
+                <button type="button" className="action action-primary" onClick={() => goTo(upNext.id, { autoplay: true })}>
+                  {upNext === nextLesson ? (ar ? "الدرس التالي" : "Next lesson") : ar ? "تابع التعلّم" : "Continue learning"}
+                  {countdown !== null ? <span className="player-countdown" data-slot="countdown" aria-hidden="true">{countdown}</span> : null}
+                </button>
+              </div>
             ) : (
               <span className="player-done-chip">
                 <CheckCircle2 aria-hidden="true" />
                 {tr.completed}
               </span>
             )
+          ) : finishState === "locked" ? (
+            <button type="button" className="action action-primary" disabled>
+              {nextLesson ? (ar ? "الدرس التالي" : "Next lesson") : ar ? "إنهاء الدرس" : "Finish lesson"}
+            </button>
           ) : (
-            <button type="button" className="action action-primary" onClick={markComplete} disabled={!canFinish || finishing}>
+            <button type="button" className="action action-primary" onClick={() => markComplete(true)} disabled={!canFinish || finishing}>
               {ar ? "إنهاء الدرس" : "Finish lesson"}
             </button>
           )}
@@ -360,7 +466,7 @@ function Player() {
               {ar ? "الدرس السابق" : "Previous lesson"}
             </button>
           ) : <span />}
-          {nextLesson && !done ? (
+          {nextLesson && !done && isStaff ? (
             <button type="button" className="lms-reset" onClick={() => goTo(nextLesson.id)}>
               {ar ? "تخطَّ إلى الدرس التالي" : "Skip to next lesson"}
             </button>
@@ -399,24 +505,23 @@ function Player() {
                     {sectionLessons.map((l) => {
                       const lessonDone = isDone(l.id);
                       const active = l.id === current.id;
+                      const locked = !isOpen(l.id);
                       const n = lessons.findIndex((x) => x.id === l.id) + 1;
+                      const kind = hasVideo(l) ? (ar ? "فيديو" : "Video") : ar ? "قراءة" : "Reading";
                       return (
                         <li key={l.id}>
                           <button
                             type="button"
-                            className={cn("player-lesson", active && "is-active", lessonDone && "is-done")}
+                            className={cn("player-lesson", active && "is-active", lessonDone && "is-done", locked && "is-locked")}
                             aria-current={active ? "step" : undefined}
+                            aria-disabled={locked || undefined}
                             onClick={() => goTo(l.id)}
                           >
-                            {lessonDone ? <CheckCircle2 aria-hidden="true" /> : active ? <PlayCircle aria-hidden="true" /> : <Circle aria-hidden="true" />}
+                            {lessonDone ? <CheckCircle2 aria-hidden="true" /> : active ? <PlayCircle aria-hidden="true" /> : locked ? <Lock aria-hidden="true" /> : <Circle aria-hidden="true" />}
                             <span className="player-lesson-text">
-                              <span className="player-lesson-title">{n}. {pick(lang, l.title_ar, l.title_en, l.title)}</span>
+                              <span className="player-lesson-title">{n}. {lessonTitle(l)}</span>
                               <small>
-                                {lessonDone
-                                  ? tr.completed
-                                  : hasVideo(l)
-                                    ? ar ? "فيديو" : "Video"
-                                    : ar ? "قراءة" : "Reading"}
+                                {lessonDone ? tr.completed : locked ? `${kind} · ${ar ? "مقفل" : "Locked"}` : kind}
                               </small>
                             </span>
                           </button>
@@ -461,7 +566,7 @@ function Player() {
           <QAPanel
             lessonId={current.id}
             user={user}
-            isInstructor={role === "admin" || (!!user && !!course?.instructor_id && user.id === course.instructor_id)}
+            isInstructor={isStaff}
             lang={lang}
           />
         </div>

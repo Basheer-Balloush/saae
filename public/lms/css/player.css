@@ -1,5 +1,6 @@
-/* The lesson player: video, the finish panel that unlocks after the video is
-   watched, and the course outline. Scoped to .lms-skin like the other LMS
+/* The lesson player: video, the finish panel that completes the lesson once
+   90% of the video is watched, and the course outline, where lessons open one
+   at a time. Scoped to .lms-skin like the other LMS
    sheets. Lesson rows sit in `aside ul li` so lms-db.css's pill skin skips
    them; every other button here is a house .action pill or a .lms-reset link. */
 
@@ -44,6 +45,10 @@
 .lms-skin .player-finish.is-done .player-finish-note svg { color: var(--lms-green); }
 .lms-skin .player-done-chip { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 999px; background: rgba(168, 207, 126, .12); color: #c1e99b; font-size: .88rem; font-weight: 800; }
 .lms-skin .player-done-chip svg { width: 18px; height: 18px; }
+.lms-skin .player-finish-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 20px; }
+.lms-skin .player-stay { font-size: .9rem; }
+/* Seconds left before moving on; sits above the pill's hover fill. */
+.lms-skin .player-countdown { position: relative; z-index: 3; display: inline-grid; place-items: center; min-width: 26px; height: 26px; margin-inline-start: 10px; border-radius: 999px; background: rgba(2, 20, 26, .28); font-size: .82rem; font-variant-numeric: tabular-nums; }
 
 /* Progress meters (watched share of the video; lessons done in the course). */
 .lms-skin .player-meter { display: flex; align-items: center; gap: 12px; }
@@ -51,6 +56,8 @@
 .lms-skin .player-meter-track { position: relative; height: 8px; overflow: hidden; border-radius: 999px; background: rgba(184, 232, 240, .12); }
 .lms-skin .player-meter-track > span { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: inherit; background: linear-gradient(90deg, var(--lms-turquoise), var(--lms-lift)); transition: inline-size .4s ease; }
 .lms-skin .player-page[dir="rtl"] .player-meter-track > span { background: linear-gradient(270deg, var(--lms-turquoise), var(--lms-lift)); }
+/* The 90% mark: where the lesson completes. */
+.lms-skin .player-meter-goal { position: absolute; inset-block: 0; width: 2px; margin-inline-start: -1px; background: rgba(231, 241, 240, .75); }
 .lms-skin .player-meter-time { direction: ltr; color: var(--lms-muted); font-size: .82rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* Previous / skip links */
@@ -76,6 +83,10 @@
 .lms-skin .player-lesson-text { display: grid; gap: 2px; min-width: 0; }
 .lms-skin .player-lesson-title { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: .92rem; font-weight: 700; line-height: 1.55; overflow-wrap: anywhere; }
 .lms-skin .player-lesson.is-active .player-lesson-title { color: var(--lms-paper); font-weight: 800; }
+/* Not open yet: every earlier lesson must be completed first. */
+.lms-skin .player-lesson.is-locked { color: rgba(231, 241, 240, .5); cursor: not-allowed; }
+.lms-skin .player-lesson.is-locked:hover { background: transparent; }
+.lms-skin .player-lesson.is-locked svg { color: rgba(184, 232, 240, .35); }
 .lms-skin .player-lesson small { color: var(--lms-muted); font-size: .76rem; font-weight: 700; }
 
 /* Lesson content, files, assignments and Q&A under the video. */
@@ -99,6 +110,7 @@
   .lms-skin .player-stage { margin-inline: calc((var(--lms-page) - 100vw) / 2); border-inline: 0; border-radius: 0; }
   .lms-skin .player-finish { padding: 16px; }
   .lms-skin .player-finish > .player-done-chip { width: 100%; justify-content: center; }
+  .lms-skin .player-finish-actions { width: 100%; justify-content: space-between; }
   .lms-skin .player-panels .pro-card { padding: 22px 18px; }
 }
 

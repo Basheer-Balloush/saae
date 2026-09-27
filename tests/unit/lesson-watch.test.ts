@@ -2,12 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   WatchTracker,
   addSpan,
-  isFullyWatched,
+  hasWatchedEnough,
   loadWatch,
   requiredSeconds,
   saveWatch,
-  watchedFraction,
   watchedSeconds,
+  watchedShare,
 } from "@/lib/lesson-watch";
 
 /** Plays from `from` to `to` at `rate`, reporting every 250 ms of wall time. */
@@ -47,20 +47,40 @@ describe("watched spans", () => {
     ).toBe(10);
   });
 
-  it("asks for the whole video less a small allowance", () => {
-    expect(requiredSeconds(60)).toBe(58);
-    expect(requiredSeconds(35 * 60)).toBe(35 * 60 - 15);
+  it("asks for 90% of the video", () => {
+    expect(requiredSeconds(600)).toBe(540);
+    expect(requiredSeconds(78 * 60 + 53)).toBeCloseTo(4259.7, 5);
     expect(requiredSeconds(0)).toBe(Infinity);
   });
 });
 
 describe("watch tracker", () => {
-  it("unlocks after the video is played through", () => {
+  it("completes after the video is played through", () => {
     const t = new WatchTracker();
     const clock = { now: 0 };
     play(t, clock, 0, 600);
-    expect(isFullyWatched(t.progress)).toBe(true);
-    expect(watchedFraction(t.progress)).toBe(1);
+    expect(hasWatchedEnough(t.progress)).toBe(true);
+    expect(watchedShare(t.progress)).toBe(1);
+  });
+
+  it("completes at 90% of the video, not before", () => {
+    const t = new WatchTracker();
+    const clock = { now: 0 };
+    play(t, clock, 0, 530);
+    expect(hasWatchedEnough(t.progress)).toBe(false);
+    expect(watchedShare(t.progress)).toBeCloseTo(530 / 600, 5);
+    play(t, clock, 530.25, 541);
+    expect(hasWatchedEnough(t.progress)).toBe(true);
+  });
+
+  it("adds up separate sittings and progress saved from an earlier visit", () => {
+    const t = new WatchTracker({ duration: 600, spans: [[0, 300]] });
+    const clock = { now: 0 };
+    play(t, clock, 300, 450);
+    t.interrupt();
+    expect(hasWatchedEnough(t.progress)).toBe(false);
+    play(t, clock, 450, 545);
+    expect(hasWatchedEnough(t.progress)).toBe(true);
   });
 
   it("does not count dragging straight to the end", () => {
@@ -70,7 +90,7 @@ describe("watch tracker", () => {
     t.report(599, 600, clock.now + 300);
     t.report(600, 600, clock.now + 550);
     expect(watchedSeconds(t.progress.spans)).toBeCloseTo(21, 5);
-    expect(isFullyWatched(t.progress)).toBe(false);
+    expect(hasWatchedEnough(t.progress)).toBe(false);
   });
 
   it("does not count 5-second keyboard skips", () => {
@@ -93,11 +113,12 @@ describe("watch tracker", () => {
     expect(watchedSeconds(t.progress.spans)).toBeCloseTo(10, 5);
   });
 
-  it("counts playback at 2x speed", () => {
+  it.each([0.5, 1.25, 1.5, 2, 4])("counts playback at %sx speed the same", (rate) => {
     const t = new WatchTracker();
     const clock = { now: 0 };
-    play(t, clock, 0, 600, 2);
-    expect(isFullyWatched(t.progress)).toBe(true);
+    play(t, clock, 0, 541, rate);
+    expect(hasWatchedEnough(t.progress)).toBe(true);
+    expect(watchedSeconds(t.progress.spans)).toBeGreaterThan(540);
   });
 
   it("does not count rewatched parts twice", () => {

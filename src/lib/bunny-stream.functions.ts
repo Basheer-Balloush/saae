@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createHash } from "crypto";
 import { lessonStatusFromBunnyVideo, type LessonVideoStatus } from "@/lib/bunny-webhook-status";
+import { openLessonIds, orderLessons } from "@/lib/lesson-sequence";
 
 /**
  * Bunny Stream integration.
@@ -178,7 +179,8 @@ export const createBunnyUpload = createServerFn({ method: "POST" })
 
 /**
  * Authenticated: return a short-lived signed Bunny embed URL for the lesson's video.
- * Requires the student to be enrolled in the course (or be the instructor / admin).
+ * Requires the student to be enrolled in the course (or be the instructor / admin),
+ * and, for a student, the lesson to be open: every earlier lesson completed.
  */
 export const getBunnyPlayback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -231,6 +233,28 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
         .eq("course_id", l.lms_sections.course_id)
         .maybeSingle();
       if (!enr) throw new Error("Forbidden: not enrolled");
+
+      // Lessons open in order, as in the player: a completed lesson or the
+      // first one not yet completed. The embed URL is signed, so refusing it
+      // here keeps a locked lesson's video closed.
+      const { data: secs } = await supabase
+        .from("lms_sections")
+        .select("id, display_order")
+        .eq("course_id", l.lms_sections.course_id);
+      const sectionIds = (secs ?? []).map((s) => s.id);
+      const [{ data: courseLessons }, { data: doneRows }] = await Promise.all([
+        supabase.from("lms_lessons").select("id, section_id, display_order").in("section_id", sectionIds),
+        supabase
+          .from("lms_lesson_progress")
+          .select("lesson_id")
+          .eq("student_id", userId)
+          .eq("is_completed", true),
+      ]);
+      const ordered = orderLessons(secs ?? [], courseLessons ?? []);
+      const done = new Set((doneRows ?? []).map((r) => r.lesson_id));
+      if (!openLessonIds(ordered, done).has(data.lessonId)) {
+        throw new Error("Lesson locked: finish the earlier lessons first");
+      }
     }
 
     // The webhook can be missing or late. Before telling the viewer the video
