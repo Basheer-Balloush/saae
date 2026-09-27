@@ -660,7 +660,9 @@ function Questions({
     onChange(list.filter((_, j) => j !== i));
     setOpen(null);
   };
-  const label = (q: QuestionInput) => (tl === "ar" ? q.label_ar : q.label_en);
+  // Header preview: the page's text language first, the other one as fallback.
+  const label = (q: QuestionInput) =>
+    tl === "ar" ? q.label_ar || q.label_en : q.label_en || q.label_ar;
 
   return (
     <div className="space-y-2">
@@ -695,9 +697,15 @@ function Questions({
                 >
                   {label(q) || t("بلا نص بعد", "No text yet")}
                 </span>
-                <span className="text-[12px] text-[var(--cx-muted)]">
+                <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-[var(--cx-muted)]">
                   {ar ? QUESTION_KIND_UI[q.kind].ar : QUESTION_KIND_UI[q.kind].en}
                   {q.is_required ? ` · ${t("مطلوب", "Required")}` : ""}
+                  {!q.label_ar.trim() && (
+                    <Pill tone="orange">{t("ينقصه النص العربي", "Arabic missing")}</Pill>
+                  )}
+                  {!q.label_en.trim() && (
+                    <Pill tone="orange">{t("ينقصه النص الإنجليزي", "English missing")}</Pill>
+                  )}
                 </span>
               </span>
               <ChevronDown
@@ -706,34 +714,22 @@ function Questions({
             </button>
             {isOpen && (
               <div className="space-y-3 border-t border-[var(--cx-line-2)] p-3.5">
-                <Field label={t("نص السؤال", "Question")}>
-                  <Input
-                    dir={tl === "ar" ? "rtl" : "ltr"}
-                    maxLength={300}
-                    value={label(q)}
-                    onChange={(e) =>
-                      update(
-                        i,
-                        tl === "ar" ? { label_ar: e.target.value } : { label_en: e.target.value },
-                      )
-                    }
+                <div className="grid gap-3 md:grid-cols-2">
+                  <QuestionText
+                    lang="ar"
+                    label={q.label_ar}
+                    help={q.help_ar}
+                    onLabel={(x) => update(i, { label_ar: x })}
+                    onHelp={(x) => update(i, { help_ar: x || null })}
                   />
-                </Field>
-                <Field label={t("شرح صغير (اختياري)", "Help text (optional)")}>
-                  <Input
-                    dir={tl === "ar" ? "rtl" : "ltr"}
-                    maxLength={600}
-                    value={(tl === "ar" ? q.help_ar : q.help_en) ?? ""}
-                    onChange={(e) =>
-                      update(
-                        i,
-                        tl === "ar"
-                          ? { help_ar: e.target.value || null }
-                          : { help_en: e.target.value || null },
-                      )
-                    }
+                  <QuestionText
+                    lang="en"
+                    label={q.label_en}
+                    help={q.help_en}
+                    onLabel={(x) => update(i, { label_en: x })}
+                    onHelp={(x) => update(i, { help_en: x || null })}
                   />
-                </Field>
+                </div>
                 <div className="flex flex-wrap items-end gap-3">
                   <Field label={t("نوع الإجابة", "Answer type")}>
                     <select
@@ -813,6 +809,64 @@ function Questions({
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+/** One language of a question: its text and optional help, side by side with the other. */
+function QuestionText({
+  lang,
+  label,
+  help,
+  onLabel,
+  onHelp,
+}: {
+  lang: L;
+  label: string;
+  help: string | null | undefined;
+  onLabel: (v: string) => void;
+  onHelp: (v: string) => void;
+}) {
+  const { t } = useT();
+  const isAr = lang === "ar";
+  const empty = !label.trim();
+  return (
+    <div
+      dir={isAr ? "rtl" : "ltr"}
+      className={`space-y-2.5 rounded-lg border p-3 ${empty ? "border-[rgba(249,156,0,0.4)] bg-[var(--cx-orange-50)]" : "border-[var(--cx-line-2)] bg-[var(--cx-raise)]"}`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1.5 text-[12.5px] font-extrabold text-[var(--cx-teal)]">
+          <span className="grid h-5 min-w-5 place-items-center rounded bg-[var(--cx-teal-50)] px-1 text-[10.5px]">
+            {isAr ? "ع" : "EN"}
+          </span>
+          {isAr ? "العربية" : "English"}
+        </span>
+        {empty && (
+          <span className="text-[11.5px] font-bold text-[var(--cx-orange-ink)]">
+            {t("مطلوب", "Required")}
+          </span>
+        )}
+      </div>
+      <Field label={isAr ? "نص السؤال" : "Question"}>
+        <Input
+          lang={lang}
+          maxLength={300}
+          value={label}
+          placeholder={
+            isAr ? "مثال: لماذا تريد الانضمام إلى هذه الفرصة؟" : "e.g. Why do you want to join?"
+          }
+          onChange={(e) => onLabel(e.target.value)}
+        />
+      </Field>
+      <Field label={isAr ? "شرح صغير (اختياري)" : "Help text (optional)"}>
+        <Input
+          lang={lang}
+          maxLength={600}
+          value={help ?? ""}
+          onChange={(e) => onHelp(e.target.value)}
+        />
+      </Field>
     </div>
   );
 }
