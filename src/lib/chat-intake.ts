@@ -26,7 +26,7 @@ export type CourseOption = {
 };
 
 export const courseUrl = (row: { slug: string | null; id: string }) =>
-  `https://aisyria.org/learning-management-system/courses/${row.slug || row.id}`;
+  `https://www.aisyria.org/learning-management-system/courses/${row.slug || row.id}`;
 
 /* Course prices are stored in Syrian pounds and shown that way across the site
    (CoursePrice renders "ل.س 500" / "500 SYP"), so the assistant must quote the

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseChoices } from "../../src/lib/chat-choices";
+import { hidePartialChoices, parseChoices } from "../../src/lib/chat-choices";
 
 describe("answer buttons", () => {
   it("takes the options off the end and leaves the question readable", () => {
@@ -84,5 +84,17 @@ describe("the shapes an Arabic reply actually arrives in", () => {
   it("ignores a marker buried far above the end of a long message", () => {
     const text = [line, "سطر", "سطر", "سطر آخر"].join("\n");
     expect(parseChoices(text).choices).toEqual([]);
+  });
+});
+
+describe("choices while the answer is still streaming", () => {
+  it("holds back a choices line that is not finished yet", () => {
+    expect(hidePartialChoices("ما مجالك؟\n[[choices: البيانات | البرم")).toBe("ما مجالك؟");
+    expect(hidePartialChoices("ما مجالك؟\n[")).toBe("ما مجالك؟");
+  });
+
+  it("leaves finished text alone", () => {
+    expect(hidePartialChoices("ما مجالك؟\n[[choices: أ | ب]]")).toBe("ما مجالك؟\n[[choices: أ | ب]]");
+    expect(hidePartialChoices("نص عادي")).toBe("نص عادي");
   });
 });

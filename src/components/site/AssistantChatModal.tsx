@@ -4,8 +4,8 @@ import { ArrowUp, Building2, GraduationCap, Handshake, Loader2, X } from "lucide
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { loadChatSession, saveChatSession, type ChatSession } from "@/lib/chat-session";
-import { parseChoices } from "@/lib/chat-choices";
-import { formatMessage } from "@/lib/chat-format";
+import { hidePartialChoices, parseChoices } from "@/lib/chat-choices";
+import { chatErrorText, formatMessage } from "@/lib/chat-format";
 import { useLang } from "@/lib/i18n";
 import "./assistant-chat-modal.css";
 
@@ -46,7 +46,7 @@ export function AssistantChatModal({
     [sessionId, lang],
   );
 
-  const { messages, sendMessage, setMessages, status, error } = useChat({
+  const { messages, sendMessage, setMessages, status, error, regenerate, clearError } = useChat({
     transport,
     messages: session.messages as UIMessage[],
   });
@@ -69,8 +69,16 @@ export function AssistantChatModal({
   const isLoading = status === "submitted" || status === "streaming";
   const [processingStage, setProcessingStage] = useState<"thinking" | "analyzing">("thinking");
   const lastMessage = messages[messages.length - 1];
+  const messageText = (message: UIMessage) =>
+    message.parts.map((part) => (part.type === "text" ? part.text : "")).join("");
+  // The answer is shown as it streams in. Until its first words arrive (or while
+  // it is only calling tools), the thinking indicator stands in for it.
+  const streamingId =
+    status === "streaming" && lastMessage?.role === "assistant" ? lastMessage.id : null;
+  const streamingHasText =
+    streamingId !== null && hidePartialChoices(messageText(lastMessage)).trim().length > 0;
   const visibleMessages =
-    status === "streaming" && lastMessage?.role === "assistant" ? messages.slice(0, -1) : messages;
+    streamingId !== null && !streamingHasText ? messages.slice(0, -1) : messages;
   const suggestions = [
     {
       icon: GraduationCap,
@@ -119,6 +127,9 @@ export function AssistantChatModal({
     if (!open) return;
     const el = scrollRef.current;
     if (!el) return;
+    // While an answer streams, only follow it if the visitor is reading the end;
+    // someone who scrolled up to reread something stays where they are.
+    if (status === "streaming" && el.scrollHeight - el.scrollTop - el.clientHeight > 160) return;
     const id = requestAnimationFrame(() => {
       el.scrollTo({ top: el.scrollHeight, behavior: messages.length > 2 ? "auto" : "smooth" });
     });
@@ -268,9 +279,8 @@ export function AssistantChatModal({
               {messages.length > 0 && (
                 <div className="assistant-chat-thread">
                   {visibleMessages.map((message, index) => {
-                    const raw = message.parts
-                      .map((part) => (part.type === "text" ? part.text : ""))
-                      .join("");
+                    const full = messageText(message);
+                    const raw = message.id === streamingId ? hidePartialChoices(full) : full;
                     const isUser = message.role === "user";
                     const { text, choices } = isUser
                       ? { text: raw, choices: [] }
@@ -301,7 +311,17 @@ export function AssistantChatModal({
                             {isUser
                               ? text
                               : formatMessage(text).map((seg, si) =>
-                                  seg.bold ? (
+                                  seg.href ? (
+                                    <a
+                                      key={si}
+                                      href={seg.href}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="assistant-chat-link"
+                                    >
+                                      {seg.bold ? <strong>{seg.text}</strong> : seg.text}
+                                    </a>
+                                  ) : seg.bold ? (
                                     <strong key={si}>{seg.text}</strong>
                                   ) : (
                                     <span key={si}>{seg.text}</span>
@@ -327,7 +347,7 @@ export function AssistantChatModal({
                     );
                   })}
 
-                  {isLoading && (
+                  {isLoading && !streamingHasText && (
                     <div className="assistant-chat-message is-assistant">
                       <span className="assistant-chat-message-avatar" aria-hidden="true">
                         <img src="/cinematic/images/abu-al-joud-3d.webp" alt="" />
@@ -349,7 +369,23 @@ export function AssistantChatModal({
                     </div>
                   )}
 
-                  {error && <div className="assistant-chat-error">{error.message}</div>}
+                  {error && (
+                    <div className="assistant-chat-error" role="alert">
+                      <span>
+                        {chatErrorText(error.message, isRtl ? "ar" : "en")}
+                      </span>
+                      <button
+                        type="button"
+                        className="assistant-chat-retry"
+                        onClick={() => {
+                          clearError();
+                          void regenerate();
+                        }}
+                      >
+                        {isRtl ? "إعادة المحاولة" : "Try again"}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
