@@ -50,6 +50,7 @@ export const Route = createFileRoute("/initiative/sponsors")({
       { rel: "canonical", href: "https://aisyria.org/initiative/sponsors" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
       { rel: "stylesheet", href: "/cinematic/css/initiative.css" },
+      { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
       { rel: "stylesheet", href: "/cinematic/css/db-content.css" },
     ],
   }),

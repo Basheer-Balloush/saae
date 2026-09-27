@@ -17,19 +17,30 @@
     <section class="directory-hero" aria-labelledby="directory-title">
       <div class="hero-grid" aria-hidden="true"></div>
       <div class="page-shell hero-copy">
-        <a class="directory-back" href="/initiative"><span aria-hidden="true" class="directory-back-arrow">←</span> <span data-i18n="backToInitiative">One Million Syrian AI Users</span></a>
-        <p class="eyebrow" data-i18n="directoryEyebrow">Sponsors &amp; contributors</p>
-        <h1 id="directory-title"><span data-i18n="directoryTitleA">Every seat</span> <span class="hero-title-rest" data-i18n="directoryTitleB">someone opened.</span></h1>
-        <p class="hero-lede" data-i18n="directoryLede">The organisations and people who have paid for Syrians to learn AI. Every seat they open is a learner who starts for free.</p>
+        <div class="directory-head">
+          <a class="directory-back" href="/initiative"><span aria-hidden="true" class="directory-back-arrow">←</span> <span data-i18n="backToInitiative">One Million Syrian AI Users</span></a>
+          <p class="eyebrow" data-i18n="directoryEyebrow">Sponsors &amp; contributors</p>
+          <div class="directory-head-row">
+            <h1 id="directory-title"><span data-i18n="directoryTitleA">Every seat</span> <span class="hero-title-rest" data-i18n="directoryTitleB">someone opened.</span></h1>
+            <p class="hero-lede" data-i18n="directoryLede">The organisations and people who have paid for Syrians to learn AI. Every seat they open is a learner who starts for free.</p>
+          </div>
+        </div>
         <dl class="directory-stats">
           <div><dt data-i18n="statSponsors">Sponsors</dt><dd><!-- db:sponsor-count:start -->—<!-- db:sponsor-count:end --></dd></div>
           <div><dt data-i18n="statSeats">Seats opened</dt><dd><!-- db:sponsor-seats:start -->—<!-- db:sponsor-seats:end --></dd></div>
           <div><dt data-i18n="statAmount">Contributed</dt><dd><!-- db:sponsor-amount:start -->—<!-- db:sponsor-amount:end --></dd></div>
         </dl>
+        <div class="directory-stats-actions">
+          <a class="motion-button" href="#sponsors-list">
+            <span class="circle" aria-hidden="true"></span>
+            <span class="motion-icon" aria-hidden="true"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+            <span class="button-text" data-i18n="viewAllSponsors">View all sponsors</span>
+          </a>
+        </div>
       </div>
     </section>
 
-    <section class="sponsors-section directory-list" aria-labelledby="directory-list-title">
+    <section class="sponsors-section directory-list" id="sponsors-list" aria-labelledby="directory-list-title">
       <div class="page-shell">
         <h2 class="sr-only" id="directory-list-title" data-i18n="directoryListTitle">All sponsors, by seats opened</h2>
         <div class="sponsor-band reveal">
