@@ -196,6 +196,16 @@ async function ingestKnowledgeText(
   userId: string,
   section: KnowledgeSection,
 ): Promise<{ documentId: string; chunkCount: number }> {
+  // Re-adding an entry replaces an earlier failed attempt with the same title,
+  // so a fixed upload doesn't leave failed duplicates behind. Ready entries
+  // with that title are left alone.
+  await sb
+    .from("chat_knowledge_documents")
+    .delete()
+    .eq("title", section.title)
+    .eq("status", "failed")
+    .is("file_path", null);
+
   const { data: doc, error: insErr } = await sb
     .from("chat_knowledge_documents")
     .insert({
