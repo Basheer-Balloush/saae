@@ -35,3 +35,12 @@ export function parseChoices(text: string): { text: string; choices: string[] } 
   }
   return { text, choices: [] };
 }
+
+/* While an answer streams in, its choices line arrives a few characters at a
+   time. Anything from an unfinished "[[" onwards is the marker being written,
+   so it is held back instead of flashing on screen. */
+export function hidePartialChoices(text: string): string {
+  const open = text.lastIndexOf("[[");
+  if (open !== -1 && text.indexOf("]]", open) === -1) return text.slice(0, open).trimEnd();
+  return text.endsWith("[") ? text.slice(0, -1).trimEnd() : text;
+}
