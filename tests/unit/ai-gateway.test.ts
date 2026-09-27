@@ -26,10 +26,16 @@ describe("chat provider", () => {
   });
 
   it("reports missing configuration instead of guessing", () => {
-    expect(resolveChatProvider({ GEMINI_API_KEY: "g" })).toBeNull();
     expect(resolveChatProvider({ CHAT_MODEL: "gemini-3.8-flash" })).toBeNull();
-    expect(resolveChatProvider({ CHAT_MODEL: "  ", GEMINI_API_KEY: "g" })).toBeNull();
     expect(resolveChatProvider({ CHAT_MODEL: "gemini-3.8-flash", GEMINI_API_KEY: "   " })).toBeNull();
+    // OpenRouter has no default model: it needs CHAT_MODEL.
+    expect(resolveChatProvider({ OPENROUTER_API_KEY: "o" })).toBeNull();
+  });
+
+  it("runs on Gemini 3.5 Flash-Lite when only the Gemini key is set", () => {
+    expect(resolveChatProvider({ GEMINI_API_KEY: "g" })).toMatchObject({ name: "google", model: "gemini-3.5-flash-lite" });
+    expect(resolveChatProvider({ CHAT_MODEL: "  ", GEMINI_API_KEY: "g" })?.model).toBe("gemini-3.5-flash-lite");
+    expect(resolveChatProvider({ GEMINI_API_KEY: "g", OPENROUTER_API_KEY: "o" })?.name).toBe("google");
   });
 
   it("ignores stray spaces around the values", () => {
