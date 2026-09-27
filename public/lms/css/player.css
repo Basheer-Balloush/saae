@@ -16,6 +16,7 @@
 .lms-skin .player-title { font-size: clamp(1.7rem, 3.4vw, 2.6rem); line-height: 1.3; letter-spacing: -.02em; overflow-wrap: anywhere; }
 .lms-skin .player-page[dir="rtl"] .player-title { letter-spacing: 0; }
 .lms-skin .player-quiz-link { flex: none; }
+.lms-skin .player-preview-note { margin-top: 12px; max-width: 62ch; padding: 10px 14px; border: 1px solid rgba(119, 224, 232, .28); border-radius: 12px; background: rgba(0, 139, 157, .12); color: rgba(231, 241, 240, .86); font-size: .88rem; font-weight: 700; line-height: 1.7; }
 
 /* Layout: video column and a sticky outline beside it. */
 .lms-skin .player-layout {
@@ -60,7 +61,7 @@
 .lms-skin .player-meter-goal { position: absolute; inset-block: 0; width: 2px; margin-inline-start: -1px; background: rgba(231, 241, 240, .75); }
 .lms-skin .player-meter-time { direction: ltr; color: var(--lms-muted); font-size: .82rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-/* Previous / skip links */
+/* Back to the previous lesson (there is no skipping ahead). */
 .lms-skin .player-steps { grid-area: steps; display: flex; justify-content: space-between; gap: 16px; padding-inline: 4px; font-size: .9rem; }
 
 /* Course outline */

@@ -67,6 +67,9 @@ function Player() {
   const [isEmbedSrc, setIsEmbedSrc] = useState(false);
   const [loading, setLoading] = useState(true);
   const [finishing, setFinishing] = useState(false);
+  // Not enrolled (an admin or instructor looking at the course): the database
+  // keeps no progress for them, so completions last only for this visit.
+  const [preview, setPreview] = useState(false);
   // The lesson whose video just played to the end, and the lesson to start
   // playing on arrival (after moving on from a finished one).
   const [endedId, setEndedId] = useState<string | null>(null);
@@ -101,10 +104,12 @@ function Player() {
       setSections(orderedSecs);
       if (orderedSecs.length) {
         const ids = orderedSecs.map((s) => s.id);
-        const [{ data: lss }, { data: prs }] = await Promise.all([
+        const [{ data: lss }, { data: prs }, { data: enr, error: enrErr }] = await Promise.all([
           supabase.from("lms_lessons").select("id,section_id,title,title_ar,title_en,video_url,video_provider,video_uid,video_ready,video_status,content_md,content_md_ar,content_md_en,attachments,display_order").in("section_id", ids),
           supabase.from("lms_lesson_progress").select("lesson_id,is_completed").eq("student_id", user.id),
+          supabase.from("lms_enrollments").select("id").eq("course_id", courseId).eq("student_id", user.id).maybeSingle(),
         ]);
+        setPreview(!enrErr && !enr);
         const list = orderLessons(orderedSecs, (lss as Lesson[]) ?? []);
         const prog = (prs as Progress[]) ?? [];
         setLessons(list);
@@ -183,22 +188,21 @@ function Player() {
   // A lesson with a video completes once enough of it has been watched.
   const canFinish = !!current && !done && (!videoLesson || watch.enough);
 
-  // Lessons open in order: students may replay any completed lesson and play
-  // the first one not yet completed. The instructor and admins can browse all.
+  // The course instructor and admins answer in Q&A; it does not change the lock.
   const isStaff = role === "admin" || (!!user && !!course?.instructor_id && user.id === course.instructor_id);
+
+  // Lessons open in order, for every account: any completed lesson can be
+  // replayed, the first one not yet completed can be played, the rest are
+  // locked. There is no way to skip ahead.
   const doneIds = useMemo(
     () => new Set(progress.filter((p) => p.is_completed).map((p) => p.lesson_id)),
     [progress],
   );
   const openIds = useMemo(() => openLessonIds(lessons, doneIds), [lessons, doneIds]);
-  const isOpen = (id: string) => isStaff || openIds.has(id);
+  const isOpen = (id: string) => openIds.has(id);
   const lessonTitle = (l: Lesson) => pick(lang, l.title_ar, l.title_en, l.title);
   /** Where "Next lesson" leads once `lessonId` is completed. */
-  const upNextAfter = (lessonId: string, done: ReadonlySet<string>) => {
-    if (!isStaff) return upNextLesson(lessons, lessonId, done);
-    const i = lessons.findIndex((l) => l.id === lessonId);
-    return i >= 0 ? lessons[i + 1] ?? null : null;
-  };
+  const upNextAfter = (lessonId: string, done: ReadonlySet<string>) => upNextLesson(lessons, lessonId, done);
   const upNext = current ? upNextAfter(current.id, doneIds) : null;
 
   /** Opens a lesson. `unlocked` skips the lock check when the caller has just
@@ -230,17 +234,23 @@ function Player() {
     const next = upNextAfter(lesson.id, new Set([...doneIds, lesson.id]));
     savingRef.current = true;
     setFinishing(true);
-    const { error } = await supabase.from("lms_lesson_progress").upsert({
-      lesson_id: lesson.id,
-      student_id: user.id,
-      is_completed: true,
-      completed_at: new Date().toISOString(),
-    }, { onConflict: "lesson_id,student_id" });
+    const { error } = preview
+      ? { error: null }
+      : await supabase.from("lms_lesson_progress").upsert({
+          lesson_id: lesson.id,
+          student_id: user.id,
+          is_completed: true,
+          completed_at: new Date().toISOString(),
+        }, { onConflict: "lesson_id,student_id" });
     savingRef.current = false;
     setFinishing(false);
     if (error) { toast.error(toUserMessage(error)); return; }
     setProgress((p) => [...p.filter((x) => x.lesson_id !== lesson.id), { lesson_id: lesson.id, is_completed: true }]);
-    toast.success(ar ? "أحسنت! اكتمل الدرس." : "Lesson completed.");
+    toast.success(
+      preview
+        ? ar ? "اكتمل الدرس في المعاينة (لا يُحفظ)." : "Lesson completed in preview (not saved)."
+        : ar ? "أحسنت! اكتمل الدرس." : "Lesson completed.",
+    );
     if (advance && next && currentIdRef.current === lesson.id) goToRef.current(next.id, { autoplay: true, unlocked: true });
   };
   const markRef = useRef(markComplete);
@@ -354,6 +364,13 @@ function Player() {
               <span>{ar ? `الدرس ${index + 1} من ${lessons.length}` : `Lesson ${index + 1} of ${lessons.length}`}</span>
             </p>
             <h1 className="player-title">{currentTitle}</h1>
+            {preview ? (
+              <p className="player-preview-note">
+                {ar
+                  ? "معاينة: لست مسجّلاً في هذه الدورة، لذلك لا يُحفظ تقدّمك. تُفتح الدروس بالترتيب كما يراها الطلاب."
+                  : "Preview: you are not enrolled in this course, so your progress is not saved. Lessons open in order, as students see them."}
+              </p>
+            ) : null}
           </div>
           <Link
             to="/learning-management-system/student/quiz/$courseId"
@@ -460,18 +477,13 @@ function Player() {
           )}
         </section>
 
-        <nav className="player-steps" aria-label={ar ? "التنقل بين الدروس" : "Lesson navigation"}>
-          {prevLesson ? (
+        {prevLesson && isOpen(prevLesson.id) ? (
+          <nav className="player-steps" aria-label={ar ? "التنقل بين الدروس" : "Lesson navigation"}>
             <button type="button" className="lms-reset" onClick={() => goTo(prevLesson.id)}>
               {ar ? "الدرس السابق" : "Previous lesson"}
             </button>
-          ) : <span />}
-          {nextLesson && !done && isStaff ? (
-            <button type="button" className="lms-reset" onClick={() => goTo(nextLesson.id)}>
-              {ar ? "تخطَّ إلى الدرس التالي" : "Skip to next lesson"}
-            </button>
-          ) : null}
-        </nav>
+          </nav>
+        ) : null}
 
         <aside className="player-outline" aria-label={ar ? "محتوى الدورة" : "Course content"}>
           <div className="player-outline-head">
