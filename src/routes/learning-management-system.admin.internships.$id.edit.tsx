@@ -226,8 +226,8 @@ function InternshipEditor() {
       title: t("حذف هذه الفرصة نهائياً؟", "Delete this internship for good?"),
       description: apps
         ? t(
-            "لها طلبات، لذلك لا يمكن حذفها. أرشفها بدلاً من ذلك.",
-            "It has applications, so it can't be deleted. Archive it instead.",
+            `ستُحذف معها كل طلباتها (${fmtNum(apps, lang)}) نهائياً. لا يمكن التراجع.`,
+            `All ${fmtNum(apps, lang)} of its applications will be deleted with it. This cannot be undone.`,
           )
         : t("لا يمكن التراجع.", "This cannot be undone."),
       confirmLabel: t("حذف", "Delete"),
