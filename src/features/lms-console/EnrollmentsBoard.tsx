@@ -23,7 +23,11 @@ type CourseSummary = {
   created_at: string;
   pending: number;
   total: number;
+  /** When the newest request for this course came in. */
+  last_request_at: string;
 };
+
+type SortKey = "recent" | "course" | "pending";
 
 export const ENROLLMENT_COURSES_KEY = ["lms-admin-enrollment-courses"] as const;
 const KEY = ENROLLMENT_COURSES_KEY;
@@ -35,8 +39,10 @@ function useCourseSummaries() {
     queryFn: async (): Promise<CourseSummary[]> => {
       const { data: reqs } = await supabase
         .from("lms_enrollment_requests")
-        .select("course_id,status");
-      const list = (reqs as { course_id: string; status: string }[]) ?? [];
+        .select("course_id,status,created_at")
+        // Newest first, so the 1000-row cap would drop the oldest, never the newest.
+        .order("created_at", { ascending: false });
+      const list = (reqs as { course_id: string; status: string; created_at: string }[]) ?? [];
       const ids = [...new Set(list.map((r) => r.course_id))];
       if (!ids.length) return [];
       const { data: cs } = await supabase
@@ -44,29 +50,37 @@ function useCourseSummaries() {
         .select("id,title_ar,title_en,cover_url,created_at")
         .in("id", ids);
       const byId = new Map(
-        ((cs as Omit<CourseSummary, "pending" | "total">[]) ?? []).map((c) => [c.id, c]),
+        ((cs as Omit<CourseSummary, "pending" | "total" | "last_request_at">[]) ?? []).map((c) => [
+          c.id,
+          c,
+        ]),
       );
-      return ids
-        .map((id) => {
-          const c = byId.get(id);
-          const mine = list.filter((r) => r.course_id === id);
-          return {
-            id,
-            title_ar: c?.title_ar ?? id,
-            title_en: c?.title_en ?? null,
-            cover_url: c?.cover_url ?? null,
-            created_at: c?.created_at ?? "",
-            pending: mine.filter((r) => r.status === "pending").length,
-            total: mine.length,
-          };
-        })
-        .sort((a, b) => b.pending - a.pending || b.created_at.localeCompare(a.created_at));
+      return ids.map((id) => {
+        const c = byId.get(id);
+        const mine = list.filter((r) => r.course_id === id);
+        return {
+          id,
+          title_ar: c?.title_ar ?? id,
+          title_en: c?.title_en ?? null,
+          cover_url: c?.cover_url ?? null,
+          created_at: c?.created_at ?? "",
+          pending: mine.filter((r) => r.status === "pending").length,
+          total: mine.length,
+          last_request_at: mine.reduce((m, r) => (r.created_at > m ? r.created_at : m), ""),
+        };
+      });
     },
   });
 }
 
-/* Enrollment decisions: courses with requests on one side (most waiting
-   first), the chosen course's requests on the other. */
+const SORTS: Record<SortKey, (a: CourseSummary, b: CourseSummary) => number> = {
+  recent: (a, b) => b.last_request_at.localeCompare(a.last_request_at),
+  course: (a, b) => b.created_at.localeCompare(a.created_at),
+  pending: (a, b) => b.pending - a.pending || b.last_request_at.localeCompare(a.last_request_at),
+};
+
+/* Enrollment decisions: courses with requests on one side (newest request
+   first by default), the chosen course's requests on the other. */
 export function EnrollmentsBoard({
   course,
   onSelect,
@@ -78,6 +92,7 @@ export function EnrollmentsBoard({
   const qc = useQueryClient();
   const { data, isLoading } = useCourseSummaries();
   const [q, setQ] = useState("");
+  const [sort, setSort] = useState<SortKey>("recent");
   const select = onSelect;
 
   const title = (c: { title_ar: string; title_en: string | null }) =>
@@ -85,22 +100,38 @@ export function EnrollmentsBoard({
   const selected = data?.find((c) => c.id === course) ?? null;
   const shown = useMemo(() => {
     const n = q.trim().toLowerCase();
-    return (data ?? []).filter(
-      (c) =>
-        !n || c.title_ar.toLowerCase().includes(n) || (c.title_en ?? "").toLowerCase().includes(n),
-    );
-  }, [data, q]);
+    return (data ?? [])
+      .filter(
+        (c) =>
+          !n ||
+          c.title_ar.toLowerCase().includes(n) ||
+          (c.title_en ?? "").toLowerCase().includes(n),
+      )
+      .sort(SORTS[sort]);
+  }, [data, q, sort]);
 
   return (
     <div>
       <div className="grid gap-5 xl:grid-cols-[340px_1fr]">
         <div className={course ? "hidden xl:block" : ""}>
-          <div className="mb-3">
+          <div className="mb-3 space-y-2">
             <SearchInput
               value={q}
               onChange={setQ}
               placeholder={t("ابحث عن دورة", "Find a course")}
             />
+            <label className="flex items-center gap-2 text-[12.5px] font-bold text-[var(--cx-muted)]">
+              {t("الترتيب", "Sort")}
+              <select
+                className="cx-input h-9 flex-1"
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortKey)}
+              >
+                <option value="recent">{t("أحدث طلب أولاً", "Newest request first")}</option>
+                <option value="course">{t("أحدث دورة أولاً", "Newest course first")}</option>
+                <option value="pending">{t("الأكثر انتظاراً أولاً", "Most waiting first")}</option>
+              </select>
+            </label>
           </div>
           <Panel flush>
             {isLoading ? (
