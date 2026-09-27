@@ -29,6 +29,34 @@ function getBunnyEnv() {
 }
 
 /**
+ * Delete a replaced video from the Bunny library, unless another lesson still
+ * plays it. Never throws: the new video is already live, so a failed cleanup
+ * only leaves an unused copy in Bunny.
+ */
+async function deleteReplacedBunnyVideo(videoId: string) {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { count } = await supabaseAdmin
+      .from("lms_lessons")
+      .select("id", { count: "exact", head: true })
+      .eq("video_provider", "bunny")
+      .eq("video_uid", videoId);
+    if ((count ?? 0) > 0) return;
+    const { libraryId, apiKey } = getBunnyEnv();
+    const res = await fetch(`https://video.bunnycdn.com/library/${libraryId}/videos/${videoId}`, {
+      method: "DELETE",
+      headers: { AccessKey: apiKey, Accept: "application/json" },
+    });
+    // 404: already gone, which is the outcome we wanted.
+    if (!res.ok && res.status !== 404) {
+      console.error("[Bunny] delete replaced video failed", videoId, res.status, await res.text());
+    }
+  } catch (e) {
+    console.error("[Bunny] delete replaced video failed", videoId, e);
+  }
+}
+
+/**
  * Instructor-only: create a Bunny video object and return TUS upload credentials.
  * The client uploads the file bytes directly to Bunny via tus-js-client.
  */
@@ -197,11 +225,12 @@ export const setLessonBunnyVideo = createServerFn({ method: "POST" })
     const { data: lesson, error } = await supabase
       .from("lms_lessons")
       .select(
-        "id, lms_sections!inner(lms_courses!inner(instructor_id))",
+        "id, video_provider, video_uid, lms_sections!inner(lms_courses!inner(instructor_id))",
       )
       .eq("id", data.lessonId)
       .maybeSingle();
     if (error || !lesson) throw new Error("Lesson not found");
+    const previous = lesson as unknown as { video_provider: string | null; video_uid: string | null };
 
     const instructorId =
       (lesson as unknown as { lms_sections: { lms_courses: { instructor_id: string } } })
@@ -234,6 +263,12 @@ export const setLessonBunnyVideo = createServerFn({ method: "POST" })
       })
       .eq("id", data.lessonId);
     if (upErr) throw new Error(upErr.message);
+
+    // Replacing a video: the lesson now points at the new upload, so the old
+    // copy is removed from Bunny instead of piling up in the library.
+    if (previous.video_provider === "bunny" && previous.video_uid && previous.video_uid !== data.videoId) {
+      await deleteReplacedBunnyVideo(previous.video_uid);
+    }
 
     return { ok: true, status: "processing" as const };
   });
