@@ -2,10 +2,7 @@ import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
-import {
-  createChatModelForRequest,
-  withLovableAiGatewayRunIdHeader,
-} from "@/lib/ai-gateway.server";
+import { createChatModelForRequest } from "@/lib/ai-gateway.server";
 import { parseChoices } from "@/lib/chat-choices";
 import { needsKnowledgeSearch } from "@/lib/chat-routing";
 import {
@@ -362,17 +359,18 @@ export const Route = createFileRoute("/api/chat")({
         if (!isAllowedChatOrigin(request)) {
           return new Response("Forbidden", { status: 403 });
         }
-        // Fail before persisting user messages if the provider is not configured.
-        // Prefers Lovable AI Gateway; falls back to the direct OpenRouter provider.
+        // Fail before persisting user messages if no chat provider is configured.
         let chat: ReturnType<typeof createChatModelForRequest>;
         try {
-          chat = createChatModelForRequest(request);
+          chat = createChatModelForRequest();
         } catch (err) {
           console.error(
             "[chat] provider init failed",
             err,
-            "hasLovableKey:",
-            Boolean(process.env["LOVABLE_API_KEY"]),
+            "hasGeminiKey:",
+            Boolean(process.env["GEMINI_API_KEY"]),
+            "hasOpenRouterKey:",
+            Boolean(process.env["OPENROUTER_API_KEY"]),
           );
           return new Response("Chat is temporarily unavailable", { status: 503 });
         }
@@ -718,7 +716,6 @@ export const Route = createFileRoute("/api/chat")({
           maxRetries: 1,
           stopWhen: stepCountIs(12),
           messages: await convertToModelMessages(trustedMessages),
-          ...(chat.providerOptions ? { providerOptions: chat.providerOptions } : {}),
           onChunk: ({ chunk }) => {
             if (firstTextMs === null && chunk.type === "text-delta") firstTextMs = Date.now() - startedAt;
           },
@@ -768,7 +765,7 @@ export const Route = createFileRoute("/api/chat")({
           },
         });
 
-        return chat.gateway ? withLovableAiGatewayRunIdHeader(response, chat.gateway) : response;
+        return response;
       },
     },
   },
