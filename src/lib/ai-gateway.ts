@@ -1,20 +1,23 @@
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 
 /* The website chat talks to one OpenAI-compatible endpoint. Google's Gemini API
-   offers one, so a Gemini key is used directly when it is set; otherwise the
-   OpenRouter key is used. CHAT_MODEL names the model for whichever is in use:
-   "gemini-3.8-flash" for Google, "google/gemini-3.8-flash" for OpenRouter. */
+   offers one, so a Gemini key is used directly when it is set; OpenRouter is the
+   emergency fallback. CHAT_MODEL names the model for whichever is in use:
+   "gemini-3.5-flash-lite" for Google, "google/gemini-3.5-flash-lite" for
+   OpenRouter. With only a Gemini key, CHAT_MODEL may be left out. */
 
 export type ChatProvider = { name: string; baseURL: string; apiKey: string; model: string };
 
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash-lite';
 const GOOGLE = 'https://generativelanguage.googleapis.com/v1beta/openai';
 const OPENROUTER = 'https://openrouter.ai/api/v1';
 
 export function resolveChatProvider(
   env: Record<string, string | undefined> = process.env,
 ): ChatProvider | null {
-  const model = env.CHAT_MODEL?.trim();
   const geminiKey = env.GEMINI_API_KEY?.trim();
+  // OpenRouter has no sensible default, so it still needs CHAT_MODEL.
+  const model = env.CHAT_MODEL?.trim() || (geminiKey ? DEFAULT_GEMINI_MODEL : undefined);
   const openRouterKey = env.OPENROUTER_API_KEY?.trim();
   const forced = env.CHAT_PROVIDER?.trim().toLowerCase();
   if (!model) return null;
