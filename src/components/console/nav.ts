@@ -69,7 +69,7 @@ export const LMS_ATTENTION: CountKey[] = [
   "trainerApplications",
   "internshipApplications",
 ];
-export const CMS_ATTENTION: CountKey[] = ["newMessages", "chatFeedback", "newLeads"];
+export const CMS_ATTENTION: CountKey[] = ["newMessages", "chatFeedback", "newLeads", "newSurveys"];
 
 export const NAV: Record<ConsoleSystem, NavGroup[]> = {
   home: [
@@ -162,6 +162,7 @@ export const NAV: Record<ConsoleSystem, NavGroup[]> = {
           ar: "استبيان التجربة الرقمية",
           en: "Digital experience survey",
           icon: ClipboardList,
+          count: "newSurveys",
         },
       ],
     },

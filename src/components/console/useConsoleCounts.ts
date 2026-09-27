@@ -15,6 +15,7 @@ export type ConsoleCounts = {
   chatFeedback: number;
   newLeads: number;
   newMessages: number;
+  newSurveys: number;
 };
 
 export type CountKey = keyof ConsoleCounts;
@@ -29,6 +30,7 @@ const EMPTY: ConsoleCounts = {
   chatFeedback: 0,
   newLeads: 0,
   newMessages: 0,
+  newSurveys: 0,
 };
 
 export const CONSOLE_COUNTS_KEY = ["console-counts"] as const;
@@ -64,6 +66,7 @@ export function useConsoleCounts(enabled: boolean) {
         newLeads,
         newMessages,
         internships,
+        newSurveys,
       ] = await Promise.all([
         count(supabase.from("lms_instructors").select("user_id", head).eq("approved", false)),
         count(supabase.from("lms_courses").select("id", head).eq("status", "pending")),
@@ -76,6 +79,14 @@ export function useConsoleCounts(enabled: boolean) {
         count(supabase.from("individual_leads").select("id", head).eq("status", "new")),
         count(supabase.from("contact_messages").select("id", head).eq("status", "new")),
         overview().catch(() => null),
+        // Full admins only (RLS); everyone else counts 0.
+        count(
+          supabase
+            .from("feedback_survey_submissions")
+            .select("id", head)
+            .eq("completed", true)
+            .eq("review_status", "new"),
+        ),
       ]);
       return {
         instructorRequests,
@@ -87,6 +98,7 @@ export function useConsoleCounts(enabled: boolean) {
         chatFeedback,
         newLeads,
         newMessages,
+        newSurveys,
       };
     },
   });
