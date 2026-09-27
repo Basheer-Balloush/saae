@@ -5,7 +5,11 @@
    close together, and no faster than MAX_RATE times the time that passed.
    A seek, a keyboard skip or a pause-then-drag breaks the chain, so jumping
    to the end never counts. What was watched is kept as merged [start, end]
-   spans, so rewatching a part never counts twice. */
+   spans, so rewatching a part never counts twice.
+
+   Progress is measured on the video's own timeline, not the clock: a lesson
+   is complete once COMPLETE_SHARE of the video has been played, whatever the
+   speed, in one sitting or several. */
 
 export type Span = [number, number];
 
@@ -15,12 +19,14 @@ export type WatchProgress = {
   spans: Span[];
 };
 
-/** Fastest playback speed that still counts as watching (the player's 2x). */
-export const MAX_RATE = 2;
+/** Share of the video that completes the lesson. */
+export const COMPLETE_SHARE = 0.9;
+/** Playback up to this speed always counts as watching: the player's top speed, 4x. */
+export const MAX_RATE = 4;
 /** Longest gap between two reports that still counts as continuous. */
 const MAX_STEP = 8;
 /** Allowance for report timing jitter, in seconds. */
-const SLACK = 0.75;
+const SLACK = 1;
 
 export const emptyProgress = (): WatchProgress => ({ duration: 0, spans: [] });
 
@@ -50,19 +56,19 @@ export function addSpan(spans: Span[], from: number, to: number): Span[] {
 
 export const watchedSeconds = (spans: Span[]) => spans.reduce((sum, [a, b]) => sum + (b - a), 0);
 
-/** The whole video, less a little for the first and last moments a player
-    may not report: 1% of it, at least 2 and at most 15 seconds. */
+/** Seconds of the video that must be watched: COMPLETE_SHARE of it. */
 export function requiredSeconds(duration: number): number {
   if (!(duration > 0)) return Infinity;
-  return Math.max(0, duration - Math.min(15, Math.max(2, duration * 0.01)));
+  return duration * COMPLETE_SHARE;
 }
 
-export const isFullyWatched = (p: WatchProgress) =>
-  p.duration > 0 && watchedSeconds(p.spans) >= requiredSeconds(p.duration);
+/** True once enough of the video has been watched to complete the lesson. */
+export const hasWatchedEnough = (p: WatchProgress) =>
+  p.duration > 0 && watchedSeconds(p.spans) >= requiredSeconds(p.duration) - 1e-6;
 
-/** 0 to 1, for progress bars. */
-export const watchedFraction = (p: WatchProgress) =>
-  p.duration > 0 ? Math.min(1, watchedSeconds(p.spans) / requiredSeconds(p.duration)) : 0;
+/** Share of the whole video watched, 0 to 1, for progress bars. */
+export const watchedShare = (p: WatchProgress) =>
+  p.duration > 0 ? Math.min(1, watchedSeconds(p.spans) / p.duration) : 0;
 
 type Anchor = { pos: number; at: number };
 
