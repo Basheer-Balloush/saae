@@ -220,7 +220,7 @@ async function ingestKnowledgeText(
     }> = [];
     for (let i = 0; i < chunks.length; i += batchSize) {
       const batch = chunks.slice(i, i + batchSize);
-      const vectors = await embedTexts(batch);
+      const vectors = await embedTexts(batch, { kind: "document", title: section.title });
       for (let j = 0; j < batch.length; j++) {
         rows.push({
           document_id: doc.id,

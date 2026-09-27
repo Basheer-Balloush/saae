@@ -16,6 +16,16 @@ type Entry = { match: (low: string) => boolean; ar: string; en: string };
 
 const RULES: Entry[] = [
   {
+    match: (l) => l.includes("embedding_configuration_missing"),
+    ar: "لا يوجد مفتاح لمعالجة المعرفة على الخادم (GEMINI_API_KEY أو OPENAI_API_KEY).",
+    en: "The server has no key for processing knowledge (GEMINI_API_KEY or OPENAI_API_KEY).",
+  },
+  {
+    match: (l) => l.includes("embedding provider error"),
+    ar: "تعذّرت معالجة النص لدى مزوّد الذكاء الاصطناعي. حاول بعد قليل.",
+    en: "The AI provider couldn't process the text. Try again shortly.",
+  },
+  {
     match: (l) => l.includes("lesson locked"),
     ar: "هذا الدرس مقفل — أكمل الدروس السابقة أولاً.",
     en: "This lesson is locked — finish the earlier lessons first.",
