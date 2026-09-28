@@ -13,9 +13,10 @@ import {
   type CourseFeedbackView,
 } from "@/lib/course-feedback.functions";
 import {
-  getTemplate,
+  allQuestions,
   missingInStep,
   otherKey,
+  OTHER_ID,
   OTHER_TEXT_MAX,
   type ChoiceQuestion,
   type TextQuestion,
@@ -65,9 +66,10 @@ function CourseFeedback() {
         setAnswers(v.answers ?? {});
         setNotes(v.notes ?? {});
         // Continue a saved draft at its first unanswered step.
-        const t = getTemplate(v.template);
-        const first = t.steps.findIndex((s) => missingInStep(s, v.answers ?? {}).length > 0);
-        setStepIndex(first === -1 ? t.steps.length - 1 : first);
+        const first = v.form.steps.findIndex(
+          (s) => missingInStep(s, v.answers ?? {}, v.notes ?? {}).length > 0,
+        );
+        setStepIndex(first === -1 ? Math.max(0, v.form.steps.length - 1) : first);
       })
       .catch(() => {
         if (active) setLoadError(true);
@@ -77,8 +79,7 @@ function CourseFeedback() {
     };
   }, [courseId, load, reloadKey]);
 
-  const template = useMemo(() => getTemplate(view?.template), [view?.template]);
-  const steps = template.steps;
+  const steps = useMemo(() => view?.form.steps ?? [], [view?.form]);
   const step = steps[stepIndex];
   const numberOf = useMemo(() => {
     const map = new Map<string, number>();
@@ -116,7 +117,7 @@ function CourseFeedback() {
     setNotes((n) => ({ ...n, [key]: value }));
   };
 
-  const missing = step ? missingInStep(step, answers) : [];
+  const missing = step ? missingInStep(step, answers, notes) : [];
 
   const goToStep = (i: number) => {
     setShowMissing(false);
@@ -140,7 +141,7 @@ function CourseFeedback() {
       document.getElementById(`q-${missing[0]}`)?.focus();
       return;
     }
-    const firstIncomplete = steps.findIndex((s) => missingInStep(s, answers).length > 0);
+    const firstIncomplete = steps.findIndex((s) => missingInStep(s, answers, notes).length > 0);
     if (firstIncomplete !== -1) {
       goToStep(firstIncomplete);
       setShowMissing(true);
@@ -148,14 +149,35 @@ function CourseFeedback() {
     }
     setSubmitting(true);
     try {
-      const res = await submit({ data: { courseId, answers, notes, lang } });
+      const res = await submit({
+        data: {
+          courseId,
+          answers,
+          notes,
+          lang,
+          formId: view?.formId ?? "",
+          formVersion: view?.formVersion ?? 0,
+        },
+      });
       dirty.current = false;
       setDone({ certificateId: res.certificateId });
       topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("form_changed")) {
+        // An admin changed the form: load it again; answers that still fit stay.
+        await flushDraft();
+        toast.message(
+          ar
+            ? "حُدّث نموذج التقييم للتو. راجع الأسئلة ثم أرسل مجدداً."
+            : "The feedback form was just updated. Check the questions and send again.",
+        );
+        setView(null);
+        setReloadKey((k) => k + 1);
+        return;
+      }
       toast.error(
-        msg.startsWith("invalid_feedback")
+        msg.includes("invalid_feedback")
           ? ar
             ? "بعض الإجابات غير مكتملة أو غير صالحة. راجع الأسئلة المحدّدة ثم أرسل مجدداً."
             : "Some answers are missing or not valid. Check the marked questions and send again."
@@ -263,6 +285,7 @@ function CourseFeedback() {
       onsite: ar
         ? "لا تحتاج الدورات الحضورية إلى هذا التقييم."
         : "In-person courses do not use this feedback form.",
+      disabled: ar ? "لا تطلب هذه الدورة تقييماً." : "This course does not ask for feedback.",
       not_enrolled: ar ? "لست مسجّلاً في هذه الدورة." : "You are not enrolled in this course.",
       unavailable: ar
         ? "التقييم غير متاح لهذه الدورة الآن."
@@ -298,6 +321,8 @@ function CourseFeedback() {
   }
 
   const last = stepIndex === steps.length - 1;
+  const questions = allQuestions(view.form);
+  const requiredCount = questions.filter((q) => q.required).length;
   const saveNote =
     saveState === "saving"
       ? ar
@@ -323,13 +348,18 @@ function CourseFeedback() {
         <h1>{ar ? "كيف كانت الدورة؟" : "How was the course?"}</h1>
         <p className="feedback-intro">
           {ar
-            ? "16 سؤال اختيار في 3 خطوات قصيرة، وسؤالان مكتوبان اختياريان. لا توجد إجابة صحيحة أو خاطئة، وإجاباتك لا تؤثّر في شهادتك."
-            : "16 multiple-choice questions in 3 short steps, and 2 optional written ones. There are no right or wrong answers, and your answers do not affect your certificate."}
+            ? "لا توجد إجابة صحيحة أو خاطئة، وإجاباتك لا تؤثّر في شهادتك."
+            : "There are no right or wrong answers, and your answers do not affect your certificate."}
+        </p>
+        <p className="feedback-meta">
+          {ar
+            ? `عدد الأسئلة: ${questions.length} · المطلوب منها: ${requiredCount} · الخطوات: ${steps.length}`
+            : `${questions.length} questions · ${requiredCount} required · ${steps.length} ${steps.length === 1 ? "step" : "steps"}`}
         </p>
         <p className="feedback-privacy">
           {ar
-            ? "يطّلع فريق المنصة على إجاباتك مع اسمك. يرى المدرّب مجاميع فقط، من خمسة متعلّمين على الأقل، دون أسماء أو تعليقات."
-            : "The platform team sees your answers with your name. Instructors see only totals from five or more learners, without names or comments."}
+            ? "يطّلع فريق المنصة على إجاباتك مع اسمك، ولا يطّلع عليها المدرّب."
+            : "The platform team sees your answers with your name. Instructors do not see them."}
         </p>
       </header>
 
@@ -405,6 +435,7 @@ function CourseFeedback() {
               n={numberOf.get(q.id) ?? 0}
               ar={ar}
               value={notes[q.id] ?? ""}
+              missing={showMissing && missing.includes(q.id)}
               onChange={(v) => setNote(q.id, v)}
             />
           ),
@@ -473,7 +504,8 @@ function ChoiceField(props: {
     >
       <legend id={`q-${q.id}`} tabIndex={-1}>
         <span className="feedback-q-num">{n}</span>
-        <span>{ar ? q.ar : q.en}</span>
+        <span>{(ar ? q.ar : q.en) || q.ar}</span>
+        {q.required ? null : <small>{ar ? "اختياري" : "Optional"}</small>}
       </legend>
       <div className={cn("feedback-choices", scale ? "is-scale" : "is-list")}>
         {q.choices.map((c) => {
@@ -492,12 +524,12 @@ function ChoiceField(props: {
                 checked={value === c.id}
                 onChange={() => onChange(c.id)}
               />
-              <span>{ar ? c.ar : c.en}</span>
+              <span>{(ar ? c.ar : c.en) || c.ar}</span>
             </label>
           );
         })}
       </div>
-      {q.otherText && value === "other" ? (
+      {q.otherText && value === OTHER_ID ? (
         <div className="field feedback-other">
           <label htmlFor={`q-${q.id}-other-text`}>
             {ar ? "وضّح (اختياري)" : "Tell us more (optional)"}
@@ -523,28 +555,34 @@ function TextField(props: {
   n: number;
   ar: boolean;
   value: string;
+  missing: boolean;
   onChange: (value: string) => void;
 }) {
-  const { q, n, ar, value, onChange } = props;
+  const { q, n, ar, value, missing, onChange } = props;
   const id = `q-${q.id}`;
   const length = [...value].length;
   return (
-    <div className="field feedback-q feedback-text">
+    <div className={cn("field feedback-q feedback-text", missing && "is-missing")}>
       <label htmlFor={id}>
         <span className="feedback-q-num">{n}</span>
-        <span>{ar ? q.ar : q.en}</span>
-        <small>{ar ? "اختياري" : "Optional"}</small>
+        <span>{(ar ? q.ar : q.en) || q.ar}</span>
+        {q.required ? null : <small>{ar ? "اختياري" : "Optional"}</small>}
       </label>
       <textarea
         id={id}
         rows={4}
         maxLength={q.max}
         value={value}
+        required={q.required}
+        aria-invalid={missing || undefined}
         onChange={(e) => onChange(e.target.value)}
       />
       <p className="hint feedback-count" aria-live="off">
         {length} / {q.max}
       </p>
+      {missing ? (
+        <p className="feedback-q-error">{ar ? "اكتب إجابتك." : "Write your answer."}</p>
+      ) : null}
     </div>
   );
 }

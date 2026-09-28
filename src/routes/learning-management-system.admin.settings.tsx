@@ -1,7 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Activity, Archive, FolderTree, Loader2, Plus, Trash2 } from "lucide-react";
+import {
+  Activity,
+  Archive,
+  FolderTree,
+  Loader2,
+  MessageSquareText,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import InstructorCleanupPanel from "@/components/lms/InstructorCleanupPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { toUserMessage } from "@/lib/safe-error";
@@ -14,13 +22,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState, Field, Loading, PageHeader, Panel, Tabs, useT } from "@/components/console/ui";
 import { SystemHealth } from "@/features/lms-console/SystemHealth";
+import { DefaultFeedbackForm } from "@/features/course-feedback/DefaultFeedbackForm";
 
-type Tab = "categories" | "cleanup" | "health";
+type Tab = "categories" | "feedback" | "cleanup" | "health";
 
 export const Route = createFileRoute("/learning-management-system/admin/settings")({
   head: () => ({ meta: [{ title: "Settings — Learning platform — SAAE" }] }),
   validateSearch: (s: Record<string, unknown>): { tab?: Tab } => ({
-    tab: s.tab === "health" || s.tab === "cleanup" ? s.tab : undefined,
+    tab: s.tab === "health" || s.tab === "cleanup" || s.tab === "feedback" ? s.tab : undefined,
   }),
   component: SettingsPage,
 });
@@ -52,6 +61,11 @@ function SettingsPage() {
         }
         tabs={[
           { value: "categories", label: t("التصنيفات", "Categories"), icon: FolderTree },
+          {
+            value: "feedback",
+            label: t("تقييم الدورات", "Course feedback"),
+            icon: MessageSquareText,
+          },
           { value: "cleanup", label: t("أرشفة المدرّبين", "Instructor clean-up"), icon: Archive },
           { value: "health", label: t("صحة النظام", "System health"), icon: Activity },
         ]}
@@ -68,6 +82,7 @@ function SettingsPage() {
           <InstructorCleanupPanel />
         </Panel>
       )}
+      {tab === "feedback" && <DefaultFeedbackForm />}
       {tab === "health" && <SystemHealth />}
     </div>
   );

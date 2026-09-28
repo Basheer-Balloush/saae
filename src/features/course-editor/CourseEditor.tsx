@@ -16,6 +16,7 @@ import {
   FileText,
   Loader2,
   MapPin,
+  MessageSquareText,
   MonitorPlay,
   Send,
   Undo2,
@@ -61,6 +62,7 @@ import { ContentTab } from "./ContentTab";
 import { StudentsTab } from "./StudentsTab";
 import { AttendanceTab } from "./AttendanceTab";
 import { CompletionTab } from "./CompletionTab";
+import { FeedbackTab } from "./FeedbackTab";
 import { GradingTab } from "./GradingTab";
 import {
   courseEdits,
@@ -696,6 +698,12 @@ export function CourseEditor({
               },
               { value: "grading", label: t("التصحيح والنتائج", "Grading"), icon: ClipboardCheck },
               { value: "completion", label: t("الإكمال والشهادة", "Completion"), icon: Award },
+              {
+                value: "feedback",
+                label: t("التقييم", "Feedback"),
+                icon: MessageSquareText,
+                hidden: !isAdmin || onsite,
+              },
             ]}
           />
           {tab === "details" && (
@@ -738,6 +746,8 @@ export function CourseEditor({
           {tab === "completion" && (
             <CompletionTab ctx={ctx} onOpenGrading={() => onTabChange("grading")} />
           )}
+          {/* Admins only: instructors see nothing of the feedback. */}
+          {tab === "feedback" && isAdmin && <FeedbackTab ctx={ctx} />}
         </div>
 
         <aside className="order-first xl:order-none">

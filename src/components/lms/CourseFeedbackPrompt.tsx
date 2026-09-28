@@ -13,8 +13,9 @@ type Props = {
 };
 
 /** The learner's next step after the lessons: the quiz, the course feedback
-    or the certificate. Shows nothing when there is no step to point to, or
-    when the check fails (the feedback page itself explains and retries). */
+    or the certificate. Shows nothing when there is no step to point to, when
+    the course asks no feedback, or when the check fails (the feedback page
+    itself explains and retries). */
 export function CourseFeedbackPrompt({ courseId, ar, context }: Props) {
   const load = useServerFn(getCourseFeedback);
   const [view, setView] = useState<CourseFeedbackView | null>(null);
@@ -50,11 +51,11 @@ export function CourseFeedbackPrompt({ courseId, ar, context }: Props) {
           <p>
             {view.certificateId
               ? ar
-                ? "شهادتك صادرة. أخبرنا كيف كانت الدورة في 16 سؤالاً قصيراً."
-                : "Your certificate is issued. Tell us how the course went in 16 short questions."
+                ? "شهادتك صادرة. أخبرنا في أسئلة قصيرة كيف كانت الدورة."
+                : "Your certificate is issued. Tell us in a few short questions how the course went."
               : ar
-                ? "أجب عن 16 سؤالاً قصيراً لتحصل على شهادتك."
-                : "Answer 16 short questions to get your certificate."}
+                ? "أجب عن أسئلة قصيرة لتحصل على شهادتك."
+                : "Answer a few short questions to get your certificate."}
           </p>
         </div>
         <Link

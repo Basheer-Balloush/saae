@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { checkFeedback, getTemplate, type TemplateId } from "@/lib/course-feedback-survey";
+import { checkFeedback, keepValidAnswers, type FormDefinition } from "@/lib/course-feedback-survey";
 import { feedbackState, type FeedbackState } from "@/lib/course-feedback-state";
+import type { Db, EffectiveForm } from "@/lib/course-feedback.server";
 
 /*
  * Course feedback, the last step of an online course before its certificate.
@@ -19,32 +19,27 @@ const responseInput = courseInput.extend({
   notes: z.record(z.string().max(64), z.string().max(4000)).default({}),
   lang: z.enum(["ar", "en"]).default("ar"),
 });
+const submitInput = responseInput.extend({
+  // The form the learner answered; a newer one means an admin changed it.
+  formId: z.string().uuid(),
+  formVersion: z.number().int().positive(),
+});
 
 export type CourseFeedbackView = {
   state: FeedbackState;
   courseTitle: { ar: string; en: string | null };
-  template: TemplateId;
-  version: string;
+  formId: string;
+  formVersion: number;
+  form: FormDefinition;
   answers: Record<string, string>;
   notes: Record<string, string>;
   certificateId: string | null;
 };
 
-type Admin = SupabaseClient;
-
-async function adminClient(): Promise<Admin> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return supabaseAdmin as never as Admin;
-}
+const server = () => import("@/lib/course-feedback.server");
 
 type Basics = {
-  course: {
-    id: string;
-    delivery_mode: string | null;
-    feedback_template: string | null;
-    title_ar: string;
-    title_en: string | null;
-  };
+  course: { id: string; delivery_mode: string | null; title_ar: string; title_en: string | null };
   enrollmentId: string | null;
   row: {
     status: "draft" | "submitted";
@@ -53,15 +48,15 @@ type Basics = {
   } | null;
 };
 
-async function loadBasics(admin: Admin, userId: string, courseId: string): Promise<Basics> {
-  const { data: course, error } = await admin
+async function loadBasics(db: Db, userId: string, courseId: string): Promise<Basics> {
+  const { data: course, error } = await db
     .from("lms_courses")
-    .select("id, delivery_mode, feedback_template, title_ar, title_en")
+    .select("id, delivery_mode, title_ar, title_en")
     .eq("id", courseId)
     .maybeSingle();
   if (error) throw new Error("Could not load the course");
   if (!course) throw new Error("Course not found");
-  const { data: enr } = await admin
+  const { data: enr } = await db
     .from("lms_enrollments")
     .select("id")
     .eq("course_id", courseId)
@@ -69,7 +64,7 @@ async function loadBasics(admin: Admin, userId: string, courseId: string): Promi
     .maybeSingle();
   let row: Basics["row"] = null;
   if (enr) {
-    const { data } = await admin
+    const { data } = await db
       .from("lms_course_feedback")
       .select("status, answers, notes")
       .eq("enrollment_id", enr.id)
@@ -81,8 +76,8 @@ async function loadBasics(admin: Admin, userId: string, courseId: string): Promi
 
 /** Runs the course's certificate check. It issues the certificate when
     everything, feedback included, is done; that is always the right outcome. */
-async function evaluate(admin: Admin, userId: string, courseId: string) {
-  const { data, error } = await admin.rpc("lms_evaluate_certificate", {
+async function evaluate(db: Db, userId: string, courseId: string) {
+  const { data, error } = await db.rpc("lms_evaluate_certificate", {
     _student_id: userId,
     _course_id: courseId,
   });
@@ -91,8 +86,8 @@ async function evaluate(admin: Admin, userId: string, courseId: string) {
   return { certificateId: res.certificate_id ?? null, reason: res.reason ?? null };
 }
 
-async function existingCertificate(admin: Admin, userId: string, courseId: string) {
-  const { data } = await admin
+async function existingCertificate(db: Db, userId: string, courseId: string) {
+  const { data } = await db
     .from("lms_certificates")
     .select("id")
     .eq("course_id", courseId)
@@ -101,28 +96,41 @@ async function existingCertificate(admin: Admin, userId: string, courseId: strin
   return (data?.id as string | undefined) ?? null;
 }
 
-async function inspect(admin: Admin, userId: string, courseId: string) {
-  const b = await loadBasics(admin, userId, courseId);
+async function inspect(db: Db, userId: string, courseId: string) {
+  const { effectiveForm } = await server();
+  const b = await loadBasics(db, userId, courseId);
+  const form: EffectiveForm = await effectiveForm(db, courseId);
   const onsite = b.course.delivery_mode === "onsite";
   const submitted = b.row?.status === "submitted";
   let reason: string | null = "not_enrolled";
   let certificateId: string | null = null;
   if (b.enrollmentId && !onsite) {
-    if (submitted) {
-      certificateId = await existingCertificate(admin, userId, courseId);
+    if (submitted || !form.enabled) {
+      certificateId = await existingCertificate(db, userId, courseId);
       reason = null;
     } else {
-      ({ reason, certificateId } = await evaluate(admin, userId, courseId));
+      ({ reason, certificateId } = await evaluate(db, userId, courseId));
     }
   }
-  const template = getTemplate(b.course.feedback_template);
-  const view: CourseFeedbackView = {
-    state: feedbackState({ enrolled: !!b.enrollmentId, onsite, submitted, reason }),
-    courseTitle: { ar: b.course.title_ar, en: b.course.title_en },
-    template: template.id,
-    version: template.version,
+  // A draft saved before an admin changed the form keeps what still fits.
+  const draft = keepValidAnswers(form.definition, {
     answers: b.row?.answers ?? {},
     notes: b.row?.notes ?? {},
+  });
+  const view: CourseFeedbackView = {
+    state: feedbackState({
+      enrolled: !!b.enrollmentId,
+      onsite,
+      enabled: form.enabled,
+      submitted,
+      reason,
+    }),
+    courseTitle: { ar: b.course.title_ar, en: b.course.title_en },
+    formId: form.formId,
+    formVersion: form.version,
+    form: form.definition,
+    answers: submitted ? {} : draft.answers,
+    notes: submitted ? {} : draft.notes,
     certificateId,
   };
   return { view, enrollmentId: b.enrollmentId };
@@ -131,15 +139,15 @@ async function inspect(admin: Admin, userId: string, courseId: string) {
 const alreadySubmitted = (message: string | undefined) =>
   !!message && message.toLowerCase().includes("feedback_already_submitted");
 
-/** The learner's feedback for a course: where they stand, the questions to
-    ask (template) and any saved draft. */
+/** The learner's feedback for a course: where they stand, the form to fill
+    in and any saved draft. */
 export const getCourseFeedback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => courseInput.parse(input))
-  .handler(
-    async ({ data, context }) =>
-      (await inspect(await adminClient(), context.userId, data.courseId)).view,
-  );
+  .handler(async ({ data, context }) => {
+    const { serviceClient } = await server();
+    return (await inspect(await serviceClient(), context.userId, data.courseId)).view;
+  });
 
 /** Saves unfinished answers so the learner can come back to them, on this
     device or another. */
@@ -147,24 +155,26 @@ export const saveCourseFeedbackDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => responseInput.parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await adminClient();
-    const b = await loadBasics(admin, context.userId, data.courseId);
+    const { serviceClient, effectiveForm } = await server();
+    const db = await serviceClient();
+    const b = await loadBasics(db, context.userId, data.courseId);
     if (!b.enrollmentId) throw new Error("Forbidden: not enrolled");
     if (b.course.delivery_mode === "onsite") throw new Error("feedback_not_open");
     if (b.row?.status === "submitted") return { status: "submitted" as const };
-    const template = getTemplate(b.course.feedback_template);
-    const check = checkFeedback(template, { answers: data.answers, notes: data.notes }, "draft");
-    if (!check.ok) throw new Error("invalid_feedback");
-    const { error } = await admin.from("lms_course_feedback").upsert(
+    const form = await effectiveForm(db, data.courseId);
+    if (!form.enabled) throw new Error("feedback_not_open");
+    // A draft never fails over a question the admin just removed.
+    const clean = keepValidAnswers(form.definition, { answers: data.answers, notes: data.notes });
+    const { error } = await db.from("lms_course_feedback").upsert(
       {
         enrollment_id: b.enrollmentId,
         course_id: data.courseId,
         student_id: context.userId,
-        template: template.id,
-        version: template.version,
+        form_id: form.formId,
+        form_version: form.version,
         lang: data.lang,
-        answers: check.clean.answers,
-        notes: check.clean.notes,
+        answers: clean.answers,
+        notes: clean.notes,
         status: "draft",
       },
       { onConflict: "enrollment_id" },
@@ -181,27 +191,30 @@ export const saveCourseFeedbackDraft = createServerFn({ method: "POST" })
     certificate or email problem never loses it. Safe to retry. */
 export const submitCourseFeedback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => responseInput.parse(input))
+  .inputValidator((input: unknown) => submitInput.parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await adminClient();
+    const { serviceClient } = await server();
+    const db = await serviceClient();
     const userId = context.userId;
-    const { view, enrollmentId } = await inspect(admin, userId, data.courseId);
+    const { view, enrollmentId } = await inspect(db, userId, data.courseId);
     if (view.state === "submitted")
       return { status: "submitted" as const, certificateId: view.certificateId };
     if (view.state !== "open") throw new Error(`feedback_not_open:${view.state}`);
+    // The page reloads the new form and keeps the answers that still fit.
+    if (view.formId !== data.formId || view.formVersion !== data.formVersion)
+      throw new Error("form_changed");
 
-    const template = getTemplate(view.template);
-    const check = checkFeedback(template, { answers: data.answers, notes: data.notes }, "submit");
+    const check = checkFeedback(view.form, { answers: data.answers, notes: data.notes }, "submit");
     if (!check.ok) {
       throw new Error(`invalid_feedback:${check.issues.map((i) => i.question).join(",")}`);
     }
-    const { error } = await admin.from("lms_course_feedback").upsert(
+    const { error } = await db.from("lms_course_feedback").upsert(
       {
         enrollment_id: enrollmentId,
         course_id: data.courseId,
         student_id: userId,
-        template: template.id,
-        version: template.version,
+        form_id: view.formId,
+        form_version: view.formVersion,
         lang: data.lang,
         answers: check.clean.answers,
         notes: check.clean.notes,
@@ -214,8 +227,8 @@ export const submitCourseFeedback = createServerFn({ method: "POST" })
 
     let certificateId: string | null = null;
     try {
-      ({ certificateId } = await evaluate(admin, userId, data.courseId));
-      if (!certificateId) certificateId = await existingCertificate(admin, userId, data.courseId);
+      ({ certificateId } = await evaluate(db, userId, data.courseId));
+      if (!certificateId) certificateId = await existingCertificate(db, userId, data.courseId);
     } catch (e) {
       console.error(
         "[course-feedback] certificate check failed",

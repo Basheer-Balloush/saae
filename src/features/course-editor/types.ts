@@ -126,7 +126,14 @@ export function courseEdits(
 }
 
 export type EditorTab =
-  "details" | "schedule" | "content" | "students" | "attendance" | "grading" | "completion";
+  | "details"
+  | "schedule"
+  | "content"
+  | "students"
+  | "attendance"
+  | "grading"
+  | "completion"
+  | "feedback";
 export const EDITOR_TABS: EditorTab[] = [
   "details",
   "schedule",
@@ -135,6 +142,7 @@ export const EDITOR_TABS: EditorTab[] = [
   "attendance",
   "grading",
   "completion",
+  "feedback",
 ];
 
 /** What every tab receives from the editor. */

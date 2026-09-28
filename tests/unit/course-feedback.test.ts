@@ -1,92 +1,159 @@
 import { describe, expect, it } from "vitest";
 import {
-  TEMPLATES,
+  DEFAULT_FORM,
+  LIMITS,
+  OTHER_CHOICE,
   allQuestions,
   checkFeedback,
-  getTemplate,
+  formDefinitionSchema,
+  formProblems,
+  keepValidAnswers,
   missingInStep,
+  newId,
   otherKey,
   type ChoiceQuestion,
+  type FormDefinition,
 } from "@/lib/course-feedback-survey";
 import { feedbackState } from "@/lib/course-feedback-state";
 
-const standard = TEMPLATES.standard;
-const choices = (t = standard) =>
-  allQuestions(t).filter((q): q is ChoiceQuestion => q.kind === "choice");
+const form = DEFAULT_FORM;
+const choices = (f: FormDefinition = form) =>
+  allQuestions(f).filter((q): q is ChoiceQuestion => q.kind === "choice");
 
 /** A full set of answers: the first choice of every question. */
-const fullAnswers = (t = standard) =>
-  Object.fromEntries(choices(t).map((q) => [q.id, q.choices[0].id]));
+const fullAnswers = (f: FormDefinition = form) =>
+  Object.fromEntries(choices(f).map((q) => [q.id, q.choices[0].id]));
 
-describe("course feedback questions", () => {
-  it.each(Object.values(TEMPLATES))(
-    "$id asks 16 choice questions and 2 optional written ones in 3 steps",
-    (t) => {
-      const qs = allQuestions(t);
-      expect(t.steps).toHaveLength(3);
-      expect(qs.filter((q) => q.kind === "choice")).toHaveLength(16);
-      expect(qs.filter((q) => q.kind === "text").map((q) => q.id)).toEqual(["opinion", "future"]);
-      expect(new Set(qs.map((q) => q.id)).size).toBe(qs.length);
-    },
-  );
+/** A deep copy to edit in a test. */
+const copy = (f: FormDefinition = form): FormDefinition => structuredClone(f);
 
-  it("has Arabic and English for every question and choice, with unique choice ids", () => {
-    for (const t of Object.values(TEMPLATES)) {
-      for (const q of allQuestions(t)) {
-        expect(q.ar.trim() && q.en.trim()).toBeTruthy();
-        if (q.kind !== "choice") continue;
-        expect(new Set(q.choices.map((c) => c.id)).size).toBe(q.choices.length);
-        for (const c of q.choices) expect(c.ar.trim() && c.en.trim()).toBeTruthy();
-      }
-    }
+describe("the default form", () => {
+  it("asks 9 required choice questions and 1 optional written one in 2 steps", () => {
+    const qs = allQuestions(form);
+    expect(form.steps).toHaveLength(2);
+    expect(qs).toHaveLength(10);
+    expect(qs.filter((q) => q.kind === "choice" && q.required)).toHaveLength(9);
+    expect(qs.filter((q) => q.kind === "text" && !q.required).map((q) => q.id)).toEqual([
+      "comments",
+    ]);
   });
 
-  it("gives the architecture workshop its three session questions instead of the outcome ones", () => {
-    const ids = allQuestions(TEMPLATES["ai-architects"]).map((q) => q.id);
-    expect(ids).toEqual(
-      expect.arrayContaining(["session_prompting", "session_visuals", "session_video"]),
-    );
-    expect(ids).not.toEqual(expect.arrayContaining(["goals"]));
-    const session = choices(TEMPLATES["ai-architects"]).find((q) => q.id === "session_video")!;
-    expect(session.choices.map((c) => c.id)).toEqual(["1", "2", "3", "4", "5", "na"]);
+  it("follows every rule a saved form must follow", () => {
+    expect(formProblems(form)).toEqual([]);
+    expect(formDefinitionSchema.parse(form)).toEqual(form);
+  });
+});
+
+describe("the rules for an edited form", () => {
+  it("needs both languages on steps, questions and choices", () => {
+    const f = copy();
+    f.steps[0].title.en = " ";
+    f.steps[0].questions[0].ar = "";
+    (f.steps[0].questions[1] as ChoiceQuestion).choices[2].en = "";
+    expect(formProblems(f)).toEqual([
+      { code: "step_title", step: 0 },
+      { code: "question_text", step: 0, question: 0 },
+      { code: "choice_text", step: 0, question: 1, choice: 2 },
+    ]);
   });
 
-  it("falls back to the standard template for an unknown or empty course setting", () => {
-    expect(getTemplate("ai-architects").id).toBe("ai-architects");
-    expect(getTemplate("something-else").id).toBe("standard");
-    expect(getTemplate(null).id).toBe("standard");
+  it("needs at least one step, one question, and two choices per choice question", () => {
+    expect(formProblems({ steps: [] }).map((p) => p.code)).toEqual(["no_steps"]);
+    const empty = copy();
+    empty.steps = [{ ...empty.steps[0], questions: [] }];
+    expect(formProblems(empty).map((p) => p.code)).toEqual(["no_questions", "empty_step"]);
+    const f = copy();
+    (f.steps[0].questions[0] as ChoiceQuestion).choices.splice(1);
+    expect(formProblems(f)).toEqual([{ code: "too_few_choices", step: 0, question: 0 }]);
+  });
+
+  it("refuses repeated ids and ids that clash with an 'other' note", () => {
+    const f = copy();
+    f.steps[1].questions[0].id = f.steps[0].questions[0].id;
+    f.steps[1].questions[3].id = "video_other";
+    const q = f.steps[0].questions[1] as ChoiceQuestion;
+    q.choices[1].id = q.choices[0].id;
+    expect(formProblems(f).map((p) => p.code)).toEqual([
+      "duplicate_choice",
+      "duplicate_question",
+      "reserved_question_id",
+    ]);
+  });
+
+  it("keeps 'other' as the last choice when it opens a text box", () => {
+    const f = copy();
+    const q = f.steps[1].questions[2] as ChoiceQuestion;
+    q.choices = [OTHER_CHOICE, ...q.choices.filter((c) => c.id !== OTHER_CHOICE.id)];
+    expect(formProblems(f).map((p) => p.code)).toEqual(["other_last"]);
+  });
+
+  it("caps steps, questions and choices", () => {
+    const f = copy();
+    f.steps = Array.from({ length: LIMITS.steps + 1 }, (_, i) => ({
+      ...f.steps[0],
+      id: `s${i}`,
+      questions: f.steps[0].questions.map((q) => ({ ...q, id: `${q.id}_${i}` })),
+    }));
+    expect(formProblems(f).map((p) => p.code)).toEqual(["too_many_steps"]);
+    expect(formDefinitionSchema.safeParse(f).success).toBe(false);
+  });
+
+  it("refuses malformed input before looking at it", () => {
+    const bad = copy() as unknown as { steps: { questions: { kind: string }[] }[] };
+    bad.steps[0].questions[0].kind = "rating";
+    expect(formDefinitionSchema.safeParse(bad).success).toBe(false);
+    const badId = copy();
+    badId.steps[0].questions[0].id = "Has Spaces";
+    expect(formDefinitionSchema.safeParse(badId).success).toBe(false);
+  });
+
+  it("makes fresh ids that are not taken", () => {
+    const taken = ["q_aaaaaa", "q_bbbbbb"];
+    const id = newId("q", taken);
+    expect(id).toMatch(/^q_[a-z0-9]{1,6}$/);
+    expect(taken).not.toContain(id);
   });
 });
 
 describe("checking a response", () => {
   it("accepts a complete submission with blank comments", () => {
     const res = checkFeedback(
-      standard,
-      { answers: fullAnswers(), notes: { opinion: "   " } },
+      form,
+      { answers: fullAnswers(), notes: { comments: "   " } },
       "submit",
     );
     expect(res.ok).toBe(true);
     expect(res.clean.notes).toEqual({});
   });
 
-  it("names every unanswered question on submit, but lets a draft be partial", () => {
+  it("names every unanswered required question on submit, but lets a draft be partial", () => {
     const answers = fullAnswers();
     delete answers.pace;
-    delete answers.recommend;
-    const res = checkFeedback(standard, { answers, notes: {} }, "submit");
+    delete answers.satisfaction;
+    const res = checkFeedback(form, { answers, notes: {} }, "submit");
     expect(res.ok).toBe(false);
     expect(res.issues).toEqual([
       { question: "pace", problem: "missing" },
-      { question: "recommend", problem: "missing" },
+      { question: "satisfaction", problem: "missing" },
     ]);
-    expect(checkFeedback(standard, { answers: { pace: "right" }, notes: {} }, "draft").ok).toBe(
-      true,
-    );
+    expect(checkFeedback(form, { answers: { pace: "right" }, notes: {} }, "draft").ok).toBe(true);
+  });
+
+  it("requires a written answer when the admin made it required, and not a choice left optional", () => {
+    const f = copy();
+    const comments = f.steps[1].questions.find((q) => q.id === "comments")!;
+    comments.required = true;
+    f.steps[0].questions[0].required = false;
+    const answers = fullAnswers(f);
+    delete answers.platform;
+    const res = checkFeedback(f, { answers, notes: { comments: "  " } }, "submit");
+    expect(res.issues).toEqual([{ question: "comments", problem: "missing" }]);
+    expect(checkFeedback(f, { answers, notes: { comments: "Good" } }, "submit").ok).toBe(true);
   });
 
   it("refuses choices and questions that do not exist", () => {
     const res = checkFeedback(
-      standard,
+      form,
       { answers: { ...fullAnswers(), pace: "7", made_up: "1" }, notes: { hacked: "x" } },
       "submit",
     );
@@ -99,48 +166,68 @@ describe("checking a response", () => {
     );
   });
 
-  it("refuses a workshop answer on the standard template", () => {
-    const res = checkFeedback(standard, { answers: { session_video: "5" }, notes: {} }, "draft");
-    expect(res.issues).toEqual([{ question: "session_video", problem: "unknown" }]);
-  });
-
   it("limits written answers to 2,000 characters, counting Arabic letters once", () => {
     const at = "ب".repeat(2000);
-    expect(checkFeedback(standard, { answers: {}, notes: { future: at } }, "draft").ok).toBe(true);
+    expect(checkFeedback(form, { answers: {}, notes: { comments: at } }, "draft").ok).toBe(true);
     expect(
-      checkFeedback(standard, { answers: {}, notes: { future: at + "ب" } }, "draft").issues,
-    ).toEqual([{ question: "future", problem: "too_long" }]);
+      checkFeedback(form, { answers: {}, notes: { comments: at + "ب" } }, "draft").issues,
+    ).toEqual([{ question: "comments", problem: "too_long" }]);
   });
 
   it("keeps the 'other' text only when 'other' is the answer", () => {
     const withOther = checkFeedback(
-      standard,
+      form,
       { answers: { improve: "other" }, notes: { [otherKey("improve")]: " Arabic subtitles " } },
       "draft",
     );
     expect(withOther.clean.notes).toEqual({ improve_other: "Arabic subtitles" });
     const without = checkFeedback(
-      standard,
-      { answers: { improve: "playback" }, notes: { [otherKey("improve")]: "left over" } },
+      form,
+      { answers: { improve: "video" }, notes: { [otherKey("improve")]: "left over" } },
       "draft",
     );
     expect(without.ok).toBe(true);
     expect(without.clean.notes).toEqual({});
   });
 
-  it("finds what is missing in a step", () => {
-    const [platform] = standard.steps;
-    expect(missingInStep(platform, { navigation: "3", audio: "4" })).toEqual([
-      "video_playback",
-      "readability",
-      "device",
+  it("finds what is missing in a step, written questions included", () => {
+    const [first] = form.steps;
+    expect(missingInStep(first, { platform: "3", teaching: "4" }, {})).toEqual([
+      "video",
+      "examples",
+      "pace",
+      "readiness",
     ]);
-    expect(missingInStep(standard.steps[2], fullAnswers())).toEqual([]);
+    const last = copy().steps[1];
+    last.questions.find((q) => q.id === "comments")!.required = true;
+    expect(missingInStep(last, fullAnswers(), {})).toEqual(["comments"]);
+    expect(missingInStep(last, fullAnswers(), { comments: "More practice" })).toEqual([]);
+  });
+});
+
+describe("a draft after the admin edits the form", () => {
+  it("keeps the answers that still fit and drops the rest", () => {
+    const f = copy();
+    // The admin removed "video", dropped a pace choice and made "comments"
+    // shorter.
+    f.steps[0].questions = f.steps[0].questions.filter((q) => q.id !== "video");
+    const pace = f.steps[0].questions.find((q) => q.id === "pace") as ChoiceQuestion;
+    pace.choices = pace.choices.filter((c) => c.id !== "much_fast");
+    const comments = f.steps[1].questions.find((q) => q.id === "comments")!;
+    if (comments.kind === "text") comments.max = 10;
+    const kept = keepValidAnswers(f, {
+      answers: { platform: "4", video: "5", pace: "much_fast", improve: "other" },
+      notes: { comments: "  far too long for ten  ", improve_other: "subtitles", gone: "x" },
+    });
+    expect(kept).toEqual({
+      answers: { platform: "4", improve: "other" },
+      notes: { comments: "far too lo", improve_other: "subtitles" },
+    });
   });
 });
 
 describe("where a learner stands", () => {
-  const base = { enrolled: true, onsite: false, submitted: false };
+  const base = { enrolled: true, onsite: false, enabled: true, submitted: false };
 
   it("opens the form once lessons and quiz are done", () => {
     expect(feedbackState({ ...base, reason: "feedback_required" })).toBe("open");
@@ -152,6 +239,14 @@ describe("where a learner stands", () => {
     expect(feedbackState({ ...base, reason: "lessons_incomplete" })).toBe("lessons_incomplete");
     expect(feedbackState({ ...base, reason: "progress_incomplete" })).toBe("lessons_incomplete");
     expect(feedbackState({ ...base, reason: "quiz_not_passed" })).toBe("quiz_required");
+  });
+
+  it("asks nothing on a course an admin switched feedback off for", () => {
+    expect(feedbackState({ ...base, enabled: false, reason: null })).toBe("disabled");
+    // A response sent before it was switched off still counts as sent.
+    expect(feedbackState({ ...base, enabled: false, submitted: true, reason: null })).toBe(
+      "submitted",
+    );
   });
 
   it("does not ask onsite learners, anyone not enrolled, or anyone who already answered", () => {

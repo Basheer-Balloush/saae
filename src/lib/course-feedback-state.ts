@@ -5,6 +5,7 @@
 export type FeedbackState =
   | "not_enrolled"
   | "onsite"
+  | "disabled"
   | "unavailable"
   | "lessons_incomplete"
   | "quiz_required"
@@ -14,6 +15,8 @@ export type FeedbackState =
 export function feedbackState(x: {
   enrolled: boolean;
   onsite: boolean;
+  /** False when an admin switched feedback off for the course. */
+  enabled: boolean;
   submitted: boolean;
   /** The certificate check's reason; null when a certificate exists. */
   reason: string | null;
@@ -21,6 +24,7 @@ export function feedbackState(x: {
   if (!x.enrolled) return "not_enrolled";
   if (x.onsite) return "onsite";
   if (x.submitted) return "submitted";
+  if (!x.enabled) return "disabled";
   switch (x.reason) {
     // Everything else is done. Before the certificate rule is switched on,
     // or for a certificate issued earlier, the form is open but optional.

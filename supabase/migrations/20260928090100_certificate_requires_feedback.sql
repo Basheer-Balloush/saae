@@ -5,7 +5,8 @@
 --
 -- The definition below is the one from 20260923170000 (the live definition
 -- of 2026-09-23 with the serial change) with one addition: the
--- "feedback_required" check just before a new certificate is issued.
+-- "feedback_required" check just before a new certificate is issued. It
+-- does not apply to a course an admin has switched feedback off for.
 -- Unchanged: onsite courses, the lesson and quiz rules, certificates that
 -- already exist, serials and the audit event.
 --
@@ -124,8 +125,12 @@ BEGIN
    WHERE course_id = _course_id AND student_id = _student_id;
 
   -- Online courses end with the learner's course feedback, after the lessons
-  -- and the quiz. A certificate issued before this rule stays issued.
+  -- and the quiz, unless an admin switched feedback off for the course.
+  -- A certificate issued before this rule stays issued.
   IF v_cert_id IS NULL AND v_mode IS DISTINCT FROM 'onsite' AND NOT EXISTS (
+    SELECT 1 FROM public.lms_feedback_forms ff
+     WHERE ff.course_id = _course_id AND ff.enabled = false
+  ) AND NOT EXISTS (
     SELECT 1 FROM public.lms_course_feedback f
      WHERE f.student_id = _student_id
        AND f.course_id = _course_id
