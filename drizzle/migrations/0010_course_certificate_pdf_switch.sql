@@ -1,1 +1,0 @@
-ALTER TABLE public.lms_courses ADD COLUMN IF NOT EXISTS certificate_pdf_enabled boolean NOT NULL DEFAULT false;
