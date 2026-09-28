@@ -1,3 +1,4 @@
+// Legacy URL: redirects to /learning-management-system/admin/people. Kept so old links keep working.
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /* Users & roles now live in People → Team & roles. */

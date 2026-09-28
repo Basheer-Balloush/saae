@@ -1,3 +1,4 @@
+// Legacy URL: redirects to /admin. Kept so old links keep working.
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /* The old card page; the admin home at /admin replaces it. */

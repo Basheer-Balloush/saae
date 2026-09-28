@@ -1,3 +1,4 @@
+// Legacy URL: redirects to /initiative. Kept so old links keep working.
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /* The old-design initiative page. /initiative replaced it and opens the same

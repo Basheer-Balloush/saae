@@ -1,3 +1,4 @@
+// Legacy URL: redirects to /learning-management-system/admin/requests. Kept so old links keep working.
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /* Review moderation lives in Requests → Reviews. */

@@ -1,3 +1,4 @@
+// Legacy URL: redirects to /learning-management-system/instructor/courses/$id. Kept so old links keep working.
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /* Grading lives in the course page now (Grading tab). */

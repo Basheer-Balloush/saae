@@ -1,3 +1,4 @@
+// Legacy URL: redirects to /admin/leads. Kept so old links keep working.
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /* Leads live at /admin/leads now. Old links (individuals, companies, one

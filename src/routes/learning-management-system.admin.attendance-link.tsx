@@ -1,3 +1,4 @@
+// Legacy URL: redirects to /learning-management-system/admin/courses. Kept so old links keep working.
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /* Attendance is part of each in-person course now (course → Attendance tab),

@@ -1,3 +1,4 @@
+// Legacy URL: redirects to /admin/chatbot. Kept so old links keep working.
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /* Visitor feedback lives on the Chatbot page now. */

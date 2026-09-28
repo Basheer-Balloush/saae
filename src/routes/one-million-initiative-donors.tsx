@@ -1,3 +1,4 @@
+// Legacy URL: redirects to /initiative/sponsors. Kept so old links keep working.
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /* The old-design sponsor table. /initiative/sponsors lists the same records in

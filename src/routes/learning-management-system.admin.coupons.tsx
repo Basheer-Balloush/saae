@@ -1,3 +1,4 @@
+// Legacy URL: redirects to /learning-management-system/admin/settings. Kept so old links keep working.
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /* Coupons were switched off (enrolment is by approval only). The old codes

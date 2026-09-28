@@ -1,3 +1,4 @@
+// Legacy URL: redirects to /learning-management-system/admin/internships. Kept so old links keep working.
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /* A new internship starts from a short dialog on the list. */
