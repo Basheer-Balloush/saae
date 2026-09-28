@@ -47,7 +47,7 @@ Build output note: no `dist/` — TanStack Start + nitro emits `.output/`:
 - Deps verified present via `--frozen-lockfile` (no changes); lockfile contents not audited.
 - `lint` timed out (>120 s) — result unknown, recorded as-is, not fixed.
 - No secrets or `.env` values recorded (only noted that bun reads `.env`, unnamed).
-- Post-baseline `git status --short` must show only `?? docs/mobile-baseline-PR0.md`.
+- Post-baseline `git status --short` must show only `?? docs/mobile/mobile-baseline-PR0.md`.
 
 ## PR2-1 tokens
 - Files: `src/styles.css` + this note only.
