@@ -17,6 +17,7 @@ import {
   safeLogoUrl,
   type Donor,
 } from "@/components/initiative/live-leaderboard";
+import { resizedImage } from "@/lib/image-url";
 
 export type SponsorRow = Donor & {
   total_amount: number | string | null;
@@ -61,7 +62,7 @@ function badgeHtml(logoUrl: string | null, initials: string): string {
   if (!logo) return `<i>${safeInitials}</i>`;
   /* The inline onerror survives the markup being re-injected by React, which a
      listener bound from a page script would not. */
-  return `<i data-initials="${safeInitials}"><img src="${escapeHtml(logo)}" alt="" width="46" height="46" loading="lazy" decoding="async" onerror="this.parentElement.textContent=this.parentElement.dataset.initials"></i>`;
+  return `<i data-initials="${safeInitials}"><img src="${escapeHtml(resizedImage(logo, 96))}" alt="" width="46" height="46" loading="lazy" decoding="async" onerror="this.parentElement.textContent=this.parentElement.dataset.initials"></i>`;
 }
 
 /* First place gets the star and second and third the medal, as on the

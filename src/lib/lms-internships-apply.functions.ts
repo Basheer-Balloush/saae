@@ -96,7 +96,9 @@ export const getInternshipApplyContext = createServerFn({ method: "POST" })
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: signed } = await supabaseAdmin.storage
         .from("internship-covers")
-        .createSignedUrl((oppRow as any).cover_image_path, 60 * 60);
+        .createSignedUrl((oppRow as any).cover_image_path, 60 * 60, {
+          transform: { width: 1080, resize: "contain", quality: 72 },
+        });
       cover_url = signed?.signedUrl ?? null;
     }
 

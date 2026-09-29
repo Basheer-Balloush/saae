@@ -7,6 +7,7 @@ import { usePortalTarget } from "@/hooks/usePortalTarget";
 import MotionButton from "@/components/ui/motion-button";
 import { PARTNERS_COPY, type Locale } from "./mobile-home-content";
 import "./homepage-partners.css";
+import { resizedImage } from "@/lib/image-url";
 
 /**
  * The desktop homepage is a static HTML string rendered by CinematicPage, so
@@ -30,7 +31,7 @@ export function DesktopPartnerCarousel({ partners }: { partners: Partner[] }) {
     () =>
       partners.flatMap((p) => {
         const src = p.lightLogo ?? p.logo;
-        return src ? [{ id: p.id, name: p.name, src, scale: p.height / 96 }] : [];
+        return src ? [{ id: p.id, name: p.name, src: resizedImage(src, 480), scale: p.height / 96 }] : [];
       }),
     [partners],
   );
