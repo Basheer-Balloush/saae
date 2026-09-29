@@ -6,6 +6,7 @@ import {
   replaceRegion,
 } from "@/lib/cinematic-db-content";
 import { communityLabel } from "@/lib/communityCategories";
+import { resizedImage } from "@/lib/image-url";
 
 export type Bilingual = { en: string; ar: string };
 export type CommunityNewsRow = {
@@ -164,7 +165,7 @@ function storyHtml(r: CommunityNewsRow): string {
   return [
     `<li><a class="community-story${photo ? "" : " is-textonly"}" href="/news/${encodeURIComponent(r.id)}">`,
     photo
-      ? `  <figure class="community-story-photo"><img src="${escapeHtml(photo)}" alt="" loading="lazy" decoding="async" draggable="false"></figure>`
+      ? `  <figure class="community-story-photo"><img src="${escapeHtml(resizedImage(photo, 720))}" alt="" loading="lazy" decoding="async" draggable="false"></figure>`
       : "",
     `  <div class="community-story-body"><p class="news-meta"><span class="news-tag">${bilingualHtml(communityLabel(r.category, "en"), communityLabel(r.category, "ar"))}</span><time datetime="${escapeHtml(r.published_at.slice(0, 10))}">${bilingualHtml(formatNewsDate(r.published_at, "en"), formatNewsDate(r.published_at, "ar"))}</time></p>`,
     `  <h3>${b(title)}</h3>${excerpt.en || excerpt.ar ? `<p class="community-story-excerpt">${b(excerpt)}</p>` : ""}<span class="community-story-cta">${bilingualHtml("Read the story", "اقرأ الخبر")} ${ARROW}</span></div>`,

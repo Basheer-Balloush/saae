@@ -1,5 +1,6 @@
 import { bilingualHtml, escapeHtml, replaceRegion } from "@/lib/cinematic-db-content";
 import type { PartnerResult } from "./data";
+import { resizedImage } from "@/lib/image-url";
 
 function statusHtml(failed: boolean): string {
   const message = failed
@@ -20,7 +21,7 @@ export function applyPartnerDirectory(html: string, result: PartnerResult): stri
     ? `<ul class="partner-grid">${rows
         .map((p) => {
           const logo = p.lightLogo ?? p.logo;
-          return `<li class="partner-plate"><span class="plate-face db-partner-face">${logo ? `<img src="${escapeHtml(logo)}" alt="" width="320" height="320" style="max-height:${p.height}px;object-fit:contain" loading="lazy" decoding="async">` : ""}</span><span class="plate-name">${escapeHtml(p.name)}</span></li>`;
+          return `<li class="partner-plate"><span class="plate-face db-partner-face">${logo ? `<img src="${escapeHtml(resizedImage(logo, 640))}" alt="" width="320" height="320" style="max-height:${p.height}px;object-fit:contain" loading="lazy" decoding="async">` : ""}</span><span class="plate-name">${escapeHtml(p.name)}</span></li>`;
         })
         .join("\n")}</ul>`
     : statusHtml(result.failed);

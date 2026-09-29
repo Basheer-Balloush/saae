@@ -12,6 +12,8 @@
  * own rank-mark SVGs.
  */
 
+import { resizedImage } from "@/lib/image-url";
+
 export type Donor = {
   donor_name: string;
   donor_display_name: string | null;
@@ -83,7 +85,7 @@ function buildBadge(donor: Donor, name: string): HTMLElement {
     return badge;
   }
   const img = document.createElement("img");
-  img.src = logo;
+  img.src = resizedImage(logo, 96);
   img.alt = "";
   img.width = 46;
   img.height = 46;

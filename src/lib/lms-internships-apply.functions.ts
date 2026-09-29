@@ -94,7 +94,9 @@ export const getInternshipApplyContext = createServerFn({ method: "POST" })
     if ((oppRow as any).cover_image_bucket && (oppRow as any).cover_image_path) {
       const { data: signed } = await supabase.storage
         .from((oppRow as any).cover_image_bucket)
-        .createSignedUrl((oppRow as any).cover_image_path, 60 * 60);
+        .createSignedUrl((oppRow as any).cover_image_path, 60 * 60, {
+          transform: { width: 1080, resize: "contain", quality: 72 },
+        });
       cover_url = signed?.signedUrl ?? null;
     }
 

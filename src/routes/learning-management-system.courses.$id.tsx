@@ -584,7 +584,7 @@ function CourseDetails() {
                       <li key={ins.slug}>
                         <Link to="/learning-management-system/instructors/$id" params={{ id: ins.slug }}>
                           <span className="instructor-avatar">
-                            {ins.avatar_url ? <img src={ins.avatar_url} alt={insName} /> : insName.charAt(0)}
+                            {ins.avatar_url ? <img src={resizedImage(ins.avatar_url, 160)} alt={insName} /> : insName.charAt(0)}
                           </span>
                           <span className="instructor-who">
                             <strong>{insName}</strong>

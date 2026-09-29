@@ -17,6 +17,7 @@ import { FaqSequence } from "./DesktopFaqScroll";
 import { IPhoneMockup } from "@/components/ui/iphone-mockup";
 import { ScaledDevice } from "./ScaledDevice";
 import { LogoCarousel, type Logo } from "@/components/ui/logo-carousel";
+import { resizedImage } from "@/lib/image-url";
 import {
   FAQ_COPY,
   MICRO_COPY,
@@ -49,7 +50,7 @@ export function MobileHomeView({
   // A partner's light logo (made for dark backgrounds) where it has one, as on the desktop.
   const partnerLogos: Logo[] = visiblePartners.flatMap((p) => {
     const src = p.lightLogo ?? p.logo;
-    return src ? [{ id: p.id, name: p.name, src, scale: p.height / 96 }] : [];
+    return src ? [{ id: p.id, name: p.name, src: resizedImage(src, 480), scale: p.height / 96 }] : [];
   });
   const dir = lang === "ar" ? "rtl" : "ltr";
   const [motionReady, setMotionReady] = useState(false);

@@ -341,7 +341,7 @@ function memberHtml(m: MemberRow): string {
   return [
     `<li class="community member">`,
     photo
-      ? `  <img class="member-photo" src="${escapeHtml(photo)}" alt="${escapeHtml(nameEn)}" loading="lazy" decoding="async">`
+      ? `  <img class="member-photo" src="${escapeHtml(resizedImage(photo, 480))}" alt="${escapeHtml(nameEn)}" loading="lazy" decoding="async">`
       : "",
     `  <h3>${bilingualHtml(nameEn, m.full_name_ar)}</h3>`,
     `  <p class="community-line">${bilingualHtml(m.position_en || m.position_ar, m.position_ar)}</p>`,
@@ -448,7 +448,7 @@ export function renderArticle(article: NewsArticleRow, related: RelatedNewsRow[]
           `  <div class="gallery-track" id="gallery-track">`,
           ...slides.map(
             (src, i) =>
-              `    <figure class="gallery-slide${i === 0 ? " is-active" : ""}"><img src="${escapeHtml(src)}" alt="${escapeHtml(`${title.en} — ${i + 1}`)}" loading="lazy" decoding="async"></figure>`,
+              `    <figure class="gallery-slide${i === 0 ? " is-active" : ""}"><img src="${escapeHtml(resizedImage(src, 1600))}"${srcSetAttr(src, [720, 1080, 1600])} alt="${escapeHtml(`${title.en} — ${i + 1}`)}" loading="lazy" decoding="async"></figure>`,
           ),
           `  </div>`,
           `  <button class="gallery-arrow gallery-prev" type="button" id="gallery-prev" aria-label="الشريحة السابقة">${PREV_SVG}</button>`,
