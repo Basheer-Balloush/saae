@@ -31,10 +31,6 @@ export type ProfileContact = {
 // an HMAC of the slug and the row is AES-256-GCM ciphertext, both derived from
 // the Worker secret PROFILE_CARD_SECRET (see profile-card-crypto.ts). Nothing
 // about a card is kept in the code or in public/.
-//
-// While the secret is being rolled out, a missing secret falls back to the
-// earlier plain table (private_profile_cards); that fallback is removed once
-// the encrypted read is confirmed live.
 
 type StoredImage = { mime: string; b64: string };
 type StoredCard = {
@@ -69,10 +65,10 @@ export function profileImagePath(slug: string, kind: "portrait" | "signature"): 
 
 let keysPromise: ReturnType<typeof deriveCardKeys> | null = null;
 
-/** The decrypted card, null when no card has this slug, undefined when the secret is not set. */
-async function loadCard(slug: string): Promise<StoredCard | null | undefined> {
+/** The decrypted card, or null when no card has this slug. */
+async function loadCard(slug: string): Promise<StoredCard | null> {
   const secret = process.env.PROFILE_CARD_SECRET;
-  if (!secret) return undefined;
+  if (!secret) throw new Error("PROFILE_CARD_SECRET is not set");
   keysPromise ??= deriveCardKeys(secret);
   const keys = await keysPromise;
   const hash = await cardSlugHash(keys, slug);
@@ -85,60 +81,32 @@ const decode = (b64: string) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0
 export async function findProfileCard(slug: string): Promise<ProfileCard | null> {
   try {
     const stored = await loadCard(slug);
-    if (stored !== undefined) {
-      return stored
-        ? {
-            ...stored.card,
-            slug,
-            portrait: profileImagePath(slug, "portrait"),
-            signature: profileImagePath(slug, "signature"),
-          }
-        : null;
-    }
-    const row = (await rpc("get_private_profile_card", { p_slug: slug })) as Omit<
-      ProfileCard,
-      "portrait" | "signature"
-    > | null;
-    if (row) {
-      return {
-        ...row,
-        portrait: profileImagePath(slug, "portrait"),
-        signature: profileImagePath(slug, "signature"),
-      };
-    }
+    if (!stored) return null;
+    return {
+      ...stored.card,
+      slug,
+      portrait: profileImagePath(slug, "portrait"),
+      signature: profileImagePath(slug, "signature"),
+    };
   } catch (error) {
     console.error("Profile card lookup failed", error);
+    return null;
   }
-  return null;
 }
 
 export async function findProfileContact(slug: string): Promise<ProfileContact | null> {
   try {
-    const stored = await loadCard(slug);
-    if (stored !== undefined) return stored?.contact ?? null;
-    const row = (await rpc("get_private_profile_contact", {
-      p_slug: slug,
-    })) as ProfileContact | null;
-    if (row) return row;
+    return (await loadCard(slug))?.contact ?? null;
   } catch (error) {
     console.error("Profile contact lookup failed", error);
+    return null;
   }
-  return null;
 }
 
 export async function findProfileImage(
   slug: string,
   kind: "portrait" | "signature",
 ): Promise<{ mime: string; bytes: Uint8Array<ArrayBuffer> } | null> {
-  const stored = await loadCard(slug);
-  if (stored !== undefined) {
-    const image = stored?.[kind];
-    return image ? { mime: image.mime, bytes: decode(image.b64) } : null;
-  }
-  const rows = (await rpc("get_private_profile_image", { p_slug: slug, p_kind: kind })) as
-    | { mime: string | null; b64: string | null }[]
-    | null;
-  const row = rows?.[0];
-  if (!row?.mime || !row.b64) return null;
-  return { mime: row.mime, bytes: decode(row.b64) };
+  const image = (await loadCard(slug))?.[kind];
+  return image ? { mime: image.mime, bytes: decode(image.b64) } : null;
 }
