@@ -146,11 +146,17 @@ async function sendUpgradeLink(userId: string, u: Upgrade) {
     throw new Error("SIGNUP_FAILED");
   }
   const { sendAccountConfirmationEmail } = await authEmail();
-  await sendAccountConfirmationEmail({
-    email: u.email,
-    confirmationUrl: confirmUrl(token),
-    lang: u.lang,
-  });
+  try {
+    await sendAccountConfirmationEmail({
+      email: u.email,
+      confirmationUrl: confirmUrl(token),
+      lang: u.lang,
+    });
+  } catch (e) {
+    // Running locally without email keys: the link goes to the server log.
+    if (!getSiteUrl().startsWith("http://localhost")) throw e;
+    console.info("[local] guest account confirmation link:", confirmUrl(token));
+  }
 }
 
 const upgradeSchema = z.object({
