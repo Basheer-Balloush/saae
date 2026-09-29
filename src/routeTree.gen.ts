@@ -43,6 +43,7 @@ import { Route as LearningManagementSystemTrainerApplyRouteImport } from './rout
 import { Route as LearningManagementSystemStudentRouteImport } from './routes/learning-management-system.student'
 import { Route as LearningManagementSystemSignupRouteImport } from './routes/learning-management-system.signup'
 import { Route as LearningManagementSystemResetPasswordRouteImport } from './routes/learning-management-system.reset-password'
+import { Route as LearningManagementSystemConfirmAccountRouteImport } from './routes/learning-management-system.confirm-account'
 import { Route as LearningManagementSystemProfileRouteImport } from './routes/learning-management-system.profile'
 import { Route as LearningManagementSystemLoginRouteImport } from './routes/learning-management-system.login'
 import { Route as LearningManagementSystemInstructorRouteImport } from './routes/learning-management-system.instructor'
@@ -315,6 +316,12 @@ const LearningManagementSystemResetPasswordRoute =
   LearningManagementSystemResetPasswordRouteImport.update({
     id: '/reset-password',
     path: '/reset-password',
+    getParentRoute: () => LearningManagementSystemRoute,
+  } as any)
+const LearningManagementSystemConfirmAccountRoute =
+  LearningManagementSystemConfirmAccountRouteImport.update({
+    id: '/confirm-account',
+    path: '/confirm-account',
     getParentRoute: () => LearningManagementSystemRoute,
   } as any)
 const LearningManagementSystemProfileRoute =
@@ -877,6 +884,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
   '/learning-management-system/profile': typeof LearningManagementSystemProfileRoute
   '/learning-management-system/reset-password': typeof LearningManagementSystemResetPasswordRoute
+  '/learning-management-system/confirm-account': typeof LearningManagementSystemConfirmAccountRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentRouteWithChildren
   '/learning-management-system/trainer-apply': typeof LearningManagementSystemTrainerApplyRoute
@@ -997,6 +1005,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
   '/learning-management-system/profile': typeof LearningManagementSystemProfileRoute
   '/learning-management-system/reset-password': typeof LearningManagementSystemResetPasswordRoute
+  '/learning-management-system/confirm-account': typeof LearningManagementSystemConfirmAccountRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/trainer-apply': typeof LearningManagementSystemTrainerApplyRoute
   '/learning-management-system/verify': typeof LearningManagementSystemVerifyRoute
@@ -1122,6 +1131,7 @@ export interface FileRoutesById {
   '/learning-management-system/login': typeof LearningManagementSystemLoginRoute
   '/learning-management-system/profile': typeof LearningManagementSystemProfileRoute
   '/learning-management-system/reset-password': typeof LearningManagementSystemResetPasswordRoute
+  '/learning-management-system/confirm-account': typeof LearningManagementSystemConfirmAccountRoute
   '/learning-management-system/signup': typeof LearningManagementSystemSignupRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentRouteWithChildren
   '/learning-management-system/trainer-apply': typeof LearningManagementSystemTrainerApplyRoute
@@ -1251,6 +1261,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/login'
     | '/learning-management-system/profile'
     | '/learning-management-system/reset-password'
+    | '/learning-management-system/confirm-account'
     | '/learning-management-system/signup'
     | '/learning-management-system/student'
     | '/learning-management-system/trainer-apply'
@@ -1371,6 +1382,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/login'
     | '/learning-management-system/profile'
     | '/learning-management-system/reset-password'
+    | '/learning-management-system/confirm-account'
     | '/learning-management-system/signup'
     | '/learning-management-system/trainer-apply'
     | '/learning-management-system/verify'
@@ -1495,6 +1507,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/login'
     | '/learning-management-system/profile'
     | '/learning-management-system/reset-password'
+    | '/learning-management-system/confirm-account'
     | '/learning-management-system/signup'
     | '/learning-management-system/student'
     | '/learning-management-system/trainer-apply'
@@ -1854,6 +1867,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/learning-management-system/reset-password'
       preLoaderRoute: typeof LearningManagementSystemResetPasswordRouteImport
+      parentRoute: typeof LearningManagementSystemRoute
+    }
+    '/learning-management-system/confirm-account': {
+      id: '/learning-management-system/confirm-account'
+      path: '/confirm-account'
+      fullPath: '/learning-management-system/confirm-account'
+      preLoaderRoute: typeof LearningManagementSystemConfirmAccountRouteImport
       parentRoute: typeof LearningManagementSystemRoute
     }
     '/learning-management-system/profile': {
@@ -2813,6 +2833,7 @@ interface LearningManagementSystemRouteChildren {
   LearningManagementSystemLoginRoute: typeof LearningManagementSystemLoginRoute
   LearningManagementSystemProfileRoute: typeof LearningManagementSystemProfileRoute
   LearningManagementSystemResetPasswordRoute: typeof LearningManagementSystemResetPasswordRoute
+  LearningManagementSystemConfirmAccountRoute: typeof LearningManagementSystemConfirmAccountRoute
   LearningManagementSystemSignupRoute: typeof LearningManagementSystemSignupRoute
   LearningManagementSystemStudentRoute: typeof LearningManagementSystemStudentRouteWithChildren
   LearningManagementSystemTrainerApplyRoute: typeof LearningManagementSystemTrainerApplyRoute
@@ -2839,6 +2860,8 @@ const LearningManagementSystemRouteChildren: LearningManagementSystemRouteChildr
     LearningManagementSystemProfileRoute: LearningManagementSystemProfileRoute,
     LearningManagementSystemResetPasswordRoute:
       LearningManagementSystemResetPasswordRoute,
+    LearningManagementSystemConfirmAccountRoute:
+      LearningManagementSystemConfirmAccountRoute,
     LearningManagementSystemSignupRoute: LearningManagementSystemSignupRoute,
     LearningManagementSystemStudentRoute:
       LearningManagementSystemStudentRouteWithChildren,
