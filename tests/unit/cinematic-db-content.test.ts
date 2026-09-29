@@ -17,10 +17,10 @@ import {
   type MemberRow,
   type NewsArticleRow,
   type NewsCardRow,
-} from "@/lib/cinematic-db-content";
+} from "@/features/website/lib/cinematic-db-content";
 
 const page = (name: string) =>
-  readFileSync(path.resolve(import.meta.dirname, "../../src/components/cinematic/html", name), "utf8");
+  readFileSync(path.resolve(import.meta.dirname, "../../src/features/website/cinematic/html", name), "utf8");
 
 const count = (haystack: string, needle: string) => haystack.split(needle).length - 1;
 

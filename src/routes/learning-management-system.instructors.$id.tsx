@@ -2,12 +2,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
-import type { CourseCardData } from "@/components/lms/CourseCard";
-import { SkinCourseCard } from "@/components/lms-skin/SkinCourseCard";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
-import { loadPublicInstructorCourses } from "@/lib/lms-public-catalog";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsT } from "@/features/lms/lib/i18n";
+import type { CourseCardData } from "@/features/lms/catalog/CourseCard";
+import { SkinCourseCard } from "@/features/lms/skin/SkinCourseCard";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
+import { loadPublicInstructorCourses } from "@/features/lms/lib/public-catalog";
 import { resizedImage } from "@/lib/image-url";
 
 export const Route = createFileRoute("/learning-management-system/instructors/$id")({

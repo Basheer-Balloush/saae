@@ -29,7 +29,7 @@ import {
   adminSetApplicationStatus,
   type ApplicationBundle,
   type ApplicationStatus,
-} from "@/lib/lms-internships-applications-admin.functions";
+} from "@/features/lms/internships/lib/applications-admin.functions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -49,7 +49,7 @@ import {
   PIPELINE,
   internshipError,
   needsReason,
-} from "@/features/internships/shared";
+} from "@/features/lms/internships/shared";
 
 export const Route = createFileRoute(
   "/learning-management-system/admin/internships/$id/applications/$appId",

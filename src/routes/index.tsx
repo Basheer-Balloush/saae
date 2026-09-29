@@ -1,11 +1,11 @@
 import React, { Suspense, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import homeHtml from "@/components/cinematic/html/home.html?raw";
-import type { CinematicScript } from "@/components/cinematic/CinematicPage";
-import { MobileHome } from "@/components/home/MobileHome";
-import { DesktopFaqScroll } from "@/components/home/DesktopFaqScroll";
-import type { NewsEntry } from "@/components/home/mobile-home-content";
-import { useHeroCapability } from "@/hooks/useHeroCapability";
+import homeHtml from "@/features/website/cinematic/html/home.html?raw";
+import type { CinematicScript } from "@/features/website/cinematic/CinematicPage";
+import { MobileHome } from "@/features/website/home/MobileHome";
+import { DesktopFaqScroll } from "@/features/website/home/DesktopFaqScroll";
+import type { NewsEntry } from "@/features/website/home/mobile-home-content";
+import { useHeroCapability } from "@/features/website/home/useHeroCapability";
 import { supabase } from "@/integrations/supabase/client";
 import { loadPartners, type Partner } from "@/features/website/partners/data";
 import { applyHomePartners } from "@/features/website/partners/render";
@@ -16,25 +16,25 @@ import {
   renderHomeNews,
   replaceRegion,
   type NewsCardRow,
-} from "@/lib/cinematic-db-content";
+} from "@/features/website/lib/cinematic-db-content";
 
 // Desktop-only cinematic shell. Lazy so the phone import graph stays light.
 const CinematicPageLazy = React.lazy(() =>
-  import("@/components/cinematic/CinematicPage").then((m) => ({ default: m.CinematicPage })),
+  import("@/features/website/cinematic/CinematicPage").then((m) => ({ default: m.CinematicPage })),
 );
 const HomepageNewsPortalLazy = React.lazy(() =>
-  import("@/components/home/HomepageNews").then((m) => ({ default: m.HomepageNewsPortal })),
+  import("@/features/website/home/HomepageNews").then((m) => ({ default: m.HomepageNewsPortal })),
 );
 
 // Desktop-only partners logo carousel, portalled into the cinematic markup.
 const DesktopPartnerCarouselLazy = React.lazy(() =>
-  import("@/components/home/DesktopPartnerCarousel").then((m) => ({
+  import("@/features/website/home/DesktopPartnerCarousel").then((m) => ({
     default: m.DesktopPartnerCarousel,
   })),
 );
 
 const DesktopSectionGuideLazy = React.lazy(() =>
-  import("@/components/home/DesktopSectionGuide").then((m) => ({
+  import("@/features/website/home/DesktopSectionGuide").then((m) => ({
     default: m.DesktopSectionGuide,
   })),
 );

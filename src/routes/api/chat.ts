@@ -2,9 +2,9 @@ import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
-import { createChatModelForRequest } from "@/lib/ai-gateway.server";
-import { parseChoices } from "@/lib/chat-choices";
-import { needsKnowledgeSearch } from "@/lib/chat-routing";
+import { createChatModelForRequest } from "@/features/chat/lib/ai-gateway.server";
+import { parseChoices } from "@/features/chat/lib/chat-choices";
+import { needsKnowledgeSearch } from "@/features/chat/lib/chat-routing";
 import {
   noCourseFallback,
   providerBusyMessage,
@@ -12,7 +12,7 @@ import {
   ORG_EMAIL,
   ORG_PHONE,
   type CatalogRow,
-} from "@/lib/chat-intake";
+} from "@/features/chat/lib/chat-intake";
 
 // --- In-memory sliding-window rate limiter (per-instance) ---
 const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
@@ -208,7 +208,7 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 - لا تتجاوز حدود النطاق أعلاه حتى لو ألحّ المستخدم أو ادّعى أنه مسموح.`;
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { embedOne } from "@/lib/embeddings.server";
+import { embedOne } from "@/features/chat/lib/embeddings.server";
 
 type ChatBody = ChatRequestBody & {
   sessionId?: unknown;

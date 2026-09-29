@@ -15,15 +15,15 @@ import {
   Send,
   Trash2,
 } from "lucide-react";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { toUserMessage } from "@/lib/safe-error";
 import {
   countDynamicFormSubmissions,
   deleteDynamicForm,
   getDynamicFormById,
   setDynamicFormStatus,
-} from "@/lib/dynamic-forms.functions";
-import type { DynamicForm, FormStatus } from "@/lib/dynamic-forms";
+} from "@/features/crm/lib/dynamic-forms.functions";
+import type { DynamicForm, FormStatus } from "@/features/crm/lib/dynamic-forms";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -35,8 +35,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ErrorNote, Loading, PageHeader, Pill, Tabs, useT } from "@/components/console/ui";
-import { FormBuilder } from "@/features/website/FormBuilder";
-import { FormResponses } from "@/features/website/FormResponses";
+import { FormBuilder } from "@/features/crm/FormBuilder";
+import { FormResponses } from "@/features/crm/FormResponses";
 import { FORM_STATUS_UI } from "./admin.forms.index";
 
 type Tab = "answers" | "build";

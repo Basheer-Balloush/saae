@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import { Award, Download, Loader2, Printer } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { getCertificatePdfLink, getCertificatePdfState } from "@/lib/certificates/certificate-pdf.functions";
+import { getCertificatePdfLink, getCertificatePdfState } from "@/features/lms/certificates/lib/certificate-pdf.functions";
 import { toUserMessage } from "@/lib/safe-error";
 import { supabase } from "@/integrations/supabase/client";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
-import { SubHero } from "@/components/lms-skin/SubHero";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsT } from "@/features/lms/lib/i18n";
+import { SubHero } from "@/features/lms/skin/SubHero";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { currentLmsReturn } from "@/lib/lms-redirect";
+import { currentLmsReturn } from "@/features/lms/lib/redirect";
 
 export const Route = createFileRoute("/learning-management-system/certificate/$id")({
   head: () => ({

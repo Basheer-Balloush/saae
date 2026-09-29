@@ -3,15 +3,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Award, CheckCircle2, MessageSquareText } from "lucide-react";
 import { toast } from "sonner";
-import { useLang } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n/i18n";
 import { cn } from "@/lib/utils";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import {
   getCourseFeedback,
   saveCourseFeedbackDraft,
   submitCourseFeedback,
   type CourseFeedbackView,
-} from "@/lib/course-feedback.functions";
+} from "@/features/lms/course-feedback/lib/feedback.functions";
 import {
   allQuestions,
   missingInStep,
@@ -20,7 +20,7 @@ import {
   OTHER_TEXT_MAX,
   type ChoiceQuestion,
   type TextQuestion,
-} from "@/lib/course-feedback-survey";
+} from "@/features/lms/course-feedback/lib/survey";
 
 export const Route = createFileRoute("/learning-management-system/student/feedback/$courseId")({
   head: () => ({

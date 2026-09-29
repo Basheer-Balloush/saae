@@ -4,16 +4,16 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-import { useLang } from "@/lib/i18n";
-import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsInternshipsT } from "@/features/lms/lib/internships-i18n";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import {
   getPublicInternshipBySlug,
   getApplyState,
   type PublicInternshipDetail,
-} from "@/lib/lms-internships-public.functions";
-import { SubHero } from "@/components/lms-skin/SubHero";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+} from "@/features/lms/internships/lib/public.functions";
+import { SubHero } from "@/features/lms/skin/SubHero";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { resizedImage, resizedSrcSet } from "@/lib/image-url";
 
 export const detailQueryKey = (slug: string) => ["public-internship", slug] as const;

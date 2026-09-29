@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { ExternalLink, Film, ImagePlus, Loader2, Trash2, Upload, X } from "lucide-react";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useRecordDraft } from "@/hooks/useFormDraft";
@@ -14,12 +14,12 @@ import {
   communityLabel,
   NEWS_CATEGORY_KEYS,
   type NewsCategoryKey,
-} from "@/lib/communityCategories";
-import { DraftNotice } from "@/components/admin/DraftNotice";
+} from "@/features/website/lib/community-categories";
+import { DraftNotice } from "@/components/console/DraftNotice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { UploadProgress } from "@/components/ui/upload-progress";
+import { UploadProgress } from "@/components/common/upload-progress";
 import {
   ErrorNote,
   Field,

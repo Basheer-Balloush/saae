@@ -1,22 +1,22 @@
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
-import type { CourseCardData } from "@/components/lms/CourseCard";
-import { SkinCourseCard } from "@/components/lms-skin/SkinCourseCard";
-import { SubHero } from "@/components/lms-skin/SubHero";
-import { IconSearch } from "@/components/lms-skin/icons";
-import { LMS_SKIN_LINKS, categoryTone } from "@/components/lms-skin/skin";
-import { FilterChips } from "@/components/lms-skin/FilterChips";
-import { loadAllPublicCourses } from "@/lib/lms-public-catalog";
-import { sortOpenFirst } from "@/lib/lms-course-ended";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsT } from "@/features/lms/lib/i18n";
+import type { CourseCardData } from "@/features/lms/catalog/CourseCard";
+import { SkinCourseCard } from "@/features/lms/skin/SkinCourseCard";
+import { SubHero } from "@/features/lms/skin/SubHero";
+import { IconSearch } from "@/features/lms/skin/icons";
+import { LMS_SKIN_LINKS, categoryTone } from "@/features/lms/skin/skin";
+import { FilterChips } from "@/features/lms/skin/FilterChips";
+import { loadAllPublicCourses } from "@/features/lms/lib/public-catalog";
+import { sortOpenFirst } from "@/features/lms/lib/course-ended";
 import {
   PAGE_SIZE,
   parseCatalogSearch,
   validateCatalogSearch,
   type CatalogSearchInput,
-} from "@/lib/lms-catalog-search";
+} from "@/features/lms/lib/catalog-search";
 
 type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
 

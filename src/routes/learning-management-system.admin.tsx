@@ -2,9 +2,9 @@ import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
-import { currentLmsReturn } from "@/lib/lms-redirect";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsT } from "@/features/lms/lib/i18n";
+import { currentLmsReturn } from "@/features/lms/lib/redirect";
 import { ConsoleShell } from "@/components/console/ConsoleShell";
 
 export const Route = createFileRoute("/learning-management-system/admin")({

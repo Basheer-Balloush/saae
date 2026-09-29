@@ -14,9 +14,9 @@ import {
   User,
   UserPlus,
 } from "lucide-react";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { toUserMessage } from "@/lib/safe-error";
-import { addNote, deleteNote, getContact, updateContact } from "@/lib/crm.functions";
+import { addNote, deleteNote, getContact, updateContact } from "@/features/crm/lib/crm.functions";
 import { confirmDialog } from "@/hooks/useConfirm";
 import { useAuth } from "@/hooks/useAuth";
 import { useFormDraft } from "@/hooks/useFormDraft";

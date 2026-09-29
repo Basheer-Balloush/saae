@@ -17,8 +17,8 @@ import {
   adminListInternships,
   adminUpsertInternship,
   type AdminInternshipRow,
-} from "@/lib/lms-internships-admin.functions";
-import type { Lifecycle } from "@/lib/lms-internships-admin";
+} from "@/features/lms/internships/lib/admin.functions";
+import type { Lifecycle } from "@/features/lms/internships/lib/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -43,7 +43,7 @@ import {
   fmtNum,
   useT,
 } from "@/components/console/ui";
-import { LIFECYCLE_UI, deadlineText, internshipError } from "@/features/internships/shared";
+import { LIFECYCLE_UI, deadlineText, internshipError } from "@/features/lms/internships/shared";
 
 export const Route = createFileRoute("/learning-management-system/admin/internships/")({
   ssr: false,

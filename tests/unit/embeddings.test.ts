@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { embedTexts, geminiInput } from "../../src/lib/embeddings.server";
+import { embedTexts, geminiInput } from "../../src/features/chat/lib/embeddings.server";
 
 const vector = (n: number) => Array.from({ length: 1536 }, () => n);
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { splitKnowledgeSections } from "../../src/lib/knowledge-sections";
+import { splitKnowledgeSections } from "../../src/features/chat/lib/knowledge-sections";
 
 describe("splitting an uploaded knowledge file", () => {
   it("makes one entry per ## heading, titled by the heading", () => {

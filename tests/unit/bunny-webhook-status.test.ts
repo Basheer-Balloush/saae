@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   lessonStatusFromBunnyVideo,
   lessonStatusFromBunnyWebhook,
-} from "../../src/lib/bunny-webhook-status";
+} from "../../src/features/lms/lib/bunny-webhook-status";
 
 describe("Bunny webhook status", () => {
   it("marks the lesson playable when encoding finishes or the first resolution is ready", () => {

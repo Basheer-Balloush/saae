@@ -2,16 +2,16 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { useAmsAuth } from "@/hooks/useAmsAuth";
-import { useLang } from "@/lib/i18n";
-import { amsT } from "@/lib/ams-i18n";
-import { localizeAuthError } from "@/lib/auth-error-i18n";
+import { useAmsAuth } from "@/features/attendance/hooks/useAmsAuth";
+import { useLang } from "@/lib/i18n/i18n";
+import { amsT } from "@/features/attendance/lib/i18n";
+import { localizeAuthError } from "@/lib/i18n/auth-error-i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff } from "lucide-react";
-import logo from "@/assets/saae-logo.png";
+import logo from "@/assets/brand/saae-logo.png";
 
 export const Route = createFileRoute("/attendance-management-system/login")({
   head: () => ({

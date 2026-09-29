@@ -20,7 +20,7 @@ import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useRecordDraft } from "@/hooks/useFormDraft";
 import { formDraftKey } from "@/lib/form-draft";
 import { confirmDialog } from "@/hooks/useConfirm";
-import { DraftNotice } from "@/components/admin/DraftNotice";
+import { DraftNotice } from "@/components/console/DraftNotice";
 import {
   COVER_MAX_BYTES,
   COVER_MIME_TYPES,
@@ -31,13 +31,13 @@ import {
   type Lifecycle,
   type OpportunityInput,
   type QuestionInput,
-} from "@/lib/lms-internships-admin";
+} from "@/features/lms/internships/lib/admin";
 import {
   adminDeleteInternship,
   adminGetCoverSignedUrl,
   adminGetInternship,
   adminUpsertInternship,
-} from "@/lib/lms-internships-admin.functions";
+} from "@/features/lms/internships/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -59,7 +59,7 @@ import {
   PROFILE_FIELD_UI,
   QUESTION_KIND_UI,
   internshipError,
-} from "@/features/internships/shared";
+} from "@/features/lms/internships/shared";
 
 export const Route = createFileRoute("/learning-management-system/admin/internships/$id/edit")({
   ssr: false,

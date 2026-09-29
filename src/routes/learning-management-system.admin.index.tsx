@@ -29,7 +29,7 @@ import {
   fmtNum,
   useT,
 } from "@/components/console/ui";
-import { NewCourseDialog } from "@/features/lms-console/NewCourseDialog";
+import { NewCourseDialog } from "@/features/lms/console/NewCourseDialog";
 
 export const Route = createFileRoute("/learning-management-system/admin/")({
   head: () => ({ meta: [{ title: "Learning platform — Admin — SAAE" }] }),

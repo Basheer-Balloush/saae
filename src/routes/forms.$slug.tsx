@@ -12,10 +12,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { useLang } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n/i18n";
 import { toUserMessage } from "@/lib/safe-error";
-import { isValidSlug, type DynamicForm } from "@/lib/dynamic-forms";
-import { getPublishedFormBySlug, submitDynamicForm } from "@/lib/dynamic-forms.functions";
+import { isValidSlug, type DynamicForm } from "@/features/crm/lib/dynamic-forms";
+import { getPublishedFormBySlug, submitDynamicForm } from "@/features/crm/lib/dynamic-forms.functions";
 
 export const Route = createFileRoute("/forms/$slug")({
   head: ({ params }) => ({

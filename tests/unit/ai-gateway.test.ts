@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveChatProvider } from "../../src/lib/ai-gateway";
+import { resolveChatProvider } from "../../src/features/chat/lib/ai-gateway";
 
 const gemini = "https://generativelanguage.googleapis.com/v1beta/openai";
 const openrouter = "https://openrouter.ai/api/v1";

@@ -2,15 +2,15 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsT } from "@/features/lms/lib/i18n";
 import { toast } from "sonner";
 import { Loader2, KeyRound } from "lucide-react";
-import { PASSWORD_MIN } from "@/lib/password-policy";
-import { localizeAuthError } from "@/lib/auth-error-i18n";
-import { AuthLayout } from "@/components/lms-skin/AuthLayout";
-import { PasswordInput } from "@/components/lms-skin/PasswordInput";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { PASSWORD_MIN } from "@/lib/auth/password-policy";
+import { localizeAuthError } from "@/lib/i18n/auth-error-i18n";
+import { AuthLayout } from "@/features/lms/skin/AuthLayout";
+import { PasswordInput } from "@/features/lms/skin/PasswordInput";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/reset-password")({
   head: () => ({ meta: [{ title: "Reset password — SAAE Training and Learning Platform" }], links: LMS_SKIN_LINKS }),

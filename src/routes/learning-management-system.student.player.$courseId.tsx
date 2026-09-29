@@ -4,20 +4,20 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, Circle, FileText, Lock, Paperclip, PlayCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsT } from "@/features/lms/lib/i18n";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { QAPanel } from "@/components/lms/QAPanel";
-import { AssignmentsPanel } from "@/components/lms/AssignmentsPanel";
-import { LessonVideo } from "@/components/lms/player/LessonVideo";
-import { CourseFeedbackPrompt } from "@/components/lms/CourseFeedbackPrompt";
-import { useLessonWatch } from "@/hooks/useLessonWatch";
-import { COMPLETE_SHARE, watchedSeconds } from "@/lib/lesson-watch";
-import { compareOrder, openLessonIds, orderLessons, upNextLesson } from "@/lib/lesson-sequence";
-import { getBunnyPlayback } from "@/lib/bunny-stream.functions";
-import { isOnsite } from "@/lib/lms-course-destination";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { QAPanel } from "@/features/lms/player/QAPanel";
+import { AssignmentsPanel } from "@/features/lms/player/AssignmentsPanel";
+import { LessonVideo } from "@/features/lms/player/LessonVideo";
+import { CourseFeedbackPrompt } from "@/features/lms/course-feedback/CourseFeedbackPrompt";
+import { useLessonWatch } from "@/features/lms/hooks/useLessonWatch";
+import { COMPLETE_SHARE, watchedSeconds } from "@/features/lms/lib/lesson-watch";
+import { compareOrder, openLessonIds, orderLessons, upNextLesson } from "@/features/lms/lib/lesson-sequence";
+import { getBunnyPlayback } from "@/features/lms/lib/bunny-stream.functions";
+import { isOnsite } from "@/features/lms/lib/course-destination";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/student/player/$courseId")({
   head: () => ({

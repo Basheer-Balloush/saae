@@ -1,14 +1,14 @@
 import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import pageHtml from "@/components/cinematic/html/initiative-sponsors.html?raw";
-import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
-import { InitiativeActionDialogs } from "@/components/initiative/InitiativeActionDialogs";
+import pageHtml from "@/features/website/cinematic/html/initiative-sponsors.html?raw";
+import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
+import { InitiativeActionDialogs } from "@/features/website/initiative/InitiativeActionDialogs";
 import {
   applySponsorDirectory,
   type SponsorDirectory,
   type SponsorRow,
-} from "@/components/initiative/sponsor-directory";
-import { getAllDonors } from "@/lib/initiative.functions";
+} from "@/features/website/initiative/sponsor-directory";
+import { getAllDonors } from "@/features/website/lib/initiative.functions";
 
 /* The initiative page's own scripts: initiative.js carries this page's
    translations and the section reveals, and skips everything it cannot find. */

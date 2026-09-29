@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/profile-card/$slug/$kind")({
           });
         }
         try {
-          const { findProfileImage } = await import("@/lib/private-profiles.server");
+          const { findProfileImage } = await import("@/features/website/lib/private-profiles.server");
           const image = await findProfileImage(params.slug, kind);
           if (!image) {
             return new Response("Not found", {

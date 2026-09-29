@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { timingSafeEqual } from 'crypto'
-import { lessonStatusFromBunnyWebhook } from '@/lib/bunny-webhook-status'
+import { lessonStatusFromBunnyWebhook } from '@/features/lms/lib/bunny-webhook-status'
 
 /**
  * Phase 6 — Bunny Stream webhook.

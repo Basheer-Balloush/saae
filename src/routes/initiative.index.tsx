@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import pageHtml from "@/components/cinematic/html/initiative.html?raw";
-import { getInitiativeStats, getTopDonors } from "@/lib/initiative.functions";
+import pageHtml from "@/features/website/cinematic/html/initiative.html?raw";
+import { getInitiativeStats, getTopDonors } from "@/features/website/lib/initiative.functions";
 import {
   renderDonors,
   renderNote,
   renderSeatsCovered,
   type Donor,
-} from "@/components/initiative/live-leaderboard";
-import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
-import { InitiativeActionDialogs } from "@/components/initiative/InitiativeActionDialogs";
+} from "@/features/website/initiative/live-leaderboard";
+import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
+import { InitiativeActionDialogs } from "@/features/website/initiative/InitiativeActionDialogs";
 
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/language.js" },

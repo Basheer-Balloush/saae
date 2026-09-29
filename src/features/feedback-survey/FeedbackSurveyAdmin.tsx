@@ -41,7 +41,7 @@ import {
   choiceLabel,
   type Choice,
   type Lang,
-} from "@/lib/feedback-survey";
+} from "@/features/feedback-survey/lib/feedback-survey";
 import type { Database } from "@/integrations/supabase/types";
 
 type Sub = Database["public"]["Tables"]["feedback_survey_submissions"]["Row"];

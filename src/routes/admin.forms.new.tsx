@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { PageHeader, useT } from "@/components/console/ui";
-import { FormBuilder } from "@/features/website/FormBuilder";
+import { FormBuilder } from "@/features/crm/FormBuilder";
 
 export const Route = createFileRoute("/admin/forms/new")({
   ssr: false,

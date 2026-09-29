@@ -9,8 +9,8 @@ import {
   adminListLmsAdmins,
   type ApplicationListRow,
   type ApplicationStatus,
-} from "@/lib/lms-internships-applications-admin.functions";
-import { adminGetInternship } from "@/lib/lms-internships-admin.functions";
+} from "@/features/lms/internships/lib/applications-admin.functions";
+import { adminGetInternship } from "@/features/lms/internships/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import {
   EmptyState,
@@ -24,7 +24,7 @@ import {
   fmtNum,
   useT,
 } from "@/components/console/ui";
-import { APP_STATUS_UI, PIPELINE } from "@/features/internships/shared";
+import { APP_STATUS_UI, PIPELINE } from "@/features/lms/internships/shared";
 
 export const Route = createFileRoute(
   "/learning-management-system/admin/internships/$id/applications/",

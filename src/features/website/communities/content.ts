@@ -1,5 +1,5 @@
 // Copy for the community pages, moved unchanged out of the route.
-import type { CommunityKey } from "@/lib/communityCategories";
+import type { CommunityKey } from "@/features/website/lib/community-categories";
 
 type Bilingual = { ar: string; en: string };
 export type Metric = { value: string; label: Bilingual };

@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { useLang } from "@/lib/i18n";
-import ministryLogo from "@/assets/ministry-communications.png.asset.json";
+import { Navbar } from "@/features/website/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { useLang } from "@/lib/i18n/i18n";
+import ministryLogo from "@/assets/ministries/ministry-communications.png.asset.json";
 
 import {
   Target,

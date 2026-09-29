@@ -2,10 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BookOpen, Briefcase, Inbox, ShieldCheck, Star } from "lucide-react";
 import { useConsoleCounts } from "@/components/console/useConsoleCounts";
 import { PageHeader, Tabs, useT } from "@/components/console/ui";
-import { EnrollmentsBoard } from "@/features/lms-console/EnrollmentsBoard";
-import { ReviewsBoard } from "@/features/lms-console/ReviewsBoard";
-import { InstructorsQueue } from "@/features/lms-console/InstructorsQueue";
-import { CourseReviewQueue, InternshipRequestList } from "@/features/lms-console/DecisionQueues";
+import { EnrollmentsBoard } from "@/features/lms/console/EnrollmentsBoard";
+import { ReviewsBoard } from "@/features/lms/console/ReviewsBoard";
+import { InstructorsQueue } from "@/features/lms/console/InstructorsQueue";
+import { CourseReviewQueue, InternshipRequestList } from "@/features/lms/console/DecisionQueues";
 
 const TABS = ["enrollments", "courses", "instructors", "reviews", "internships"] as const;
 type Tab = (typeof TABS)[number];

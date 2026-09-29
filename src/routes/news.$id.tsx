@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import pageHtml from "@/components/cinematic/html/news-article.html?raw";
-import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
+import pageHtml from "@/features/website/cinematic/html/news-article.html?raw";
+import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
 import { supabase } from "@/integrations/supabase/client";
 import {
   NEWS_ARTICLE_COLUMNS,
@@ -12,7 +12,7 @@ import {
   type ArticleFragments,
   type NewsArticleRow,
   type RelatedNewsRow,
-} from "@/lib/cinematic-db-content";
+} from "@/features/website/lib/cinematic-db-content";
 
 /* The hand-built stories' script: reveal-on-scroll and the image gallery. */
 const SCRIPTS: CinematicScript[] = [

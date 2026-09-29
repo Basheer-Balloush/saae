@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Eye, EyeOff, Languages, Loader2, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useLang } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConsoleAmbient, useConsoleRoot } from "@/components/console/ConsoleShell";

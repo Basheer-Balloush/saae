@@ -6,7 +6,7 @@
  *   props, no provider or global stubs) and anchors are parsed from that
  *   markup — no hand-built href inventories.
  * - Rendered anchors are compared with the actual desktop source
- *   (src/components/cinematic/html/home.html): every non-fragment desktop
+ *   (src/features/website/cinematic/html/home.html): every non-fragment desktop
  *   href must appear either verbatim or as its DESKTOP_HREF_EQUIVALENTS
  *   value, and no rendered link may point at https://aisyria.org.
  * - Local asset paths from rendered markup must exist under public/; SSR
@@ -20,10 +20,10 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
-import homeHtml from "@/components/cinematic/html/home.html?raw";
-import { COMMUNITY_KEYS } from "@/lib/communityCategories";
-import { MobileHomeView } from "@/components/home/MobileHome";
-import { DESKTOP_HOME_QUERY } from "@/hooks/useHeroCapability";
+import homeHtml from "@/features/website/cinematic/html/home.html?raw";
+import { COMMUNITY_KEYS } from "@/features/website/lib/community-categories";
+import { MobileHomeView } from "@/features/website/home/MobileHome";
+import { DESKTOP_HOME_QUERY } from "@/features/website/home/useHeroCapability";
 import {
   ACHIEVEMENTS,
   COMMUNITIES,
@@ -34,8 +34,8 @@ import {
   OPENING,
   OPENING_HEADLINE,
   PARTNERS,
-} from "@/components/home/mobile-home-content";
-import { mobileNewsEntries, type NewsCardRow } from "@/lib/cinematic-db-content";
+} from "@/features/website/home/mobile-home-content";
+import { mobileNewsEntries, type NewsCardRow } from "@/features/website/lib/cinematic-db-content";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 

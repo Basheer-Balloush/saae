@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chatErrorText, formatMessage } from "../../src/lib/chat-format";
+import { chatErrorText, formatMessage } from "../../src/features/chat/lib/chat-format";
 
 const plain = (t: string) => formatMessage(t).map((s) => s.text).join("");
 

@@ -4,17 +4,17 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-import { useLang } from "@/lib/i18n";
-import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsInternshipsT } from "@/features/lms/lib/internships-i18n";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import {
   getInternshipApplyContext,
   mapApplyError,
   submitInternshipApplication,
   type ApplyContext,
-} from "@/lib/lms-internships-apply.functions";
-import { SubHero } from "@/components/lms-skin/SubHero";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+} from "@/features/lms/internships/lib/apply.functions";
+import { SubHero } from "@/features/lms/skin/SubHero";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/internships/$slug/apply")({
   head: () => ({

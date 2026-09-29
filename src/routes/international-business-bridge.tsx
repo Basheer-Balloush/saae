@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
+import { Navbar } from "@/features/website/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Mic, Landmark, Presentation, Link2, MessageSquare, Users, Boxes, Clock, Calendar, MapPin } from "lucide-react";
-import ministryEconomy from "@/assets/ministry-economy.png.asset.json";
-import ministryComms from "@/assets/ministry-communications-v2.png.asset.json";
-import { useLang } from "@/lib/i18n";
+import ministryEconomy from "@/assets/ministries/ministry-economy.png.asset.json";
+import ministryComms from "@/assets/ministries/ministry-communications-v2.png.asset.json";
+import { useLang } from "@/lib/i18n/i18n";
 
 // 30 July 2026, 11:00 AM Damascus time (UTC+3, no DST)
 const TARGET_MS = Date.UTC(2026, 6, 30, 8, 0, 0);

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createChatModelForRequest } from '@/lib/ai-gateway.server';
+import { createChatModelForRequest } from '@/features/chat/lib/ai-gateway.server';
 
 afterEach(() => {
   vi.unstubAllEnvs();

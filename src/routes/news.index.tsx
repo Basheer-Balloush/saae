@@ -1,14 +1,14 @@
 import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import pageHtml from "@/components/cinematic/html/news.html?raw";
-import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
+import pageHtml from "@/features/website/cinematic/html/news.html?raw";
+import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
 import { supabase } from "@/integrations/supabase/client";
 import {
   NEWS_CARD_COLUMNS,
   applyNewsList,
   renderNewsListHtml,
   type NewsCardRow,
-} from "@/lib/cinematic-db-content";
+} from "@/features/website/lib/cinematic-db-content";
 
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/news-inline.js?v=news-circuit-4" },

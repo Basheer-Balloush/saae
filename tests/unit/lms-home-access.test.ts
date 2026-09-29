@@ -6,8 +6,8 @@ const readRoute = (name: string) =>
 
 describe("LMS home access", () => {
   it("keeps Home unconditional and Profile available in both navigation designs", () => {
-    for (const file of ["lms-skin/LmsSkinShell.tsx", "lms/LmsNavbar.tsx"]) {
-      const source = readFileSync(new URL("../../src/components/" + file, import.meta.url), "utf8");
+    for (const file of ["lms/skin/LmsSkinShell.tsx", "lms/LmsNavbar.tsx"]) {
+      const source = readFileSync(new URL("../../src/features/" + file, import.meta.url), "utf8");
       const links = source.slice(source.indexOf("const links:"));
       const home = links.indexOf('to: "/learning-management-system"');
       expect(home).toBeGreaterThan(-1);

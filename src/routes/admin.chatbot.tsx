@@ -19,7 +19,7 @@ import {
   UserRound,
   type LucideIcon,
 } from "lucide-react";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { toUserMessage } from "@/lib/safe-error";
 import {
   addKnowledgeText,
@@ -35,9 +35,9 @@ import {
   listVisitorProfiles,
   setChatFeedbackHandled,
   type VisitorProfile,
-} from "@/lib/admin-chat.functions";
-import { FEEDBACK_CATEGORIES, feedbackCategoryLabel } from "@/lib/chat-feedback";
-import { splitKnowledgeSections } from "@/lib/knowledge-sections";
+} from "@/features/chat/lib/admin-chat.functions";
+import { FEEDBACK_CATEGORIES, feedbackCategoryLabel } from "@/features/chat/lib/chat-feedback";
+import { splitKnowledgeSections } from "@/features/chat/lib/knowledge-sections";
 import { confirmDialog } from "@/hooks/useConfirm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

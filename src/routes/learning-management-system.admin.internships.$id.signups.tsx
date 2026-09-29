@@ -11,8 +11,8 @@ import {
   adminSetSignupLinkActive,
   type SignupLink,
   type SignupSubmission,
-} from "@/lib/event-signup.functions";
-import { adminGetInternship } from "@/lib/lms-internships-admin.functions";
+} from "@/features/crm/lib/event-signup.functions";
+import { adminGetInternship } from "@/features/lms/internships/lib/admin.functions";
 import { exportRowsToXlsx } from "@/lib/admin-xlsx-export";
 import { confirmDialog } from "@/hooks/useConfirm";
 import { Button } from "@/components/ui/button";

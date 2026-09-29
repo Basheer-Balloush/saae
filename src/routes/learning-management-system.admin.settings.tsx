@@ -10,19 +10,19 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import InstructorCleanupPanel from "@/components/lms/InstructorCleanupPanel";
+import InstructorCleanupPanel from "@/features/lms/console/InstructorCleanupPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { toUserMessage } from "@/lib/safe-error";
 import { confirmDialog } from "@/hooks/useConfirm";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useFormDraft } from "@/hooks/useFormDraft";
 import { formDraftKey } from "@/lib/form-draft";
-import { DraftNotice } from "@/components/admin/DraftNotice";
+import { DraftNotice } from "@/components/console/DraftNotice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState, Field, Loading, PageHeader, Panel, Tabs, useT } from "@/components/console/ui";
-import { SystemHealth } from "@/features/lms-console/SystemHealth";
-import { DefaultFeedbackForm } from "@/features/course-feedback/DefaultFeedbackForm";
+import { SystemHealth } from "@/features/lms/console/SystemHealth";
+import { DefaultFeedbackForm } from "@/features/lms/course-feedback/DefaultFeedbackForm";
 
 type Tab = "categories" | "feedback" | "cleanup" | "health";
 

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { assertEmailRecipientAllowed, getSiteUrl, sendTransactionalEmail } from '@/lib/email-delivery.server';
-import { embedTexts } from '@/lib/embeddings.server';
-import { createChatModel } from '@/lib/ai-gateway';
+import { assertEmailRecipientAllowed, getSiteUrl, sendTransactionalEmail } from '@/lib/email/email-delivery.server';
+import { embedTexts } from '@/features/chat/lib/embeddings.server';
+import { createChatModel } from '@/features/chat/lib/ai-gateway';
 
 beforeEach(() => {
   vi.stubEnv('EMAIL_DELIVERY_MODE', 'disabled');

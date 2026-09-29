@@ -2,11 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Home, Image as ImageIcon, Newspaper, Pencil, Plus, Trash2 } from "lucide-react";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { supabase } from "@/integrations/supabase/client";
 import { toUserMessage } from "@/lib/safe-error";
 import { confirmDialog } from "@/hooks/useConfirm";
-import { communityLabel, NEWS_CATEGORY_KEYS, newsCategories } from "@/lib/communityCategories";
+import { communityLabel, NEWS_CATEGORY_KEYS, newsCategories } from "@/features/website/lib/community-categories";
 import { Button } from "@/components/ui/button";
 import {
   EmptyState,

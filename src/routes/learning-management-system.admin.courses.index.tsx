@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { BookOpen, Check, Inbox, MonitorPlay, MapPin, Plus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { CoursePrice } from "@/components/lms/CoursePrice";
+import { CoursePrice } from "@/features/lms/catalog/CoursePrice";
 import {
   CourseStatusPill,
   CourseThumb,
@@ -21,8 +21,8 @@ import {
   fmtNum,
   useT,
 } from "@/components/console/ui";
-import { useLmsAdminActions, type CourseStatus } from "@/features/lms-console/actions";
-import { NewCourseDialog } from "@/features/lms-console/NewCourseDialog";
+import { useLmsAdminActions, type CourseStatus } from "@/features/lms/console/actions";
+import { NewCourseDialog } from "@/features/lms/console/NewCourseDialog";
 
 type StatusFilter = "all" | CourseStatus;
 

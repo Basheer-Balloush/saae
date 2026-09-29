@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
-import { COMMUNITY_KEYS } from "@/lib/communityCategories";
+import { COMMUNITY_KEYS } from "@/features/website/lib/community-categories";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const BASE_URL = "https://aisyria.org";

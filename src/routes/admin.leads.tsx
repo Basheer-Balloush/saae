@@ -18,7 +18,7 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import {
   listIndividualLeads,
   listCompanyLeads,
@@ -33,8 +33,8 @@ import {
   getCompanyLead,
   updateIndividualLead,
   updateCompanyLead,
-} from "@/lib/crm.functions";
-import { getConversationMessages } from "@/lib/admin-chat.functions";
+} from "@/features/crm/lib/crm.functions";
+import { getConversationMessages } from "@/features/chat/lib/admin-chat.functions";
 import { toUserMessage } from "@/lib/safe-error";
 import { exportRowsToXlsx } from "@/lib/admin-xlsx-export";
 import { useAuth } from "@/hooks/useAuth";

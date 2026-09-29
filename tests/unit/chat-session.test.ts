@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CHAT_IDLE_MS, resolveChatSession } from "../../src/lib/chat-session";
+import { CHAT_IDLE_MS, resolveChatSession } from "../../src/features/chat/lib/chat-session";
 
 const now = 1_800_000_000_000;
 const stored = (s: object) => JSON.stringify(s);

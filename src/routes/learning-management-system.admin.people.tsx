@@ -18,10 +18,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { selectInBatches } from "@/lib/select-in-batches";
 import { toUserMessage } from "@/lib/safe-error";
 import { confirmDialog } from "@/hooks/useConfirm";
-import { listLmsStudents } from "@/lib/crm.functions";
-import { getEmailsForUsers, grantRoleByEmail } from "@/lib/lms-admin-users.functions";
+import { listLmsStudents } from "@/features/crm/lib/crm.functions";
+import { getEmailsForUsers, grantRoleByEmail } from "@/features/lms/lib/admin-users.functions";
 import { exportRowsToXlsx } from "@/lib/admin-xlsx-export";
-import { AdminInstructorEditDialog } from "@/components/lms/AdminInstructorEditDialog";
+import { AdminInstructorEditDialog } from "@/features/lms/console/AdminInstructorEditDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useConsoleCounts } from "@/components/console/useConsoleCounts";
@@ -39,7 +39,7 @@ import {
   fmtNum,
   useT,
 } from "@/components/console/ui";
-import { useLmsAdminActions } from "@/features/lms-console/actions";
+import { useLmsAdminActions } from "@/features/lms/console/actions";
 
 type Tab = "instructors" | "students" | "roles";
 

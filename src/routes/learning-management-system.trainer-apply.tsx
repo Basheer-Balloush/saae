@@ -5,16 +5,16 @@ import { Loader2, Upload, X, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { useLang } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n/i18n";
 import { toUserMessage } from "@/lib/safe-error";
 import { Checkbox } from "@/components/ui/checkbox";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
-import { currentLmsReturn } from "@/lib/lms-redirect";
+import { currentLmsReturn } from "@/features/lms/lib/redirect";
 import {
   submitTrainerApplication,
   attachTrainerApplicationFile,
-} from "@/lib/trainer-application.functions";
-import { UploadProgress } from "@/components/ui/upload-progress";
+} from "@/features/lms/instructors/lib/trainer-application.functions";
+import { UploadProgress } from "@/components/common/upload-progress";
 import {
   Select,
   SelectContent,
@@ -22,8 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SubHero } from "@/components/lms-skin/SubHero";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { SubHero } from "@/features/lms/skin/SubHero";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/trainer-apply")({
   ssr: false,

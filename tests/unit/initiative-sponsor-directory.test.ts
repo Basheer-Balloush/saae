@@ -6,10 +6,10 @@ import {
   sponsorRowsHtml,
   sponsorTotals,
   type SponsorRow,
-} from "../../src/components/initiative/sponsor-directory";
+} from "../../src/features/website/initiative/sponsor-directory";
 
 const page = readFileSync(
-  path.join(__dirname, "../../src/components/cinematic/html/initiative-sponsors.html"),
+  path.join(__dirname, "../../src/features/website/cinematic/html/initiative-sponsors.html"),
   "utf8",
 );
 

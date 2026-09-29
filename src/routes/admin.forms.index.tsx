@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { BarChart3, ClipboardList, FileText, Plus } from "lucide-react";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { toUserMessage } from "@/lib/safe-error";
-import { listDynamicForms } from "@/lib/dynamic-forms.functions";
-import type { FormStatus } from "@/lib/dynamic-forms";
-import { ADMIN_FORMS } from "@/lib/admin-forms-registry";
+import { listDynamicForms } from "@/features/crm/lib/dynamic-forms.functions";
+import type { FormStatus } from "@/features/crm/lib/dynamic-forms";
+import { ADMIN_FORMS } from "@/features/crm/lib/admin-forms-registry";
 import { Button } from "@/components/ui/button";
 import {
   EmptyState,

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import pageHtml from "@/components/cinematic/html/news-tv-interview.html?raw";
-import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
+import pageHtml from "@/features/website/cinematic/html/news-tv-interview.html?raw";
+import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
 
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/news-tv-interview-inline.js" },

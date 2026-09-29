@@ -1,16 +1,16 @@
 import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAmsAuth } from "@/hooks/useAmsAuth";
-import { registerAmsServiceWorker } from "@/lib/ams-pwa";
-import { AmsNavbar } from "@/components/ams/AmsNavbar";
-import { AmsInstallButton } from "@/components/ams/AmsInstallButton";
-import { AmsFooter } from "@/components/ams/AmsFooter";
+import { useAmsAuth } from "@/features/attendance/hooks/useAmsAuth";
+import { registerAmsServiceWorker } from "@/features/attendance/lib/pwa";
+import { AmsNavbar } from "@/features/attendance/layout/AmsNavbar";
+import { AmsInstallButton } from "@/features/attendance/layout/AmsInstallButton";
+import { AmsFooter } from "@/features/attendance/layout/AmsFooter";
 import { Link } from "@tanstack/react-router";
 import { LayoutDashboard } from "lucide-react";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { useLang } from "@/lib/i18n";
-import { amsT } from "@/lib/ams-i18n";
+import { useLang } from "@/lib/i18n/i18n";
+import { amsT } from "@/features/attendance/lib/i18n";
 
 export const Route = createFileRoute("/attendance-management-system")({
   head: () => ({

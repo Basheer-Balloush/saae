@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { resolveLmsRole, type LmsRole } from "@/lib/lms-roles";
-export type { LmsRole } from "@/lib/lms-roles";
+import { resolveLmsRole, type LmsRole } from "@/features/lms/lib/roles";
+export type { LmsRole } from "@/features/lms/lib/roles";
 
 type LmsAuthState = { session: Session | null; user: User | null; role: LmsRole; loading: boolean };
 

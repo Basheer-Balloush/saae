@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hidePartialChoices, parseChoices } from "../../src/lib/chat-choices";
+import { hidePartialChoices, parseChoices } from "../../src/features/chat/lib/chat-choices";
 
 describe("answer buttons", () => {
   it("takes the options off the end and leaves the question readable", () => {

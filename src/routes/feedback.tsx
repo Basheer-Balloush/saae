@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { StarRating } from "@/components/feedback/StarRating";
+import { StarRating } from "@/features/feedback-survey/StarRating";
 import {
   AGE_RANGES,
   CONTACT_METHODS,
@@ -22,13 +22,13 @@ import {
   type Lang,
   type NoteKey,
   type RatingSection,
-} from "@/lib/feedback-survey";
+} from "@/features/feedback-survey/lib/feedback-survey";
 import {
   getFeedbackUploadUrl,
   startFeedbackSurvey,
   submitFeedbackSurvey,
-} from "@/lib/feedback-survey.functions";
-import "@/components/feedback/feedback.css";
+} from "@/features/feedback-survey/lib/feedback-survey.functions";
+import "@/features/feedback-survey/feedback.css";
 
 export const Route = createFileRoute("/feedback")({
   validateSearch: (s) => z.object({ lang: z.enum(["ar", "en"]).optional() }).parse(s),

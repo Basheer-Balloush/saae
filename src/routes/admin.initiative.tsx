@@ -20,7 +20,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { toUserMessage } from "@/lib/safe-error";
 import { exportRowsToXlsx } from "@/lib/admin-xlsx-export";
 import {
@@ -33,13 +33,13 @@ import {
   adminUpdateSettings,
   getInitiativeSettings,
   getInitiativeStats,
-} from "@/lib/initiative.functions";
+} from "@/features/website/lib/initiative.functions";
 import { confirmDialog } from "@/hooks/useConfirm";
 import { useAuth } from "@/hooks/useAuth";
 import { useFormDraft, useRecordDraft } from "@/hooks/useFormDraft";
 import { formDraftKey, loadFormDraft } from "@/lib/form-draft";
-import { DraftNotice } from "@/components/admin/DraftNotice";
-import { UploadProgress } from "@/components/ui/upload-progress";
+import { DraftNotice } from "@/components/console/DraftNotice";
+import { UploadProgress } from "@/components/common/upload-progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

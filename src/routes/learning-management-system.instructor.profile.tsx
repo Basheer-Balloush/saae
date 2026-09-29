@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { toUserMessage } from "@/lib/safe-error";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
-import { UploadProgress } from "@/components/ui/upload-progress";
+import { UploadProgress } from "@/components/common/upload-progress";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {

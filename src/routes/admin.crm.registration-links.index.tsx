@@ -3,8 +3,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Copy, Download, Link2, Loader2, Plus, UserRound } from "lucide-react";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
-import { publicJoinUrl } from "@/lib/registration-link-url";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
+import { publicJoinUrl } from "@/features/crm/lib/registration-link-url";
 import { exportRowsToXlsx } from "@/lib/admin-xlsx-export";
 import {
   adminCreateRegistrationLink,
@@ -13,7 +13,7 @@ import {
   adminSetRegistrationLinkActive,
   type RegistrationLink,
   type RegistrationSubmission,
-} from "@/lib/crm-registration-links.functions";
+} from "@/features/crm/lib/crm-registration-links.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";

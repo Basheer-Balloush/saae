@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCourseDate, formatIssueDate, renderCertificateHtml } from "@/lib/certificates/certificate-html";
+import { formatCourseDate, formatIssueDate, renderCertificateHtml } from "@/features/lms/certificates/lib/certificate-html";
 
 const base = {
   name: "محمد أمين الناشف",

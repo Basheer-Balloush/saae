@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CourseEditor } from "@/features/course-editor/CourseEditor";
-import { EDITOR_TABS, type EditorTab } from "@/features/course-editor/types";
+import { CourseEditor } from "@/features/lms/course-editor/CourseEditor";
+import { EDITOR_TABS, type EditorTab } from "@/features/lms/course-editor/types";
 
 export const Route = createFileRoute("/learning-management-system/admin/courses/$id")({
   head: () => ({ meta: [{ title: "Edit course — Learning platform — SAAE" }] }),

@@ -3,12 +3,12 @@ const state = vi.hoisted(() => ({
   completionFailure: false, jobs: [] as Record<string, any>[], sends: vi.fn(), from: vi.fn(), audit: vi.fn(),
 }));
 vi.mock('@/integrations/supabase/client.server', () => ({ supabaseAdmin: { from: state.from } }));
-vi.mock('@/lib/audit-log.server', () => ({ logAuditEvent: state.audit }));
-vi.mock('@/lib/trainer-approved-email.server', () => ({ sendTrainerApprovedEmail: state.sends }));
+vi.mock('@/lib/auth/audit-log.server', () => ({ logAuditEvent: state.audit }));
+vi.mock('@/features/lms/lib/trainer-approved-email.server', () => ({ sendTrainerApprovedEmail: state.sends }));
 import '@/integrations/supabase/client.server';
-import '@/lib/audit-log.server';
-import '@/lib/trainer-approved-email.server';
-import { processOutbox } from '@/lib/lms-outbox.server';
+import '@/lib/auth/audit-log.server';
+import '@/features/lms/lib/trainer-approved-email.server';
+import { processOutbox } from '@/features/lms/lib/outbox.server';
 
 beforeEach(() => {
   vi.stubEnv('ENABLE_TRAINER_OUTBOX', 'true'); vi.stubEnv('EMAIL_DELIVERY_MODE', 'test');

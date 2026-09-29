@@ -3,11 +3,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, RefreshCw, Trash2, Upload, User as UserIcon } from "lucide-react";
-import { currentLmsReturn } from "@/lib/lms-redirect";
+import { currentLmsReturn } from "@/features/lms/lib/redirect";
 
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { useLang } from "@/lib/i18n";
-import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsInternshipsT } from "@/features/lms/lib/internships-i18n";
 import {
   clearProfilePointer,
   finalizeProfileFileUpload,
@@ -16,24 +16,24 @@ import {
   prepareProfileFileUpload,
   updateMyProfile,
   type ProfileOverview,
-} from "@/lib/lms-profile.functions";
+} from "@/features/lms/lib/profile.functions";
 import {
   AVATAR_MAX_BYTES,
   AVATAR_MIME_TYPES,
   CV_MAX_BYTES,
   CV_MIME_TYPES,
-} from "@/lib/lms-profile";
+} from "@/features/lms/lib/profile";
 import {
   listMyInternshipApplications,
   mapApplyError,
   withdrawInternshipApplication,
   type MyApplicationRow,
-} from "@/lib/lms-internships-apply.functions";
+} from "@/features/lms/internships/lib/apply.functions";
 import { confirmDialog } from "@/hooks/useConfirm";
-import { courseDestination } from "@/lib/lms-course-destination";
-import { SubHero } from "@/components/lms-skin/SubHero";
-import { IconDocument } from "@/components/lms-skin/icons";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { courseDestination } from "@/features/lms/lib/course-destination";
+import { SubHero } from "@/features/lms/skin/SubHero";
+import { IconDocument } from "@/features/lms/skin/icons";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { resizedImage } from "@/lib/image-url";
 
 export const Route = createFileRoute("/learning-management-system/profile")({

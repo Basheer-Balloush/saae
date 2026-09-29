@@ -2,17 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ArrowDown, ArrowUp, Handshake, Loader2, Pencil, Plus, Trash2, Upload } from "lucide-react";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useRecordDraft, useReopenDraftForm } from "@/hooks/useFormDraft";
 import { formDraftKey } from "@/lib/form-draft";
 import { toUserMessage } from "@/lib/safe-error";
 import { confirmDialog } from "@/hooks/useConfirm";
-import { DraftNotice } from "@/components/admin/DraftNotice";
+import { DraftNotice } from "@/components/console/DraftNotice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UploadProgress } from "@/components/ui/upload-progress";
+import { UploadProgress } from "@/components/common/upload-progress";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   EmptyState,

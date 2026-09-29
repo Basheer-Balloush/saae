@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { AttendanceHome } from "@/features/attendance/AttendanceHome";
 
 /* The attendance system inside the admin console. The phone app at

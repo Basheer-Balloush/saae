@@ -2,14 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { z } from "zod";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
-import { localizeAuthError } from "@/lib/auth-error-i18n";
-import { sendLmsPasswordReset } from "@/lib/lms-auth.functions";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsT } from "@/features/lms/lib/i18n";
+import { localizeAuthError } from "@/lib/i18n/auth-error-i18n";
+import { sendLmsPasswordReset } from "@/features/lms/lib/auth.functions";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { AuthLayout } from "@/components/lms-skin/AuthLayout";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { AuthLayout } from "@/features/lms/skin/AuthLayout";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/forgot-password")({
   head: () => ({

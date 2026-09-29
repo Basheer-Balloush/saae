@@ -1,14 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { useLang } from "@/lib/i18n";
+import { Navbar } from "@/features/website/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { useLang } from "@/lib/i18n/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { claimSeatAccount } from "@/lib/initiative.functions";
+import { claimSeatAccount } from "@/features/website/lib/initiative.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, KeyRound } from "lucide-react";
 

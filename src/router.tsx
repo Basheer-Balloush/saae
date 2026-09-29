@@ -1,7 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
-import { RouteErrorFallback } from "./components/RouteErrorFallback";
+import { RouteErrorFallback } from "./components/app/RouteErrorFallback";
 
 export const getRouter = () => {
   const queryClient = new QueryClient({

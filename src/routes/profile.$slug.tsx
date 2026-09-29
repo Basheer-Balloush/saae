@@ -3,8 +3,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useServerFn } from "@tanstack/react-start";
-import { getProfileCard, getProfileContact } from "@/lib/private-profiles.functions";
-import "@/components/profile-card/profile-card.css";
+import { getProfileCard, getProfileContact } from "@/features/website/lib/private-profiles.functions";
+import "@/features/website/profile-card/profile-card.css";
 
 const ministryMark = { url: "/profile-card/org-ar.svg" };
 

@@ -4,16 +4,16 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
-import { useLang } from "@/lib/i18n";
-import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsInternshipsT } from "@/features/lms/lib/internships-i18n";
 import {
   getApplyState,
   listPublicInternships,
   type PublicInternshipCard,
-} from "@/lib/lms-internships-public.functions";
-import { SubHero } from "@/components/lms-skin/SubHero";
-import { IconSearch } from "@/components/lms-skin/icons";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+} from "@/features/lms/internships/lib/public.functions";
+import { SubHero } from "@/features/lms/skin/SubHero";
+import { IconSearch } from "@/features/lms/skin/icons";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { resizedImage, resizedSrcSet } from "@/lib/image-url";
 
 export const Route = createFileRoute("/learning-management-system/internships/")({

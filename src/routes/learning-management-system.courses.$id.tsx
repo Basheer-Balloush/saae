@@ -2,17 +2,17 @@ import { createFileRoute, Link, useNavigate, useRouter, notFound } from "@tansta
 import { useEffect, useState } from "react";
 import { PlayCircle, Loader2, Lock, Clock, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useCourseTeachingStatus } from "@/hooks/useCourseTeachingStatus";
+import { useCourseTeachingStatus } from "@/features/lms/hooks/useCourseTeachingStatus";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsT } from "@/features/lms/lib/i18n";
 import { Textarea } from "@/components/ui/textarea";
-import { CoursePrice } from "@/components/lms/CoursePrice";
-import { CourseReviews } from "@/components/lms/CourseReviews";
-import { EnrollmentFormDialog } from "@/components/lms/EnrollmentFormDialog";
-import { SubHero } from "@/components/lms-skin/SubHero";
-import { IconCategoryAI } from "@/components/lms-skin/icons";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { CoursePrice } from "@/features/lms/catalog/CoursePrice";
+import { CourseReviews } from "@/features/lms/catalog/CourseReviews";
+import { EnrollmentFormDialog } from "@/features/lms/catalog/EnrollmentFormDialog";
+import { SubHero } from "@/features/lms/skin/SubHero";
+import { IconCategoryAI } from "@/features/lms/skin/icons";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { resizedImage, resizedSrcSet } from "@/lib/image-url";
 
 

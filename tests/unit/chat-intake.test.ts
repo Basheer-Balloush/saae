@@ -7,7 +7,7 @@ import {
   ORG_EMAIL,
   ORG_PHONE,
   type CatalogRow,
-} from "../../src/lib/chat-intake";
+} from "../../src/features/chat/lib/chat-intake";
 
 const row = (over: Partial<CatalogRow> = {}): CatalogRow => ({
   id: "11111111-1111-1111-1111-111111111111",

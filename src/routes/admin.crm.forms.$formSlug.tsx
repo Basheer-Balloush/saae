@@ -1,7 +1,7 @@
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { supabase } from "@/integrations/supabase/client";
-import { findAdminForm } from "@/lib/admin-forms-registry";
+import { findAdminForm } from "@/features/crm/lib/admin-forms-registry";
 import { PageHeader, useT } from "@/components/console/ui";
 
 /* The two built-in surveys render here. Any other slug is a custom form:

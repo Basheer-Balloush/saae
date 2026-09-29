@@ -1,17 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useLang } from "@/lib/i18n";
-import type { CourseCardData } from "@/components/lms/CourseCard";
-import { loadAllPublicCourses } from "@/lib/lms-public-catalog";
-import { SkinCourseCard } from "@/components/lms-skin/SkinCourseCard";
-import { CategoriesCarousel } from "@/components/lms-skin/CategoriesCarousel";
-import { FaqAccordion } from "@/components/lms-skin/FaqAccordion";
-import { Counter, Reveal } from "@/components/lms-skin/Reveal";
-import { IconSearch } from "@/components/lms-skin/icons";
-import { LMS_SKIN_LINKS, categoryTone } from "@/components/lms-skin/skin";
-import { FilterChips } from "@/components/lms-skin/FilterChips";
-import { sortOpenFirst } from "@/lib/lms-course-ended";
+import { useLang } from "@/lib/i18n/i18n";
+import type { CourseCardData } from "@/features/lms/catalog/CourseCard";
+import { loadAllPublicCourses } from "@/features/lms/lib/public-catalog";
+import { SkinCourseCard } from "@/features/lms/skin/SkinCourseCard";
+import { CategoriesCarousel } from "@/features/lms/skin/CategoriesCarousel";
+import { FaqAccordion } from "@/features/lms/skin/FaqAccordion";
+import { Counter, Reveal } from "@/features/lms/skin/Reveal";
+import { IconSearch } from "@/features/lms/skin/icons";
+import { LMS_SKIN_LINKS, categoryTone } from "@/features/lms/skin/skin";
+import { FilterChips } from "@/features/lms/skin/FilterChips";
+import { sortOpenFirst } from "@/features/lms/lib/course-ended";
 
 type Category = { id: string; name_ar: string; name_en: string | null; slug: string };
 type HomeCourse = CourseCardData & { category_id?: string | null };

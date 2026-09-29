@@ -1,4 +1,4 @@
-import { bilingualHtml, escapeHtml, replaceRegion } from "@/lib/cinematic-db-content";
+import { bilingualHtml, escapeHtml, replaceRegion } from "@/features/website/lib/cinematic-db-content";
 import type { PartnerResult } from "./data";
 import { resizedImage } from "@/lib/image-url";
 

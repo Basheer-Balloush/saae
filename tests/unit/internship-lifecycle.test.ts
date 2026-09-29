@@ -4,7 +4,7 @@ import {
   LIFECYCLE_TRANSITIONS,
   OpportunityInputSchema,
   slugRegex,
-} from "@/lib/lms-internships-admin";
+} from "@/features/lms/internships/lib/admin";
 
 describe("internship lifecycle (baseline regression guard)", () => {
   it("allows only declared transitions", () => {

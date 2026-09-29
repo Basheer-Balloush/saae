@@ -2,11 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { ShieldCheck, ShieldX, Loader2, AlertTriangle, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
-import { SubHero } from "@/components/lms-skin/SubHero";
-import { IconCertificate } from "@/components/lms-skin/icons";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsT } from "@/features/lms/lib/i18n";
+import { SubHero } from "@/features/lms/skin/SubHero";
+import { IconCertificate } from "@/features/lms/skin/icons";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/verify")({
   head: () => ({ meta: [{ title: "Verify certificate — SAAE Training and Learning Platform" }], links: LMS_SKIN_LINKS }),

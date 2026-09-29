@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { installCinematicScrollSafety } from "../../src/components/cinematic/scroll-safety";
+import { installCinematicScrollSafety } from "../../src/features/website/cinematic/scroll-safety";
 
 describe("cinematic scroll safety", () => {
   let classes: Set<string>;

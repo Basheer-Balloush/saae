@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { needsKnowledgeSearch } from "../../src/lib/chat-routing";
+import { needsKnowledgeSearch } from "../../src/features/chat/lib/chat-routing";
 
 describe("when the assistant searches its knowledge", () => {
   it("skips a button the assistant just offered", () => {

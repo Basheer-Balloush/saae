@@ -18,8 +18,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toUserMessage } from "@/lib/safe-error";
 import { confirmDialog } from "@/hooks/useConfirm";
-import { sendCertificateEmail } from "@/lib/certificate-email.functions";
-import { addAmsRegistrantWithLms } from "@/lib/ams-registrant.functions";
+import { sendCertificateEmail } from "@/features/lms/certificates/lib/certificate-email.functions";
+import { addAmsRegistrantWithLms } from "@/features/attendance/lib/registrant.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

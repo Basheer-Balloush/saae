@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
-import { localizeAuthError } from "@/lib/auth-error-i18n";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsT } from "@/features/lms/lib/i18n";
+import { localizeAuthError } from "@/lib/i18n/auth-error-i18n";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { lmsRedirectSearchSchema } from "@/lib/lms-redirect";
-import { AuthLayout } from "@/components/lms-skin/AuthLayout";
-import { PasswordInput } from "@/components/lms-skin/PasswordInput";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { lmsRedirectSearchSchema } from "@/features/lms/lib/redirect";
+import { AuthLayout } from "@/features/lms/skin/AuthLayout";
+import { PasswordInput } from "@/features/lms/skin/PasswordInput";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 
 
 export const Route = createFileRoute("/learning-management-system/login")({

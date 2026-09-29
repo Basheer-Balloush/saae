@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { toUserMessage } from "@/lib/safe-error";
 import { Button } from "@/components/ui/button";
-import { CoursePrice } from "@/components/lms/CoursePrice";
+import { CoursePrice } from "@/features/lms/catalog/CoursePrice";
 import {
   CourseStatusPill,
   EmptyState,
@@ -29,7 +29,7 @@ import {
   fmtNum,
   useT,
 } from "@/components/console/ui";
-import { NewCourseDialog } from "@/features/lms-console/NewCourseDialog";
+import { NewCourseDialog } from "@/features/lms/console/NewCourseDialog";
 
 export const Route = createFileRoute("/learning-management-system/instructor/")({
   head: () => ({ meta: [{ title: "My courses — SAAE Training and Learning Platform" }] }),

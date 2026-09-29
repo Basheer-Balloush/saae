@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { openLessonIds, orderLessons, upNextLesson } from "@/lib/lesson-sequence";
+import { openLessonIds, orderLessons, upNextLesson } from "@/features/lms/lib/lesson-sequence";
 
 const sections = [
   { id: "s2", display_order: 2 },

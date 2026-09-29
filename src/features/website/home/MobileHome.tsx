@@ -1,0 +1,243 @@
+import { useEffect, useRef, useState } from "react";
+import type { Partner } from "@/features/website/partners/data";
+import { useLang } from "@/lib/i18n/i18n";
+import MotionButton from "@/features/website/motion/motion-button";
+import { ContainerScroll } from "@/features/website/motion/container-scroll-animation";
+import { MotionFooter } from "@/features/website/motion/motion-footer";
+import "./homepage-footer.css";
+import { HomepageNews } from "./HomepageNews";
+import "./homepage-partners.css";
+import { DESKTOP_HOME_QUERY } from "@/features/website/home/useHeroCapability";
+import "./mobile-home.css";
+import { MobileTreeHero } from "./MobileTreeHero";
+import { MobileRadialNav } from "./MobileRadialNav";
+import { MobileMissionReel } from "./MobileMissionReel";
+import { MobileSectionGuide } from "./MobileSectionGuide";
+import { FaqSequence } from "./DesktopFaqScroll";
+import { IPhoneMockup } from "@/features/website/motion/iphone-mockup";
+import { ScaledDevice } from "./ScaledDevice";
+import { LogoCarousel, type Logo } from "@/features/website/motion/logo-carousel";
+import { resizedImage } from "@/lib/image-url";
+import {
+  FAQ_COPY,
+  MICRO_COPY,
+  PARTNERS_COPY,
+  type Locale,
+  type NewsEntry,
+} from "./mobile-home-content";
+
+function pick<T extends { ar: string; en: string }>(t: T, lang: Locale): string {
+  return lang === "ar" ? t.ar : t.en;
+}
+
+export function MobileHomeView({
+  lang,
+  onToggleLang,
+  news,
+  newsFailed = false,
+  partners,
+  partnersFailed = false,
+}: {
+  lang: Locale;
+  onToggleLang: () => void;
+  /** The newest homepage stories from the database. */
+  news: NewsEntry[];
+  newsFailed?: boolean;
+  partners: Partner[];
+  partnersFailed?: boolean;
+}) {
+  const visiblePartners = partnersFailed ? [] : partners;
+  // A partner's light logo (made for dark backgrounds) where it has one, as on the desktop.
+  const partnerLogos: Logo[] = visiblePartners.flatMap((p) => {
+    const src = p.lightLogo ?? p.logo;
+    return src ? [{ id: p.id, name: p.name, src: resizedImage(src, 480), scale: p.height / 96 }] : [];
+  });
+  const dir = lang === "ar" ? "rtl" : "ltr";
+  const [motionReady, setMotionReady] = useState(false);
+
+  const heroSentinelRef = useRef<HTMLDivElement | null>(null);
+  const handoffOutRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setMotionReady(true);
+  }, []);
+
+  return (
+    <div
+      className={motionReady ? "mobile-home mh-gate mh-motion-ready" : "mobile-home mh-gate"}
+      dir={dir}
+      lang={lang}
+    >
+      <style>{`@media ${DESKTOP_HOME_QUERY}{.mobile-home.mh-gate{visibility:hidden}}`}</style>
+      <noscript>
+        <style>
+          {
+            ".mobile-home.mh-gate{visibility:visible!important}.mh-tree-hero{block-size:auto!important}.mh-tree-stage{position:relative!important;block-size:auto!important;padding-block:96px 120px}.mh-bands{position:static!important;display:flex!important;flex-direction:column;gap:40px}.mh-band,.mh-band-opening,.mh-tree-hero .mh-word{opacity:1!important;transform:none!important}.mh-tree-cue{display:none}"
+          }
+        </style>
+      </noscript>
+      <a className="mh-skip" href="#main-content">
+        {pick(MICRO_COPY.skip, lang)}
+      </a>
+
+      <MobileRadialNav lang={lang === "ar" ? "ar" : "en"} onToggleLang={onToggleLang} />
+
+      <main id="main-content">
+        <MobileTreeHero lang={lang === "ar" ? "ar" : "en"} sentinelRef={heroSentinelRef} />
+
+        <div className="mh-chapters">
+          <HomepageNews news={news} newsFailed={newsFailed} lang={lang} />
+
+          {/* As on the desktop, partners pin and slide out as "how we work" slides in (MobileMissionReel). */}
+          <div className="mh-handoff">
+            <div className="mh-handoff-out" ref={handoffOutRef}>
+            <section
+              className="mh-section hn-root hp-partners mh-partners"
+              id="partners"
+              aria-labelledby="mh-partners-title"
+            >
+              <div className="hn-tech-details" aria-hidden="true"><span /><span /></div>
+              <div className="mh-wrap mh-partners-head">
+                <h2 className="hn-intro-heading hp-heading" id="mh-partners-title">
+                  {lang === "ar" ? "شركاء " : "Partners in "}<span className="hn-headline-accent">{lang === "ar" ? "النجاح" : "Success"}</span>
+                </h2>
+                <p className="mh-section-p">{pick(PARTNERS_COPY.body, lang)}</p>
+              </div>
+              {visiblePartners.length ? (
+                <>
+                  {/* The desktop's logo carousel: each column swaps its logo in place. */}
+                  <LogoCarousel columnCount={3} logos={partnerLogos} className="mh-partner-carousel" />
+                  {/* The carousel's logos are pictures; their names are here for readers. */}
+                  <ul className="mh-sr-only" aria-label={pick(PARTNERS_COPY.title, lang)}>
+                    {partnerLogos.map((logo) => (
+                      <li key={logo.id}>{logo.name}</li>
+                    ))}
+                  </ul>
+                  {/* A partner without a logo keeps its name on screen. */}
+                  {visiblePartners.some((p) => !(p.lightLogo ?? p.logo)) && (
+                    <ul className="mh-partner-names">
+                      {visiblePartners
+                        .filter((p) => !(p.lightLogo ?? p.logo))
+                        .map((p) => (
+                          <li key={p.id}>
+                            <span>{p.name}</span>
+                          </li>
+                        ))}
+                    </ul>
+                  )}
+                </>
+              ) : (
+                <p className="mh-wrap" role="status">
+                  {partnersFailed
+                    ? lang === "ar"
+                      ? "تعذّر تحميل الشركاء. يرجى المحاولة مرة أخرى."
+                      : "Partners could not be loaded. Please try again."
+                    : lang === "ar"
+                      ? "لا يوجد شركاء لعرضهم حالياً."
+                      : "No partners to display yet."}
+                </p>
+              )}
+              <div className="mh-wrap">
+                <div className="hp-actions"><MotionButton href="/partners" label={pick(PARTNERS_COPY.allPartners, lang)} className="hn-show-all" /></div>
+              </div>
+            </section>
+            </div>
+            <div className="mh-handoff-runway" aria-hidden="true" />
+          </div>
+
+          <MobileMissionReel lang={lang} outRef={handoffOutRef} />
+
+
+          <section className="mh-section hn-root hp-faq mh-faq" id="faq" aria-labelledby="mh-faq-title">
+            <div className="hn-tech-details" aria-hidden="true"><span /><span /></div>
+            {/* The desktop's FAQ: the title, a phone rising in under it, then one
+                question at a time on its screen as the reader scrolls. */}
+            <ContainerScroll
+              className="hp-faq-scroll mh-faq-scroll"
+              cardClassName="hp-faq-scroll-card"
+              layout="column"
+              introHeight={900}
+              titleComponent={
+                <div className="faq-intro">
+                  <h2 className="photo-head" id="mh-faq-title">
+                    {pick(FAQ_COPY.title, lang)}
+                  </h2>
+                </div>
+              }
+            >
+              {/* An iPhone 17 Pro Max (78 x 163.4 mm): a thin black bezel inside
+                  the metal band, the island and corners in its proportions. Laid
+                  out at one size, then scaled to the room each phone's screen
+                  leaves. */}
+              <ScaledDevice width={270} height={566}>
+                <IPhoneMockup
+                  model="15-pro"
+                  islandTop={9}
+                  islandWidth={74}
+                  islandHeight={22}
+                  islandRadius={11}
+                  color="#04090b"
+                  screenBg="#061820"
+                  className="hp-faq-device mh-faq-device"
+                  style={{ width: "100%", height: "100%" }}
+                  frameStyle={{
+                    width: "100%",
+                    height: "100%",
+                    padding: 0,
+                    borderRadius: 44,
+                    border: "2.5px solid #2d5a63",
+                    background: "#04090b",
+                  }}
+                  screenStyle={{
+                    position: "absolute",
+                    inset: 6,
+                    width: "auto",
+                    height: "auto",
+                    borderRadius: 36,
+                  }}
+                  safeAreaOverrides={{ top: 46, bottom: 26, left: 14, right: 14 }}
+                  statusBar={{ inset: 14, fontSize: 10 }}
+                  shadow="inset 0 0 0 1px rgba(160, 230, 238, .35), 0 0 0 1px rgba(0, 0, 0, .6), 0 22px 48px rgba(0, 0, 0, .45), 0 0 34px rgba(0, 139, 157, .18)"
+                >
+                  <FaqSequence lang={lang} />
+                </IPhoneMockup>
+              </ScaledDevice>
+            </ContainerScroll>
+          </section>
+        </div>
+      </main>
+
+      <MobileSectionGuide lang={lang === "ar" ? "ar" : "en"} />
+
+      {/* The desktop homepage's footer (DesktopMotionFooter), stacked for the
+          phone in mobile-home.css. */}
+      <MotionFooter locale={lang === "ar" ? "ar" : "en"} />
+    </div>
+  );
+}
+
+export function MobileHome({
+  news,
+  newsFailed,
+  partners,
+  partnersFailed,
+}: {
+  news: NewsEntry[];
+  newsFailed?: boolean;
+  partners: Partner[];
+  partnersFailed?: boolean;
+}) {
+  const { lang, toggle } = useLang();
+  return (
+    <MobileHomeView
+      lang={lang}
+      onToggleLang={toggle}
+      news={news}
+      newsFailed={newsFailed}
+      partners={partners}
+      partnersFailed={partnersFailed}
+    />
+  );
+}
+
+export default MobileHome;

@@ -1,6 +1,6 @@
 // Legacy URL: redirects to /admin. Kept so old links keep working.
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { requireAdminBeforeLoad } from "@/lib/admin-route-guard";
+import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { supabase } from "@/integrations/supabase/client";
 import { FeedbackSurveyAdmin } from "@/features/feedback-survey/FeedbackSurveyAdmin";
 

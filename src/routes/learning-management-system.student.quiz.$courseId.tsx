@@ -4,17 +4,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Award, Loader2, CheckCircle2, XCircle, ArrowRight, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { useLang } from "@/lib/i18n";
-import { lmsT } from "@/lib/lms-i18n";
+import { useLang } from "@/lib/i18n/i18n";
+import { lmsT } from "@/features/lms/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { QuizMenu, type QuizListItem } from "@/components/lms/quiz/QuizMenu";
-import { QuizAttempt } from "@/components/lms/quiz/QuizAttempt";
-import { getUnansweredQuestions } from "@/lib/quiz-validation";
-import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
-import { sendCertificateEmail } from "@/lib/certificate-email.functions";
-import { CourseFeedbackPrompt } from "@/components/lms/CourseFeedbackPrompt";
+import { QuizMenu, type QuizListItem } from "@/features/lms/quiz/QuizMenu";
+import { QuizAttempt } from "@/features/lms/quiz/QuizAttempt";
+import { getUnansweredQuestions } from "@/features/lms/lib/quiz-validation";
+import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
+import { sendCertificateEmail } from "@/features/lms/certificates/lib/certificate-email.functions";
+import { CourseFeedbackPrompt } from "@/features/lms/course-feedback/CourseFeedbackPrompt";
 
 export const Route = createFileRoute("/learning-management-system/student/quiz/$courseId")({
   head: () => ({

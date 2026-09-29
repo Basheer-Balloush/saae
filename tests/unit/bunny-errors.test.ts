@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bunnyErrorMessage } from "../../src/lib/bunny-errors";
+import { bunnyErrorMessage } from "../../src/features/lms/lib/bunny-errors";
 
 describe("bunnyErrorMessage", () => {
   it("names the missing server secrets", () => {

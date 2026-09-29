@@ -1,16 +1,16 @@
 import { useEffect, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import pageHtml from "@/components/cinematic/html/about.html?raw";
-import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
-import { useLang } from "@/lib/i18n";
-import { applyPublicLanguage } from "@/lib/public-site/language";
+import pageHtml from "@/features/website/cinematic/html/about.html?raw";
+import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
+import { useLang } from "@/lib/i18n/i18n";
+import { applyPublicLanguage } from "@/features/website/lib/public-language";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MEMBER_COLUMNS,
   applyMembers,
   renderMembersHtml,
   type MemberRow,
-} from "@/lib/cinematic-db-content";
+} from "@/features/website/lib/cinematic-db-content";
 
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/about-inline.js" },
