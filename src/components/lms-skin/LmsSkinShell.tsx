@@ -21,13 +21,14 @@ import {
 type Props = {
   role: LmsRole;
   isAuthed: boolean;
+  isGuest?: boolean;
   onSignOut: () => void;
   mainSiteFooter?: boolean;
   children: ReactNode;
 };
 
 /** LMS chrome with homepage ambient ground, language switch, tubelight menu, and official homepage footer. */
-export function LmsSkinShell({ role, isAuthed, onSignOut, children }: Props) {
+export function LmsSkinShell({ role, isAuthed, isGuest, onSignOut, children }: Props) {
   const { lang } = useLang();
   /* "dark" puts the shared components (buttons, fields, reviews) on the
      site's dark palette; lms-db.css tints its tokens to the LMS petrol. */
@@ -42,7 +43,7 @@ export function LmsSkinShell({ role, isAuthed, onSignOut, children }: Props) {
           <span className="orb-olive" />
         </div>
         <LanguageSwitch />
-        <TubeNav role={role} isAuthed={isAuthed} onSignOut={onSignOut} />
+        <TubeNav role={role} isAuthed={isAuthed} isGuest={isGuest} onSignOut={onSignOut} />
         <main id="main-content">{children}</main>
       </div>
       <Footer />
@@ -70,7 +71,7 @@ function LanguageSwitch() {
 type NavEntry = { to: string; label: string; icon: ReactNode; exact?: boolean };
 
 /* The same links, by role, as the dashboard navbar (LmsNavbar). */
-function TubeNav({ role, isAuthed, onSignOut }: Omit<Props, "children">) {
+function TubeNav({ role, isAuthed, isGuest, onSignOut }: Omit<Props, "children">) {
   const { lang } = useLang();
   const ar = lang === "ar";
   const tr = lmsT[lang];
@@ -194,17 +195,31 @@ function TubeNav({ role, isAuthed, onSignOut }: Omit<Props, "children">) {
         ))}
         <span className="tube-divider" aria-hidden="true" />
         {isAuthed ? (
-          <button
-            type="button"
-            className="tube-auth tube-login"
-            onClick={() => {
-              close();
-              onSignOut();
-            }}
-          >
-            <LogOut />
-            <span className="tube-auth-label">{tr.signOut}</span>
-          </button>
+          <>
+            {isGuest && (
+              <Link
+                to="/learning-management-system/signup"
+                className="tube-auth tube-signup"
+                onClick={close}
+              >
+                <IconSignup />
+                <span className="tube-auth-label">{ar ? "إنشاء حسابي" : "Create my account"}</span>
+              </Link>
+            )}
+            <button
+              type="button"
+              className="tube-auth tube-login"
+              onClick={() => {
+                close();
+                onSignOut();
+              }}
+            >
+              <LogOut />
+              <span className="tube-auth-label">
+                {isGuest ? (ar ? "خروج الزائر" : "Leave guest mode") : tr.signOut}
+              </span>
+            </button>
+          </>
         ) : (
           <>
             <Link

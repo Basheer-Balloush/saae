@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { GuestBanner } from "@/components/lms/GuestAccess";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { toUserMessage } from "@/lib/safe-error";
@@ -183,6 +184,8 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
             : "Everything you joined, your progress in each course, and the status of every registration request."
         }
       />
+
+      <GuestBanner />
 
       <section className="lms-stats" aria-label={ar ? "ملخّص التعلّم" : "Learning summary"}>
         <div className="page-shell">

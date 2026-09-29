@@ -36,6 +36,7 @@ export type Learner = {
 type AuthUser = {
   id: string;
   email?: string | null;
+  is_anonymous?: boolean;
   user_metadata?: Record<string, unknown> | null;
 };
 
@@ -79,6 +80,8 @@ export const findLearners = createServerFn({ method: "POST" })
 
     const found: Learner[] = [];
     await eachUser((u) => {
+      // Guests cannot hold coupons.
+      if (u.is_anonymous) return true;
       const profile = profileOf.get(u.id);
       const phone = profile?.phone ?? metaText(u, "phone");
       const hit = byEmail

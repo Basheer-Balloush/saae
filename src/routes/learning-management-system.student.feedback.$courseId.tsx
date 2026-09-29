@@ -52,7 +52,7 @@ function CourseFeedback() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{
     certificateId: string | null;
-    waitingFor: "payment" | null;
+    waitingFor: "payment" | "account" | null;
   } | null>(null);
   const topRef = useRef<HTMLDivElement | null>(null);
   const dirty = useRef(false);
@@ -242,7 +242,8 @@ function CourseFeedback() {
   }
 
   const certificateId = done?.certificateId ?? view.certificateId;
-  const waitingForPayment = !certificateId && (done?.waitingFor ?? view.waitingFor) === "payment";
+  const waitingFor = certificateId ? null : (done?.waitingFor ?? view.waitingFor);
+  const waitingForPayment = waitingFor === "payment";
 
   if (done || view.state === "submitted") {
     return shell(
@@ -256,13 +257,17 @@ function CourseFeedback() {
             ? ar
               ? "أكملت جميع متطلبات الدورة، وشهادتك جاهزة."
               : "You have met every requirement of the course, and your certificate is ready."
-            : waitingForPayment
+            : waitingFor === "account"
               ? ar
-                ? "أكملت الدورة، وتصدر شهادتك فور اكتمال الدفع. تواصل مع فريق المنصة لإتمامه."
-                : "You have finished the course. Your certificate is issued as soon as the payment is complete; contact the platform team to finish it."
-              : ar
-                ? "ستظهر شهادتك هنا حين تكتمل بقية متطلبات الدورة."
-                : "Your certificate appears here once the course’s other requirements are met."}
+                ? "أكملت الدورة! أنشئ حسابك لتصدر شهادتك باسمك، وتبقى فيه كل دوراتك وتقدّمك."
+                : "You have finished the course. Create your account and your certificate is issued in your name; it keeps all your courses and progress."
+              : waitingForPayment
+                ? ar
+                  ? "أكملت الدورة، وتصدر شهادتك فور اكتمال الدفع. تواصل مع فريق المنصة لإتمامه."
+                  : "You have finished the course. Your certificate is issued as soon as the payment is complete; contact the platform team to finish it."
+                : ar
+                  ? "ستظهر شهادتك هنا حين تكتمل بقية متطلبات الدورة."
+                  : "Your certificate appears here once the course’s other requirements are met."}
         </p>
         <div className="feedback-done-actions">
           {certificateId ? (
@@ -272,6 +277,10 @@ function CourseFeedback() {
               className="action action-primary"
             >
               {ar ? "الحصول على الشهادة" : "Get certificate"}
+            </Link>
+          ) : waitingFor === "account" ? (
+            <Link to="/learning-management-system/signup" className="action action-primary">
+              {ar ? "إنشاء حسابي" : "Create my account"}
             </Link>
           ) : null}
           <Link to="/learning-management-system/student" className="action action-secondary">

@@ -190,6 +190,14 @@ export function couponWhatsappText(
 /* ---------- messages ---------- */
 
 const COUPON_MESSAGES: Record<string, { ar: string; en: string }> = {
+  coupon_needs_account: {
+    ar: "الكوبونات للحسابات فقط. أنشئ حسابك (يبقى تقدّمك معك) ثم أدخل الكود.",
+    en: "Coupons are for accounts only. Create your account (your progress stays with you), then enter the code.",
+  },
+  account_required: {
+    ar: "هذا متاح للحسابات فقط، لا للزوار.",
+    en: "This is available to accounts only, not to guests.",
+  },
   coupon_not_found: {
     ar: "هذا الكود غير صحيح. تأكّد منه وأعد المحاولة.",
     en: "This code is not valid. Check it and try again.",

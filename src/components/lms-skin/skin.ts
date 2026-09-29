@@ -13,7 +13,7 @@ const SKINNED_PATHS = [
   /^\/learning-management-system$/,
   /^\/learning-management-system\/(catalog|verify)$/,
   /^\/learning-management-system\/courses\/[^/]+$/,
-  /^\/learning-management-system\/(login|signup|forgot-password|reset-password)$/,
+  /^\/learning-management-system\/(login|signup|forgot-password|reset-password|confirm-account)$/,
   /^\/learning-management-system\/internships(\/[^/]+(\/apply)?)?$/,
   /^\/learning-management-system\/student(\/requests)?$/,
   /^\/learning-management-system\/(profile|trainer-apply)$/,

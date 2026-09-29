@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
@@ -12,6 +13,8 @@ import { lmsRedirectSearchSchema } from "@/lib/lms-redirect";
 import { AuthLayout } from "@/components/lms-skin/AuthLayout";
 import { PasswordInput } from "@/components/lms-skin/PasswordInput";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { ContinueAsGuest } from "@/components/lms/GuestAccess";
+import { mergeGuestIntoAccount } from "@/lib/guest-account.functions";
 
 
 export const Route = createFileRoute("/learning-management-system/login")({
@@ -29,9 +32,13 @@ const schema = z.object({
 
 function LmsLogin() {
   const navigate = useNavigate();
-  const { user, loading } = useLmsAuth();
+  const { user, loading, isGuest } = useLmsAuth();
   const { lang } = useLang();
+  const ar = lang === "ar";
   const tr = lmsT[lang];
+  const mergeGuest = useServerFn(mergeGuestIntoAccount);
+  // While a guest's progress moves into the account, stay on this page.
+  const merging = useRef(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -39,8 +46,8 @@ function LmsLogin() {
   const target = search.redirect ?? "/learning-management-system/profile";
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: target });
-  }, [loading, user, navigate, target]);
+    if (!loading && user && !isGuest && !merging.current) navigate({ to: target });
+  }, [loading, user, isGuest, navigate, target]);
 
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -53,9 +60,38 @@ function LmsLogin() {
     }
     setSubmitting(true);
     try {
+      // A guest's own token, taken before the session switches, proves the
+      // guest is theirs so its progress can move into the account.
+      let guestToken: string | null = null;
+      if (isGuest) {
+        const { data } = await supabase.auth.refreshSession();
+        guestToken = data.session?.access_token ?? null;
+        merging.current = true;
+      }
       const { error } = await supabase.auth.signInWithPassword(parsed.data);
-      if (error) throw error;
-      toast.success(tr.signedIn);
+      if (error) {
+        merging.current = false;
+        throw error;
+      }
+      if (!guestToken) {
+        toast.success(tr.signedIn);
+        return;
+      }
+      try {
+        const res = await mergeGuest({ data: { guestAccessToken: guestToken, lang } });
+        toast.success(
+          res.courses
+            ? ar
+              ? "سجّلت الدخول، ونقلنا دوراتك وتقدّمك كزائر إلى حسابك."
+              : "You are signed in, and your guest courses and progress are now in your account."
+            : tr.signedIn,
+        );
+      } catch (err: unknown) {
+        toast.error(localizeAuthError(err, lang, tr.authFailed));
+      } finally {
+        merging.current = false;
+        navigate({ to: target });
+      }
     } catch (err: unknown) {
       toast.error(localizeAuthError(err, lang, tr.authFailed));
     } finally {
@@ -67,6 +103,13 @@ function LmsLogin() {
     <AuthLayout titleId="auth-title">
       <h1 id="auth-title">{tr.signInTitle}</h1>
       <p className="auth-lede">{tr.signInSubtitle}</p>
+      {isGuest && (
+        <p className="auth-guest-note">
+          {ar
+            ? "أنت تتصفّح كزائر. سجّل الدخول إلى حسابك وستنتقل إليه دوراتك وتقدّمك."
+            : "You are browsing as a guest. Sign in to your account and your courses and progress move into it."}
+        </p>
+      )}
 
       <form onSubmit={onSubmit}>
         <div className="field">
@@ -82,6 +125,7 @@ function LmsLogin() {
           <span>{tr.signIn}</span>
         </button>
       </form>
+      {!user && !loading && <ContinueAsGuest redirect={search.redirect} />}
       <p className="auth-alt">
         <Link to="/learning-management-system/signup" search={{ redirect: search.redirect }}>
           {tr.needAccount}

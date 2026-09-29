@@ -34,7 +34,7 @@ function hashIdentifier(kind: string, value: string) {
   return createHash('sha256').update(`${kind}:${value}:${pepper}`).digest('hex')
 }
 
-class RateLimitedError extends Error {
+export class RateLimitedError extends Error {
   constructor(readonly retryAfterSeconds: number) {
     super('RATE_LIMITED')
   }
@@ -42,7 +42,7 @@ class RateLimitedError extends Error {
 
 // `bucket` keeps a second counter under the same kind (the SQL only accepts
 // signup/reset/resend), e.g. a short gap on top of the 15-minute window.
-async function enforceRateLimit(kind: 'signup' | 'reset' | 'resend', email: string, maxPerWindow = 5, windowSeconds = 900, bucket: string = kind) {
+export async function enforceRateLimit(kind: 'signup' | 'reset' | 'resend', email: string, maxPerWindow = 5, windowSeconds = 900, bucket: string = kind) {
   const identifierHash = hashIdentifier(bucket, email)
   const { data, error } = await supabaseAdmin.rpc('lms_auth_check_rate_limit', {
     _kind: kind,
@@ -195,6 +195,28 @@ export async function createLmsAccount(input: SignupInput): Promise<CreateAccoun
   })
 
   return { sentTo: email, email, confirmationRequired: true }
+}
+
+/**
+ * The confirmation email for a guest becoming an account: the signup email,
+ * with a link to our own confirmation page (see guest-account.functions.ts).
+ */
+export async function sendAccountConfirmationEmail(input: { email: string; confirmationUrl: string; lang: Lang }) {
+  assertEmailRecipientAllowed(input.email)
+  const rendered = await renderEmail(
+    React.createElement(SignupEmail, {
+      siteName: SITE_NAMES[input.lang],
+      siteUrl: getSiteUrl(),
+      recipient: input.email,
+      confirmationUrl: input.confirmationUrl,
+      lang: input.lang,
+    })
+  )
+  await sendViaResend({
+    to: input.email,
+    subject: input.lang === 'ar' ? 'تأكيد بريدك الإلكتروني' : 'Confirm your email',
+    ...rendered,
+  })
 }
 
 /** Back-compat alias for the previous export name. */

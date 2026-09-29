@@ -650,8 +650,15 @@ function LearnerPaymentsDialog({
           confirmLabel={t("اعتراف", "Recognize")}
           onConfirm={async (reason) => {
             try {
-              await recognizeEnrollment(row.id, reason);
-              toast.success(t("عُلّمت الدورة مكتملة", "Marked as completed"));
+              const res = await recognizeEnrollment(row.id, reason);
+              toast.success(
+                res.reason === "account_required"
+                  ? t(
+                      "عُلّمت الدورة مكتملة. الطالب زائر: تصدر شهادته حين ينشئ حسابه.",
+                      "Marked as completed. The student is a guest: the certificate is issued once they create their account.",
+                    )
+                  : t("عُلّمت الدورة مكتملة", "Marked as completed"),
+              );
               await onChanged();
             } catch (e) {
               toast.error(toUserMessage(e));

@@ -50,6 +50,21 @@ const MAP: Array<{ match: RegExp; ar: string; en: string }> = [
     en: "Too many attempts — please wait a few minutes before trying again",
   },
   {
+    match: /GUEST_SESSION_EXPIRED/i,
+    ar: "انتهت جلسة الزائر على هذا المتصفّح، فلم نتمكّن من نقل تقدّمك",
+    en: "Your guest session on this browser has ended, so your progress could not be moved",
+  },
+  {
+    match: /NOT_A_GUEST/i,
+    ar: "أنت مسجّل الدخول بحساب بالفعل",
+    en: "You are already signed in to an account",
+  },
+  {
+    match: /MERGE_FAILED/i,
+    ar: "سجّلت الدخول، لكن تعذّر نقل تقدّمك كزائر — حاول مرة أخرى",
+    en: "You are signed in, but your guest progress could not be moved — please try again",
+  },
+  {
     match: /SIGNUP_FAILED/i,
     ar: "تعذّر إنشاء الحساب حالياً — حاول مرة أخرى",
     en: "We couldn't create your account right now — please try again",
@@ -86,6 +101,10 @@ const CODE_MAP: Record<string, { ar: string; en: string }> = {
   over_request_rate_limit: {
     ar: "محاولات كثيرة جداً، يرجى الانتظار قبل المحاولة مرّة أخرى",
     en: "Too many attempts — please wait a few minutes before trying again",
+  },
+  anonymous_provider_disabled: {
+    ar: "الدخول كزائر غير متاح حالياً — أنشئ حساباً أو سجّل الدخول",
+    en: "Guest access is not available right now — sign up or sign in",
   },
   over_email_send_rate_limit: {
     ar: "محاولات كثيرة جداً، يرجى الانتظار قبل المحاولة مرّة أخرى",

@@ -20,6 +20,7 @@ import { useCourseParticipantNames } from "@/hooks/useCourseParticipantNames";
 import { exportRowsToXlsx, type XlsxColumn } from "@/lib/admin-xlsx-export";
 import { sendEnrollmentApprovedEmail } from "@/lib/lms-enrollment-email.functions";
 import { getEmailsForUsers } from "@/lib/lms-admin-users.functions";
+import { guestLabel } from "@/lib/guest";
 import { enrollmentErrorMessage } from "@/lib/lms-enrollment-errors";
 import { BASE_FIELD_IDS } from "@/components/lms/EnrollmentFormDialog";
 import { EnrollmentResponseViewer } from "@/components/lms/EnrollmentResponseViewer";
@@ -67,7 +68,12 @@ type CourseInfo = {
   approval_whatsapp_message_en: string | null;
 };
 
-type Profile = { full_name: string | null; phone: string | null; email: string | null };
+type Profile = {
+  full_name: string | null;
+  phone: string | null;
+  email: string | null;
+  guest?: boolean;
+};
 
 function renderTemplate(tpl: string, vars: Record<string, string>): string {
   return tpl.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, k) => vars[k] ?? "");
@@ -154,6 +160,7 @@ export function EnrollmentRequestsPanel({
         fetchEmails({ data: { userIds: ids } }).catch(() => ({
           emails: {} as Record<string, string>,
           names: {} as Record<string, string>,
+          guests: [] as string[],
         })),
       ]);
       const emailMap = (emails?.emails ?? {}) as Record<string, string>;
@@ -161,9 +168,15 @@ export function EnrollmentRequestsPanel({
         string,
         string
       >;
+      const guests = new Set((emails as { guests?: string[] })?.guests ?? []);
       const map: Record<string, Profile> = {};
       for (const id of ids)
-        map[id] = { full_name: nameMap[id] ?? null, phone: null, email: emailMap[id] ?? null };
+        map[id] = {
+          full_name: nameMap[id] ?? null,
+          phone: null,
+          email: emailMap[id] ?? null,
+          guest: guests.has(id),
+        };
       for (const p of (profs as {
         user_id: string;
         full_name: string | null;
@@ -198,6 +211,7 @@ export function EnrollmentRequestsPanel({
     profiles[uid]?.full_name ||
     participants.names[uid]?.trim() ||
     profiles[uid]?.email ||
+    (profiles[uid]?.guest ? guestLabel(uid, ar) : null) ||
     (participants.loading
       ? t("جارٍ تحميل الاسم…", "Loading name…")
       : t("مستخدم غير معروف", "Unknown user"));
@@ -526,6 +540,7 @@ export function EnrollmentRequestsPanel({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[15px] font-bold">{nameOf(r.user_id)}</span>
+                      {p?.guest && <Pill tone="orange">{t("زائر", "Guest")}</Pill>}
                       <RequestStatusPill status={r.status} />
                       <Pill tone="gray">
                         {r.payment_method === "manual"
@@ -610,18 +625,20 @@ export function EnrollmentRequestsPanel({
                       />
                     )}
                     <div className="flex flex-wrap items-center gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => decide(r, "approve", "email")}
-                        disabled={busy === r.id}
-                      >
-                        {busy === r.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Mail className="h-4 w-4" />
-                        )}
-                        {t("قبول + بريد", "Approve + email")}
-                      </Button>
+                      {!p?.guest && (
+                        <Button
+                          size="sm"
+                          onClick={() => decide(r, "approve", "email")}
+                          disabled={busy === r.id}
+                        >
+                          {busy === r.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Mail className="h-4 w-4" />
+                          )}
+                          {t("قبول + بريد", "Approve + email")}
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         className="bg-[var(--cx-olive)] text-white hover:bg-[#5a7c35]"

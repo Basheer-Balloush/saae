@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { confirmDialog } from "@/hooks/useConfirm";
+import { useLang } from "@/lib/i18n";
 import { useSingleDeviceSession } from "@/hooks/useSingleDeviceSession";
 import { LmsNavbar } from "@/components/lms/LmsNavbar";
 import { Footer } from "@/components/site/Footer";
@@ -20,11 +22,27 @@ export const Route = createFileRoute("/learning-management-system")({
 
 function LmsLayout() {
   const navigate = useNavigate();
-  const { user, role } = useLmsAuth();
+  const { user, role, isGuest } = useLmsAuth();
+  const { lang } = useLang();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   useSingleDeviceSession(user?.id ?? null);
 
   const handleSignOut = async () => {
+    // A guest's progress lives only in this browser's session.
+    if (
+      isGuest &&
+      !(await confirmDialog({
+        title: lang === "ar" ? "الخروج من وضع الزائر؟" : "Leave guest mode?",
+        description:
+          lang === "ar"
+            ? "ستفقد دوراتك وتقدّمك كزائر. أنشئ حسابك أولاً لتحتفظ بها."
+            : "You will lose your guest courses and progress. Create your account first to keep them.",
+        confirmLabel: lang === "ar" ? "خروج" : "Leave",
+        destructive: true,
+      }))
+    ) {
+      return;
+    }
     await supabase.auth.signOut();
     navigate({ to: "/learning-management-system" });
   };
@@ -36,7 +54,7 @@ function LmsLayout() {
      Other LMS pages keep the standard navbar and footer below. */
   if (isSkinnedLmsPath(pathname)) {
     return (
-      <LmsSkinShell role={role} isAuthed={!!user} onSignOut={handleSignOut}>
+      <LmsSkinShell role={role} isAuthed={!!user} isGuest={isGuest} onSignOut={handleSignOut}>
         <Outlet />
       </LmsSkinShell>
     );
@@ -48,7 +66,7 @@ function LmsLayout() {
         <span className="orb-petrol" />
         <span className="orb-olive" />
       </div>
-      <LmsNavbar role={role} isAuthed={!!user} onSignOut={handleSignOut} />
+      <LmsNavbar role={role} isAuthed={!!user} isGuest={isGuest} onSignOut={handleSignOut} />
       <main className="flex-1 pt-20 relative z-[1]">
         <Outlet />
       </main>

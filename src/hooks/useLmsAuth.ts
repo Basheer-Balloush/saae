@@ -50,5 +50,6 @@ export function useLmsAuth() {
     }, () => { if (!disposed && revision === initialRevision) setState({ session: null, user: null, role: null, loading: false }); });
     return () => { disposed = true; ++revision; sub.subscription.unsubscribe(); };
   }, []);
-  return state;
+  // A guest is signed in with no email or password yet (see lib/guest.ts).
+  return { ...state, isGuest: !!state.user?.is_anonymous };
 }

@@ -260,6 +260,20 @@ html[dir] .lms-skin .lms-hero-copy h1.course-page-title { font-size: clamp(2rem,
 .lms-skin .auth-next a { color: var(--lms-lift); font-weight: 800; text-decoration: none; }
 .lms-skin .auth-icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, var(--lms-turquoise), #047383); color: #06232a; }
 .lms-skin .auth-icon svg { width: 26px; height: 26px; }
+/* Guests */
+.lms-skin .auth-guest { display: grid; justify-items: center; gap: 10px; margin-top: 18px; }
+.lms-skin .auth-or { display: flex; align-items: center; gap: 12px; width: 100%; color: var(--lms-muted); font-size: .8rem; font-weight: 800; }
+.lms-skin .auth-or::before, .lms-skin .auth-or::after { content: ""; flex: 1; height: 1px; background: rgba(184, 232, 240, .16); }
+.lms-skin .auth-guest-hint { max-width: 42ch; color: var(--lms-muted); font-size: .8rem; line-height: 1.7; text-align: center; text-wrap: pretty; }
+.lms-skin .auth-guest-note { margin-bottom: 14px; padding: 12px 14px; border: 1px solid rgba(119, 224, 232, .3); border-radius: 14px; background: rgba(0, 139, 157, .1); color: rgba(231, 241, 240, .85); font-size: .88rem; line-height: 1.7; }
+.lms-skin .guest-banner { padding-block: 8px 0; }
+.lms-skin .guest-banner-card { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; padding: 16px 18px; border: 1px solid rgba(255, 205, 92, .3); border-radius: 18px; background: rgba(255, 205, 92, .07); }
+.lms-skin .guest-banner-card > svg { flex: none; width: 26px; height: 26px; color: #ffd97a; }
+.lms-skin .guest-banner-copy { flex: 1 1 280px; min-width: 0; }
+.lms-skin .guest-banner-copy h2 { margin: 0 0 4px; color: #ffd97a; font-size: 1rem; letter-spacing: 0; }
+.lms-skin .guest-banner-copy p { margin: 0; color: rgba(231, 241, 240, .8); font-size: .88rem; line-height: 1.7; }
+.lms-skin .guest-banner-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.lms-skin .guest-banner-actions .action { min-height: 44px; font-size: .84rem; }
 
 @media (max-width: 1020px) {
   .lms-skin .course-layout { grid-template-columns: minmax(0, 1fr); }

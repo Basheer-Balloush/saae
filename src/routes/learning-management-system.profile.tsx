@@ -6,6 +6,7 @@ import { Loader2, RefreshCw, Trash2, Upload, User as UserIcon } from "lucide-rea
 import { currentLmsReturn } from "@/lib/lms-redirect";
 
 import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { GuestBanner } from "@/components/lms/GuestAccess";
 import { useLang } from "@/lib/i18n";
 import { lmsInternshipsT } from "@/lib/lms-internships-i18n";
 import {
@@ -82,7 +83,7 @@ function ProfilePage() {
   const { lang } = useLang();
   const ar = lang === "ar";
   const t = lmsInternshipsT[lang];
-  const { user, loading: authLoading } = useLmsAuth();
+  const { user, loading: authLoading, isGuest } = useLmsAuth();
 
   const fetchOverview = useServerFn(getMyProfileOverview);
 
@@ -153,7 +154,7 @@ function ProfilePage() {
 
   if (!data) return null;
 
-  const name = data.profile.full_name?.trim() || data.email || "";
+  const name = data.profile.full_name?.trim() || data.email || (isGuest ? (ar ? "زائر" : "Guest") : "");
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w.charAt(0)).join("").toUpperCase();
   const completedCount = data.enrollments.filter((e) => e.completed_at).length;
   const avg = data.enrollments.length
@@ -186,9 +187,14 @@ function ProfilePage() {
               <a className="action action-primary" href="#profile-identity">
                 <span>{ar ? "تعديل الملف" : "Edit profile"}</span>
               </a>
-              <Link className="action action-secondary" to="/learning-management-system/trainer-apply">
-                <span>{ar ? "كن مدرّباً" : "Be an instructor"}</span>
-              </Link>
+              {!isGuest && (
+                <Link
+                  className="action action-secondary"
+                  to="/learning-management-system/trainer-apply"
+                >
+                  <span>{ar ? "كن مدرّباً" : "Be an instructor"}</span>
+                </Link>
+              )}
             </span>
           </div>
           <dl className="profile-stats">

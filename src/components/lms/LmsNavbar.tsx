@@ -18,12 +18,13 @@ import logoArLight from "@/assets/saae-logo-ar-light.png";
 type Props = {
   role: LmsRole;
   isAuthed: boolean;
+  isGuest?: boolean;
   onSignOut: () => void;
 };
 
 type NavLink = { to: string; label: string; icon?: React.ReactNode };
 
-export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
+export function LmsNavbar({ role, isAuthed, isGuest, onSignOut }: Props) {
   const { lang, toggle: toggleLang } = useLang();
   const { theme, toggle: toggleTheme } = useTheme();
   const tr = lmsT[lang];
@@ -152,10 +153,17 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
           </button>
 
           {isAuthed ? (
-            <Button variant="ghost" size="sm" onClick={onSignOut} className="hidden md:inline-flex">
-              <LogOut className="h-4 w-4 mx-1" />
-              <span>{tr.signOut}</span>
-            </Button>
+            <div className="hidden md:flex items-center gap-1.5">
+              {isGuest && (
+                <Link to="/learning-management-system/signup">
+                  <Button size="sm">{lang === "ar" ? "إنشاء حسابي" : "Create my account"}</Button>
+                </Link>
+              )}
+              <Button variant="ghost" size="sm" onClick={onSignOut}>
+                <LogOut className="h-4 w-4 mx-1" />
+                <span>{tr.signOut}</span>
+              </Button>
+            </div>
           ) : (
             <div className="hidden md:flex items-center gap-1.5">
               <Link to="/learning-management-system/login">
@@ -204,6 +212,17 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
               {lang === "ar" ? "العودة للموقع الرئيسي" : "Back to main site"}
             </Link>
 
+            {isAuthed && isGuest && (
+              <Link
+                to="/learning-management-system/signup"
+                onClick={() => setOpen(false)}
+                className="mt-2"
+              >
+                <Button size="sm" className="w-full">
+                  {lang === "ar" ? "إنشاء حسابي" : "Create my account"}
+                </Button>
+              </Link>
+            )}
             {isAuthed ? (
               <button
                 onClick={() => { setOpen(false); onSignOut(); }}

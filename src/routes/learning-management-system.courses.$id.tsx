@@ -223,7 +223,7 @@ const DAY_LABELS: Record<string, { ar: string; en: string }> = {
 function CourseDetails() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useLmsAuth();
+  const { user, loading: authLoading, isGuest } = useLmsAuth();
   const { lang } = useLang();
   const tr = lmsT[lang];
   const ar = lang === "ar";
@@ -455,7 +455,7 @@ function CourseDetails() {
             <Clock />
             {ar ? "طلبك قيد المراجعة" : "Your request is pending"}
           </div>
-          {course.delivery_mode !== "onsite" && (
+          {course.delivery_mode !== "onsite" && !isGuest && (
             <RecognitionCodeBox courseId={course.id} ar={ar} onRecognized={onRecognized} />
           )}
         </>
@@ -596,7 +596,7 @@ function CourseDetails() {
             </article>
 
             <div className="pro-card skin-reviews">
-              <CourseReviews courseId={course.id} canReview={enrolled} />
+              <CourseReviews courseId={course.id} canReview={enrolled && !isGuest} />
             </div>
           </div>
 

@@ -7,6 +7,9 @@ import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { localizeAuthError } from "@/lib/auth-error-i18n";
 import { signUpLmsUser, resendLmsConfirmationEmail } from "@/lib/lms-auth.functions";
+import { resendGuestUpgrade, startGuestUpgrade } from "@/lib/guest-account.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { ContinueAsGuest } from "@/components/lms/GuestAccess";
 import { toast } from "sonner";
 import { Loader2, MailCheck } from "lucide-react";
 import { PASSWORD_MIN, scorePasswordStrength } from "@/lib/password-policy";
@@ -56,7 +59,7 @@ const schema = z.object({
 
 function LmsSignup() {
   const navigate = useNavigate();
-  const { user, loading } = useLmsAuth();
+  const { user, loading, isGuest } = useLmsAuth();
   const { lang } = useLang();
   const ar = lang === "ar";
   const tr = lmsT[lang];
@@ -76,6 +79,26 @@ function LmsSignup() {
   const resendLock = useRef(false);
   const signUpUser = useServerFn(signUpLmsUser);
   const resendConfirmation = useServerFn(resendLmsConfirmationEmail);
+  const upgradeGuest = useServerFn(startGuestUpgrade);
+  const resendUpgrade = useServerFn(resendGuestUpgrade);
+
+  // A guest's name from the enrollment form fills the name field.
+  useEffect(() => {
+    if (!isGuest || !user) return;
+    let cancelled = false;
+    supabase
+      .from("lms_user_profiles")
+      .select("full_name")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        const name = data?.full_name?.trim();
+        if (!cancelled && name) setFullName((v) => v || name);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isGuest, user]);
 
   const resendWait = Math.max(0, Math.ceil((resendReadyAt - now) / 1000));
 
@@ -100,7 +123,9 @@ function LmsSignup() {
     resendLock.current = true;
     setResending(true);
     try {
-      const res = await resendConfirmation({ data: { email: result.email, lang } });
+      const res = isGuest
+        ? await resendUpgrade({ data: { lang } })
+        : await resendConfirmation({ data: { email: result.email, lang } });
       if (res.sent) {
         toast.success(lang === "ar" ? "أعدنا إرسال رابط التأكيد" : "Confirmation link sent again");
         startResendWait(NEXT_RESEND_WAIT);
@@ -122,8 +147,8 @@ function LmsSignup() {
 
   useEffect(() => {
     // Once the account is active, land the user back where they started.
-    if (!loading && user) navigate({ to: returnTo ?? "/learning-management-system/profile" });
-  }, [loading, user, navigate, returnTo]);
+    if (!loading && user && !isGuest) navigate({ to: returnTo ?? "/learning-management-system/profile" });
+  }, [loading, user, isGuest, navigate, returnTo]);
 
 
 
@@ -144,6 +169,28 @@ function LmsSignup() {
     }
     setSubmitting(true);
     try {
+      if (isGuest) {
+        // The guest account itself becomes the new account.
+        const res = await upgradeGuest({
+          data: {
+            fullName: parsed.data.fullName,
+            email: parsed.data.email,
+            password: parsed.data.password,
+            asInstructor,
+            lang,
+          },
+        });
+        if (res.confirmationRequired) {
+          setResult({ email: res.email, confirmationRequired: true });
+          startResendWait(FIRST_RESEND_WAIT);
+          toast.success(tr.signedUp);
+        } else {
+          // The session's token still says "guest" until it is refreshed.
+          await supabase.auth.refreshSession();
+          toast.success(tr.signedUpConfirmed);
+        }
+        return;
+      }
       const res = await signUpUser({ data: { fullName: parsed.data.fullName, email: parsed.data.email, password: parsed.data.password, asInstructor, lang } });
       // The server is the single source of truth for whether confirmation is required.
       const confirmationRequired = res?.confirmationRequired !== false;
@@ -169,6 +216,13 @@ function LmsSignup() {
     <AuthLayout titleId="auth-title">
       <h1 id="auth-title">{tr.signUpTitle}</h1>
       <p className="auth-lede">{tr.signUpSubtitle}</p>
+      {isGuest && !result && (
+        <p className="auth-guest-note">
+          {ar
+            ? "أنت تتصفّح كزائر. أنشئ حسابك وستبقى فيه دوراتك وتقدّمك وطلباتك."
+            : "You are browsing as a guest. Create your account and it keeps your courses, progress and requests."}
+        </p>
+      )}
 
       {result ? (
         <div className="auth-result">
@@ -184,9 +238,13 @@ function LmsSignup() {
                 {ar ? "أرسلنا رابط تأكيد إلى" : "We sent a confirmation link to"}{" "}
                 <b dir="ltr">{result.email}</b>
                 {". "}
-                {ar
-                  ? "افتح الرابط لتأكيد بريدك قبل تسجيل الدخول."
-                  : "Open the link to confirm your email before signing in."}
+                {isGuest
+                  ? ar
+                    ? "افتح الرابط لتأكيد بريدك، فيصبح حسابك جاهزاً بكل دوراتك وتقدّمك كزائر. إلى ذلك الحين تبقى زائراً."
+                    : "Open the link to confirm your email and your account is ready, with every course and all your guest progress. Until then you stay a guest."
+                  : ar
+                    ? "افتح الرابط لتأكيد بريدك قبل تسجيل الدخول."
+                    : "Open the link to confirm your email before signing in."}
               </>
             ) : (
               <>
@@ -284,6 +342,7 @@ function LmsSignup() {
               <span>{tr.signUp}</span>
             </button>
           </form>
+          {!user && !loading && <ContinueAsGuest redirect={returnTo} />}
           <p className="auth-alt">
             <Link to="/learning-management-system/login" search={{ redirect: returnTo }}>
               {tr.haveAccount}

@@ -34,12 +34,15 @@ export type CourseFeedbackView = {
   answers: Record<string, string>;
   notes: Record<string, string>;
   certificateId: string | null;
-  /** "payment" when everything is done but the course's certificate waits
-      for what the learner owes. */
-  waitingFor: "payment" | null;
+  /** What a finished course's certificate still waits for: what the learner
+      owes, or (for a guest) their account. */
+  waitingFor: "payment" | "account" | null;
 };
 
 const server = () => import("@/lib/course-feedback.server");
+
+const waitingForOf = (reason: string | null): CourseFeedbackView["waitingFor"] =>
+  reason === "payment_required" ? "payment" : reason === "account_required" ? "account" : null;
 
 type Basics = {
   course: { id: string; delivery_mode: string | null; title_ar: string; title_en: string | null };
@@ -116,7 +119,7 @@ async function inspect(db: Db, userId: string, courseId: string) {
         // Nothing left to answer: say what the certificate still waits for.
         const res = await evaluate(db, userId, courseId);
         certificateId = res.certificateId;
-        waitingFor = res.reason === "payment_required" ? "payment" : null;
+        waitingFor = waitingForOf(res.reason);
         if (res.certificateId) await emailCertificate(userId, courseId, "ar");
       }
     } else {
@@ -257,7 +260,7 @@ export const submitCourseFeedback = createServerFn({ method: "POST" })
     try {
       const res = await evaluate(db, userId, data.courseId);
       certificateId = res.certificateId;
-      waitingFor = res.reason === "payment_required" ? "payment" : null;
+      waitingFor = waitingForOf(res.reason);
       if (!certificateId) certificateId = await existingCertificate(db, userId, data.courseId);
     } catch (e) {
       console.error(

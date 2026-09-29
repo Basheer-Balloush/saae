@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { CheckCircle2, Info, Loader2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
+import { currentLmsReturn } from "@/lib/lms-redirect";
 import { useLang } from "@/lib/i18n";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -60,7 +62,7 @@ export function EnrollmentFormDialog({
   courseId: string;
   onSubmitted: (outcome: EnrollmentOutcome) => void;
 }) {
-  const { user } = useLmsAuth();
+  const { user, isGuest } = useLmsAuth();
   const { lang } = useLang();
   const ar = lang === "ar";
   const [loading, setLoading] = useState(true);
@@ -78,6 +80,8 @@ export function EnrollmentFormDialog({
   // Base fields
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  // A guest has no email on the account; they may give one for contact.
+  const [guestEmail, setGuestEmail] = useState("");
   const userEmail = user?.email ?? "";
 
   useEffect(() => {
@@ -191,8 +195,12 @@ export function EnrollmentFormDialog({
       toast.error(ar ? "رقم الهاتف مطلوب" : "Phone number is required");
       return;
     }
-    if (!userEmail) {
+    if (!isGuest && !userEmail) {
       toast.error(ar ? "الإيميل غير متوفر في حسابك" : "Email is missing from your account");
+      return;
+    }
+    if (isGuest && guestEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim())) {
+      toast.error(ar ? "البريد الإلكتروني غير صالح" : "The email address is not valid");
       return;
     }
     // validate all required custom fields
@@ -212,7 +220,7 @@ export function EnrollmentFormDialog({
       const baseAnswers = [
         { field_id: BASE_FIELD_IDS.fullName, value: fullName.trim() },
         { field_id: BASE_FIELD_IDS.phone, value: phone.trim() },
-        { field_id: BASE_FIELD_IDS.email, value: userEmail },
+        { field_id: BASE_FIELD_IDS.email, value: isGuest ? guestEmail.trim() : userEmail },
       ];
       const customAnswers = fields.map((f) => ({ field_id: f.id, value: values[f.id] ?? null }));
       const answers = [...baseAnswers, ...customAnswers];
@@ -221,7 +229,7 @@ export function EnrollmentFormDialog({
       const res = await submitEnrollment({
         courseId,
         answers,
-        coupon: normalizeCode(code) ? code : null,
+        coupon: !isGuest && normalizeCode(code) ? code : null,
       });
       if (!res.ok) {
         // A refused code writes nothing: show why under the field.
@@ -238,6 +246,18 @@ export function EnrollmentFormDialog({
         onSubmitted({ status: "recognized", certificateId: res.certificate_id });
       } else {
         toast.success(ar ? "تم إرسال طلبك. سيتم التواصل معك قريباً." : "Request submitted. We will contact you soon.");
+        if (isGuest && user) {
+          // Admins see a guest by the name and phone they gave here.
+          await supabase
+            .from("lms_user_profiles")
+            .upsert(
+              { user_id: user.id, full_name: trimmedName, phone: phone.trim() },
+              { onConflict: "user_id" },
+            )
+            .then(({ error }) => {
+              if (error) console.error("Could not save the guest's name", error.message);
+            });
+        }
         onSubmitted({ status: "pending" });
       }
       onOpenChange(false);
@@ -368,71 +388,114 @@ export function EnrollmentFormDialog({
               </Label>
               <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium">
-                {ar ? "البريد الإلكتروني" : "Email"} <span className="text-destructive">*</span>
-              </Label>
-              <Input type="email" value={userEmail} readOnly className="bg-muted/40" />
-              <p className="text-xs text-muted-foreground">
-                {ar ? "مأخوذ من حسابك تلقائياً" : "Pulled automatically from your account"}
-              </p>
-            </div>
+            {isGuest ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="enroll-guest-email" className="text-sm font-medium">
+                  {ar ? "البريد الإلكتروني" : "Email"}{" "}
+                  <span className="font-normal text-muted-foreground">
+                    {ar ? "(اختياري)" : "(optional)"}
+                  </span>
+                </Label>
+                <Input
+                  id="enroll-guest-email"
+                  type="email"
+                  dir="ltr"
+                  autoComplete="email"
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {ar ? "لنتواصل معك بشأن طلبك." : "So we can contact you about your request."}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium">
+                  {ar ? "البريد الإلكتروني" : "Email"} <span className="text-destructive">*</span>
+                </Label>
+                <Input type="email" value={userEmail} readOnly className="bg-muted/40" />
+                <p className="text-xs text-muted-foreground">
+                  {ar ? "مأخوذ من حسابك تلقائياً" : "Pulled automatically from your account"}
+                </p>
+              </div>
+            )}
 
             {fields.map(renderField)}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="enroll-coupon" className="text-sm font-medium">
-                {ar ? "كود الكوبون" : "Coupon code"}{" "}
-                <span className="font-normal text-muted-foreground">
-                  {ar ? "(اختياري)" : "(optional)"}
+            {isGuest ? (
+              <p className="flex items-start gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-sm leading-relaxed">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                <span>
+                  {ar
+                    ? "لديك كوبون؟ الكوبونات للحسابات فقط. "
+                    : "Have a coupon? Coupons are for accounts only. "}
+                  <Link
+                    to="/learning-management-system/signup"
+                    search={{ redirect: currentLmsReturn() }}
+                    className="font-semibold text-primary underline underline-offset-4"
+                  >
+                    {ar ? "أنشئ حسابك" : "Create your account"}
+                  </Link>
+                  {ar
+                    ? " (يبقى تقدّمك معك) ثم أدخله هنا."
+                    : " (your progress stays with you), then enter it here."}
                 </span>
-              </Label>
-              <div className="flex gap-2">
-                <Input
-                  id="enroll-coupon"
-                  dir="ltr"
-                  autoComplete="off"
-                  spellCheck={false}
-                  value={code}
-                  onChange={(e) => changeCode(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      check();
-                    }
-                  }}
-                  className="font-mono uppercase"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={check}
-                  disabled={!normalizeCode(code) || checking || busy}
-                >
-                  {checking && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {ar ? "تحقّق" : "Check"}
-                </Button>
-              </div>
-              {quote?.ok === true && (
-                <div className="rounded-md bg-emerald-500/10 px-3 py-2 text-sm" role="status">
-                  <p className="flex items-start gap-1.5">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                    <span>{quoteSummary(quote, ar)}</span>
-                  </p>
-                  {quote.effect === "discount" && (
-                    <p className="mt-1 flex flex-wrap items-baseline gap-2 ps-6 tabular-nums">
-                      <s className="text-muted-foreground">{formatSP(quote.list_price, ar)}</s>
-                      <strong>{formatSP(quote.final_price, ar)}</strong>
-                    </p>
-                  )}
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                <Label htmlFor="enroll-coupon" className="text-sm font-medium">
+                  {ar ? "كود الكوبون" : "Coupon code"}{" "}
+                  <span className="font-normal text-muted-foreground">
+                    {ar ? "(اختياري)" : "(optional)"}
+                  </span>
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="enroll-coupon"
+                    dir="ltr"
+                    autoComplete="off"
+                    spellCheck={false}
+                    value={code}
+                    onChange={(e) => changeCode(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        check();
+                      }
+                    }}
+                    className="font-mono uppercase"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={check}
+                    disabled={!normalizeCode(code) || checking || busy}
+                  >
+                    {checking && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {ar ? "تحقّق" : "Check"}
+                  </Button>
                 </div>
-              )}
-              {quote?.ok === false && (
-                <p className="text-sm text-destructive" role="alert">
-                  {couponErrorMessage(quote.error, ar)}
-                </p>
-              )}
-            </div>
+                {quote?.ok === true && (
+                  <div className="rounded-md bg-emerald-500/10 px-3 py-2 text-sm" role="status">
+                    <p className="flex items-start gap-1.5">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                      <span>{quoteSummary(quote, ar)}</span>
+                    </p>
+                    {quote.effect === "discount" && (
+                      <p className="mt-1 flex flex-wrap items-baseline gap-2 ps-6 tabular-nums">
+                        <s className="text-muted-foreground">{formatSP(quote.list_price, ar)}</s>
+                        <strong>{formatSP(quote.final_price, ar)}</strong>
+                      </p>
+                    )}
+                  </div>
+                )}
+                {quote?.ok === false && (
+                  <p className="text-sm text-destructive" role="alert">
+                    {couponErrorMessage(quote.error, ar)}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="flex gap-2 pt-2 border-t border-border">
               <Button onClick={submit} disabled={busy} className="flex-1">

@@ -65,17 +65,22 @@ export const getEmailsForUsers = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertLmsAdmin(context.userId);
-    if (data.userIds.length === 0) return { emails: {} as Record<string, string>, names: {} as Record<string, string> };
+    if (data.userIds.length === 0)
+      return { emails: {} as Record<string, string>, names: {} as Record<string, string>, guests: [] as string[] };
     const wanted = new Set(data.userIds);
     const emails: Record<string, string> = {};
     const names: Record<string, string> = {};
+    const guests: string[] = [];
+    let seen = 0;
     let page = 1;
     const perPage = 1000;
-    for (let i = 0; i < 20 && Object.keys(emails).length < wanted.size; i++) {
+    for (let i = 0; i < 20 && seen < wanted.size; i++) {
       const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
       if (error) throw new Error(error.message);
       for (const u of list.users) {
         if (!wanted.has(u.id)) continue;
+        seen++;
+        if (u.is_anonymous) guests.push(u.id);
         if (u.email) emails[u.id] = u.email;
         const meta = (u.user_metadata ?? {}) as { full_name?: string; name?: string };
         const name = meta.full_name ?? meta.name;
@@ -84,5 +89,5 @@ export const getEmailsForUsers = createServerFn({ method: "POST" })
       if (list.users.length < perPage) break;
       page++;
     }
-    return { emails, names };
+    return { emails, names, guests };
   });
