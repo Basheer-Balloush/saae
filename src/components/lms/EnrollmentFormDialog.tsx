@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Upload } from "lucide-react";
+import { CheckCircle2, Info, Loader2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
@@ -13,6 +13,14 @@ import { toUserMessage } from "@/lib/safe-error";
 import { enrollmentErrorMessage } from "@/lib/lms-enrollment-errors";
 import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/ui/upload-progress";
+import {
+  couponErrorMessage,
+  formatSP,
+  normalizeCode,
+  quoteSummary,
+  type CouponQuote,
+} from "@/lib/coupons";
+import { checkCoupon, loadEnrollNote, submitEnrollment, type EnrollNote } from "@/lib/coupons-db";
 
 type FieldType =
   | "short_text" | "long_text" | "number" | "single_choice"
@@ -35,14 +43,22 @@ export const BASE_FIELD_IDS = {
   email: "__base_email",
 } as const;
 
+/** How sending the form ended: a request for an admin, or (with a
+    recognition code) an enrollment that goes straight to the feedback form. */
+export type EnrollmentOutcome =
+  | { status: "pending" }
+  | {
+      status: "recognized";
+      certificateId: string | null;
+    };
+
 export function EnrollmentFormDialog({
-  open, onOpenChange, courseId, notes, onSubmitted,
+  open, onOpenChange, courseId, onSubmitted,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   courseId: string;
-  notes: string | null;
-  onSubmitted: () => void;
+  onSubmitted: (outcome: EnrollmentOutcome) => void;
 }) {
   const { user } = useLmsAuth();
   const { lang } = useLang();
@@ -52,6 +68,12 @@ export function EnrollmentFormDialog({
   const [values, setValues] = useState<Record<string, AnswerValue>>({});
   const [busy, setBusy] = useState(false);
   const [fileProgress, setFileProgress] = useState<Record<string, { pct: number; loaded: number; total: number; name: string }>>({});
+
+  // The course's note above the form, and the optional coupon.
+  const [note, setNote] = useState<EnrollNote>({ ar: null, en: null });
+  const [code, setCode] = useState("");
+  const [quote, setQuote] = useState<CouponQuote | null>(null);
+  const [checking, setChecking] = useState(false);
 
   // Base fields
   const [fullName, setFullName] = useState("");
@@ -87,6 +109,9 @@ export function EnrollmentFormDialog({
         setFields([]);
       }
       setValues({});
+      setCode("");
+      setQuote(null);
+      setNote(await loadEnrollNote(courseId).catch(() => ({ ar: null, en: null })));
       // Prefill from auth user_metadata if available
       const meta = (user?.user_metadata ?? {}) as { full_name?: string; name?: string; phone?: string };
       setFullName(meta.full_name ?? meta.name ?? "");
@@ -96,6 +121,23 @@ export function EnrollmentFormDialog({
   }, [open, courseId, user]);
 
   const setVal = (id: string, v: AnswerValue) => setValues((p) => ({ ...p, [id]: v }));
+
+  const changeCode = (v: string) => {
+    setCode(v);
+    setQuote(null);
+  };
+
+  const check = async () => {
+    if (!normalizeCode(code) || checking) return;
+    setChecking(true);
+    try {
+      setQuote(await checkCoupon(courseId, code));
+    } catch (e) {
+      setQuote({ ok: false, error: e instanceof Error ? e.message : "" });
+    } finally {
+      setChecking(false);
+    }
+  };
 
   const handleFile = async (field: Field, file: File) => {
     if (!user) return;
@@ -175,19 +217,29 @@ export function EnrollmentFormDialog({
       const customAnswers = fields.map((f) => ({ field_id: f.id, value: values[f.id] ?? null }));
       const answers = [...baseAnswers, ...customAnswers];
 
-      // Phase 4 (CF-01): request + answers are written atomically server-side.
-      const { data: rpcData, error: rpcErr } = await supabase.rpc("lms_submit_enrollment_request", {
-        _course_id: courseId,
-        _payment_method: "manual",
-        _notes: notes || undefined,
-        _answers: answers,
+      // The request, its answers and any coupon are written together server-side.
+      const res = await submitEnrollment({
+        courseId,
+        answers,
+        coupon: normalizeCode(code) ? code : null,
       });
-      if (rpcErr) throw rpcErr;
-      const requestId = (rpcData as { request_id?: string } | null)?.request_id;
-      if (!requestId) throw new Error("invalid_arguments");
-
-      toast.success(ar ? "تم إرسال طلبك. سيتم التواصل معك قريباً." : "Request submitted. We will contact you soon.");
-      onSubmitted();
+      if (!res.ok) {
+        // A refused code writes nothing: show why under the field.
+        setQuote(res);
+        toast.error(couponErrorMessage(res.error, ar));
+        return;
+      }
+      if (res.status === "recognized") {
+        toast.success(
+          ar
+            ? "تم تسجيلك وإكمال الدورة. بقي استبيان التقييم لتحصل على شهادتك."
+            : "You are enrolled and the course is completed. Answer the feedback form to get your certificate.",
+        );
+        onSubmitted({ status: "recognized", certificateId: res.certificate_id });
+      } else {
+        toast.success(ar ? "تم إرسال طلبك. سيتم التواصل معك قريباً." : "Request submitted. We will contact you soon.");
+        onSubmitted({ status: "pending" });
+      }
       onOpenChange(false);
     } catch (e) {
       toast.error(enrollmentErrorMessage(e, ar));
@@ -294,6 +346,12 @@ export function EnrollmentFormDialog({
           <p className="text-sm text-muted-foreground text-center py-6">{ar ? "جاري التحميل..." : "Loading..."}</p>
         ) : (
           <div className="space-y-4">
+            {(ar ? note.ar || note.en : note.en || note.ar) && (
+              <p className="flex items-start gap-2 whitespace-pre-line rounded-md bg-primary/10 px-3 py-2.5 text-sm leading-relaxed">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span>{ar ? note.ar || note.en : note.en || note.ar}</span>
+              </p>
+            )}
             {/* Base fields — always present */}
             <div className="space-y-1.5">
               <Label className="text-sm font-medium">
@@ -321,10 +379,71 @@ export function EnrollmentFormDialog({
             </div>
 
             {fields.map(renderField)}
+
+            <div className="space-y-1.5">
+              <Label htmlFor="enroll-coupon" className="text-sm font-medium">
+                {ar ? "كود الكوبون" : "Coupon code"}{" "}
+                <span className="font-normal text-muted-foreground">
+                  {ar ? "(اختياري)" : "(optional)"}
+                </span>
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="enroll-coupon"
+                  dir="ltr"
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={code}
+                  onChange={(e) => changeCode(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      check();
+                    }
+                  }}
+                  className="font-mono uppercase"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={check}
+                  disabled={!normalizeCode(code) || checking || busy}
+                >
+                  {checking && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {ar ? "تحقّق" : "Check"}
+                </Button>
+              </div>
+              {quote?.ok === true && (
+                <div className="rounded-md bg-emerald-500/10 px-3 py-2 text-sm" role="status">
+                  <p className="flex items-start gap-1.5">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                    <span>{quoteSummary(quote, ar)}</span>
+                  </p>
+                  {quote.effect === "discount" && (
+                    <p className="mt-1 flex flex-wrap items-baseline gap-2 ps-6 tabular-nums">
+                      <s className="text-muted-foreground">{formatSP(quote.list_price, ar)}</s>
+                      <strong>{formatSP(quote.final_price, ar)}</strong>
+                    </p>
+                  )}
+                </div>
+              )}
+              {quote?.ok === false && (
+                <p className="text-sm text-destructive" role="alert">
+                  {couponErrorMessage(quote.error, ar)}
+                </p>
+              )}
+            </div>
+
             <div className="flex gap-2 pt-2 border-t border-border">
               <Button onClick={submit} disabled={busy} className="flex-1">
                 {busy && <Loader2 className="h-4 w-4 animate-spin mx-1" />}
-                {ar ? "إرسال الطلب" : "Submit request"}
+                {quote?.ok === true && quote.effect === "recognition"
+                  ? ar
+                    ? "التسجيل والانتقال إلى التقييم"
+                    : "Enroll and go to the feedback form"
+                  : ar
+                    ? "إرسال الطلب"
+                    : "Submit request"}
               </Button>
               <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
                 {ar ? "إلغاء" : "Cancel"}

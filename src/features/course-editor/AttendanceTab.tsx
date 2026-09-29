@@ -96,7 +96,7 @@ export function AttendanceTab({ ctx }: { ctx: EditorCtx }) {
           </Button>
         )}
       </div>
-      <Register amsId={amsId} lmsCourseId={course.id} canDelete={isAdmin} />
+      <Register amsId={amsId} lmsCourseId={course.id} canDelete={isAdmin} showPayments={isAdmin} />
     </div>
   );
 }

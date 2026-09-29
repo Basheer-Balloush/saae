@@ -37,6 +37,8 @@ import {
   useT,
 } from "@/components/console/ui";
 import { ConfirmationMessagesDialog } from "./ConfirmationMessagesDialog";
+import { listCouponUses } from "@/lib/coupons-db";
+import { formatSP, type CouponUse } from "@/lib/coupons";
 
 type ReqStatus = "pending" | "approved" | "rejected" | "cancelled";
 type Filter = ReqStatus | "all";
@@ -111,6 +113,8 @@ export function EnrollmentRequestsPanel({
   const [viewing, setViewing] = useState<string | null>(null);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
+  // The coupon on each request, with the price the learner was quoted.
+  const [coupons, setCoupons] = useState<Record<string, CouponUse & { code: string | null }>>({});
 
   const load = useCallback(async () => {
     const [{ data: list }, { data: c }] = await Promise.all([
@@ -132,6 +136,12 @@ export function EnrollmentRequestsPanel({
     const rows = (list as Req[]) ?? [];
     setReqs(rows);
     setCourse((c as CourseInfo | null) ?? null);
+    if (canDecide) {
+      const uses = await listCouponUses({ courseId }).catch(() => []);
+      const byRequest: Record<string, CouponUse & { code: string | null }> = {};
+      for (const u of uses) if (u.request_id) byRequest[u.request_id] = u;
+      setCoupons(byRequest);
+    }
     if (canDecide && rows.length) {
       const ids = [...new Set(rows.map((r) => r.user_id))];
       const [profs, emails] = await Promise.all([
@@ -380,6 +390,18 @@ export function EnrollmentRequestsPanel({
           get: ({ req }) => req.payment_method,
         },
         {
+          header: t("الكوبون", "Coupon"),
+          type: "text",
+          width: 16,
+          get: ({ req }) => coupons[req.id]?.code ?? "",
+        },
+        {
+          header: t("السعر بعد الكوبون", "Price after coupon"),
+          type: "number",
+          width: 16,
+          get: ({ req }) => (coupons[req.id] ? Number(coupons[req.id].final_price) : null),
+        },
+        {
           header: t("ملاحظات الطالب", "Student notes"),
           type: "text",
           width: 32,
@@ -510,6 +532,24 @@ export function EnrollmentRequestsPanel({
                           ? t("دفع يدوي", "Manual payment")
                           : t("دفع إلكتروني", "Online payment")}
                       </Pill>
+                      {coupons[r.id] && (
+                        <Pill tone={coupons[r.id].status === "released" ? "gray" : "teal"}>
+                          <span dir="ltr" className="font-mono">
+                            {coupons[r.id].code}
+                          </span>
+                          {coupons[r.id].effect === "recognition" ? (
+                            <span>{t("· اعتراف", "· recognition")}</span>
+                          ) : (
+                            <span className="tabular-nums">
+                              · <s>{formatSP(Number(coupons[r.id].list_price), ar)}</s>{" "}
+                              {formatSP(Number(coupons[r.id].final_price), ar)}
+                            </span>
+                          )}
+                          {coupons[r.id].status === "released" && (
+                            <span>{t("· أُعيد", "· given back")}</span>
+                          )}
+                        </Pill>
+                      )}
                     </div>
                     <div className="mt-0.5 text-[12.5px] text-[var(--cx-muted)]">
                       {p?.email && (

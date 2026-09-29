@@ -50,7 +50,10 @@ function CourseFeedback() {
   const [showMissing, setShowMissing] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState<{ certificateId: string | null } | null>(null);
+  const [done, setDone] = useState<{
+    certificateId: string | null;
+    waitingFor: "payment" | null;
+  } | null>(null);
   const topRef = useRef<HTMLDivElement | null>(null);
   const dirty = useRef(false);
   const latest = useRef({ answers, notes, lang });
@@ -160,7 +163,7 @@ function CourseFeedback() {
         },
       });
       dirty.current = false;
-      setDone({ certificateId: res.certificateId });
+      setDone({ certificateId: res.certificateId, waitingFor: res.waitingFor });
       topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
@@ -239,6 +242,7 @@ function CourseFeedback() {
   }
 
   const certificateId = done?.certificateId ?? view.certificateId;
+  const waitingForPayment = !certificateId && (done?.waitingFor ?? view.waitingFor) === "payment";
 
   if (done || view.state === "submitted") {
     return shell(
@@ -252,9 +256,13 @@ function CourseFeedback() {
             ? ar
               ? "أكملت جميع متطلبات الدورة، وشهادتك جاهزة."
               : "You have met every requirement of the course, and your certificate is ready."
-            : ar
-              ? "ستظهر شهادتك هنا حين تكتمل بقية متطلبات الدورة."
-              : "Your certificate appears here once the course’s other requirements are met."}
+            : waitingForPayment
+              ? ar
+                ? "أكملت الدورة، وتصدر شهادتك فور اكتمال الدفع. تواصل مع فريق المنصة لإتمامه."
+                : "You have finished the course. Your certificate is issued as soon as the payment is complete; contact the platform team to finish it."
+              : ar
+                ? "ستظهر شهادتك هنا حين تكتمل بقية متطلبات الدورة."
+                : "Your certificate appears here once the course’s other requirements are met."}
         </p>
         <div className="feedback-done-actions">
           {certificateId ? (

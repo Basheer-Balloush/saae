@@ -2576,12 +2576,15 @@ export type Database = {
           approval_whatsapp_message_en: string | null
           category_id: string | null
           certificate_pdf_enabled: boolean
+          certificate_requires_payment: boolean
           cover_url: string | null
           created_at: string
           delivery_mode: Database["public"]["Enums"]["lms_delivery_mode"]
           description_ar: string | null
           description_en: string | null
           duration_hours: number | null
+          enroll_note_ar: string | null
+          enroll_note_en: string | null
           end_date: string | null
           enrollment_deadline: string | null
           enrollment_open: boolean
@@ -2617,12 +2620,15 @@ export type Database = {
           approval_whatsapp_message_en?: string | null
           category_id?: string | null
           certificate_pdf_enabled?: boolean
+          certificate_requires_payment?: boolean
           cover_url?: string | null
           created_at?: string
           delivery_mode?: Database["public"]["Enums"]["lms_delivery_mode"]
           description_ar?: string | null
           description_en?: string | null
           duration_hours?: number | null
+          enroll_note_ar?: string | null
+          enroll_note_en?: string | null
           end_date?: string | null
           enrollment_deadline?: string | null
           enrollment_open?: boolean
@@ -2658,12 +2664,15 @@ export type Database = {
           approval_whatsapp_message_en?: string | null
           category_id?: string | null
           certificate_pdf_enabled?: boolean
+          certificate_requires_payment?: boolean
           cover_url?: string | null
           created_at?: string
           delivery_mode?: Database["public"]["Enums"]["lms_delivery_mode"]
           description_ar?: string | null
           description_en?: string | null
           duration_hours?: number | null
+          enroll_note_ar?: string | null
+          enroll_note_en?: string | null
           end_date?: string | null
           enrollment_deadline?: string | null
           enrollment_open?: boolean
@@ -2795,25 +2804,40 @@ export type Database = {
       lms_enrollments: {
         Row: {
           completed_at: string | null
+          amount_due: number | null
+          amount_due_note: string | null
+          completion_source: string
+          discount: number | null
           course_id: string
           enrolled_at: string
           id: string
+          list_price: number | null
           progress: number
           student_id: string
         }
         Insert: {
           completed_at?: string | null
+          amount_due?: number | null
+          amount_due_note?: string | null
+          completion_source?: string
+          discount?: number | null
           course_id: string
           enrolled_at?: string
           id?: string
+          list_price?: number | null
           progress?: number
           student_id: string
         }
         Update: {
           completed_at?: string | null
+          amount_due?: number | null
+          amount_due_note?: string | null
+          completion_source?: string
+          discount?: number | null
           course_id?: string
           enrolled_at?: string
           id?: string
+          list_price?: number | null
           progress?: number
           student_id?: string
         }

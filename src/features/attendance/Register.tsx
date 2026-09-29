@@ -43,6 +43,8 @@ import {
   useT,
 } from "@/components/console/ui";
 import "@/components/console/console.css";
+import { PAYMENT_STATE_LABELS, paymentSummary, type PaymentState } from "@/lib/coupons";
+import { loadCoursePayments } from "@/lib/coupons-db";
 
 export type PaymentStatus = "paid" | "unpaid" | "partial" | "waived";
 type Session = { id: string; title: string; session_date: string; lms_section_id: string | null };
@@ -74,10 +76,14 @@ export function Register({
   amsId,
   lmsCourseId,
   canDelete = true,
+  showPayments = false,
 }: {
   amsId: string;
   lmsCourseId: string | null;
   canDelete?: boolean;
+  /** LMS admins: on a course linked to the learning platform, payments come
+      from the course's payment record instead of the status here. */
+  showPayments?: boolean;
 }) {
   const { t, ar, lang } = useT();
   const sendCertEmail = useServerFn(sendCertificateEmail);
@@ -86,6 +92,17 @@ export function Register({
   const [people, setPeople] = useState<Registrant[]>([]);
   const [marks, setMarks] = useState<Record<string, Mark>>({});
   const [studentOf, setStudentOf] = useState<Record<string, string>>({});
+  // Payment state per LMS enrollment, from the learning platform's record.
+  const [paidState, setPaidState] = useState<Record<string, PaymentState>>({});
+  const lmsState = (r: Registrant): PaymentState | null =>
+    (r.lms_enrollment_id && paidState[r.lms_enrollment_id]) || null;
+  /** On a linked course: the learner's state in the platform's payment record. */
+  const owes = (r: Registrant) => (linked ? lmsState(r) : null);
+  const payLabel = (r: Registrant) => {
+    const st = linked ? lmsState(r) : null;
+    if (st) return ar ? PAYMENT_STATE_LABELS[st].ar : PAYMENT_STATE_LABELS[st].en;
+    return ar ? PAY_UI[r.payment_status].ar : PAY_UI[r.payment_status].en;
+  };
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [bulk, setBulk] = useState<string | null>(null);
   const [phoneSession, setPhoneSession] = useState<string | null>(null);
@@ -119,6 +136,22 @@ export function Register({
           ((ens as { id: string; student_id: string }[]) ?? []).map((e) => [e.id, e.student_id]),
         ),
       );
+      if (showPayments) {
+        const money = await loadCoursePayments(lmsCourseId).catch(() => null);
+        if (money) {
+          setPaidState(
+            Object.fromEntries(
+              money.enrollments.map((e) => [
+                e.id,
+                paymentSummary(
+                  e.amount_due,
+                  money.entries.filter((x) => x.student_id === e.student_id),
+                ).state,
+              ]),
+            ),
+          );
+        }
+      }
     }
     const m: Record<string, Mark> = {};
     if (sList.length) {
@@ -142,7 +175,7 @@ export function Register({
       (cur) =>
         cur ?? (sList.find((s) => s.session_date === today) ?? sList[sList.length - 1])?.id ?? null,
     );
-  }, [amsId, lmsCourseId]);
+  }, [amsId, lmsCourseId, showPayments]);
   useEffect(() => {
     load();
   }, [load]);
@@ -238,7 +271,7 @@ export function Register({
         r.full_name,
         r.email ?? "",
         r.phone ?? "",
-        ar ? PAY_UI[r.payment_status].ar : PAY_UI[r.payment_status].en,
+        payLabel(r),
         ...sessions.map((s) =>
           marks[`${s.id}:${r.id}`] === true ? "✓" : marks[`${s.id}:${r.id}`] === false ? "✗" : "",
         ),
@@ -483,6 +516,15 @@ export function Register({
                               </Pill>
                             </span>
                           )}
+                          {(owes(r) === "unpaid" || owes(r) === "partial") && (
+                            <span className="ms-2">
+                              <Pill tone={PAYMENT_STATE_LABELS[owes(r)!].tone}>
+                                {ar
+                                  ? PAYMENT_STATE_LABELS[owes(r)!].ar
+                                  : PAYMENT_STATE_LABELS[owes(r)!].en}
+                              </Pill>
+                            </span>
+                          )}
                         </td>
                         {sessions.map((s) => (
                           <td key={s.id} className="text-center">
@@ -515,9 +557,19 @@ export function Register({
               <SheetHeader className="text-start">
                 <SheetTitle>{person.full_name}</SheetTitle>
                 <div className="flex flex-wrap gap-2">
-                  <Pill tone={PAY_UI[person.payment_status].tone}>
-                    {ar ? PAY_UI[person.payment_status].ar : PAY_UI[person.payment_status].en}
-                  </Pill>
+                  {person.lms_enrollment_id && linked ? (
+                    lmsState(person) && (
+                      <Pill tone={PAYMENT_STATE_LABELS[lmsState(person)!].tone}>
+                        {ar
+                          ? PAYMENT_STATE_LABELS[lmsState(person)!].ar
+                          : PAYMENT_STATE_LABELS[lmsState(person)!].en}
+                      </Pill>
+                    )
+                  ) : (
+                    <Pill tone={PAY_UI[person.payment_status].tone}>
+                      {ar ? PAY_UI[person.payment_status].ar : PAY_UI[person.payment_status].en}
+                    </Pill>
+                  )}
                   {person.lms_enrollment_id && (
                     <Pill tone="teal">{t("من منصّة التعلّم", "From the learning platform")}</Pill>
                   )}
@@ -768,20 +820,29 @@ function AddPerson({
               />
             </Field>
           </div>
-          <Field label={t("الدفع", "Payment")}>
-            <div className="flex flex-wrap gap-1.5">
-              {(Object.keys(PAY_UI) as PaymentStatus[]).map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setF({ ...f, payment_status: p })}
-                  className={`rounded-full border px-3 py-1.5 text-[13px] font-bold ${f.payment_status === p ? "border-[var(--cx-teal)] bg-[var(--cx-petrol)] text-white" : "border-[var(--cx-line)] text-[var(--cx-ink-2)]"}`}
-                >
-                  {ar ? PAY_UI[p].ar : PAY_UI[p].en}
-                </button>
-              ))}
-            </div>
-          </Field>
+          {linked ? (
+            <p className="rounded-lg bg-[var(--cx-raise-2)] px-3 py-2 text-[13px] text-[var(--cx-muted)]">
+              {t(
+                "تُسجّل الدفعات في تبويب الطلاب في الدورة على منصّة التعلّم.",
+                "Payments are recorded in the course's Students tab on the learning platform.",
+              )}
+            </p>
+          ) : (
+            <Field label={t("الدفع", "Payment")}>
+              <div className="flex flex-wrap gap-1.5">
+                {(Object.keys(PAY_UI) as PaymentStatus[]).map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setF({ ...f, payment_status: p })}
+                    className={`rounded-full border px-3 py-1.5 text-[13px] font-bold ${f.payment_status === p ? "border-[var(--cx-teal)] bg-[var(--cx-petrol)] text-white" : "border-[var(--cx-line)] text-[var(--cx-ink-2)]"}`}
+                  >
+                    {ar ? PAY_UI[p].ar : PAY_UI[p].en}
+                  </button>
+                ))}
+              </div>
+            </Field>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>

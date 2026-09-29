@@ -158,7 +158,12 @@ export function AttendanceHome({
             ) : undefined
           }
         />
-        <Register amsId={current.id} lmsCourseId={current.lms_course_id} canDelete={canManage} />
+        <Register
+          amsId={current.id}
+          lmsCourseId={current.lms_course_id}
+          canDelete={canManage}
+          showPayments={isAdmin}
+        />
         {canManage && (
           <button
             type="button"

@@ -34,6 +34,9 @@ export type CourseFeedbackView = {
   answers: Record<string, string>;
   notes: Record<string, string>;
   certificateId: string | null;
+  /** "payment" when everything is done but the course's certificate waits
+      for what the learner owes. */
+  waitingFor: "payment" | null;
 };
 
 const server = () => import("@/lib/course-feedback.server");
@@ -104,10 +107,18 @@ async function inspect(db: Db, userId: string, courseId: string) {
   const submitted = b.row?.status === "submitted";
   let reason: string | null = "not_enrolled";
   let certificateId: string | null = null;
+  let waitingFor: CourseFeedbackView["waitingFor"] = null;
   if (b.enrollmentId && !onsite) {
     if (submitted || !form.enabled) {
       certificateId = await existingCertificate(db, userId, courseId);
       reason = null;
+      if (!certificateId) {
+        // Nothing left to answer: say what the certificate still waits for.
+        const res = await evaluate(db, userId, courseId);
+        certificateId = res.certificateId;
+        waitingFor = res.reason === "payment_required" ? "payment" : null;
+        if (res.certificateId) await emailCertificate(userId, courseId, "ar");
+      }
     } else {
       ({ reason, certificateId } = await evaluate(db, userId, courseId));
     }
@@ -132,8 +143,20 @@ async function inspect(db: Db, userId: string, courseId: string) {
     answers: submitted ? {} : draft.answers,
     notes: submitted ? {} : draft.notes,
     certificateId,
+    waitingFor,
   };
   return { view, enrollmentId: b.enrollmentId };
+}
+
+/** Sends the certificate email once (it does nothing when already sent). A
+    failure is logged; the certificate itself is already issued. */
+async function emailCertificate(userId: string, courseId: string, lang: "ar" | "en") {
+  try {
+    const { deliverCertificateEmail } = await import("@/lib/certificate-email.server");
+    await deliverCertificateEmail({ studentId: userId, courseId, lang });
+  } catch (e) {
+    console.error("[course-feedback] certificate email failed", e instanceof Error ? e.message : e);
+  }
 }
 
 const alreadySubmitted = (message: string | undefined) =>
@@ -198,7 +221,11 @@ export const submitCourseFeedback = createServerFn({ method: "POST" })
     const userId = context.userId;
     const { view, enrollmentId } = await inspect(db, userId, data.courseId);
     if (view.state === "submitted")
-      return { status: "submitted" as const, certificateId: view.certificateId };
+      return {
+        status: "submitted" as const,
+        certificateId: view.certificateId,
+        waitingFor: view.waitingFor,
+      };
     if (view.state !== "open") throw new Error(`feedback_not_open:${view.state}`);
     // The page reloads the new form and keeps the answers that still fit.
     if (view.formId !== data.formId || view.formVersion !== data.formVersion)
@@ -226,8 +253,11 @@ export const submitCourseFeedback = createServerFn({ method: "POST" })
     if (error && !alreadySubmitted(error.message)) throw new Error("Could not save your feedback");
 
     let certificateId: string | null = null;
+    let waitingFor: CourseFeedbackView["waitingFor"] = null;
     try {
-      ({ certificateId } = await evaluate(db, userId, data.courseId));
+      const res = await evaluate(db, userId, data.courseId);
+      certificateId = res.certificateId;
+      waitingFor = res.reason === "payment_required" ? "payment" : null;
       if (!certificateId) certificateId = await existingCertificate(db, userId, data.courseId);
     } catch (e) {
       console.error(
@@ -235,20 +265,6 @@ export const submitCourseFeedback = createServerFn({ method: "POST" })
         e instanceof Error ? e.message : e,
       );
     }
-    if (certificateId) {
-      try {
-        const { deliverCertificateEmail } = await import("@/lib/certificate-email.server");
-        await deliverCertificateEmail({
-          studentId: userId,
-          courseId: data.courseId,
-          lang: data.lang,
-        });
-      } catch (e) {
-        console.error(
-          "[course-feedback] certificate email failed",
-          e instanceof Error ? e.message : e,
-        );
-      }
-    }
-    return { status: "submitted" as const, certificateId };
+    if (certificateId) await emailCertificate(userId, data.courseId, data.lang);
+    return { status: "submitted" as const, certificateId, waitingFor };
   });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -7,6 +7,7 @@ import { toUserMessage } from "@/lib/safe-error";
 import { previewCourseCertificate } from "@/lib/certificates/certificate-pdf.functions";
 import { Button } from "@/components/ui/button";
 import { Panel, ToggleRow } from "@/components/console/ui";
+import { loadCourseCouponSettings, setCertificateRequiresPayment } from "@/lib/coupons-db";
 import type { EditorCtx } from "./types";
 
 export function CompletionTab({
@@ -44,6 +45,8 @@ export function CompletionTab({
           onToggle={(v) => update({ certificate_pdf_enabled: v })}
         />
       )}
+
+      {isAdmin && <PaymentRule ctx={ctx} />}
 
       <button
         type="button"
@@ -188,6 +191,52 @@ function CertificateSettings({
           onChange={onToggle}
         />
       </div>
+    </Panel>
+  );
+}
+
+/* Admins only: whether the certificate waits until the student has paid
+   what they owe. On for courses created from 29 Sep 2026, off before. */
+function PaymentRule({ ctx }: { ctx: EditorCtx }) {
+  const { course, t } = ctx;
+  const [on, setOn] = useState<boolean | null>(null);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    loadCourseCouponSettings(course.id)
+      .then((s) => setOn(s.certificateRequiresPayment))
+      .catch(() => setOn(null));
+  }, [course.id]);
+
+  const change = async (v: boolean) => {
+    setSaving(true);
+    try {
+      await setCertificateRequiresPayment(course.id, v);
+      setOn(v);
+      toast.success(
+        v
+          ? t("تنتظر الشهادة الآن اكتمال الدفع.", "Certificates now wait for full payment.")
+          : t("لم تعد الشهادة تنتظر الدفع.", "Certificates no longer wait for payment."),
+      );
+    } catch (e) {
+      toast.error(toUserMessage(e));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Panel title={t("الشهادة والدفع", "Certificate and payment")}>
+      <ToggleRow
+        id="certificate-requires-payment"
+        label={t("الشهادة بعد اكتمال الدفع", "Certificate after full payment")}
+        hint={t(
+          "تصدر شهادة الطالب حين يدفع كل ما عليه، أو يُعفى منه. من لا شيء عليه لا ينتظر. تُسجّل الدفعات في تبويب الطلاب.",
+          "A student's certificate is issued once they have paid, or been let off, all they owe. Anyone who owes nothing never waits. Payments are recorded in the Students tab.",
+        )}
+        checked={!!on}
+        disabled={on === null || saving}
+        onChange={change}
+      />
     </Panel>
   );
 }

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCourseParticipantNames } from "@/hooks/useCourseParticipantNames";
 import { CourseFormBuilder } from "@/components/lms/CourseFormBuilder";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   EmptyState,
   Field,
@@ -15,6 +16,7 @@ import {
   fmtNum,
 } from "@/components/console/ui";
 import { EnrollmentRequestsPanel } from "@/features/lms-console/EnrollmentRequestsPanel";
+import { PaymentsPanel } from "./PaymentsPanel";
 import type { EditorCtx } from "./types";
 
 type Enrolled = { id: string; student_id: string; enrolled_at: string; progress: number };
@@ -24,6 +26,8 @@ export function StudentsTab({ ctx }: { ctx: EditorCtx }) {
   const participants = useCourseParticipantNames(course.id, user?.id, !user);
   const [enrolled, setEnrolled] = useState<Enrolled[] | null>(null);
   const [q, setQ] = useState("");
+  // Reloads the payments after a request is approved.
+  const [paymentsKey, setPaymentsKey] = useState(0);
 
   const loadEnrolled = useCallback(async () => {
     const { data } = await supabase
@@ -99,6 +103,38 @@ export function StudentsTab({ ctx }: { ctx: EditorCtx }) {
             />
           </Field>
         </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Field
+            label={t("ملاحظة فوق نموذج التسجيل (اختياري)", "Note above the enroll form (optional)")}
+            htmlFor="enroll-note-ar"
+            hint={t(
+              "تظهر للطالب في أعلى النموذج، مثل: «إذا حضرت أركاثون 2025 أدخل الكود الذي وصلك». اتركها فارغة لإخفائها.",
+              "Students see it at the top of the form, e.g. “If you attended Archathon 2025, enter the code you received.” Leave it empty to hide it.",
+            )}
+          >
+            <Textarea
+              id="enroll-note-ar"
+              dir="rtl"
+              rows={3}
+              maxLength={1000}
+              value={course.enroll_note_ar ?? ""}
+              onChange={(e) => update({ enroll_note_ar: e.target.value })}
+            />
+          </Field>
+          <Field
+            label={t("الملاحظة بالإنجليزية (اختياري)", "The note in English (optional)")}
+            htmlFor="enroll-note-en"
+          >
+            <Textarea
+              id="enroll-note-en"
+              dir="ltr"
+              rows={3}
+              maxLength={1000}
+              value={course.enroll_note_en ?? ""}
+              onChange={(e) => update({ enroll_note_en: e.target.value })}
+            />
+          </Field>
+        </div>
       </Panel>
 
       <Panel
@@ -118,9 +154,14 @@ export function StudentsTab({ ctx }: { ctx: EditorCtx }) {
         <EnrollmentRequestsPanel
           courseId={course.id}
           canDecide={isAdmin}
-          onChanged={loadEnrolled}
+          onChanged={() => {
+            loadEnrolled();
+            setPaymentsKey((k) => k + 1);
+          }}
         />
       </Panel>
+
+      {isAdmin && <PaymentsPanel key={paymentsKey} ctx={ctx} nameOf={nameOf} />}
 
       <Panel
         title={t("الطلاب المسجّلون", "Enrolled students")}

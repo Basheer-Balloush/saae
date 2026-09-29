@@ -31,6 +31,9 @@ export type Course = {
   duration_hours: number | null;
   delivery_mode: "onsite" | "online";
   certificate_pdf_enabled: boolean;
+  /** Shown above the enroll form when set. */
+  enroll_note_ar: string | null;
+  enroll_note_en: string | null;
 };
 
 export type Section = {
@@ -87,6 +90,8 @@ export const COURSE_DRAFT_FIELDS = [
   "location_ar",
   "location_en",
   "duration_hours",
+  "enroll_note_ar",
+  "enroll_note_en",
 ] as const satisfies readonly (keyof Course)[];
 
 export type CourseEdits = {

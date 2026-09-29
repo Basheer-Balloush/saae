@@ -1,15 +1,19 @@
 import { createFileRoute, Link, useNavigate, useRouter, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { PlayCircle, Loader2, Lock, Clock, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCourseTeachingStatus } from "@/hooks/useCourseTeachingStatus";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
-import { Textarea } from "@/components/ui/textarea";
 import { CoursePrice } from "@/components/lms/CoursePrice";
 import { CourseReviews } from "@/components/lms/CourseReviews";
-import { EnrollmentFormDialog } from "@/components/lms/EnrollmentFormDialog";
+import { EnrollmentFormDialog, type EnrollmentOutcome } from "@/components/lms/EnrollmentFormDialog";
+import { EnrollmentBalance } from "@/components/lms/EnrollmentBalance";
+import { RecognitionCodeBox } from "@/components/lms/RecognitionCodeBox";
+import { loadMyEnrollment } from "@/lib/coupons-db";
+import { sendCertificateEmail } from "@/lib/certificate-email.functions";
 import { SubHero } from "@/components/lms-skin/SubHero";
 import { IconCategoryAI } from "@/components/lms-skin/icons";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
@@ -223,20 +227,21 @@ function CourseDetails() {
   const { lang } = useLang();
   const tr = lmsT[lang];
   const ar = lang === "ar";
-  const { course, instructor, coInstructors, sections, lessons, hasForm } = Route.useLoaderData() as CourseLoaderData;
+  const { course, instructor, coInstructors, sections, lessons } = Route.useLoaderData() as CourseLoaderData;
   const teaching = useCourseTeachingStatus(course.id, user?.id, authLoading);
   const [enrolled, setEnrolled] = useState(false);
   const [pendingRequest, setPendingRequest] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [manualOpen, setManualOpen] = useState(false);
-  const [manualNotes, setManualNotes] = useState("");
   const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [mine, setMine] = useState<Awaited<ReturnType<typeof loadMyEnrollment>>>(null);
+  const emailCertificate = useServerFn(sendCertificateEmail);
   const [hasQuiz, setHasQuiz] = useState(false);
 
   useEffect(() => {
     if (!course || !user) {
       setEnrolled(false);
       setPendingRequest(false);
+      setMine(null);
       return;
     }
     let cancelled = false;
@@ -248,6 +253,7 @@ function CourseDetails() {
       if (cancelled) return;
       setEnrolled(!!e);
       setPendingRequest(!!req);
+      setMine(e ? await loadMyEnrollment(course.id, user.id).catch(() => null) : null);
       if (e) {
         const { data: q } = await supabase
           .from("lms_quizzes")
@@ -290,13 +296,28 @@ function CourseDetails() {
     }
   };
 
-  const onManualSubmit = async () => {
-    setBusy(true);
-    try {
-      if (await requireAuth()) setFormDialogOpen(true);
-    } finally {
-      setBusy(false);
+  // A recognition code: the course is done, so go straight to the feedback
+  // form, or to the certificate when the course asks no feedback.
+  const onRecognized = async (certificateId: string | null) => {
+    setPendingRequest(false);
+    setEnrolled(true);
+    if (certificateId) {
+      await emailCertificate({ data: { courseId: course.id, lang } }).catch(() => undefined);
+      navigate({
+        to: "/learning-management-system/certificate/$id",
+        params: { id: certificateId },
+      });
+    } else {
+      navigate({
+        to: "/learning-management-system/student/feedback/$courseId",
+        params: { courseId: course.id },
+      });
     }
+  };
+
+  const onSubmitted = (outcome: EnrollmentOutcome) => {
+    if (outcome.status === "recognized") onRecognized(outcome.certificateId);
+    else setPendingRequest(true);
   };
 
   const title = lang === "ar" ? course.title_ar : course.title_en || course.title_ar;
@@ -380,12 +401,43 @@ function CourseDetails() {
           </>
         );
       }
+      const recognized = mine?.enrollment.completion_source === "recognition";
       return (
-        <Link to="/learning-management-system/student/player/$courseId" params={{ courseId: course.id }} className="action action-primary">
-          <span className="btn-content">
-            <span>{tr.goToCourse}</span>
-          </span>
-        </Link>
+        <>
+          {recognized && (
+            <div className="enroll-note is-open">
+              <CheckCircle />
+              {ar ? "أكملت هذه الدورة بالاعتراف" : "Completed by recognition"}
+            </div>
+          )}
+          {recognized && (
+            <Link
+              to="/learning-management-system/student/feedback/$courseId"
+              params={{ courseId: course.id }}
+              className="action action-primary"
+            >
+              <span className="btn-content">
+                <span>{ar ? "التقييم والشهادة" : "Feedback and certificate"}</span>
+              </span>
+            </Link>
+          )}
+          <Link
+            to="/learning-management-system/student/player/$courseId"
+            params={{ courseId: course.id }}
+            className={recognized ? "action action-secondary" : "action action-primary"}
+          >
+            <span className="btn-content">
+              <span>{tr.goToCourse}</span>
+            </span>
+          </Link>
+          {mine && (
+            <EnrollmentBalance
+              amountDue={mine.enrollment.amount_due}
+              entries={mine.entries}
+              ar={ar}
+            />
+          )}
+        </>
       );
     }
     if (isFinished) {
@@ -398,10 +450,15 @@ function CourseDetails() {
     }
     if (pendingRequest) {
       return (
-        <div className="enroll-note is-pending">
-          <Clock />
-          {ar ? "طلبك قيد المراجعة" : "Your request is pending"}
-        </div>
+        <>
+          <div className="enroll-note is-pending">
+            <Clock />
+            {ar ? "طلبك قيد المراجعة" : "Your request is pending"}
+          </div>
+          {course.delivery_mode !== "onsite" && (
+            <RecognitionCodeBox courseId={course.id} ar={ar} onRecognized={onRecognized} />
+          )}
+        </>
       );
     }
     if (closed || deadlinePassed || isFull) {
@@ -432,27 +489,6 @@ function CourseDetails() {
             ? "سجّل وعبّئ النموذج. بعد قبولك في الدورة سيتم التواصل معك لترتيب الدفع."
             : "Register and fill the form. Once accepted, we'll contact you to arrange payment."}
         </p>
-        {manualOpen && !hasForm && (
-          <div className="enroll-notes">
-            <Textarea
-              placeholder={ar ? "ملاحظات (اختياري)" : "Notes (optional)"}
-              value={manualNotes}
-              onChange={(e) => setManualNotes(e.target.value)}
-              rows={3}
-            />
-            <button type="button" className="action action-primary" onClick={onManualSubmit} disabled={busy || authLoading}>
-              <span className="btn-content">
-                {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-                <span>{ar ? "إرسال" : "Submit"}</span>
-              </span>
-            </button>
-            <button type="button" className="action action-secondary" onClick={() => setManualOpen(false)}>
-              <span className="btn-content">
-                <span>{ar ? "إلغاء" : "Cancel"}</span>
-              </span>
-            </button>
-          </div>
-        )}
       </>
     );
   })();
@@ -613,8 +649,7 @@ function CourseDetails() {
         open={formDialogOpen && teaching.status === "no" && !!user}
         onOpenChange={setFormDialogOpen}
         courseId={course?.id ?? id}
-        notes={manualNotes || null}
-        onSubmitted={() => { setPendingRequest(true); setManualOpen(false); setManualNotes(""); }}
+        onSubmitted={onSubmitted}
       />
     </>
   );

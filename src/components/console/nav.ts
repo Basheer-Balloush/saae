@@ -18,6 +18,7 @@ import {
   Settings,
   Smartphone,
   Sparkles,
+  Ticket,
   UserCircle,
   Users,
   UsersRound,
@@ -201,6 +202,7 @@ export const NAV: Record<ConsoleSystem, NavGroup[]> = {
           also: /^\/learning-management-system\/admin\/users/,
         },
         { to: `${LMS_ADMIN}/internships`, ar: "فرص التدريب", en: "Internships", icon: Briefcase },
+        { to: `${LMS_ADMIN}/coupons`, ar: "الكوبونات", en: "Coupons", icon: Ticket },
       ],
     },
     {

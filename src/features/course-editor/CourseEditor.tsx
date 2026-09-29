@@ -308,6 +308,8 @@ export function CourseEditor({
       location_ar: course.location_ar,
       location_en: course.location_en,
       duration_hours: course.duration_hours,
+      enroll_note_ar: course.enroll_note_ar?.trim() || null,
+      enroll_note_en: course.enroll_note_en?.trim() || null,
       slug: slug || null,
       price: course.is_free ? 0 : course.price,
       sale_price:
