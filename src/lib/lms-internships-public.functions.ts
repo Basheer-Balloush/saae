@@ -91,7 +91,10 @@ async function signCover(
   // below. Never accept an arbitrary client-supplied bucket or object path.
   if (bucket !== "internship-covers" || !path) return null;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin.storage.from(bucket).createSignedUrl(path, 60 * 60);
+  const { data, error } = await supabaseAdmin.storage.from(bucket).createSignedUrl(path, 60 * 60, {
+    // A resized copy: the originals are camera-size PNGs (up to 1.7 MB).
+    transform: { width: 1080, resize: "contain", quality: 72 },
+  });
   if (error) console.error("Internship cover signing failed", { status: error.statusCode });
   return data?.signedUrl ?? null;
 }

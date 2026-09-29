@@ -33,6 +33,7 @@ import { courseDestination } from "@/lib/lms-course-destination";
 import { SubHero } from "@/components/lms-skin/SubHero";
 import { IconDocument } from "@/components/lms-skin/icons";
 import { LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { resizedImage } from "@/lib/image-url";
 
 export const Route = createFileRoute("/learning-management-system/profile")({
   head: () => ({
@@ -168,7 +169,7 @@ function ProfilePage() {
         <div className="page-shell profile-head">
           <div className="profile-id">
             <span className="profile-avatar" aria-hidden="true">
-              {avatar.url ? <img src={avatar.url} alt="" /> : initials || <UserIcon />}
+              {avatar.url ? <img src={resizedImage(avatar.url, 320)} alt="" /> : initials || <UserIcon />}
             </span>
             <span className="profile-who">
               <span className="profile-name-row">
