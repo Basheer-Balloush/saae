@@ -68,3 +68,21 @@ Result: no import cycles between areas; LMS sub-areas depend on the core, never 
 - **Deploy side effect.** Server-function ids come from file paths. After this deploy, a visitor with a tab open from _before_ the deploy may see one failed action and need to refresh once. Merge at a low-traffic time.
 - **`.lovable/`** (old planning notes): delete it if the repository is no longer linked to Lovable.
 - **Splitting the files over 700 lines** (listed in the restructure brief, Phase 6): recommended as a separate follow-up PR, one file per commit.
+
+## Equivalence audit (2026-09-29, against `main` 1e854ec6)
+
+| Check                                                                                                    | Result                                                                                                                           |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| typecheck / tests / offline checks / build / bundle check                                                | 0 errors / 370 passed, 2 skipped (same as main) / 19 pass / OK / OK                                                              |
+| Line-by-line comparison of all 498 kept files with their originals (import paths and formatting ignored) | Only comments, the legacy-URL labels, one `let` → `const`, test file paths, and 5 regexes differ                                 |
+| The 5 rewritten regexes, on every Unicode code point (1,112,064)                                         | Identical matches                                                                                                                |
+| Server functions (`createServerFn` exports)                                                              | 143 on main, 143 here, same names                                                                                                |
+| Route tree                                                                                               | 126 route ids with identical paths and parents                                                                                   |
+| Every page URL, APIs, sitemap, webhooks, robots/llms/AMS files and a 404 (137 requests)                  | Identical status, redirect, content type, title and server-rendered text                                                         |
+| Encrypted profile cards (3 cards, AR and EN) against the live site                                       | Identical text, links, contact file and images; analytics off on those pages                                                     |
+| Structure (import graph)                                                                                 | No cycles between areas; LMS sub-areas depend on the core only                                                                   |
+| Deleted public files referenced anywhere / live DB rows pointing at removed files                        | None / none                                                                                                                      |
+| Generated CSS                                                                                            | No class used by remaining code disappeared (474 removed classes belonged to deleted code)                                       |
+| Screenshots: 31 pages, desktop EN and phone AR, top/middle/bottom, storage blocked (186)                 | Same layout and text; differences only in animation frames (mascot, ticker, count-up counters, which settle to identical values) |
+
+Not covered: pages behind a login (their code is covered by the line-by-line comparison and the build).
