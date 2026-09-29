@@ -2,13 +2,17 @@ import { describe, expect, it } from "vitest";
 import {
   codeProblem,
   couponErrorMessage,
+  couponOffer,
+  couponWhatsappText,
   discountFor,
   formatSP,
   listPrice,
   normalizeCode,
   paymentSummary,
+  phoneKey,
   quoteSummary,
   randomCode,
+  whatsappNumber,
   type PaymentEntry,
 } from "@/lib/coupons";
 
@@ -182,5 +186,36 @@ describe("what a learner has paid", () => {
       paid: 100,
     });
     expect(paymentSummary(500, []).state).toBe("unpaid");
+  });
+});
+
+describe("personal coupons", () => {
+  it("match a Syrian mobile number however it is written", () => {
+    expect(phoneKey("0944 123 456")).toBe("944123456");
+    expect(phoneKey("+963 944-123-456")).toBe("944123456");
+    expect(phoneKey("00963944123456")).toBe("944123456");
+    expect(phoneKey("12345")).toBe("12345");
+  });
+
+  it("open WhatsApp with the country code first", () => {
+    expect(whatsappNumber("0944 123 456")).toBe("963944123456");
+    expect(whatsappNumber("+963944123456")).toBe("963944123456");
+    expect(whatsappNumber("0049 170 1234567")).toBe("491701234567");
+    expect(whatsappNumber(null)).toBe("");
+  });
+
+  it("describe the offer in the email and message", () => {
+    const c = { percent_off: 20, max_discount: 400, max_uses: 2, expires_at: null };
+    expect(couponOffer(c, true)).toEqual({
+      offer: "خصم 20٪ بحد أقصى 400 ل.س",
+      limits: "صالح لـ 2 دورات",
+    });
+    expect(couponOffer({ ...c, max_discount: null, max_uses: 1 }, false)).toEqual({
+      offer: "20% off",
+      limits: "valid for 1 course",
+    });
+    const text = couponWhatsappText({ ...c, code: "K7QX-M2PA" }, "سارة", "https://x/catalog", true);
+    expect(text).toContain("K7QX-M2PA");
+    expect(text).toContain("https://x/catalog");
   });
 });
