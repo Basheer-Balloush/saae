@@ -1,19 +1,19 @@
 # Restructure notes (September 2026)
 
-Started from `main` at **`1a5192dc`** ("Abu Al-Joud answers about SAAE only") on branch `refactor/cleanup`.
+Started from `main` at **`1e854ec6`** ("Read profile content only from the encrypted table") on branch `refactor/cleanup`. Earlier builds on `1a5192dc` and `056d9624` were redone on this newer `main` so the course-feedback and encrypted profile-card work are included.
 
 ## Baseline and result
 
-| Check                            | Baseline (1a5192dc)            | After                                           |
+| Check                            | Baseline (1e854ec6)            | After                                           |
 | -------------------------------- | ------------------------------ | ----------------------------------------------- |
 | `tsc --noEmit`                   | 0 errors                       | 0 errors                                        |
-| unit tests                       | 344 passed (39 files)          | 344 passed (39 files)                           |
+| unit tests                       | 370 passed (41 files)          | 370 passed (41 files)                           |
 | offline checks (`test:plans`)    | 19 pass / 0 fail               | 19 pass / 0 fail                                |
 | `vite build`                     | OK                             | OK                                              |
-| bundle check                     | OK (274 files)                 | OK                                              |
+| bundle check                     | OK                             | OK                                              |
 | ESLint errors                    | ~7,900 (almost all formatting) | 104 (102 `no-explicit-any`, see below)          |
 | knip unused files / dependencies | 70 files, 44 packages          | 0 / 0                                           |
-| route tree                       | 123 routes                     | identical ids, paths, parents and address lists |
+| route tree                       | 126 route ids                  | identical ids, paths, parents and address lists |
 
 ## What changed
 
@@ -35,6 +35,18 @@ Started from `main` at **`1a5192dc`** ("Abu Al-Joud answers about SAAE only") on
    - Moved `DEPLOYMENT.md` and `roadmap.md` into `docs/`.
    - Grouped the admin and mobile docs.
    - Updated the paths in `docs/PROJECT-DOCUMENTATION.md` and `AGENTS.md`.
+
+## Structure fixes found by the structure audit
+
+An import-graph audit of the first build found five placement problems, fixed here:
+
+1. The six animation pieces were in `components/motion` although only the website uses them: now `features/website/motion`.
+2. The site footer lived in the website folder although the LMS uses it too: now `components/layout/Footer.tsx`.
+3. `StarRating` (the `/feedback` survey) sat in the website folder: now in `features/feedback-survey`.
+4. The LMS core imported from its sub-areas (internships translations, the course editor's `FileUploader`): both now live in the LMS core.
+5. The LMS email queue imported the instructor-approved email from `lms/instructors`: that email now lives in the LMS core.
+
+Result: no import cycles between areas; LMS sub-areas depend on the core, never the reverse.
 
 ## Kept on purpose
 

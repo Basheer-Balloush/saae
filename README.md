@@ -43,22 +43,23 @@ src/
 │   ├── news/  initiative/  api/  lovable/     (lovable/email/* are live webhook URLs)
 │   └── about.tsx, partners.tsx, …             single-page addresses
 ├── features/               Everything that belongs to ONE product area
-│   ├── website/            public site: cinematic/, home/, layout/, initiative/, communities/,
-│   │                       partners/, feedback/, profile-card/, lib/, media.ts
+│   ├── website/            public site: cinematic/, home/, layout/ (navbar), motion/ (animation
+│   │                       pieces), initiative/, communities/, partners/, profile-card/, lib/, media.ts
 │   ├── chat/               Abu Al-Joud assistant (widget + lib/)
 │   ├── crm/                leads, forms, surveys (FormBuilder, SurveyView, … + lib/)
-│   ├── feedback-survey/    digital-experience survey admin + lib/
+│   ├── feedback-survey/    the /feedback survey: admin view, StarRating, lib/
 │   ├── attendance/         AMS screens, layout/, hooks/, lib/
-│   └── lms/                learner side: skin/, catalog/, player/, quiz/, hooks/, lib/
+│   └── lms/                LMS core: skin/, catalog/, player/, quiz/, hooks/, lib/, FileUploader
 │       ├── console/        LMS admin console
 │       ├── course-editor/  course editor tabs
+│       ├── course-feedback/ course feedback forms, prompt and results (+ lib/)
 │       ├── instructors/    accreditation logic (lib/)
 │       ├── internships/    internships (shared UI helpers + lib/)
 │       └── certificates/   certificate PDF and email (lib/)
 ├── components/             UI shared by MORE THAN ONE area
 │   ├── ui/                 shadcn primitives (+ lms-portal-skin, which the dialogs use)
 │   ├── console/            admin design system (ConsoleShell, cx-* styles, DraftNotice)
-│   ├── motion/             animation pieces (motion-footer, logo-carousel, …)
+│   ├── layout/             the Footer shared by the public site and the LMS
 │   ├── common/             small shared widgets (upload-progress)
 │   └── app/                mounted once in __root (RouteProgress, ScrollToHash, error fallback)
 ├── lib/                    Shared infrastructure only
@@ -92,7 +93,7 @@ Ask these questions in order and stop at the first "yes":
 | 5   | Is it non-UI code used by two or more areas? | `src/lib/`                                                                  |
 | 6   | Is it a hook?                                | Used by one area: `features/<area>/hooks/`. Used by several: `src/hooks/`.  |
 
-A feature may import from another feature (for example the LMS console uses `lms/catalog/EnrollmentFormDialog`). Never create an import circle. When two areas start sharing something, move it to `components/` or `lib/`.
+A feature may import from another feature (for example the LMS console uses `lms/catalog/EnrollmentFormDialog`). Inside the LMS, sub-areas (`console/`, `course-editor/`, …) build on the LMS core, and the core never imports from a sub-area. Never create an import circle. When two areas start sharing something, move it to `components/` or `lib/`.
 
 ## Conventions
 
@@ -100,6 +101,7 @@ A feature may import from another feature (for example the LMS console uses `lms
 - **`*.server.ts`:** server-only code. Never import it from client code; `bun run check:bundle` enforces this.
 - **Routes:** a file's path is its URL. Renaming or moving a route file changes a live address, so don't, unless you mean to. The legacy files marked `// Legacy URL` only redirect old links; keep them.
 - **Cinematic pages:** the HTML lives in `src/features/website/cinematic/html/`; the CSS and JS they load live in `public/cinematic/` and are referenced by exact path.
+- **Private profile cards (`/profile/<secret-link>`):** stored only encrypted in the `private_cards` table (`features/website/lib/profile-card-crypto.ts`), decrypted on the server with the Cloudflare secret `PROFILE_CARD_SECRET`. Never put card details in code, `public/`, or commit messages, and never load analytics on those pages.
 - **`src/assets/partner-*.png`:** these must keep their names and location. They are loaded by filename pattern, and partner rows in the database store these paths.
 - **Unused code:** run `bunx knip@5` (configured in `knip.json`). Files in `public/` are referenced from HTML/CSS strings, so check those with `git grep` instead.
 - **Languages:** every user-facing string needs English and Arabic, and layouts must work in RTL.
