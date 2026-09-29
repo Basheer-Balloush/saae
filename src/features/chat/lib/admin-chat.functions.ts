@@ -149,7 +149,7 @@ export const getChatStats = createServerFn({ method: "GET" })
     };
   });
 
-// listLeads moved to src/lib/crm.functions.ts as listIndividualLeads / listCompanyLeads
+// listLeads moved to src/features/crm/lib/crm.functions.ts as listIndividualLeads / listCompanyLeads
 
 export const listKnowledgeDocuments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

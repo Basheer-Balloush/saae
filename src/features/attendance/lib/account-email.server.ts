@@ -5,7 +5,7 @@ import {
 } from "@/lib/email/email-delivery.server";
 import * as React from "react";
 import { render } from "@react-email/components";
-import { AmsAccountCreatedEmail } from "../../../lib/email/templates/ams-account-created";
+import { AmsAccountCreatedEmail } from "@/lib/email/templates/ams-account-created";
 
 type Lang = "ar" | "en";
 

@@ -1,7 +1,7 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { logAuditEvent } from "../../../lib/auth/audit-log.server";
-import { assertEmailRecipientAllowed } from "../../../lib/email/email-delivery.server";
-import { isBackgroundRecipientAllowed } from "../../../lib/email/queued-email.server";
+import { logAuditEvent } from "@/lib/auth/audit-log.server";
+import { assertEmailRecipientAllowed } from "@/lib/email/email-delivery.server";
+import { isBackgroundRecipientAllowed } from "@/lib/email/queued-email.server";
 /**
  * Phase 2 (CF-02) — durable outbox worker.
  *

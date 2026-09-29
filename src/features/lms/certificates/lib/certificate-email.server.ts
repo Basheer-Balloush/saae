@@ -6,7 +6,7 @@ import {
 } from "@/lib/email/email-delivery.server";
 import * as React from "react";
 import { render } from "@react-email/components";
-import { CertificateIssuedEmail } from "../../../../lib/email/templates/certificate-issued";
+import { CertificateIssuedEmail } from "@/lib/email/templates/certificate-issued";
 
 type Lang = "ar" | "en";
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 /* The desktop homepage's navigation on the phone homepage: the tree button
    that opens the radial menu, and the language pill beside it. Same markup and
-   classes as src/components/cinematic/radial-nav.ts, so navigation.css (which
+   classes as src/features/website/cinematic/radial-nav.ts, so navigation.css (which
    the homepage route already loads) styles both identically; the behaviour of
    public/cinematic/js/navigation.js is ported here. Language comes in as props,
    like the rest of MobileHomeView, so the pill drives the app's language. */

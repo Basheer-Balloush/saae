@@ -5,7 +5,7 @@ import {
   createLmsAccount,
   resendLmsConfirmation,
 } from "./auth-email.server";
-import { PASSWORD_MIN } from "../../../lib/auth/password-policy";
+import { PASSWORD_MIN } from "@/lib/auth/password-policy";
 
 const langSchema = z.enum(["ar", "en"]);
 
