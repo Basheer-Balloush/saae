@@ -6,6 +6,8 @@
 // the page HTML: the browser asks for it separately after the page loads, so
 // link previews and scrapers that don't run JavaScript never see it.
 
+import { cardSlugHash, decryptCard, deriveCardKeys } from "./profile-card-crypto";
+
 type CardText = { name: string; role: string; roleSub: string; title: string };
 
 export type ProfileCard = {
@@ -25,9 +27,23 @@ export type ProfileContact = {
   phones: { type: string; number: string }[];
 };
 
-// The cards live in the database table private_profile_cards (RLS on, no
-// policies), read only through exact-slug functions (get_private_profile_*).
-// Nothing about a card is kept in the code or in public/.
+// The cards live encrypted in the database table private_cards: the row key is
+// an HMAC of the slug and the row is AES-256-GCM ciphertext, both derived from
+// the Worker secret PROFILE_CARD_SECRET (see profile-card-crypto.ts). Nothing
+// about a card is kept in the code or in public/.
+//
+// While the secret is being rolled out, a missing secret falls back to the
+// earlier plain table (private_profile_cards); that fallback is removed once
+// the encrypted read is confirmed live.
+
+type StoredImage = { mime: string; b64: string };
+type StoredCard = {
+  card: Omit<ProfileCard, "slug" | "portrait" | "signature">;
+  contact: ProfileContact;
+  portrait: StoredImage;
+  signature: StoredImage;
+};
+
 type Rpc = (
   fn: string,
   args: Record<string, unknown>,
@@ -51,8 +67,34 @@ export function profileImagePath(slug: string, kind: "portrait" | "signature"): 
   return `/api/profile-card/${encodeURIComponent(slug)}/${kind}`;
 }
 
+let keysPromise: ReturnType<typeof deriveCardKeys> | null = null;
+
+/** The decrypted card, null when no card has this slug, undefined when the secret is not set. */
+async function loadCard(slug: string): Promise<StoredCard | null | undefined> {
+  const secret = process.env.PROFILE_CARD_SECRET;
+  if (!secret) return undefined;
+  keysPromise ??= deriveCardKeys(secret);
+  const keys = await keysPromise;
+  const hash = await cardSlugHash(keys, slug);
+  const payload = (await rpc("get_private_card", { p_slug_hash: hash })) as string | null;
+  return payload ? decryptCard<StoredCard>(keys, hash, payload) : null;
+}
+
+const decode = (b64: string) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+
 export async function findProfileCard(slug: string): Promise<ProfileCard | null> {
   try {
+    const stored = await loadCard(slug);
+    if (stored !== undefined) {
+      return stored
+        ? {
+            ...stored.card,
+            slug,
+            portrait: profileImagePath(slug, "portrait"),
+            signature: profileImagePath(slug, "signature"),
+          }
+        : null;
+    }
     const row = (await rpc("get_private_profile_card", { p_slug: slug })) as Omit<
       ProfileCard,
       "portrait" | "signature"
@@ -72,6 +114,8 @@ export async function findProfileCard(slug: string): Promise<ProfileCard | null>
 
 export async function findProfileContact(slug: string): Promise<ProfileContact | null> {
   try {
+    const stored = await loadCard(slug);
+    if (stored !== undefined) return stored?.contact ?? null;
     const row = (await rpc("get_private_profile_contact", {
       p_slug: slug,
     })) as ProfileContact | null;
@@ -86,10 +130,15 @@ export async function findProfileImage(
   slug: string,
   kind: "portrait" | "signature",
 ): Promise<{ mime: string; bytes: Uint8Array<ArrayBuffer> } | null> {
+  const stored = await loadCard(slug);
+  if (stored !== undefined) {
+    const image = stored?.[kind];
+    return image ? { mime: image.mime, bytes: decode(image.b64) } : null;
+  }
   const rows = (await rpc("get_private_profile_image", { p_slug: slug, p_kind: kind })) as
     | { mime: string | null; b64: string | null }[]
     | null;
   const row = rows?.[0];
   if (!row?.mime || !row.b64) return null;
-  return { mime: row.mime, bytes: Uint8Array.from(atob(row.b64), (c) => c.charCodeAt(0)) };
+  return { mime: row.mime, bytes: decode(row.b64) };
 }
