@@ -5,7 +5,7 @@
 
 const GREETING =
   /^(hi|hello|hey|thanks|thank you|ok|okay|yes|no|سلام|السلام عليكم|مرحبا|مرحباً|أهلا|أهلاً|اهلا|هلا|شكرا|شكراً|تمام|نعم|لا|أكيد|اوكي|أوكي)$/i;
-const PUNCTUATION = /[\s.,!?؟،؛:…"'«»()\-]+/g;
+const PUNCTUATION = /[\s.,!?؟،؛:…"'«»()-]+/g;
 
 export function needsKnowledgeSearch(text: string, offeredChoices: string[] = []): boolean {
   const t = text.trim();

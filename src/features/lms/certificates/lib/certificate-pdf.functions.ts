@@ -5,6 +5,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const gender = z.enum(["male", "female"]);
 
+// The typed Supabase client's rpc() is too generic to name here.
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 async function isLmsAdmin(supabase: { rpc: Function }, userId: string): Promise<boolean> {
   // admin or lms_admin, the same as the LMS pages' own admin check.
   const { data } = await supabase.rpc("is_lms_admin", { _user_id: userId });

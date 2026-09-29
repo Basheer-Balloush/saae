@@ -32,7 +32,7 @@ function splitLinks(segment: Segment): Segment[] {
   LINK.lastIndex = 0;
   while ((match = LINK.exec(segment.text)) !== null) {
     let raw = match[2] ?? match[3];
-    let label = match[1];
+    const label = match[1];
     let end = match.index + match[0].length;
     if (!label) {
       const trail = raw.match(TRAILING)?.[0] ?? "";

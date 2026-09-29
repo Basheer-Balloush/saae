@@ -29,7 +29,7 @@ export const Route = createFileRoute("/learning-management-system/signup")({
 const FIRST_RESEND_WAIT = 60;
 const NEXT_RESEND_WAIT = 90;
 
-const ARABIC_NAME_RE = /^[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿\s]+$/;
+const ARABIC_NAME_RE = /^[\u0600-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-\uFEFF\s]+$/;
 
 function getStrengthInfo(score: number, lang: "ar" | "en") {
   const t = lmsT[lang];

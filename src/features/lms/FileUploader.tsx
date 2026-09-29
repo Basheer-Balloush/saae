@@ -83,7 +83,7 @@ export function FileUploader({
     setUploading(true);
     setProgress({ pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
-      const safeName = `${Date.now()}-${file.name.replace(/[^\w.\-]+/g, "_")}`;
+      const safeName = `${Date.now()}-${file.name.replace(/[^\w.-]+/g, "_")}`;
       const fullPath = `${pathPrefix.replace(/\/+$/, "")}/${safeName}`;
       await uploadToSupabaseStorage({
         bucket,

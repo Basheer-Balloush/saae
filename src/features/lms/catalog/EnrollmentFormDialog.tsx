@@ -138,7 +138,7 @@ export function EnrollmentFormDialog({
       toast.error(ar ? `الحد الأقصى ${MAX_FILE_MB} ميجا` : `Max ${MAX_FILE_MB} MB`);
       return;
     }
-    const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+    const safeName = file.name.replace(/[^\w.-]+/g, "_");
     const path = `form-uploads/${courseId}/${user.id}/${field.id}-${Date.now()}-${safeName}`;
     setFileProgress((p) => ({
       ...p,

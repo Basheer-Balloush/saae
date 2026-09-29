@@ -8,7 +8,7 @@
 
 const MARKER = /\[\[\s*choices\s*:\s*([^\]]+)\]\]/i;
 // Backticks, punctuation, and bidi controls may sit around the marker on its line.
-const DECORATION = /[`\s.,;!?؛،؟​-‏‪-‮⁦-⁩]/g;
+const DECORATION = /[`\s.,;!?؛،؟\u200B-\u200F\u202A-\u202E\u2066-\u2069]/g;
 const LINES_FROM_END = 3;
 const MAX_CHOICES = 6;
 const MAX_LABEL = 60;
