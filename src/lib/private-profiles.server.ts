@@ -25,100 +25,9 @@ export type ProfileContact = {
   phones: { type: string; number: string }[];
 };
 
-const PROFILES: { card: ProfileCard; contact: ProfileContact }[] = [
-  {
-    card: {
-      slug: "minister-of-finance-T4R0O_U4PQWPdCSM",
-      portrait: "/profile-card/portrait-minister.jpeg",
-      signature: "/profile-card/signature.png",
-      fileName: "Mohamad-Yisr-Barnieh.vcf",
-      ar: {
-        name: "محمد يسر برنية",
-        role: "وزير الماليـــة",
-        roleSub: "فـي الجمهوريـة العربيـة السوريـة",
-        title: "وزير المالية في الجمهورية العربية السورية",
-      },
-      en: {
-        name: "Mohamad Yisr Barnieh",
-        role: "Minister of Finance",
-        roleSub: "of the Syrian Arab Republic",
-        title: "Minister of Finance of the Syrian Arab Republic",
-      },
-      linkedin: "https://sy.linkedin.com/in/yisr-barnieh-3846a88a",
-    },
-    contact: {
-      emails: ["minister@mof.gov.sy", "minister.office@mof.gov.sy"],
-      whatsapp: "963983551111",
-      phones: [
-        { type: "CELL;PREF=1", number: "+963983551111" },
-        { type: "WORK,VOICE", number: "+96311226605" },
-      ],
-    },
-  },
-  {
-    card: {
-      slug: "deputy-minister-of-finance-Xq2mV7RtNp4yLc9s",
-      portrait: "/profile-card/d6e111cce6-portrait.jpg",
-      signature: "/profile-card/d6e111cce6-signature.png",
-      fileName: "Mohammad-Abdelhaleem-Abazeed.vcf",
-      ar: {
-        name: "محمد عبدالحليم ابازيد",
-        role: "نائب وزير الماليـــة",
-        roleSub: "فـي الجمهوريـة العربيـة السوريـة",
-        title: "نائب وزير المالية في الجمهورية العربية السورية",
-      },
-      en: {
-        name: "Mohammad Abdelhaleem Abazeed",
-        role: "Vice Minister of Finance",
-        roleSub: "of the Syrian Arab Republic",
-        title: "Vice Minister of Finance of the Syrian Arab Republic",
-      },
-      linkedin: "https://www.linkedin.com/in/mohamedaabazid",
-    },
-    contact: {
-      emails: ["deputyminister@mof.gov.sy"],
-      whatsapp: "963968444555",
-      phones: [
-        { type: "WORK,VOICE;PREF=1", number: "+96350005511" },
-        { type: "WORK,VOICE", number: "+963950005511" },
-        { type: "CELL", number: "+963968444555" },
-      ],
-    },
-  },
-  {
-    card: {
-      slug: "communications-director-9FaMUyl0Lx4p196W",
-      portrait: "/profile-card/67bb9af009-portrait.jpg",
-      signature: "/profile-card/67bb9af009-signature.png",
-      fileName: "Mohammed-Shahhoud.vcf",
-      ar: {
-        name: "محمد شحود",
-        role: "مدير الاتصال الحكومي",
-        roleSub: "فـي وزارة الماليـة",
-        title: "مدير الاتصال الحكومي في وزارة المالية",
-      },
-      en: {
-        name: "Mohammed Shahhoud",
-        role: "Government Communications Director",
-        roleSub: "Ministry of Finance",
-        title: "Government Communications Director, Ministry of Finance",
-      },
-    },
-    contact: {
-      emails: ["pr@mof.gov.sy"],
-      whatsapp: "963989323335",
-      phones: [{ type: "CELL;PREF=1", number: "+963989323335" }],
-    },
-  },
-];
-
-function find(slug: string) {
-  return PROFILES.find((p) => p.card.slug === slug) ?? null;
-}
-
-// The cards now live in the database table private_profile_cards, read through
-// exact-slug functions (get_private_profile_*). The copies above are only a
-// fallback while the move is verified live; they are removed afterwards.
+// The cards live in the database table private_profile_cards (RLS on, no
+// policies), read only through exact-slug functions (get_private_profile_*).
+// Nothing about a card is kept in the code or in public/.
 type Rpc = (
   fn: string,
   args: Record<string, unknown>,
@@ -158,7 +67,7 @@ export async function findProfileCard(slug: string): Promise<ProfileCard | null>
   } catch (error) {
     console.error("Profile card lookup failed", error);
   }
-  return find(slug)?.card ?? null;
+  return null;
 }
 
 export async function findProfileContact(slug: string): Promise<ProfileContact | null> {
@@ -170,7 +79,7 @@ export async function findProfileContact(slug: string): Promise<ProfileContact |
   } catch (error) {
     console.error("Profile contact lookup failed", error);
   }
-  return find(slug)?.contact ?? null;
+  return null;
 }
 
 export async function findProfileImage(
