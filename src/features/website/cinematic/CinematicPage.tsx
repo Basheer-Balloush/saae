@@ -140,9 +140,10 @@ function CinematicPageImpl({ html, scripts, htmlClass, bodyClass, htmlAttrs }: P
     if (htmlClass) root.classList.add(htmlClass);
     if (bodyClass) document.body.classList.add(bodyClass);
     if (htmlAttrs) for (const [k, v] of Object.entries(htmlAttrs)) root.setAttribute(k, v);
-    const releaseScroll = htmlClass === "site-loading"
-      ? installCinematicScrollSafety(mountRef.current ?? document.body)
-      : () => {};
+    const releaseScroll =
+      htmlClass === "site-loading"
+        ? installCinematicScrollSafety(mountRef.current ?? document.body)
+        : () => {};
     const disposers: Array<() => void> = [];
     const ctx: CinematicRuntimeContext = {
       locale: root.lang === "en" ? "en" : "ar",

@@ -58,7 +58,7 @@
 .profile-org-en {
   display: block;
   color: var(--profile-gold);
-  font-size: clamp(15px, calc(.6vw + 13px), 20px);
+  font-size: clamp(15px, calc(0.6vw + 13px), 20px);
   font-weight: 500;
   line-height: 1.4;
   white-space: nowrap;
@@ -72,7 +72,7 @@
   background: transparent;
   color: var(--profile-gold);
   font-family: system-ui, sans-serif;
-  font-size: clamp(14px, calc(.3vw + 13px), 17px);
+  font-size: clamp(14px, calc(0.3vw + 13px), 17px);
   font-weight: 500;
 }
 
@@ -83,7 +83,6 @@
   outline: 2px solid var(--profile-gold);
   outline-offset: 2px;
 }
-
 
 .profile-card-layout {
   position: relative;
@@ -186,7 +185,9 @@
   font-family: "Qomra", "Noto Kufi Arabic", "Cairo", sans-serif;
   font-size: clamp(15px, 3.8vw, 18px);
   font-weight: 500;
-  box-shadow: 0 2px 6px color-mix(in srgb, var(--profile-maroon) 15%, transparent), inset 0 1px 0 color-mix(in srgb, white 50%, transparent);
+  box-shadow:
+    0 2px 6px color-mix(in srgb, var(--profile-maroon) 15%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 50%, transparent);
 }
 
 [dir="ltr"] .profile-save-btn {
@@ -224,7 +225,9 @@
   border-radius: 3px;
   background: color-mix(in srgb, white 15%, transparent);
   color: var(--profile-icon);
-  transition: color .2s, border-color .2s;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
 }
 
 .profile-social a:hover,
@@ -273,11 +276,11 @@
   }
 
   .profile-role strong {
-    font-size: clamp(22px, calc(.6vw + 16px), 28px);
+    font-size: clamp(22px, calc(0.6vw + 16px), 28px);
   }
 
   .profile-role span {
-    font-size: clamp(22px, calc(.6vw + 17px), 29px);
+    font-size: clamp(22px, calc(0.6vw + 17px), 29px);
   }
 
   .profile-save-btn {
@@ -312,7 +315,6 @@
     block-size: 56px;
     margin-block-start: 28px;
   }
-
 }
 
 @media (prefers-reduced-motion: reduce) {

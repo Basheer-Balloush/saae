@@ -42,10 +42,7 @@ async function rateLimit(): Promise<boolean> {
     headers.get("cf-connecting-ip") ||
     (headers.get("x-forwarded-for") ?? "").split(",")[0]?.trim() ||
     "unknown";
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(`feedback:${ip}`),
-  );
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`feedback:${ip}`));
   const ipHash = Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
@@ -81,7 +78,11 @@ export const startFeedbackSurvey = createServerFn({ method: "POST" })
     return { id: row.id as string | null };
   });
 
-const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+const EXT: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
 
 export const getFeedbackUploadUrl = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) =>
@@ -89,7 +90,11 @@ export const getFeedbackUploadUrl = createServerFn({ method: "POST" })
       .object({
         submissionId: z.string().uuid(),
         contentType: z.enum(["image/jpeg", "image/png", "image/webp"]),
-        size: z.number().int().positive().max(5 * 1024 * 1024),
+        size: z
+          .number()
+          .int()
+          .positive()
+          .max(5 * 1024 * 1024),
       })
       .parse(i),
   )
@@ -131,7 +136,12 @@ const SubmitSchema = z.object({
   problem_notes: clean(3000),
   requested_feature: clean(3000),
   general_notes: clean(3000),
-  screenshot_path: z.string().max(200).regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp)$/).nullable().optional(),
+  screenshot_path: z
+    .string()
+    .max(200)
+    .regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp)$/)
+    .nullable()
+    .optional(),
 });
 
 export const submitFeedbackSurvey = createServerFn({ method: "POST" })
@@ -142,7 +152,12 @@ export const submitFeedbackSurvey = createServerFn({ method: "POST" })
 
     // Required: every visible non-N/A section must be fully answered.
     const services = data.services_used;
-    const rows: { section_key: string; question_key: string; rating: number | null; not_applicable: boolean }[] = [];
+    const rows: {
+      section_key: string;
+      question_key: string;
+      rating: number | null;
+      not_applicable: boolean;
+    }[] = [];
     for (const section of SECTIONS) {
       if (!isSectionVisible(section, services)) continue;
       for (const qq of section.questions) {
@@ -151,7 +166,8 @@ export const submitFeedbackSurvey = createServerFn({ method: "POST" })
           if (!section.allowNA) return { ok: false, error: "missing_required" as const };
           continue;
         }
-        if (v === "na" && !section.allowNA) return { ok: false, error: "missing_required" as const };
+        if (v === "na" && !section.allowNA)
+          return { ok: false, error: "missing_required" as const };
         rows.push({
           section_key: section.key,
           question_key: qq.key,
@@ -193,14 +209,16 @@ export const submitFeedbackSurvey = createServerFn({ method: "POST" })
       contact_name: data.wants_contact ? data.contact_name || null : null,
       contact_email: data.wants_contact ? data.contact_email || null : null,
       contact_phone: data.wants_contact ? data.contact_phone || null : null,
-      preferred_contact_method: data.wants_contact ? data.preferred_contact_method ?? null : null,
+      preferred_contact_method: data.wants_contact ? (data.preferred_contact_method ?? null) : null,
       positive_notes: data.positive_notes || null,
       improvement_notes: data.improvement_notes || null,
       problem_notes: data.problem_notes || null,
       requested_feature: data.requested_feature || null,
       general_notes: data.general_notes || null,
       screenshot_path:
-        data.screenshot_path && data.submissionId && data.screenshot_path.startsWith(data.submissionId)
+        data.screenshot_path &&
+        data.submissionId &&
+        data.screenshot_path.startsWith(data.submissionId)
           ? data.screenshot_path
           : null,
       updated_at: new Date().toISOString(),
@@ -216,7 +234,10 @@ export const submitFeedbackSurvey = createServerFn({ method: "POST" })
       if (!existing || existing.completed) id = null;
     }
     if (id) {
-      const { error } = await supabaseAdmin.from("feedback_survey_submissions").update(record).eq("id", id);
+      const { error } = await supabaseAdmin
+        .from("feedback_survey_submissions")
+        .update(record)
+        .eq("id", id);
       if (error) return { ok: false, error: "save_failed" as const };
     } else {
       const { data: ins, error } = await supabaseAdmin
@@ -232,7 +253,10 @@ export const submitFeedbackSurvey = createServerFn({ method: "POST" })
         .from("feedback_survey_answers")
         .insert(rows.map((r) => ({ ...r, submission_id: id! })));
       if (error) {
-        await supabaseAdmin.from("feedback_survey_submissions").update({ completed: false }).eq("id", id!);
+        await supabaseAdmin
+          .from("feedback_survey_submissions")
+          .update({ completed: false })
+          .eq("id", id!);
         return { ok: false, error: "save_failed" as const };
       }
     }

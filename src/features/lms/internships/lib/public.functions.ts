@@ -70,23 +70,16 @@ const SlugSchema = z.object({
 });
 
 function publicClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    {
-      auth: {
-        storage: undefined,
-        persistSession: false,
-        autoRefreshToken: false,
-      },
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: {
+      storage: undefined,
+      persistSession: false,
+      autoRefreshToken: false,
     },
-  );
+  });
 }
 
-async function signCover(
-  bucket: string | null,
-  path: string | null,
-): Promise<string | null> {
+async function signCover(bucket: string | null, path: string | null): Promise<string | null> {
   // Only called with rows returned by the anonymous published/closed queries
   // below. Never accept an arbitrary client-supplied bucket or object path.
   if (bucket !== "internship-covers" || !path) return null;

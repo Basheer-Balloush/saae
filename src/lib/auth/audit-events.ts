@@ -145,5 +145,7 @@ export function buildAuditEvent(event: AuditEvent): AuditEvent {
 
 /** Correlation id for grouping one logical command across services. */
 export function newCorrelationId(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `cid_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  return (
+    globalThis.crypto?.randomUUID?.() ?? `cid_${Date.now()}_${Math.random().toString(36).slice(2)}`
+  );
 }

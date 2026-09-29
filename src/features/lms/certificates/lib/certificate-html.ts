@@ -28,7 +28,10 @@ export type CertificateInput = {
 };
 
 const escapeHtml = (s: string) =>
-  s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+  s.replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
+  );
 
 /* Course dates are calendar days stored at midnight UTC: read them in UTC so
    no timezone moves them a day. The issue date is a real moment, shown as
@@ -36,7 +39,12 @@ const escapeHtml = (s: string) =>
 /* Accepts PostgREST's "2026-07-26T00:00:00+00:00" and Postgres's own
    "2026-07-26 00:00:00+00", so a date never prints as NaN. */
 function parseTimestamp(value: string): Date {
-  const d = new Date(value.trim().replace(" ", "T").replace(/([+-]\d\d)$/, "$1:00"));
+  const d = new Date(
+    value
+      .trim()
+      .replace(" ", "T")
+      .replace(/([+-]\d\d)$/, "$1:00"),
+  );
   if (Number.isNaN(d.getTime())) throw new Error(`certificate_bad_date ${value}`);
   return d;
 }
@@ -58,7 +66,12 @@ export function formatIssueDate(iso: string): string {
 }
 
 /* The certificate's wording, in the masculine or feminine form. */
-function paragraphLines(gender: CertificateGender, course: string, from: string, to: string): string[] {
+function paragraphLines(
+  gender: CertificateGender,
+  course: string,
+  from: string,
+  to: string,
+): string[] {
   const f = gender === "female";
   const date = (d: string) => `<bdi dir="ltr">${d}</bdi>`;
   return [

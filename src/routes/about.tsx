@@ -34,12 +34,14 @@ export const Route = createFileRoute("/about")({
       { title: "About SAAE | AI, Education & Entrepreneurship in Syria" },
       {
         name: "description",
-        content: "Learn how SAAE connects AI education, research, communities and entrepreneurship to build practical capability across Syria.",
+        content:
+          "Learn how SAAE connects AI education, research, communities and entrepreneurship to build practical capability across Syria.",
       },
       { property: "og:title", content: "About SAAE | AI, Education & Entrepreneurship in Syria" },
       {
         property: "og:description",
-        content: "Meet the Syrian association turning AI knowledge into practical skills, research and public value.",
+        content:
+          "Meet the Syrian association turning AI knowledge into practical skills, research and public value.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -10,12 +10,19 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { useLang } from "@/lib/i18n/i18n";
 import { toUserMessage } from "@/lib/safe-error";
 import { isValidSlug, type DynamicForm } from "@/features/crm/lib/dynamic-forms";
-import { getPublishedFormBySlug, submitDynamicForm } from "@/features/crm/lib/dynamic-forms.functions";
+import {
+  getPublishedFormBySlug,
+  submitDynamicForm,
+} from "@/features/crm/lib/dynamic-forms.functions";
 
 export const Route = createFileRoute("/forms/$slug")({
   head: ({ params }) => ({
@@ -32,13 +39,18 @@ export const Route = createFileRoute("/forms/$slug")({
     <div className="min-h-screen flex items-center justify-center p-6 text-center">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Form not found</h1>
-        <p className="mt-2 text-sm text-muted-foreground">This form is unavailable or has not been published.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          This form is unavailable or has not been published.
+        </p>
       </div>
     </div>
   ),
   errorComponent: ({ error }) => (
     <div className="min-h-screen flex items-center justify-center p-6">
-      <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+      <div
+        role="alert"
+        className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive"
+      >
         {error.message}
       </div>
     </div>
@@ -68,7 +80,11 @@ function PublicFormPage() {
   }, [slug, fetchForm]);
 
   if (form === null) {
-    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
   if (form === "missing") throw notFound();
 
@@ -78,7 +94,9 @@ function PublicFormPage() {
     for (const f of form.fields) {
       const v = values[f.id];
       const empty =
-        v === undefined || v === null || v === "" ||
+        v === undefined ||
+        v === null ||
+        v === "" ||
         (Array.isArray(v) && v.length === 0) ||
         (f.type === "single_checkbox" && !v);
       if (f.required && empty) {
@@ -131,39 +149,83 @@ function PublicFormPage() {
               const val = values[f.id];
               const set = (v: unknown) => setValues((p) => ({ ...p, [f.id]: v }));
               const req = f.required && (
-                <span className="ms-1 text-destructive" aria-hidden>*</span>
+                <span className="ms-1 text-destructive" aria-hidden>
+                  *
+                </span>
               );
               return (
                 <div key={f.id} className="space-y-2">
                   {f.type !== "single_checkbox" && (
-                    <Label htmlFor={f.id}>{label}{req}</Label>
+                    <Label htmlFor={f.id}>
+                      {label}
+                      {req}
+                    </Label>
                   )}
                   {f.type === "short_text" && (
-                    <Input id={f.id} value={(val as string) ?? ""} placeholder={placeholder}
-                      onChange={(e) => set(e.target.value)} required={f.required} maxLength={500} />
+                    <Input
+                      id={f.id}
+                      value={(val as string) ?? ""}
+                      placeholder={placeholder}
+                      onChange={(e) => set(e.target.value)}
+                      required={f.required}
+                      maxLength={500}
+                    />
                   )}
                   {f.type === "long_text" && (
-                    <Textarea id={f.id} value={(val as string) ?? ""} placeholder={placeholder}
-                      onChange={(e) => set(e.target.value)} required={f.required} maxLength={5000} />
+                    <Textarea
+                      id={f.id}
+                      value={(val as string) ?? ""}
+                      placeholder={placeholder}
+                      onChange={(e) => set(e.target.value)}
+                      required={f.required}
+                      maxLength={5000}
+                    />
                   )}
                   {f.type === "email" && (
-                    <Input id={f.id} type="email" dir="ltr" value={(val as string) ?? ""} placeholder={placeholder}
-                      onChange={(e) => set(e.target.value)} required={f.required} maxLength={200} />
+                    <Input
+                      id={f.id}
+                      type="email"
+                      dir="ltr"
+                      value={(val as string) ?? ""}
+                      placeholder={placeholder}
+                      onChange={(e) => set(e.target.value)}
+                      required={f.required}
+                      maxLength={200}
+                    />
                   )}
                   {f.type === "number" && (
-                    <Input id={f.id} type="number" dir="ltr" value={(val as number | undefined) ?? ""} placeholder={placeholder}
-                      onChange={(e) => set(e.target.value === "" ? undefined : Number(e.target.value))} required={f.required} />
+                    <Input
+                      id={f.id}
+                      type="number"
+                      dir="ltr"
+                      value={(val as number | undefined) ?? ""}
+                      placeholder={placeholder}
+                      onChange={(e) =>
+                        set(e.target.value === "" ? undefined : Number(e.target.value))
+                      }
+                      required={f.required}
+                    />
                   )}
                   {f.type === "date" && (
-                    <Input id={f.id} type="date" dir="ltr" value={(val as string) ?? ""}
-                      onChange={(e) => set(e.target.value)} required={f.required} />
+                    <Input
+                      id={f.id}
+                      type="date"
+                      dir="ltr"
+                      value={(val as string) ?? ""}
+                      onChange={(e) => set(e.target.value)}
+                      required={f.required}
+                    />
                   )}
                   {f.type === "select" && (
                     <Select value={(val as string) ?? ""} onValueChange={set}>
-                      <SelectTrigger id={f.id}><SelectValue placeholder={placeholder ?? "—"} /></SelectTrigger>
+                      <SelectTrigger id={f.id}>
+                        <SelectValue placeholder={placeholder ?? "—"} />
+                      </SelectTrigger>
                       <SelectContent>
                         {(f.options ?? []).map((o) => (
-                          <SelectItem key={o.value} value={o.value}>{ar ? o.label_ar : o.label_en}</SelectItem>
+                          <SelectItem key={o.value} value={o.value}>
+                            {ar ? o.label_ar : o.label_en}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -188,7 +250,9 @@ function PublicFormPage() {
                             <Checkbox
                               checked={checked}
                               onCheckedChange={(c) => {
-                                const next = c ? [...arr, o.value] : arr.filter((v) => v !== o.value);
+                                const next = c
+                                  ? [...arr, o.value]
+                                  : arr.filter((v) => v !== o.value);
                                 set(next);
                               }}
                             />
@@ -200,12 +264,11 @@ function PublicFormPage() {
                   )}
                   {f.type === "single_checkbox" && (
                     <label className="flex items-start gap-2 text-sm">
-                      <Checkbox
-                        id={f.id}
-                        checked={!!val}
-                        onCheckedChange={(c) => set(!!c)}
-                      />
-                      <span>{label}{req}</span>
+                      <Checkbox id={f.id} checked={!!val} onCheckedChange={(c) => set(!!c)} />
+                      <span>
+                        {label}
+                        {req}
+                      </span>
                     </label>
                   )}
                 </div>

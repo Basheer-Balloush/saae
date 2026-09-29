@@ -3,7 +3,10 @@ import { useEffect, useState } from "react";
 import { Award, Download, Loader2, Printer } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { getCertificatePdfLink, getCertificatePdfState } from "@/features/lms/certificates/lib/certificate-pdf.functions";
+import {
+  getCertificatePdfLink,
+  getCertificatePdfState,
+} from "@/features/lms/certificates/lib/certificate-pdf.functions";
 import { toUserMessage } from "@/lib/safe-error";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n/i18n";
@@ -26,7 +29,9 @@ export const Route = createFileRoute("/learning-management-system/certificate/$i
 });
 
 type Cert = {
-  id: string; serial: string; issued_at: string;
+  id: string;
+  serial: string;
+  issued_at: string;
   course: { title_ar: string; title_en: string | null } | null;
   student_name: string;
 };
@@ -51,15 +56,28 @@ function CertificatePage() {
     }
     setLoading(true);
     (async () => {
-      const { data: c } = await supabase.from("lms_certificates")
-        .select("id, serial, issued_at, course_id, student_id").eq("id", id).maybeSingle();
+      const { data: c } = await supabase
+        .from("lms_certificates")
+        .select("id, serial, issued_at, course_id, student_id")
+        .eq("id", id)
+        .maybeSingle();
       if (c) {
         const [{ data: course }, { data: ins }] = await Promise.all([
-          supabase.from("lms_courses").select("title_ar,title_en").eq("id", (c as { course_id: string }).course_id).maybeSingle(),
-          supabase.from("lms_instructors").select("full_name").eq("user_id", (c as { student_id: string }).student_id).maybeSingle(),
+          supabase
+            .from("lms_courses")
+            .select("title_ar,title_en")
+            .eq("id", (c as { course_id: string }).course_id)
+            .maybeSingle(),
+          supabase
+            .from("lms_instructors")
+            .select("full_name")
+            .eq("user_id", (c as { student_id: string }).student_id)
+            .maybeSingle(),
         ]);
         setCert({
-          id: c.id, serial: c.serial, issued_at: c.issued_at,
+          id: c.id,
+          serial: c.serial,
+          issued_at: c.issued_at,
           course: course as { title_ar: string; title_en: string | null } | null,
           // Students have no lms_instructors row: fall back to the account name.
           student_name:
@@ -79,7 +97,9 @@ function CertificatePage() {
       {user ? (
         <Link to="/learning-management-system/student">{tr.myCourses}</Link>
       ) : (
-        <Link to="/learning-management-system/verify">{ar ? "التحقق من شهادة" : "Verify a certificate"}</Link>
+        <Link to="/learning-management-system/verify">
+          {ar ? "التحقق من شهادة" : "Verify a certificate"}
+        </Link>
       )}
       <span aria-hidden="true">/</span>
       <span>{tr.certificate}</span>
@@ -135,8 +155,16 @@ function CertificatePage() {
     );
   }
 
-  const courseTitle = cert.course ? (lang === "ar" ? cert.course.title_ar : cert.course.title_en || cert.course.title_ar) : "—";
-  const date = new Date(cert.issued_at).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", { year: "numeric", month: "long", day: "numeric" });
+  const courseTitle = cert.course
+    ? lang === "ar"
+      ? cert.course.title_ar
+      : cert.course.title_en || cert.course.title_ar
+    : "—";
+  const date = new Date(cert.issued_at).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <>
@@ -148,7 +176,11 @@ function CertificatePage() {
         before={crumbs}
         copyChildren={
           <p className="cert-print" style={{ marginTop: 26 }}>
-            <button type="button" className="action action-secondary" onClick={() => window.print()}>
+            <button
+              type="button"
+              className="action action-secondary"
+              onClick={() => window.print()}
+            >
               <span className="btn-content">
                 <Printer className="h-4 w-4" />
                 <span>{tr.printCertificate}</span>
@@ -191,7 +223,9 @@ function CertificatePage() {
 function CertificatePdfPanel({ certificateId, ar }: { certificateId: string; ar: boolean }) {
   const getState = useServerFn(getCertificatePdfState);
   const getLink = useServerFn(getCertificatePdfLink);
-  const [state, setState] = useState<Awaited<ReturnType<typeof getCertificatePdfState>> | null>(null);
+  const [state, setState] = useState<Awaited<ReturnType<typeof getCertificatePdfState>> | null>(
+    null,
+  );
   const [name, setName] = useState("");
   const [gender, setGender] = useState<"male" | "female" | "">("");
   const [busy, setBusy] = useState(false);
@@ -212,7 +246,11 @@ function CertificatePdfPanel({ certificateId, ar }: { certificateId: string; ar:
 
   const download = async () => {
     if (name.trim().length < 3 || !gender) {
-      toast.error(ar ? "اكتب اسمك كما تريده على الشهادة واختر الصيغة." : "Enter your name as it should appear and choose the wording.");
+      toast.error(
+        ar
+          ? "اكتب اسمك كما تريده على الشهادة واختر الصيغة."
+          : "Enter your name as it should appear and choose the wording.",
+      );
       return;
     }
     setBusy(true);
@@ -220,10 +258,19 @@ function CertificatePdfPanel({ certificateId, ar }: { certificateId: string; ar:
       const res = await getLink({ data: { certificateId, name: name.trim(), gender } });
       if (res.status === "ready") window.location.href = res.url;
       else if (res.status === "course_dates_missing")
-        toast.error(ar ? "لم تُحدَّد تواريخ الدورة بعد. تواصل مع إدارة الدورة." : "The course dates are not set yet. Please contact the course team.");
+        toast.error(
+          ar
+            ? "لم تُحدَّد تواريخ الدورة بعد. تواصل مع إدارة الدورة."
+            : "The course dates are not set yet. Please contact the course team.",
+        );
       else if (res.status === "error" && res.message)
-        toast.error(`${ar ? "تعذّر إنشاء الشهادة" : "Certificate failed"}: ${res.message}`, { duration: 20_000 });
-      else toast.error(ar ? "تعذّر تجهيز الشهادة الآن." : "The certificate could not be prepared right now.");
+        toast.error(`${ar ? "تعذّر إنشاء الشهادة" : "Certificate failed"}: ${res.message}`, {
+          duration: 20_000,
+        });
+      else
+        toast.error(
+          ar ? "تعذّر تجهيز الشهادة الآن." : "The certificate could not be prepared right now.",
+        );
     } catch (e) {
       toast.error(toUserMessage(e));
     } finally {
@@ -239,34 +286,74 @@ function CertificatePdfPanel({ certificateId, ar }: { certificateId: string; ar:
         </h2>
         {state.preview && (
           <p style={{ marginTop: 6, fontSize: ".85rem", opacity: 0.75 }}>
-            {ar ? "معاينة للمشرف: الشهادة غير مفعّلة لطلاب هذه الدورة بعد." : "Admin preview: the certificate is not on for this course's students yet."}
+            {ar
+              ? "معاينة للمشرف: الشهادة غير مفعّلة لطلاب هذه الدورة بعد."
+              : "Admin preview: the certificate is not on for this course's students yet."}
           </p>
         )}
         {!state.datesReady ? (
           <p style={{ marginTop: 12 }}>
-            {ar ? "ستتوفر الشهادة عند تحديد تواريخ الدورة." : "The certificate will be available once the course dates are set."}
+            {ar
+              ? "ستتوفر الشهادة عند تحديد تواريخ الدورة."
+              : "The certificate will be available once the course dates are set."}
           </p>
         ) : (
           <div style={{ display: "grid", gap: 14, marginTop: 14 }}>
             <label style={{ display: "grid", gap: 6 }}>
-              <span>{ar ? "الاسم كما سيظهر على الشهادة" : "Your name as it will appear on the certificate"}</span>
+              <span>
+                {ar
+                  ? "الاسم كما سيظهر على الشهادة"
+                  : "Your name as it will appear on the certificate"}
+              </span>
               <input
                 className="field-input"
                 dir="rtl"
                 value={name}
                 maxLength={120}
                 onChange={(e) => setName(e.target.value)}
-                style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid currentColor", background: "transparent" }}
+                style={{
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  border: "1px solid currentColor",
+                  background: "transparent",
+                }}
               />
             </label>
             <fieldset style={{ display: "flex", gap: 18, border: 0, padding: 0 }}>
-              <legend style={{ marginBottom: 6 }}>{ar ? "صيغة الشهادة" : "Certificate wording"}</legend>
-              <label><input type="radio" name="cert-gender" checked={gender === "male"} onChange={() => setGender("male")} /> {ar ? "مذكّر" : "Male"}</label>
-              <label><input type="radio" name="cert-gender" checked={gender === "female"} onChange={() => setGender("female")} /> {ar ? "مؤنّث" : "Female"}</label>
+              <legend style={{ marginBottom: 6 }}>
+                {ar ? "صيغة الشهادة" : "Certificate wording"}
+              </legend>
+              <label>
+                <input
+                  type="radio"
+                  name="cert-gender"
+                  checked={gender === "male"}
+                  onChange={() => setGender("male")}
+                />{" "}
+                {ar ? "مذكّر" : "Male"}
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="cert-gender"
+                  checked={gender === "female"}
+                  onChange={() => setGender("female")}
+                />{" "}
+                {ar ? "مؤنّث" : "Female"}
+              </label>
             </fieldset>
             <p>
-              <button type="button" className="action action-primary" disabled={busy} onClick={download}>
-                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              <button
+                type="button"
+                className="action action-primary"
+                disabled={busy}
+                onClick={download}
+              >
+                {busy ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
                 {ar ? "تحميل الشهادة (PDF)" : "Download certificate (PDF)"}
               </button>
             </p>

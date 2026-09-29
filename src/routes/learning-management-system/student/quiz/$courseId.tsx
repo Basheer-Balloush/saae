@@ -19,7 +19,11 @@ import { CourseFeedbackPrompt } from "@/features/lms/course-feedback/CourseFeedb
 export const Route = createFileRoute("/learning-management-system/student/quiz/$courseId")({
   head: () => ({
     meta: [{ title: "Quizzes — SAAE Training and Learning Platform" }],
-    links: [...LMS_SKIN_LINKS, { rel: "stylesheet", href: "/lms/css/quiz.css" }, { rel: "stylesheet", href: "/lms/css/feedback.css" }],
+    links: [
+      ...LMS_SKIN_LINKS,
+      { rel: "stylesheet", href: "/lms/css/quiz.css" },
+      { rel: "stylesheet", href: "/lms/css/feedback.css" },
+    ],
   }),
   validateSearch: (search: Record<string, unknown>) => ({
     quiz: typeof search.quiz === "string" ? search.quiz : undefined,
@@ -312,7 +316,11 @@ function QuizPage() {
         courseId={courseId}
         ar={ar}
         onBack={goToCourse}
-        notice={list.some((q) => q.has_passed) ? <CourseFeedbackPrompt courseId={courseId} ar={ar} context="quiz" /> : null}
+        notice={
+          list.some((q) => q.has_passed) ? (
+            <CourseFeedbackPrompt courseId={courseId} ar={ar} context="quiz" />
+          ) : null
+        }
       />
     );
   }
@@ -522,7 +530,9 @@ function QuizPage() {
           )}
           {/* After a pass: the course feedback comes next, then the certificate
               (or the lessons still to finish). */}
-          {result.passed ? <CourseFeedbackPrompt courseId={courseId} ar={ar} context="quiz" /> : null}
+          {result.passed ? (
+            <CourseFeedbackPrompt courseId={courseId} ar={ar} context="quiz" />
+          ) : null}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Button
               variant="outline"

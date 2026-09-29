@@ -50,7 +50,9 @@ export function MobileHomeView({
   // A partner's light logo (made for dark backgrounds) where it has one, as on the desktop.
   const partnerLogos: Logo[] = visiblePartners.flatMap((p) => {
     const src = p.lightLogo ?? p.logo;
-    return src ? [{ id: p.id, name: p.name, src: resizedImage(src, 480), scale: p.height / 96 }] : [];
+    return src
+      ? [{ id: p.id, name: p.name, src: resizedImage(src, 480), scale: p.height / 96 }]
+      : [];
   });
   const dir = lang === "ar" ? "rtl" : "ltr";
   const [motionReady, setMotionReady] = useState(false);
@@ -91,65 +93,87 @@ export function MobileHomeView({
           {/* As on the desktop, partners pin and slide out as "how we work" slides in (MobileMissionReel). */}
           <div className="mh-handoff">
             <div className="mh-handoff-out" ref={handoffOutRef}>
-            <section
-              className="mh-section hn-root hp-partners mh-partners"
-              id="partners"
-              aria-labelledby="mh-partners-title"
-            >
-              <div className="hn-tech-details" aria-hidden="true"><span /><span /></div>
-              <div className="mh-wrap mh-partners-head">
-                <h2 className="hn-intro-heading hp-heading" id="mh-partners-title">
-                  {lang === "ar" ? "شركاء " : "Partners in "}<span className="hn-headline-accent">{lang === "ar" ? "النجاح" : "Success"}</span>
-                </h2>
-                <p className="mh-section-p">{pick(PARTNERS_COPY.body, lang)}</p>
-              </div>
-              {visiblePartners.length ? (
-                <>
-                  {/* The desktop's logo carousel: each column swaps its logo in place. */}
-                  <LogoCarousel columnCount={3} logos={partnerLogos} className="mh-partner-carousel" />
-                  {/* The carousel's logos are pictures; their names are here for readers. */}
-                  <ul className="mh-sr-only" aria-label={pick(PARTNERS_COPY.title, lang)}>
-                    {partnerLogos.map((logo) => (
-                      <li key={logo.id}>{logo.name}</li>
-                    ))}
-                  </ul>
-                  {/* A partner without a logo keeps its name on screen. */}
-                  {visiblePartners.some((p) => !(p.lightLogo ?? p.logo)) && (
-                    <ul className="mh-partner-names">
-                      {visiblePartners
-                        .filter((p) => !(p.lightLogo ?? p.logo))
-                        .map((p) => (
-                          <li key={p.id}>
-                            <span>{p.name}</span>
-                          </li>
-                        ))}
+              <section
+                className="mh-section hn-root hp-partners mh-partners"
+                id="partners"
+                aria-labelledby="mh-partners-title"
+              >
+                <div className="hn-tech-details" aria-hidden="true">
+                  <span />
+                  <span />
+                </div>
+                <div className="mh-wrap mh-partners-head">
+                  <h2 className="hn-intro-heading hp-heading" id="mh-partners-title">
+                    {lang === "ar" ? "شركاء " : "Partners in "}
+                    <span className="hn-headline-accent">
+                      {lang === "ar" ? "النجاح" : "Success"}
+                    </span>
+                  </h2>
+                  <p className="mh-section-p">{pick(PARTNERS_COPY.body, lang)}</p>
+                </div>
+                {visiblePartners.length ? (
+                  <>
+                    {/* The desktop's logo carousel: each column swaps its logo in place. */}
+                    <LogoCarousel
+                      columnCount={3}
+                      logos={partnerLogos}
+                      className="mh-partner-carousel"
+                    />
+                    {/* The carousel's logos are pictures; their names are here for readers. */}
+                    <ul className="mh-sr-only" aria-label={pick(PARTNERS_COPY.title, lang)}>
+                      {partnerLogos.map((logo) => (
+                        <li key={logo.id}>{logo.name}</li>
+                      ))}
                     </ul>
-                  )}
-                </>
-              ) : (
-                <p className="mh-wrap" role="status">
-                  {partnersFailed
-                    ? lang === "ar"
-                      ? "تعذّر تحميل الشركاء. يرجى المحاولة مرة أخرى."
-                      : "Partners could not be loaded. Please try again."
-                    : lang === "ar"
-                      ? "لا يوجد شركاء لعرضهم حالياً."
-                      : "No partners to display yet."}
-                </p>
-              )}
-              <div className="mh-wrap">
-                <div className="hp-actions"><MotionButton href="/partners" label={pick(PARTNERS_COPY.allPartners, lang)} className="hn-show-all" /></div>
-              </div>
-            </section>
+                    {/* A partner without a logo keeps its name on screen. */}
+                    {visiblePartners.some((p) => !(p.lightLogo ?? p.logo)) && (
+                      <ul className="mh-partner-names">
+                        {visiblePartners
+                          .filter((p) => !(p.lightLogo ?? p.logo))
+                          .map((p) => (
+                            <li key={p.id}>
+                              <span>{p.name}</span>
+                            </li>
+                          ))}
+                      </ul>
+                    )}
+                  </>
+                ) : (
+                  <p className="mh-wrap" role="status">
+                    {partnersFailed
+                      ? lang === "ar"
+                        ? "تعذّر تحميل الشركاء. يرجى المحاولة مرة أخرى."
+                        : "Partners could not be loaded. Please try again."
+                      : lang === "ar"
+                        ? "لا يوجد شركاء لعرضهم حالياً."
+                        : "No partners to display yet."}
+                  </p>
+                )}
+                <div className="mh-wrap">
+                  <div className="hp-actions">
+                    <MotionButton
+                      href="/partners"
+                      label={pick(PARTNERS_COPY.allPartners, lang)}
+                      className="hn-show-all"
+                    />
+                  </div>
+                </div>
+              </section>
             </div>
             <div className="mh-handoff-runway" aria-hidden="true" />
           </div>
 
           <MobileMissionReel lang={lang} outRef={handoffOutRef} />
 
-
-          <section className="mh-section hn-root hp-faq mh-faq" id="faq" aria-labelledby="mh-faq-title">
-            <div className="hn-tech-details" aria-hidden="true"><span /><span /></div>
+          <section
+            className="mh-section hn-root hp-faq mh-faq"
+            id="faq"
+            aria-labelledby="mh-faq-title"
+          >
+            <div className="hn-tech-details" aria-hidden="true">
+              <span />
+              <span />
+            </div>
             {/* The desktop's FAQ: the title, a phone rising in under it, then one
                 question at a time on its screen as the reader scrolls. */}
             <ContainerScroll

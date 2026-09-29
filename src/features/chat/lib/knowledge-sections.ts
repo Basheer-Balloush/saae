@@ -44,7 +44,9 @@ export function splitKnowledgeSections(title: string, text: string): KnowledgeSe
   // No headings: the whole text is one entry.
   if (sections.length === 0) {
     const whole = tidy(intro);
-    return whole.length >= MIN_TEXT ? [{ title: title.trim().slice(0, MAX_TITLE), text: whole }] : [];
+    return whole.length >= MIN_TEXT
+      ? [{ title: title.trim().slice(0, MAX_TITLE), text: whole }]
+      : [];
   }
   // Text before the first heading (a file's own title or notes) is not an entry.
   return sections.filter((s) => s.text.length >= MIN_TEXT);

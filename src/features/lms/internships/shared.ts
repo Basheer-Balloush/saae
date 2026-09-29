@@ -1,4 +1,8 @@
-import type { Lifecycle, QuestionKind, RequiredProfileField } from "@/features/lms/internships/lib/admin";
+import type {
+  Lifecycle,
+  QuestionKind,
+  RequiredProfileField,
+} from "@/features/lms/internships/lib/admin";
 import type { ApplicationStatus } from "@/features/lms/internships/lib/applications-admin.functions";
 
 type Tone = "green" | "orange" | "gray" | "teal" | "red";

@@ -14,7 +14,11 @@ type Part = string | number | null | undefined;
 /** Null when the account is not known yet, so nothing is read or written for "nobody". */
 export function formDraftKey(userId: string | null | undefined, ...parts: Part[]): string | null {
   if (!userId) return null;
-  return [PREFIX, userId, ...parts.map((p) => (p === null || p === undefined || p === "" ? "-" : String(p)))].join(":");
+  return [
+    PREFIX,
+    userId,
+    ...parts.map((p) => (p === null || p === undefined || p === "" ? "-" : String(p))),
+  ].join(":");
 }
 
 export function loadFormDraft<T>(key: string): T | null {
@@ -22,7 +26,11 @@ export function loadFormDraft<T>(key: string): T | null {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as { savedAt?: unknown; values?: unknown };
-    if (typeof parsed.savedAt !== "number" || Date.now() - parsed.savedAt > MAX_AGE_MS || !("values" in parsed)) {
+    if (
+      typeof parsed.savedAt !== "number" ||
+      Date.now() - parsed.savedAt > MAX_AGE_MS ||
+      !("values" in parsed)
+    ) {
       localStorage.removeItem(key);
       return null;
     }

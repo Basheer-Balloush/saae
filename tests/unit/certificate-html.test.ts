@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { formatCourseDate, formatIssueDate, renderCertificateHtml } from "@/features/lms/certificates/lib/certificate-html";
+import {
+  formatCourseDate,
+  formatIssueDate,
+  renderCertificateHtml,
+} from "@/features/lms/certificates/lib/certificate-html";
 
 const base = {
   name: "محمد أمين الناشف",
@@ -44,11 +48,18 @@ describe("certificate page", () => {
 
   it("keeps each date left-to-right inside the Arabic sentence", () => {
     const html = renderCertificateHtml({ ...base, gender: "female" });
-    expect(html).toContain('من <bdi dir="ltr">26/7/2026</bdi> ولغاية <bdi dir="ltr">30/7/2026</bdi>');
+    expect(html).toContain(
+      'من <bdi dir="ltr">26/7/2026</bdi> ولغاية <bdi dir="ltr">30/7/2026</bdi>',
+    );
   });
 
   it("escapes the name and course title", () => {
-    const html = renderCertificateHtml({ ...base, gender: "male", name: "<script>x</script>", courseTitleAr: "A & B" });
+    const html = renderCertificateHtml({
+      ...base,
+      gender: "male",
+      name: "<script>x</script>",
+      courseTitleAr: "A & B",
+    });
     expect(html).not.toContain("<script>x");
     expect(html).toContain("&lt;script&gt;x&lt;/script&gt;");
     expect(html).toContain("(A &amp; B)");

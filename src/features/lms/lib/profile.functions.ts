@@ -124,10 +124,7 @@ export const getMyProfileOverview = createServerFn({ method: "GET" })
     const certificates = (certRes.data ?? []) as ProfileOverviewCert[];
 
     const courseIds = Array.from(
-      new Set([
-        ...enrollments.map((e) => e.course_id),
-        ...certificates.map((c) => c.course_id),
-      ]),
+      new Set([...enrollments.map((e) => e.course_id), ...certificates.map((c) => c.course_id)]),
     );
 
     let courses: ProfileOverviewCourse[] = [];
@@ -231,8 +228,7 @@ export const prepareProfileFileUpload = createServerFn({ method: "POST" })
     const path = `${userId}/${input.kind}/${Date.now()}-${randomToken()}.${canonicalExt}`;
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: signed, error } = await supabaseAdmin
-      .storage
+    const { data: signed, error } = await supabaseAdmin.storage
       .from(PROFILE_BUCKET)
       .createSignedUploadUrl(path);
     if (error || !signed) throw new Error(error?.message ?? "signed_upload_failed");
@@ -271,8 +267,7 @@ export const finalizeProfileFileUpload = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Confirm the object exists, matches declared size, and starts with expected magic bytes
-    const { data: blob, error: dlErr } = await supabaseAdmin
-      .storage
+    const { data: blob, error: dlErr } = await supabaseAdmin.storage
       .from(PROFILE_BUCKET)
       .download(input.path);
     if (dlErr || !blob) throw new Error("file_rejected:missing_object");
@@ -339,8 +334,7 @@ export const getProfileFileSignedUrl = createServerFn({ method: "POST" })
     const ttl = Math.min(Math.max(input.expires_in ?? 60, 15), 300);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: signed, error: signErr } = await supabaseAdmin
-      .storage
+    const { data: signed, error: signErr } = await supabaseAdmin.storage
       .from(row.bucket)
       .createSignedUrl(row.path, ttl, {
         download: row.original_filename ?? true,

@@ -101,7 +101,11 @@ function CatalogError({ reset }: { reset: () => void }) {
     <SubHero
       id="catalog-error-title"
       titleSpans={[ar ? "تعذّر تحميل الدورات" : "Couldn't load courses"]}
-      lede={ar ? "حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى." : "A connection error occurred. Please try again."}
+      lede={
+        ar
+          ? "حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى."
+          : "A connection error occurred. Please try again."
+      }
       copyChildren={
         <p className="catalog-error" style={{ marginTop: 28 }}>
           <button
@@ -161,10 +165,21 @@ function Catalog() {
 
   const setFilter = (key: "category" | "level" | "price", value: string) =>
     // Any filter change resets pagination.
-    navigate({ search: (prev: CatalogSearchInput) => ({ ...prev, [key]: value === "all" ? "" : value, page: 1 }) });
+    navigate({
+      search: (prev: CatalogSearchInput) => ({
+        ...prev,
+        [key]: value === "all" ? "" : value,
+        page: 1,
+      }),
+    });
 
   const goToPage = (page: number) =>
-    navigate({ search: (prev: CatalogSearchInput) => ({ ...prev, page: Math.max(1, Math.min(totalPages, page)) }) });
+    navigate({
+      search: (prev: CatalogSearchInput) => ({
+        ...prev,
+        page: Math.max(1, Math.min(totalPages, page)),
+      }),
+    });
 
   const hasFilters = !!(search.q || search.category || search.level || search.price);
 
@@ -263,7 +278,9 @@ function Catalog() {
               <button
                 type="button"
                 className="lms-reset"
-                onClick={() => navigate({ search: { q: "", category: "", level: "", price: "", page: 1 } })}
+                onClick={() =>
+                  navigate({ search: { q: "", category: "", level: "", price: "", page: 1 } })
+                }
               >
                 {ar ? "إعادة تعيين" : "Reset filters"}
               </button>
@@ -292,7 +309,11 @@ function Catalog() {
                   <span>{ar ? "السابق" : "Previous"}</span>
                 </span>
               </button>
-              <span>{ar ? `صفحة ${search.page} من ${totalPages}` : `Page ${search.page} of ${totalPages}`}</span>
+              <span>
+                {ar
+                  ? `صفحة ${search.page} من ${totalPages}`
+                  : `Page ${search.page} of ${totalPages}`}
+              </span>
               <button
                 type="button"
                 className="action action-secondary"

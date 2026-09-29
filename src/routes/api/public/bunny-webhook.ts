@@ -1,6 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { timingSafeEqual } from 'crypto'
-import { lessonStatusFromBunnyWebhook } from '@/features/lms/lib/bunny-webhook-status'
+import { createFileRoute } from "@tanstack/react-router";
+import { timingSafeEqual } from "crypto";
+import { lessonStatusFromBunnyWebhook } from "@/features/lms/lib/bunny-webhook-status";
 
 /**
  * Phase 6 — Bunny Stream webhook.
@@ -15,53 +15,53 @@ import { lessonStatusFromBunnyWebhook } from '@/features/lms/lib/bunny-webhook-s
  * `video_uid` still matches — so a stale event for an old (replaced) video
  * cannot mark the new upload ready.
  */
-export const Route = createFileRoute('/api/public/bunny-webhook')({
+export const Route = createFileRoute("/api/public/bunny-webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const url = new URL(request.url)
-        const provided = url.searchParams.get('secret') ?? ''
-        const expected = process.env.BUNNY_WEBHOOK_SECRET ?? ''
-        if (!expected) return new Response('webhook_not_configured', { status: 503 })
-        const a = Buffer.from(provided)
-        const b = Buffer.from(expected)
+        const url = new URL(request.url);
+        const provided = url.searchParams.get("secret") ?? "";
+        const expected = process.env.BUNNY_WEBHOOK_SECRET ?? "";
+        if (!expected) return new Response("webhook_not_configured", { status: 503 });
+        const a = Buffer.from(provided);
+        const b = Buffer.from(expected);
         if (a.length !== b.length || !timingSafeEqual(a, b)) {
-          return new Response('unauthorized', { status: 401 })
+          return new Response("unauthorized", { status: 401 });
         }
 
-        let body: { VideoGuid?: string; VideoLibraryId?: number; Status?: number }
+        let body: { VideoGuid?: string; VideoLibraryId?: number; Status?: number };
         try {
-          body = (await request.json()) as typeof body
+          body = (await request.json()) as typeof body;
         } catch {
-          return new Response('bad_request', { status: 400 })
+          return new Response("bad_request", { status: 400 });
         }
-        const guid = body.VideoGuid?.trim()
-        if (!guid) return new Response('missing_guid', { status: 400 })
+        const guid = body.VideoGuid?.trim();
+        if (!guid) return new Response("missing_guid", { status: 400 });
 
-        const status = lessonStatusFromBunnyWebhook(body.Status)
+        const status = lessonStatusFromBunnyWebhook(body.Status);
         // Captions / generated titles / unknown codes: nothing to change.
-        if (!status) return new Response('ok')
+        if (!status) return new Response("ok");
 
-        const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         let update = supabaseAdmin
-          .from('lms_lessons')
+          .from("lms_lessons")
           .update({
             video_status: status,
-            video_ready: status === 'ready',
-            video_status_error: status === 'failed' ? `provider_status_${body.Status}` : null,
+            video_ready: status === "ready",
+            video_status_error: status === "failed" ? `provider_status_${body.Status}` : null,
           })
-          .eq('video_provider', 'bunny')
-          .eq('video_uid', guid)
+          .eq("video_provider", "bunny")
+          .eq("video_uid", guid);
         // Events can arrive late or out of order; a playable video never goes
         // back to processing.
-        if (status === 'processing') update = update.neq('video_status', 'ready')
-        const { error } = await update
+        if (status === "processing") update = update.neq("video_status", "ready");
+        const { error } = await update;
         if (error) {
-          console.error('[bunny-webhook] update failed', error.message)
-          return new Response('update_failed', { status: 500 })
+          console.error("[bunny-webhook] update failed", error.message);
+          return new Response("update_failed", { status: 500 });
         }
-        return new Response('ok')
+        return new Response("ok");
       },
     },
   },
-})
+});

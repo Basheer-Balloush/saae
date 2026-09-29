@@ -182,7 +182,9 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
               );
             })}
             {(() => {
-              const isInitiative = (location.pathname.startsWith("/initiative") || location.pathname.startsWith("/one-million-initiative"));
+              const isInitiative =
+                location.pathname.startsWith("/initiative") ||
+                location.pathname.startsWith("/one-million-initiative");
               return (
                 <Link
                   to="/initiative"

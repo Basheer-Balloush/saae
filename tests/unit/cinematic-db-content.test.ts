@@ -20,12 +20,16 @@ import {
 } from "@/features/website/lib/cinematic-db-content";
 
 const page = (name: string) =>
-  readFileSync(path.resolve(import.meta.dirname, "../../src/features/website/cinematic/html", name), "utf8");
+  readFileSync(
+    path.resolve(import.meta.dirname, "../../src/features/website/cinematic/html", name),
+    "utf8",
+  );
 
 const count = (haystack: string, needle: string) => haystack.split(needle).length - 1;
 
 /* Shaped like the organization project's rows on 12 September 2026. */
-const STORAGE = "https://zkpuyhrmyslmstzwojvw.supabase.co/storage/v1/object/public/news-images/images";
+const STORAGE =
+  "https://zkpuyhrmyslmstzwojvw.supabase.co/storage/v1/object/public/news-images/images";
 function card(id: string, title: string, overrides: Partial<NewsCardRow> = {}): NewsCardRow {
   return {
     id,
@@ -42,12 +46,23 @@ function card(id: string, title: string, overrides: Partial<NewsCardRow> = {}): 
   };
 }
 const ROWS: NewsCardRow[] = [
-  card("3d1ad0d0-55da-4343-9d71-046dfc27a027", "Chairman of the Board on Syria TV", { published_at: "2026-07-19" }),
-  card("d00e3f20-8d09-43e0-a4d5-a16f60af4e22", "Launch of the Train One Million initiative", { excerpt_en: "A national programme.", excerpt_ar: "برنامج وطني." }),
+  card("3d1ad0d0-55da-4343-9d71-046dfc27a027", "Chairman of the Board on Syria TV", {
+    published_at: "2026-07-19",
+  }),
+  card("d00e3f20-8d09-43e0-a4d5-a16f60af4e22", "Launch of the Train One Million initiative", {
+    excerpt_en: "A national programme.",
+    excerpt_ar: "برنامج وطني.",
+  }),
   card("859c1adc-24ab-4129-a8f0-d6e4fe5d85ea", "The First Syrian AI Symposium"),
   card("6a20d591-18f7-4e40-9fe0-07317cec708e", "First AI trainers graduate"),
-  card("38accff9-cee7-45fb-99f6-2ada9f829da6", "BUILDEX | Aleppo Governorate Pavilion", { category: "architecture", published_at: "2026-06-10" }),
-  card("08108acd-4d78-4c56-9c01-858e56a28c9d", "Launch of Archathon", { category: "data", published_at: "2026-02-14" }),
+  card("38accff9-cee7-45fb-99f6-2ada9f829da6", "BUILDEX | Aleppo Governorate Pavilion", {
+    category: "architecture",
+    published_at: "2026-06-10",
+  }),
+  card("08108acd-4d78-4c56-9c01-858e56a28c9d", "Launch of Archathon", {
+    category: "data",
+    published_at: "2026-02-14",
+  }),
 ];
 
 const HOSTILE = `<img src=x onerror="alert(1)">`;
@@ -82,13 +97,25 @@ describe("the cinematic pages carry every region the loaders fill", () => {
     ["home.html", ["home-news-slides", "home-news-dots"]],
     ["news.html", ["news-list"]],
     ["about.html", ["about-members"]],
-    ["news-article.html", ["article-head", "article-cover", "article-body", "article-gallery", "article-videos", "article-related"]],
+    [
+      "news-article.html",
+      [
+        "article-head",
+        "article-cover",
+        "article-body",
+        "article-gallery",
+        "article-videos",
+        "article-related",
+      ],
+    ],
   ])("%s", (file, regions) => {
     const html = page(file);
     for (const name of regions) {
       expect(count(html, `<!-- db:${name}:start -->`)).toBe(1);
       expect(count(html, `<!-- db:${name}:end -->`)).toBe(1);
-      expect(html.indexOf(`<!-- db:${name}:start -->`)).toBeLessThan(html.indexOf(`<!-- db:${name}:end -->`));
+      expect(html.indexOf(`<!-- db:${name}:start -->`)).toBeLessThan(
+        html.indexOf(`<!-- db:${name}:end -->`),
+      );
     }
   });
 });
@@ -140,7 +167,9 @@ describe("homepage news", () => {
 
   it("renders both languages and omits an empty excerpt", () => {
     const frag = renderHomeNews(ROWS.slice(0, 2))!;
-    expect(frag.slidesHtml).toContain('<span data-db-lang="ar" dir="rtl">Chairman of the Board on Syria TV (ar)</span>');
+    expect(frag.slidesHtml).toContain(
+      '<span data-db-lang="ar" dir="rtl">Chairman of the Board on Syria TV (ar)</span>',
+    );
     expect(count(frag.slidesHtml, 'class="news-excerpt"')).toBe(1);
   });
 });
@@ -205,7 +234,9 @@ describe("about members", () => {
   });
 
   it("escapes member text and skips photos that are not https", () => {
-    const html = renderMembersHtml([{ ...member("board", HOSTILE), photo_url: "http://example.com/a.jpg" }]);
+    const html = renderMembersHtml([
+      { ...member("board", HOSTILE), photo_url: "http://example.com/a.jpg" },
+    ]);
     expect(html).not.toContain("<img src=x");
     expect(html).not.toContain("member-photo");
   });

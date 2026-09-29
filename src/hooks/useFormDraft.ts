@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type SetStateAction } from "react";
-import { clearFormDraft, formDraftKey, hasFormDraft, loadFormDraft, pruneFormDrafts, saveFormDraft } from "@/lib/form-draft";
+import {
+  clearFormDraft,
+  formDraftKey,
+  hasFormDraft,
+  loadFormDraft,
+  pruneFormDrafts,
+  saveFormDraft,
+} from "@/lib/form-draft";
 
 let pruned = false;
 
@@ -18,7 +25,12 @@ export function useFormDraft<T>(key: string | null, initial: T) {
 
   const read = (k: string | null) => {
     const draft = k ? loadFormDraft<T>(k) : null;
-    return { key: k, values: draft ?? initial, baseline: JSON.stringify(initial), restored: draft !== null };
+    return {
+      key: k,
+      values: draft ?? initial,
+      baseline: JSON.stringify(initial),
+      restored: draft !== null,
+    };
   };
   const [state, setState] = useState(() => read(key));
 

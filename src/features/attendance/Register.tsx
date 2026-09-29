@@ -677,15 +677,13 @@ function AddPerson({
             : t("أُضيف", "Added"),
         );
       } else {
-        const { error } = await supabase
-          .from("ams_registrants")
-          .insert({
-            course_id: amsId,
-            full_name: name,
-            email: email || null,
-            phone: f.phone.trim() || null,
-            payment_status: f.payment_status,
-          });
+        const { error } = await supabase.from("ams_registrants").insert({
+          course_id: amsId,
+          full_name: name,
+          email: email || null,
+          phone: f.phone.trim() || null,
+          payment_status: f.payment_status,
+        });
         if (error) throw error;
         toast.success(t("أُضيف", "Added"));
       }

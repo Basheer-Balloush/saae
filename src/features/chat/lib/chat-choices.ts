@@ -25,7 +25,12 @@ export function parseChoices(text: string): { text: string; choices: string[] } 
 
     const choices = match[1]
       .split("|")
-      .map((choice) => choice.trim().replace(/^\d+[).\-\s]+/, "").trim())
+      .map((choice) =>
+        choice
+          .trim()
+          .replace(/^\d+[).\-\s]+/, "")
+          .trim(),
+      )
       .filter((choice) => choice.length > 0 && choice.length <= MAX_LABEL)
       .slice(0, MAX_CHOICES);
     if (choices.length === 0) continue;

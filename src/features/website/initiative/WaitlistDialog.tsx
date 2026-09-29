@@ -4,7 +4,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,14 +23,46 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-export function WaitlistDialog({ open, onOpenChange, lang }: { open: boolean; onOpenChange: (v: boolean) => void; lang: "ar" | "en" }) {
+export function WaitlistDialog({
+  open,
+  onOpenChange,
+  lang,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  lang: "ar" | "en";
+}) {
   const submit = useServerFn(submitWaitlist);
   const [loading, setLoading] = useState(false);
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({ resolver: zodResolver(schema) });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const t = lang === "ar"
-    ? { title: "سجّل على قائمة الانتظار", desc: "أدخل بياناتك وسنرسل لك دعوة فور تغطية مقعدك من إحدى الرعايات.", name: "الاسم الكامل", email: "البريد الإلكتروني", phone: "رقم الهاتف", submit: "تسجيل", sending: "جارٍ الإرسال...", success: "تم تسجيلك بنجاح. ستصلك دعوة عند تغطية مقعدك." }
-    : { title: "Join the waitlist", desc: "Enter your details. You'll get an invitation as soon as your seat is sponsored.", name: "Full name", email: "Email", phone: "Phone", submit: "Register", sending: "Sending...", success: "Registered. You'll get an invitation as soon as your seat is covered." };
+  const t =
+    lang === "ar"
+      ? {
+          title: "سجّل على قائمة الانتظار",
+          desc: "أدخل بياناتك وسنرسل لك دعوة فور تغطية مقعدك من إحدى الرعايات.",
+          name: "الاسم الكامل",
+          email: "البريد الإلكتروني",
+          phone: "رقم الهاتف",
+          submit: "تسجيل",
+          sending: "جارٍ الإرسال...",
+          success: "تم تسجيلك بنجاح. ستصلك دعوة عند تغطية مقعدك.",
+        }
+      : {
+          title: "Join the waitlist",
+          desc: "Enter your details. You'll get an invitation as soon as your seat is sponsored.",
+          name: "Full name",
+          email: "Email",
+          phone: "Phone",
+          submit: "Register",
+          sending: "Sending...",
+          success: "Registered. You'll get an invitation as soon as your seat is covered.",
+        };
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -56,12 +94,16 @@ export function WaitlistDialog({ open, onOpenChange, lang }: { open: boolean; on
           <div>
             <Label>{t.email}</Label>
             <Input type="email" dir="ltr" {...register("email")} />
-            {errors.email && <p className="text-xs text-destructive mt-1">{errors.email.message}</p>}
+            {errors.email && (
+              <p className="text-xs text-destructive mt-1">{errors.email.message}</p>
+            )}
           </div>
           <div>
             <Label>{t.phone}</Label>
             <Input dir="ltr" {...register("phone")} />
-            {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone.message}</p>}
+            {errors.phone && (
+              <p className="text-xs text-destructive mt-1">{errors.phone.message}</p>
+            )}
           </div>
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? t.sending : t.submit}

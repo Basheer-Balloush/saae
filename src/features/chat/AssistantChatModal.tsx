@@ -3,7 +3,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp, Building2, GraduationCap, Handshake, Loader2, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { loadChatSession, saveChatSession, type ChatSession } from "@/features/chat/lib/chat-session";
+import {
+  loadChatSession,
+  saveChatSession,
+  type ChatSession,
+} from "@/features/chat/lib/chat-session";
 import { hidePartialChoices, parseChoices } from "@/features/chat/lib/chat-choices";
 import { chatErrorText, formatMessage } from "@/features/chat/lib/chat-format";
 import { useLang } from "@/lib/i18n/i18n";
@@ -371,9 +375,7 @@ export function AssistantChatModal({
 
                   {error && (
                     <div className="assistant-chat-error" role="alert">
-                      <span>
-                        {chatErrorText(error.message, isRtl ? "ar" : "en")}
-                      </span>
+                      <span>{chatErrorText(error.message, isRtl ? "ar" : "en")}</span>
                       <button
                         type="button"
                         className="assistant-chat-retry"

@@ -53,7 +53,8 @@ describe("open lessons", () => {
 
 describe("up next", () => {
   const ordered = orderLessons(sections, lessons);
-  const after = (id: string, ...done: string[]) => upNextLesson(ordered, id, new Set(done))?.id ?? null;
+  const after = (id: string, ...done: string[]) =>
+    upNextLesson(ordered, id, new Set(done))?.id ?? null;
 
   it("moves on to the next lesson once the current one is completed", () => {
     expect(after("a1", "a1")).toBe("a2");

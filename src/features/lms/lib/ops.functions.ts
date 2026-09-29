@@ -96,10 +96,7 @@ export type OpsHealthSummary = {
 export const getOpsHealthSummary = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: res, error } = await context.supabase.rpc(
-      "lms_ops_health_summary" as never,
-    );
+    const { data: res, error } = await context.supabase.rpc("lms_ops_health_summary" as never);
     if (error) throw new Error(error.message);
     return res as unknown as OpsHealthSummary;
   });
-

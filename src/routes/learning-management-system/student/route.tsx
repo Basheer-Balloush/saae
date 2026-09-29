@@ -16,9 +16,14 @@ function StudentLayout() {
   const tr = lmsT[lang];
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/learning-management-system/login", search: { redirect: currentLmsReturn() } });
+    if (!loading && !user)
+      navigate({
+        to: "/learning-management-system/login",
+        search: { redirect: currentLmsReturn() },
+      });
   }, [loading, user, navigate]);
 
-  if (loading || !user) return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
+  if (loading || !user)
+    return <p className="text-center py-20 text-muted-foreground">{tr.loading}</p>;
   return <Outlet />;
 }

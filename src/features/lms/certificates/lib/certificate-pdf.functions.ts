@@ -54,16 +54,14 @@ export const getCertificatePdfLink = createServerFn({ method: "POST" })
     }
 
     if (isOwner && (data.name || data.gender)) {
-      await admin
-        .from("lms_user_profiles")
-        .upsert(
-          {
-            user_id: context.userId,
-            ...(data.name ? { certificate_name: data.name } : {}),
-            ...(data.gender ? { gender: data.gender } : {}),
-          },
-          { onConflict: "user_id" },
-        );
+      await admin.from("lms_user_profiles").upsert(
+        {
+          user_id: context.userId,
+          ...(data.name ? { certificate_name: data.name } : {}),
+          ...(data.gender ? { gender: data.gender } : {}),
+        },
+        { onConflict: "user_id" },
+      );
     }
 
     let result: Awaited<ReturnType<typeof ensureCertificatePdf>>;
@@ -102,15 +100,26 @@ export const getCertificatePdfState = createServerFn({ method: "POST" })
     if (!isOwner && !isAdmin) return { enabled: false as const };
 
     const [{ data: course }, { data: profile }] = await Promise.all([
-      admin.from("lms_courses").select("certificate_pdf_enabled, start_date, end_date").eq("id", cert.course_id).maybeSingle(),
-      admin.from("lms_user_profiles").select("full_name, certificate_name, gender").eq("user_id", cert.student_id).maybeSingle(),
+      admin
+        .from("lms_courses")
+        .select("certificate_pdf_enabled, start_date, end_date")
+        .eq("id", cert.course_id)
+        .maybeSingle(),
+      admin
+        .from("lms_user_profiles")
+        .select("full_name, certificate_name, gender")
+        .eq("user_id", cert.student_id)
+        .maybeSingle(),
     ]);
     const enabled = Boolean(course?.certificate_pdf_enabled) || isAdmin;
     return {
       enabled,
       preview: isAdmin && !course?.certificate_pdf_enabled,
       datesReady: Boolean(course?.start_date && course?.end_date),
-      name: (cert.recipient_name ?? profile?.certificate_name ?? profile?.full_name ?? "") as string,
+      name: (cert.recipient_name ??
+        profile?.certificate_name ??
+        profile?.full_name ??
+        "") as string,
       gender: (cert.recipient_gender ?? profile?.gender ?? null) as "male" | "female" | null,
     };
   });

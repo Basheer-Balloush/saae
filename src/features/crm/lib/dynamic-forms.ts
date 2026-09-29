@@ -17,10 +17,28 @@ export const FORM_STATUSES = ["draft", "published", "hidden", "archived"] as con
 export type FormStatus = (typeof FORM_STATUSES)[number];
 
 export const RESERVED_SLUGS = new Set([
-  "admin", "api", "auth", "learning-management-system", "attendance-management-system",
-  "contact", "about", "news", "communities", "initiative-survey", "event-survey",
-  "one-million-initiative", "one-million-initiative-home", "one-million-initiative-donors",
-  "registration", "resources", "super-admin", "sitemap.xml", "forms", "assets", "static", "public",
+  "admin",
+  "api",
+  "auth",
+  "learning-management-system",
+  "attendance-management-system",
+  "contact",
+  "about",
+  "news",
+  "communities",
+  "initiative-survey",
+  "event-survey",
+  "one-million-initiative",
+  "one-million-initiative-home",
+  "one-million-initiative-donors",
+  "registration",
+  "resources",
+  "super-admin",
+  "sitemap.xml",
+  "forms",
+  "assets",
+  "static",
+  "public",
 ]);
 
 export const FIELD_TYPES_WITH_OPTIONS: FieldType[] = ["select", "radio", "checkbox_group"];
@@ -139,13 +157,15 @@ export function newFieldId(): string {
 }
 
 /** Validate a submission payload against a form's field spec. Returns cleaned values or throws. */
-export function validateSubmission(fields: FormField[], values: Record<string, unknown>): Record<string, unknown> {
+export function validateSubmission(
+  fields: FormField[],
+  values: Record<string, unknown>,
+): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const f of fields) {
     const raw = values[f.id];
     const empty =
-      raw === undefined || raw === null || raw === "" ||
-      (Array.isArray(raw) && raw.length === 0);
+      raw === undefined || raw === null || raw === "" || (Array.isArray(raw) && raw.length === 0);
     if (empty) {
       if (f.required) throw new Error(`required:${f.id}`);
       out[f.id] = null;
@@ -160,7 +180,11 @@ export function validateSubmission(fields: FormField[], values: Record<string, u
         break;
       }
       case "email": {
-        if (typeof raw !== "string" || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(raw) || raw.length > 200) {
+        if (
+          typeof raw !== "string" ||
+          !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(raw) ||
+          raw.length > 200
+        ) {
           throw new Error(`invalid_email:${f.id}`);
         }
         out[f.id] = raw.trim().toLowerCase();
@@ -197,7 +221,8 @@ export function validateSubmission(fields: FormField[], values: Record<string, u
       case "checkbox_group": {
         if (!Array.isArray(raw)) throw new Error(`invalid:${f.id}`);
         const opts = new Set((f.options ?? []).map((o) => o.value));
-        for (const v of raw) if (typeof v !== "string" || !opts.has(v)) throw new Error(`invalid_option:${f.id}`);
+        for (const v of raw)
+          if (typeof v !== "string" || !opts.has(v)) throw new Error(`invalid_option:${f.id}`);
         out[f.id] = raw;
         break;
       }

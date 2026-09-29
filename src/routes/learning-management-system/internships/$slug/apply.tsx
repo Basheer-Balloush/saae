@@ -18,10 +18,7 @@ import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/internships/$slug/apply")({
   head: () => ({
-    meta: [
-      { title: "Apply — Internship" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "Apply — Internship" }, { name: "robots", content: "noindex, nofollow" }],
     links: LMS_SKIN_LINKS,
   }),
   component: ApplyPage,
@@ -121,11 +118,15 @@ function ApplyPage() {
       const hasSel = !!a?.selected && a.selected.length > 0;
       if (q.kind === "single_choice" || q.kind === "multi_choice") {
         if (!hasSel) {
-          toast.error(lang === "ar" ? "بعض الأسئلة المطلوبة فارغة" : "Please answer all required questions");
+          toast.error(
+            lang === "ar" ? "بعض الأسئلة المطلوبة فارغة" : "Please answer all required questions",
+          );
           return;
         }
       } else if (!hasText) {
-        toast.error(lang === "ar" ? "بعض الأسئلة المطلوبة فارغة" : "Please answer all required questions");
+        toast.error(
+          lang === "ar" ? "بعض الأسئلة المطلوبة فارغة" : "Please answer all required questions",
+        );
         return;
       }
     }
@@ -161,7 +162,6 @@ function ApplyPage() {
     } finally {
       setSubmitting(false);
     }
-
   };
 
   const p = ctx.profile;
@@ -235,7 +235,9 @@ function ApplyPage() {
               <ul className="apply-list">
                 {ctx.certificates.map((c) => (
                   <li key={c.id}>
-                    <span dir="auto">{lang === "ar" ? c.course_title_ar : c.course_title_en || c.course_title_ar}</span>
+                    <span dir="auto">
+                      {lang === "ar" ? c.course_title_ar : c.course_title_en || c.course_title_ar}
+                    </span>
                     <b dir="ltr">{c.serial}</b>
                   </li>
                 ))}
@@ -267,7 +269,13 @@ function ApplyPage() {
                       </p>
                     )}
                     {q.kind === "long_text" ? (
-                      <textarea id={inputId} value={a.text ?? ""} onChange={(e) => setText(e.target.value)} rows={4} dir="auto" />
+                      <textarea
+                        id={inputId}
+                        value={a.text ?? ""}
+                        onChange={(e) => setText(e.target.value)}
+                        rows={4}
+                        dir="auto"
+                      />
                     ) : q.kind === "single_choice" ? (
                       <div className="choice-list" id={inputId}>
                         {q.options.map((opt) => (
@@ -304,7 +312,13 @@ function ApplyPage() {
                         })}
                       </div>
                     ) : (
-                      <input id={inputId} type="text" value={a.text ?? ""} onChange={(e) => setText(e.target.value)} dir="auto" />
+                      <input
+                        id={inputId}
+                        type="text"
+                        value={a.text ?? ""}
+                        onChange={(e) => setText(e.target.value)}
+                        dir="auto"
+                      />
                     )}
                   </div>
                 );
@@ -313,7 +327,12 @@ function ApplyPage() {
           )}
 
           <div className="apply-bar">
-            <button type="button" className="auth-submit" disabled={cannotApply || submitting} onClick={onSubmit}>
+            <button
+              type="button"
+              className="auth-submit"
+              disabled={cannotApply || submitting}
+              onClick={onSubmit}
+            >
               <span className="btn-content">
                 {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 <span>{submitting ? t.applySubmitting : t.applySubmit}</span>

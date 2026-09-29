@@ -5,11 +5,9 @@ import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 function publicClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
 }
 
 // ---------- Public reads ----------
@@ -18,7 +16,13 @@ export const getInitiativeStats = createServerFn({ method: "GET" }).handler(asyn
   const sb = publicClient();
   const { data, error } = await sb.rpc("initiative_public_stats");
   if (error) throw new Error(error.message);
-  const row = (data as any)?.[0] ?? { target: 1000000, done: 0, waiting: 0, covered_unassigned: 0, total_chairs_funded: 0 };
+  const row = (data as any)?.[0] ?? {
+    target: 1000000,
+    done: 0,
+    waiting: 0,
+    covered_unassigned: 0,
+    total_chairs_funded: 0,
+  };
   return {
     target: Number(row.target ?? 1000000),
     done: Number(row.done ?? 0),
@@ -43,7 +47,10 @@ export const getTopDonors = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const sb = publicClient();
     const { data: rows, error } = data.donorType
-      ? await sb.rpc("initiative_top_donors_by_type", { _donor_type: data.donorType, _limit: data.limit })
+      ? await sb.rpc("initiative_top_donors_by_type", {
+          _donor_type: data.donorType,
+          _limit: data.limit,
+        })
       : await sb.rpc("initiative_top_donors", { _limit: data.limit });
     if (error) throw new Error(error.message);
     return (rows ?? []) as Array<{
@@ -55,7 +62,6 @@ export const getTopDonors = createServerFn({ method: "GET" })
       last_donation_at: string;
     }>;
   });
-
 
 export const getAllDonors = createServerFn({ method: "GET" }).handler(async () => {
   const sb = publicClient();
@@ -127,18 +133,27 @@ export const submitDirectPayment = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => directPaymentSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: settings } = await supabaseAdmin.from("initiative_settings").select("seat_price_usd").limit(1).maybeSingle();
+    const { data: settings } = await supabaseAdmin
+      .from("initiative_settings")
+      .select("seat_price_usd")
+      .limit(1)
+      .maybeSingle();
     const amount = Number(settings?.seat_price_usd ?? 1);
-    const claimToken = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
-    const { data: row, error } = await supabaseAdmin.from("initiative_direct_payments").insert({
-      full_name: data.full_name,
-      email: data.email.toLowerCase(),
-      phone: data.phone,
-      amount,
-      currency: "USD",
-      status: "pending",
-      claim_token: claimToken,
-    }).select("id").single();
+    const claimToken =
+      crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+    const { data: row, error } = await supabaseAdmin
+      .from("initiative_direct_payments")
+      .insert({
+        full_name: data.full_name,
+        email: data.email.toLowerCase(),
+        phone: data.phone,
+        amount,
+        currency: "USD",
+        status: "pending",
+        claim_token: claimToken,
+      })
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
     return { id: row.id, paymentUrl: null as string | null };
   });
@@ -212,16 +227,24 @@ export const claimSeatAccount = createServerFn({ method: "POST" })
     }
 
     // Grant lms_student role
-    await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "lms_student" }).select();
+    await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: userId, role: "lms_student" })
+      .select();
 
     // Enroll
-    const { data: settings } = await supabaseAdmin.from("initiative_settings").select("course_id").maybeSingle();
+    const { data: settings } = await supabaseAdmin
+      .from("initiative_settings")
+      .select("course_id")
+      .maybeSingle();
     const courseId = settings?.course_id;
     if (courseId) {
       if (kind === "waitlist") {
         await supabaseAdmin.rpc("initiative_claim_seat", { _token: data.token, _user_id: userId });
       } else {
-        await supabaseAdmin.from("lms_enrollments").insert({ course_id: courseId, student_id: userId });
+        await supabaseAdmin
+          .from("lms_enrollments")
+          .insert({ course_id: courseId, student_id: userId });
         await supabaseAdmin
           .from("initiative_direct_payments")
           .update({ user_id: userId, claimed_at: new Date().toISOString() })
@@ -233,7 +256,6 @@ export const claimSeatAccount = createServerFn({ method: "POST" })
   });
 
 // ---------- Admin operations ----------
-
 
 async function assertAdmin(supabase: any, userId: string) {
   const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "lms_admin" });
@@ -272,42 +294,54 @@ export const adminConfirmDonation = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { data: covered, error } = await context.supabase.rpc("initiative_confirm_donation", { _donation_id: data.id });
+    const { data: covered, error } = await context.supabase.rpc("initiative_confirm_donation", {
+      _donation_id: data.id,
+    });
     if (error) throw new Error(error.message);
     return { covered };
   });
 
 export const adminCreateDonation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    donor_name: string;
-    donor_display_name?: string;
-    donor_type: "individual" | "company";
-    email?: string;
-    phone?: string;
-    logo_url?: string;
-    chairs_count: number;
-    currency: "USD" | "SYP";
-    confirm: boolean;
-  }) => d)
+  .inputValidator(
+    (d: {
+      donor_name: string;
+      donor_display_name?: string;
+      donor_type: "individual" | "company";
+      email?: string;
+      phone?: string;
+      logo_url?: string;
+      chairs_count: number;
+      currency: "USD" | "SYP";
+      confirm: boolean;
+    }) => d,
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { data: s } = await context.supabase.from("initiative_settings").select("seat_price_usd, usd_to_syp_rate").maybeSingle();
+    const { data: s } = await context.supabase
+      .from("initiative_settings")
+      .select("seat_price_usd, usd_to_syp_rate")
+      .maybeSingle();
     const seat = Number(s?.seat_price_usd ?? 1);
     const rate = Number(s?.usd_to_syp_rate ?? 14000);
-    const amount = data.currency === "USD" ? data.chairs_count * seat : data.chairs_count * seat * rate;
-    const { data: row, error } = await context.supabase.from("initiative_donations").insert({
-      donor_name: data.donor_name,
-      donor_display_name: data.donor_display_name ?? null,
-      donor_type: data.donor_type,
-      email: data.email ?? null,
-      phone: data.phone ?? null,
-      logo_url: data.logo_url ?? null,
-      chairs_count: data.chairs_count,
-      amount,
-      currency: data.currency,
-      status: "pending",
-    }).select("id").single();
+    const amount =
+      data.currency === "USD" ? data.chairs_count * seat : data.chairs_count * seat * rate;
+    const { data: row, error } = await context.supabase
+      .from("initiative_donations")
+      .insert({
+        donor_name: data.donor_name,
+        donor_display_name: data.donor_display_name ?? null,
+        donor_type: data.donor_type,
+        email: data.email ?? null,
+        phone: data.phone ?? null,
+        logo_url: data.logo_url ?? null,
+        chairs_count: data.chairs_count,
+        amount,
+        currency: data.currency,
+        status: "pending",
+      })
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
     if (data.confirm) {
       await context.supabase.rpc("initiative_confirm_donation", { _donation_id: row.id });
@@ -320,32 +354,43 @@ export const adminDeleteDonation = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { error } = await context.supabase.from("initiative_donations").delete().eq("id", data.id);
+    const { error } = await context.supabase
+      .from("initiative_donations")
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
-const settingsUpdateSchema = z.object({
-  seat_price_usd: z.coerce.number().positive().max(1000000).optional(),
-  usd_to_syp_rate: z.coerce.number().positive().max(100000000).optional(),
-  total_target: z.coerce.number().int().positive().max(1000000000).optional(),
-  course_id: z.string().uuid().nullable().optional(),
-  about_ar: z.string().max(5000).optional(),
-  about_en: z.string().max(5000).optional(),
-  mission_ar: z.string().max(5000).optional(),
-  mission_en: z.string().max(5000).optional(),
-  values_ar: z.string().max(5000).optional(),
-  values_en: z.string().max(5000).optional(),
-}).strict();
+const settingsUpdateSchema = z
+  .object({
+    seat_price_usd: z.coerce.number().positive().max(1000000).optional(),
+    usd_to_syp_rate: z.coerce.number().positive().max(100000000).optional(),
+    total_target: z.coerce.number().int().positive().max(1000000000).optional(),
+    course_id: z.string().uuid().nullable().optional(),
+    about_ar: z.string().max(5000).optional(),
+    about_en: z.string().max(5000).optional(),
+    mission_ar: z.string().max(5000).optional(),
+    mission_en: z.string().max(5000).optional(),
+    values_ar: z.string().max(5000).optional(),
+    values_en: z.string().max(5000).optional(),
+  })
+  .strict();
 
 export const adminUpdateSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => settingsUpdateSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { data: s } = await context.supabase.from("initiative_settings").select("id").maybeSingle();
+    const { data: s } = await context.supabase
+      .from("initiative_settings")
+      .select("id")
+      .maybeSingle();
     if (!s) throw new Error("settings_missing");
-    const { error } = await context.supabase.from("initiative_settings").update(data).eq("id", s.id);
+    const { error } = await context.supabase
+      .from("initiative_settings")
+      .update(data)
+      .eq("id", s.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -354,7 +399,10 @@ export const adminListCourses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { data, error } = await context.supabase.from("lms_courses").select("id, title_ar, title_en").order("created_at", { ascending: false });
+    const { data, error } = await context.supabase
+      .from("lms_courses")
+      .select("id, title_ar, title_en")
+      .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data;
   });

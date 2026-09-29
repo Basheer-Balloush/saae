@@ -37,10 +37,7 @@ export const COMMUNITY_LABELS_EN: Record<CommunityKey, string> = {
 // News-only extra categories (not full communities with their own pages)
 export const EXTRA_NEWS_CATEGORY_KEYS = ["society"] as const;
 
-export const NEWS_CATEGORY_KEYS = [
-  ...COMMUNITY_KEYS,
-  ...EXTRA_NEWS_CATEGORY_KEYS,
-] as const;
+export const NEWS_CATEGORY_KEYS = [...COMMUNITY_KEYS, ...EXTRA_NEWS_CATEGORY_KEYS] as const;
 
 export type NewsCategoryKey = (typeof NEWS_CATEGORY_KEYS)[number];
 
@@ -61,7 +58,10 @@ export function communityLabel(key: string, lang: "ar" | "en"): string {
  * Returns the effective categories list for a news row. Falls back to the
  * legacy single `category` column when the array is empty.
  */
-export function newsCategories(row: { categories?: string[] | null; category?: string | null }): string[] {
+export function newsCategories(row: {
+  categories?: string[] | null;
+  category?: string | null;
+}): string[] {
   const arr = (row.categories ?? []).filter(Boolean);
   if (arr.length > 0) return arr;
   return row.category ? [row.category] : [];

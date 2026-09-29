@@ -1,5 +1,10 @@
 import { useRef } from "react";
-import { NA_LABEL, RATING_LABELS, type AnswerValue, type Lang } from "@/features/feedback-survey/lib/feedback-survey";
+import {
+  NA_LABEL,
+  RATING_LABELS,
+  type AnswerValue,
+  type Lang,
+} from "@/features/feedback-survey/lib/feedback-survey";
 
 export function StarRating({
   id,
@@ -41,7 +46,10 @@ export function StarRating({
 
   const errId = `${id}-err`;
   return (
-    <fieldset className={`fb-q ${invalid ? "is-invalid" : ""}`} aria-describedby={invalid ? errId : undefined}>
+    <fieldset
+      className={`fb-q ${invalid ? "is-invalid" : ""}`}
+      aria-describedby={invalid ? errId : undefined}
+    >
       <legend className="fb-q-label">{label}</legend>
       <div className="fb-stars-row">
         <div role="radiogroup" aria-label={label} className="fb-stars">
@@ -98,7 +106,9 @@ export function StarRating({
       </div>
       {invalid && (
         <p id={errId} className="fb-err" role="alert">
-          {lang === "ar" ? "يرجى اختيار تقييم لهذا السؤال." : "Please choose a rating for this question."}
+          {lang === "ar"
+            ? "يرجى اختيار تقييم لهذا السؤال."
+            : "Please choose a rating for this question."}
         </p>
       )}
     </fieldset>

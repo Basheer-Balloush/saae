@@ -15,7 +15,9 @@ import { CheckCircle2, KeyRound } from "lucide-react";
 type Search = { token?: string };
 
 export const Route = createFileRoute("/initiative/claim")({
-  validateSearch: (s: Record<string, unknown>): Search => ({ token: typeof s.token === "string" ? s.token : undefined }),
+  validateSearch: (s: Record<string, unknown>): Search => ({
+    token: typeof s.token === "string" ? s.token : undefined,
+  }),
   head: () => ({ meta: [{ title: "تفعيل مقعد المبادرة" }] }),
   component: ClaimPage,
 });
@@ -30,31 +32,35 @@ function ClaimPage() {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState<{ email: string } | null>(null);
 
-  const t = isAr ? {
-    title: "تفعيل مقعدك في المبادرة",
-    desc: "تم تغطية مقعدك. ضع كلمة مرور لإنشاء حسابك في منصة LMS والوصول الفوري للكورس.",
-    pw: "كلمة المرور (8 أحرف على الأقل)",
-    activate: "تفعيل وإنشاء الحساب",
-    success: "تم تفعيل حسابك بنجاح",
-    successDesc: "يمكنك الآن تسجيل الدخول والبدء بالكورس.",
-    goLogin: "تسجيل الدخول",
-    invalid: "رابط غير صالح أو منتهي.",
-  } : {
-    title: "Activate your seat",
-    desc: "Your seat is covered. Set a password to create your LMS account and access the course immediately.",
-    pw: "Password (min 8 chars)",
-    activate: "Activate & create account",
-    success: "Account activated",
-    successDesc: "You can now log in and start the course.",
-    goLogin: "Log in",
-    invalid: "Invalid or expired link.",
-  };
+  const t = isAr
+    ? {
+        title: "تفعيل مقعدك في المبادرة",
+        desc: "تم تغطية مقعدك. ضع كلمة مرور لإنشاء حسابك في منصة LMS والوصول الفوري للكورس.",
+        pw: "كلمة المرور (8 أحرف على الأقل)",
+        activate: "تفعيل وإنشاء الحساب",
+        success: "تم تفعيل حسابك بنجاح",
+        successDesc: "يمكنك الآن تسجيل الدخول والبدء بالكورس.",
+        goLogin: "تسجيل الدخول",
+        invalid: "رابط غير صالح أو منتهي.",
+      }
+    : {
+        title: "Activate your seat",
+        desc: "Your seat is covered. Set a password to create your LMS account and access the course immediately.",
+        pw: "Password (min 8 chars)",
+        activate: "Activate & create account",
+        success: "Account activated",
+        successDesc: "You can now log in and start the course.",
+        goLogin: "Log in",
+        invalid: "Invalid or expired link.",
+      };
 
   if (!token) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="pt-32 pb-20 container mx-auto px-4 text-center"><p className="text-destructive">{t.invalid}</p></main>
+        <main className="pt-32 pb-20 container mx-auto px-4 text-center">
+          <p className="text-destructive">{t.invalid}</p>
+        </main>
         <Footer />
       </div>
     );
@@ -62,7 +68,10 @@ function ClaimPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 8) { toast.error(isAr ? "كلمة المرور قصيرة جداً" : "Password too short"); return; }
+    if (password.length < 8) {
+      toast.error(isAr ? "كلمة المرور قصيرة جداً" : "Password too short");
+      return;
+    }
     setLoading(true);
     try {
       const res: any = await claimFn({ data: { token, password } });
@@ -89,7 +98,10 @@ function ClaimPage() {
               <CheckCircle2 className="h-16 w-16 text-primary mx-auto" />
               <h1 className="text-2xl font-bold mt-4">{t.success}</h1>
               <p className="text-muted-foreground mt-2">{t.successDesc}</p>
-              <Button className="mt-6 w-full" onClick={() => navigate({ to: "/learning-management-system/student" })}>
+              <Button
+                className="mt-6 w-full"
+                onClick={() => navigate({ to: "/learning-management-system/student" })}
+              >
                 {isAr ? "الانتقال للكورس" : "Go to course"}
               </Button>
             </div>
@@ -101,9 +113,18 @@ function ClaimPage() {
               <form onSubmit={onSubmit} className="space-y-4 mt-6">
                 <div>
                   <Label>{t.pw}</Label>
-                  <Input type="password" dir="ltr" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
+                  <Input
+                    type="password"
+                    dir="ltr"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    minLength={8}
+                    required
+                  />
                 </div>
-                <Button type="submit" disabled={loading} className="w-full">{loading ? "..." : t.activate}</Button>
+                <Button type="submit" disabled={loading} className="w-full">
+                  {loading ? "..." : t.activate}
+                </Button>
               </form>
             </>
           )}

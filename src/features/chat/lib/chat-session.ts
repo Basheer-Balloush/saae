@@ -17,7 +17,10 @@ export function newChatSessionId(): string {
 }
 
 /** The stored session when it is still active, otherwise a brand-new one. */
-export function resolveChatSession(raw: string | null, now: number): { session: ChatSession; isNew: boolean } {
+export function resolveChatSession(
+  raw: string | null,
+  now: number,
+): { session: ChatSession; isNew: boolean } {
   try {
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<ChatSession>;
@@ -34,7 +37,9 @@ export function resolveChatSession(raw: string | null, now: number): { session: 
           session: {
             id: parsed.id,
             lastActivity: parsed.lastActivity,
-            messages: Array.isArray(parsed.messages) ? parsed.messages.slice(-MAX_STORED_MESSAGES) : [],
+            messages: Array.isArray(parsed.messages)
+              ? parsed.messages.slice(-MAX_STORED_MESSAGES)
+              : [],
           },
           isNew: false,
         };

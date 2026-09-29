@@ -62,12 +62,15 @@ const schema = z.object({
   fullNameAr: z.string().trim().min(1),
   fullNameEn: z.string().trim().min(1),
   phone: z.string().trim().min(1),
-  dateOfBirth: z.string().refine((v) => {
-    const d = new Date(v);
-    if (Number.isNaN(d.getTime())) return false;
-    const age = (Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000);
-    return age >= 18;
-  }, { message: "min_age_18" }),
+  dateOfBirth: z.string().refine(
+    (v) => {
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) return false;
+      const age = (Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000);
+      return age >= 18;
+    },
+    { message: "min_age_18" },
+  ),
   city: z.string().trim().min(1),
   experienceLevel: z.enum(["lt_1", "1_2", "3_5", "5_plus"]),
   specializations: z.array(z.string()).min(1),
@@ -92,7 +95,14 @@ function TrainerApplyPage() {
   const [existing, setExisting] = useState<ExistingApp | null>(null);
   const [loadingExisting, setLoadingExisting] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string; index: number; count: number } | null>(null);
+  const [uploadPct, setUploadPct] = useState<{
+    pct: number;
+    loaded: number;
+    total: number;
+    name: string;
+    index: number;
+    count: number;
+  } | null>(null);
 
   const [fullNameAr, setFullNameAr] = useState("");
   const [fullNameEn, setFullNameEn] = useState("");
@@ -116,7 +126,10 @@ function TrainerApplyPage() {
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      navigate({ to: "/learning-management-system/login", search: { redirect: currentLmsReturn() } });
+      navigate({
+        to: "/learning-management-system/login",
+        search: { redirect: currentLmsReturn() },
+      });
       return;
     }
     (async () => {
@@ -169,7 +182,10 @@ function TrainerApplyPage() {
       const map: Record<string, string> = {
         min_age_18: ar ? "يجب أن يكون عمرك 18 سنة أو أكثر" : "You must be at least 18 years old",
       };
-      toast.error(map[msg] ?? (ar ? `تحقق من الحقل: ${issue.path.join(".")}` : `Check field: ${issue.path.join(".")}`));
+      toast.error(
+        map[msg] ??
+          (ar ? `تحقق من الحقل: ${issue.path.join(".")}` : `Check field: ${issue.path.join(".")}`),
+      );
       return;
     }
     setSubmitting(true);
@@ -207,7 +223,14 @@ function TrainerApplyPage() {
         const u = uploads[i];
         const safeName = u.file.name.replace(/[^A-Za-z0-9._-]/g, "_");
         const path = `${user.id}/${applicationId}/${u.kind}-${Date.now()}-${safeName}`;
-        setUploadPct({ pct: 0, loaded: 0, total: u.file.size, name: u.file.name, index: i + 1, count: total });
+        setUploadPct({
+          pct: 0,
+          loaded: 0,
+          total: u.file.size,
+          name: u.file.name,
+          index: i + 1,
+          count: total,
+        });
         await uploadToSupabaseStorage({
           bucket: "trainer-applications",
           path,
@@ -215,7 +238,14 @@ function TrainerApplyPage() {
           upsert: false,
           contentType: u.file.type,
           onProgress: (pct, loaded, tot) =>
-            setUploadPct({ pct, loaded, total: tot, name: u.file.name, index: i + 1, count: total }),
+            setUploadPct({
+              pct,
+              loaded,
+              total: tot,
+              name: u.file.name,
+              index: i + 1,
+              count: total,
+            }),
         });
         await attachTrainerApplicationFile({
           data: {
@@ -230,8 +260,11 @@ function TrainerApplyPage() {
       }
 
       toast.success(ar ? "تم إرسال طلبك بنجاح" : "Application submitted");
-      setExisting({ id: applicationId, status: "pending_review", submitted_at: new Date().toISOString() });
-
+      setExisting({
+        id: applicationId,
+        status: "pending_review",
+        submitted_at: new Date().toISOString(),
+      });
     } catch (err) {
       toast.error(toUserMessage(err));
     } finally {
@@ -304,28 +337,75 @@ function TrainerApplyPage() {
               <h2>{ar ? "١. البيانات الشخصية" : "1. Personal information"}</h2>
               <div className="form-grid">
                 <div className="field">
-                  <label htmlFor="ta-name-ar">{ar ? "الاسم الكامل (عربي)" : "Full name (Arabic)"} *</label>
-                  <input id="ta-name-ar" type="text" dir="rtl" required value={fullNameAr} onChange={(e) => setFullNameAr(e.target.value)} />
+                  <label htmlFor="ta-name-ar">
+                    {ar ? "الاسم الكامل (عربي)" : "Full name (Arabic)"} *
+                  </label>
+                  <input
+                    id="ta-name-ar"
+                    type="text"
+                    dir="rtl"
+                    required
+                    value={fullNameAr}
+                    onChange={(e) => setFullNameAr(e.target.value)}
+                  />
                 </div>
                 <div className="field">
-                  <label htmlFor="ta-name-en">{ar ? "الاسم الكامل (إنجليزي)" : "Full name (English)"} *</label>
-                  <input id="ta-name-en" type="text" dir="ltr" required value={fullNameEn} onChange={(e) => setFullNameEn(e.target.value)} />
+                  <label htmlFor="ta-name-en">
+                    {ar ? "الاسم الكامل (إنجليزي)" : "Full name (English)"} *
+                  </label>
+                  <input
+                    id="ta-name-en"
+                    type="text"
+                    dir="ltr"
+                    required
+                    value={fullNameEn}
+                    onChange={(e) => setFullNameEn(e.target.value)}
+                  />
                 </div>
                 <div className="field">
                   <label htmlFor="ta-phone">{ar ? "رقم الهاتف" : "Phone"} *</label>
-                  <input id="ta-phone" type="tel" dir="ltr" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+963…" />
+                  <input
+                    id="ta-phone"
+                    type="tel"
+                    dir="ltr"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+963…"
+                  />
                 </div>
                 <div className="field">
                   <label htmlFor="ta-dob">{ar ? "تاريخ الميلاد" : "Date of birth"} *</label>
-                  <input id="ta-dob" type="date" required value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
+                  <input
+                    id="ta-dob"
+                    type="date"
+                    required
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                  />
                 </div>
                 <div className="field span-2">
                   <label htmlFor="ta-city">{ar ? "المدينة" : "City"} *</label>
-                  <input id="ta-city" type="text" required value={city} onChange={(e) => setCity(e.target.value)} />
+                  <input
+                    id="ta-city"
+                    type="text"
+                    required
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
                 </div>
                 <div className="field span-2">
-                  <label htmlFor="ta-avatar">{ar ? "صورة شخصية (اختياري في هذه المرحلة)" : "Profile photo (optional at this stage)"}</label>
-                  <input id="ta-avatar" type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)} />
+                  <label htmlFor="ta-avatar">
+                    {ar
+                      ? "صورة شخصية (اختياري في هذه المرحلة)"
+                      : "Profile photo (optional at this stage)"}
+                  </label>
+                  <input
+                    id="ta-avatar"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)}
+                  />
                 </div>
               </div>
             </article>
@@ -334,25 +414,49 @@ function TrainerApplyPage() {
               <h2>{ar ? "٢. بيانات الأهلية" : "2. Eligibility"}</h2>
               <div className="form-grid">
                 <div className="field">
-                  <label htmlFor="ta-exp">{ar ? "سنوات الخبرة بالذكاء الاصطناعي" : "AI experience"} *</label>
+                  <label htmlFor="ta-exp">
+                    {ar ? "سنوات الخبرة بالذكاء الاصطناعي" : "AI experience"} *
+                  </label>
                   <Select value={experienceLevel} onValueChange={setExperienceLevel}>
-                    <SelectTrigger id="ta-exp"><SelectValue placeholder={ar ? "اختر…" : "Select…"} /></SelectTrigger>
+                    <SelectTrigger id="ta-exp">
+                      <SelectValue placeholder={ar ? "اختر…" : "Select…"} />
+                    </SelectTrigger>
                     <SelectContent>
                       {EXPERIENCE_LEVELS.map((l) => (
-                        <SelectItem key={l.id} value={l.id}>{ar ? l.ar : l.en}</SelectItem>
+                        <SelectItem key={l.id} value={l.id}>
+                          {ar ? l.ar : l.en}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="field">
                   <label htmlFor="ta-linkedin">{ar ? "رابط LinkedIn" : "LinkedIn URL"} *</label>
-                  <input id="ta-linkedin" dir="ltr" required type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/…" />
+                  <input
+                    id="ta-linkedin"
+                    dir="ltr"
+                    required
+                    type="url"
+                    value={linkedinUrl}
+                    onChange={(e) => setLinkedinUrl(e.target.value)}
+                    placeholder="https://linkedin.com/in/…"
+                  />
                 </div>
                 <fieldset className="field span-2">
-                  <legend>{ar ? "المجالات التخصصية (اختر واحدة على الأقل)" : "Specializations (pick at least one)"} *</legend>
+                  <legend>
+                    {ar
+                      ? "المجالات التخصصية (اختر واحدة على الأقل)"
+                      : "Specializations (pick at least one)"}{" "}
+                    *
+                  </legend>
                   <div className="course-filters" role="group">
                     {SPECIALIZATIONS.map((s) => (
-                      <button key={s.id} type="button" aria-pressed={specializations.includes(s.id)} onClick={() => toggleSpec(s.id)}>
+                      <button
+                        key={s.id}
+                        type="button"
+                        aria-pressed={specializations.includes(s.id)}
+                        onClick={() => toggleSpec(s.id)}
+                      >
                         <span>{ar ? s.ar : s.en}</span>
                       </button>
                     ))}
@@ -360,25 +464,56 @@ function TrainerApplyPage() {
                 </fieldset>
                 <div className="field span-2">
                   <label htmlFor="ta-bio">{ar ? "نبذة عن الخبرة" : "Experience summary"} *</label>
-                  <textarea id="ta-bio" rows={5} required value={bio} onChange={(e) => setBio(e.target.value)} />
+                  <textarea
+                    id="ta-bio"
+                    rows={5}
+                    required
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                  />
                 </div>
                 <div className="field">
-                  <label htmlFor="ta-github">{ar ? "رابط GitHub / Portfolio" : "GitHub / Portfolio URL"}</label>
-                  <input id="ta-github" dir="ltr" type="url" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} />
+                  <label htmlFor="ta-github">
+                    {ar ? "رابط GitHub / Portfolio" : "GitHub / Portfolio URL"}
+                  </label>
+                  <input
+                    id="ta-github"
+                    dir="ltr"
+                    type="url"
+                    value={githubUrl}
+                    onChange={(e) => setGithubUrl(e.target.value)}
+                  />
                 </div>
                 <label className="check-row" htmlFor="prev">
-                  <Checkbox id="prev" checked={hasPrevTraining} onCheckedChange={(v) => setHasPrevTraining(!!v)} />
-                  <span>{ar ? "لديّ خبرة تدريبية سابقة" : "I have previous training experience"}</span>
+                  <Checkbox
+                    id="prev"
+                    checked={hasPrevTraining}
+                    onCheckedChange={(v) => setHasPrevTraining(!!v)}
+                  />
+                  <span>
+                    {ar ? "لديّ خبرة تدريبية سابقة" : "I have previous training experience"}
+                  </span>
                 </label>
                 {hasPrevTraining && (
                   <div className="field span-2">
-                    <label htmlFor="ta-prev">{ar ? "تفاصيل الخبرة التدريبية" : "Previous training details"}</label>
-                    <textarea id="ta-prev" rows={3} value={prevTrainingDetails} onChange={(e) => setPrevTrainingDetails(e.target.value)} />
+                    <label htmlFor="ta-prev">
+                      {ar ? "تفاصيل الخبرة التدريبية" : "Previous training details"}
+                    </label>
+                    <textarea
+                      id="ta-prev"
+                      rows={3}
+                      value={prevTrainingDetails}
+                      onChange={(e) => setPrevTrainingDetails(e.target.value)}
+                    />
                   </div>
                 )}
                 <div className="field span-2">
                   <label htmlFor="ta-cv">{ar ? "السيرة الذاتية" : "CV"} *</label>
-                  <input id="ta-cv" type="file" onChange={(e) => setCvFile(e.target.files?.[0] ?? null)} />
+                  <input
+                    id="ta-cv"
+                    type="file"
+                    onChange={(e) => setCvFile(e.target.files?.[0] ?? null)}
+                  />
                   {cvFile && (
                     <p className="field-note">
                       <FileText className="h-3 w-3" /> {cvFile.name}
@@ -386,8 +521,18 @@ function TrainerApplyPage() {
                   )}
                 </div>
                 <div className="field span-2">
-                  <label htmlFor="ta-samples">{ar ? "نماذج أعمال أو مشاريع (ملف واحد على الأقل)" : "Work samples (at least one)"} *</label>
-                  <input id="ta-samples" type="file" multiple onChange={(e) => setWorkSamples(Array.from(e.target.files ?? []))} />
+                  <label htmlFor="ta-samples">
+                    {ar
+                      ? "نماذج أعمال أو مشاريع (ملف واحد على الأقل)"
+                      : "Work samples (at least one)"}{" "}
+                    *
+                  </label>
+                  <input
+                    id="ta-samples"
+                    type="file"
+                    multiple
+                    onChange={(e) => setWorkSamples(Array.from(e.target.files ?? []))}
+                  />
                   {workSamples.length > 0 && (
                     <ul className="file-list">
                       {workSamples.map((f, i) => (
@@ -412,15 +557,29 @@ function TrainerApplyPage() {
               <h2>{ar ? "٣. الموافقات" : "3. Consents"}</h2>
               <div className="consent-list">
                 <label className="check-row">
-                  <Checkbox checked={consentEthics} onCheckedChange={(v) => setConsentEthics(!!v)} />
-                  <span>{ar ? "أوافق على سياسات وأخلاقيات الجمعية." : "I accept the association's ethics and policies."}</span>
+                  <Checkbox
+                    checked={consentEthics}
+                    onCheckedChange={(v) => setConsentEthics(!!v)}
+                  />
+                  <span>
+                    {ar
+                      ? "أوافق على سياسات وأخلاقيات الجمعية."
+                      : "I accept the association's ethics and policies."}
+                  </span>
                 </label>
                 <label className="check-row">
                   <Checkbox checked={consentData} onCheckedChange={(v) => setConsentData(!!v)} />
-                  <span>{ar ? "أوافق على معالجة بياناتي الشخصية لأغراض التقييم." : "I consent to processing of my personal data for evaluation."}</span>
+                  <span>
+                    {ar
+                      ? "أوافق على معالجة بياناتي الشخصية لأغراض التقييم."
+                      : "I consent to processing of my personal data for evaluation."}
+                  </span>
                 </label>
                 <label className="check-row">
-                  <Checkbox checked={consentProcess} onCheckedChange={(v) => setConsentProcess(!!v)} />
+                  <Checkbox
+                    checked={consentProcess}
+                    onCheckedChange={(v) => setConsentProcess(!!v)}
+                  />
                   <span>
                     {ar
                       ? "أفهم أن نظام المعادلة يتكون من 4 مراحل (نظري، عملي، تدريب، مقابلة) وإعادة تقييم دورية كل 6 أشهر."
@@ -443,7 +602,11 @@ function TrainerApplyPage() {
 
             <div className="apply-bar">
               <button type="submit" className="auth-submit" disabled={submitting}>
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {submitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
                 <span>{ar ? "إرسال الطلب" : "Submit application"}</span>
               </button>
             </div>

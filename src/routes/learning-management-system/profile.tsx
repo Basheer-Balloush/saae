@@ -111,7 +111,10 @@ function ProfilePage() {
   // Redirect logged-out users to LMS login
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate({ to: "/learning-management-system/login", search: { redirect: currentLmsReturn() } });
+      navigate({
+        to: "/learning-management-system/login",
+        search: { redirect: currentLmsReturn() },
+      });
     }
   }, [authLoading, user, navigate]);
 
@@ -154,10 +157,18 @@ function ProfilePage() {
   if (!data) return null;
 
   const name = data.profile.full_name?.trim() || data.email || "";
-  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w.charAt(0)).join("").toUpperCase();
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w.charAt(0))
+    .join("")
+    .toUpperCase();
   const completedCount = data.enrollments.filter((e) => e.completed_at).length;
   const avg = data.enrollments.length
-    ? Math.round(data.enrollments.reduce((s, e) => s + Number(e.progress ?? 0), 0) / data.enrollments.length)
+    ? Math.round(
+        data.enrollments.reduce((s, e) => s + Number(e.progress ?? 0), 0) / data.enrollments.length,
+      )
     : 0;
 
   return (
@@ -170,11 +181,17 @@ function ProfilePage() {
         <div className="page-shell profile-head">
           <div className="profile-id">
             <span className="profile-avatar" aria-hidden="true">
-              {avatar.url ? <img src={resizedImage(avatar.url, 320)} alt="" /> : initials || <UserIcon />}
+              {avatar.url ? (
+                <img src={resizedImage(avatar.url, 320)} alt="" />
+              ) : (
+                initials || <UserIcon />
+              )}
             </span>
             <span className="profile-who">
               <span className="profile-name-row">
-                <strong id="profile-name" dir="auto">{name}</strong>
+                <strong id="profile-name" dir="auto">
+                  {name}
+                </strong>
               </span>
               {data.profile.organization && (
                 <span className="profile-role" dir="auto">
@@ -186,7 +203,10 @@ function ProfilePage() {
               <a className="action action-primary" href="#profile-identity">
                 <span>{ar ? "تعديل الملف" : "Edit profile"}</span>
               </a>
-              <Link className="action action-secondary" to="/learning-management-system/trainer-apply">
+              <Link
+                className="action action-secondary"
+                to="/learning-management-system/trainer-apply"
+              >
                 <span>{ar ? "كن مدرّباً" : "Be an instructor"}</span>
               </Link>
             </span>
@@ -194,19 +214,27 @@ function ProfilePage() {
           <dl className="profile-stats">
             <div>
               <dt>{ar ? "ملتحق بها" : "Enrolled"}</dt>
-              <dd><b>{data.enrollments.length}</b></dd>
+              <dd>
+                <b>{data.enrollments.length}</b>
+              </dd>
             </div>
             <div>
               <dt>{ar ? "مكتملة" : "Completed"}</dt>
-              <dd><b>{completedCount}</b></dd>
+              <dd>
+                <b>{completedCount}</b>
+              </dd>
             </div>
             <div>
               <dt>{ar ? "شهادات" : "Certificates"}</dt>
-              <dd><b>{data.certificates.length}</b></dd>
+              <dd>
+                <b>{data.certificates.length}</b>
+              </dd>
             </div>
             <div>
               <dt>{t.profileProgress}</dt>
-              <dd><b>{avg}%</b></dd>
+              <dd>
+                <b>{avg}%</b>
+              </dd>
             </div>
           </dl>
         </div>
@@ -222,7 +250,13 @@ function ProfilePage() {
           </div>
           <aside className="profile-side">
             <ContactCard data={data} lang={lang} />
-            <AvatarCard data={data} onChanged={load} lang={lang} previewUrl={avatar.url} previewBusy={avatar.busy} />
+            <AvatarCard
+              data={data}
+              onChanged={load}
+              lang={lang}
+              previewUrl={avatar.url}
+              previewBusy={avatar.busy}
+            />
             <CvCard data={data} onChanged={load} lang={lang} />
           </aside>
         </div>
@@ -321,19 +355,46 @@ function IdentityCard({
         </div>
         <div className="field">
           <label htmlFor="fullName">{t.profileFullName}</label>
-          <input id="fullName" type="text" value={fullName} maxLength={200} onChange={(e) => setFullName(e.target.value)} dir="auto" />
+          <input
+            id="fullName"
+            type="text"
+            value={fullName}
+            maxLength={200}
+            onChange={(e) => setFullName(e.target.value)}
+            dir="auto"
+          />
         </div>
         <div className="field">
           <label htmlFor="phone">{t.profilePhone}</label>
-          <input id="phone" type="text" value={phone} maxLength={40} onChange={(e) => setPhone(e.target.value)} dir="ltr" />
+          <input
+            id="phone"
+            type="text"
+            value={phone}
+            maxLength={40}
+            onChange={(e) => setPhone(e.target.value)}
+            dir="ltr"
+          />
         </div>
         <div className="field">
           <label htmlFor="org">{t.profileOrganization}</label>
-          <input id="org" type="text" value={organization} maxLength={200} onChange={(e) => setOrganization(e.target.value)} dir="auto" />
+          <input
+            id="org"
+            type="text"
+            value={organization}
+            maxLength={200}
+            onChange={(e) => setOrganization(e.target.value)}
+            dir="auto"
+          />
         </div>
         <div className="field span-2">
           <label htmlFor="bio">{t.profileBiography}</label>
-          <textarea id="bio" value={biography} maxLength={4000} onChange={(e) => setBiography(e.target.value)} dir="auto" />
+          <textarea
+            id="bio"
+            value={biography}
+            maxLength={4000}
+            onChange={(e) => setBiography(e.target.value)}
+            dir="auto"
+          />
           <span className="char-count">{biography.length}/4000</span>
         </div>
         <div className="form-actions span-2">
@@ -413,18 +474,40 @@ function AvatarCard({
         onChange={(e) => onFile(e.target.files?.[0] ?? null)}
       />
       <div className="card-actions">
-        <button type="button" className="action action-secondary" onClick={onPick} disabled={busy === "upload"}>
-          {busy === "upload" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-          <span>{fileId ? (ar ? "تغيير الصورة" : "Change photo") : ar ? "رفع صورة" : "Upload photo"}</span>
+        <button
+          type="button"
+          className="action action-secondary"
+          onClick={onPick}
+          disabled={busy === "upload"}
+        >
+          {busy === "upload" ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Upload className="h-4 w-4" />
+          )}
+          <span>
+            {fileId ? (ar ? "تغيير الصورة" : "Change photo") : ar ? "رفع صورة" : "Upload photo"}
+          </span>
         </button>
         {fileId && (
-          <button type="button" className="action action-secondary is-danger" onClick={onClear} disabled={busy === "clear"}>
-            {busy === "clear" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+          <button
+            type="button"
+            className="action action-secondary is-danger"
+            onClick={onClear}
+            disabled={busy === "clear"}
+          >
+            {busy === "clear" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
             <span>{ar ? "إزالة" : "Remove"}</span>
           </button>
         )}
       </div>
-      <p className="file-hint">{ar ? "JPEG / PNG / WebP · حتى 5 ميغابايت" : "JPEG / PNG / WebP · up to 5 MB"}</p>
+      <p className="file-hint">
+        {ar ? "JPEG / PNG / WebP · حتى 5 ميغابايت" : "JPEG / PNG / WebP · up to 5 MB"}
+      </p>
     </article>
   );
 }
@@ -494,7 +577,15 @@ function CvCard({
     <article className="pro-card cv-card">
       <IconDocument />
       <h2>{t.profileCv}</h2>
-      <p>{fileId ? (ar ? "السيرة الذاتيّة الحاليّة" : "Current CV") : ar ? "لم تُضف سيرة ذاتيّة بعد" : "No CV uploaded yet"}</p>
+      <p>
+        {fileId
+          ? ar
+            ? "السيرة الذاتيّة الحاليّة"
+            : "Current CV"
+          : ar
+            ? "لم تُضف سيرة ذاتيّة بعد"
+            : "No CV uploaded yet"}
+      </p>
       <input
         ref={inputRef}
         type="file"
@@ -503,18 +594,41 @@ function CvCard({
         onChange={(e) => onFile(e.target.files?.[0] ?? null)}
       />
       <div className="cv-actions">
-        <button type="button" className="action action-primary" onClick={onPick} disabled={busy === "upload"}>
-          {busy === "upload" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+        <button
+          type="button"
+          className="action action-primary"
+          onClick={onPick}
+          disabled={busy === "upload"}
+        >
+          {busy === "upload" ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Upload className="h-4 w-4" />
+          )}
           <span>{fileId ? t.profileReplaceCv : t.profileUploadCv}</span>
         </button>
         {fileId && (
           <>
-            <button type="button" className="action action-secondary" onClick={onView} disabled={busy === "view"}>
+            <button
+              type="button"
+              className="action action-secondary"
+              onClick={onView}
+              disabled={busy === "view"}
+            >
               {busy === "view" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               <span>{t.profileViewCv}</span>
             </button>
-            <button type="button" className="action action-secondary is-danger" onClick={onClear} disabled={busy === "clear"}>
-              {busy === "clear" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            <button
+              type="button"
+              className="action action-secondary is-danger"
+              onClick={onClear}
+              disabled={busy === "clear"}
+            >
+              {busy === "clear" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
               <span>{ar ? "إزالة" : "Remove"}</span>
             </button>
           </>
@@ -554,7 +668,9 @@ function CoursesCard({ data, lang }: { data: ProfileOverview; lang: "ar" | "en" 
         </span>
       </div>
 
-      {active.length === 0 && <p>{ar ? "لا توجد دورات نشطة حاليًا" : "No active courses right now"}</p>}
+      {active.length === 0 && (
+        <p>{ar ? "لا توجد دورات نشطة حاليًا" : "No active courses right now"}</p>
+      )}
       {active.map((e) => {
         const c = courseMap.get(e.course_id);
         const att = data.attendance.byCourse[e.course_id];
@@ -693,7 +809,13 @@ function ApplicationsCard({ lang }: { lang: "ar" | "en" }) {
     }
   };
   const statusClass = (s: MyApplicationRow["status"]) =>
-    s === "accepted" ? "is-open" : s === "rejected" ? "is-rejected" : s === "withdrawn" ? "is-cancelled" : "is-pending";
+    s === "accepted"
+      ? "is-open"
+      : s === "rejected"
+        ? "is-rejected"
+        : s === "withdrawn"
+          ? "is-cancelled"
+          : "is-pending";
 
   const canWithdraw = (s: MyApplicationRow["status"]) =>
     s !== "accepted" && s !== "rejected" && s !== "withdrawn";
@@ -715,7 +837,11 @@ function ApplicationsCard({ lang }: { lang: "ar" | "en" }) {
             return (
               <li key={r.id} className="req-card">
                 <span className="req-main">
-                  <Link to="/learning-management-system/internships/$slug" params={{ slug: r.opportunity_slug }} dir="auto">
+                  <Link
+                    to="/learning-management-system/internships/$slug"
+                    params={{ slug: r.opportunity_slug }}
+                    dir="auto"
+                  >
                     {title}
                   </Link>
                   <span>
@@ -728,12 +854,19 @@ function ApplicationsCard({ lang }: { lang: "ar" | "en" }) {
                 <span className="req-side">
                   {r.attempt_number > 1 && (
                     <span className="attempt-chip">
-                      {lang === "ar" ? `محاولة #${r.attempt_number}` : `Attempt #${r.attempt_number}`}
+                      {lang === "ar"
+                        ? `محاولة #${r.attempt_number}`
+                        : `Attempt #${r.attempt_number}`}
                     </span>
                   )}
                   <span className={`status ${statusClass(r.status)}`}>{statusLabel(r.status)}</span>
                   {canWithdraw(r.status) && (
-                    <button type="button" className="action action-secondary" onClick={() => onWithdraw(r.id)} disabled={busy === r.id}>
+                    <button
+                      type="button"
+                      className="action action-secondary"
+                      onClick={() => onWithdraw(r.id)}
+                      disabled={busy === r.id}
+                    >
                       {busy === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
                       <span>{t.applyWithdraw}</span>
                     </button>

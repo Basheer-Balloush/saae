@@ -339,7 +339,13 @@ function extractTextFromMessage(m: { content?: unknown; parts?: unknown }): stri
   return "";
 }
 
-const ALLOWED_CHAT_HOSTS = [/^(www\.)?aisyria\.org$/, /\.lovable\.app$/, /\.lovableproject\.com$/, /^localhost$/, /^127\.0\.0\.1$/];
+const ALLOWED_CHAT_HOSTS = [
+  /^(www\.)?aisyria\.org$/,
+  /\.lovable\.app$/,
+  /\.lovableproject\.com$/,
+  /^localhost$/,
+  /^127\.0\.0\.1$/,
+];
 function isAllowedChatOrigin(request: Request): boolean {
   const raw = request.headers.get("origin") || request.headers.get("referer");
   if (!raw) return false;
@@ -459,9 +465,13 @@ export const Route = createFileRoute("/api/chat")({
         // The stored history and the knowledge search don't depend on each other,
         // so they run side by side. A button press or a greeting asks for no
         // association facts, so it skips the search.
-        const previous = messages[messages.length - 2] as { role?: string; parts?: unknown } | undefined;
+        const previous = messages[messages.length - 2] as
+          | { role?: string; parts?: unknown }
+          | undefined;
         const previousChoices =
-          previous?.role === "assistant" ? parseChoices(extractTextFromMessage(previous)).choices : [];
+          previous?.role === "assistant"
+            ? parseChoices(extractTextFromMessage(previous)).choices
+            : [];
         const needsKnowledge =
           last?.role === "user" && needsKnowledgeSearch(lastUserText, previousChoices);
         const retrievalStartedAt = Date.now();
@@ -484,22 +494,26 @@ export const Route = createFileRoute("/api/chat")({
         let persistingUser: Promise<void> = Promise.resolve();
         if (conversationId && last?.role === "user" && lastUserText && !isRetry) {
           persistingUser = persistMessage(conversationId, "user", lastUserText, last.parts ?? null);
-          if (storedHistory) history.push({ role: "user", content: lastUserText, parts: last.parts ?? null });
+          if (storedHistory)
+            history.push({ role: "user", content: lastUserText, parts: last.parts ?? null });
         }
 
         const storedMessages: UIMessage[] = history
           // A turn that produced no text (a failed generation, a tool call that
           // errored) must not be replayed: providers reject a message with empty
           // content, which would break every later message in the conversation.
-          .filter((m) => (m.content ?? "").trim().length > 0 || (Array.isArray(m.parts) && m.parts.length > 0))
+          .filter(
+            (m) =>
+              (m.content ?? "").trim().length > 0 || (Array.isArray(m.parts) && m.parts.length > 0),
+          )
           .map((m, i) => ({
-          id: `db-${i}`,
-          role: m.role as "user" | "assistant",
-          parts:
-            Array.isArray(m.parts) && m.parts.length > 0
-              ? (m.parts as UIMessage["parts"])
-              : [{ type: "text", text: m.content ?? "" }],
-        }));
+            id: `db-${i}`,
+            role: m.role as "user" | "assistant",
+            parts:
+              Array.isArray(m.parts) && m.parts.length > 0
+                ? (m.parts as UIMessage["parts"])
+                : [{ type: "text", text: m.content ?? "" }],
+          }));
 
         // If transcript storage is unavailable, fall back to the current user turn
         // so the model always receives a non-empty prompt.
@@ -720,7 +734,8 @@ export const Route = createFileRoute("/api/chat")({
           stopWhen: stepCountIs(12),
           messages: await convertToModelMessages(trustedMessages),
           onChunk: ({ chunk }) => {
-            if (firstTextMs === null && chunk.type === "text-delta") firstTextMs = Date.now() - startedAt;
+            if (firstTextMs === null && chunk.type === "text-delta")
+              firstTextMs = Date.now() - startedAt;
           },
           // Where the time goes, per reply. No message text or personal data.
           onFinish: ({ steps, totalUsage, finishReason }) => {
@@ -749,7 +764,9 @@ export const Route = createFileRoute("/api/chat")({
             console.error("[chat] stream failed", {
               error,
               message: error instanceof Error ? error.message : String(error),
-              status: (error as { statusCode?: number; status?: number })?.statusCode ?? (error as { status?: number })?.status,
+              status:
+                (error as { statusCode?: number; status?: number })?.statusCode ??
+                (error as { status?: number })?.status,
               body: (error as { responseBody?: string })?.responseBody,
             });
             return providerBusyMessage(error, lang === "en" ? "en" : "ar");

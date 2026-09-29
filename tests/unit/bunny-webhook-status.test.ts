@@ -30,6 +30,7 @@ describe("Bunny video object status", () => {
     expect(lessonStatusFromBunnyVideo(8)).toBe("ready");
     expect(lessonStatusFromBunnyVideo(5)).toBe("failed");
     expect(lessonStatusFromBunnyVideo(6)).toBe("failed");
-    for (const s of [0, 1, 2, 3, 7, undefined]) expect(lessonStatusFromBunnyVideo(s)).toBe("processing");
+    for (const s of [0, 1, 2, 3, 7, undefined])
+      expect(lessonStatusFromBunnyVideo(s)).toBe("processing");
   });
 });

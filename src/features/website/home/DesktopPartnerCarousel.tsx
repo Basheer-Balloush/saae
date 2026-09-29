@@ -31,7 +31,9 @@ export function DesktopPartnerCarousel({ partners }: { partners: Partner[] }) {
     () =>
       partners.flatMap((p) => {
         const src = p.lightLogo ?? p.logo;
-        return src ? [{ id: p.id, name: p.name, src: resizedImage(src, 480), scale: p.height / 96 }] : [];
+        return src
+          ? [{ id: p.id, name: p.name, src: resizedImage(src, 480), scale: p.height / 96 }]
+          : [];
       }),
     [partners],
   );

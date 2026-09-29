@@ -14,7 +14,10 @@ const SubmitSchema = z.object({
   full_name_ar: z.string().trim().min(1),
   full_name_en: z.string().trim().min(1),
   phone: z.string().trim().min(1),
-  date_of_birth: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date_of_birth: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/),
   city: z.string().trim().min(1),
   experience_level: z.enum(["lt_1", "1_2", "3_5", "5_plus"]),
   specializations: z.array(z.string().trim().min(1)).min(1),
@@ -66,17 +69,14 @@ export const attachTrainerApplicationFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => AttachSchema.parse(input))
   .handler(async ({ data, context }) => {
-    const { data: fileId, error } = await context.supabase.rpc(
-      "attach_trainer_application_file",
-      {
-        p_application_id: data.application_id,
-        p_kind: data.kind,
-        p_storage_path: data.storage_path,
-        p_original_name: data.original_name,
-        p_content_type: data.content_type ?? "",
-        p_size_bytes: data.size_bytes,
-      },
-    );
+    const { data: fileId, error } = await context.supabase.rpc("attach_trainer_application_file", {
+      p_application_id: data.application_id,
+      p_kind: data.kind,
+      p_storage_path: data.storage_path,
+      p_original_name: data.original_name,
+      p_content_type: data.content_type ?? "",
+      p_size_bytes: data.size_bytes,
+    });
     if (error) throw new Error(error.message);
 
     const { logAuditEvent } = await import("@/lib/auth/audit-log.server");

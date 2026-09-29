@@ -1,78 +1,81 @@
 import type { Lang } from "@/lib/i18n/translations";
 
-export const amsT: Record<Lang, {
-  title: string;
-  subtitle: string;
-  email: string;
-  password: string;
-  signIn: string;
-  signingIn: string;
-  signOut: string;
-  invalidEmail: string;
-  passwordMin: string;
-  signedIn: string;
-  authFailed: string;
-  noAccess: string;
-  install: string;
-  installed: string;
-  installing: string;
-  installNotAvailable: string;
-  iosInstallTitle: string;
-  iosInstallSteps: string;
-  dashboard: string;
-  welcome: string;
-  noSections: string;
-  loading: string;
-  copyright: string;
-  courses: string;
-  addCourse: string;
-  courseNameAr: string;
-  courseNameEn: string;
-  noCourses: string;
-  registrants: string;
-  addRegistrant: string;
-  fullName: string;
-  emailField: string;
-  phone: string;
-  paymentStatus: string;
-  paid: string;
-  unpaid: string;
-  partial: string;
-  waived: string;
-  noRegistrants: string;
-  sessions: string;
-  addSession: string;
-  sessionTitle: string;
-  sessionDate: string;
-  noSessions: string;
-  attendance: string;
-  present: string;
-  save: string;
-  cancel: string;
-  create: string;
-  add: string;
-  delete: string;
-  confirmDelete: string;
-  saved: string;
-  required: string;
-  back: string;
-  open: string;
-  view: string;
-  details: string;
-  exportExcel: string;
-  attendanceCount: string;
-  selectSessionsToExport: string;
-  selectAll: string;
-  absent: string;
-  export: string;
-  confirmDeleteCourse: string;
-  previousRegistrants: string;
-  useDetails: string;
-  linkedFromLms: string;
-  sessionsFromSectionsHint: string;
-  accountCreated: string;
-  emailRequired: string;
-}> = {
+export const amsT: Record<
+  Lang,
+  {
+    title: string;
+    subtitle: string;
+    email: string;
+    password: string;
+    signIn: string;
+    signingIn: string;
+    signOut: string;
+    invalidEmail: string;
+    passwordMin: string;
+    signedIn: string;
+    authFailed: string;
+    noAccess: string;
+    install: string;
+    installed: string;
+    installing: string;
+    installNotAvailable: string;
+    iosInstallTitle: string;
+    iosInstallSteps: string;
+    dashboard: string;
+    welcome: string;
+    noSections: string;
+    loading: string;
+    copyright: string;
+    courses: string;
+    addCourse: string;
+    courseNameAr: string;
+    courseNameEn: string;
+    noCourses: string;
+    registrants: string;
+    addRegistrant: string;
+    fullName: string;
+    emailField: string;
+    phone: string;
+    paymentStatus: string;
+    paid: string;
+    unpaid: string;
+    partial: string;
+    waived: string;
+    noRegistrants: string;
+    sessions: string;
+    addSession: string;
+    sessionTitle: string;
+    sessionDate: string;
+    noSessions: string;
+    attendance: string;
+    present: string;
+    save: string;
+    cancel: string;
+    create: string;
+    add: string;
+    delete: string;
+    confirmDelete: string;
+    saved: string;
+    required: string;
+    back: string;
+    open: string;
+    view: string;
+    details: string;
+    exportExcel: string;
+    attendanceCount: string;
+    selectSessionsToExport: string;
+    selectAll: string;
+    absent: string;
+    export: string;
+    confirmDeleteCourse: string;
+    previousRegistrants: string;
+    useDetails: string;
+    linkedFromLms: string;
+    sessionsFromSectionsHint: string;
+    accountCreated: string;
+    emailRequired: string;
+  }
+> = {
   en: {
     title: "Attendance Management",
     subtitle: "Sign in with your attendance account.",
@@ -89,9 +92,10 @@ export const amsT: Record<Lang, {
     install: "Install app",
     installed: "App already installed",
     installing: "Installing…",
-    installNotAvailable: "Install not available on this browser yet — open this page in Chrome/Edge or use your browser menu \"Add to Home Screen\".",
+    installNotAvailable:
+      'Install not available on this browser yet — open this page in Chrome/Edge or use your browser menu "Add to Home Screen".',
     iosInstallTitle: "Install on iPhone / iPad",
-    iosInstallSteps: "Tap the Share button, then \"Add to Home Screen\".",
+    iosInstallSteps: 'Tap the Share button, then "Add to Home Screen".',
     dashboard: "Dashboard",
     welcome: "Welcome to the Attendance Management System. Sections will appear here soon.",
     noSections: "No sections configured yet.",
@@ -142,7 +146,8 @@ export const amsT: Record<Lang, {
     previousRegistrants: "Previously registered",
     useDetails: "Use details",
     linkedFromLms: "Linked to LMS",
-    sessionsFromSectionsHint: "Sessions mirror the LMS course sections and are managed from the LMS.",
+    sessionsFromSectionsHint:
+      "Sessions mirror the LMS course sections and are managed from the LMS.",
     accountCreated: "Account created — login details emailed to the student.",
     emailRequired: "Email is required for LMS-linked courses.",
   },
@@ -162,9 +167,10 @@ export const amsT: Record<Lang, {
     install: "تثبيت التطبيق",
     installed: "التطبيق مثبّت مسبقًا",
     installing: "جاري التثبيت…",
-    installNotAvailable: "التثبيت غير متاح في هذا المتصفح — افتح الصفحة في Chrome/Edge أو استخدم خيار \"إضافة إلى الشاشة الرئيسية\" من قائمة المتصفح.",
+    installNotAvailable:
+      'التثبيت غير متاح في هذا المتصفح — افتح الصفحة في Chrome/Edge أو استخدم خيار "إضافة إلى الشاشة الرئيسية" من قائمة المتصفح.',
     iosInstallTitle: "التثبيت على iPhone / iPad",
-    iosInstallSteps: "اضغط زر المشاركة ثم \"إضافة إلى الشاشة الرئيسية\".",
+    iosInstallSteps: 'اضغط زر المشاركة ثم "إضافة إلى الشاشة الرئيسية".',
     dashboard: "لوحة التحكم",
     welcome: "مرحبًا بك في نظام إدارة الحضور. ستظهر الأقسام هنا قريبًا.",
     noSections: "لا توجد أقسام مُهيّأة بعد.",

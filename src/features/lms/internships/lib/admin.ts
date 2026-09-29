@@ -92,9 +92,7 @@ export const ListInternshipsInputSchema = z.object({
   status: z.enum(LIFECYCLE).optional(),
   page: z.number().int().min(1).max(1000).default(1),
   page_size: z.number().int().min(5).max(100).default(20),
-  sort: z
-    .enum(["updated_desc", "deadline_asc", "title_asc", "status"])
-    .default("updated_desc"),
+  sort: z.enum(["updated_desc", "deadline_asc", "title_asc", "status"]).default("updated_desc"),
 });
 export type ListInternshipsInput = z.infer<typeof ListInternshipsInputSchema>;
 

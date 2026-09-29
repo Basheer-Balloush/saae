@@ -49,7 +49,9 @@ export const listContacts = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     let q = context.supabase
       .from("crm_contacts")
-      .select("id, display_name, contact_type, primary_email, primary_phone, organization, status, tags, assigned_admin_id, created_at, updated_at")
+      .select(
+        "id, display_name, contact_type, primary_email, primary_phone, organization, status, tags, assigned_admin_id, created_at, updated_at",
+      )
       .order("updated_at", { ascending: false })
       .limit(data.limit ?? 500);
     if (data.type) q = q.eq("contact_type", data.type);
@@ -67,9 +69,7 @@ export const listContacts = createServerFn({ method: "POST" })
 
 export const getContact = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { contactId: string }) =>
-    z.object({ contactId: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: { contactId: string }) => z.object({ contactId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const sb = context.supabase;
@@ -83,9 +83,21 @@ export const getContact = createServerFn({ method: "POST" })
 
     const [identitiesQ, indLeadsQ, compLeadsQ, notesQ, formSubsQ] = await Promise.all([
       sb.from("crm_contact_identities").select("*").eq("contact_id", data.contactId),
-      sb.from("individual_leads").select("*").eq("contact_id", data.contactId).order("created_at", { ascending: false }),
-      sb.from("company_leads").select("*").eq("contact_id", data.contactId).order("created_at", { ascending: false }),
-      sb.from("crm_notes").select("*").eq("contact_id", data.contactId).order("created_at", { ascending: false }),
+      sb
+        .from("individual_leads")
+        .select("*")
+        .eq("contact_id", data.contactId)
+        .order("created_at", { ascending: false }),
+      sb
+        .from("company_leads")
+        .select("*")
+        .eq("contact_id", data.contactId)
+        .order("created_at", { ascending: false }),
+      sb
+        .from("crm_notes")
+        .select("*")
+        .eq("contact_id", data.contactId)
+        .order("created_at", { ascending: false }),
       sb
         .from("dynamic_form_submissions")
         .select("id, form_id, values, submitted_at, dynamic_forms(slug, name_en, name_ar)")
@@ -139,7 +151,11 @@ export const getContact = createServerFn({ method: "POST" })
       });
     }
     for (const s of formSubsQ.data ?? []) {
-      const form = (s as unknown as { dynamic_forms?: { slug: string; name_en: string; name_ar: string } | null }).dynamic_forms;
+      const form = (
+        s as unknown as {
+          dynamic_forms?: { slug: string; name_en: string; name_ar: string } | null;
+        }
+      ).dynamic_forms;
       activities.push({
         kind: "form_submission",
         id: s.id,
@@ -182,34 +198,35 @@ export const getContact = createServerFn({ method: "POST" })
 
 export const createContact = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    display_name: string;
-    contact_type?: "individual" | "company";
-    primary_email?: string;
-    primary_phone?: string;
-    organization?: string;
-    country?: string;
-    city?: string;
-    tags?: string[];
-    status?: LeadStatusT;
-    notes?: string;
-    force?: boolean;
-  }) =>
-    z
-      .object({
-        display_name: z.string().trim().min(1).max(200),
-        contact_type: ContactType.optional(),
-        primary_email: z.string().trim().email().max(255).optional().or(z.literal("")),
-        primary_phone: z.string().trim().max(50).optional().or(z.literal("")),
-        organization: z.string().trim().max(200).optional().or(z.literal("")),
-        country: z.string().trim().max(100).optional().or(z.literal("")),
-        city: z.string().trim().max(100).optional().or(z.literal("")),
-        tags: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
-        status: LeadStatus.optional(),
-        notes: z.string().trim().max(4000).optional(),
-        force: z.boolean().optional(),
-      })
-      .parse(d),
+  .inputValidator(
+    (d: {
+      display_name: string;
+      contact_type?: "individual" | "company";
+      primary_email?: string;
+      primary_phone?: string;
+      organization?: string;
+      country?: string;
+      city?: string;
+      tags?: string[];
+      status?: LeadStatusT;
+      notes?: string;
+      force?: boolean;
+    }) =>
+      z
+        .object({
+          display_name: z.string().trim().min(1).max(200),
+          contact_type: ContactType.optional(),
+          primary_email: z.string().trim().email().max(255).optional().or(z.literal("")),
+          primary_phone: z.string().trim().max(50).optional().or(z.literal("")),
+          organization: z.string().trim().max(200).optional().or(z.literal("")),
+          country: z.string().trim().max(100).optional().or(z.literal("")),
+          city: z.string().trim().max(100).optional().or(z.literal("")),
+          tags: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
+          status: LeadStatus.optional(),
+          notes: z.string().trim().max(4000).optional(),
+          force: z.boolean().optional(),
+        })
+        .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
@@ -237,7 +254,12 @@ export const createContact = createServerFn({ method: "POST" })
           .maybeSingle();
         if (r) dup = r;
       }
-      if (dup) return { ok: false as const, duplicateContactId: dup.contact_id, matchedOn: email ? "email" : "phone" };
+      if (dup)
+        return {
+          ok: false as const,
+          duplicateContactId: dup.contact_id,
+          matchedOn: email ? "email" : "phone",
+        };
     }
 
     const { data: inserted, error } = await sb
@@ -259,49 +281,67 @@ export const createContact = createServerFn({ method: "POST" })
     if (error || !inserted) throw new Error(error?.message ?? "insert failed");
 
     if (email) {
-      await sb.from("crm_contact_identities").insert({ contact_id: inserted.id, identity_type: "email", identity_value: email });
+      await sb
+        .from("crm_contact_identities")
+        .insert({ contact_id: inserted.id, identity_type: "email", identity_value: email });
     }
     if (phone) {
-      await sb.from("crm_contact_identities").insert({ contact_id: inserted.id, identity_type: "phone", identity_value: phone });
+      await sb
+        .from("crm_contact_identities")
+        .insert({ contact_id: inserted.id, identity_type: "phone", identity_value: phone });
     }
     if (data.notes && data.notes.trim()) {
-      await sb.from("crm_notes").insert({ contact_id: inserted.id, author_id: context.userId, body: data.notes.trim() });
+      await sb
+        .from("crm_notes")
+        .insert({ contact_id: inserted.id, author_id: context.userId, body: data.notes.trim() });
     }
     return { ok: true as const, contactId: inserted.id };
   });
 
 export const updateContact = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    contactId: string;
-    display_name?: string;
-    status?: LeadStatusT;
-    assigned_admin_id?: string | null;
-    tags?: string[];
-    organization?: string | null;
-    country?: string | null;
-    city?: string | null;
-  }) =>
-    z
-      .object({
-        contactId: z.string().uuid(),
-        display_name: z.string().trim().min(1).max(200).optional(),
-        status: LeadStatus.optional(),
-        assigned_admin_id: z.string().uuid().nullable().optional(),
-        tags: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
-        organization: z.string().trim().max(200).nullable().optional(),
-        country: z.string().trim().max(100).nullable().optional(),
-        city: z.string().trim().max(100).nullable().optional(),
-      })
-      .parse(d),
+  .inputValidator(
+    (d: {
+      contactId: string;
+      display_name?: string;
+      status?: LeadStatusT;
+      assigned_admin_id?: string | null;
+      tags?: string[];
+      organization?: string | null;
+      country?: string | null;
+      city?: string | null;
+    }) =>
+      z
+        .object({
+          contactId: z.string().uuid(),
+          display_name: z.string().trim().min(1).max(200).optional(),
+          status: LeadStatus.optional(),
+          assigned_admin_id: z.string().uuid().nullable().optional(),
+          tags: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
+          organization: z.string().trim().max(200).nullable().optional(),
+          country: z.string().trim().max(100).nullable().optional(),
+          city: z.string().trim().max(100).nullable().optional(),
+        })
+        .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const patch: Record<string, unknown> = {};
-    for (const k of ["display_name", "status", "assigned_admin_id", "tags", "organization", "country", "city"] as const) {
+    for (const k of [
+      "display_name",
+      "status",
+      "assigned_admin_id",
+      "tags",
+      "organization",
+      "country",
+      "city",
+    ] as const) {
       if (data[k] !== undefined) patch[k] = data[k];
     }
-    const { error } = await context.supabase.from("crm_contacts").update(patch as never).eq("id", data.contactId);
+    const { error } = await context.supabase
+      .from("crm_contacts")
+      .update(patch as never)
+      .eq("id", data.contactId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -349,7 +389,9 @@ export const listLmsStudents = createServerFn({ method: "GET" })
     const sb = context.supabase;
     const { data: enrollments, error } = await sb
       .from("lms_enrollments")
-      .select("id, student_id, progress, enrolled_at, completed_at, lms_courses(id, title_en, title_ar, slug)")
+      .select(
+        "id, student_id, progress, enrolled_at, completed_at, lms_courses(id, title_en, title_ar, slug)",
+      )
       .order("enrolled_at", { ascending: false })
       .limit(2000);
     if (error) throw new Error(error.message);
@@ -362,11 +404,22 @@ export const listLmsStudents = createServerFn({ method: "GET" })
         completed_count: number;
         avg_progress: number;
         last_enrolled_at: string;
-        courses: Array<{ id: string; title_en: string; title_ar: string; slug: string; progress: number; completed: boolean }>;
+        courses: Array<{
+          id: string;
+          title_en: string;
+          title_ar: string;
+          slug: string;
+          progress: number;
+          completed: boolean;
+        }>;
       }
     >();
     for (const e of enrollments ?? []) {
-      const course = (e as unknown as { lms_courses?: { id: string; title_en: string; title_ar: string; slug: string } | null }).lms_courses;
+      const course = (
+        e as unknown as {
+          lms_courses?: { id: string; title_en: string; title_ar: string; slug: string } | null;
+        }
+      ).lms_courses;
       if (!course) continue;
       const existing = byStudent.get(e.student_id) ?? {
         student_id: e.student_id,
@@ -401,7 +454,10 @@ export const listLmsStudents = createServerFn({ method: "GET" })
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const perPage = 1000;
       for (let page = 1; page <= 20; page++) {
-        const { data: list, error: aErr } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+        const { data: list, error: aErr } = await supabaseAdmin.auth.admin.listUsers({
+          page,
+          perPage,
+        });
         if (aErr) break;
         for (const u of list.users) emailsById[u.id] = u.email ?? "";
         if (list.users.length < perPage) break;
@@ -438,12 +494,19 @@ function escLike(s: string) {
   return s.replace(/[%_,()]/g, (m) => `\\${m}`);
 }
 
-function applyIndividualFilters<T extends { or: (v: string) => T; eq: (a: string, b: string) => T; gte: (a: string, b: string) => T; lte: (a: string, b: string) => T }>(
-  q: T, f: LeadFiltersT,
-): T {
+function applyIndividualFilters<
+  T extends {
+    or: (v: string) => T;
+    eq: (a: string, b: string) => T;
+    gte: (a: string, b: string) => T;
+    lte: (a: string, b: string) => T;
+  },
+>(q: T, f: LeadFiltersT): T {
   if (f.search) {
     const s = escLike(f.search);
-    q = q.or(`full_name.ilike.%${s}%,email.ilike.%${s}%,phone.ilike.%${s}%,specialty.ilike.%${s}%,work_field.ilike.%${s}%`);
+    q = q.or(
+      `full_name.ilike.%${s}%,email.ilike.%${s}%,phone.ilike.%${s}%,specialty.ilike.%${s}%,work_field.ilike.%${s}%`,
+    );
   }
   if (f.status) q = q.eq("status", f.status);
   if (f.source) q = q.eq("source", f.source);
@@ -452,12 +515,19 @@ function applyIndividualFilters<T extends { or: (v: string) => T; eq: (a: string
   return q;
 }
 
-function applyCompanyFilters<T extends { or: (v: string) => T; eq: (a: string, b: string) => T; gte: (a: string, b: string) => T; lte: (a: string, b: string) => T }>(
-  q: T, f: LeadFiltersT,
-): T {
+function applyCompanyFilters<
+  T extends {
+    or: (v: string) => T;
+    eq: (a: string, b: string) => T;
+    gte: (a: string, b: string) => T;
+    lte: (a: string, b: string) => T;
+  },
+>(q: T, f: LeadFiltersT): T {
   if (f.search) {
     const s = escLike(f.search);
-    q = q.or(`company_name.ilike.%${s}%,contact_name.ilike.%${s}%,contact_email.ilike.%${s}%,contact_phone.ilike.%${s}%,work_field.ilike.%${s}%`);
+    q = q.or(
+      `company_name.ilike.%${s}%,contact_name.ilike.%${s}%,contact_email.ilike.%${s}%,contact_phone.ilike.%${s}%,work_field.ilike.%${s}%`,
+    );
   }
   if (f.status) q = q.eq("status", f.status);
   if (f.source) q = q.eq("source", f.source);
@@ -506,7 +576,9 @@ const EXPORT_CAP = 10000;
 
 export const exportIndividualLeads = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: LeadFiltersT = {}) => LeadFilters.omit({ limit: true, offset: true }).parse(d))
+  .inputValidator((d: LeadFiltersT = {}) =>
+    LeadFilters.omit({ limit: true, offset: true }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     let q = context.supabase
@@ -525,7 +597,9 @@ export const exportIndividualLeads = createServerFn({ method: "POST" })
 
 export const exportCompanyLeads = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: LeadFiltersT = {}) => LeadFilters.omit({ limit: true, offset: true }).parse(d))
+  .inputValidator((d: LeadFiltersT = {}) =>
+    LeadFilters.omit({ limit: true, offset: true }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     let q = context.supabase
@@ -554,7 +628,12 @@ async function loadLeadDetail(
   const { data: lead, error } = await sb.from(table).select(cols).eq("id", leadId).maybeSingle();
   if (error) throw new Error(error.message);
   if (!lead) throw new Error("lead_not_found");
-  const leadRow = lead as unknown as { id: string; contact_id: string | null; conversation_id: string | null; created_at: string };
+  const leadRow = lead as unknown as {
+    id: string;
+    contact_id: string | null;
+    conversation_id: string | null;
+    created_at: string;
+  };
 
   let contact = null;
   let notes: Array<{ id: string; body: string; created_at: string; author_id: string | null }> = [];
@@ -568,7 +647,11 @@ async function loadLeadDetail(
   if (leadRow.contact_id) {
     const [cQ, nQ, fQ] = await Promise.all([
       sb.from("crm_contacts").select("*").eq("id", leadRow.contact_id).maybeSingle(),
-      sb.from("crm_notes").select("id, body, created_at, author_id").eq("contact_id", leadRow.contact_id).order("created_at", { ascending: false }),
+      sb
+        .from("crm_notes")
+        .select("id, body, created_at, author_id")
+        .eq("contact_id", leadRow.contact_id)
+        .order("created_at", { ascending: false }),
       sb
         .from("dynamic_form_submissions")
         .select("id, submitted_at, values, dynamic_forms(slug, name_en, name_ar)")
@@ -581,8 +664,18 @@ async function loadLeadDetail(
     contact = cQ.data;
     notes = nQ.data ?? [];
     formSubs = ((fQ.data ?? []) as unknown[]).map((r) => {
-      const row = r as { id: string; submitted_at: string; values: unknown; dynamic_forms: { slug: string; name_en: string; name_ar: string } | { slug: string; name_en: string; name_ar: string }[] | null };
-      const df = Array.isArray(row.dynamic_forms) ? row.dynamic_forms[0] ?? null : row.dynamic_forms;
+      const row = r as {
+        id: string;
+        submitted_at: string;
+        values: unknown;
+        dynamic_forms:
+          | { slug: string; name_en: string; name_ar: string }
+          | { slug: string; name_en: string; name_ar: string }[]
+          | null;
+      };
+      const df = Array.isArray(row.dynamic_forms)
+        ? (row.dynamic_forms[0] ?? null)
+        : row.dynamic_forms;
       return { id: row.id, submitted_at: row.submitted_at, values: row.values, dynamic_forms: df };
     });
   }
@@ -691,10 +784,9 @@ export const createIndividualLead = createServerFn({ method: "POST" })
   .inputValidator((d: IndividualCreateT) => IndividualCreate.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { data: result, error } = await context.supabase.rpc(
-      "crm_create_individual_lead_tx",
-      { payload: stripEmpty(data) as never },
-    );
+    const { data: result, error } = await context.supabase.rpc("crm_create_individual_lead_tx", {
+      payload: stripEmpty(data) as never,
+    });
     if (error) throw new Error(error.message);
     return result as { lead_id: string; contact_id: string };
   });
@@ -704,10 +796,9 @@ export const createCompanyLead = createServerFn({ method: "POST" })
   .inputValidator((d: CompanyCreateT) => CompanyCreate.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { data: result, error } = await context.supabase.rpc(
-      "crm_create_company_lead_tx",
-      { payload: stripEmpty(data) as never },
-    );
+    const { data: result, error } = await context.supabase.rpc("crm_create_company_lead_tx", {
+      payload: stripEmpty(data) as never,
+    });
     if (error) throw new Error(error.message);
     return result as { lead_id: string; contact_id: string };
   });
@@ -721,10 +812,10 @@ export const updateIndividualLead = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { leadId, ...rest } = data;
-    const { data: result, error } = await context.supabase.rpc(
-      "crm_update_individual_lead_tx",
-      { _lead_id: leadId, payload: rest as never },
-    );
+    const { data: result, error } = await context.supabase.rpc("crm_update_individual_lead_tx", {
+      _lead_id: leadId,
+      payload: rest as never,
+    });
     if (error) throw new Error(error.message);
     return result;
   });
@@ -735,18 +826,19 @@ export const updateCompanyLead = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { leadId, ...rest } = data;
-    const { data: result, error } = await context.supabase.rpc(
-      "crm_update_company_lead_tx",
-      { _lead_id: leadId, payload: rest as never },
-    );
+    const { data: result, error } = await context.supabase.rpc("crm_update_company_lead_tx", {
+      _lead_id: leadId,
+      payload: rest as never,
+    });
     if (error) throw new Error(error.message);
     return result;
   });
 
 export const setLeadStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { leadType: "individual" | "company"; leadId: string; status: LeadStatusT }) =>
-    z.object({ leadType: LeadType, leadId: z.string().uuid(), status: LeadStatus }).parse(d),
+  .inputValidator(
+    (d: { leadType: "individual" | "company"; leadId: string; status: LeadStatusT }) =>
+      z.object({ leadType: LeadType, leadId: z.string().uuid(), status: LeadStatus }).parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
@@ -763,7 +855,11 @@ export const addLeadNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { leadType: "individual" | "company"; leadId: string; body: string }) =>
     z
-      .object({ leadType: LeadType, leadId: z.string().uuid(), body: z.string().trim().min(1).max(20000) })
+      .object({
+        leadType: LeadType,
+        leadId: z.string().uuid(),
+        body: z.string().trim().min(1).max(20000),
+      })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -779,15 +875,16 @@ export const addLeadNote = createServerFn({ method: "POST" })
 
 export const editLeadNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { leadType: "individual" | "company"; leadId: string; noteId: string; body: string }) =>
-    z
-      .object({
-        leadType: LeadType,
-        leadId: z.string().uuid(),
-        noteId: z.string().uuid(),
-        body: z.string().trim().min(1).max(20000),
-      })
-      .parse(d),
+  .inputValidator(
+    (d: { leadType: "individual" | "company"; leadId: string; noteId: string; body: string }) =>
+      z
+        .object({
+          leadType: LeadType,
+          leadId: z.string().uuid(),
+          noteId: z.string().uuid(),
+          body: z.string().trim().min(1).max(20000),
+        })
+        .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
@@ -819,7 +916,13 @@ export const listLatestNotesForContacts = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    type NoteEntry = { id: string; contact_id: string; body: string; created_at: string; updated_at: string };
+    type NoteEntry = {
+      id: string;
+      contact_id: string;
+      body: string;
+      created_at: string;
+      updated_at: string;
+    };
     if (data.contactIds.length === 0) return { notes: {} as Record<string, NoteEntry> };
     const { data: rows, error } = await context.supabase
       .from("crm_notes")
@@ -842,4 +945,3 @@ export const listLatestNotesForContacts = createServerFn({ method: "POST" })
     }
     return { notes: map };
   });
-

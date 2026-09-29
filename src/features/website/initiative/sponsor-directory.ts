@@ -9,7 +9,11 @@
  * Donor names come from a public form, so every value from a row goes through
  * escapeHtml, and a logo only becomes an image source after safeLogoUrl.
  */
-import { formatNewsDate, escapeHtml, replaceRegion } from "@/features/website/lib/cinematic-db-content";
+import {
+  formatNewsDate,
+  escapeHtml,
+  replaceRegion,
+} from "@/features/website/lib/cinematic-db-content";
 import {
   displayName,
   initialsFor,

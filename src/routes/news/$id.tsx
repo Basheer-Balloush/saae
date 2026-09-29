@@ -29,7 +29,12 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const FALLBACK_OG_IMAGE =
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
 
-type ArticleMeta = { title: string; description: string; image: string | null; publishedAt: string | null };
+type ArticleMeta = {
+  title: string;
+  description: string;
+  image: string | null;
+  publishedAt: string | null;
+};
 
 type LoaderData = { meta: ArticleMeta | null; fragments: ArticleFragments };
 
@@ -62,7 +67,12 @@ export const Route = createFileRoute("/news/$id")({
           : `${title} — ${rawDesc || "خبر من الجمعية السورية للذكاء الصنعي وريادة الأعمال (SAAE)."}`;
       const description = fullDesc.length > 160 ? `${fullDesc.slice(0, 157).trimEnd()}…` : fullDesc;
       return {
-        meta: { title, description, image: article.image_url ?? null, publishedAt: article.published_at ?? null },
+        meta: {
+          title,
+          description,
+          image: article.image_url ?? null,
+          publishedAt: article.published_at ?? null,
+        },
         fragments: renderArticle(article, (rel ?? []) as unknown as RelatedNewsRow[]),
       };
     } catch {

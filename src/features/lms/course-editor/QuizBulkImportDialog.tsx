@@ -206,9 +206,7 @@ export function QuizBulkImportDialog({
       const trimmed = d.choices.map((c) => c.trim());
       // Empty choices are dropped, so the stored index must be renumbered
       // against the kept choices or it points at the wrong answer.
-      const keptBeforeCorrect = trimmed
-        .slice(0, d.correct_index)
-        .filter((c) => c !== "").length;
+      const keptBeforeCorrect = trimmed.slice(0, d.correct_index).filter((c) => c !== "").length;
       return {
         quiz_id: quizId,
         question: d.question.trim(),

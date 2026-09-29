@@ -47,13 +47,19 @@ export const grantRoleByEmail = createServerFn({ method: "POST" })
       const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
       if (error) throw new Error(error.message);
       const u = list.users.find((x) => (x.email ?? "").toLowerCase() === data.email);
-      if (u) { foundId = u.id; break; }
+      if (u) {
+        foundId = u.id;
+        break;
+      }
       if (list.users.length < perPage) break;
       page++;
     }
     if (!foundId) throw new Error("لم يتم العثور على مستخدم بهذا الإيميل / User not found");
 
-    const { error: roleError } = await context.supabase.rpc("lms_set_user_role", { _user_id: foundId, _role: data.role });
+    const { error: roleError } = await context.supabase.rpc("lms_set_user_role", {
+      _user_id: foundId,
+      _role: data.role,
+    });
     if (roleError) throw new Error(roleError.message);
     return { ok: true, userId: foundId };
   });
@@ -65,7 +71,8 @@ export const getEmailsForUsers = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertLmsAdmin(context.userId);
-    if (data.userIds.length === 0) return { emails: {} as Record<string, string>, names: {} as Record<string, string> };
+    if (data.userIds.length === 0)
+      return { emails: {} as Record<string, string>, names: {} as Record<string, string> };
     const wanted = new Set(data.userIds);
     const emails: Record<string, string> = {};
     const names: Record<string, string> = {};

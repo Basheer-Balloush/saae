@@ -314,7 +314,8 @@ function ScrollRestoration() {
     };
     // A whole-page Back (from a page outside the app) arrives as a load.
     const entry = performance.getEntriesByType?.("navigation")[0] as
-      PerformanceNavigationTiming | undefined;
+      | PerformanceNavigationTiming
+      | undefined;
     if (entry?.type === "back_forward") hold();
 
     let ticking = false;

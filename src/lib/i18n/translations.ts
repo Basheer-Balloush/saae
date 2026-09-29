@@ -1,36 +1,99 @@
 export type Lang = "en" | "ar";
 
 type Dict = {
-  nav: { home: string; news: string; communities: string; achievements: string; partners: string; about: string; contact: string; cta: string; langToggle: string };
+  nav: {
+    home: string;
+    news: string;
+    communities: string;
+    achievements: string;
+    partners: string;
+    about: string;
+    contact: string;
+    cta: string;
+    langToggle: string;
+  };
   news: {
-    eyebrow: string; title: string; subtitle: string; readMore: string; viewAll: string;
-    categories: { workshop: string; partnership: string; research: string; education: string; community: string; event: string };
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    readMore: string;
+    viewAll: string;
+    categories: {
+      workshop: string;
+      partnership: string;
+      research: string;
+      education: string;
+      community: string;
+      event: string;
+    };
     items: {
       featured: { title: string; excerpt: string; date: string };
-      a: { title: string; date: string }; b: { title: string; date: string }; c: { title: string; date: string };
-      d: { title: string; date: string }; e: { title: string; date: string }; f: { title: string; date: string }; g: { title: string; date: string };
+      a: { title: string; date: string };
+      b: { title: string; date: string };
+      c: { title: string; date: string };
+      d: { title: string; date: string };
+      e: { title: string; date: string };
+      f: { title: string; date: string };
+      g: { title: string; date: string };
     };
   };
   communities: {
-    eyebrow: string; title: string; subtitle: string; cta: string; discover: string;
-    cards: Record<"data" | "architecture" | "medical" | "research" | "software" | "economy" | "trainers" | "media", { title: string; desc: string }>;
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    cta: string;
+    discover: string;
+    cards: Record<
+      | "data"
+      | "architecture"
+      | "medical"
+      | "research"
+      | "software"
+      | "economy"
+      | "trainers"
+      | "media",
+      { title: string; desc: string }
+    >;
   };
-  achievements: { eyebrow: string; title: string; body: string; stats: { value: string; label: string }[] };
+  achievements: {
+    eyebrow: string;
+    title: string;
+    body: string;
+    stats: { value: string; label: string }[];
+  };
   partners: { eyebrow: string; title: string };
   assistant: {
-    eyebrow: string; title: string; subtitle: string; cta: string; soon: string;
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    cta: string;
+    soon: string;
     features: {
       inquiries: { title: string; desc: string };
       lead: { title: string; desc: string };
       suggestions: { title: string; desc: string };
     };
-    chat: { name: string; status: string; user: string; bot: string; typing: string; thinking: string; analyzing: string };
+    chat: {
+      name: string;
+      status: string;
+      user: string;
+      bot: string;
+      typing: string;
+      thinking: string;
+      analyzing: string;
+    };
     greeting: string;
   };
   footer: {
-    mission: string; quickLinks: string; contact: string;
+    mission: string;
+    quickLinks: string;
+    contact: string;
     form: { name: string; email: string; message: string; send: string; sent: string };
-    hq: string; address: string; visit: string; rights: string; madeIn: string;
+    hq: string;
+    address: string;
+    visit: string;
+    rights: string;
+    madeIn: string;
   };
 };
 
@@ -193,7 +256,13 @@ export const translations: Record<Lang, Dict> = {
         "The first official organization in Syria dedicated to artificial intelligence, innovation, and entrepreneurial thinking — empowering Syrian talent to rebuild and uplift our country.",
       quickLinks: "Quick links",
       contact: "Get in touch",
-      form: { name: "Your name", email: "Email", message: "Message", send: "Send message", sent: "Message sent — thank you." },
+      form: {
+        name: "Your name",
+        email: "Email",
+        message: "Message",
+        send: "Send message",
+        sent: "Message sent — thank you.",
+      },
       hq: "Damascus headquarters",
       address: "Damascus — near the Ministry of Higher Education & Scientific Research",
       visit: "Visit us",
@@ -216,8 +285,7 @@ export const translations: Record<Lang, Dict> = {
     news: {
       eyebrow: "غرفة الأخبار",
       title: "الأخبار البارزة والنشاطات الأخيرة",
-      subtitle:
-        "قصص وأبحاث ومحطات مهمة من الجمعية السورية للذكاء الاصطناعي وريادة الأعمال.",
+      subtitle: "قصص وأبحاث ومحطات مهمة من الجمعية السورية للذكاء الاصطناعي وريادة الأعمال.",
       readMore: "اقرأ المقال كاملاً",
       viewAll: "عرض جميع الأخبار والنشاطات",
       categories: {
@@ -359,7 +427,13 @@ export const translations: Record<Lang, Dict> = {
         "أول منظمة رسمية في سورية مكرّسة للذكاء الاصطناعي والابتكار والتفكير الريادي — تمكّن المواهب السورية لإعادة بناء بلدنا والارتقاء به.",
       quickLinks: "روابط سريعة",
       contact: "تواصل معنا",
-      form: { name: "الاسم", email: "البريد الإلكتروني", message: "رسالتك", send: "إرسال الرسالة", sent: "تم إرسال رسالتك، شكراً لك." },
+      form: {
+        name: "الاسم",
+        email: "البريد الإلكتروني",
+        message: "رسالتك",
+        send: "إرسال الرسالة",
+        sent: "تم إرسال رسالتك، شكراً لك.",
+      },
       hq: "المقر الرئيسي - دمشق",
       address: "دمشق - بجانب وزارة التعليم العالي والبحث العلمي",
       visit: "زورونا",

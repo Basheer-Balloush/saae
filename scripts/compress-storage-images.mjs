@@ -21,7 +21,9 @@ import { join } from "node:path";
 const URL_BASE = process.env.SUPABASE_URL?.replace(/\/+$/, "");
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!URL_BASE || !KEY) {
-  console.error("Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (Cloudflare → Settings → Runtime variables).");
+  console.error(
+    "Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (Cloudflare → Settings → Runtime variables).",
+  );
   process.exit(1);
 }
 const args = process.argv.slice(2);
@@ -51,7 +53,12 @@ async function listAll(bucket, prefix = "") {
     const res = await api(`object/list/${bucket}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ prefix, limit: 100, offset, sortBy: { column: "name", order: "asc" } }),
+      body: JSON.stringify({
+        prefix,
+        limit: 100,
+        offset,
+        sortBy: { column: "name", order: "asc" },
+      }),
     });
     if (!res.ok) throw new Error(`list ${bucket}: ${res.status} ${await res.text()}`);
     const page = await res.json();
@@ -60,7 +67,8 @@ async function listAll(bucket, prefix = "") {
       const path = prefix ? `${prefix}/${entry.name}` : entry.name;
       // A folder comes back without metadata; walk into it.
       if (!entry.id && !entry.metadata) found.push(...(await listAll(bucket, path)));
-      else found.push({ path, size: entry.metadata?.size ?? 0, type: entry.metadata?.mimetype ?? "" });
+      else
+        found.push({ path, size: entry.metadata?.size ?? 0, type: entry.metadata?.mimetype ?? "" });
     }
     if (page.length < 100) break;
   }
@@ -86,7 +94,9 @@ try {
     console.log(`\n${bucket}: ${targets.length} of ${files.length} files above ${kb(MIN_BYTES)}`);
 
     for (const file of targets) {
-      const res = await api(`object/${bucket}/${file.path.split("/").map(encodeURIComponent).join("/")}`);
+      const res = await api(
+        `object/${bucket}/${file.path.split("/").map(encodeURIComponent).join("/")}`,
+      );
       if (!res.ok) {
         console.error(`  ! download ${file.path}: ${res.status}`);
         continue;
@@ -111,11 +121,18 @@ try {
       changed += 1;
       console.log(`  ${APPLY ? "→" : "·"} ${file.path}  ${kb(file.size)} → ${kb(bytes.length)}`);
       if (!APPLY) continue;
-      const put = await api(`object/${bucket}/${file.path.split("/").map(encodeURIComponent).join("/")}`, {
-        method: "PUT",
-        headers: { "content-type": "image/webp", "cache-control": "max-age=31536000", "x-upsert": "true" },
-        body: bytes,
-      });
+      const put = await api(
+        `object/${bucket}/${file.path.split("/").map(encodeURIComponent).join("/")}`,
+        {
+          method: "PUT",
+          headers: {
+            "content-type": "image/webp",
+            "cache-control": "max-age=31536000",
+            "x-upsert": "true",
+          },
+          body: bytes,
+        },
+      );
       if (!put.ok) console.error(`  ! upload ${file.path}: ${put.status} ${await put.text()}`);
     }
   }

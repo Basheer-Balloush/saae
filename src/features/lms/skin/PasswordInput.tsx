@@ -15,7 +15,15 @@ export function PasswordInput(props: Props) {
       <button
         type="button"
         className="pass-toggle"
-        aria-label={show ? (ar ? "إخفاء كلمة المرور" : "Hide password") : ar ? "إظهار كلمة المرور" : "Show password"}
+        aria-label={
+          show
+            ? ar
+              ? "إخفاء كلمة المرور"
+              : "Hide password"
+            : ar
+              ? "إظهار كلمة المرور"
+              : "Show password"
+        }
         aria-pressed={show}
         onClick={() => setShow((v) => !v)}
       >

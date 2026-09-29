@@ -1,25 +1,29 @@
-import { getSiteUrl, sendTransactionalEmail, assertEmailRecipientAllowed } from '@/lib/email/email-delivery.server'
-import * as React from 'react'
-import { render } from '@react-email/components'
-import { AmsAccountCreatedEmail } from '../../../lib/email/templates/ams-account-created'
+import {
+  getSiteUrl,
+  sendTransactionalEmail,
+  assertEmailRecipientAllowed,
+} from "@/lib/email/email-delivery.server";
+import * as React from "react";
+import { render } from "@react-email/components";
+import { AmsAccountCreatedEmail } from "../../../lib/email/templates/ams-account-created";
 
-type Lang = 'ar' | 'en'
+type Lang = "ar" | "en";
 
 const SITE_NAMES: Record<Lang, string> = {
-  ar: 'الجمعية السورية للذكاء الاصطناعي وريادة الأعمال',
-  en: 'Syrian Association for AI & Entrepreneurship',
-}
+  ar: "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال",
+  en: "Syrian Association for AI & Entrepreneurship",
+};
 
 export async function sendAmsAccountCreatedEmail(input: {
-  to: string
-  fullName: string
-  password: string
-  courseName: string
-  lang: Lang
+  to: string;
+  fullName: string;
+  password: string;
+  courseName: string;
+  lang: Lang;
 }) {
-  assertEmailRecipientAllowed(input.to)
+  assertEmailRecipientAllowed(input.to);
 
-  const siteName = SITE_NAMES[input.lang]
+  const siteName = SITE_NAMES[input.lang];
   const element = React.createElement(AmsAccountCreatedEmail, {
     siteName,
     siteUrl: getSiteUrl(),
@@ -29,9 +33,14 @@ export async function sendAmsAccountCreatedEmail(input: {
     password: input.password,
     courseName: input.courseName,
     lang: input.lang,
-  })
-  const html = await render(element)
-  const text = await render(element, { plainText: true })
+  });
+  const html = await render(element);
+  const text = await render(element, { plainText: true });
 
-  await sendTransactionalEmail({ to: input.to, subject: input.lang === 'ar' ? 'تم إنشاء حسابك على المنصة' : 'Your account has been created', html, text })
+  await sendTransactionalEmail({
+    to: input.to,
+    subject: input.lang === "ar" ? "تم إنشاء حسابك على المنصة" : "Your account has been created",
+    html,
+    text,
+  });
 }

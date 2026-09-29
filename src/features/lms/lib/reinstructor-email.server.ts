@@ -1,10 +1,18 @@
-import { getSiteUrl, sendTransactionalEmail, assertEmailRecipientAllowed } from '@/lib/email/email-delivery.server'
+import {
+  getSiteUrl,
+  sendTransactionalEmail,
+  assertEmailRecipientAllowed,
+} from "@/lib/email/email-delivery.server";
 
-export async function sendReinstructorEmail(input: { idempotencyKey?: string; to: string; fullName: string }) {
-  assertEmailRecipientAllowed(input.to)
+export async function sendReinstructorEmail(input: {
+  idempotencyKey?: string;
+  to: string;
+  fullName: string;
+}) {
+  assertEmailRecipientAllowed(input.to);
 
-  const name = (input.fullName || '').trim() || 'الأستاذ/ة'
-  const subject = 'يرجى إعادة تعبئة نموذج اعتماد المدرّبين — الجمعية السورية للذكاء الاصطناعي'
+  const name = (input.fullName || "").trim() || "الأستاذ/ة";
+  const subject = "يرجى إعادة تعبئة نموذج اعتماد المدرّبين — الجمعية السورية للذكاء الاصطناعي";
 
   const html = `<!doctype html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"/></head>
@@ -34,14 +42,20 @@ export async function sendReinstructorEmail(input: { idempotencyKey?: string; to
       إذا لم تكن قد قدّمت طلباً من قبل يمكنك تجاهل هذه الرسالة.
     </p>
   </div>
-</body></html>`
+</body></html>`;
 
   const text = `مرحباً ${name},
 
 تم تحديث نظام اعتماد المدرّبين. يرجى إعادة تعبئة نموذج الطلب عبر الرابط:
 ${getSiteUrl()}/learning-management-system/trainer-apply
 
-— الجمعية السورية للذكاء الاصطناعي وريادة الأعمال`
+— الجمعية السورية للذكاء الاصطناعي وريادة الأعمال`;
 
-  await sendTransactionalEmail({ to: input.to, subject: subject, html, text, idempotencyKey: input.idempotencyKey })
+  await sendTransactionalEmail({
+    to: input.to,
+    subject: subject,
+    html,
+    text,
+    idempotencyKey: input.idempotencyKey,
+  });
 }

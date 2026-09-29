@@ -48,8 +48,17 @@ export function FaqAccordion() {
       {FAQ.map((item, i) => {
         const isOpen = open === i;
         return (
-          <div key={item.q.en} className="faq-item" onMouseEnter={() => setOpen(i)} onMouseLeave={() => setOpen(null)}>
-            <button type="button" aria-expanded={isOpen} onClick={() => setOpen((cur) => (cur === i ? null : i))}>
+          <div
+            key={item.q.en}
+            className="faq-item"
+            onMouseEnter={() => setOpen(i)}
+            onMouseLeave={() => setOpen(null)}
+          >
+            <button
+              type="button"
+              aria-expanded={isOpen}
+              onClick={() => setOpen((cur) => (cur === i ? null : i))}
+            >
               <span>{item.q[lang]}</span>
               <span className="faq-mark" aria-hidden="true">
                 +

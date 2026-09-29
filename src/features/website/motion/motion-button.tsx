@@ -69,8 +69,7 @@ function rootClassName(
     variant === "secondary"
       ? "border border-[var(--motion-button-border,var(--input))] bg-transparent"
       : "bg-[var(--motion-button-surface,var(--background))]",
-    animate &&
-      "transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none",
+    animate && "transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none",
     animate && !mounted && "translate-y-2 opacity-0",
     className,
     classes,
@@ -110,7 +109,11 @@ export default function MotionButton(props: MotionButtonProps) {
       <a
         {...anchorProps}
         target={anchorProps.target}
-        rel={anchorProps.target === "_blank" ? (anchorProps.rel ?? "noopener noreferrer") : anchorProps.rel}
+        rel={
+          anchorProps.target === "_blank"
+            ? (anchorProps.rel ?? "noopener noreferrer")
+            : anchorProps.rel
+        }
         data-slot="motion-button"
         data-variant={variant}
         style={style}

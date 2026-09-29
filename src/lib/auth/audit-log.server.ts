@@ -8,7 +8,9 @@ import { buildAuditEvent, newCorrelationId, type AuditEvent } from "@/lib/auth/a
  * audit failure must not roll back a legitimate business command, but it is
  * always visible in logs.
  */
-export async function logAuditEvent(event: AuditEvent): Promise<{ ok: boolean; correlation_id: string }> {
+export async function logAuditEvent(
+  event: AuditEvent,
+): Promise<{ ok: boolean; correlation_id: string }> {
   const built = buildAuditEvent(event);
   const correlationId = built.correlation_id ?? newCorrelationId();
 

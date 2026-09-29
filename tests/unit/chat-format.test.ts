@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { chatErrorText, formatMessage } from "../../src/features/chat/lib/chat-format";
 
-const plain = (t: string) => formatMessage(t).map((s) => s.text).join("");
+const plain = (t: string) =>
+  formatMessage(t)
+    .map((s) => s.text)
+    .join("");
 
 describe("what the visitor reads", () => {
   it("shows bold as bold instead of printing the stars", () => {
@@ -13,7 +16,9 @@ describe("what the visitor reads", () => {
   });
 
   it("never leaves a stray star on screen", () => {
-    expect(plain("**(Question 1 of 6)**\n**Who are you?**")).toBe("(Question 1 of 6)\nWho are you?");
+    expect(plain("**(Question 1 of 6)**\n**Who are you?**")).toBe(
+      "(Question 1 of 6)\nWho are you?",
+    );
     expect(plain("an unclosed **marker here")).toBe("an unclosed marker here");
   });
 
@@ -37,7 +42,9 @@ describe("what the visitor reads", () => {
 
 describe("links in answers", () => {
   it("turns a bare course URL into a link, on www, leaving the full stop outside", () => {
-    expect(formatMessage("سجّل هنا: https://aisyria.org/learning-management-system/courses/gen-ai-09.")).toEqual([
+    expect(
+      formatMessage("سجّل هنا: https://aisyria.org/learning-management-system/courses/gen-ai-09."),
+    ).toEqual([
       { text: "سجّل هنا: ", bold: false },
       {
         text: "https://www.aisyria.org/learning-management-system/courses/gen-ai-09",

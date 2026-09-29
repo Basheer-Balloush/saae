@@ -13,7 +13,9 @@ export function RouteErrorFallback({ error, reset }: { error: unknown; reset: ()
           {isAr ? "تعذّر تحميل الصفحة" : "This page didn't load"}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {isAr ? "حدث خطأ. جرّب مرة أخرى أو عُد إلى الرئيسية." : "Something went wrong. Try again or head back home."}
+          {isAr
+            ? "حدث خطأ. جرّب مرة أخرى أو عُد إلى الرئيسية."
+            : "Something went wrong. Try again or head back home."}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button

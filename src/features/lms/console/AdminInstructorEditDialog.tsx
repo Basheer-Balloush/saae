@@ -16,8 +16,15 @@ import { formDraftKey } from "@/lib/form-draft";
 import { DraftNotice } from "@/components/console/DraftNotice";
 
 type InstructorEdits = {
-  fullNameAr: string; fullNameEn: string; specialtyAr: string; specialtyEn: string;
-  bioAr: string; bioEn: string; linkedin: string; github: string; avatarUrl: string;
+  fullNameAr: string;
+  fullNameEn: string;
+  specialtyAr: string;
+  specialtyEn: string;
+  bioAr: string;
+  bioEn: string;
+  linkedin: string;
+  github: string;
+  avatarUrl: string;
 };
 
 export function AdminInstructorEditDialog({
@@ -45,13 +52,28 @@ export function AdminInstructorEditDialog({
   const [github, setGithub] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [uploadPct, setUploadPct] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
+  const [uploadPct, setUploadPct] = useState<{
+    pct: number;
+    loaded: number;
+    total: number;
+    name: string;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { user } = useLmsAuth();
   const [loadedValues, setLoadedValues] = useState<InstructorEdits | null>(null);
   const currentValues = useMemo<InstructorEdits>(
-    () => ({ fullNameAr, fullNameEn, specialtyAr, specialtyEn, bioAr, bioEn, linkedin, github, avatarUrl }),
+    () => ({
+      fullNameAr,
+      fullNameEn,
+      specialtyAr,
+      specialtyEn,
+      bioAr,
+      bioEn,
+      linkedin,
+      github,
+      avatarUrl,
+    }),
     [fullNameAr, fullNameEn, specialtyAr, specialtyEn, bioAr, bioEn, linkedin, github, avatarUrl],
   );
   const draft = useRecordDraft<InstructorEdits>({
@@ -59,10 +81,15 @@ export function AdminInstructorEditDialog({
     loaded: loadedValues,
     current: loadedValues ? currentValues : null,
     apply: (d) => {
-      setFullNameAr(d.fullNameAr); setFullNameEn(d.fullNameEn);
-      setSpecialtyAr(d.specialtyAr); setSpecialtyEn(d.specialtyEn);
-      setBioAr(d.bioAr); setBioEn(d.bioEn);
-      setLinkedin(d.linkedin); setGithub(d.github); setAvatarUrl(d.avatarUrl);
+      setFullNameAr(d.fullNameAr);
+      setFullNameEn(d.fullNameEn);
+      setSpecialtyAr(d.specialtyAr);
+      setSpecialtyEn(d.specialtyEn);
+      setBioAr(d.bioAr);
+      setBioEn(d.bioEn);
+      setLinkedin(d.linkedin);
+      setGithub(d.github);
+      setAvatarUrl(d.avatarUrl);
     },
   });
 
@@ -77,7 +104,8 @@ export function AdminInstructorEditDialog({
     setUploading(true);
     setUploadPct({ pct: 0, loaded: 0, total: file.size, name: file.name });
     try {
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const ext =
+        (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
       const path = `${userId}/avatar-${Date.now()}.${ext}`;
       const { publicUrl } = await uploadToSupabaseStorage({
         bucket: "lms-media",
@@ -104,7 +132,9 @@ export function AdminInstructorEditDialog({
     (async () => {
       const { data } = await supabase
         .from("lms_instructors")
-        .select("full_name,full_name_ar,full_name_en,bio,bio_ar,bio_en,specialty,specialty_ar,specialty_en,linkedin_url,github_url,avatar_url")
+        .select(
+          "full_name,full_name_ar,full_name_en,bio,bio_ar,bio_en,specialty,specialty_ar,specialty_en,linkedin_url,github_url,avatar_url",
+        )
         .eq("user_id", userId)
         .maybeSingle();
       const d = (data ?? {}) as Record<string, string | null>;
@@ -157,7 +187,10 @@ export function AdminInstructorEditDialog({
       })
       .eq("user_id", userId);
     setSaving(false);
-    if (error) { toast.error(toUserMessage(error)); return; }
+    if (error) {
+      toast.error(toUserMessage(error));
+      return;
+    }
     toast.success(ar ? "تم الحفظ" : "Saved");
     draft.clear();
     onSaved?.();
@@ -178,31 +211,57 @@ export function AdminInstructorEditDialog({
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
                 <Label>الاسم (عربي)</Label>
-                <Input dir="rtl" value={fullNameAr} onChange={(e) => setFullNameAr(e.target.value)} />
+                <Input
+                  dir="rtl"
+                  value={fullNameAr}
+                  onChange={(e) => setFullNameAr(e.target.value)}
+                />
               </div>
               <div>
                 <Label>Name (English)</Label>
-                <Input dir="ltr" value={fullNameEn} onChange={(e) => setFullNameEn(e.target.value)} />
+                <Input
+                  dir="ltr"
+                  value={fullNameEn}
+                  onChange={(e) => setFullNameEn(e.target.value)}
+                />
               </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
                 <Label>الاختصاص (عربي)</Label>
-                <Input dir="rtl" value={specialtyAr} onChange={(e) => setSpecialtyAr(e.target.value)} />
+                <Input
+                  dir="rtl"
+                  value={specialtyAr}
+                  onChange={(e) => setSpecialtyAr(e.target.value)}
+                />
               </div>
               <div>
                 <Label>Specialty (English)</Label>
-                <Input dir="ltr" value={specialtyEn} onChange={(e) => setSpecialtyEn(e.target.value)} />
+                <Input
+                  dir="ltr"
+                  value={specialtyEn}
+                  onChange={(e) => setSpecialtyEn(e.target.value)}
+                />
               </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
                 <Label>نبذة (عربي)</Label>
-                <Textarea dir="rtl" rows={3} value={bioAr} onChange={(e) => setBioAr(e.target.value)} />
+                <Textarea
+                  dir="rtl"
+                  rows={3}
+                  value={bioAr}
+                  onChange={(e) => setBioAr(e.target.value)}
+                />
               </div>
               <div>
                 <Label>Bio (English)</Label>
-                <Textarea dir="ltr" rows={3} value={bioEn} onChange={(e) => setBioEn(e.target.value)} />
+                <Textarea
+                  dir="ltr"
+                  rows={3}
+                  value={bioEn}
+                  onChange={(e) => setBioEn(e.target.value)}
+                />
               </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
@@ -219,7 +278,11 @@ export function AdminInstructorEditDialog({
               <Label>{ar ? "الصورة الشخصية" : "Avatar"}</Label>
               <div className="mt-2 flex items-center gap-3">
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="avatar" className="h-16 w-16 rounded-full object-cover border border-border" />
+                  <img
+                    src={avatarUrl}
+                    alt="avatar"
+                    className="h-16 w-16 rounded-full object-cover border border-border"
+                  />
                 ) : (
                   <div className="h-16 w-16 rounded-full bg-muted border border-border" />
                 )}
@@ -230,21 +293,39 @@ export function AdminInstructorEditDialog({
                   className="hidden"
                   onChange={onPickFile}
                 />
-                <Button type="button" variant="outline" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
-                  {uploading ? <Loader2 className="h-4 w-4 animate-spin mx-2" /> : <Upload className="h-4 w-4 mx-2" />}
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={uploading}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mx-2" />
+                  ) : (
+                    <Upload className="h-4 w-4 mx-2" />
+                  )}
                   {ar ? "رفع صورة" : "Upload image"}
                 </Button>
               </div>
               {uploadPct && (
                 <div className="mt-2">
-                  <UploadProgress percent={uploadPct.pct} loaded={uploadPct.loaded} total={uploadPct.total} label={uploadPct.name} />
+                  <UploadProgress
+                    percent={uploadPct.pct}
+                    loaded={uploadPct.loaded}
+                    total={uploadPct.total}
+                    label={uploadPct.name}
+                  />
                 </div>
               )}
-              <Label className="mt-3 block text-xs text-muted-foreground">{ar ? "أو رابط مباشر" : "Or direct URL"}</Label>
+              <Label className="mt-3 block text-xs text-muted-foreground">
+                {ar ? "أو رابط مباشر" : "Or direct URL"}
+              </Label>
               <Input dir="ltr" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} />
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>{ar ? "إلغاء" : "Cancel"}</Button>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                {ar ? "إلغاء" : "Cancel"}
+              </Button>
               <Button onClick={onSave} disabled={saving}>
                 {saving && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
                 {ar ? "حفظ" : "Save"}

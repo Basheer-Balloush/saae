@@ -9,12 +9,25 @@ export function useAmsAuth() {
   useEffect(() => {
     if (authLoading || !user || role !== "lms_instructor") return;
     let cancelled = false;
-    supabase.rpc("has_ams_portal_access").then(({ data, error }) => {
-      if (!cancelled) setResult({ key, allowed: !error && !!data });
-    }, () => { if (!cancelled) setResult({ key, allowed: false }); });
-    return () => { cancelled = true; };
+    supabase.rpc("has_ams_portal_access").then(
+      ({ data, error }) => {
+        if (!cancelled) setResult({ key, allowed: !error && !!data });
+      },
+      () => {
+        if (!cancelled) setResult({ key, allowed: false });
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
   }, [key, user?.id, role, authLoading]);
   const pending = role === "lms_instructor" && result?.key !== key;
-  return { user, session, loading: authLoading || pending,
-    hasAccess: !authLoading && (role === "admin" || (role === "lms_instructor" && result?.key === key && result.allowed)) };
+  return {
+    user,
+    session,
+    loading: authLoading || pending,
+    hasAccess:
+      !authLoading &&
+      (role === "admin" || (role === "lms_instructor" && result?.key === key && result.allowed)),
+  };
 }

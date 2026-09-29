@@ -12,7 +12,8 @@ export function AmsFooter() {
       >
         {isRtl ? (
           <span dir="rtl">
-            جميع الحقوق محفوظة للجمعية السورية للذكاء الاصطناعي وريادة الأعمال <bdi dir="ltr">{year} ©</bdi>
+            جميع الحقوق محفوظة للجمعية السورية للذكاء الاصطناعي وريادة الأعمال{" "}
+            <bdi dir="ltr">{year} ©</bdi>
           </span>
         ) : (
           <span>All rights reserved for Syrian Association for AI & Entrepreneurship {year}©</span>

@@ -1,7 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { checkFeedback, keepValidAnswers, type FormDefinition } from "@/features/lms/course-feedback/lib/survey";
+import {
+  checkFeedback,
+  keepValidAnswers,
+  type FormDefinition,
+} from "@/features/lms/course-feedback/lib/survey";
 import { feedbackState, type FeedbackState } from "@/features/lms/course-feedback/lib/state";
 import type { Db, EffectiveForm } from "@/features/lms/course-feedback/lib/feedback.server";
 
@@ -237,7 +241,8 @@ export const submitCourseFeedback = createServerFn({ method: "POST" })
     }
     if (certificateId) {
       try {
-        const { deliverCertificateEmail } = await import("@/features/lms/certificates/lib/certificate-email.server");
+        const { deliverCertificateEmail } =
+          await import("@/features/lms/certificates/lib/certificate-email.server");
         await deliverCertificateEmail({
           studentId: userId,
           courseId: data.courseId,

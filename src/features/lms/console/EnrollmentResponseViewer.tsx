@@ -6,14 +6,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 
 type Field = {
-  id: string; field_type: string;
-  label_ar: string; label_en: string | null;
+  id: string;
+  field_type: string;
+  label_ar: string;
+  label_en: string | null;
 };
 
 type Answer = { field_id: string; value: unknown };
 
 export function EnrollmentResponseViewer({
-  open, onOpenChange, requestId, courseId,
+  open,
+  onOpenChange,
+  requestId,
+  courseId,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -44,7 +49,10 @@ export function EnrollmentResponseViewer({
       }
       setAnswers((resp.answers as Answer[]) ?? []);
       const { data: f } = await supabase
-        .from("lms_course_forms").select("id").eq("course_id", courseId).maybeSingle();
+        .from("lms_course_forms")
+        .select("id")
+        .eq("course_id", courseId)
+        .maybeSingle();
       if (f) {
         const { data: ff } = await supabase
           .from("lms_course_form_fields")
@@ -66,8 +74,10 @@ export function EnrollmentResponseViewer({
     if (value === null || value === undefined || value === "") {
       return <span className="text-muted-foreground italic">—</span>;
     }
-    if (field.field_type === "yes_no") return <span>{value === true ? (ar ? "نعم" : "Yes") : (ar ? "لا" : "No")}</span>;
-    if (field.field_type === "multi_choice" && Array.isArray(value)) return <span>{value.join(", ")}</span>;
+    if (field.field_type === "yes_no")
+      return <span>{value === true ? (ar ? "نعم" : "Yes") : ar ? "لا" : "No"}</span>;
+    if (field.field_type === "multi_choice" && Array.isArray(value))
+      return <span>{value.join(", ")}</span>;
     if (field.field_type === "file" && typeof value === "string") {
       return (
         <Button size="sm" variant="outline" onClick={() => openFile(value)}>
@@ -98,11 +108,29 @@ export function EnrollmentResponseViewer({
           <div className="space-y-3">
             {(() => {
               const baseFields: Field[] = [
-                { id: "__base_full_name", field_type: "short_text", label_ar: "الاسم الكامل", label_en: "Full name" },
-                { id: "__base_phone", field_type: "short_text", label_ar: "رقم الهاتف", label_en: "Phone number" },
-                { id: "__base_email", field_type: "short_text", label_ar: "البريد الإلكتروني", label_en: "Email" },
+                {
+                  id: "__base_full_name",
+                  field_type: "short_text",
+                  label_ar: "الاسم الكامل",
+                  label_en: "Full name",
+                },
+                {
+                  id: "__base_phone",
+                  field_type: "short_text",
+                  label_ar: "رقم الهاتف",
+                  label_en: "Phone number",
+                },
+                {
+                  id: "__base_email",
+                  field_type: "short_text",
+                  label_ar: "البريد الإلكتروني",
+                  label_en: "Email",
+                },
               ];
-              const allFields = [...baseFields, ...fields.filter((f) => !f.id.startsWith("__base_"))];
+              const allFields = [
+                ...baseFields,
+                ...fields.filter((f) => !f.id.startsWith("__base_")),
+              ];
               return allFields.map((f) => {
                 const ans = answers.find((a) => a.field_id === f.id);
                 const label = ar ? f.label_ar : f.label_en || f.label_ar;

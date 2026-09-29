@@ -29,9 +29,14 @@ describe("answer buttons", () => {
   });
 
   it("keeps the row short and skips empty or oversized labels", () => {
-    const many = parseChoices(`س\n[[choices: ${["a", "b", "c", "d", "e", "f", "g", "h"].join(" | ")}]]`);
+    const many = parseChoices(
+      `س\n[[choices: ${["a", "b", "c", "d", "e", "f", "g", "h"].join(" | ")}]]`,
+    );
     expect(many.choices).toHaveLength(6);
-    expect(parseChoices(`س\n[[choices: أ |  | ${"x".repeat(80)} | ب]]`).choices).toEqual(["أ", "ب"]);
+    expect(parseChoices(`س\n[[choices: أ |  | ${"x".repeat(80)} | ب]]`).choices).toEqual([
+      "أ",
+      "ب",
+    ]);
   });
 
   it("is case-insensitive and tolerates spacing from the model", () => {
@@ -94,7 +99,9 @@ describe("choices while the answer is still streaming", () => {
   });
 
   it("leaves finished text alone", () => {
-    expect(hidePartialChoices("ما مجالك؟\n[[choices: أ | ب]]")).toBe("ما مجالك؟\n[[choices: أ | ب]]");
+    expect(hidePartialChoices("ما مجالك؟\n[[choices: أ | ب]]")).toBe(
+      "ما مجالك؟\n[[choices: أ | ب]]",
+    );
     expect(hidePartialChoices("نص عادي")).toBe("نص عادي");
   });
 });

@@ -66,19 +66,39 @@ export async function ensureCertificatePdf(
 ): Promise<CertificatePdfResult> {
   const { data: cert } = await admin
     .from("lms_certificates")
-    .select("id, serial, issued_at, course_id, student_id, recipient_name, recipient_gender, pdf_path")
+    .select(
+      "id, serial, issued_at, course_id, student_id, recipient_name, recipient_gender, pdf_path",
+    )
     .eq("id", certificateId)
     .maybeSingle();
   if (!cert) return { status: "not_found" };
 
   const [{ data: course }, { data: profile }] = await Promise.all([
-    admin.from("lms_courses").select("title_ar, start_date, end_date").eq("id", cert.course_id).maybeSingle(),
-    admin.from("lms_user_profiles").select("full_name, certificate_name, gender").eq("user_id", cert.student_id).maybeSingle(),
+    admin
+      .from("lms_courses")
+      .select("title_ar, start_date, end_date")
+      .eq("id", cert.course_id)
+      .maybeSingle(),
+    admin
+      .from("lms_user_profiles")
+      .select("full_name, certificate_name, gender")
+      .eq("user_id", cert.student_id)
+      .maybeSingle(),
   ]);
   if (!course?.start_date || !course?.end_date) return { status: "course_dates_missing" };
 
-  const name = (details.name ?? cert.recipient_name ?? profile?.certificate_name ?? profile?.full_name ?? "").trim() || null;
-  const gender = (details.gender ?? cert.recipient_gender ?? profile?.gender ?? null) as CertificateGender | null;
+  const name =
+    (
+      details.name ??
+      cert.recipient_name ??
+      profile?.certificate_name ??
+      profile?.full_name ??
+      ""
+    ).trim() || null;
+  const gender = (details.gender ??
+    cert.recipient_gender ??
+    profile?.gender ??
+    null) as CertificateGender | null;
   if (!name || !gender) return { status: "needs_details", name, gender };
 
   if (cert.pdf_path && name === cert.recipient_name && gender === cert.recipient_gender) {
@@ -116,7 +136,10 @@ export async function ensureCertificatePdf(
     return { status: "ready", path, serial: cert.serial, pdf };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    await admin.from("lms_certificates").update({ pdf_error: msg.slice(0, 500) }).eq("id", cert.id);
+    await admin
+      .from("lms_certificates")
+      .update({ pdf_error: msg.slice(0, 500) })
+      .eq("id", cert.id);
     throw e;
   }
 }

@@ -16,7 +16,16 @@ type Props = {
 };
 
 /** The sub-page hero band shared by the inner LMS pages. */
-export function SubHero({ id, eyebrow, titleSpans, titleClassName, lede, before, copyChildren, children }: Props) {
+export function SubHero({
+  id,
+  eyebrow,
+  titleSpans,
+  titleClassName,
+  lede,
+  before,
+  copyChildren,
+  children,
+}: Props) {
   return (
     <section className="lms-hero lms-subhero" aria-labelledby={id}>
       <div className="hero-grid" aria-hidden="true" />

@@ -17,7 +17,10 @@ export const Route = createFileRoute("/attendance-management-system/login")({
   head: () => ({
     meta: [
       { title: "AMS Sign In — SAAE Attendance" },
-      { name: "description", content: "Sign in to the SAAE Attendance Management System for instructors." },
+      {
+        name: "description",
+        content: "Sign in to the SAAE Attendance Management System for instructors.",
+      },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "AMS Sign In — SAAE Attendance" },
       { property: "og:description", content: "Sign in to the SAAE Attendance Management System." },
@@ -79,20 +82,10 @@ function AmsLogin() {
     <div className="flex-1 flex items-center justify-center px-6 py-24">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-soft">
         <div className="flex flex-col items-center text-center">
-          <img
-            src={logo}
-            alt="SAAE"
-            width={80}
-            height={80}
-            className="h-16 w-auto"
-          />
+          <img src={logo} alt="SAAE" width={80} height={80} className="h-16 w-auto" />
         </div>
-        <h1 className="mt-3 text-xl font-bold text-foreground text-center">
-          {tr.title}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground text-center">
-          {tr.subtitle}
-        </p>
+        <h1 className="mt-3 text-xl font-bold text-foreground text-center">{tr.title}</h1>
+        <p className="mt-1 text-sm text-muted-foreground text-center">{tr.subtitle}</p>
 
         <form onSubmit={onSubmit} className="mt-5 space-y-3">
           <div>

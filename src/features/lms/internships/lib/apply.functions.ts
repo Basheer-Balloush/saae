@@ -92,7 +92,10 @@ export const getInternshipApplyContext = createServerFn({ method: "POST" })
 
     let cover_url: string | null = null;
     // Covers are private files; sign server-side only for this published/closed row.
-    if ((oppRow as any).cover_image_bucket === "internship-covers" && (oppRow as any).cover_image_path) {
+    if (
+      (oppRow as any).cover_image_bucket === "internship-covers" &&
+      (oppRow as any).cover_image_path
+    ) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: signed } = await supabaseAdmin.storage
         .from("internship-covers")
@@ -210,7 +213,10 @@ export const getInternshipApplyContext = createServerFn({ method: "POST" })
       const { data: cRows } = await supabase
         .from("lms_courses")
         .select("id, title_ar, title_en")
-        .in("id", certRows.map((c) => c.course_id));
+        .in(
+          "id",
+          certRows.map((c) => c.course_id),
+        );
       const byId = new Map(((cRows ?? []) as any[]).map((c) => [c.id, c]));
       certificates = certRows.map((c) => ({
         id: c.id,
@@ -247,8 +253,7 @@ export const getInternshipApplyContext = createServerFn({ method: "POST" })
     let block_reason: ApplyContext["block_reason"] = null;
     const now = Date.now();
     if (opp.status !== "published") block_reason = "not_open";
-    else if (opp.opens_at && new Date(opp.opens_at).getTime() > now)
-      block_reason = "not_open_yet";
+    else if (opp.opens_at && new Date(opp.opens_at).getTime() > now) block_reason = "not_open_yet";
     else if (opp.deadline_at && new Date(opp.deadline_at).getTime() < now)
       block_reason = "deadline_passed";
     else if (existing_application) {

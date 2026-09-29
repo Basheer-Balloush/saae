@@ -95,7 +95,8 @@ function LmsHome() {
 
   const catName = (c: Category) => (ar ? c.name_ar : c.name_en || c.name_ar);
   const toneById = useMemo(
-    () => new Map(categories.map((c, i) => [c.id, categoryTone(i, `${c.name_en ?? ""} ${c.name_ar}`)])),
+    () =>
+      new Map(categories.map((c, i) => [c.id, categoryTone(i, `${c.name_en ?? ""} ${c.name_ar}`)])),
     [categories],
   );
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);

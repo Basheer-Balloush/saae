@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Award, ClipboardList, MessageSquareText } from "lucide-react";
-import { getCourseFeedback, type CourseFeedbackView } from "@/features/lms/course-feedback/lib/feedback.functions";
+import {
+  getCourseFeedback,
+  type CourseFeedbackView,
+} from "@/features/lms/course-feedback/lib/feedback.functions";
 
 type Props = {
   courseId: string;

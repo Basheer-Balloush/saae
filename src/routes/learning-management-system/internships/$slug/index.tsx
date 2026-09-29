@@ -34,10 +34,7 @@ export const Route = createFileRoute("/learning-management-system/internships/$s
   head: ({ params, loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [
-          { title: "Internship — SAAE" },
-          { name: "robots", content: "noindex" },
-        ],
+        meta: [{ title: "Internship — SAAE" }, { name: "robots", content: "noindex" }],
         links: LMS_SKIN_LINKS,
       };
     }
@@ -174,9 +171,13 @@ function InternshipDetail() {
     stipend && { label: t.internshipStipend, value: stipend },
     d.deadline_at && {
       label: t.internshipDeadline,
-      value: new Date(d.deadline_at).toLocaleString(lang, { dateStyle: "long", timeStyle: "short" }),
+      value: new Date(d.deadline_at).toLocaleString(lang, {
+        dateStyle: "long",
+        timeStyle: "short",
+      }),
     },
-    typeof d.capacity === "number" && d.capacity > 0 && { label: ar ? "السّعة" : "Capacity", value: String(d.capacity) },
+    typeof d.capacity === "number" &&
+      d.capacity > 0 && { label: ar ? "السّعة" : "Capacity", value: String(d.capacity) },
   ].filter((f): f is { label: string; value: string } => !!f);
   const reqLines = requirements ? toLines(requirements) : [];
 
@@ -204,13 +205,22 @@ function InternshipDetail() {
       >
         {d.cover_url ? (
           <div className="course-hero-cover">
-            <img src={resizedImage(d.cover_url, 1080)} srcSet={resizedSrcSet(d.cover_url, [720, 1080, 1440])} sizes="(max-width: 700px) 92vw, 560px" alt="" />
+            <img
+              src={resizedImage(d.cover_url, 1080)}
+              srcSet={resizedSrcSet(d.cover_url, [720, 1080, 1440])}
+              sizes="(max-width: 700px) 92vw, 560px"
+              alt=""
+            />
           </div>
         ) : null}
       </SubHero>
 
       {facts.length > 0 && (
-        <section className="lms-section" aria-label={ar ? "معلومات أساسية" : "Key facts"} style={{ paddingBlock: 0 }}>
+        <section
+          className="lms-section"
+          aria-label={ar ? "معلومات أساسية" : "Key facts"}
+          style={{ paddingBlock: 0 }}
+        >
           <div className="page-shell intern-facts">
             {facts.map((f) => (
               <p key={f.label} className="pro-card">

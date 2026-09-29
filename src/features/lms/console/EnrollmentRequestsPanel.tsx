@@ -397,12 +397,14 @@ export function EnrollmentRequestsPanel({
           width: 20,
           get: ({ req }) => req.decided_at,
         },
-        ...fields.map((f): XlsxColumn<ExportRow> => ({
-          header: ar ? f.label_ar : f.label_en || f.label_ar,
-          type: "text",
-          width: 24,
-          get: ({ ans }) => text(ans, f.id),
-        })),
+        ...fields.map(
+          (f): XlsxColumn<ExportRow> => ({
+            header: ar ? f.label_ar : f.label_en || f.label_ar,
+            type: "text",
+            width: 24,
+            get: ({ ans }) => text(ans, f.id),
+          }),
+        ),
       ];
       const courseTitle = course
         ? ar

@@ -15,24 +15,54 @@ import { IconCategoryAI } from "@/features/lms/skin/icons";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { resizedImage, resizedSrcSet } from "@/lib/image-url";
 
-
 type Course = {
-  id: string; title_ar: string; title_en: string | null;
-  description_ar: string | null; description_en: string | null;
-  cover_url: string | null; level: string; price: number; sale_price?: number | null; is_free: boolean;
-  students_count: number; rating_avg: number; review_count: number;
-  enrollment_open: boolean; enrollment_deadline: string | null; max_students: number | null;
-  start_date: string | null; end_date: string | null;
+  id: string;
+  title_ar: string;
+  title_en: string | null;
+  description_ar: string | null;
+  description_en: string | null;
+  cover_url: string | null;
+  level: string;
+  price: number;
+  sale_price?: number | null;
+  is_free: boolean;
+  students_count: number;
+  rating_avg: number;
+  review_count: number;
+  enrollment_open: boolean;
+  enrollment_deadline: string | null;
+  max_students: number | null;
+  start_date: string | null;
+  end_date: string | null;
   schedule_days: string[] | null;
-  schedule_time_from: string | null; schedule_time_to: string | null;
-  location_ar: string | null; location_en: string | null;
+  schedule_time_from: string | null;
+  schedule_time_to: string | null;
+  location_ar: string | null;
+  location_en: string | null;
   duration_hours: number | null;
   delivery_mode: string | null;
   slug?: string | null;
 };
 type Section = { id: string; title: string; display_order: number };
-type Lesson = { id: string; section_id: string; title: string; duration_seconds: number; is_preview: boolean; display_order: number };
-type Instructor = { slug: string; full_name: string; full_name_ar: string | null; full_name_en: string | null; avatar_url: string | null; specialty: string | null; specialty_ar: string | null; specialty_en: string | null; is_primary: boolean };
+type Lesson = {
+  id: string;
+  section_id: string;
+  title: string;
+  duration_seconds: number;
+  is_preview: boolean;
+  display_order: number;
+};
+type Instructor = {
+  slug: string;
+  full_name: string;
+  full_name_ar: string | null;
+  full_name_en: string | null;
+  avatar_url: string | null;
+  specialty: string | null;
+  specialty_ar: string | null;
+  specialty_en: string | null;
+  is_primary: boolean;
+};
 
 type PublicCoursePayload = {
   course: Course;
@@ -71,35 +101,45 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
 
   head: ({ params, loaderData }) => {
     const c = loaderData?.course;
-    const m = c ? {
-      title: (c.title_en ?? c.title_ar ?? "Course") as string,
-      description: (() => {
-        const title = (c.title_en ?? c.title_ar ?? "Course") as string;
-        const rawDesc = (c.description_en ?? c.description_ar ?? "") as string;
-        const fullDesc = rawDesc && rawDesc.length >= 50 ? rawDesc : `${title} — course on the SAAE Training and Learning Platform.`;
-        return fullDesc.length > 160 ? `${fullDesc.slice(0, 157).trimEnd()}…` : fullDesc;
-      })(),
-      image: c.cover_url ?? null,
-      price: Number(c.sale_price ?? c.price ?? 0),
-      isFree: Boolean(c.is_free),
-      rating: Number(c.rating_avg ?? 0),
-      reviewCount: Number(c.review_count ?? 0),
-      canonicalSlug: (c.slug ?? c.id) as string,
-      // A-19: truthful availability signal
-      availability: (() => {
-        const now = new Date();
-        const finished = !!c.end_date && new Date(c.end_date) < now;
-        const deadlinePassed = !!c.enrollment_deadline && new Date(c.enrollment_deadline) < now;
-        const isFull = c.max_students != null && Number(c.students_count) >= Number(c.max_students);
-        if (finished) return "https://schema.org/Discontinued";
-        if (!c.enrollment_open || deadlinePassed) return "https://schema.org/SoldOut";
-        if (isFull) return "https://schema.org/SoldOut";
-        return "https://schema.org/InStock";
-      })(),
-    } : null;
+    const m = c
+      ? {
+          title: (c.title_en ?? c.title_ar ?? "Course") as string,
+          description: (() => {
+            const title = (c.title_en ?? c.title_ar ?? "Course") as string;
+            const rawDesc = (c.description_en ?? c.description_ar ?? "") as string;
+            const fullDesc =
+              rawDesc && rawDesc.length >= 50
+                ? rawDesc
+                : `${title} — course on the SAAE Training and Learning Platform.`;
+            return fullDesc.length > 160 ? `${fullDesc.slice(0, 157).trimEnd()}…` : fullDesc;
+          })(),
+          image: c.cover_url ?? null,
+          price: Number(c.sale_price ?? c.price ?? 0),
+          isFree: Boolean(c.is_free),
+          rating: Number(c.rating_avg ?? 0),
+          reviewCount: Number(c.review_count ?? 0),
+          canonicalSlug: (c.slug ?? c.id) as string,
+          // A-19: truthful availability signal
+          availability: (() => {
+            const now = new Date();
+            const finished = !!c.end_date && new Date(c.end_date) < now;
+            const deadlinePassed = !!c.enrollment_deadline && new Date(c.enrollment_deadline) < now;
+            const isFull =
+              c.max_students != null && Number(c.students_count) >= Number(c.max_students);
+            if (finished) return "https://schema.org/Discontinued";
+            if (!c.enrollment_open || deadlinePassed) return "https://schema.org/SoldOut";
+            if (isFull) return "https://schema.org/SoldOut";
+            return "https://schema.org/InStock";
+          })(),
+        }
+      : null;
     const url = `https://aisyria.org/learning-management-system/courses/${m?.canonicalSlug ?? params.id}`;
-    const title = m?.title ? `${m.title} — SAAE Training and Learning Platform` : "Course — SAAE Training and Learning Platform";
-    const description = m?.description ?? "Course on the SAAE Training and Learning Platform — learn from expert instructors and grow your skills.";
+    const title = m?.title
+      ? `${m.title} — SAAE Training and Learning Platform`
+      : "Course — SAAE Training and Learning Platform";
+    const description =
+      m?.description ??
+      "Course on the SAAE Training and Learning Platform — learn from expert instructors and grow your skills.";
     const image = m?.image ?? undefined;
     return {
       meta: [
@@ -109,7 +149,12 @@ export const Route = createFileRoute("/learning-management-system/courses/$id")(
         { property: "og:description", content: description },
         { property: "og:type", content: "website" },
         { property: "og:url", content: url },
-        ...(image ? [{ property: "og:image", content: image }, { name: "twitter:image", content: image }] : []),
+        ...(image
+          ? [
+              { property: "og:image", content: image },
+              { name: "twitter:image", content: image },
+            ]
+          : []),
       ],
       links: [{ rel: "canonical", href: url }, ...LMS_SKIN_LINKS],
       scripts: m
@@ -167,7 +212,11 @@ function CourseNotFound() {
       eyebrow={lmsT[lang].navCatalog}
       titleSpans={[ar ? "الدورة غير موجودة" : "Course not found"]}
       titleClassName="course-page-title"
-      lede={ar ? "هذه الدورة غير متاحة أو لم يتم نشرها بعد." : "This course does not exist or is not published yet."}
+      lede={
+        ar
+          ? "هذه الدورة غير متاحة أو لم يتم نشرها بعد."
+          : "This course does not exist or is not published yet."
+      }
       copyChildren={
         <p style={{ marginTop: 28 }}>
           <Link to="/learning-management-system/catalog" className="action action-primary">
@@ -191,13 +240,20 @@ function CourseLoadError({ reset }: { reset: () => void }) {
       eyebrow={lmsT[lang].navCatalog}
       titleSpans={[ar ? "تعذّر تحميل الدورة" : "Couldn't load this course"]}
       titleClassName="course-page-title"
-      lede={ar ? "حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى." : "A connection error occurred. Please try again."}
+      lede={
+        ar
+          ? "حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى."
+          : "A connection error occurred. Please try again."
+      }
       copyChildren={
         <p style={{ marginTop: 28 }}>
           <button
             type="button"
             className="action action-primary"
-            onClick={() => { router.invalidate(); reset(); }}
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
           >
             <span className="btn-content">
               <span>{ar ? "إعادة المحاولة" : "Retry"}</span>
@@ -210,9 +266,12 @@ function CourseLoadError({ reset }: { reset: () => void }) {
 }
 
 const DAY_LABELS: Record<string, { ar: string; en: string }> = {
-  sat: { ar: "السبت", en: "Saturday" }, sun: { ar: "الأحد", en: "Sunday" },
-  mon: { ar: "الإثنين", en: "Monday" }, tue: { ar: "الثلاثاء", en: "Tuesday" },
-  wed: { ar: "الأربعاء", en: "Wednesday" }, thu: { ar: "الخميس", en: "Thursday" },
+  sat: { ar: "السبت", en: "Saturday" },
+  sun: { ar: "الأحد", en: "Sunday" },
+  mon: { ar: "الإثنين", en: "Monday" },
+  tue: { ar: "الثلاثاء", en: "Tuesday" },
+  wed: { ar: "الأربعاء", en: "Wednesday" },
+  thu: { ar: "الخميس", en: "Thursday" },
   fri: { ar: "الجمعة", en: "Friday" },
 };
 
@@ -223,7 +282,8 @@ function CourseDetails() {
   const { lang } = useLang();
   const tr = lmsT[lang];
   const ar = lang === "ar";
-  const { course, instructor, coInstructors, sections, lessons, hasForm } = Route.useLoaderData() as CourseLoaderData;
+  const { course, instructor, coInstructors, sections, lessons, hasForm } =
+    Route.useLoaderData() as CourseLoaderData;
   const teaching = useCourseTeachingStatus(course.id, user?.id, authLoading);
   const [enrolled, setEnrolled] = useState(false);
   const [pendingRequest, setPendingRequest] = useState(false);
@@ -242,8 +302,19 @@ function CourseDetails() {
     let cancelled = false;
     (async () => {
       const [{ data: e }, { data: req }] = await Promise.all([
-        supabase.from("lms_enrollments").select("id").eq("course_id", course.id).eq("student_id", user.id).maybeSingle(),
-        supabase.from("lms_enrollment_requests").select("id").eq("course_id", course.id).eq("user_id", user.id).eq("status", "pending").maybeSingle(),
+        supabase
+          .from("lms_enrollments")
+          .select("id")
+          .eq("course_id", course.id)
+          .eq("student_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("lms_enrollment_requests")
+          .select("id")
+          .eq("course_id", course.id)
+          .eq("user_id", user.id)
+          .eq("status", "pending")
+          .maybeSingle(),
       ]);
       if (cancelled) return;
       setEnrolled(!!e);
@@ -255,15 +326,18 @@ function CourseDetails() {
           .eq("course_id", course.id)
           .limit(1);
         if (!cancelled) setHasQuiz(!!(q && q.length > 0));
-
       } else {
         setHasQuiz(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [course, user]);
 
-  useEffect(() => { setFormDialogOpen(false); }, [user?.id, course.id, teaching.status]);
+  useEffect(() => {
+    setFormDialogOpen(false);
+  }, [user?.id, course.id, teaching.status]);
 
   const requireAuth = async () => {
     // The public page can render before the persisted session has finished
@@ -276,7 +350,9 @@ function CourseDetails() {
 
     navigate({
       to: "/learning-management-system/signup",
-      search: { redirect: `/learning-management-system/courses/${encodeURIComponent(course.slug ?? id)}` },
+      search: {
+        redirect: `/learning-management-system/courses/${encodeURIComponent(course.slug ?? id)}`,
+      },
     });
     return false;
   };
@@ -303,13 +379,28 @@ function CourseDetails() {
   const desc = lang === "ar" ? course.description_ar : course.description_en;
   const isFinished = !!course.end_date && new Date(course.end_date) < new Date();
 
-  const fmtDate = (iso: string) => new Date(iso).toLocaleDateString(ar ? "ar-EG" : "en-US", { year: "numeric", month: "long", day: "numeric" });
-  const days = (course.schedule_days ?? []).map((d) => ar ? DAY_LABELS[d]?.ar : DAY_LABELS[d]?.en).filter(Boolean).join(ar ? "، " : ", ");
-  const loc = ar ? (course.location_ar || course.location_en) : (course.location_en || course.location_ar);
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(ar ? "ar-EG" : "en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  const days = (course.schedule_days ?? [])
+    .map((d) => (ar ? DAY_LABELS[d]?.ar : DAY_LABELS[d]?.en))
+    .filter(Boolean)
+    .join(ar ? "، " : ", ");
+  const loc = ar
+    ? course.location_ar || course.location_en
+    : course.location_en || course.location_ar;
   const facts = [
     (course.start_date || course.end_date) && {
       label: ar ? "التاريخ" : "Date",
-      value: [course.start_date && fmtDate(course.start_date), course.end_date && fmtDate(course.end_date)].filter(Boolean).join(" — "),
+      value: [
+        course.start_date && fmtDate(course.start_date),
+        course.end_date && fmtDate(course.end_date),
+      ]
+        .filter(Boolean)
+        .join(" — "),
     },
     (course.schedule_time_from || course.schedule_time_to) && {
       label: ar ? "الوقت" : "Time",
@@ -317,11 +408,15 @@ function CourseDetails() {
     },
     days && { label: ar ? "الأيام" : "Days", value: days },
     loc && { label: ar ? "المكان" : "Location", value: loc },
-    course.duration_hours != null && { label: ar ? "مدة الدورة" : "Duration", value: `${course.duration_hours} ${ar ? "ساعة" : "hours"}` },
+    course.duration_hours != null && {
+      label: ar ? "مدة الدورة" : "Duration",
+      value: `${course.duration_hours} ${ar ? "ساعة" : "hours"}`,
+    },
   ].filter((f): f is { label: string; value: string } => !!f);
 
   const enrollPanel = (() => {
-    const deadlinePassed = !!course.enrollment_deadline && new Date(course.enrollment_deadline) < new Date();
+    const deadlinePassed =
+      !!course.enrollment_deadline && new Date(course.enrollment_deadline) < new Date();
     const isFull = course.max_students != null && course.students_count >= course.max_students;
     const closed = !course.enrollment_open;
     if (teaching.status === "loading") {
@@ -336,7 +431,9 @@ function CourseDetails() {
     if (teaching.status === "error") {
       return (
         <>
-          <p className="enroll-hint">{ar ? "تعذّر التحقق من صلاحية التسجيل." : "Could not check enrollment eligibility."}</p>
+          <p className="enroll-hint">
+            {ar ? "تعذّر التحقق من صلاحية التسجيل." : "Could not check enrollment eligibility."}
+          </p>
           <button type="button" className="action action-secondary" onClick={teaching.retry}>
             <span className="btn-content">
               <span>{ar ? "إعادة المحاولة" : "Retry"}</span>
@@ -348,8 +445,16 @@ function CourseDetails() {
     if (teaching.status === "yes") {
       return (
         <>
-          <p className="enroll-hint">{ar ? "أنت أحد مدرّسي هذه الدورة، لذلك لا يمكنك التسجيل فيها كطالب." : "You teach this course. You cannot enroll in it as a student."}</p>
-          <Link to="/learning-management-system/instructor/courses/$id" params={{ id: course.id }} className="action action-primary">
+          <p className="enroll-hint">
+            {ar
+              ? "أنت أحد مدرّسي هذه الدورة، لذلك لا يمكنك التسجيل فيها كطالب."
+              : "You teach this course. You cannot enroll in it as a student."}
+          </p>
+          <Link
+            to="/learning-management-system/instructor/courses/$id"
+            params={{ id: course.id }}
+            className="action action-primary"
+          >
             <span className="btn-content">
               <span>{ar ? "إدارة الدورة" : "Manage course"}</span>
             </span>
@@ -363,7 +468,9 @@ function CourseDetails() {
           <>
             <div className="enroll-note is-open">
               <CheckCircle />
-              {ar ? "أنت مسجّل — يتم تتبّع تقدّمك عبر الحضور" : "You're enrolled — progress is tracked via attendance"}
+              {ar
+                ? "أنت مسجّل — يتم تتبّع تقدّمك عبر الحضور"
+                : "You're enrolled — progress is tracked via attendance"}
             </div>
             {hasQuiz && (
               <Link
@@ -381,7 +488,11 @@ function CourseDetails() {
         );
       }
       return (
-        <Link to="/learning-management-system/student/player/$courseId" params={{ courseId: course.id }} className="action action-primary">
+        <Link
+          to="/learning-management-system/student/player/$courseId"
+          params={{ courseId: course.id }}
+          className="action action-primary"
+        >
           <span className="btn-content">
             <span>{tr.goToCourse}</span>
           </span>
@@ -408,15 +519,26 @@ function CourseDetails() {
       return (
         <div className="enroll-note is-closed">
           {isFull
-            ? (ar ? "اكتمل العدد" : "Course is full")
+            ? ar
+              ? "اكتمل العدد"
+              : "Course is full"
             : deadlinePassed
-            ? (ar ? "انتهى موعد التسجيل" : "Enrollment deadline passed")
-            : (ar ? "التسجيل مغلق حالياً" : "Enrollment is closed")}
+              ? ar
+                ? "انتهى موعد التسجيل"
+                : "Enrollment deadline passed"
+              : ar
+                ? "التسجيل مغلق حالياً"
+                : "Enrollment is closed"}
         </div>
       );
     }
     const enrollButton = (
-      <button type="button" className="action action-primary" onClick={onFreeEnroll} disabled={busy || authLoading}>
+      <button
+        type="button"
+        className="action action-primary"
+        onClick={onFreeEnroll}
+        disabled={busy || authLoading}
+      >
         <span className="btn-content">
           {(busy || authLoading) && <Loader2 className="h-4 w-4 animate-spin" />}
           <span>{tr.enroll}</span>
@@ -440,13 +562,22 @@ function CourseDetails() {
               onChange={(e) => setManualNotes(e.target.value)}
               rows={3}
             />
-            <button type="button" className="action action-primary" onClick={onManualSubmit} disabled={busy || authLoading}>
+            <button
+              type="button"
+              className="action action-primary"
+              onClick={onManualSubmit}
+              disabled={busy || authLoading}
+            >
               <span className="btn-content">
                 {busy && <Loader2 className="h-4 w-4 animate-spin" />}
                 <span>{ar ? "إرسال" : "Submit"}</span>
               </span>
             </button>
-            <button type="button" className="action action-secondary" onClick={() => setManualOpen(false)}>
+            <button
+              type="button"
+              className="action action-secondary"
+              onClick={() => setManualOpen(false)}
+            >
               <span className="btn-content">
                 <span>{ar ? "إلغاء" : "Cancel"}</span>
               </span>
@@ -502,7 +633,16 @@ function CourseDetails() {
         }
       >
         <div className="course-hero-cover">
-          {course.cover_url ? <img src={resizedImage(course.cover_url, 1080)} srcSet={resizedSrcSet(course.cover_url, [720, 1080, 1440])} sizes="(max-width: 700px) 92vw, 560px" alt={title} /> : <IconCategoryAI />}
+          {course.cover_url ? (
+            <img
+              src={resizedImage(course.cover_url, 1080)}
+              srcSet={resizedSrcSet(course.cover_url, [720, 1080, 1440])}
+              sizes="(max-width: 700px) 92vw, 560px"
+              alt={title}
+            />
+          ) : (
+            <IconCategoryAI />
+          )}
         </div>
       </SubHero>
 
@@ -540,18 +680,22 @@ function CourseDetails() {
                     <div key={s.id} className="syllabus-section">
                       <h3>{s.title}</h3>
                       <ul>
-                        {lessons.filter((l) => l.section_id === s.id).map((l) => {
-                          const open = enrolled || l.is_preview;
-                          return (
-                            <li key={l.id} className={open ? "is-open" : undefined}>
-                              {open ? <PlayCircle /> : <Lock />}
-                              <span className="lesson-title">{l.title}</span>
-                              {l.is_preview && !enrolled && (
-                                <span className="lesson-preview">{ar ? "معاينة" : "Preview"}</span>
-                              )}
-                            </li>
-                          );
-                        })}
+                        {lessons
+                          .filter((l) => l.section_id === s.id)
+                          .map((l) => {
+                            const open = enrolled || l.is_preview;
+                            return (
+                              <li key={l.id} className={open ? "is-open" : undefined}>
+                                {open ? <PlayCircle /> : <Lock />}
+                                <span className="lesson-title">{l.title}</span>
+                                {l.is_preview && !enrolled && (
+                                  <span className="lesson-preview">
+                                    {ar ? "معاينة" : "Preview"}
+                                  </span>
+                                )}
+                              </li>
+                            );
+                          })}
                       </ul>
                     </div>
                   ))}
@@ -590,9 +734,16 @@ function CourseDetails() {
                     const insSpec = (ar ? ins.specialty_ar : ins.specialty_en) || ins.specialty;
                     return (
                       <li key={ins.slug}>
-                        <Link to="/learning-management-system/instructors/$id" params={{ id: ins.slug }}>
+                        <Link
+                          to="/learning-management-system/instructors/$id"
+                          params={{ id: ins.slug }}
+                        >
                           <span className="instructor-avatar">
-                            {ins.avatar_url ? <img src={resizedImage(ins.avatar_url, 160)} alt={insName} /> : insName.charAt(0)}
+                            {ins.avatar_url ? (
+                              <img src={resizedImage(ins.avatar_url, 160)} alt={insName} />
+                            ) : (
+                              insName.charAt(0)
+                            )}
                           </span>
                           <span className="instructor-who">
                             <strong>{insName}</strong>
@@ -614,7 +765,11 @@ function CourseDetails() {
         onOpenChange={setFormDialogOpen}
         courseId={course?.id ?? id}
         notes={manualNotes || null}
-        onSubmitted={() => { setPendingRequest(true); setManualOpen(false); setManualNotes(""); }}
+        onSubmitted={() => {
+          setPendingRequest(true);
+          setManualOpen(false);
+          setManualNotes("");
+        }}
       />
     </>
   );

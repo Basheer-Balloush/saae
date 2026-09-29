@@ -3,7 +3,10 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { chunkText, embedTexts } from "@/features/chat/lib/embeddings.server";
-import { splitKnowledgeSections, type KnowledgeSection } from "@/features/chat/lib/knowledge-sections";
+import {
+  splitKnowledgeSections,
+  type KnowledgeSection,
+} from "@/features/chat/lib/knowledge-sections";
 
 async function assertAdmin(sb: SupabaseClient, userId: string) {
   const { data, error } = await sb
@@ -88,9 +91,7 @@ export const listVisitorProfiles = createServerFn({ method: "GET" })
 
 export const deleteVisitorProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { profileId: string }) =>
-    z.object({ profileId: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: { profileId: string }) => z.object({ profileId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { error } = await (context.supabase as unknown as SupabaseClient)

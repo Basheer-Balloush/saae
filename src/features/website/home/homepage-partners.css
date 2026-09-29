@@ -9,11 +9,11 @@
 }
 .hp-faq .hn-tech-details {
   z-index: -1;
-  opacity: .7;
+  opacity: 0.7;
 }
 .hp-faq .hn-tech-details span {
   width: min(360px, 30%);
-  opacity: .34;
+  opacity: 0.34;
 }
 .hp-handoff,
 .hp-faq {
@@ -279,11 +279,11 @@ html.hero-opening-ready .hp-partners .hp-heading {
 }
 .hp-handoff .mission .hn-tech-details {
   z-index: -1;
-  opacity: .7;
+  opacity: 0.7;
 }
 .hp-handoff .mission .hn-tech-details span {
   width: min(360px, 30%);
-  opacity: .34;
+  opacity: 0.34;
 }
 .mobile-home .hp-partners .hp-heading {
   font-size: 38px;

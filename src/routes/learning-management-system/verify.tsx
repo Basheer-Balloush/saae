@@ -9,7 +9,10 @@ import { IconCertificate } from "@/features/lms/skin/icons";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/verify")({
-  head: () => ({ meta: [{ title: "Verify certificate — SAAE Training and Learning Platform" }], links: LMS_SKIN_LINKS }),
+  head: () => ({
+    meta: [{ title: "Verify certificate — SAAE Training and Learning Platform" }],
+    links: LMS_SKIN_LINKS,
+  }),
   component: VerifyPage,
 });
 
@@ -92,7 +95,9 @@ function VerifyPage() {
             void run();
           }}
         >
-          <label htmlFor="cert-serial">{ar ? "الرقم التسلسلي للشهادة" : "Certificate serial number"}</label>
+          <label htmlFor="cert-serial">
+            {ar ? "الرقم التسلسلي للشهادة" : "Certificate serial number"}
+          </label>
           <input
             id="cert-serial"
             type="text"
@@ -132,7 +137,9 @@ function VerifyPage() {
                 </div>
                 <div>
                   <dt>{tr.issuedOn}</dt>
-                  <dd>{new Date(state.cert.issued_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}</dd>
+                  <dd>
+                    {new Date(state.cert.issued_at).toLocaleDateString(lang === "ar" ? "ar" : "en")}
+                  </dd>
                 </div>
               </dl>
             </article>
@@ -149,7 +156,12 @@ function VerifyPage() {
             <div className="enroll-note is-closed verify-result">
               <AlertTriangle aria-hidden="true" />
               {tr.verifyError}
-              <button type="button" className="action action-secondary" onClick={() => void run()} disabled={!canSubmit}>
+              <button
+                type="button"
+                className="action action-secondary"
+                onClick={() => void run()}
+                disabled={!canSubmit}
+              >
                 <span className="btn-content">
                   <RotateCcw className="h-4 w-4" aria-hidden="true" />
                   <span>{tr.verifyRetry}</span>

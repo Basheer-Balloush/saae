@@ -4,7 +4,10 @@ import { toast } from "sonner";
 import { SaveBar, useT } from "@/components/console/ui";
 import { toUserMessage } from "@/lib/safe-error";
 import { formProblems, type FormDefinition } from "@/features/lms/course-feedback/lib/survey";
-import { saveFeedbackForm, type AdminForm } from "@/features/lms/course-feedback/lib/admin.functions";
+import {
+  saveFeedbackForm,
+  type AdminForm,
+} from "@/features/lms/course-feedback/lib/admin.functions";
 import { FormEditor } from "./FormEditor";
 
 /* A form open for editing, saved as its next version. `courseId` null is the

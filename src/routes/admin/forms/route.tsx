@@ -5,10 +5,7 @@ export const Route = createFileRoute("/admin/forms")({
   ssr: false,
   beforeLoad: requireAdminBeforeLoad,
   head: () => ({
-    meta: [
-      { title: "Forms — Admin" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "Forms — Admin" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: () => <Outlet />,
 });

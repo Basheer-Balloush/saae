@@ -1,5 +1,18 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, X, Moon, Sun, Globe, LogOut, BookOpen, LayoutDashboard, ShieldCheck, GraduationCap, ArrowLeft, ArrowRight } from "lucide-react";
+import {
+  Menu,
+  X,
+  Moon,
+  Sun,
+  Globe,
+  LogOut,
+  BookOpen,
+  LayoutDashboard,
+  ShieldCheck,
+  GraduationCap,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n/i18n";
 import { useTheme } from "@/lib/theme";
@@ -39,12 +52,12 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
 
-  const links: NavLink[] = [
-    { to: "/learning-management-system", label: tr.navHome },
-  ];
+  const links: NavLink[] = [{ to: "/learning-management-system", label: tr.navHome }];
   if (isAuthed) {
     links.push({ to: "/learning-management-system/profile", label: tr.navProfile });
   }
@@ -61,7 +74,11 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
     links.push({ to: "/learning-management-system/instructor", label: tr.navInstructor });
   }
   if (role === "admin") {
-    links.push({ to: "/learning-management-system/admin", label: tr.navAdmin, icon: <LayoutDashboard className="h-3.5 w-3.5" /> });
+    links.push({
+      to: "/learning-management-system/admin",
+      label: tr.navAdmin,
+      icon: <LayoutDashboard className="h-3.5 w-3.5" />,
+    });
   }
 
   return (
@@ -132,7 +149,11 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
             className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary md:inline-flex"
             aria-label={lang === "ar" ? "العودة للموقع" : "Back to site"}
           >
-            {lang === "ar" ? <ArrowRight className="h-3.5 w-3.5" /> : <ArrowLeft className="h-3.5 w-3.5" />}
+            {lang === "ar" ? (
+              <ArrowRight className="h-3.5 w-3.5" />
+            ) : (
+              <ArrowLeft className="h-3.5 w-3.5" />
+            )}
             <span>{lang === "ar" ? "الموقع" : "Site"}</span>
           </Link>
           <button
@@ -159,7 +180,9 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
           ) : (
             <div className="hidden md:flex items-center gap-1.5">
               <Link to="/learning-management-system/login">
-                <Button variant="ghost" size="sm">{tr.signIn}</Button>
+                <Button variant="ghost" size="sm">
+                  {tr.signIn}
+                </Button>
               </Link>
               <Link to="/learning-management-system/signup">
                 <Button size="sm">{tr.signUp}</Button>
@@ -200,13 +223,20 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
               onClick={() => setOpen(false)}
               className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
             >
-              {lang === "ar" ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
+              {lang === "ar" ? (
+                <ArrowRight className="h-4 w-4" />
+              ) : (
+                <ArrowLeft className="h-4 w-4" />
+              )}
               {lang === "ar" ? "العودة للموقع الرئيسي" : "Back to main site"}
             </Link>
 
             {isAuthed ? (
               <button
-                onClick={() => { setOpen(false); onSignOut(); }}
+                onClick={() => {
+                  setOpen(false);
+                  onSignOut();
+                }}
                 className="mt-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary"
               >
                 <LogOut className="h-4 w-4" />
@@ -215,10 +245,14 @@ export function LmsNavbar({ role, isAuthed, onSignOut }: Props) {
             ) : (
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <Link to="/learning-management-system/login" onClick={() => setOpen(false)}>
-                  <Button variant="outline" size="sm" className="w-full">{tr.signIn}</Button>
+                  <Button variant="outline" size="sm" className="w-full">
+                    {tr.signIn}
+                  </Button>
                 </Link>
                 <Link to="/learning-management-system/signup" onClick={() => setOpen(false)}>
-                  <Button size="sm" className="w-full">{tr.signUp}</Button>
+                  <Button size="sm" className="w-full">
+                    {tr.signUp}
+                  </Button>
                 </Link>
               </div>
             )}

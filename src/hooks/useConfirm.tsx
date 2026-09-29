@@ -1,4 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -87,7 +96,9 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
         <AlertDialogContent dir={isAr ? "rtl" : "ltr"}>
           <AlertDialogHeader>
             <AlertDialogTitle>{opts?.title ?? ""}</AlertDialogTitle>
-            {opts?.description && <AlertDialogDescription>{opts.description}</AlertDialogDescription>}
+            {opts?.description && (
+              <AlertDialogDescription>{opts.description}</AlertDialogDescription>
+            )}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => settle(false)}>{cancelLabel}</AlertDialogCancel>

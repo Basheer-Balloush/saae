@@ -20,9 +20,17 @@ export const Route = createFileRoute("/learning-management-system/internships/")
   head: () => ({
     meta: [
       { title: "Internship Opportunities — SAAE" },
-      { name: "description", content: "Browse open internship opportunities at SAAE and apply through the Training and Learning Platform." },
+      {
+        name: "description",
+        content:
+          "Browse open internship opportunities at SAAE and apply through the Training and Learning Platform.",
+      },
       { property: "og:title", content: "Internship Opportunities — SAAE" },
-      { property: "og:description", content: "Browse open internship opportunities at SAAE and apply through the Training and Learning Platform." },
+      {
+        property: "og:description",
+        content:
+          "Browse open internship opportunities at SAAE and apply through the Training and Learning Platform.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://aisyria.org/learning-management-system/internships" },
     ],
@@ -52,7 +60,6 @@ function PublicInternshipsList() {
     }, 300);
     return () => clearTimeout(id);
   }, [q]);
-
 
   const opts = queryOptions({
     queryKey: ["public-internships", { page, q: debouncedQ }],
@@ -109,7 +116,11 @@ function PublicInternshipsList() {
           {isError && (
             <div className="state-box">
               <p>{t.errorLoad}</p>
-              <button type="button" className="action action-secondary" onClick={() => void refetch()}>
+              <button
+                type="button"
+                className="action action-secondary"
+                onClick={() => void refetch()}
+              >
                 <span className="btn-content">
                   <span>{t.errorRetry}</span>
                 </span>
@@ -131,13 +142,25 @@ function PublicInternshipsList() {
 
               {totalPages > 1 && (
                 <nav className="lms-pager" aria-label="Pagination">
-                  <button type="button" className="action action-secondary" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                  <button
+                    type="button"
+                    className="action action-secondary"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
                     <span className="btn-content">
                       <span>{ar ? "السابق" : "Previous"}</span>
                     </span>
                   </button>
-                  <span>{ar ? `الصفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}</span>
-                  <button type="button" className="action action-secondary" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                  <span>
+                    {ar ? `الصفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
+                  </span>
+                  <button
+                    type="button"
+                    className="action action-secondary"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
                     <span className="btn-content">
                       <span>{ar ? "التالي" : "Next"}</span>
                     </span>
@@ -170,13 +193,25 @@ function InternshipCard({ item, lang }: { item: PublicInternshipCard; lang: "ar"
   const meta = [
     location,
     duration,
-    item.deadline_at ? `${t.internshipDeadline}: ${new Date(item.deadline_at).toLocaleDateString(lang)}` : null,
+    item.deadline_at
+      ? `${t.internshipDeadline}: ${new Date(item.deadline_at).toLocaleDateString(lang)}`
+      : null,
   ].filter(Boolean);
 
   return (
     <li className="opp-card is-link">
       <Link to="/learning-management-system/internships/$slug" params={{ slug: item.slug }}>
-        {item.cover_url ? <img className="opp-cover" src={resizedImage(item.cover_url, 720)} srcSet={resizedSrcSet(item.cover_url, [480, 720, 1080])} sizes="(max-width: 700px) 92vw, 380px" alt="" loading="lazy" decoding="async" /> : null}
+        {item.cover_url ? (
+          <img
+            className="opp-cover"
+            src={resizedImage(item.cover_url, 720)}
+            srcSet={resizedSrcSet(item.cover_url, [480, 720, 1080])}
+            sizes="(max-width: 700px) 92vw, 380px"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        ) : null}
         <span className="opp-body">
           <span className="opp-tag">{ar ? "فرصة تدريب" : "Internship"}</span>
           <h3 dir="auto">{title}</h3>
@@ -191,9 +226,12 @@ function InternshipCard({ item, lang }: { item: PublicInternshipCard; lang: "ar"
             </span>
           )}
           <span className="opp-foot">
-            <span className={`status ${state === "open" ? "is-open" : "is-review"}`}>{stateLabel}</span>
+            <span className={`status ${state === "open" ? "is-open" : "is-review"}`}>
+              {stateLabel}
+            </span>
             <span className="opp-apply">
-              <span>{ar ? "تفاصيل الفرصة" : "View the internship"}</span> <span aria-hidden="true">{ar ? "←" : "→"}</span>
+              <span>{ar ? "تفاصيل الفرصة" : "View the internship"}</span>{" "}
+              <span aria-hidden="true">{ar ? "←" : "→"}</span>
             </span>
           </span>
         </span>

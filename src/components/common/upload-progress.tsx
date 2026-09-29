@@ -31,10 +31,7 @@ export function UploadProgress({
         <span className="tabular-nums font-medium text-foreground">{pct}%</span>
       </div>
       <div
-        className={cn(
-          "w-full overflow-hidden rounded-full bg-muted",
-          compact ? "h-1.5" : "h-2",
-        )}
+        className={cn("w-full overflow-hidden rounded-full bg-muted", compact ? "h-1.5" : "h-2")}
         role="progressbar"
         aria-valuenow={pct}
         aria-valuemin={0}

@@ -6,7 +6,11 @@ import { requireAdminBeforeLoad } from "@/lib/auth/admin-route-guard";
 import { supabase } from "@/integrations/supabase/client";
 import { toUserMessage } from "@/lib/safe-error";
 import { confirmDialog } from "@/hooks/useConfirm";
-import { communityLabel, NEWS_CATEGORY_KEYS, newsCategories } from "@/features/website/lib/community-categories";
+import {
+  communityLabel,
+  NEWS_CATEGORY_KEYS,
+  newsCategories,
+} from "@/features/website/lib/community-categories";
 import { Button } from "@/components/ui/button";
 import {
   EmptyState,

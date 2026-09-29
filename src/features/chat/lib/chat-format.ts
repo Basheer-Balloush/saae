@@ -41,7 +41,8 @@ function splitLinks(segment: Segment): Segment[] {
     }
     const href = safeHref(raw);
     if (!href) continue;
-    if (match.index > last) out.push({ text: segment.text.slice(last, match.index), bold: segment.bold });
+    if (match.index > last)
+      out.push({ text: segment.text.slice(last, match.index), bold: segment.bold });
     out.push({ text: label ?? href, bold: segment.bold, href });
     last = end;
     LINK.lastIndex = end;

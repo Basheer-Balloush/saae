@@ -48,7 +48,11 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
   };
 
   const loadMine = async () => {
-    if (!user) { setHasMine(false); setMyPending(false); return; }
+    if (!user) {
+      setHasMine(false);
+      setMyPending(false);
+      return;
+    }
     const { data } = await supabase
       .from("lms_reviews")
       .select("id,status")
@@ -61,7 +65,9 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
   };
 
   useEffect(() => {
-    setReviews([]); setOffset(0); setTotal(0);
+    setReviews([]);
+    setOffset(0);
+    setTotal(0);
     loadPage(0, true);
     loadMine();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,7 +109,9 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
           <div className="mt-3 flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
               <button key={n} onClick={() => setRating(n)} type="button" aria-label={`${n}`}>
-                <Star className={`h-6 w-6 ${n <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`} />
+                <Star
+                  className={`h-6 w-6 ${n <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`}
+                />
               </button>
             ))}
           </div>
@@ -144,12 +152,19 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
                 {new Date(r.created_at).toLocaleDateString(isAr ? "ar" : "en")}
               </span>
             </div>
-            {r.comment && <p className="mt-2 text-sm text-foreground leading-relaxed">{r.comment}</p>}
+            {r.comment && (
+              <p className="mt-2 text-sm text-foreground leading-relaxed">{r.comment}</p>
+            )}
           </div>
         ))}
         {offset < total && (
           <div className="pt-2">
-            <Button variant="outline" size="sm" disabled={loading} onClick={() => loadPage(offset, false)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={loading}
+              onClick={() => loadPage(offset, false)}
+            >
               {loading && <Loader2 className="h-4 w-4 animate-spin mx-2" />}
               {isAr ? "عرض المزيد" : "Load more"}
             </Button>

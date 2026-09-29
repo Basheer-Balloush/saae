@@ -31,7 +31,10 @@ export const Route = createFileRoute("/resources/ai-tools")({
           "@type": "Article",
           headline: "دليل مواقع الذكاء الاصطناعي للطلاب والباحثين",
           inLanguage: "ar",
-          author: { "@type": "Organization", name: "SAAE — الجمعية السورية للذكاء الصنعي وريادة الأعمال" },
+          author: {
+            "@type": "Organization",
+            name: "SAAE — الجمعية السورية للذكاء الصنعي وريادة الأعمال",
+          },
           publisher: {
             "@type": "Organization",
             name: "SAAE",
@@ -63,8 +66,7 @@ const CATEGORIES: Category[] = [
   {
     id: "research",
     title: "البحث العلمي والأكاديمي",
-    intro:
-      "أدوات تساعد الباحثين والطلاب في الوصول للأوراق العلمية، تلخيصها، وتحليلها بسرعة.",
+    intro: "أدوات تساعد الباحثين والطلاب في الوصول للأوراق العلمية، تلخيصها، وتحليلها بسرعة.",
     tools: [
       {
         name: "Perplexity AI",
@@ -98,8 +100,7 @@ const CATEGORIES: Category[] = [
   {
     id: "coding",
     title: "البرمجة وتطوير البرمجيات",
-    intro:
-      "مساعدات برمجية تسرّع كتابة الكود وتساعد الطلاب في تعلّم البرمجة.",
+    intro: "مساعدات برمجية تسرّع كتابة الكود وتساعد الطلاب في تعلّم البرمجة.",
     tools: [
       {
         name: "GitHub Copilot",
@@ -164,8 +165,7 @@ const CATEGORIES: Category[] = [
   {
     id: "education",
     title: "التعليم والإنتاجية",
-    intro:
-      "أدوات تساعد الطلاب على التعلّم، الكتابة، تنظيم الملاحظات، وتلخيص المحاضرات.",
+    intro: "أدوات تساعد الطلاب على التعلّم، الكتابة، تنظيم الملاحظات، وتلخيص المحاضرات.",
     tools: [
       {
         name: "ChatGPT",
@@ -227,16 +227,11 @@ function AIToolsGuide() {
         </header>
 
         <nav className="mb-12 p-4 rounded-lg bg-muted/40 border border-border">
-          <p className="font-semibold mb-3">
-            {lang === "ar" ? "محتويات الدليل" : "Contents"}
-          </p>
+          <p className="font-semibold mb-3">{lang === "ar" ? "محتويات الدليل" : "Contents"}</p>
           <ul className="grid sm:grid-cols-2 gap-2">
             {CATEGORIES.map((c) => (
               <li key={c.id}>
-                <a
-                  href={`#${c.id}`}
-                  className="text-primary hover:underline"
-                >
+                <a href={`#${c.id}`} className="text-primary hover:underline">
                   {c.title}
                 </a>
               </li>
@@ -267,9 +262,7 @@ function AIToolsGuide() {
                       </a>
                     </h3>
                   </div>
-                  <p className="text-foreground/90 leading-relaxed mb-2">
-                    {tool.desc}
-                  </p>
+                  <p className="text-foreground/90 leading-relaxed mb-2">{tool.desc}</p>
                   {tool.note && (
                     <p className="text-sm text-muted-foreground">
                       {isRtl ? "ملاحظة: " : "Note: "}

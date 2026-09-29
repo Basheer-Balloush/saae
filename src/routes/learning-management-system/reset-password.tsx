@@ -13,7 +13,10 @@ import { PasswordInput } from "@/features/lms/skin/PasswordInput";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/reset-password")({
-  head: () => ({ meta: [{ title: "Reset password — SAAE Training and Learning Platform" }], links: LMS_SKIN_LINKS }),
+  head: () => ({
+    meta: [{ title: "Reset password — SAAE Training and Learning Platform" }],
+    links: LMS_SKIN_LINKS,
+  }),
   component: ResetPage,
 });
 
@@ -54,7 +57,13 @@ function ResetPage() {
       <form onSubmit={onSubmit}>
         <div className="field">
           <label htmlFor="password">{tr.newPassword}</label>
-          <PasswordInput id="password" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <PasswordInput
+            id="password"
+            autoComplete="new-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
         <button type="submit" className="auth-submit" disabled={submitting}>
           {submitting && <Loader2 className="h-4 w-4 animate-spin" />}

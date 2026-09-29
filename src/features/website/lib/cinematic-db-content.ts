@@ -232,7 +232,10 @@ export function mobileNewsEntries(rows: NewsCardRow[]): NewsEntry[] {
     return {
       id: row.id,
       tag: { en: communityLabel(row.category, "en"), ar: communityLabel(row.category, "ar") },
-      date: { en: formatNewsDate(row.published_at, "en"), ar: formatNewsDate(row.published_at, "ar") },
+      date: {
+        en: formatNewsDate(row.published_at, "en"),
+        ar: formatNewsDate(row.published_at, "ar"),
+      },
       dateTime: row.published_at.slice(0, 10),
       headline,
       excerpt: { en: en || ar, ar: ar || en },
@@ -260,11 +263,17 @@ function newsStatusHtml(failed: boolean): string {
 
 /** The homepage ring: up to four stories, then the design's own "all news" card. */
 export function renderHomeNews(rows: NewsCardRow[], failed = false): HomeNewsFragments {
-  if (failed || rows.length === 0) return {
-    slidesHtml: `<li class="flow-slide news-slide" data-tint="4, 128, 144"><article class="news-card news-card-more"><div class="news-copy">${newsStatusHtml(failed)}</div></article></li>`,
-    dotsHtml: [0, 1].map(i => `<button class="flow-dot carousel-dot-btn" type="button" data-go="${i}" aria-label="Show item ${i + 1} of 2"${i === 0 ? ' aria-current="true"' : ""}></button>`).join("\n"),
-    total: 2,
-  };
+  if (failed || rows.length === 0)
+    return {
+      slidesHtml: `<li class="flow-slide news-slide" data-tint="4, 128, 144"><article class="news-card news-card-more"><div class="news-copy">${newsStatusHtml(failed)}</div></article></li>`,
+      dotsHtml: [0, 1]
+        .map(
+          (i) =>
+            `<button class="flow-dot carousel-dot-btn" type="button" data-go="${i}" aria-label="Show item ${i + 1} of 2"${i === 0 ? ' aria-current="true"' : ""}></button>`,
+        )
+        .join("\n"),
+      total: 2,
+    };
   const items = rows.slice(0, HOME_NEWS_LIMIT);
   const total = items.length + 1;
   const slidesHtml = items
@@ -299,7 +308,10 @@ export function applyHomeNews(html: string, fragments: HomeNewsFragments | null)
     replaceRegion(html, "home-news-slides", fragments.slidesHtml),
     "home-news-dots",
     fragments.dotsHtml,
-  ).replace('aria-label="Latest news, five items"', `aria-label="Latest news, ${fragments.total} items"`);
+  ).replace(
+    'aria-label="Latest news, five items"',
+    `aria-label="Latest news, ${fragments.total} items"`,
+  );
 }
 
 /** The news page: the newest story featured, every other one in the grid. */
@@ -434,9 +446,14 @@ function paragraphsHtml(text: string): string {
     .join("\n");
 }
 
-export function renderArticle(article: NewsArticleRow, related: RelatedNewsRow[]): ArticleFragments {
+export function renderArticle(
+  article: NewsArticleRow,
+  related: RelatedNewsRow[],
+): ArticleFragments {
   const title = titles(article);
-  const categories = (article.categories?.length ? article.categories : [article.category]).filter(Boolean);
+  const categories = (article.categories?.length ? article.categories : [article.category]).filter(
+    Boolean,
+  );
   const cover = httpsUrl(article.image_url);
 
   const headHtml = [
@@ -454,8 +471,10 @@ export function renderArticle(article: NewsArticleRow, related: RelatedNewsRow[]
     ? `<figure class="article-cover reveal">\n  <img src="${escapeHtml(resizedImage(cover, 1600))}"${srcSetAttr(cover, [720, 1080, 1600])} sizes="(max-width: 767px) 100vw, 80vw" alt="${escapeHtml(title.en)}" decoding="async">\n</figure>`
     : "";
 
-  const bodyEn = article.content_en || article.content || article.excerpt_en || article.excerpt || "";
-  const bodyAr = article.content_ar || article.content || article.excerpt_ar || article.excerpt || "";
+  const bodyEn =
+    article.content_en || article.content || article.excerpt_en || article.excerpt || "";
+  const bodyAr =
+    article.content_ar || article.content || article.excerpt_ar || article.excerpt || "";
   const bodyHtml =
     bodyEn || bodyAr
       ? [
@@ -504,7 +523,10 @@ export function renderArticle(article: NewsArticleRow, related: RelatedNewsRow[]
       : [
           `<section class="article-videos reveal" aria-labelledby="videos-title">`,
           `  <h2 class="related-heading" id="videos-title">${bilingualHtml("Videos", "فيديوهات")}</h2>`,
-          ...videos.map((src) => `  <video src="${escapeHtml(src)}" controls preload="metadata" playsinline></video>`),
+          ...videos.map(
+            (src) =>
+              `  <video src="${escapeHtml(src)}" controls preload="metadata" playsinline></video>`,
+          ),
           `</section>`,
         ].join("\n");
 

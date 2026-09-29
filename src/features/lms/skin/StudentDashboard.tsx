@@ -130,7 +130,10 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
     const list = (data as Req[]) ?? [];
     if (list.length) {
       const ids = [...new Set(list.map((r) => r.course_id))];
-      const { data: cs } = await supabase.from("lms_courses").select("id,title_ar,title_en,cover_url").in("id", ids);
+      const { data: cs } = await supabase
+        .from("lms_courses")
+        .select("id,title_ar,title_en,cover_url")
+        .in("id", ids);
       const map = new Map((cs ?? []).map((c) => [c.id, c]));
       list.forEach((r) => {
         const c = map.get(r.course_id);
@@ -141,14 +144,28 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
     setReqLoading(false);
   };
 
-  useEffect(() => { loadReqs(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
+  useEffect(() => {
+    loadReqs(); /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [user]);
 
   const cancel = async (id: string) => {
-    if (!(await confirmDialog({ title: ar ? "إلغاء الطلب؟" : "Cancel this request?", destructive: true }))) return;
+    if (
+      !(await confirmDialog({
+        title: ar ? "إلغاء الطلب؟" : "Cancel this request?",
+        destructive: true,
+      }))
+    )
+      return;
     setBusy(id);
-    const { error } = await supabase.from("lms_enrollment_requests").update({ status: "cancelled" }).eq("id", id);
+    const { error } = await supabase
+      .from("lms_enrollment_requests")
+      .update({ status: "cancelled" })
+      .eq("id", id);
     setBusy(null);
-    if (error) { toast.error(toUserMessage(error)); return; }
+    if (error) {
+      toast.error(toUserMessage(error));
+      return;
+    }
     toast.success(ar ? "تم الإلغاء" : "Cancelled");
     loadReqs();
   };
@@ -170,7 +187,8 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
     selectTab(forward ? "requests" : "courses");
   };
 
-  const courseTitle = (c: { title_ar: string; title_en: string | null }) => (ar ? c.title_ar : c.title_en || c.title_ar);
+  const courseTitle = (c: { title_ar: string; title_en: string | null }) =>
+    ar ? c.title_ar : c.title_en || c.title_ar;
 
   return (
     <>
@@ -190,33 +208,50 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
             <dl className="stats-band stats-band-4">
               <div>
                 <dt>{tr.enrolledCourses}</dt>
-                <dd><Counter value={rows.length} /></dd>
+                <dd>
+                  <Counter value={rows.length} />
+                </dd>
               </div>
               <div>
                 <dt>{tr.avgProgress}</dt>
-                <dd><Counter value={avg} suffix="%" /></dd>
+                <dd>
+                  <Counter value={avg} suffix="%" />
+                </dd>
               </div>
               <div>
                 <dt>{tr.completed}</dt>
-                <dd><Counter value={completed} /></dd>
+                <dd>
+                  <Counter value={completed} />
+                </dd>
               </div>
               <div>
                 <dt>{ar ? "الشهادات" : "Certificates"}</dt>
-                <dd><Counter value={certs.length} /></dd>
+                <dd>
+                  <Counter value={certs.length} />
+                </dd>
               </div>
             </dl>
           </div>
         </div>
       </section>
 
-      <section className="lms-section" aria-label={ar ? "الدورات والطلبات" : "Courses and requests"}>
+      <section
+        className="lms-section"
+        aria-label={ar ? "الدورات والطلبات" : "Courses and requests"}
+      >
         <div className="page-shell">
-          <div className="lms-tabs" role="tablist" aria-label={ar ? "عروض الطالب" : "Student views"}>
+          <div
+            className="lms-tabs"
+            role="tablist"
+            aria-label={ar ? "عروض الطالب" : "Student views"}
+          >
             <button
               type="button"
               role="tab"
               id="tab-courses"
-              ref={(el) => { tabRefs.current.courses = el; }}
+              ref={(el) => {
+                tabRefs.current.courses = el;
+              }}
               aria-selected={tab === "courses"}
               aria-controls="panel-courses"
               tabIndex={tab === "courses" ? 0 : -1}
@@ -229,7 +264,9 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
               type="button"
               role="tab"
               id="tab-requests"
-              ref={(el) => { tabRefs.current.requests = el; }}
+              ref={(el) => {
+                tabRefs.current.requests = el;
+              }}
               aria-selected={tab === "requests"}
               aria-controls="panel-requests"
               tabIndex={tab === "requests" ? 0 : -1}
@@ -241,7 +278,12 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
             </button>
           </div>
 
-          <div id="panel-courses" role="tabpanel" aria-labelledby="tab-courses" hidden={tab !== "courses"}>
+          <div
+            id="panel-courses"
+            role="tabpanel"
+            aria-labelledby="tab-courses"
+            hidden={tab !== "courses"}
+          >
             {loading ? (
               <p className="state-box">
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -265,23 +307,41 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
                   return (
                     <li key={r.id} className="study-card">
                       <span className="course-thumb cat-ai" aria-hidden="true">
-                        {r.course.cover_url ? <img src={resizedImage(r.course.cover_url, 720)} alt="" loading="lazy" decoding="async" /> : <IconCategoryAI />}
+                        {r.course.cover_url ? (
+                          <img
+                            src={resizedImage(r.course.cover_url, 720)}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : (
+                          <IconCategoryAI />
+                        )}
                         {ended ? <span className="course-ended">{tr.courseEndedShort}</span> : null}
                       </span>
                       <span className="study-body">
                         <span className="course-tags">
                           <span className={done ? "tag-free" : undefined}>
-                            {done ? (ar ? "مكتملة" : "Completed") : ar ? "قيد التقدّم" : "In progress"}
+                            {done
+                              ? ar
+                                ? "مكتملة"
+                                : "Completed"
+                              : ar
+                                ? "قيد التقدّم"
+                                : "In progress"}
                           </span>
                         </span>
                         <h3>{courseTitle(r.course)}</h3>
                         <span className="progress" role="img" aria-label={`${pct}%`}>
-                          <i style={{ width: `${Math.min(100, Math.max(0, Number(r.progress)))}%` }} />
+                          <i
+                            style={{ width: `${Math.min(100, Math.max(0, Number(r.progress)))}%` }}
+                          />
                         </span>
                         <span className="study-foot">
                           <b>{pct}%</b>
                           <Link {...courseDestination(r.course.id, r.course.delivery_mode)}>
-                            <span>{ar ? "تابع" : "Continue"}</span> <span aria-hidden="true">{ar ? "←" : "→"}</span>
+                            <span>{ar ? "تابع" : "Continue"}</span>{" "}
+                            <span aria-hidden="true">{ar ? "←" : "→"}</span>
                           </Link>
                         </span>
                       </span>
@@ -302,9 +362,16 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
                         {c.serial}
                       </p>
                       <h3>{c.title}</h3>
-                      <p className="cert-meta">{new Date(c.issued_at).toLocaleDateString(ar ? "ar" : "en")}</p>
-                      <Link className="cert-link" to="/learning-management-system/certificate/$id" params={{ id: c.id }}>
-                        <span>{ar ? "عرض الشهادة" : "View certificate"}</span> <span aria-hidden="true">{ar ? "←" : "→"}</span>
+                      <p className="cert-meta">
+                        {new Date(c.issued_at).toLocaleDateString(ar ? "ar" : "en")}
+                      </p>
+                      <Link
+                        className="cert-link"
+                        to="/learning-management-system/certificate/$id"
+                        params={{ id: c.id }}
+                      >
+                        <span>{ar ? "عرض الشهادة" : "View certificate"}</span>{" "}
+                        <span aria-hidden="true">{ar ? "←" : "→"}</span>
                       </Link>
                     </li>
                   ))}
@@ -313,7 +380,12 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
             )}
           </div>
 
-          <div id="panel-requests" role="tabpanel" aria-labelledby="tab-requests" hidden={tab !== "requests"}>
+          <div
+            id="panel-requests"
+            role="tabpanel"
+            aria-labelledby="tab-requests"
+            hidden={tab !== "requests"}
+          >
             {reqLoading ? (
               <p className="state-box">
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -334,13 +406,22 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
                   return (
                     <li key={r.id} className="req-card">
                       <span className="req-main">
-                        <Link to="/learning-management-system/courses/$id" params={{ id: r.course_id }}>
+                        <Link
+                          to="/learning-management-system/courses/$id"
+                          params={{ id: r.course_id }}
+                        >
                           {title}
                         </Link>
                         <span>
                           {new Date(r.created_at).toLocaleDateString(ar ? "ar" : "en")}
                           {" · "}
-                          {r.payment_method === "manual" ? (ar ? "دفع يدوي" : "Manual payment") : ar ? "دفع إلكتروني" : "Online payment"}
+                          {r.payment_method === "manual"
+                            ? ar
+                              ? "دفع يدوي"
+                              : "Manual payment"
+                            : ar
+                              ? "دفع إلكتروني"
+                              : "Online payment"}
                         </span>
                         {r.notes && <span className="req-note">{r.notes}</span>}
                         {r.admin_notes && (
@@ -352,11 +433,26 @@ export function StudentDashboard({ initialTab }: { initialTab: Tab }) {
                       <span className="req-side">
                         <span className={`status ${STATUS_CLASS[r.status]}`}>
                           {ar
-                            ? { pending: "قيد المراجعة", approved: "موافَق", rejected: "مرفوض", cancelled: "ملغى" }[r.status]
-                            : { pending: "Pending review", approved: "Approved", rejected: "Rejected", cancelled: "Cancelled" }[r.status]}
+                            ? {
+                                pending: "قيد المراجعة",
+                                approved: "موافَق",
+                                rejected: "مرفوض",
+                                cancelled: "ملغى",
+                              }[r.status]
+                            : {
+                                pending: "Pending review",
+                                approved: "Approved",
+                                rejected: "Rejected",
+                                cancelled: "Cancelled",
+                              }[r.status]}
                         </span>
                         {r.status === "pending" && (
-                          <button type="button" className="action action-secondary" onClick={() => cancel(r.id)} disabled={busy === r.id}>
+                          <button
+                            type="button"
+                            className="action action-secondary"
+                            onClick={() => cancel(r.id)}
+                            disabled={busy === r.id}
+                          >
                             <span className="btn-content">
                               {busy === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                               <span>{ar ? "إلغاء" : "Cancel"}</span>

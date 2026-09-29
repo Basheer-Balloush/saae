@@ -11,10 +11,7 @@ import {
 } from "@/features/lms/internships/lib/admin";
 
 async function assertLmsAdmin(supabase: any, userId: string) {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   if (error) throw new Error(error.message);
   const roles = (data ?? []).map((r: { role: string }) => r.role);
   if (!roles.includes("lms_admin") && !roles.includes("admin")) {
@@ -46,17 +43,14 @@ export const adminListInternships = createServerFn({ method: "POST" })
 
     let query = supabase
       .from("internship_opportunities")
-      .select(
-        "id, slug, title_ar, title_en, status, deadline_at, starts_at, updated_at",
-        { count: "exact" },
-      );
+      .select("id, slug, title_ar, title_en, status, deadline_at, starts_at, updated_at", {
+        count: "exact",
+      });
 
     if (status) query = query.eq("status", status);
     if (q && q.length) {
       const pat = `%${q.replace(/[%_]/g, "")}%`;
-      query = query.or(
-        `title_ar.ilike.${pat},title_en.ilike.${pat},slug.ilike.${pat}`,
-      );
+      query = query.or(`title_ar.ilike.${pat},title_en.ilike.${pat},slug.ilike.${pat}`);
     }
     switch (sort) {
       case "deadline_asc":
@@ -66,7 +60,9 @@ export const adminListInternships = createServerFn({ method: "POST" })
         query = query.order("title_ar", { ascending: true });
         break;
       case "status":
-        query = query.order("status", { ascending: true }).order("updated_at", { ascending: false });
+        query = query
+          .order("status", { ascending: true })
+          .order("updated_at", { ascending: false });
         break;
       default:
         query = query.order("updated_at", { ascending: false });
@@ -163,7 +159,8 @@ export const adminUpsertInternship = createServerFn({ method: "POST" })
         .eq("id", id)
         .select("id")
         .single();
-      if (error) throw new Error(error.message.includes("duplicate") ? "slug_taken" : error.message);
+      if (error)
+        throw new Error(error.message.includes("duplicate") ? "slug_taken" : error.message);
       oppId = upd.id;
     } else {
       const { data: existing } = await supabase
@@ -177,7 +174,8 @@ export const adminUpsertInternship = createServerFn({ method: "POST" })
         .insert(oppPayload)
         .select("id")
         .single();
-      if (error) throw new Error(error.message.includes("duplicate") ? "slug_taken" : error.message);
+      if (error)
+        throw new Error(error.message.includes("duplicate") ? "slug_taken" : error.message);
       oppId = ins.id;
     }
 
@@ -187,9 +185,7 @@ export const adminUpsertInternship = createServerFn({ method: "POST" })
       .select("id")
       .eq("opportunity_id", oppId);
     const existingIds = new Set(((existingQs ?? []) as { id: string }[]).map((q) => q.id));
-    const incomingIds = new Set(
-      questions.filter((q) => q.id).map((q) => q.id as string),
-    );
+    const incomingIds = new Set(questions.filter((q) => q.id).map((q) => q.id as string));
     const toDelete = [...existingIds].filter((qid) => !incomingIds.has(qid));
 
     if (toDelete.length) {
@@ -200,9 +196,7 @@ export const adminUpsertInternship = createServerFn({ method: "POST" })
       if (dErr) {
         // FK RESTRICT from answers
         throw new Error(
-          dErr.message.includes("violates foreign key")
-            ? "question_has_answers"
-            : dErr.message,
+          dErr.message.includes("violates foreign key") ? "question_has_answers" : dErr.message,
         );
       }
     }
@@ -227,9 +221,7 @@ export const adminUpsertInternship = createServerFn({ method: "POST" })
           .eq("id", q.id);
         if (error) throw new Error(error.message);
       } else {
-        const { error } = await supabase
-          .from("internship_questions")
-          .insert(payload);
+        const { error } = await supabase.from("internship_questions").insert(payload);
         if (error) throw new Error(error.message);
       }
     }
@@ -280,10 +272,7 @@ export const adminDeleteInternship = createServerFn({ method: "POST" })
       .delete()
       .eq("opportunity_id", data.id);
     if (appsError) throw new Error(appsError.message);
-    const { error } = await supabase
-      .from("internship_opportunities")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await supabase.from("internship_opportunities").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

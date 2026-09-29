@@ -180,7 +180,11 @@ function InstructorProfile() {
                 aria-label={t("تغيير الصورة", "Change photo")}
               >
                 {p.avatar_url ? (
-                  <img src={resizedImage(p.avatar_url, 320)} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={resizedImage(p.avatar_url, 320)}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <span className="grid h-full w-full place-items-center bg-[var(--cx-teal-50)] text-[28px] font-extrabold text-[var(--cx-teal)]">
                     {initial}

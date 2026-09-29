@@ -18,7 +18,8 @@ export const lmsRedirectSearchSchema = (raw: Record<string, unknown>): { redirec
   redirect: safeLmsRedirect(raw?.redirect),
 });
 
-const AUTH_PAGE = /^\/learning-management-system\/(login|signup|forgot-password|reset-password)\/?$/;
+const AUTH_PAGE =
+  /^\/learning-management-system\/(login|signup|forgot-password|reset-password)\/?$/;
 
 /**
  * The current LMS page as a login return target, so sign-in lands back here.

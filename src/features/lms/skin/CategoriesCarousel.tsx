@@ -77,9 +77,12 @@ export function CategoriesCarousel({
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
-    const observer = new IntersectionObserver((entries) => setOnScreen(entries.some((e) => e.isIntersecting)), {
-      threshold: 0.05,
-    });
+    const observer = new IntersectionObserver(
+      (entries) => setOnScreen(entries.some((e) => e.isIntersecting)),
+      {
+        threshold: 0.05,
+      },
+    );
     observer.observe(stage);
     const pause = () => setPaused(true);
     const resume = () => setPaused(false);
@@ -149,7 +152,9 @@ export function CategoriesCarousel({
     <section className="lms-section cats-showcase" aria-labelledby="cats-title">
       <div className="cats-bg" aria-hidden="true">
         <span className="cats-bg-glow" />
-        <span className={`cats-bg-icon${bgTone ? "" : " is-swap"}`}>{bgTone ? <ToneIcon tone={bgTone} /> : null}</span>
+        <span className={`cats-bg-icon${bgTone ? "" : " is-swap"}`}>
+          {bgTone ? <ToneIcon tone={bgTone} /> : null}
+        </span>
       </div>
       <div className="page-shell cats-shell">
         <div className="lms-head">
@@ -192,7 +197,12 @@ export function CategoriesCarousel({
               {categories.map((c, i) => {
                 const { pos, hidden, style } = layoutFor(i);
                 return (
-                  <li key={c.id} className={`cat-card${pos === 0 ? " is-front" : ""}`} style={style} aria-hidden={hidden}>
+                  <li
+                    key={c.id}
+                    className={`cat-card${pos === 0 ? " is-front" : ""}`}
+                    style={style}
+                    aria-hidden={hidden}
+                  >
                     <button
                       type="button"
                       tabIndex={hidden ? -1 : 0}
@@ -219,10 +229,18 @@ export function CategoriesCarousel({
               })}
             </ul>
             <div className="cats-nav" role="group" aria-label={ar ? "الفئات" : "Categories"}>
-              <button type="button" aria-label={ar ? "الفئة السابقة" : "Previous category"} onClick={() => goTo(active - 1)}>
+              <button
+                type="button"
+                aria-label={ar ? "الفئة السابقة" : "Previous category"}
+                onClick={() => goTo(active - 1)}
+              >
                 <span aria-hidden="true">←</span>
               </button>
-              <button type="button" aria-label={ar ? "الفئة التالية" : "Next category"} onClick={() => goTo(active + 1)}>
+              <button
+                type="button"
+                aria-label={ar ? "الفئة التالية" : "Next category"}
+                onClick={() => goTo(active + 1)}
+              >
                 <span aria-hidden="true">→</span>
               </button>
             </div>

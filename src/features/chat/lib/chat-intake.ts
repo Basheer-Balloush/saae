@@ -35,7 +35,8 @@ export const courseUrl = (row: { slug: string | null; id: string }) =>
 function priceLabel(row: CatalogRow, lang: "ar" | "en"): string {
   if (row.is_free) return lang === "ar" ? "مجاني" : "Free";
   const effective = row.sale_price != null && row.sale_price > 0 ? row.sale_price : row.price;
-  if (effective == null || Number.isNaN(effective)) return lang === "ar" ? "السعر غير محدّد" : "Price not set";
+  if (effective == null || Number.isNaN(effective))
+    return lang === "ar" ? "السعر غير محدّد" : "Price not set";
   const amount = Number(effective).toLocaleString("en-US");
   return lang === "ar" ? `ل.س ${amount}` : `${amount} SYP`;
 }
@@ -46,7 +47,9 @@ export function toCourseOptions(rows: CatalogRow[], lang: "ar" | "en", limit = 3
     .filter((row) => (lang === "ar" ? row.title_ar || row.title_en : row.title_en || row.title_ar))
     .slice(0, limit)
     .map((row) => ({
-      title: (lang === "ar" ? row.title_ar || row.title_en : row.title_en || row.title_ar) as string,
+      title: (lang === "ar"
+        ? row.title_ar || row.title_en
+        : row.title_en || row.title_ar) as string,
       url: courseUrl(row),
       level: row.level,
       price: priceLabel(row, lang),
@@ -55,7 +58,11 @@ export function toCourseOptions(rows: CatalogRow[], lang: "ar" | "en", limit = 3
 }
 
 /** Said when the catalogue has nothing for this visitor: never invent a course. */
-export function noCourseFallback(lang: "ar" | "en"): { message: string; phone: string; email: string } {
+export function noCourseFallback(lang: "ar" | "en"): {
+  message: string;
+  phone: string;
+  email: string;
+} {
   return {
     message:
       lang === "ar"
@@ -71,10 +78,13 @@ function statusOf(error: unknown): number | null {
   const candidate = error as { statusCode?: unknown; status?: unknown; cause?: unknown } | null;
   const direct = candidate?.statusCode ?? candidate?.status;
   if (typeof direct === "number") return direct;
-  const nested = (candidate?.cause as { statusCode?: unknown; status?: unknown } | undefined) ?? undefined;
+  const nested =
+    (candidate?.cause as { statusCode?: unknown; status?: unknown } | undefined) ?? undefined;
   const fromCause = nested?.statusCode ?? nested?.status;
   if (typeof fromCause === "number") return fromCause;
-  const match = /\b(4\d\d|5\d\d)\b/.exec(error instanceof Error ? error.message : String(error ?? ""));
+  const match = /\b(4\d\d|5\d\d)\b/.exec(
+    error instanceof Error ? error.message : String(error ?? ""),
+  );
   return match ? Number(match[1]) : null;
 }
 

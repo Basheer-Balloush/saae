@@ -41,7 +41,9 @@ export default function InstructorCleanupPanel() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const chosen = Object.keys(selected).filter((k) => selected[k]);
 
@@ -49,7 +51,9 @@ export default function InstructorCleanupPanel() {
     if (chosen.length === 0) return;
     setBusy(true);
     try {
-      const res = await archiveInstructors({ data: { user_ids: chosen, note: note || undefined, retention_days: 90, notify: true } });
+      const res = await archiveInstructors({
+        data: { user_ids: chosen, note: note || undefined, retention_days: 90, notify: true },
+      });
       toast.success(
         ar
           ? `تمت الأرشفة: ${res.archived} · إشعارات مرسلة: ${res.sent}`
@@ -79,7 +83,13 @@ export default function InstructorCleanupPanel() {
   };
 
   const doPurge = async (id: string) => {
-    if (!(await confirm({ title: ar ? "حذف نهائي لهذه الدفعة؟" : "Permanently purge this batch?", destructive: true }))) return;
+    if (
+      !(await confirm({
+        title: ar ? "حذف نهائي لهذه الدفعة؟" : "Permanently purge this batch?",
+        destructive: true,
+      }))
+    )
+      return;
     setBusy(true);
     try {
       const res = await purgeCleanupBatch({ data: { batch_id: id } });
@@ -95,7 +105,9 @@ export default function InstructorCleanupPanel() {
   return (
     <div className="mb-6 rounded-2xl border border-border bg-muted/20 p-4 sm:p-5 space-y-4">
       <div>
-        <h3 className="font-bold text-foreground">{ar ? "أرشفة المدرّبين غير المعتمدين" : "Archive unapproved instructors"}</h3>
+        <h3 className="font-bold text-foreground">
+          {ar ? "أرشفة المدرّبين غير المعتمدين" : "Archive unapproved instructors"}
+        </h3>
         <p className="text-xs text-muted-foreground mt-1 max-w-3xl">
           {ar
             ? "اختر الملفات المطلوب أرشفتها. الأرشفة قابلة للاستعادة خلال 90 يوماً ولا تحذف الدورات أو التسجيلات، ويُرسل لكل متدرّب بريد لإعادة تعبئة النموذج."
@@ -106,7 +118,9 @@ export default function InstructorCleanupPanel() {
       {loading ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : candidates.length === 0 ? (
-        <p className="text-xs text-muted-foreground">{ar ? "لا يوجد ملفات مرشّحة." : "No candidates."}</p>
+        <p className="text-xs text-muted-foreground">
+          {ar ? "لا يوجد ملفات مرشّحة." : "No candidates."}
+        </p>
       ) : (
         <>
           <div className="overflow-x-auto rounded-xl border border-border bg-background">
@@ -144,7 +158,11 @@ export default function InstructorCleanupPanel() {
             onChange={(e) => setNote(e.target.value)}
           />
           <Button variant="outline" onClick={doArchive} disabled={busy || chosen.length === 0}>
-            {busy ? <Loader2 className="h-4 w-4 animate-spin mx-2" /> : <Archive className="h-4 w-4 mx-2" />}
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin mx-2" />
+            ) : (
+              <Archive className="h-4 w-4 mx-2" />
+            )}
             {ar ? `أرشفة المحدد (${chosen.length})` : `Archive selected (${chosen.length})`}
           </Button>
         </>
@@ -155,20 +173,37 @@ export default function InstructorCleanupPanel() {
           <p className="text-xs font-bold">{ar ? "دفعات الأرشفة" : "Cleanup batches"}</p>
           <ul className="space-y-2">
             {batches.map((b) => (
-              <li key={b.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-background p-3 text-xs">
+              <li
+                key={b.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-background p-3 text-xs"
+              >
                 <span>
-                  {new Date(b.created_at).toLocaleString()} · {ar ? "مؤرشف" : "archived"} {b.archived_count}
+                  {new Date(b.created_at).toLocaleString()} · {ar ? "مؤرشف" : "archived"}{" "}
+                  {b.archived_count}
                   {b.restored_count ? ` · ${ar ? "مستعاد" : "restored"} ${b.restored_count}` : ""}
                   {b.purged_at ? ` · ${ar ? "محذوف نهائياً" : "purged"} ${b.purged_count}` : ""}
                   {b.note ? ` · ${b.note}` : ""}
                 </span>
                 {!b.purged_at && (
                   <span className="flex gap-2">
-                    <Button size="sm" variant="ghost" disabled={busy} onClick={() => doRestore(b.id)}>
-                      <RotateCcw className="h-3 w-3 mx-1" />{ar ? "استعادة" : "Restore"}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={() => doRestore(b.id)}
+                    >
+                      <RotateCcw className="h-3 w-3 mx-1" />
+                      {ar ? "استعادة" : "Restore"}
                     </Button>
-                    <Button size="sm" variant="ghost" className="text-destructive" disabled={busy} onClick={() => doPurge(b.id)}>
-                      <Trash2 className="h-3 w-3 mx-1" />{ar ? "حذف نهائي" : "Purge"}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive"
+                      disabled={busy}
+                      onClick={() => doPurge(b.id)}
+                    >
+                      <Trash2 className="h-3 w-3 mx-1" />
+                      {ar ? "حذف نهائي" : "Purge"}
                     </Button>
                   </span>
                 )}

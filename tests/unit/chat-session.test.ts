@@ -6,7 +6,11 @@ const stored = (s: object) => JSON.stringify(s);
 
 describe("chat session lifetime", () => {
   it("keeps the conversation across a reload within the idle window", () => {
-    const raw = stored({ id: "abc123-session", lastActivity: now - 60_000, messages: [{ id: "m1" }] });
+    const raw = stored({
+      id: "abc123-session",
+      lastActivity: now - 60_000,
+      messages: [{ id: "m1" }],
+    });
     const { session, isNew } = resolveChatSession(raw, now);
     expect(isNew).toBe(false);
     expect(session.id).toBe("abc123-session");
@@ -14,7 +18,11 @@ describe("chat session lifetime", () => {
   });
 
   it("starts a new conversation once the idle window passes", () => {
-    const raw = stored({ id: "abc123-session", lastActivity: now - CHAT_IDLE_MS - 1, messages: [{ id: "m1" }] });
+    const raw = stored({
+      id: "abc123-session",
+      lastActivity: now - CHAT_IDLE_MS - 1,
+      messages: [{ id: "m1" }],
+    });
     const { session, isNew } = resolveChatSession(raw, now);
     expect(isNew).toBe(true);
     expect(session.id).not.toBe("abc123-session");
@@ -22,8 +30,14 @@ describe("chat session lifetime", () => {
   });
 
   it("treats the boundary as expired, so 30 minutes idle ends the conversation", () => {
-    const justInside = resolveChatSession(stored({ id: "abc123-session", lastActivity: now - CHAT_IDLE_MS + 1, messages: [] }), now);
-    const atBoundary = resolveChatSession(stored({ id: "abc123-session", lastActivity: now - CHAT_IDLE_MS, messages: [] }), now);
+    const justInside = resolveChatSession(
+      stored({ id: "abc123-session", lastActivity: now - CHAT_IDLE_MS + 1, messages: [] }),
+      now,
+    );
+    const atBoundary = resolveChatSession(
+      stored({ id: "abc123-session", lastActivity: now - CHAT_IDLE_MS, messages: [] }),
+      now,
+    );
     expect(justInside.isNew).toBe(false);
     expect(atBoundary.isNew).toBe(true);
   });
@@ -33,7 +47,12 @@ describe("chat session lifetime", () => {
     expect(resolveChatSession("{not json", now).isNew).toBe(true);
     expect(resolveChatSession(stored({ id: "x", lastActivity: now }), now).isNew).toBe(true);
     expect(resolveChatSession(stored({ id: "abc123-session" }), now).isNew).toBe(true);
-    expect(resolveChatSession(stored({ id: "abc123-session", lastActivity: now + 60_000, messages: [] }), now).isNew).toBe(true);
+    expect(
+      resolveChatSession(
+        stored({ id: "abc123-session", lastActivity: now + 60_000, messages: [] }),
+        now,
+      ).isNew,
+    ).toBe(true);
   });
 
   it("gives every new conversation its own id", () => {
@@ -45,7 +64,10 @@ describe("chat session lifetime", () => {
 
   it("keeps only the most recent messages, matching the server's replay limit", () => {
     const many = Array.from({ length: 80 }, (_, i) => ({ id: `m${i}` }));
-    const { session } = resolveChatSession(stored({ id: "abc123-session", lastActivity: now, messages: many }), now);
+    const { session } = resolveChatSession(
+      stored({ id: "abc123-session", lastActivity: now, messages: many }),
+      now,
+    );
     expect(session.messages).toHaveLength(50);
     expect(session.messages[49]).toEqual({ id: "m79" });
   });

@@ -2,7 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createHash } from "crypto";
-import { lessonStatusFromBunnyVideo, type LessonVideoStatus } from "@/features/lms/lib/bunny-webhook-status";
+import {
+  lessonStatusFromBunnyVideo,
+  type LessonVideoStatus,
+} from "@/features/lms/lib/bunny-webhook-status";
 import { openLessonIds, orderLessons } from "@/features/lms/lib/lesson-sequence";
 
 /**
@@ -51,7 +54,11 @@ function getBunnyPlaybackEnv() {
   return { libraryId: env.BUNNY_STREAM_LIBRARY_ID, tokenKey: env.BUNNY_STREAM_TOKEN_KEY };
 }
 
-async function fetchBunnyVideoStatus(libraryId: string, apiKey: string, videoId: string): Promise<LessonVideoStatus> {
+async function fetchBunnyVideoStatus(
+  libraryId: string,
+  apiKey: string,
+  videoId: string,
+): Promise<LessonVideoStatus> {
   const res = await fetch(`https://video.bunnycdn.com/library/${libraryId}/videos/${videoId}`, {
     headers: { AccessKey: apiKey, Accept: "application/json" },
   });
@@ -117,35 +124,27 @@ export const createBunnyUpload = createServerFn({ method: "POST" })
       .maybeSingle();
     if (lessonErr || !lesson) throw new Error("Lesson not found");
 
-    const instructorId =
-      (lesson as unknown as { lms_sections: { lms_courses: { instructor_id: string } } })
-        .lms_sections?.lms_courses?.instructor_id;
+    const instructorId = (
+      lesson as unknown as { lms_sections: { lms_courses: { instructor_id: string } } }
+    ).lms_sections?.lms_courses?.instructor_id;
 
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    const isAdmin = (roles ?? []).some(
-      (r) => r.role === "lms_admin" || r.role === "admin",
-    );
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    const isAdmin = (roles ?? []).some((r) => r.role === "lms_admin" || r.role === "admin");
 
     if (!isAdmin && instructorId !== userId) {
       throw new Error("Forbidden: you do not own this lesson");
     }
 
     // 1) Create the video object on Bunny.
-    const createRes = await fetch(
-      `https://video.bunnycdn.com/library/${libraryId}/videos`,
-      {
-        method: "POST",
-        headers: {
-          AccessKey: apiKey,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ title: data.title }),
+    const createRes = await fetch(`https://video.bunnycdn.com/library/${libraryId}/videos`, {
+      method: "POST",
+      headers: {
+        AccessKey: apiKey,
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
-    );
+      body: JSON.stringify({ title: data.title }),
+    });
     if (!createRes.ok) {
       const txt = await createRes.text();
       console.error("[Bunny] create video failed", createRes.status, txt);
@@ -164,9 +163,7 @@ export const createBunnyUpload = createServerFn({ method: "POST" })
     //    signature = sha256(libraryId + apiKey + expirationTime + videoId)
     const expirationTime = Math.floor(Date.now() / 1000) + 60 * 60 * 6; // 6h window for upload
     const sigInput = `${libraryId}${apiKey}${expirationTime}${videoId}`;
-    const authorizationSignature = createHash("sha256")
-      .update(sigInput)
-      .digest("hex");
+    const authorizationSignature = createHash("sha256").update(sigInput).digest("hex");
 
     return {
       videoId,
@@ -184,9 +181,7 @@ export const createBunnyUpload = createServerFn({ method: "POST" })
  */
 export const getBunnyPlayback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
-    z.object({ lessonId: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input) => z.object({ lessonId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { libraryId, tokenKey } = getBunnyPlaybackEnv();
@@ -216,13 +211,8 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
     }
 
     // Authorization: admin OR instructor of the course OR active enrolled student.
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    const isAdmin = (roles ?? []).some(
-      (r) => r.role === "lms_admin" || r.role === "admin",
-    );
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    const isAdmin = (roles ?? []).some((r) => r.role === "lms_admin" || r.role === "admin");
     const isInstructor = l.lms_sections.lms_courses.instructor_id === userId;
 
     if (!isAdmin && !isInstructor) {
@@ -243,7 +233,10 @@ export const getBunnyPlayback = createServerFn({ method: "POST" })
         .eq("course_id", l.lms_sections.course_id);
       const sectionIds = (secs ?? []).map((s) => s.id);
       const [{ data: courseLessons }, { data: doneRows }] = await Promise.all([
-        supabase.from("lms_lessons").select("id, section_id, display_order").in("section_id", sectionIds),
+        supabase
+          .from("lms_lessons")
+          .select("id, section_id, display_order")
+          .in("section_id", sectionIds),
         supabase
           .from("lms_lesson_progress")
           .select("lesson_id")
@@ -312,25 +305,21 @@ export const setLessonBunnyVideo = createServerFn({ method: "POST" })
 
     const { data: lesson, error } = await supabase
       .from("lms_lessons")
-      .select(
-        "id, video_provider, video_uid, lms_sections!inner(lms_courses!inner(instructor_id))",
-      )
+      .select("id, video_provider, video_uid, lms_sections!inner(lms_courses!inner(instructor_id))")
       .eq("id", data.lessonId)
       .maybeSingle();
     if (error || !lesson) throw new Error("Lesson not found");
-    const previous = lesson as unknown as { video_provider: string | null; video_uid: string | null };
+    const previous = lesson as unknown as {
+      video_provider: string | null;
+      video_uid: string | null;
+    };
 
-    const instructorId =
-      (lesson as unknown as { lms_sections: { lms_courses: { instructor_id: string } } })
-        .lms_sections.lms_courses.instructor_id;
+    const instructorId = (
+      lesson as unknown as { lms_sections: { lms_courses: { instructor_id: string } } }
+    ).lms_sections.lms_courses.instructor_id;
 
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    const isAdmin = (roles ?? []).some(
-      (r) => r.role === "lms_admin" || r.role === "admin",
-    );
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    const isAdmin = (roles ?? []).some((r) => r.role === "lms_admin" || r.role === "admin");
 
     if (!isAdmin && instructorId !== userId) {
       throw new Error("Forbidden");
@@ -354,7 +343,11 @@ export const setLessonBunnyVideo = createServerFn({ method: "POST" })
 
     // Replacing a video: the lesson now points at the new upload, so the old
     // copy is removed from Bunny instead of piling up in the library.
-    if (previous.video_provider === "bunny" && previous.video_uid && previous.video_uid !== data.videoId) {
+    if (
+      previous.video_provider === "bunny" &&
+      previous.video_uid &&
+      previous.video_uid !== data.videoId
+    ) {
       await deleteReplacedBunnyVideo(previous.video_uid);
     }
 
@@ -374,7 +367,9 @@ export const refreshBunnyLessonStatus = createServerFn({ method: "POST" })
 
     const { data: lesson, error } = await supabase
       .from("lms_lessons")
-      .select("id, video_provider, video_uid, video_status, lms_sections!inner(lms_courses!inner(instructor_id))")
+      .select(
+        "id, video_provider, video_uid, video_status, lms_sections!inner(lms_courses!inner(instructor_id))",
+      )
       .eq("id", data.lessonId)
       .maybeSingle();
     if (error || !lesson) throw new Error("Lesson not found");

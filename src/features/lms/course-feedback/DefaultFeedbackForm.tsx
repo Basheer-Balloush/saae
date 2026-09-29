@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ErrorNote, fmtDate, Loading, Panel, useT } from "@/components/console/ui";
-import { getDefaultFeedbackForm, type AdminForm } from "@/features/lms/course-feedback/lib/admin.functions";
+import {
+  getDefaultFeedbackForm,
+  type AdminForm,
+} from "@/features/lms/course-feedback/lib/admin.functions";
 import { EditableForm } from "./EditableForm";
 
 /* LMS settings: the default feedback form every online course asks, unless

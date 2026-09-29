@@ -16,12 +16,19 @@ export function shouldCompress(type: string, bytes: number, limit = COMPRESS_ABO
 }
 
 /** Scales (w, h) down to fit the box, keeping the aspect ratio; never scales up. */
-export function fitWithin(width: number, height: number, maxEdge = MAX_EDGE): { width: number; height: number } {
+export function fitWithin(
+  width: number,
+  height: number,
+  maxEdge = MAX_EDGE,
+): { width: number; height: number } {
   if (width <= 0 || height <= 0) return { width: 0, height: 0 };
   const longest = Math.max(width, height);
   if (longest <= maxEdge) return { width: Math.round(width), height: Math.round(height) };
   const scale = maxEdge / longest;
-  return { width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale)) };
+  return {
+    width: Math.max(1, Math.round(width * scale)),
+    height: Math.max(1, Math.round(height * scale)),
+  };
 }
 
 /** The stored name must match the bytes: a WebP body under a .png name confuses caches and downloads. */
@@ -35,7 +42,11 @@ export function webpPath(path: string): string {
  * encoding, a decode failure). Never throws: an upload is more important than a
  * saved kilobyte.
  */
-export async function compressImage(file: File, maxEdge = MAX_EDGE, quality = QUALITY): Promise<File> {
+export async function compressImage(
+  file: File,
+  maxEdge = MAX_EDGE,
+  quality = QUALITY,
+): Promise<File> {
   if (!shouldCompress(file.type, file.size)) return file;
   if (typeof document === "undefined" || typeof createImageBitmap !== "function") return file;
   try {

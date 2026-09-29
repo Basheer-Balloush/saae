@@ -34,7 +34,9 @@ export function useSingleDeviceSession(userId: string | null) {
     const validate = async () => {
       const sessionId = localStorage.getItem(SESSION_KEY);
       if (!sessionId) return;
-      const { data } = await supabase.rpc("lms_validate_session", { _session_id: sessionId } as never);
+      const { data } = await supabase.rpc("lms_validate_session", {
+        _session_id: sessionId,
+      } as never);
       if (cancelled || data !== false) return;
       if (notifiedRef.current || sessionStorage.getItem(WARNED_KEY) === "1") return;
       notifiedRef.current = true;

@@ -15,7 +15,8 @@ const MAP: Array<{ match: RegExp; ar: string; en: string }> = [
     en: "Email not confirmed",
   },
   {
-    match: /user already registered|already exists|already.*registered|email_exists|EMAIL_ALREADY_REGISTERED/i,
+    match:
+      /user already registered|already exists|already.*registered|email_exists|EMAIL_ALREADY_REGISTERED/i,
     ar: "هذا البريد الإلكترونيّ مسجَّل مسبقاً — سجّل الدخول بدلاً من إنشاء حساب جديد",
     en: "This email is already registered — please log in instead",
   },
@@ -94,7 +95,8 @@ const CODE_MAP: Record<string, { ar: string; en: string }> = {
 };
 
 export function localizeAuthError(err: unknown, lang: Lang, fallback: string): string {
-  const code = typeof err === "object" && err !== null ? (err as { code?: unknown }).code : undefined;
+  const code =
+    typeof err === "object" && err !== null ? (err as { code?: unknown }).code : undefined;
   if (typeof code === "string" && CODE_MAP[code]) {
     return lang === "ar" ? CODE_MAP[code].ar : CODE_MAP[code].en;
   }

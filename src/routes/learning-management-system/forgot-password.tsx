@@ -15,10 +15,17 @@ export const Route = createFileRoute("/learning-management-system/forgot-passwor
   head: () => ({
     meta: [
       { title: "Forgot Password — SAAE Training and Learning Platform" },
-      { name: "description", content: "Reset your SAAE Training and Learning Platform password by requesting a secure email link." },
+      {
+        name: "description",
+        content:
+          "Reset your SAAE Training and Learning Platform password by requesting a secure email link.",
+      },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "Forgot Password — SAAE Training and Learning Platform" },
-      { property: "og:description", content: "Reset your SAAE Training and Learning Platform password." },
+      {
+        property: "og:description",
+        content: "Reset your SAAE Training and Learning Platform password.",
+      },
     ],
     links: LMS_SKIN_LINKS,
   }),
@@ -45,9 +52,11 @@ function ForgotPage() {
       const res = await sendPasswordReset({ data: { email: parsed.data, lang } });
       if (!res.sent) {
         toast.error(
-          res.reason === "not_found" ? tr.resetNoAccount
-            : res.reason === "rate_limited" ? tr.resetRateLimited
-            : tr.resetSendFailed,
+          res.reason === "not_found"
+            ? tr.resetNoAccount
+            : res.reason === "rate_limited"
+              ? tr.resetRateLimited
+              : tr.resetSendFailed,
         );
         return;
       }
@@ -71,7 +80,16 @@ function ForgotPage() {
         <form onSubmit={onSubmit}>
           <div className="field">
             <label htmlFor="email">{tr.email}</label>
-            <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" placeholder="name@example.com" />
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              dir="ltr"
+              placeholder="name@example.com"
+            />
           </div>
           <button type="submit" className="auth-submit" disabled={submitting}>
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}

@@ -23,22 +23,40 @@ export type EnrollmentErrorCode =
   | "invalid_channel";
 
 const MESSAGES: Record<EnrollmentErrorCode, { ar: string; en: string }> = {
-  course_instructor_cannot_enroll: { ar: "أنت أحد مدرّسي هذه الدورة، لذلك لا يمكنك التسجيل فيها كطالب.", en: "You teach this course. You cannot enroll in it as a student." },
+  course_instructor_cannot_enroll: {
+    ar: "أنت أحد مدرّسي هذه الدورة، لذلك لا يمكنك التسجيل فيها كطالب.",
+    en: "You teach this course. You cannot enroll in it as a student.",
+  },
   unauthenticated: { ar: "يجب تسجيل الدخول أولاً", en: "Please sign in first" },
-  forbidden: { ar: "لا تملك صلاحية تنفيذ هذا الإجراء", en: "You are not allowed to perform this action" },
+  forbidden: {
+    ar: "لا تملك صلاحية تنفيذ هذا الإجراء",
+    en: "You are not allowed to perform this action",
+  },
   course_not_found: { ar: "الدورة غير موجودة", en: "Course not found" },
   course_not_published: { ar: "الدورة غير منشورة", en: "Course is not published" },
   enrollment_closed: { ar: "التسجيل مغلق حالياً", en: "Enrollment is closed" },
   enrollment_deadline_passed: { ar: "انتهى موعد التسجيل", en: "Enrollment deadline has passed" },
   course_full: { ar: "اكتمل عدد المقاعد في هذه الدورة", en: "This course is full" },
-  payment_required: { ar: "هذه دورة مدفوعة وتتطلب إتمام الدفع", en: "This is a paid course and requires payment" },
+  payment_required: {
+    ar: "هذه دورة مدفوعة وتتطلب إتمام الدفع",
+    en: "This is a paid course and requires payment",
+  },
   already_enrolled: { ar: "الطالب مسجّل في الدورة مسبقاً", en: "The student is already enrolled" },
   request_not_found: { ar: "الطلب غير موجود", en: "Request not found" },
-  request_not_pending: { ar: "تمت معالجة هذا الطلب مسبقاً", en: "This request has already been decided" },
+  request_not_pending: {
+    ar: "تمت معالجة هذا الطلب مسبقاً",
+    en: "This request has already been decided",
+  },
   invalid_arguments: { ar: "بيانات غير صالحة", en: "Invalid data" },
   invalid_answers: { ar: "بيانات غير صالحة", en: "Invalid data" },
-  missing_required_fields: { ar: "يرجى تعبئة جميع الحقول المطلوبة", en: "Please fill in all required fields" },
-  request_already_pending: { ar: "لديك طلب تسجيل قيد المراجعة لهذه الدورة", en: "You already have a pending request for this course" },
+  missing_required_fields: {
+    ar: "يرجى تعبئة جميع الحقول المطلوبة",
+    en: "Please fill in all required fields",
+  },
+  request_already_pending: {
+    ar: "لديك طلب تسجيل قيد المراجعة لهذه الدورة",
+    en: "You already have a pending request for this course",
+  },
   invalid_channel: { ar: "بيانات غير صالحة", en: "Invalid data" },
 };
 

@@ -42,7 +42,7 @@ interface Props {
 
 const t = (lang: Lang, ar: string, en: string) => (lang === "ar" ? ar : en);
 const pick = (lang: Lang, ar: string | null | undefined, en: string | null | undefined, fb = "") =>
-  lang === "en" ? (en || ar || fb) : (ar || en || fb);
+  lang === "en" ? en || ar || fb : ar || en || fb;
 
 export function AssignmentsPanel({ lessonId, user, lang }: Props) {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -54,10 +54,16 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
     setLoading(true);
     const { data: aData, error } = await supabase
       .from("lms_assignments")
-      .select("id,course_id,lesson_id,title_ar,title_en,description_ar,description_en,brief_file_path,max_grade,due_date,grace_period_minutes,max_attempts,locked")
+      .select(
+        "id,course_id,lesson_id,title_ar,title_en,description_ar,description_en,brief_file_path,max_grade,due_date,grace_period_minutes,max_attempts,locked",
+      )
       .eq("lesson_id", lessonId)
       .order("created_at", { ascending: true });
-    if (error) { toast.error(toUserMessage(error)); setLoading(false); return; }
+    if (error) {
+      toast.error(toUserMessage(error));
+      setLoading(false);
+      return;
+    }
     const list = (aData as Assignment[]) ?? [];
     setAssignments(list);
     if (list.length) {
@@ -66,9 +72,14 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
         .select("id,assignment_id,file_path,submitted_at,grade,feedback,attempt_number,is_late")
         .order("attempt_number", { ascending: true })
         .eq("student_id", user.id)
-        .in("assignment_id", list.map((a) => a.id));
+        .in(
+          "assignment_id",
+          list.map((a) => a.id),
+        );
       const map: Record<string, Submission> = {};
-      ((sData as Submission[]) ?? []).forEach((s) => { map[s.assignment_id] = s; });
+      ((sData as Submission[]) ?? []).forEach((s) => {
+        map[s.assignment_id] = s;
+      });
       setSubsByA(map);
     } else {
       setSubsByA({});
@@ -76,7 +87,9 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
     setLoading(false);
   }, [lessonId, user]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const onSubmissionUploaded = async (assignment: Assignment, filePath: string) => {
     if (!user) return;
@@ -84,7 +97,10 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
       _assignment_id: assignment.id,
       _file_path: filePath,
     });
-    if (error) { toast.error(toUserMessage(error)); return; }
+    if (error) {
+      toast.error(toUserMessage(error));
+      return;
+    }
     load();
   };
 
@@ -93,7 +109,10 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
   if (assignments.length === 0) return null;
 
   return (
-    <div className="mt-6 rounded-2xl border border-border bg-card p-4 sm:p-6" dir={lang === "ar" ? "rtl" : "ltr"}>
+    <div
+      className="mt-6 rounded-2xl border border-border bg-card p-4 sm:p-6"
+      dir={lang === "ar" ? "rtl" : "ltr"}
+    >
       <h3 className="font-bold text-foreground flex items-center gap-2">
         <ClipboardList className="h-4 w-4" />
         {t(lang, "الوظائف", "Assignments")}
@@ -116,14 +135,23 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <h4 className="font-semibold text-foreground">{title}</h4>
-                  {desc && <p className="mt-1 text-sm text-muted-foreground whitespace-pre-wrap">{desc}</p>}
+                  {desc && (
+                    <p className="mt-1 text-sm text-muted-foreground whitespace-pre-wrap">{desc}</p>
+                  )}
                   {a.due_date && (
-                    <p className={"mt-1.5 text-xs inline-flex items-center gap-1 " + (overdue ? "text-destructive" : "text-muted-foreground")}>
+                    <p
+                      className={
+                        "mt-1.5 text-xs inline-flex items-center gap-1 " +
+                        (overdue ? "text-destructive" : "text-muted-foreground")
+                      }
+                    >
                       <Clock className="h-3 w-3" />
                       {t(lang, "الاستحقاق", "Due")}: {new Date(a.due_date).toLocaleString()}
                       {a.grace_period_minutes > 0 && (
                         <span className="text-muted-foreground">
-                          {" "}({t(lang, "مهلة", "grace")} {a.grace_period_minutes} {t(lang, "دقيقة", "min")})
+                          {" "}
+                          ({t(lang, "مهلة", "grace")} {a.grace_period_minutes}{" "}
+                          {t(lang, "دقيقة", "min")})
                         </span>
                       )}
                     </p>
@@ -148,7 +176,9 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
                       )}
                     </span>
                   ) : (
-                    <span className="text-muted-foreground">{t(lang, "لم يُسلّم بعد", "Not submitted")}</span>
+                    <span className="text-muted-foreground">
+                      {t(lang, "لم يُسلّم بعد", "Not submitted")}
+                    </span>
                   )}
                 </div>
               </div>
@@ -168,14 +198,24 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
 
               <div className="mt-3 border-t border-border pt-3">
                 <p className="text-xs font-semibold text-muted-foreground mb-2">
-                  {sub ? t(lang, "تسليمك", "Your submission") : t(lang, "ارفع تسليمك", "Upload your submission")}
+                  {sub
+                    ? t(lang, "تسليمك", "Your submission")
+                    : t(lang, "ارفع تسليمك", "Upload your submission")}
                 </p>
                 {closed && (
                   <p className="mb-2 text-xs text-destructive">
                     {a.locked
-                      ? t(lang, "التسليم مُقفل من قبل المدرّب.", "Submissions are locked by the instructor.")
+                      ? t(
+                          lang,
+                          "التسليم مُقفل من قبل المدرّب.",
+                          "Submissions are locked by the instructor.",
+                        )
                       : attemptsLeft === 0
-                        ? t(lang, "استنفدت عدد المحاولات المسموح بها.", "You have used all allowed attempts.")
+                        ? t(
+                            lang,
+                            "استنفدت عدد المحاولات المسموح بها.",
+                            "You have used all allowed attempts.",
+                          )
                         : t(lang, "انتهى موعد التسليم.", "The submission deadline has passed.")}
                   </p>
                 )}
@@ -185,12 +225,16 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
                   currentPath={sub?.file_path ?? null}
                   onUploaded={(p) => onSubmissionUploaded(a, p)}
                   disabled={closed}
-                  label={sub ? t(lang, "إعادة الرفع", "Re-upload") : t(lang, "رفع الملف", "Upload file")}
+                  label={
+                    sub ? t(lang, "إعادة الرفع", "Re-upload") : t(lang, "رفع الملف", "Upload file")
+                  }
                 />
                 {sub && (
                   <p className="mt-1 text-[11px] text-muted-foreground">
-                    {t(lang, "تم التسليم في", "Submitted at")}: {new Date(sub.submitted_at).toLocaleString()}
-                    {" · "}{t(lang, "المحاولة", "Attempt")} {sub.attempt_number}
+                    {t(lang, "تم التسليم في", "Submitted at")}:{" "}
+                    {new Date(sub.submitted_at).toLocaleString()}
+                    {" · "}
+                    {t(lang, "المحاولة", "Attempt")} {sub.attempt_number}
                   </p>
                 )}
               </div>
@@ -203,7 +247,9 @@ export function AssignmentsPanel({ lessonId, user, lang }: Props) {
                   </p>
                   {sub!.feedback && (
                     <p className="mt-1.5 text-sm text-foreground whitespace-pre-wrap">
-                      <span className="font-semibold">{t(lang, "تعليق المدرّب", "Instructor feedback")}: </span>
+                      <span className="font-semibold">
+                        {t(lang, "تعليق المدرّب", "Instructor feedback")}:{" "}
+                      </span>
                       {sub!.feedback}
                     </p>
                   )}

@@ -171,9 +171,7 @@ export const setDynamicFormStatus = createServerFn({ method: "POST" })
 export const deleteDynamicForm = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string; deleteSubmissions?: boolean }) =>
-    z
-      .object({ id: z.string().uuid(), deleteSubmissions: z.boolean().optional() })
-      .parse(d),
+    z.object({ id: z.string().uuid(), deleteSubmissions: z.boolean().optional() }).parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
@@ -243,7 +241,8 @@ export const getPublishedFormBySlug = createServerFn({ method: "POST" })
       global: {
         fetch: (input, init) => {
           const h = new Headers(init?.headers);
-          if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
+          if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`)
+            h.delete("Authorization");
           h.set("apikey", key);
           return fetch(input, { ...init, headers: h });
         },
@@ -278,7 +277,8 @@ export const submitDynamicForm = createServerFn({ method: "POST" })
       global: {
         fetch: (input, init) => {
           const h = new Headers(init?.headers);
-          if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
+          if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`)
+            h.delete("Authorization");
           h.set("apikey", key);
           return fetch(input, { ...init, headers: h });
         },

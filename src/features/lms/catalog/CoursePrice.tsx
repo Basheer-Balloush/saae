@@ -51,7 +51,8 @@ export function CoursePrice({
   if (isFree) return <span className={className}>{freeLabel}</span>;
 
   const hasSale = salePrice != null && Number(salePrice) >= 0 && Number(salePrice) < Number(price);
-  const oldSize = size === "lg" ? "text-base font-medium" : size === "sm" ? "text-[11px]" : "text-[10px]";
+  const oldSize =
+    size === "lg" ? "text-base font-medium" : size === "sm" ? "text-[11px]" : "text-[10px]";
 
   return (
     <span className={`inline-flex flex-nowrap items-center gap-2 ${className ?? ""}`}>

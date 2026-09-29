@@ -128,7 +128,9 @@ function InstructorProfile() {
   const totalStudents = courses.reduce((s, c) => s + Number(c.students_count ?? 0), 0);
   // Average over rated courses only; unrated ones would drag it toward 0.
   const rated = courses.map((c) => Number(c.rating_avg ?? 0)).filter((r) => r > 0);
-  const avgRating = rated.length ? (rated.reduce((s, r) => s + r, 0) / rated.length).toFixed(1) : null;
+  const avgRating = rated.length
+    ? (rated.reduce((s, r) => s + r, 0) / rated.length).toFixed(1)
+    : null;
 
   const name = (lang === "ar" ? ins.full_name_ar : ins.full_name_en) || ins.full_name;
   const sp = (lang === "ar" ? ins.specialty_ar : ins.specialty_en) || ins.specialty;

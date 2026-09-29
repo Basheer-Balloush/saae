@@ -8,7 +8,24 @@ import { uploadToSupabaseStorage } from "@/lib/upload-with-progress";
 import { UploadProgress } from "@/components/common/upload-progress";
 import { confirmDialog } from "@/hooks/useConfirm";
 
-const ALLOWED_EXTS = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "zip", "rar", "7z", "txt", "md", "png", "jpg", "jpeg", "webp"];
+const ALLOWED_EXTS = [
+  "pdf",
+  "doc",
+  "docx",
+  "ppt",
+  "pptx",
+  "xls",
+  "xlsx",
+  "zip",
+  "rar",
+  "7z",
+  "txt",
+  "md",
+  "png",
+  "jpg",
+  "jpeg",
+  "webp",
+];
 const MAX_BYTES = 25 * 1024 * 1024; // 25MB
 
 export interface FileUploaderProps {
@@ -39,7 +56,12 @@ export function FileUploader({
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [progress, setProgress] = useState<{ pct: number; loaded: number; total: number; name: string } | null>(null);
+  const [progress, setProgress] = useState<{
+    pct: number;
+    loaded: number;
+    total: number;
+    name: string;
+  } | null>(null);
 
   const currentName = currentPath ? currentPath.split("/").pop() : null;
 
@@ -69,12 +91,14 @@ export function FileUploader({
         file,
         upsert: true,
         contentType: file.type || undefined,
-        onProgress: (pct, loaded, total) =>
-          setProgress({ pct, loaded, total, name: file.name }),
+        onProgress: (pct, loaded, total) => setProgress({ pct, loaded, total, name: file.name }),
       });
       // Best-effort: remove previous file if it had the same prefix and a different name
       if (currentPath && currentPath !== fullPath) {
-        await supabase.storage.from(bucket).remove([currentPath]).catch(() => {});
+        await supabase.storage
+          .from(bucket)
+          .remove([currentPath])
+          .catch(() => {});
       }
       await onUploaded(fullPath);
       toast.success("Uploaded");
@@ -91,7 +115,9 @@ export function FileUploader({
     if (!currentPath) return;
     setDownloading(true);
     try {
-      const { data, error } = await supabase.storage.from(bucket).createSignedUrl(currentPath, 60 * 10);
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(currentPath, 60 * 10);
       if (error) throw error;
       if (data?.signedUrl) window.open(data.signedUrl, "_blank", "noopener,noreferrer");
     } catch (err) {
@@ -105,7 +131,10 @@ export function FileUploader({
   const handleRemove = async () => {
     if (!currentPath || !onRemoved) return;
     if (!(await confirmDialog({ title: "Remove this file?", destructive: true }))) return;
-    await supabase.storage.from(bucket).remove([currentPath]).catch(() => {});
+    await supabase.storage
+      .from(bucket)
+      .remove([currentPath])
+      .catch(() => {});
     await onRemoved();
   };
 
@@ -128,16 +157,36 @@ export function FileUploader({
             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-md border border-border bg-muted/40 hover:bg-muted text-foreground max-w-[260px] truncate"
             title={currentName ?? undefined}
           >
-            {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileIcon className="h-3.5 w-3.5" />}
+            {downloading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <FileIcon className="h-3.5 w-3.5" />
+            )}
             <span className="truncate">{currentName}</span>
           </button>
         ) : null}
-        <Button type="button" size="sm" variant="outline" onClick={handlePick} disabled={disabled || uploading}>
-          {uploading ? <Loader2 className="h-4 w-4 animate-spin mx-1" /> : <Upload className="h-4 w-4 mx-1" />}
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={handlePick}
+          disabled={disabled || uploading}
+        >
+          {uploading ? (
+            <Loader2 className="h-4 w-4 animate-spin mx-1" />
+          ) : (
+            <Upload className="h-4 w-4 mx-1" />
+          )}
           {label}
         </Button>
         {currentPath && onRemoved && (
-          <Button type="button" size="sm" variant="ghost" onClick={handleRemove} disabled={disabled || uploading}>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={handleRemove}
+            disabled={disabled || uploading}
+          >
             <X className="h-4 w-4" />
           </Button>
         )}

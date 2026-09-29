@@ -229,8 +229,8 @@
   display: inline-block;
   width: max-content;
   max-width: 100%;
-  padding-block: .16em .2em;
-  padding-inline: .08em;
+  padding-block: 0.16em 0.2em;
+  padding-inline: 0.08em;
   white-space: nowrap;
   text-wrap: nowrap;
 }

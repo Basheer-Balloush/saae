@@ -13,14 +13,14 @@ import { AuthLayout } from "@/features/lms/skin/AuthLayout";
 import { PasswordInput } from "@/features/lms/skin/PasswordInput";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 
-
 export const Route = createFileRoute("/learning-management-system/login")({
-  head: () => ({ meta: [{ title: "Sign in — SAAE Training and Learning Platform" }], links: LMS_SKIN_LINKS }),
+  head: () => ({
+    meta: [{ title: "Sign in — SAAE Training and Learning Platform" }],
+    links: LMS_SKIN_LINKS,
+  }),
   validateSearch: (raw: Record<string, unknown>) => lmsRedirectSearchSchema(raw),
   component: LmsLogin,
 });
-
-
 
 const schema = z.object({
   email: z.string().trim().email().max(255),
@@ -41,7 +41,6 @@ function LmsLogin() {
   useEffect(() => {
     if (!loading && user) navigate({ to: target });
   }, [loading, user, navigate, target]);
-
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,11 +70,26 @@ function LmsLogin() {
       <form onSubmit={onSubmit}>
         <div className="field">
           <label htmlFor="email">{tr.email}</label>
-          <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" placeholder="name@example.com" />
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            dir="ltr"
+            placeholder="name@example.com"
+          />
         </div>
         <div className="field">
           <label htmlFor="password">{tr.password}</label>
-          <PasswordInput id="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <PasswordInput
+            id="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
         <button type="submit" className="auth-submit" disabled={submitting}>
           {submitting && <Loader2 className="h-4 w-4 animate-spin" />}

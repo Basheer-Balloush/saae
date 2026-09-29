@@ -172,7 +172,13 @@ function InternshipEditor() {
   const set = <K extends keyof V>(k: K, val: V[K]) => setV((p) => (p ? { ...p, [k]: val } : p));
   const txt = (
     base:
-      "title" | "summary" | "description" | "requirements" | "location" | "duration" | "stipend",
+      | "title"
+      | "summary"
+      | "description"
+      | "requirements"
+      | "location"
+      | "duration"
+      | "stipend",
   ) => `${base}_${tl}` as keyof V;
   const str = (k: keyof V) => (v[k] as string | null | undefined) ?? "";
   const setStr = (k: keyof V, s: string, nullable = true) =>

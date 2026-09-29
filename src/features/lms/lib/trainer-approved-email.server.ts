@@ -1,11 +1,19 @@
-import { getSiteUrl, sendTransactionalEmail, assertEmailRecipientAllowed } from '@/lib/email/email-delivery.server'
+import {
+  getSiteUrl,
+  sendTransactionalEmail,
+  assertEmailRecipientAllowed,
+} from "@/lib/email/email-delivery.server";
 
 /** Phase 2 (CF-02): sent from the outbox after a trainer is activated. */
-export async function sendTrainerApprovedEmail(input: { idempotencyKey?: string; to: string; fullName?: string | null }) {
-  assertEmailRecipientAllowed(input.to)
+export async function sendTrainerApprovedEmail(input: {
+  idempotencyKey?: string;
+  to: string;
+  fullName?: string | null;
+}) {
+  assertEmailRecipientAllowed(input.to);
 
-  const name = (input.fullName || '').trim() || 'الأستاذ/ة'
-  const subject = 'تم اعتمادك كمدرّب — الجمعية السورية للذكاء الاصطناعي وريادة الأعمال'
+  const name = (input.fullName || "").trim() || "الأستاذ/ة";
+  const subject = "تم اعتمادك كمدرّب — الجمعية السورية للذكاء الاصطناعي وريادة الأعمال";
 
   const html = `<!doctype html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"/></head>
@@ -27,15 +35,21 @@ export async function sendTrainerApprovedEmail(input: { idempotencyKey?: string;
       الجمعية السورية للذكاء الاصطناعي وريادة الأعمال
     </p>
   </div>
-</body></html>`
+</body></html>`;
 
   const text = `مبروك ${name},
 
 تم اعتماد طلبك كمدرّب على منصة التدريب والتعلّم. سجّل الدخول عبر:
 ${getSiteUrl()}/learning-management-system/login
 
-— الجمعية السورية للذكاء الاصطناعي وريادة الأعمال`
+— الجمعية السورية للذكاء الاصطناعي وريادة الأعمال`;
 
-  await sendTransactionalEmail({ to: input.to, subject: subject, html, text, idempotencyKey: input.idempotencyKey })
-  return true
+  await sendTransactionalEmail({
+    to: input.to,
+    subject: subject,
+    html,
+    text,
+    idempotencyKey: input.idempotencyKey,
+  });
+  return true;
 }
