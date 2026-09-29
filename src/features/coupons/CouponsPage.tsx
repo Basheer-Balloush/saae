@@ -194,7 +194,7 @@ export function CouponsPage() {
                       <td className="whitespace-nowrap text-[13px]">
                         {c.effect === "recognition"
                           ? t("الدورة مكتملة", "Course completed")
-                          : `${Number(c.percent_off)}٪${c.max_discount != null ? ` · ${t("حد", "max")} ${formatSP(Number(c.max_discount), ar)}` : ""}`}
+                          : `${Number(c.percent_off)}٪${c.min_discount != null ? ` · ${t("أدنى", "min")} ${formatSP(Number(c.min_discount), ar)}` : ""}${c.max_discount != null ? ` · ${t("أقصى", "max")} ${formatSP(Number(c.max_discount), ar)}` : ""}`}
                       </td>
                       <td className="whitespace-nowrap text-[13px] tabular-nums">
                         {n} / {c.max_uses ?? "∞"} {ar ? USES_UNIT[kind].ar : USES_UNIT[kind].en}

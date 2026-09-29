@@ -105,8 +105,8 @@ export const KIND_LABELS: Record<
     ar: "اعتراف بإكمال الدورة",
     en: "Course recognition",
     hint: {
-      ar: "لمن حضر الدورة خارج المنصة: يُسجَّل فوراً والدورة مكتملة، ثم الاستبيان والشهادة. للدورات الأونلاين فقط.",
-      en: "For people who attended the course elsewhere: enrolled at once with the course completed, then the feedback form and certificate. Online courses only.",
+      ar: "لمن حضر الدورة خارج المنصة: يُسجَّل فوراً والدورة مكتملة، ثم الاستبيان والشهادة. لكل متعلّم استخدام واحد؛ الحد الإجمالي يحدد عدد المتعلّمين. للدورات الأونلاين فقط.",
+      en: "For people who attended the course elsewhere: enrolled at once with the course completed, then the feedback form and certificate. Each learner can use it once; the total use limit controls the number of learners. Online courses only.",
     },
   },
   course: {

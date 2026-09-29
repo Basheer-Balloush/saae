@@ -107,7 +107,9 @@ async function personalCoupon(couponId: string) {
   // lms_coupons is not in the generated types yet.
   const { data: c } = await (db as unknown as SupabaseClient)
     .from("lms_coupons")
-    .select("id, code, scope, user_id, percent_off, max_discount, max_uses, expires_at, active")
+    .select(
+      "id, code, scope, user_id, percent_off, min_discount, max_discount, max_uses, expires_at, active",
+    )
     .eq("id", couponId)
     .maybeSingle();
   const coupon = c as {
@@ -116,6 +118,7 @@ async function personalCoupon(couponId: string) {
     scope: string;
     user_id: string | null;
     percent_off: number | null;
+    min_discount: number | null;
     max_discount: number | null;
     max_uses: number | null;
     expires_at: string | null;

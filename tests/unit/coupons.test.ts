@@ -56,6 +56,14 @@ describe("prices", () => {
     expect(discountFor(4650, 20, null)).toBe(930);
   });
 
+  it("honors a minimum without exceeding the maximum or course price", () => {
+    expect(discountFor(1000, 5, null, 100)).toBe(100);
+    expect(discountFor(1000, 20, null, 100)).toBe(200);
+    expect(discountFor(1000, 5, 150, 100)).toBe(100);
+    expect(discountFor(1000, 30, 150, 100)).toBe(150);
+    expect(discountFor(80, 5, null, 100)).toBe(80);
+  });
+
   it("round down to whole pounds, like the database", () => {
     expect(discountFor(1333, 15, null)).toBe(199);
     expect(discountFor(1100, 7, null)).toBe(77);
@@ -88,12 +96,13 @@ describe("messages", () => {
           effect: "discount",
           scope: "personal",
           percent_off: 20,
+          min_discount: 100,
           max_discount: 400,
           discount: 400,
         },
         true,
       ),
-    ).toBe("كوبون شخصي: خصم 20٪ بحد أقصى 400 ل.س");
+    ).toBe("كوبون شخصي: خصم 20٪ بحد أدنى 100 ل.س (حتى سعر الدورة) بحد أقصى 400 ل.س");
     expect(
       quoteSummary(
         {
@@ -101,6 +110,7 @@ describe("messages", () => {
           effect: "discount",
           scope: "category",
           percent_off: 15,
+          min_discount: null,
           max_discount: null,
           discount: 697,
         },
@@ -114,6 +124,7 @@ describe("messages", () => {
           effect: "recognition",
           scope: "course",
           percent_off: null,
+          min_discount: null,
           max_discount: null,
           discount: 4650,
         },
@@ -205,7 +216,13 @@ describe("personal coupons", () => {
   });
 
   it("describe the offer in the email and message", () => {
-    const c = { percent_off: 20, max_discount: 400, max_uses: 2, expires_at: null };
+    const c = {
+      percent_off: 20,
+      min_discount: null,
+      max_discount: 400,
+      max_uses: 2,
+      expires_at: null,
+    };
     expect(couponOffer(c, true)).toEqual({
       offer: "خصم 20٪ بحد أقصى 400 ل.س",
       limits: "صالح لـ 2 دورات",
@@ -214,6 +231,9 @@ describe("personal coupons", () => {
       offer: "20% off",
       limits: "valid for 1 course",
     });
+    expect(couponOffer({ ...c, min_discount: 100 }, false).offer).toBe(
+      "20% off, at least 100 SP (up to the course price), at most 400 SP",
+    );
     const text = couponWhatsappText({ ...c, code: "K7QX-M2PA" }, "سارة", "https://x/catalog", true);
     expect(text).toContain("K7QX-M2PA");
     expect(text).toContain("https://x/catalog");

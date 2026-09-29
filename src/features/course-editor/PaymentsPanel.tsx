@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Award, Download, Loader2, Pencil, Undo2, Wallet } from "lucide-react";
+import { Download, Loader2, Pencil, Undo2, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,7 +36,6 @@ import {
 import {
   cancelPaymentEntry,
   loadCoursePayments,
-  recognizeEnrollment,
   recordPayment,
   setAmountDue,
   type CertificateResult,
@@ -337,7 +336,6 @@ function LearnerPaymentsDialog({
   const [cancelling, setCancelling] = useState<PaymentEntry | null>(null);
   const [waiving, setWaiving] = useState(false);
   const [editingDue, setEditingDue] = useState(false);
-  const [recognizing, setRecognizing] = useState(false);
 
   // A payment that completes the course issues the certificate: email it.
   const afterCertificateCheck = async (c: CertificateResult | undefined) => {
@@ -530,21 +528,6 @@ function LearnerPaymentsDialog({
           </form>
         )}
 
-        {ctx.course.delivery_mode === "online" && row.completion_source !== "recognition" && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-[var(--cx-line)] p-3 text-[13px]">
-            <span className="text-[var(--cx-muted)]">
-              {t(
-                "حضر الدورة خارج المنصة؟ علّمها مكتملة، ويبقى عليه استبيان التقييم قبل الشهادة.",
-                "Attended the course elsewhere? Mark it completed; the feedback form still comes before the certificate.",
-              )}
-            </span>
-            <Button size="sm" variant="outline" onClick={() => setRecognizing(true)}>
-              <Award className="h-4 w-4" />
-              {t("اعتراف بإكمال الدورة", "Recognize completion")}
-            </Button>
-          </div>
-        )}
-
         <section aria-labelledby="pay-history-h">
           <h3 id="pay-history-h" className="mb-2 text-[14.5px] font-extrabold">
             {t("السجل", "History")}
@@ -638,32 +621,6 @@ function LearnerPaymentsDialog({
           confirmLabel={t("إعفاء", "Waive")}
           required
           onConfirm={(reason) => record("waiver", s.remaining, reason)}
-        />
-        <ReasonDialog
-          open={recognizing}
-          onOpenChange={setRecognizing}
-          title={t("اعتراف بإكمال الدورة؟", "Recognize completion?")}
-          description={t(
-            "تظهر الدورة مكتملة للطالب، ويبقى عليه استبيان التقييم قبل الشهادة. ما يدين به لا يتغيّر.",
-            "The course shows as completed for the student; the feedback form still comes before the certificate. What they owe does not change.",
-          )}
-          confirmLabel={t("اعتراف", "Recognize")}
-          onConfirm={async (reason) => {
-            try {
-              const res = await recognizeEnrollment(row.id, reason);
-              toast.success(
-                res.reason === "account_required"
-                  ? t(
-                      "عُلّمت الدورة مكتملة. الطالب زائر: تصدر شهادته حين ينشئ حسابه.",
-                      "Marked as completed. The student is a guest: the certificate is issued once they create their account.",
-                    )
-                  : t("عُلّمت الدورة مكتملة", "Marked as completed"),
-              );
-              await onChanged();
-            } catch (e) {
-              toast.error(toUserMessage(e));
-            }
-          }}
         />
         <AmountDueDialog
           open={editingDue}

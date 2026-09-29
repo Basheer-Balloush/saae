@@ -17,6 +17,7 @@ export type Coupon = {
   category_id: string | null;
   user_id: string | null;
   percent_off: number | null;
+  min_discount: number | null;
   max_discount: number | null;
   max_uses: number | null;
   expires_at: string | null;
@@ -51,6 +52,7 @@ export type CouponQuote =
       effect: CouponEffect;
       scope: CouponScope;
       percent_off: number | null;
+      min_discount: number | null;
       max_discount: number | null;
       list_price: number;
       discount: number;
@@ -106,14 +108,22 @@ export function listPrice(price: number, salePrice: number | null, isFree: boole
   return price;
 }
 
-/** The percentage of the price, never more than the maximum, rounded down
-    to whole pounds: 20% at most 400 on 4,650 is 400. */
-export function discountFor(list: number, percent: number, maxDiscount: number | null): number {
+/** The percentage rounded down to whole pounds, raised to the optional
+    minimum, then capped by the optional maximum and the course price. */
+export function discountFor(
+  list: number,
+  percent: number,
+  maxDiscount: number | null,
+  minDiscount: number | null = null,
+): number {
   if (!(list > 0) || !(percent > 0)) return 0;
-  const raw = (list * Math.min(percent, 100)) / 100;
-  const capped = maxDiscount != null && maxDiscount > 0 ? Math.min(raw, maxDiscount) : raw;
   // The small epsilon keeps 7% of 1,100 (77.00000000000001) at 77.
-  return Math.floor(capped + 1e-9);
+  const percentage = Math.floor((list * Math.min(percent, 100)) / 100 + 1e-9);
+  return Math.min(
+    list,
+    maxDiscount == null ? list : Math.floor(maxDiscount),
+    Math.max(percentage, minDiscount ?? 0),
+  );
 }
 
 /** Amounts in Syrian pounds, the way the course page writes them. */
@@ -144,14 +154,15 @@ export function whatsappNumber(raw: string | null | undefined): string {
 /** What a personal coupon offers, for the email and the WhatsApp message:
     { offer: "خصم 20٪ بحد أقصى 400 ل.س", limits: "صالح لـ 2 دورات حتى …" }. */
 export function couponOffer(
-  c: Pick<Coupon, "percent_off" | "max_discount" | "max_uses" | "expires_at">,
+  c: Pick<Coupon, "percent_off" | "min_discount" | "max_discount" | "max_uses" | "expires_at">,
   ar: boolean,
 ) {
   const pct = Number(c.percent_off ?? 0);
+  const floor = c.min_discount != null ? formatSP(Number(c.min_discount), ar) : null;
   const cap = c.max_discount != null ? formatSP(Number(c.max_discount), ar) : null;
   const offer = ar
-    ? `خصم ${pct}٪${cap ? ` بحد أقصى ${cap}` : ""}`
-    : `${pct}% off${cap ? `, at most ${cap}` : ""}`;
+    ? `خصم ${pct}٪${floor ? ` بحد أدنى ${floor} (حتى سعر الدورة)` : ""}${cap ? ` بحد أقصى ${cap}` : ""}`
+    : `${pct}% off${floor ? `, at least ${floor} (up to the course price)` : ""}${cap ? `, at most ${cap}` : ""}`;
   const parts: string[] = [];
   if (c.max_uses != null) {
     const n = Number(c.max_uses);
@@ -176,7 +187,10 @@ export function couponOffer(
 
 /** The WhatsApp message for a personal coupon. */
 export function couponWhatsappText(
-  c: Pick<Coupon, "code" | "percent_off" | "max_discount" | "max_uses" | "expires_at">,
+  c: Pick<
+    Coupon,
+    "code" | "percent_off" | "min_discount" | "max_discount" | "max_uses" | "expires_at"
+  >,
   name: string | null,
   catalogUrl: string,
   ar: boolean,
@@ -225,6 +239,14 @@ const COUPON_MESSAGES: Record<string, { ar: string; en: string }> = {
     ar: "هذه الدورة مجانية ولا تحتاج إلى كود خصم.",
     en: "This course is free and needs no discount code.",
   },
+  coupon_recognition_only: {
+    ar: "أدخل كود اعتراف بإكمال الدورة، وليس كود خصم.",
+    en: "Enter a course recognition code, not a discount code.",
+  },
+  already_completed: {
+    ar: "هذه الدورة مكتملة بالفعل في حسابك.",
+    en: "This course is already completed in your account.",
+  },
   already_enrolled: { ar: "أنت مسجّل في هذه الدورة.", en: "You are enrolled in this course." },
   request_already_pending: {
     ar: "لديك طلب تسجيل قيد المراجعة في هذه الدورة. لا يُقبل الآن إلا كود اعتراف.",
@@ -251,6 +273,7 @@ export function quoteSummary(q: Extract<CouponQuote, { ok: true }>, ar: boolean)
       : "Recognition code: the course shows as completed on your profile, then you answer the feedback form and get your certificate.";
   }
   const pct = Number(q.percent_off);
+  const floor = q.min_discount != null ? Number(q.min_discount) : null;
   const cap = q.max_discount != null ? Number(q.max_discount) : null;
   const kind =
     q.scope === "personal"
@@ -264,9 +287,17 @@ export function quoteSummary(q: Extract<CouponQuote, { ok: true }>, ar: boolean)
         : ar
           ? "كوبون الدورة"
           : "Course coupon";
+  const floorText =
+    floor != null
+      ? ar
+        ? ` بحد أدنى ${formatSP(floor, ar)} (حتى سعر الدورة)`
+        : `, at least ${formatSP(floor, ar)} (up to the course price)`
+      : "";
   const capText =
     cap != null ? (ar ? ` بحد أقصى ${formatSP(cap, ar)}` : `, at most ${formatSP(cap, ar)}`) : "";
-  return ar ? `${kind}: خصم ${pct}٪${capText}` : `${kind}: ${pct}% off${capText}`;
+  return ar
+    ? `${kind}: خصم ${pct}٪${floorText}${capText}`
+    : `${kind}: ${pct}% off${floorText}${capText}`;
 }
 
 /* ---------- payments ---------- */

@@ -34,6 +34,7 @@ type Form = {
   categoryId: string;
   learner: Learner | null;
   percent: string;
+  minDiscount: string;
   maxDiscount: string;
   maxUses: string;
   expires: string;
@@ -47,6 +48,7 @@ const EMPTY: Form = {
   categoryId: "",
   learner: null,
   percent: "",
+  minDiscount: "",
   maxDiscount: "",
   maxUses: "",
   expires: "",
@@ -54,6 +56,7 @@ const EMPTY: Form = {
 
 const posInt = (v: string) => /^\d+$/.test(v.trim()) && Number(v) > 0;
 const posNum = (v: string) => /^\d+(\.\d{1,2})?$/.test(v.trim()) && Number(v) > 0;
+const wholeSP = (v: string) => /^\d{1,10}$/.test(v.trim()) && Number(v) > 0;
 
 /** Creates a coupon of any of the four kinds. */
 export function NewCouponDialog({
@@ -96,8 +99,19 @@ export function NewCouponDialog({
     if (f.kind === "personal" && !f.learner) p.learner = t("اختر المتعلّم.", "Choose the learner.");
     if (discount && !(posNum(f.percent) && Number(f.percent) <= 100))
       p.percent = t("نسبة بين 1 و100.", "A percentage from 1 to 100.");
+    if (f.minDiscount.trim() && !wholeSP(f.minDiscount))
+      p.minDiscount = t("مبلغ صحيح أكبر من صفر.", "A whole amount above zero.");
     if (f.maxDiscount.trim() && !posNum(f.maxDiscount))
       p.maxDiscount = t("مبلغ أكبر من صفر.", "An amount above zero.");
+    if (
+      f.minDiscount.trim() &&
+      f.maxDiscount.trim() &&
+      Number(f.minDiscount) > Number(f.maxDiscount)
+    )
+      p.minDiscount = t(
+        "الحد الأدنى لا يتجاوز الحد الأقصى.",
+        "The minimum cannot exceed the maximum.",
+      );
     if (limitsRequired ? !posInt(f.maxUses) : f.maxUses.trim() && !posInt(f.maxUses))
       p.maxUses = t("عدد صحيح أكبر من صفر.", "A whole number above zero.");
     const end = endOfDay(f.expires);
@@ -110,6 +124,14 @@ export function NewCouponDialog({
   // An example with a real price, so the admin sees what the numbers mean.
   const sample = useMemo(() => {
     if (!discount || !posNum(f.percent)) return null;
+    if (f.minDiscount.trim() && !wholeSP(f.minDiscount)) return null;
+    if (f.maxDiscount.trim() && !posNum(f.maxDiscount)) return null;
+    if (
+      f.minDiscount.trim() &&
+      f.maxDiscount.trim() &&
+      Number(f.minDiscount) > Number(f.maxDiscount)
+    )
+      return null;
     const course =
       f.kind === "course"
         ? refs.courses.find((c) => c.id === f.courseId)
@@ -122,6 +144,7 @@ export function NewCouponDialog({
       price,
       Number(f.percent),
       f.maxDiscount.trim() ? Number(f.maxDiscount) : null,
+      f.minDiscount.trim() ? Number(f.minDiscount) : null,
     );
     return { price, d, name: course ? refs.courseName(course.id, ar) : null };
   }, [discount, f, refs, ar]);
@@ -146,6 +169,7 @@ export function NewCouponDialog({
         category_id: f.kind === "category" ? f.categoryId : null,
         user_id: f.kind === "personal" ? (f.learner?.id ?? null) : null,
         percent_off: discount ? Number(f.percent) : null,
+        min_discount: discount && f.minDiscount.trim() ? Number(f.minDiscount) : null,
         max_discount: discount && f.maxDiscount.trim() ? Number(f.maxDiscount) : null,
         max_uses: f.maxUses.trim() ? Number(f.maxUses) : null,
         expires_at: endOfDay(f.expires),
@@ -303,6 +327,24 @@ export function NewCouponDialog({
                   value={f.percent}
                   onChange={(e) => set({ percent: e.target.value })}
                   placeholder="20"
+                />
+              </Field>
+              <Field
+                label={t("أدنى خصم ل.س (اختياري)", "Minimum discount SP (optional)")}
+                htmlFor="coupon-min"
+                error={err("minDiscount")}
+                hint={t(
+                  "لا يقل الخصم عن هذا المبلغ، ولا يتجاوز سعر الدورة.",
+                  "The discount is at least this amount, up to the course price.",
+                )}
+              >
+                <Input
+                  id="coupon-min"
+                  inputMode="numeric"
+                  dir="ltr"
+                  value={f.minDiscount}
+                  onChange={(e) => set({ minDiscount: e.target.value })}
+                  placeholder="100"
                 />
               </Field>
               <Field

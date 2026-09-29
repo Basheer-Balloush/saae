@@ -67,6 +67,7 @@ export async function loadEnrollNote(courseId: string): Promise<EnrollNote> {
 export type MyEnrollment = {
   id: string;
   completion_source: "platform" | "recognition";
+  completed_at: string | null;
   amount_due: number | null;
 };
 
@@ -75,7 +76,7 @@ export type MyEnrollment = {
 export async function loadMyEnrollment(courseId: string, userId: string) {
   const { data: e } = await db
     .from("lms_enrollments")
-    .select("id, completion_source, amount_due")
+    .select("id, completion_source, completed_at, amount_due")
     .eq("course_id", courseId)
     .eq("student_id", userId)
     .maybeSingle();
@@ -140,12 +141,6 @@ export async function countActiveUses(): Promise<Record<string, number>> {
 
 export async function cancelRecognition(useId: string, note: string) {
   unwrap(await db.rpc("lms_admin_cancel_recognition", { _redemption_id: useId, _note: note }));
-}
-
-export async function recognizeEnrollment(enrollmentId: string, note: string) {
-  return unwrap(
-    await db.rpc("lms_admin_recognize_enrollment", { _enrollment_id: enrollmentId, _note: note }),
-  ) as { certificate_id: string | null; reason: string | null };
 }
 
 /* ---------- admins: payments ---------- */

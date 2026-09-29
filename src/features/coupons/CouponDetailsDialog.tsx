@@ -75,6 +75,7 @@ export function CouponDetailsDialog({
   const [names, setNames] = useState<Record<string, string>>({});
   const [edit, setEdit] = useState({
     percent: "",
+    minDiscount: "",
     maxDiscount: "",
     maxUses: "",
     expires: "",
@@ -100,6 +101,7 @@ export function CouponDetailsDialog({
     if (!coupon) return;
     setEdit({
       percent: coupon.percent_off == null ? "" : String(Number(coupon.percent_off)),
+      minDiscount: coupon.min_discount == null ? "" : String(Number(coupon.min_discount)),
       maxDiscount: coupon.max_discount == null ? "" : String(Number(coupon.max_discount)),
       maxUses: coupon.max_uses == null ? "" : String(coupon.max_uses),
       expires: dateInputValue(coupon.expires_at),
@@ -149,9 +151,26 @@ export function CouponDetailsDialog({
     const maxDiscount = edit.maxDiscount.trim() ? Number(edit.maxDiscount) : null;
     if (maxDiscount != null && !(maxDiscount > 0))
       return toast.error(t("أقصى خصم أكبر من صفر.", "The maximum discount must be above zero."));
+    const minDiscount = edit.minDiscount.trim() ? Number(edit.minDiscount) : null;
+    if (
+      minDiscount != null &&
+      !(Number.isInteger(minDiscount) && minDiscount > 0 && minDiscount <= 9_999_999_999)
+    )
+      return toast.error(
+        t(
+          "أدنى خصم مبلغ صحيح أكبر من صفر.",
+          "The minimum discount must be a whole amount above zero.",
+        ),
+      );
+    if (minDiscount != null && maxDiscount != null && minDiscount > maxDiscount)
+      return toast.error(
+        t("الحد الأدنى لا يتجاوز الحد الأقصى.", "The minimum cannot exceed the maximum."),
+      );
     patch(
       {
-        ...(discount ? { percent_off: percent, max_discount: maxDiscount } : {}),
+        ...(discount
+          ? { percent_off: percent, min_discount: minDiscount, max_discount: maxDiscount }
+          : {}),
         max_uses: maxUses,
         expires_at: endOfDay(edit.expires),
         label: edit.label.trim() || null,
@@ -273,7 +292,7 @@ export function CouponDetailsDialog({
             <dt className="text-[var(--cx-muted)]">{t("الأثر", "Effect")}</dt>
             <dd className="font-bold">
               {discount
-                ? `${Number(coupon.percent_off)}٪${coupon.max_discount != null ? ` · ${t("حد", "max")} ${formatSP(Number(coupon.max_discount), ar)}` : ""}`
+                ? `${Number(coupon.percent_off)}٪${coupon.min_discount != null ? ` · ${t("أدنى", "min")} ${formatSP(Number(coupon.min_discount), ar)}` : ""}${coupon.max_discount != null ? ` · ${t("أقصى", "max")} ${formatSP(Number(coupon.max_discount), ar)}` : ""}`
                 : t("الدورة مكتملة", "Course completed")}
             </dd>
           </div>
@@ -324,6 +343,15 @@ export function CouponDetailsDialog({
                   inputMode="decimal"
                   value={edit.percent}
                   onChange={(e) => setEdit({ ...edit, percent: e.target.value })}
+                />
+              </Field>
+              <Field label={t("أدنى خصم ل.س", "Minimum discount SP")} htmlFor="edit-min">
+                <Input
+                  id="edit-min"
+                  dir="ltr"
+                  inputMode="numeric"
+                  value={edit.minDiscount}
+                  onChange={(e) => setEdit({ ...edit, minDiscount: e.target.value })}
                 />
               </Field>
               <Field label={t("أقصى خصم ل.س", "Maximum discount SP")} htmlFor="edit-max">
@@ -441,7 +469,11 @@ export function CouponDetailsDialog({
                       <td className="text-[13px]">{refs.courseName(u.course_id, ar)}</td>
                       <td className="whitespace-nowrap text-[13px] tabular-nums">
                         {u.effect === "recognition" ? (
-                          t("لا شيء", "Nothing")
+                          u.request_id === null ? (
+                            t("الرصيد لم يتغيّر", "Balance unchanged")
+                          ) : (
+                            t("لا شيء", "Nothing")
+                          )
                         ) : (
                           <>
                             <s className="text-[var(--cx-muted)]">
@@ -463,12 +495,14 @@ export function CouponDetailsDialog({
                         {fmtDate(u.created_at, lang)}
                       </td>
                       <td>
-                        {u.effect === "recognition" && u.status === "applied" && (
-                          <Button size="sm" variant="ghost" onClick={() => setCancelling(u)}>
-                            <Undo2 className="h-4 w-4" />
-                            {t("إلغاء", "Cancel")}
-                          </Button>
-                        )}
+                        {u.effect === "recognition" &&
+                          u.status === "applied" &&
+                          u.request_id !== null && (
+                            <Button size="sm" variant="ghost" onClick={() => setCancelling(u)}>
+                              <Undo2 className="h-4 w-4" />
+                              {t("إلغاء", "Cancel")}
+                            </Button>
+                          )}
                       </td>
                     </tr>
                   ))}
