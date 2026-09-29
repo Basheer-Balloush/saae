@@ -37,7 +37,7 @@ import {
 import { ErrorNote, Loading, PageHeader, Pill, Tabs, useT } from "@/components/console/ui";
 import { FormBuilder } from "@/features/crm/FormBuilder";
 import { FormResponses } from "@/features/crm/FormResponses";
-import { FORM_STATUS_UI } from "./admin.forms.index";
+import { FORM_STATUS_UI } from "../index";
 
 type Tab = "answers" | "build";
 

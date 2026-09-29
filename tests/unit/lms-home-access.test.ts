@@ -17,7 +17,7 @@ describe("LMS home access", () => {
     }
   });
   it("does not redirect members away when their session loads", () => {
-    const source = readRoute("learning-management-system.index.tsx");
+    const source = readRoute("learning-management-system/index.tsx");
     expect(source).not.toContain("useLmsAuth");
     expect(source).not.toMatch(/\b(?:navigate|redirect)\s*\(/);
     expect(source).toContain('createFileRoute("/learning-management-system/")');
@@ -25,14 +25,14 @@ describe("LMS home access", () => {
   });
 
   it("retains course discovery and the full catalog link", () => {
-    const source = readRoute("learning-management-system.index.tsx");
+    const source = readRoute("learning-management-system/index.tsx");
     expect(source).toContain("setQuery");
     expect(source).toContain("setFilter");
     expect(source).toContain('to="/learning-management-system/catalog"');
   });
 
   it("keeps the student area's sign-in requirement", () => {
-    const source = readRoute("learning-management-system.student.tsx");
+    const source = readRoute("learning-management-system/student/route.tsx");
     expect(source).toContain("!loading && !user");
     expect(source).toContain('to: "/learning-management-system/login"');
   });

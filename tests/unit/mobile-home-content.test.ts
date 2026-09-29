@@ -249,21 +249,21 @@ describe("mobile homepage rendered output", () => {
         continue;
       }
       if (pathname.startsWith("/news/")) {
-        expect(existsSync(path.join(ROOT, "src/routes/news.$id.tsx"))).toBe(true);
+        expect(existsSync(path.join(ROOT, "src/routes/news/$id.tsx"))).toBe(true);
         continue;
       }
       const table: Record<string, string> = {
         "/": "src/routes/index.tsx",
         "/about": "src/routes/about.tsx",
         "/partners": "src/routes/partners.tsx",
-        "/initiative": "src/routes/initiative.index.tsx",
+        "/initiative": "src/routes/initiative/index.tsx",
         "/contact": "src/routes/contact.tsx",
-        "/news": "src/routes/news.index.tsx",
-        "/learning-management-system": "src/routes/learning-management-system.tsx",
+        "/news": "src/routes/news/index.tsx",
+        "/learning-management-system": "src/routes/learning-management-system/route.tsx",
         "/resources/ai-tools": "src/routes/resources.ai-tools.tsx",
-        "/initiative/sponsors": "src/routes/initiative.sponsors.tsx",
+        "/initiative/sponsors": "src/routes/initiative/sponsors.tsx",
         "/registration": "src/routes/registration.tsx",
-        "/learning-management-system/catalog": "src/routes/learning-management-system.catalog.tsx",
+        "/learning-management-system/catalog": "src/routes/learning-management-system/catalog.tsx",
       };
       expect(table[pathname] !== undefined, `unexpected local route: ${href}`).toBe(true);
       const routeFile = path.join(ROOT, table[pathname]);
