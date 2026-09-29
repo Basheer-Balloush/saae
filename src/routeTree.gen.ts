@@ -112,14 +112,15 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LearningManagementSystemStudentQuizCourseIdRouteImport } from './routes/learning-management-system.student.quiz.$courseId'
-import { Route as LearningManagementSystemStudentFeedbackCourseIdRouteImport } from './routes/learning-management-system.student.feedback.$courseId'
 import { Route as LearningManagementSystemStudentPlayerCourseIdRouteImport } from './routes/learning-management-system.student.player.$courseId'
+import { Route as LearningManagementSystemStudentFeedbackCourseIdRouteImport } from './routes/learning-management-system.student.feedback.$courseId'
 import { Route as LearningManagementSystemInternshipsSlugApplyRouteImport } from './routes/learning-management-system.internships.$slug.apply'
 import { Route as LearningManagementSystemInstructorQuizResultsCourseIdRouteImport } from './routes/learning-management-system.instructor.quiz-results.$courseId'
 import { Route as LearningManagementSystemInstructorCoursesIdRouteImport } from './routes/learning-management-system.instructor.courses.$id'
 import { Route as LearningManagementSystemInstructorAssignmentsCourseIdRouteImport } from './routes/learning-management-system.instructor.assignments.$courseId'
 import { Route as LearningManagementSystemAdminInternshipsNewRouteImport } from './routes/learning-management-system.admin.internships.new'
 import { Route as LearningManagementSystemAdminCoursesIdRouteImport } from './routes/learning-management-system.admin.courses.$id'
+import { Route as ApiProfileCardSlugKindRouteImport } from './routes/api/profile-card.$slug.$kind'
 import { Route as AdminFormsFormIdEditRouteImport } from './routes/admin.forms.$formId.edit'
 import { Route as AdminCrmRegistrationLinksIdRouteImport } from './routes/admin.crm.registration-links.$id'
 import { Route as AdminCrmLeadsIndividualsRouteImport } from './routes/admin.crm.leads.individuals'
@@ -693,16 +694,16 @@ const LearningManagementSystemStudentQuizCourseIdRoute =
     path: '/quiz/$courseId',
     getParentRoute: () => LearningManagementSystemStudentRoute,
   } as any)
-const LearningManagementSystemStudentFeedbackCourseIdRoute =
-  LearningManagementSystemStudentFeedbackCourseIdRouteImport.update({
-    id: '/feedback/$courseId',
-    path: '/feedback/$courseId',
-    getParentRoute: () => LearningManagementSystemStudentRoute,
-  } as any)
 const LearningManagementSystemStudentPlayerCourseIdRoute =
   LearningManagementSystemStudentPlayerCourseIdRouteImport.update({
     id: '/player/$courseId',
     path: '/player/$courseId',
+    getParentRoute: () => LearningManagementSystemStudentRoute,
+  } as any)
+const LearningManagementSystemStudentFeedbackCourseIdRoute =
+  LearningManagementSystemStudentFeedbackCourseIdRouteImport.update({
+    id: '/feedback/$courseId',
+    path: '/feedback/$courseId',
     getParentRoute: () => LearningManagementSystemStudentRoute,
   } as any)
 const LearningManagementSystemInternshipsSlugApplyRoute =
@@ -741,6 +742,11 @@ const LearningManagementSystemAdminCoursesIdRoute =
     path: '/courses/$id',
     getParentRoute: () => LearningManagementSystemAdminRoute,
   } as any)
+const ApiProfileCardSlugKindRoute = ApiProfileCardSlugKindRouteImport.update({
+  id: '/api/profile-card/$slug/$kind',
+  path: '/api/profile-card/$slug/$kind',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminFormsFormIdEditRoute = AdminFormsFormIdEditRouteImport.update({
   id: '/$formId/edit',
   path: '/$formId/edit',
@@ -923,15 +929,16 @@ export interface FileRoutesByFullPath {
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRouteWithChildren
   '/admin/crm/registration-links/$id': typeof AdminCrmRegistrationLinksIdRoute
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
+  '/api/profile-card/$slug/$kind': typeof ApiProfileCardSlugKindRoute
   '/learning-management-system/admin/courses/$id': typeof LearningManagementSystemAdminCoursesIdRoute
   '/learning-management-system/admin/internships/new': typeof LearningManagementSystemAdminInternshipsNewRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/instructor/quiz-results/$courseId': typeof LearningManagementSystemInstructorQuizResultsCourseIdRoute
   '/learning-management-system/internships/$slug/apply': typeof LearningManagementSystemInternshipsSlugApplyRoute
+  '/learning-management-system/student/feedback/$courseId': typeof LearningManagementSystemStudentFeedbackCourseIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
   '/learning-management-system/student/quiz/$courseId': typeof LearningManagementSystemStudentQuizCourseIdRoute
-  '/learning-management-system/student/feedback/$courseId': typeof LearningManagementSystemStudentFeedbackCourseIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1040,15 +1047,16 @@ export interface FileRoutesByTo {
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRouteWithChildren
   '/admin/crm/registration-links/$id': typeof AdminCrmRegistrationLinksIdRoute
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
+  '/api/profile-card/$slug/$kind': typeof ApiProfileCardSlugKindRoute
   '/learning-management-system/admin/courses/$id': typeof LearningManagementSystemAdminCoursesIdRoute
   '/learning-management-system/admin/internships/new': typeof LearningManagementSystemAdminInternshipsNewRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/instructor/quiz-results/$courseId': typeof LearningManagementSystemInstructorQuizResultsCourseIdRoute
   '/learning-management-system/internships/$slug/apply': typeof LearningManagementSystemInternshipsSlugApplyRoute
+  '/learning-management-system/student/feedback/$courseId': typeof LearningManagementSystemStudentFeedbackCourseIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
   '/learning-management-system/student/quiz/$courseId': typeof LearningManagementSystemStudentQuizCourseIdRoute
-  '/learning-management-system/student/feedback/$courseId': typeof LearningManagementSystemStudentFeedbackCourseIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1166,15 +1174,16 @@ export interface FileRoutesById {
   '/admin/crm/leads/individuals': typeof AdminCrmLeadsIndividualsRouteWithChildren
   '/admin/crm/registration-links/$id': typeof AdminCrmRegistrationLinksIdRoute
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
+  '/api/profile-card/$slug/$kind': typeof ApiProfileCardSlugKindRoute
   '/learning-management-system/admin/courses/$id': typeof LearningManagementSystemAdminCoursesIdRoute
   '/learning-management-system/admin/internships/new': typeof LearningManagementSystemAdminInternshipsNewRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
   '/learning-management-system/instructor/courses/$id': typeof LearningManagementSystemInstructorCoursesIdRoute
   '/learning-management-system/instructor/quiz-results/$courseId': typeof LearningManagementSystemInstructorQuizResultsCourseIdRoute
   '/learning-management-system/internships/$slug/apply': typeof LearningManagementSystemInternshipsSlugApplyRoute
+  '/learning-management-system/student/feedback/$courseId': typeof LearningManagementSystemStudentFeedbackCourseIdRoute
   '/learning-management-system/student/player/$courseId': typeof LearningManagementSystemStudentPlayerCourseIdRoute
   '/learning-management-system/student/quiz/$courseId': typeof LearningManagementSystemStudentQuizCourseIdRoute
-  '/learning-management-system/student/feedback/$courseId': typeof LearningManagementSystemStudentFeedbackCourseIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1294,15 +1303,16 @@ export interface FileRouteTypes {
     | '/admin/crm/leads/individuals'
     | '/admin/crm/registration-links/$id'
     | '/admin/forms/$formId/edit'
+    | '/api/profile-card/$slug/$kind'
     | '/learning-management-system/admin/courses/$id'
     | '/learning-management-system/admin/internships/new'
     | '/learning-management-system/instructor/assignments/$courseId'
     | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/instructor/quiz-results/$courseId'
     | '/learning-management-system/internships/$slug/apply'
+    | '/learning-management-system/student/feedback/$courseId'
     | '/learning-management-system/student/player/$courseId'
     | '/learning-management-system/student/quiz/$courseId'
-    | '/learning-management-system/student/feedback/$courseId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1411,15 +1421,16 @@ export interface FileRouteTypes {
     | '/admin/crm/leads/individuals'
     | '/admin/crm/registration-links/$id'
     | '/admin/forms/$formId/edit'
+    | '/api/profile-card/$slug/$kind'
     | '/learning-management-system/admin/courses/$id'
     | '/learning-management-system/admin/internships/new'
     | '/learning-management-system/instructor/assignments/$courseId'
     | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/instructor/quiz-results/$courseId'
     | '/learning-management-system/internships/$slug/apply'
+    | '/learning-management-system/student/feedback/$courseId'
     | '/learning-management-system/student/player/$courseId'
     | '/learning-management-system/student/quiz/$courseId'
-    | '/learning-management-system/student/feedback/$courseId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1536,15 +1547,16 @@ export interface FileRouteTypes {
     | '/admin/crm/leads/individuals'
     | '/admin/crm/registration-links/$id'
     | '/admin/forms/$formId/edit'
+    | '/api/profile-card/$slug/$kind'
     | '/learning-management-system/admin/courses/$id'
     | '/learning-management-system/admin/internships/new'
     | '/learning-management-system/instructor/assignments/$courseId'
     | '/learning-management-system/instructor/courses/$id'
     | '/learning-management-system/instructor/quiz-results/$courseId'
     | '/learning-management-system/internships/$slug/apply'
+    | '/learning-management-system/student/feedback/$courseId'
     | '/learning-management-system/student/player/$courseId'
     | '/learning-management-system/student/quiz/$courseId'
-    | '/learning-management-system/student/feedback/$courseId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1598,6 +1610,7 @@ export interface RootRouteChildren {
   InitiativeIndexRoute: typeof InitiativeIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
   ApiPublicBunnyWebhookRoute: typeof ApiPublicBunnyWebhookRoute
+  ApiProfileCardSlugKindRoute: typeof ApiProfileCardSlugKindRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -2326,18 +2339,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemStudentQuizCourseIdRouteImport
       parentRoute: typeof LearningManagementSystemStudentRoute
     }
-    '/learning-management-system/student/feedback/$courseId': {
-      id: '/learning-management-system/student/feedback/$courseId'
-      path: '/feedback/$courseId'
-      fullPath: '/learning-management-system/student/feedback/$courseId'
-      preLoaderRoute: typeof LearningManagementSystemStudentFeedbackCourseIdRouteImport
-      parentRoute: typeof LearningManagementSystemStudentRoute
-    }
     '/learning-management-system/student/player/$courseId': {
       id: '/learning-management-system/student/player/$courseId'
       path: '/player/$courseId'
       fullPath: '/learning-management-system/student/player/$courseId'
       preLoaderRoute: typeof LearningManagementSystemStudentPlayerCourseIdRouteImport
+      parentRoute: typeof LearningManagementSystemStudentRoute
+    }
+    '/learning-management-system/student/feedback/$courseId': {
+      id: '/learning-management-system/student/feedback/$courseId'
+      path: '/feedback/$courseId'
+      fullPath: '/learning-management-system/student/feedback/$courseId'
+      preLoaderRoute: typeof LearningManagementSystemStudentFeedbackCourseIdRouteImport
       parentRoute: typeof LearningManagementSystemStudentRoute
     }
     '/learning-management-system/internships/$slug/apply': {
@@ -2381,6 +2394,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/learning-management-system/admin/courses/$id'
       preLoaderRoute: typeof LearningManagementSystemAdminCoursesIdRouteImport
       parentRoute: typeof LearningManagementSystemAdminRoute
+    }
+    '/api/profile-card/$slug/$kind': {
+      id: '/api/profile-card/$slug/$kind'
+      path: '/api/profile-card/$slug/$kind'
+      fullPath: '/api/profile-card/$slug/$kind'
+      preLoaderRoute: typeof ApiProfileCardSlugKindRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/forms/$formId/edit': {
       id: '/admin/forms/$formId/edit'
@@ -2761,9 +2781,9 @@ const LearningManagementSystemInstructorRouteWithChildren =
 interface LearningManagementSystemStudentRouteChildren {
   LearningManagementSystemStudentRequestsRoute: typeof LearningManagementSystemStudentRequestsRoute
   LearningManagementSystemStudentIndexRoute: typeof LearningManagementSystemStudentIndexRoute
+  LearningManagementSystemStudentFeedbackCourseIdRoute: typeof LearningManagementSystemStudentFeedbackCourseIdRoute
   LearningManagementSystemStudentPlayerCourseIdRoute: typeof LearningManagementSystemStudentPlayerCourseIdRoute
   LearningManagementSystemStudentQuizCourseIdRoute: typeof LearningManagementSystemStudentQuizCourseIdRoute
-  LearningManagementSystemStudentFeedbackCourseIdRoute: typeof LearningManagementSystemStudentFeedbackCourseIdRoute
 }
 
 const LearningManagementSystemStudentRouteChildren: LearningManagementSystemStudentRouteChildren =
@@ -2772,12 +2792,12 @@ const LearningManagementSystemStudentRouteChildren: LearningManagementSystemStud
       LearningManagementSystemStudentRequestsRoute,
     LearningManagementSystemStudentIndexRoute:
       LearningManagementSystemStudentIndexRoute,
+    LearningManagementSystemStudentFeedbackCourseIdRoute:
+      LearningManagementSystemStudentFeedbackCourseIdRoute,
     LearningManagementSystemStudentPlayerCourseIdRoute:
       LearningManagementSystemStudentPlayerCourseIdRoute,
     LearningManagementSystemStudentQuizCourseIdRoute:
       LearningManagementSystemStudentQuizCourseIdRoute,
-    LearningManagementSystemStudentFeedbackCourseIdRoute:
-      LearningManagementSystemStudentFeedbackCourseIdRoute,
   }
 
 const LearningManagementSystemStudentRouteWithChildren =
@@ -2880,6 +2900,7 @@ const rootRouteChildren: RootRouteChildren = {
   InitiativeIndexRoute: InitiativeIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
   ApiPublicBunnyWebhookRoute: ApiPublicBunnyWebhookRoute,
+  ApiProfileCardSlugKindRoute: ApiProfileCardSlugKindRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,

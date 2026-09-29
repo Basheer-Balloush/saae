@@ -116,10 +116,71 @@ function find(slug: string) {
   return PROFILES.find((p) => p.card.slug === slug) ?? null;
 }
 
-export function findProfileCard(slug: string): ProfileCard | null {
+// The cards now live in the database table private_profile_cards, read through
+// exact-slug functions (get_private_profile_*). The copies above are only a
+// fallback while the move is verified live; they are removed afterwards.
+type Rpc = (
+  fn: string,
+  args: Record<string, unknown>,
+) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
+
+async function rpc(fn: string, args: Record<string, unknown>): Promise<unknown> {
+  const { createClient } = await import("@supabase/supabase-js");
+  const url = process.env.SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
+  const key = process.env.SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) throw new Error("Supabase is not configured");
+  const client = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data, error } = await (client.rpc as unknown as Rpc)(fn, args);
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+/** The address the page uses for a card image; it only works with the right slug. */
+export function profileImagePath(slug: string, kind: "portrait" | "signature"): string {
+  return `/api/profile-card/${encodeURIComponent(slug)}/${kind}`;
+}
+
+export async function findProfileCard(slug: string): Promise<ProfileCard | null> {
+  try {
+    const row = (await rpc("get_private_profile_card", { p_slug: slug })) as Omit<
+      ProfileCard,
+      "portrait" | "signature"
+    > | null;
+    if (row) {
+      return {
+        ...row,
+        portrait: profileImagePath(slug, "portrait"),
+        signature: profileImagePath(slug, "signature"),
+      };
+    }
+  } catch (error) {
+    console.error("Profile card lookup failed", error);
+  }
   return find(slug)?.card ?? null;
 }
 
-export function findProfileContact(slug: string): ProfileContact | null {
+export async function findProfileContact(slug: string): Promise<ProfileContact | null> {
+  try {
+    const row = (await rpc("get_private_profile_contact", {
+      p_slug: slug,
+    })) as ProfileContact | null;
+    if (row) return row;
+  } catch (error) {
+    console.error("Profile contact lookup failed", error);
+  }
   return find(slug)?.contact ?? null;
+}
+
+export async function findProfileImage(
+  slug: string,
+  kind: "portrait" | "signature",
+): Promise<{ mime: string; bytes: Uint8Array<ArrayBuffer> } | null> {
+  const rows = (await rpc("get_private_profile_image", { p_slug: slug, p_kind: kind })) as
+    | { mime: string | null; b64: string | null }[]
+    | null;
+  const row = rows?.[0];
+  if (!row?.mime || !row.b64) return null;
+  return { mime: row.mime, bytes: Uint8Array.from(atob(row.b64), (c) => c.charCodeAt(0)) };
 }
