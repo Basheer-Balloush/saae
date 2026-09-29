@@ -198,16 +198,23 @@ const isDarkPath = (pathname: string) =>
 function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = useLocation({ select: (location) => location.pathname });
   const ground = isDarkPath(pathname) ? DARK_GROUND : undefined;
+  /* Private profile pages must never reach analytics: the slug in their
+     address is the secret. */
+  const analytics = !pathname.startsWith("/profile/");
   const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');if(/^\\/(admin(\\/|$)|attendance-management-system(\\/|$)|learning-management-system\\/(admin|instructor)(\\/|$))/.test(location.pathname))document.documentElement.classList.add('cx-dark','dark');var l=localStorage.getItem('saae-lang')==='en'?'en':'ar';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning style={ground}>
       <head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM4Y7E9Y96" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-MM4Y7E9Y96');`,
-          }}
-        />
+        {analytics && (
+          <>
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM4Y7E9Y96" />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-MM4Y7E9Y96');`,
+              }}
+            />
+          </>
+        )}
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <HeadContent />
       </head>
