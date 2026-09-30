@@ -106,16 +106,42 @@ export function matchNamedCourse(rows: CatalogRow[], question: string): CatalogR
   if (query.length === 0) return null;
   const ranked = rows
     .map((row) => {
-      const title = new Set(tokens(`${row.title_ar ?? ""} ${row.title_en ?? ""}`));
-      const hits = query.filter((word) => title.has(word)).length;
-      return { row, hits, coverage: hits / query.length };
+      const titleVariants = [row.title_ar, row.title_en]
+        .filter((title): title is string => !!title)
+        .map((title) => new Set(tokens(title)));
+      const bestTitle = titleVariants
+        .map((title) => {
+          const hits = query.filter((word) => title.has(word)).length;
+          return { hits, titleCoverage: title.size > 0 ? hits / title.size : 0 };
+        })
+        .sort((a, b) => b.titleCoverage - a.titleCoverage || b.hits - a.hits)[0] ?? {
+        hits: 0,
+        titleCoverage: 0,
+      };
+      return {
+        row,
+        hits: bestTitle.hits,
+        titleCoverage: bestTitle.titleCoverage,
+        queryCoverage: bestTitle.hits / query.length,
+      };
     })
-    .sort((a, b) => b.coverage - a.coverage || b.hits - a.hits);
+    .sort(
+      (a, b) =>
+        b.titleCoverage - a.titleCoverage || b.hits - a.hits || b.queryCoverage - a.queryCoverage,
+    );
   const best = ranked[0];
-  if (!best || best.hits < Math.min(2, query.length) || best.coverage < 0.65) return null;
+  // Visitors usually append detail requests (date, place, price, registration)
+  // to the title. Those words should not make an otherwise complete title fail.
+  if (!best || best.hits < Math.min(2, query.length) || best.titleCoverage < 0.65) return null;
   // If two titles fit equally well, avoid picking one without asking the visitor.
   const second = ranked[1];
-  if (second && second.coverage === best.coverage && second.hits === best.hits) return null;
+  if (
+    second &&
+    second.titleCoverage === best.titleCoverage &&
+    second.hits === best.hits &&
+    second.queryCoverage === best.queryCoverage
+  )
+    return null;
   return best.row;
 }
 
