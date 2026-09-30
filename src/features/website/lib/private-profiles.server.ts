@@ -65,15 +65,23 @@ export function profileImagePath(slug: string, kind: "portrait" | "signature"): 
 
 let keysPromise: ReturnType<typeof deriveCardKeys> | null = null;
 
-/** The decrypted card, or null when no card has this slug. */
-async function loadCard(slug: string): Promise<StoredCard | null> {
+/**
+ * The decrypted card, or null when no card has this slug. A row can instead hold
+ * `{ alias: "<slug>" }`: a second, shorter secret link to the same card. Printed
+ * QR codes use these (e.g. HTTPS://AISYRIA.ORG/PROFILE/7KD2M9XPQ4), because a
+ * short, all-capitals link makes a much less dense code.
+ */
+async function loadCard(slug: string, followAlias = true): Promise<StoredCard | null> {
   const secret = process.env.PROFILE_CARD_SECRET;
   if (!secret) throw new Error("PROFILE_CARD_SECRET is not set");
   keysPromise ??= deriveCardKeys(secret);
   const keys = await keysPromise;
   const hash = await cardSlugHash(keys, slug);
   const payload = (await rpc("get_private_card", { p_slug_hash: hash })) as string | null;
-  return payload ? decryptCard<StoredCard>(keys, hash, payload) : null;
+  if (!payload) return null;
+  const stored = await decryptCard<StoredCard | { alias: string }>(keys, hash, payload);
+  if ("alias" in stored) return followAlias ? loadCard(stored.alias, false) : null;
+  return stored;
 }
 
 const decode = (b64: string) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
