@@ -71,7 +71,7 @@ export function toCourseOptions(rows: CatalogRow[], lang: "ar" | "en", limit = 3
       schedule_time_from: null,
       schedule_time_to: null,
       location: null,
-      description: lang === "ar" ? row.description_ar ?? null : row.description_en ?? null,
+      description: lang === "ar" ? (row.description_ar ?? null) : (row.description_en ?? null),
       topics: [],
       registration_status: "unknown",
       seats_confirmed: false,
