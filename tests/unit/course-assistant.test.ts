@@ -24,6 +24,19 @@ const softwareCourse: CatalogRow = {
   end_date: "2026-07-16",
 };
 
+const generativeAi09Course: CatalogRow = {
+  id: "course-2",
+  slug: "generative-ai-09",
+  title_ar: "الذكاء الاصطناعي التوليدي 09",
+  title_en: "Generative AI 09",
+  level: "beginner",
+  is_free: false,
+  price: 1000,
+  sale_price: 500,
+  delivery_mode: "onsite",
+  end_date: "2026-10-08",
+};
+
 describe("course answers grounded in the LMS", () => {
   it("finds an archived course when the visitor changes its word order", () => {
     expect(matchNamedCourse([softwareCourse], "شو تفاصيل دورة هندسة البرمجيات الحديثة؟")?.id).toBe(
@@ -32,6 +45,18 @@ describe("course answers grounded in the LMS", () => {
     expect(matchNamedCourse([softwareCourse], "المنهجية الحديثة في هندسة البر مجيات")?.id).toBe(
       softwareCourse.id,
     );
+    expect(
+      matchNamedCourse(
+        [softwareCourse, generativeAi09Course],
+        "احكيلي عن دورة المنهجية الحديثة في هندسة البرمجيات: شو بتعلّم، ومتى كانت، وهل فيني سجّل فيها؟",
+      )?.id,
+    ).toBe(softwareCourse.id);
+    expect(
+      matchNamedCourse(
+        [softwareCourse, generativeAi09Course],
+        "دورة الذكاء الاصطناعي التوليدي 09: شو موعدها ومكانها وسعرها وهل التسجيل مفتوح؟",
+      )?.id,
+    ).toBe(generativeAi09Course.id);
     expect(matchNamedCourse([softwareCourse], "دورة برمجة روبوتات تحت الماء")).toBeNull();
   });
 
