@@ -136,6 +136,11 @@ export const KIND_LABELS: Record<
 };
 
 /** What the limit counts, for each kind. */
+/** The kinds the admin screens list and create. Recognition codes are kept out
+    of the dashboard: they still work for learners, and are created and changed
+    in the database. */
+export const ADMIN_KINDS: CouponKind[] = ["course", "category", "personal"];
+
 export const USES_UNIT: Record<CouponKind, { ar: string; en: string }> = {
   recognition: { ar: "استخدام", en: "uses" },
   course: { ar: "استخدام", en: "uses" },

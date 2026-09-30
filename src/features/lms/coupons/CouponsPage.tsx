@@ -20,6 +20,7 @@ import { getEmailsForUsers } from "@/features/lms/lib/admin-users.functions";
 import { NewCouponDialog } from "./NewCouponDialog";
 import { CouponDetailsDialog } from "./CouponDetailsDialog";
 import {
+  ADMIN_KINDS,
   KIND_LABELS,
   STATUS_LABELS,
   USES_UNIT,
@@ -31,7 +32,8 @@ import {
 
 type Filter = CouponKind | "all";
 
-/** Every coupon, recognition code included: create, find, open one. */
+/** The discount coupons: create, find, open one. Recognition codes are not
+    shown here (see ADMIN_KINDS). */
 export function CouponsPage() {
   const { t, ar, lang } = useT();
   const refs = useCouponRefs();
@@ -47,7 +49,8 @@ export function CouponsPage() {
 
   const load = useCallback(async () => {
     try {
-      const [list, counts] = await Promise.all([listCoupons(), countActiveUses()]);
+      const [all, counts] = await Promise.all([listCoupons(), countActiveUses()]);
+      const list = all.filter((c) => ADMIN_KINDS.includes(couponKind(c)));
       setCoupons(list);
       setUsed(counts);
       setFailed(false);
@@ -101,8 +104,8 @@ export function CouponsPage() {
         eyebrow={t("منصّة التعلّم", "Learning platform")}
         title={t("الكوبونات", "Coupons")}
         description={t(
-          "أكواد الاعتراف بإكمال الدورة، وكوبونات الخصم لدورة أو تصنيف أو متعلّم. في كل دورة يستخدم المتعلّم كوبون خصم واحداً وكود اعتراف واحداً.",
-          "Course recognition codes, and discount coupons for a course, a category or a learner. In each course a learner uses one discount coupon and one recognition code.",
+          "كوبونات الخصم لدورة أو تصنيف أو متعلّم. في كل دورة يستخدم المتعلّم كوبون خصم واحداً.",
+          "Discount coupons for a course, a category or a learner. In each course a learner uses one discount coupon.",
         )}
         actions={
           <Button onClick={() => setCreating(true)} disabled={refs.loading}>
@@ -127,7 +130,7 @@ export function CouponsPage() {
             onChange={setFilter}
             options={[
               { value: "all", label: t("الكل", "All"), count: counts.all },
-              ...(Object.keys(KIND_LABELS) as CouponKind[]).map((k) => ({
+              ...ADMIN_KINDS.map((k) => ({
                 value: k,
                 label: ar ? KIND_LABELS[k].ar : KIND_LABELS[k].en,
                 count: counts[k],
@@ -192,9 +195,7 @@ export function CouponsPage() {
                       </td>
                       <td className="text-[13px]">{target(c)}</td>
                       <td className="whitespace-nowrap text-[13px]">
-                        {c.effect === "recognition"
-                          ? t("الدورة مكتملة", "Course completed")
-                          : `${Number(c.percent_off)}٪${c.min_discount != null ? ` · ${t("أدنى", "min")} ${formatSP(Number(c.min_discount), ar)}` : ""}${c.max_discount != null ? ` · ${t("أقصى", "max")} ${formatSP(Number(c.max_discount), ar)}` : ""}`}
+                        {`${Number(c.percent_off)}٪${c.min_discount != null ? ` · ${t("أدنى", "min")} ${formatSP(Number(c.min_discount), ar)}` : ""}${c.max_discount != null ? ` · ${t("أقصى", "max")} ${formatSP(Number(c.max_discount), ar)}` : ""}`}
                       </td>
                       <td className="whitespace-nowrap text-[13px] tabular-nums">
                         {n} / {c.max_uses ?? "∞"} {ar ? USES_UNIT[kind].ar : USES_UNIT[kind].en}

@@ -24,7 +24,7 @@ import {
 import { createCoupon } from "@/features/lms/lib/coupons-db";
 import { findLearners, type Learner } from "@/features/lms/lib/coupons-admin.functions";
 import { toUserMessage } from "@/lib/safe-error";
-import { KIND_LABELS, endOfDay, type CouponKind, type CouponRefs } from "./refs";
+import { ADMIN_KINDS, KIND_LABELS, endOfDay, type CouponKind, type CouponRefs } from "./refs";
 
 type Form = {
   kind: CouponKind;
@@ -39,11 +39,6 @@ type Form = {
   maxUses: string;
   expires: string;
 };
-
-/* The kinds offered here. A recognition code is not created from this screen
-   (the dialog can still build one); existing ones are listed and managed like
-   any coupon. */
-const OFFERED: CouponKind[] = ["course", "category", "personal"];
 
 const EMPTY: Form = {
   kind: "course",
@@ -224,7 +219,7 @@ export function NewCouponDialog({
             role="radiogroup"
             aria-label={t("النوع", "Kind")}
           >
-            {OFFERED.map((k) => (
+            {ADMIN_KINDS.map((k) => (
               <button
                 key={k}
                 type="button"
