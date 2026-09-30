@@ -9,10 +9,14 @@ import { PASSWORD_MIN } from "@/lib/auth/password-policy";
 /*
  * A guest (a Supabase anonymous user) becomes a real account in one of two
  * ways, and keeps everything they did either way:
- * - creating an account converts the guest itself. The password is set at
- *   once, the email when they open the link we send (while the site requires
- *   email confirmation), then lms_finish_guest_upgrade makes it an ordinary
- *   learner and issues the certificates it was waiting for;
+ * - creating an account converts the guest itself. The guest gives a name and
+ *   an email, opens the link we send (while the site requires email
+ *   confirmation) and chooses a password there. Only then does the guest get
+ *   its email and password, in one call, and lms_finish_guest_upgrade makes it
+ *   an ordinary learner and issues the certificates it was waiting for.
+ *   Nothing about the guest changes before that: setting a password through
+ *   the Auth admin API ends every session of the user, which would sign a
+ *   guest out of an account that cannot be signed in to yet;
  * - signing in to an existing account merges the guest into it
  *   (lms_merge_guest). The guest's own access token proves the guest is theirs.
  */
@@ -57,8 +61,6 @@ function failAuth(error: { code?: string; status?: number; message: string }): n
   if (error.code === "email_exists" || /already.*registered/i.test(error.message)) {
     throw new Error("EMAIL_ALREADY_REGISTERED");
   }
-  if (error.code === "weak_password")
-    throw Object.assign(new Error(error.message), { code: "weak_password" });
   console.error("guest upgrade failed", {
     code: error.code,
     status: error.status,
@@ -85,14 +87,19 @@ async function emailCertificates(userId: string, certificates: NewCertificate[],
 
 type Upgrade = { email: string; fullName: string; asInstructor: boolean; lang: Lang };
 
-/** Gives the guest its confirmed email and makes it an ordinary learner. */
-async function completeUpgrade(userId: string, u: Upgrade) {
+/**
+ * Gives the guest its confirmed email and its password and makes it an
+ * ordinary learner. Returns null when Auth refuses the password as too weak.
+ */
+async function completeUpgrade(userId: string, u: Upgrade, password: string) {
   const db = await admin();
   const { error } = await db.auth.admin.updateUserById(userId, {
     email: u.email,
     email_confirm: true,
+    password,
     user_metadata: { full_name: u.fullName, lang: u.lang },
   });
+  if (error?.code === "weak_password") return null;
   if (error) failAuth(error);
 
   const { data, error: finishError } = await (
@@ -125,10 +132,11 @@ async function completeUpgrade(userId: string, u: Upgrade) {
   return certificates.length;
 }
 
-const confirmUrl = (token: string) =>
-  `${getSiteUrl()}/learning-management-system/confirm-account?token=${encodeURIComponent(token)}`;
+const confirmPath = (token: string) =>
+  `/learning-management-system/confirm-account?token=${encodeURIComponent(token)}`;
 
-async function sendUpgradeLink(userId: string, u: Upgrade) {
+/** Records what the guest asked for and returns the token that finishes it. */
+async function saveUpgrade(userId: string, u: Upgrade) {
   const token = randomBytes(32).toString("base64url");
   const { error } = await (await untyped()).from("lms_guest_upgrades").upsert(
     {
@@ -146,17 +154,18 @@ async function sendUpgradeLink(userId: string, u: Upgrade) {
     console.error("saving the guest upgrade failed", { message: error.message });
     throw new Error("SIGNUP_FAILED");
   }
+  return token;
+}
+
+async function sendUpgradeLink(u: Upgrade, token: string) {
+  const confirmationUrl = getSiteUrl() + confirmPath(token);
   const { sendAccountConfirmationEmail } = await authEmail();
   try {
-    await sendAccountConfirmationEmail({
-      email: u.email,
-      confirmationUrl: confirmUrl(token),
-      lang: u.lang,
-    });
+    await sendAccountConfirmationEmail({ email: u.email, confirmationUrl, lang: u.lang });
   } catch (e) {
     // Running locally without email keys: the link goes to the server log.
     if (!getSiteUrl().startsWith("http://localhost")) throw e;
-    console.info("[local] guest account confirmation link:", confirmUrl(token));
+    console.info("[local] guest account confirmation link:", confirmationUrl);
   }
 }
 
@@ -173,14 +182,14 @@ const upgradeSchema = z.object({
       },
     ),
   email: z.string().trim().email().max(255),
-  password: z.string().min(PASSWORD_MIN).max(72),
   asInstructor: z.boolean(),
   lang: langSchema,
 });
 
 /**
- * A guest creates their account. Returns whether they still have to open the
- * link in their email; without confirmation the account is ready at once.
+ * A guest asks for an account. While the site confirms emails, the link that
+ * finishes it goes to their email; otherwise `next` is the page that finishes
+ * it now. Either way the guest stays a guest until they choose a password.
  */
 export const startGuestUpgrade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -193,26 +202,18 @@ export const startGuestUpgrade = createServerFn({ method: "POST" })
     await enforceRateLimit("signup", email, 6, 900);
     if (await emailTaken(email)) throw new Error("EMAIL_ALREADY_REGISTERED");
 
-    // The password now: with no email yet, nobody can sign in with it.
-    const db = await admin();
-    const { error } = await db.auth.admin.updateUserById(userId, {
-      password: data.password,
-      user_metadata: { full_name: data.fullName, lang: data.lang },
-    });
-    if (error) failAuth(error);
-
     const upgrade: Upgrade = {
       email,
       fullName: data.fullName,
       asInstructor: data.asInstructor,
       lang: data.lang,
     };
+    const token = await saveUpgrade(userId, upgrade);
     if (!(await isEmailConfirmationRequired())) {
-      const certificates = await completeUpgrade(userId, upgrade);
-      return { email, confirmationRequired: false as const, certificates };
+      return { email, confirmationRequired: false as const, next: confirmPath(token) };
     }
-    await sendUpgradeLink(userId, upgrade);
-    return { email, confirmationRequired: true as const, certificates: 0 };
+    await sendUpgradeLink(upgrade, token);
+    return { email, confirmationRequired: true as const, next: null };
   });
 
 /** Sends the confirmation link again, with the same limits as signup. */
@@ -236,45 +237,83 @@ export const resendGuestUpgrade = createServerFn({ method: "POST" })
       const retryAfter = err instanceof RateLimitedError ? err.retryAfterSeconds : 60;
       return { sent: false as const, retryAfter };
     }
-    await sendUpgradeLink(userId, {
+    const upgrade: Upgrade = {
       email: row.email,
       fullName: row.full_name,
       asInstructor: row.as_instructor,
       lang: row.lang,
-    });
+    };
+    // A new link replaces the one sent before.
+    await sendUpgradeLink(upgrade, await saveUpgrade(userId, upgrade));
     return { sent: true as const, retryAfter: 0 };
   });
 
-/**
- * The link from the email. The token is the proof, so this needs no session:
- * the link may be opened on another device.
- */
-export const confirmGuestUpgrade = createServerFn({ method: "POST" })
-  .inputValidator((d: { token: string }) =>
-    z.object({ token: z.string().min(20).max(200) }).parse(d),
-  )
-  .handler(async ({ data }) => {
-    const { data: row } = await (await untyped())
-      .from("lms_guest_upgrades")
-      .select("user_id, email, full_name, as_instructor, lang, expires_at")
-      .eq("token_hash", hashToken(data.token))
-      .maybeSingle();
-    if (!row) return { status: "invalid" as const };
-    if (new Date(row.expires_at).getTime() < Date.now()) return { status: "expired" as const };
+type PendingUpgrade =
+  | { status: "invalid" | "expired" }
+  | { status: "email_taken"; email: string }
+  | { status: "ready"; email: string; userId: string; upgrade: Upgrade };
 
-    // Someone may have registered the email in the meantime. A half-finished
-    // earlier attempt already gave it to this account, which is fine.
-    const { data: current } = await (await admin()).auth.admin.getUserById(row.user_id);
-    if (current.user?.email !== row.email && (await emailTaken(row.email))) {
-      return { status: "email_taken" as const, email: row.email as string };
-    }
-    const certificates = await completeUpgrade(row.user_id, {
+/** What a confirmation token stands for right now. */
+async function findUpgrade(token: string): Promise<PendingUpgrade> {
+  const { data: row } = await (await untyped())
+    .from("lms_guest_upgrades")
+    .select("user_id, email, full_name, as_instructor, lang, expires_at")
+    .eq("token_hash", hashToken(token))
+    .maybeSingle();
+  if (!row) return { status: "invalid" };
+  if (new Date(row.expires_at).getTime() < Date.now()) return { status: "expired" };
+
+  const { data: current } = await (await admin()).auth.admin.getUserById(row.user_id);
+  if (!current.user) return { status: "invalid" };
+  // Already an account under another email: this link is not for it.
+  if (!current.user.is_anonymous && current.user.email !== row.email) return { status: "invalid" };
+  // Someone may have registered the email in the meantime. A half-finished
+  // earlier attempt already gave it to this account, which is fine.
+  if (current.user.email !== row.email && (await emailTaken(row.email))) {
+    return { status: "email_taken", email: row.email };
+  }
+  return {
+    status: "ready",
+    email: row.email,
+    userId: row.user_id,
+    upgrade: {
       email: row.email,
       fullName: row.full_name,
       asInstructor: row.as_instructor,
       lang: row.lang,
-    });
-    return { status: "confirmed" as const, email: row.email as string, certificates };
+    },
+  };
+}
+
+const tokenSchema = z.string().min(20).max(200);
+
+/**
+ * The link from the email, when its page opens. The token is the proof, so
+ * this needs no session: the link may be opened on another device.
+ */
+export const checkGuestUpgrade = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string }) => z.object({ token: tokenSchema }).parse(d))
+  .handler(async ({ data }) => {
+    const found = await findUpgrade(data.token);
+    if (found.status === "ready") return { status: "ready" as const, email: found.email };
+    return found;
+  });
+
+/**
+ * The guest chose a password: the account gets its email and password now.
+ * Setting the password ends the guest's sessions, so the page signs in with
+ * the new email and password straight after.
+ */
+export const confirmGuestUpgrade = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string; password: string }) =>
+    z.object({ token: tokenSchema, password: z.string().min(PASSWORD_MIN).max(72) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const found = await findUpgrade(data.token);
+    if (found.status !== "ready") return found;
+    const certificates = await completeUpgrade(found.userId, found.upgrade, data.password);
+    if (certificates === null) return { status: "weak_password" as const };
+    return { status: "confirmed" as const, email: found.email, certificates };
   });
 
 /**

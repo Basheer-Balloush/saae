@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n/i18n";
@@ -12,10 +12,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { ContinueAsGuest } from "@/features/lms/GuestAccess";
 import { toast } from "sonner";
 import { Loader2, MailCheck } from "lucide-react";
-import { PASSWORD_MIN, scorePasswordStrength } from "@/lib/auth/password-policy";
+import { PASSWORD_MIN } from "@/lib/auth/password-policy";
 import { lmsRedirectSearchSchema } from "@/features/lms/lib/redirect";
 import { AuthLayout } from "@/features/lms/skin/AuthLayout";
-import { PasswordInput } from "@/features/lms/skin/PasswordInput";
+import { NewPasswordFields } from "@/features/lms/skin/NewPasswordFields";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 
 export const Route = createFileRoute("/learning-management-system/signup")({
@@ -34,46 +34,27 @@ const NEXT_RESEND_WAIT = 90;
 
 const ARABIC_NAME_RE = /^[\u0600-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-\uFEFF\s]+$/;
 
-function getStrengthInfo(score: number, lang: "ar" | "en") {
-  const t = lmsT[lang];
-  if (score <= 2)
-    return {
-      label: t.passwordWeak,
-      color: "bg-red-500",
-      width: `${(score / 6) * 100}%`,
-      textColor: "text-red-400",
-    };
-  if (score <= 4)
-    return {
-      label: t.passwordMedium,
-      color: "bg-amber-500",
-      width: `${(score / 6) * 100}%`,
-      textColor: "text-amber-400",
-    };
-  return {
-    label: t.passwordStrong,
-    color: "bg-green-500",
-    width: `${(score / 6) * 100}%`,
-    textColor: "text-green-400",
-  };
-}
+// A guest gives a name and an email here, and chooses the password on the page
+// their confirmation link opens.
+const guestSchema = z.object({
+  fullName: z
+    .string()
+    .trim()
+    .min(5)
+    .max(120)
+    .refine(
+      (v) => {
+        if (!ARABIC_NAME_RE.test(v)) return false;
+        const parts = v.split(/\s+/).filter((p) => p.length >= 2);
+        return parts.length >= 3;
+      },
+      { message: "ARABIC_TRIPLE" },
+    ),
+  email: z.string().trim().email().max(255),
+});
 
-const schema = z
-  .object({
-    fullName: z
-      .string()
-      .trim()
-      .min(5)
-      .max(120)
-      .refine(
-        (v) => {
-          if (!ARABIC_NAME_RE.test(v)) return false;
-          const parts = v.split(/\s+/).filter((p) => p.length >= 2);
-          return parts.length >= 3;
-        },
-        { message: "ARABIC_TRIPLE" },
-      ),
-    email: z.string().trim().email().max(255),
+const schema = guestSchema
+  .extend({
     password: z.string().min(PASSWORD_MIN).max(72),
     confirmPassword: z.string().min(PASSWORD_MIN).max(72),
   })
@@ -172,12 +153,6 @@ function LmsSignup() {
     }
   };
 
-  const passwordStrength = useMemo(() => scorePasswordStrength(password), [password]);
-  const strengthInfo = useMemo(
-    () => getStrengthInfo(passwordStrength, lang),
-    [passwordStrength, lang],
-  );
-
   useEffect(() => {
     // Once the account is active, land the user back where they started.
     if (!loading && user && !isGuest)
@@ -186,7 +161,9 @@ function LmsSignup() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = schema.safeParse({ fullName, email, password, confirmPassword });
+    const parsed = isGuest
+      ? guestSchema.safeParse({ fullName, email })
+      : schema.safeParse({ fullName, email, password, confirmPassword });
     if (!parsed.success) {
       const issue = parsed.error.issues[0];
       const code = issue.path[0];
@@ -211,7 +188,6 @@ function LmsSignup() {
           data: {
             fullName: parsed.data.fullName,
             email: parsed.data.email,
-            password: parsed.data.password,
             asInstructor,
             lang,
           },
@@ -221,9 +197,8 @@ function LmsSignup() {
           startResendWait(FIRST_RESEND_WAIT);
           toast.success(tr.signedUp);
         } else {
-          // The session's token still says "guest" until it is refreshed.
-          await supabase.auth.refreshSession();
-          toast.success(tr.signedUpConfirmed);
+          // No email to confirm: straight to the page where they choose the password.
+          window.location.assign(res.next);
         }
         return;
       }
@@ -231,7 +206,7 @@ function LmsSignup() {
         data: {
           fullName: parsed.data.fullName,
           email: parsed.data.email,
-          password: parsed.data.password,
+          password,
           asInstructor,
           lang,
         },
@@ -248,14 +223,6 @@ function LmsSignup() {
     }
   };
 
-  const passChecks = [
-    { label: `${PASSWORD_MIN}+`, met: password.length >= PASSWORD_MIN },
-    { label: "abc", met: /[a-z]/.test(password) },
-    { label: "ABC", met: /[A-Z]/.test(password) },
-    { label: "123", met: /[0-9]/.test(password) },
-    { label: "!@#", met: /[^A-Za-z0-9]/.test(password) },
-  ];
-
   return (
     <AuthLayout titleId="auth-title">
       <h1 id="auth-title">{tr.signUpTitle}</h1>
@@ -263,8 +230,8 @@ function LmsSignup() {
       {isGuest && !result && (
         <p className="auth-guest-note">
           {ar
-            ? "أنت تتصفّح كزائر. أنشئ حسابك وستبقى فيه دوراتك وتقدّمك وطلباتك."
-            : "You are browsing as a guest. Create your account and it keeps your courses, progress and requests."}
+            ? "أنت تتصفّح كزائر. أنشئ حسابك وستبقى فيه دوراتك وتقدّمك وطلباتك. تختار كلمة المرور بعد تأكيد بريدك."
+            : "You are browsing as a guest. Create your account and it keeps your courses, progress and requests. You choose your password after confirming your email."}
         </p>
       )}
 
@@ -288,8 +255,8 @@ function LmsSignup() {
                 {". "}
                 {isGuest
                   ? ar
-                    ? "افتح الرابط لتأكيد بريدك، فيصبح حسابك جاهزاً بكل دوراتك وتقدّمك كزائر. إلى ذلك الحين تبقى زائراً."
-                    : "Open the link to confirm your email and your account is ready, with every course and all your guest progress. Until then you stay a guest."
+                    ? "افتح الرابط لتأكيد بريدك واختيار كلمة المرور، فيصبح حسابك جاهزاً بكل دوراتك وتقدّمك كزائر. إلى ذلك الحين تبقى زائراً."
+                    : "Open the link to confirm your email and choose your password, and your account is ready with every course and all your guest progress. Until then you stay a guest."
                   : ar
                     ? "افتح الرابط لتأكيد بريدك قبل تسجيل الدخول."
                     : "Open the link to confirm your email before signing in."}
@@ -378,46 +345,14 @@ function LmsSignup() {
                 placeholder="name@example.com"
               />
             </div>
-            <div className="field">
-              <label htmlFor="password">{tr.password}</label>
-              <PasswordInput
-                id="password"
-                autoComplete="new-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+            {!isGuest && (
+              <NewPasswordFields
+                password={password}
+                confirmPassword={confirmPassword}
+                onPassword={setPassword}
+                onConfirmPassword={setConfirmPassword}
               />
-              {password.length > 0 && (
-                <div className="pass-strength">
-                  <div className="pass-strength-row">
-                    <span>{tr.passwordStrength}</span>
-                    <span className={strengthInfo.textColor}>{strengthInfo.label}</span>
-                  </div>
-                  <div className="pass-strength-bar">
-                    <i className={strengthInfo.color} style={{ width: strengthInfo.width }} />
-                  </div>
-                  <div className="pass-chips">
-                    {passChecks.map((c) => (
-                      <span key={c.label} className={c.met ? "is-met" : undefined}>
-                        {c.label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="field">
-              <label htmlFor="confirmPassword">
-                {ar ? "تأكيد كلمة المرور" : "Confirm password"}
-              </label>
-              <PasswordInput
-                id="confirmPassword"
-                autoComplete="new-password"
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
+            )}
             <fieldset className="field role-field">
               <legend>{ar ? "انضم بصفتك" : "Join as"}</legend>
               <div className="role-seg">
