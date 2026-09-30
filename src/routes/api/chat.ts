@@ -210,6 +210,7 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 أ) اتّصل بأداة \`find_courses\` مع مجاله ومستواه للبحث عن دورة مناسبة **من دورات الجمعية الحقيقية**.
 ب) إذا رجعت الأداة بدورات: اقترح واحدة (أو اثنتين) بالاسم والرابط والسعر كما رجعت حرفياً. ممنوع اختراع اسم دورة أو رابط أو سعر.
    استخدم تاريخها ومكانها وحالة التسجيل ومحتواها إن أعادتها الأداة. إذا كانت الحالة ended فقل إن الدورة انتهت ولا تدعُ الزائر للتسجيل فيها. إذا كانت open فقل إن تقديم الطلب ممكن، لا إن المقعد مؤكد. لا تقل إن الموعد غير متوفر إذا أرجعته الأداة.
+   مع كل دورة اذكر سبب ملاءمتها بجملة قصيرة (المستوى، النمط حضوري/عن بُعد، وحالة التسجيل). إذا طلب الزائر دورات عامة دون تحديد مجال وكانت النتائج من مجالات متباعدة، اسأله سؤالاً واحداً عن اهتمامه قبل سردها.
 ج) إذا رجعت الأداة فارغة: اعتذر بلطف وأعطه رقم الجمعية \`${ORG_PHONE}\` والبريد \`${ORG_EMAIL}\` للتواصل المباشر، ولا تخترع بديلاً.
 د) إذا كان يريد شراكة أو خدمة لشركته: اجمع بيانات الشركة ثم احفظها بأداة \`submit_company_lead\`. وإذا كان فرداً وأعطى بياناته: احفظها بأداة \`submit_individual_lead\`.
 هـ) اتّصل بأداة \`save_visitor_profile\` **فقط إذا أكمل رحلة التعرّف** (أجاب عن أسئلتها). الزائر الذي اكتفى بسؤال ولم يبدأ الرحلة لا يُحفظ له ملف. احفظ ملفّه: خلاصة عنه، هدفه، ما رُشِّح له، خطوته خلال أسبوع، ومعلومة تُذكر في لقاء قادم.
@@ -627,7 +628,7 @@ export const Route = createFileRoute("/api/chat")({
         const tools = {
           find_courses: tool({
             description:
-              "Search the association's published courses. Call before recommending any course. Returns [] when nothing matches; then give the association's phone instead of inventing a course.",
+              "Search the association's published courses. Call before recommending any course. Returns [] when nothing matches; then give the association's phone instead of inventing a course. When presenting results, give one short fit reason per course (its level, delivery mode and registration status). If the visitor named no field of interest and the results span unrelated fields, ask one question about their interest instead of listing mixed courses without explanation.",
             inputSchema: z.object({
               topic: z.string().nullable().optional(),
               level: z.enum(["beginner", "intermediate", "advanced"]).nullable().optional(),
