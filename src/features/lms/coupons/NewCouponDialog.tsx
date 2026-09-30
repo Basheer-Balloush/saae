@@ -40,8 +40,13 @@ type Form = {
   expires: string;
 };
 
+/* The kinds offered here. A recognition code is not created from this screen
+   (the dialog can still build one); existing ones are listed and managed like
+   any coupon. */
+const OFFERED: CouponKind[] = ["course", "category", "personal"];
+
 const EMPTY: Form = {
-  kind: "recognition",
+  kind: "course",
   code: "",
   label: "",
   courseId: "",
@@ -58,7 +63,7 @@ const posInt = (v: string) => /^\d+$/.test(v.trim()) && Number(v) > 0;
 const posNum = (v: string) => /^\d+(\.\d{1,2})?$/.test(v.trim()) && Number(v) > 0;
 const wholeSP = (v: string) => /^\d{1,10}$/.test(v.trim()) && Number(v) > 0;
 
-/** Creates a coupon of any of the four kinds. */
+/** Creates a discount coupon: for a course, a category or one learner. */
 export function NewCouponDialog({
   open,
   onOpenChange,
@@ -214,8 +219,12 @@ export function NewCouponDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t("النوع", "Kind")}>
-            {(Object.keys(KIND_LABELS) as CouponKind[]).map((k) => (
+          <div
+            className="grid gap-2 sm:grid-cols-3"
+            role="radiogroup"
+            aria-label={t("النوع", "Kind")}
+          >
+            {OFFERED.map((k) => (
               <button
                 key={k}
                 type="button"
