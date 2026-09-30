@@ -86,7 +86,14 @@ export function PaymentsPanel({
     return data.enrollments
       .map((e) => {
         const entries = data.entries.filter((x) => x.student_id === e.student_id);
-        const use = data.uses.find((u) => u.user_id === e.student_id && u.status === "applied");
+        // The code behind the price: a discount, else the recognition code
+        // that enrolled the learner for nothing.
+        const applied = data.uses.filter(
+          (u) => u.user_id === e.student_id && u.status === "applied",
+        );
+        const use =
+          applied.find((u) => u.effect === "discount") ??
+          applied.find((u) => u.request_id !== null);
         return {
           ...e,
           name: nameOf(e.student_id),

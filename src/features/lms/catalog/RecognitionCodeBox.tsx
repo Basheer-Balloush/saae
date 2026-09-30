@@ -3,8 +3,9 @@ import { Loader2 } from "lucide-react";
 import { couponErrorMessage, normalizeCode } from "@/features/lms/lib/coupons";
 import { redeemRecognitionCode } from "@/features/lms/lib/coupons-db";
 
-/** On a course whose request is still waiting: a learner who attended the
-    course elsewhere enters their recognition code here instead. */
+/** A learner who attended the course elsewhere enters their recognition code
+    here: while their request is still waiting, or once enrolled (then what
+    they owe does not change). */
 export function RecognitionCodeBox({
   courseId,
   ar,

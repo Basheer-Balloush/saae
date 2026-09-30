@@ -73,28 +73,36 @@ export async function loadEnrollNote(courseId: string): Promise<EnrollNote> {
 export type MyEnrollment = {
   id: string;
   completion_source: "platform" | "recognition";
-  completed_at: string | null;
   amount_due: number | null;
 };
 
 /** The signed-in learner's enrollment in a course, with what they owe and
-    have paid. */
+    have paid, and whether their certificate is already issued. */
 export async function loadMyEnrollment(courseId: string, userId: string) {
   const { data: e } = await db
     .from("lms_enrollments")
-    .select("id, completion_source, completed_at, amount_due")
+    .select("id, completion_source, amount_due")
     .eq("course_id", courseId)
     .eq("student_id", userId)
     .maybeSingle();
   if (!e) return null;
-  const { data: entries } = await db
-    .from("lms_payment_entries")
-    .select("id, kind, amount, corrects_id")
-    .eq("course_id", courseId)
-    .eq("student_id", userId);
+  const [{ data: entries }, { data: certificate }] = await Promise.all([
+    db
+      .from("lms_payment_entries")
+      .select("id, kind, amount, corrects_id")
+      .eq("course_id", courseId)
+      .eq("student_id", userId),
+    db
+      .from("lms_certificates")
+      .select("id")
+      .eq("course_id", courseId)
+      .eq("student_id", userId)
+      .maybeSingle(),
+  ]);
   return {
     enrollment: e as MyEnrollment,
     entries: (entries ?? []) as Pick<PaymentEntry, "id" | "kind" | "amount" | "corrects_id">[],
+    certified: !!certificate,
   };
 }
 

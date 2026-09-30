@@ -547,7 +547,7 @@ function CourseDetails() {
               ar={ar}
             />
           )}
-          {!recognized && mine && !mine.enrollment.completed_at && !isGuest && (
+          {!recognized && mine && !mine.certified && !isGuest && (
             <RecognitionCodeBox courseId={course.id} ar={ar} onRecognized={onRecognized} />
           )}
         </>

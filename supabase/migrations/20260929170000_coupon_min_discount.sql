@@ -17,6 +17,13 @@ ALTER TABLE public.lms_coupons
 COMMENT ON COLUMN public.lms_coupons.min_discount IS
   'Optional minimum discount in whole Syrian pounds; capped by course price and max_discount.';
 
+-- A learner uses at most one discount coupon and one recognition code on a
+-- course (before: one coupon of either kind).
+DROP INDEX IF EXISTS public.lms_coupon_redemptions_one_per_course;
+CREATE UNIQUE INDEX lms_coupon_redemptions_one_per_course
+  ON public.lms_coupon_redemptions (user_id, course_id, effect)
+  WHERE status IN ('pending', 'applied', 'cancelled');
+
 -- Keep the guest account guard from 20260929160000 while adding the floor.
 CREATE OR REPLACE FUNCTION public.lms_coupon_quote(_user_id uuid, _course_id uuid, _code text)
 RETURNS jsonb
@@ -70,9 +77,13 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'coupon_wrong_course');
   END IF;
 
+  -- One discount coupon per learner per course, ever. A recognition code is
+  -- held back only by an earlier recognition code, so a learner who enrolled
+  -- with a discount can still be recognized.
   IF EXISTS (SELECT 1 FROM public.lms_coupon_redemptions r
               WHERE r.user_id = _user_id AND r.course_id = _course_id
-                AND r.status IN ('pending', 'applied', 'cancelled')) THEN
+                AND r.status IN ('pending', 'applied', 'cancelled')
+                AND (v_coupon.effect = 'discount' OR r.effect = 'recognition')) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'coupon_already_used_here');
   END IF;
   IF v_coupon.scope = 'category' AND EXISTS (
@@ -120,8 +131,14 @@ BEGIN
 END;
 $$;
 
--- The existing cancel action deletes the enrollment. That is valid only for
--- enrollments created by a code, never for a pre-existing learner's record.
+-- Cancels a recognition-code use and gives the use back to the code. The
+-- learner cannot use a recognition code on that course again.
+--   * The code created the enrollment (the use has a request): the enrollment
+--     and its certificate are removed, as before.
+--   * The learner was already enrolled (no request): the enrollment, what they
+--     owe and their payments stay. The course goes back to the learner's own
+--     progress, and a certificate stays only if their own lessons and quiz
+--     earn it.
 CREATE OR REPLACE FUNCTION public.lms_admin_cancel_recognition(_redemption_id uuid, _note text DEFAULT NULL)
 RETURNS void
 LANGUAGE plpgsql
@@ -130,28 +147,56 @@ SET search_path = public, pg_temp
 AS $$
 DECLARE
   v_use public.lms_coupon_redemptions%ROWTYPE;
+  v_total integer;
+  v_done integer;
+  v_pct numeric;
 BEGIN
   IF auth.uid() IS NULL THEN RAISE EXCEPTION 'unauthenticated'; END IF;
   IF NOT public.is_lms_admin(auth.uid()) THEN RAISE EXCEPTION 'forbidden'; END IF;
 
   SELECT * INTO v_use FROM public.lms_coupon_redemptions WHERE id = _redemption_id FOR UPDATE;
   IF NOT FOUND THEN RAISE EXCEPTION 'coupon_use_not_found'; END IF;
-  IF v_use.effect <> 'recognition' OR v_use.status <> 'applied' OR v_use.request_id IS NULL THEN
+  IF v_use.effect <> 'recognition' OR v_use.status <> 'applied' THEN
     RAISE EXCEPTION 'coupon_use_not_cancellable';
   END IF;
 
-  DELETE FROM public.lms_certificates WHERE course_id = v_use.course_id AND student_id = v_use.user_id;
-  DELETE FROM public.lms_enrollments WHERE course_id = v_use.course_id AND student_id = v_use.user_id;
+  IF v_use.request_id IS NULL THEN
+    SELECT count(*) INTO v_total FROM public.lms_lessons l
+      JOIN public.lms_sections s ON s.id = l.section_id
+     WHERE s.course_id = v_use.course_id;
+    SELECT count(*) INTO v_done FROM public.lms_lesson_progress lp
+      JOIN public.lms_lessons l ON l.id = lp.lesson_id
+      JOIN public.lms_sections s ON s.id = l.section_id
+     WHERE s.course_id = v_use.course_id AND lp.student_id = v_use.user_id AND lp.is_completed = true;
+    v_pct := CASE WHEN v_total = 0 THEN 0 ELSE (v_done::numeric / v_total::numeric) * 100 END;
+
+    UPDATE public.lms_enrollments
+       SET completion_source = 'platform', progress = v_pct,
+           completed_at = CASE WHEN v_pct >= 100 THEN coalesce(completed_at, now()) ELSE NULL END
+     WHERE course_id = v_use.course_id AND student_id = v_use.user_id;
+
+    -- With the enrollment back to 'platform', the check answers with a
+    -- certificate only when the learner's own lessons and quiz are done.
+    IF (public.lms_evaluate_certificate(v_use.user_id, v_use.course_id)->>'certificate_id') IS NULL THEN
+      DELETE FROM public.lms_certificates
+       WHERE course_id = v_use.course_id AND student_id = v_use.user_id;
+    END IF;
+  ELSE
+    DELETE FROM public.lms_certificates WHERE course_id = v_use.course_id AND student_id = v_use.user_id;
+    DELETE FROM public.lms_enrollments WHERE course_id = v_use.course_id AND student_id = v_use.user_id;
+  END IF;
 
   UPDATE public.lms_coupon_redemptions
      SET status = 'cancelled', decided_at = now(), decided_by = auth.uid(),
          note = nullif(btrim(coalesce(_note, '')), '')
    WHERE id = _redemption_id;
 
-  UPDATE public.lms_enrollment_requests
-     SET status = 'cancelled', decided_by = auth.uid(), decided_at = now(),
-         admin_notes = coalesce(nullif(btrim(coalesce(_note, '')), ''), admin_notes)
-   WHERE id = v_use.request_id;
+  IF v_use.request_id IS NOT NULL THEN
+    UPDATE public.lms_enrollment_requests
+       SET status = 'cancelled', decided_by = auth.uid(), decided_at = now(),
+           admin_notes = coalesce(nullif(btrim(coalesce(_note, '')), ''), admin_notes)
+     WHERE id = v_use.request_id;
+  END IF;
 
   BEGIN
     INSERT INTO public.lms_audit_events
@@ -159,7 +204,8 @@ BEGIN
     VALUES
       ('coupon.recognition_cancelled', auth.uid(), 'lms_admin', 'lms_coupon_redemption', _redemption_id::text,
        nullif(btrim(coalesce(_note, '')), ''),
-       jsonb_build_object('course_id', v_use.course_id, 'student_id', v_use.user_id));
+       jsonb_build_object('course_id', v_use.course_id, 'student_id', v_use.user_id,
+                          'enrollment_kept', v_use.request_id IS NULL));
   EXCEPTION WHEN OTHERS THEN NULL;
   END;
 END;
@@ -219,7 +265,12 @@ BEGIN
       RETURN jsonb_build_object('ok', false, 'error', 'already_enrolled');
     END IF;
 
-    -- Enroll first, so approving the request finds no coupon to apply.
+    -- A discount coupon waiting on that request is given back: the
+    -- recognition replaces it, and approving must find no coupon to apply.
+    UPDATE public.lms_coupon_redemptions
+       SET status = 'released', decided_at = now()
+     WHERE request_id = v_req_id AND status = 'pending';
+
     v_quote := public.lms_apply_recognition(v_uid, _course_id, v_quote, v_req_id);
     UPDATE public.lms_enrollment_requests
        SET status = 'approved', decided_at = now()
@@ -232,13 +283,17 @@ BEGIN
   IF v_enrollment.id IS NULL THEN
     RETURN jsonb_build_object('ok', false, 'error', 'already_enrolled');
   END IF;
-  IF v_enrollment.completion_source = 'recognition' OR v_enrollment.completed_at IS NOT NULL THEN
+  -- Nothing to gain once recognized or certified. A learner who finished the
+  -- lessons but not the quiz can still use a code.
+  IF v_enrollment.completion_source = 'recognition' OR EXISTS (
+    SELECT 1 FROM public.lms_certificates c
+     WHERE c.course_id = _course_id AND c.student_id = v_uid) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'already_completed');
   END IF;
 
   UPDATE public.lms_enrollments
      SET completion_source = 'recognition', progress = 100,
-         completed_at = now()
+         completed_at = coalesce(completed_at, now())
    WHERE id = v_enrollment.id;
 
   -- Record the original enrollment price and discount, not the quote's

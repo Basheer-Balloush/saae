@@ -51,6 +51,7 @@ src/
 │   ├── attendance/         AMS screens, layout/, hooks/, lib/
 │   └── lms/                LMS core: skin/, catalog/, player/, quiz/, hooks/, lib/, FileUploader
 │       ├── console/        LMS admin console
+│       ├── coupons/        coupon admin screens (rules in lib/coupons*.ts)
 │       ├── course-editor/  course editor tabs
 │       ├── course-feedback/ course feedback forms, prompt and results (+ lib/)
 │       ├── instructors/    accreditation logic (lib/)

@@ -503,14 +503,12 @@ export function CouponDetailsDialog({
                         {fmtDate(u.created_at, lang)}
                       </td>
                       <td>
-                        {u.effect === "recognition" &&
-                          u.status === "applied" &&
-                          u.request_id !== null && (
-                            <Button size="sm" variant="ghost" onClick={() => setCancelling(u)}>
-                              <Undo2 className="h-4 w-4" />
-                              {t("إلغاء", "Cancel")}
-                            </Button>
-                          )}
+                        {u.effect === "recognition" && u.status === "applied" && (
+                          <Button size="sm" variant="ghost" onClick={() => setCancelling(u)}>
+                            <Undo2 className="h-4 w-4" />
+                            {t("إلغاء", "Cancel")}
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -524,10 +522,18 @@ export function CouponDetailsDialog({
           open={!!cancelling}
           onOpenChange={(v) => !v && setCancelling(null)}
           title={t("إلغاء الاعتراف؟", "Cancel this recognition?")}
-          description={t(
-            "يُحذف تسجيل المتعلّم في الدورة وشهادته، ويعود الاستخدام إلى الكود. لا يستطيع المتعلّم استخدام كود آخر في هذه الدورة.",
-            "The learner's enrollment and certificate are removed and the use goes back to the code. The learner cannot use another code on this course.",
-          )}
+          description={
+            // A learner who was enrolled before the code keeps the enrollment.
+            cancelling?.request_id === null
+              ? t(
+                  "يبقى تسجيل المتعلّم وما عليه وما دفعه. تعود الدورة إلى تقدّمه الفعلي، وتُحذف الشهادة إن لم يكمل الدروس والاختبار بنفسه. يعود الاستخدام إلى الكود، ولا يستطيع المتعلّم استخدام كود اعتراف آخر في هذه الدورة.",
+                  "The learner stays enrolled, and what they owe and paid stays. The course goes back to their own progress, and the certificate is removed unless they finished the lessons and quiz themselves. The use goes back to the code, and the learner cannot use another recognition code on this course.",
+                )
+              : t(
+                  "يُحذف تسجيل المتعلّم في الدورة وشهادته، ويعود الاستخدام إلى الكود. لا يستطيع المتعلّم استخدام كود آخر في هذه الدورة.",
+                  "The learner's enrollment and certificate are removed and the use goes back to the code. The learner cannot use another code on this course.",
+                )
+          }
           confirmLabel={t("إلغاء الاعتراف", "Cancel recognition")}
           required
           destructive
