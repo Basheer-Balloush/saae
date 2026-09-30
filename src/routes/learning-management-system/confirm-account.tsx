@@ -104,10 +104,10 @@ function ConfirmAccount() {
       <AuthLayout titleId="auth-title">
         <h1 id="auth-title">{title.ready}</h1>
         <p className="auth-lede">
-          {ar ? "تأكّد بريدك" : "Your email"} <b dir="ltr">{email}</b>
+          {ar ? "حسابك سيكون بالبريد" : "Your account will use"} <b dir="ltr">{email}</b>
           {ar
-            ? ". اختر كلمة المرور ليصبح حسابك جاهزاً بكل دوراتك وتقدّمك كزائر."
-            : " is confirmed. Choose a password and your account is ready, with every course and all the progress from your guest visits."}
+            ? ". اختر كلمة المرور ليصبح جاهزاً بكل دوراتك وتقدّمك كزائر."
+            : ". Choose a password and it is ready, with every course and all the progress from your guest visits."}
         </p>
         <form onSubmit={onSubmit}>
           <NewPasswordFields

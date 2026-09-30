@@ -64,7 +64,8 @@ export const findLearners = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertLmsAdmin(context.userId);
     const db = await admin();
-    const byEmail = data.query.includes("@");
+    // Anything but digits and phone punctuation is an email, or a part of one.
+    const byEmail = /[^\d\s+().-]/.test(data.query);
     const needle = byEmail ? data.query.toLowerCase() : phoneKey(data.query);
     if (!byEmail && needle.length < 6) return { learners: [] as Learner[] };
 

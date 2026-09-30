@@ -101,8 +101,8 @@ export function CouponsPage() {
         eyebrow={t("منصّة التعلّم", "Learning platform")}
         title={t("الكوبونات", "Coupons")}
         description={t(
-          "أكواد الاعتراف بإكمال الدورة، وكوبونات الخصم لدورة أو تصنيف أو متعلّم. كل متعلّم يستخدم كوبوناً واحداً في كل دورة.",
-          "Course recognition codes, and discount coupons for a course, a category or a learner. Each learner uses one coupon per course.",
+          "أكواد الاعتراف بإكمال الدورة، وكوبونات الخصم لدورة أو تصنيف أو متعلّم. في كل دورة يستخدم المتعلّم كوبون خصم واحداً وكود اعتراف واحداً.",
+          "Course recognition codes, and discount coupons for a course, a category or a learner. In each course a learner uses one discount coupon and one recognition code.",
         )}
         actions={
           <Button onClick={() => setCreating(true)} disabled={refs.loading}>
