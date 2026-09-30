@@ -32,8 +32,8 @@ import {
 
 type Filter = CouponKind | "all";
 
-/** The discount coupons: create, find, open one. Recognition codes are not
-    shown here (see ADMIN_KINDS). */
+/** Every coupon: create, find, open one. Recognition codes are listed but
+    have no tab of their own and are not created here (see ADMIN_KINDS). */
 export function CouponsPage() {
   const { t, ar, lang } = useT();
   const refs = useCouponRefs();
@@ -49,8 +49,7 @@ export function CouponsPage() {
 
   const load = useCallback(async () => {
     try {
-      const [all, counts] = await Promise.all([listCoupons(), countActiveUses()]);
-      const list = all.filter((c) => ADMIN_KINDS.includes(couponKind(c)));
+      const [list, counts] = await Promise.all([listCoupons(), countActiveUses()]);
       setCoupons(list);
       setUsed(counts);
       setFailed(false);
@@ -104,8 +103,8 @@ export function CouponsPage() {
         eyebrow={t("منصّة التعلّم", "Learning platform")}
         title={t("الكوبونات", "Coupons")}
         description={t(
-          "كوبونات الخصم لدورة أو تصنيف أو متعلّم. في كل دورة يستخدم المتعلّم كوبون خصم واحداً.",
-          "Discount coupons for a course, a category or a learner. In each course a learner uses one discount coupon.",
+          "كل الكوبونات وأكوادها. في كل دورة يستخدم المتعلّم كوبون خصم واحداً.",
+          "Every coupon and its code. In each course a learner uses one discount coupon.",
         )}
         actions={
           <Button onClick={() => setCreating(true)} disabled={refs.loading}>
@@ -195,7 +194,9 @@ export function CouponsPage() {
                       </td>
                       <td className="text-[13px]">{target(c)}</td>
                       <td className="whitespace-nowrap text-[13px]">
-                        {`${Number(c.percent_off)}٪${c.min_discount != null ? ` · ${t("أدنى", "min")} ${formatSP(Number(c.min_discount), ar)}` : ""}${c.max_discount != null ? ` · ${t("أقصى", "max")} ${formatSP(Number(c.max_discount), ar)}` : ""}`}
+                        {c.effect === "recognition"
+                          ? t("الدورة مكتملة", "Course completed")
+                          : `${Number(c.percent_off)}٪${c.min_discount != null ? ` · ${t("أدنى", "min")} ${formatSP(Number(c.min_discount), ar)}` : ""}${c.max_discount != null ? ` · ${t("أقصى", "max")} ${formatSP(Number(c.max_discount), ar)}` : ""}`}
                       </td>
                       <td className="whitespace-nowrap text-[13px] tabular-nums">
                         {n} / {c.max_uses ?? "∞"} {ar ? USES_UNIT[kind].ar : USES_UNIT[kind].en}
