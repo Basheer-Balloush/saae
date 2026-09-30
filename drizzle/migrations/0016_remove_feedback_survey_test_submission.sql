@@ -1,1 +1,0 @@
-DELETE FROM public.feedback_survey_submissions WHERE id = '82cd3958-aa76-473c-ba5c-77a985c898c5';

@@ -25,7 +25,10 @@ export function resizedImage(url: string, width: number, quality = 72): string {
 }
 
 /** A srcset of resized copies, or undefined when the image cannot be resized. */
-export function resizedSrcSet(url: string, widths: number[] = [480, 720, 1080]): string | undefined {
+export function resizedSrcSet(
+  url: string,
+  widths: number[] = [480, 720, 1080],
+): string | undefined {
   if (!splitResizable(url)) return undefined;
   return widths.map((w) => `${resizedImage(url, w)} ${w}w`).join(", ");
 }

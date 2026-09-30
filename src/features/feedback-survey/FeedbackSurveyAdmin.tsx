@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
-  ClipboardList,
-  Download,
-  MessageSquareText,
-  Star,
-  ThumbsUp,
-  Users,
-  X,
-} from "lucide-react";
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { ClipboardList, Download, MessageSquareText, Star, ThumbsUp, Users, X } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { CONSOLE_COUNTS_KEY } from "@/components/console/useConsoleCounts";
@@ -41,13 +41,23 @@ import {
   choiceLabel,
   type Choice,
   type Lang,
-} from "@/lib/feedback-survey";
+} from "@/features/feedback-survey/lib/feedback-survey";
 import type { Database } from "@/integrations/supabase/types";
 
 type Sub = Database["public"]["Tables"]["feedback_survey_submissions"]["Row"];
-type Ans = { submission_id: string; section_key: string; question_key: string; rating: number | null; not_applicable: boolean };
-type Row = Sub & { answers: Ans[]; sectionAvg: Record<string, number | null>; avgAll: number | null; hasComments: boolean };
-
+type Ans = {
+  submission_id: string;
+  section_key: string;
+  question_key: string;
+  rating: number | null;
+  not_applicable: boolean;
+};
+type Row = Sub & {
+  answers: Ans[];
+  sectionAvg: Record<string, number | null>;
+  avgAll: number | null;
+  hasComments: boolean;
+};
 
 const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
 const f1 = (n: number | null | undefined) => (n === null || n === undefined ? "—" : n.toFixed(2));
@@ -86,7 +96,9 @@ async function fetchAll() {
     const ans = bySub.get(s.id) ?? [];
     const sectionAvg: Record<string, number | null> = {};
     for (const sec of SECTIONS) {
-      sectionAvg[sec.key] = avg(ans.filter((a) => a.section_key === sec.key && a.rating).map((a) => a.rating!));
+      sectionAvg[sec.key] = avg(
+        ans.filter((a) => a.section_key === sec.key && a.rating).map((a) => a.rating!),
+      );
     }
     return {
       ...s,
@@ -190,7 +202,12 @@ export function FeedbackSurveyAdmin() {
           "Visitor and learner answers about the website, learning platform and assistant. Public link: /feedback",
         )}
         actions={
-          <button type="button" className="cx-btn cx-btn-primary" onClick={() => exportCsv(filtered, lang)} disabled={!filtered.length}>
+          <button
+            type="button"
+            className="cx-btn cx-btn-primary"
+            onClick={() => exportCsv(filtered, lang)}
+            disabled={!filtered.length}
+          >
             <Download className="h-4 w-4" /> {t("تصدير CSV", "Export CSV")}
           </button>
         }
@@ -218,14 +235,28 @@ export function FeedbackSurveyAdmin() {
           {tab === "comments" && <Comments rows={filtered} lang={lang} onOpen={setOpenId} />}
         </>
       )}
-      {open && <Detail row={open} lang={lang} onClose={() => setOpenId(null)} onUpdate={updateRow} />}
+      {open && (
+        <Detail row={open} lang={lang} onClose={() => setOpenId(null)} onUpdate={updateRow} />
+      )}
     </div>
   );
 }
 
 /* ---------------- Filters ---------------- */
 
-function Sel({ label, value, onChange, options, lang }: { label: string; value: string; onChange: (v: string) => void; options: Choice[]; lang: Lang }) {
+function Sel({
+  label,
+  value,
+  onChange,
+  options,
+  lang,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: Choice[];
+  lang: Lang;
+}) {
   return (
     <label className="flex min-w-0 flex-col gap-1 text-[12px] font-bold text-[var(--cx-muted)]">
       {label}
@@ -241,37 +272,115 @@ function Sel({ label, value, onChange, options, lang }: { label: string; value: 
   );
 }
 
-function FilterBar({ filters, setFilters, lang }: { filters: Filters; setFilters: (f: Filters) => void; lang: Lang }) {
+function FilterBar({
+  filters,
+  setFilters,
+  lang,
+}: {
+  filters: Filters;
+  setFilters: (f: Filters) => void;
+  lang: Lang;
+}) {
   const t = (a: string, e: string) => (lang === "ar" ? a : e);
   const up = (k: keyof Filters, v: string | boolean) => setFilters({ ...filters, [k]: v });
-  const ratings: Choice[] = [1, 2, 3, 4, 5].map((n) => ({ value: String(n), ar: `${n} · ${RATING_LABELS.ar[n]}`, en: `${n} · ${RATING_LABELS.en[n]}` }));
+  const ratings: Choice[] = [1, 2, 3, 4, 5].map((n) => ({
+    value: String(n),
+    ar: `${n} · ${RATING_LABELS.ar[n]}`,
+    en: `${n} · ${RATING_LABELS.en[n]}`,
+  }));
   return (
     <Panel className="mb-4">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
         <label className="flex flex-col gap-1 text-[12px] font-bold text-[var(--cx-muted)]">
           {t("من تاريخ", "From")}
-          <input type="date" className="cx-input h-10" value={filters.from} onChange={(e) => up("from", e.target.value)} />
+          <input
+            type="date"
+            className="cx-input h-10"
+            value={filters.from}
+            onChange={(e) => up("from", e.target.value)}
+          />
         </label>
         <label className="flex flex-col gap-1 text-[12px] font-bold text-[var(--cx-muted)]">
           {t("إلى تاريخ", "To")}
-          <input type="date" className="cx-input h-10" value={filters.to} onChange={(e) => up("to", e.target.value)} />
+          <input
+            type="date"
+            className="cx-input h-10"
+            value={filters.to}
+            onChange={(e) => up("to", e.target.value)}
+          />
         </label>
-        <Sel label={t("الصفة", "User type")} value={filters.user_type} onChange={(v) => up("user_type", v)} options={USER_TYPES} lang={lang} />
-        <Sel label={t("المحافظة", "Governorate")} value={filters.governorate} onChange={(v) => up("governorate", v)} options={GOVERNORATES} lang={lang} />
-        <Sel label={t("الجهاز", "Device")} value={filters.device_type} onChange={(v) => up("device_type", v)} options={DEVICES} lang={lang} />
-        <Sel label={t("تكرار الاستخدام", "Frequency")} value={filters.usage_frequency} onChange={(v) => up("usage_frequency", v)} options={FREQUENCIES} lang={lang} />
-        <Sel label={t("الخدمة", "Service")} value={filters.service} onChange={(v) => up("service", v)} options={SERVICES} lang={lang} />
-        <Sel label={t("الرضا العام", "Overall rating")} value={filters.rating} onChange={(v) => up("rating", v)} options={ratings} lang={lang} />
-        <Sel label={t("الحالة", "Status")} value={filters.status} onChange={(v) => up("status", v)} options={REVIEW_STATUSES} lang={lang} />
+        <Sel
+          label={t("الصفة", "User type")}
+          value={filters.user_type}
+          onChange={(v) => up("user_type", v)}
+          options={USER_TYPES}
+          lang={lang}
+        />
+        <Sel
+          label={t("المحافظة", "Governorate")}
+          value={filters.governorate}
+          onChange={(v) => up("governorate", v)}
+          options={GOVERNORATES}
+          lang={lang}
+        />
+        <Sel
+          label={t("الجهاز", "Device")}
+          value={filters.device_type}
+          onChange={(v) => up("device_type", v)}
+          options={DEVICES}
+          lang={lang}
+        />
+        <Sel
+          label={t("تكرار الاستخدام", "Frequency")}
+          value={filters.usage_frequency}
+          onChange={(v) => up("usage_frequency", v)}
+          options={FREQUENCIES}
+          lang={lang}
+        />
+        <Sel
+          label={t("الخدمة", "Service")}
+          value={filters.service}
+          onChange={(v) => up("service", v)}
+          options={SERVICES}
+          lang={lang}
+        />
+        <Sel
+          label={t("الرضا العام", "Overall rating")}
+          value={filters.rating}
+          onChange={(v) => up("rating", v)}
+          options={ratings}
+          lang={lang}
+        />
+        <Sel
+          label={t("الحالة", "Status")}
+          value={filters.status}
+          onChange={(v) => up("status", v)}
+          options={REVIEW_STATUSES}
+          lang={lang}
+        />
         <label className="flex items-center gap-2 text-[13px] font-bold">
-          <input type="checkbox" checked={filters.contact} onChange={(e) => up("contact", e.target.checked)} className="h-5 w-5" />
+          <input
+            type="checkbox"
+            checked={filters.contact}
+            onChange={(e) => up("contact", e.target.checked)}
+            className="h-5 w-5"
+          />
           {t("طلبوا التواصل", "Requested contact")}
         </label>
         <label className="flex items-center gap-2 text-[13px] font-bold">
-          <input type="checkbox" checked={filters.comments} onChange={(e) => up("comments", e.target.checked)} className="h-5 w-5" />
+          <input
+            type="checkbox"
+            checked={filters.comments}
+            onChange={(e) => up("comments", e.target.checked)}
+            className="h-5 w-5"
+          />
           {t("لديهم تعليقات", "Has comments")}
         </label>
-        <button type="button" className="cx-btn cx-btn-ghost self-end" onClick={() => setFilters(NO_FILTERS)}>
+        <button
+          type="button"
+          className="cx-btn cx-btn-ghost self-end"
+          onClick={() => setFilters(NO_FILTERS)}
+        >
           {t("مسح الفلاتر", "Clear filters")}
         </button>
       </div>
@@ -286,7 +395,8 @@ function FilterBar({ filters, setFilters, lang }: { filters: Filters; setFilters
 const SCALE = ["#d9463b", "#f5b7ae", "#6f8589", "#b8eaee", "#129aa9"];
 
 type Tone = "good" | "ok" | "low" | "none";
-const toneOf = (v: number | null): Tone => (v === null ? "none" : v >= 4 ? "good" : v >= 3 ? "ok" : "low");
+const toneOf = (v: number | null): Tone =>
+  v === null ? "none" : v >= 4 ? "good" : v >= 3 ? "ok" : "low";
 const TONE_COLOR: Record<Tone, string> = {
   good: "var(--cx-teal)",
   ok: "var(--cx-orange-ink)",
@@ -309,13 +419,16 @@ function Overview({ rows, all, lang }: { rows: Row[]; all: Row[]; lang: Lang }) 
   const dayAgo = new Date(now.getTime() - 864e5).toISOString();
   const started = all.filter((r) => r.completed || r.created_at < dayAgo).length;
   const done = all.filter((r) => r.completed).length;
-  const secAvg = (k: string) => avg(rows.map((r) => r.sectionAvg[k]).filter((x): x is number => x !== null));
+  const secAvg = (k: string) =>
+    avg(rows.map((r) => r.sectionAvg[k]).filter((x): x is number => x !== null));
   const secN = (k: string) => rows.filter((r) => r.sectionAvg[k] !== null).length;
 
   const allRatings = rows.flatMap((r) => r.answers.filter((a) => a.rating).map((a) => a.rating!));
   const dist = [1, 2, 3, 4, 5].map((n) => ({ n, value: allRatings.filter((x) => x === n).length }));
   const questions = ALL_QUESTIONS.map((q) => {
-    const xs = rows.flatMap((r) => r.answers.filter((a) => a.question_key === q.key && a.rating).map((a) => a.rating!));
+    const xs = rows.flatMap((r) =>
+      r.answers.filter((a) => a.question_key === q.key && a.rating).map((a) => a.rating!),
+    );
     return { key: q.key, name: q[lang], value: avg(xs), n: xs.length };
   }).filter((q) => q.n > 0);
   const sorted = [...questions].sort((a, b) => (a.value ?? 0) - (b.value ?? 0));
@@ -338,7 +451,11 @@ function Overview({ rows, all, lang }: { rows: Row[]; all: Row[]; lang: Lang }) 
   // Daily view: show empty days as 0 so gaps don't read as a straight line.
   if (trend === "day" && trendMap.size > 1) {
     const keys = [...trendMap.keys()].sort();
-    for (let d = new Date(keys[0]); d.toISOString().slice(0, 10) < keys[keys.length - 1]; d.setUTCDate(d.getUTCDate() + 1)) {
+    for (
+      let d = new Date(keys[0]);
+      d.toISOString().slice(0, 10) < keys[keys.length - 1];
+      d.setUTCDate(d.getUTCDate() + 1)
+    ) {
       const k = d.toISOString().slice(0, 10);
       if (!trendMap.has(k)) trendMap.set(k, 0);
     }
@@ -360,17 +477,32 @@ function Overview({ rows, all, lang }: { rows: Row[]; all: Row[]; lang: Lang }) 
   const completion = started ? Math.round((done / started) * 100) : null;
 
   if (!rows.length) {
-    return <EmptyState icon={ClipboardList} title={t("لا توجد إجابات مطابقة بعد", "No matching responses yet")} />;
+    return (
+      <EmptyState
+        icon={ClipboardList}
+        title={t("لا توجد إجابات مطابقة بعد", "No matching responses yet")}
+      />
+    );
   }
 
   return (
     <div className="space-y-4">
       {/* Headline: the three numbers the team asks about first. */}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,1fr)]">
-        <section className="cx-card relative overflow-hidden p-5" style={{ backgroundImage: "radial-gradient(120% 90% at 100% 0%, rgba(119,224,232,0.14), transparent 60%)" }}>
-          <p className="text-[13px] font-bold text-[var(--cx-muted)]">{t("الرضا العام", "Overall satisfaction")}</p>
+        <section
+          className="cx-card relative overflow-hidden p-5"
+          style={{
+            backgroundImage:
+              "radial-gradient(120% 90% at 100% 0%, rgba(119,224,232,0.14), transparent 60%)",
+          }}
+        >
+          <p className="text-[13px] font-bold text-[var(--cx-muted)]">
+            {t("الرضا العام", "Overall satisfaction")}
+          </p>
           <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-2">
-            <span className="text-[56px] font-extrabold leading-none tabular-nums text-[var(--cx-ink)]">{f1(overall)}</span>
+            <span className="text-[56px] font-extrabold leading-none tabular-nums text-[var(--cx-ink)]">
+              {f1(overall)}
+            </span>
             <span className="pb-1.5 text-[18px] font-bold text-[var(--cx-muted)]">/ 5</span>
             <ToneTag value={overall} lang={lang} />
           </div>
@@ -380,8 +512,14 @@ function Overview({ rows, all, lang }: { rows: Row[]; all: Row[]; lang: Lang }) 
           </p>
           <div className="mt-4 grid grid-cols-3 gap-2 border-t border-[var(--cx-line-2)] pt-4">
             <MiniStat label={t("كل الإجابات", "All responses")} value={rows.length} />
-            <MiniStat label={t("هذا الأسبوع", "This week")} value={rows.filter((r) => (r.submitted_at ?? "") >= weekAgo).length} />
-            <MiniStat label={t("اليوم", "Today")} value={rows.filter((r) => (r.submitted_at ?? "").slice(0, 10) === today).length} />
+            <MiniStat
+              label={t("هذا الأسبوع", "This week")}
+              value={rows.filter((r) => (r.submitted_at ?? "") >= weekAgo).length}
+            />
+            <MiniStat
+              label={t("اليوم", "Today")}
+              value={rows.filter((r) => (r.submitted_at ?? "").slice(0, 10) === today).length}
+            />
           </div>
         </section>
 
@@ -390,18 +528,25 @@ function Overview({ rows, all, lang }: { rows: Row[]; all: Row[]; lang: Lang }) 
             <ThumbsUp className="h-4 w-4" /> {t("مؤشر التوصية", "Recommendation score")}
           </div>
           <div className="mt-2 text-[40px] font-extrabold leading-none tabular-nums text-[var(--cx-ink)]">
-            <bdi dir="ltr">{recScore === null ? "—" : recScore > 0 ? `+${recScore}` : recScore}</bdi>
+            <bdi dir="ltr">
+              {recScore === null ? "—" : recScore > 0 ? `+${recScore}` : recScore}
+            </bdi>
           </div>
           <RecGauge score={recScore} />
           <div className="mt-3 flex justify-between text-[12px] text-[var(--cx-muted)]">
             <span>
-              <b className="text-[var(--cx-teal)] tabular-nums">{promoters}</b> {t("يوصون (4–5)", "promoters (4–5)")}
+              <b className="text-[var(--cx-teal)] tabular-nums">{promoters}</b>{" "}
+              {t("يوصون (4–5)", "promoters (4–5)")}
             </span>
             <span>
-              <b className="text-[var(--cx-red)] tabular-nums">{detractors}</b> {t("لا يوصون (1–2)", "detractors (1–2)")}
+              <b className="text-[var(--cx-red)] tabular-nums">{detractors}</b>{" "}
+              {t("لا يوصون (1–2)", "detractors (1–2)")}
             </span>
           </div>
-          <p className="mt-2 text-[11.5px] text-[var(--cx-faint)]">{t("النطاق من", "Scale")} <bdi dir="ltr">−100</bdi> {t("إلى", "to")} <bdi dir="ltr">+100</bdi></p>
+          <p className="mt-2 text-[11.5px] text-[var(--cx-faint)]">
+            {t("النطاق من", "Scale")} <bdi dir="ltr">−100</bdi> {t("إلى", "to")}{" "}
+            <bdi dir="ltr">+100</bdi>
+          </p>
         </section>
 
         <section className="cx-card p-5">
@@ -412,35 +557,57 @@ function Overview({ rows, all, lang }: { rows: Row[]; all: Row[]; lang: Lang }) 
             {completion === null ? "—" : `${completion}%`}
           </div>
           <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-[var(--cx-track)]">
-            <div className="h-full rounded-full bg-[var(--cx-teal)]" style={{ width: `${completion ?? 0}%` }} />
+            <div
+              className="h-full rounded-full bg-[var(--cx-teal)]"
+              style={{ width: `${completion ?? 0}%` }}
+            />
           </div>
           <div className="mt-3 flex justify-between text-[12px] text-[var(--cx-muted)]">
             <span>
               <b className="text-[var(--cx-ink)] tabular-nums">{done}</b> {t("أكملوا", "completed")}
             </span>
             <span>
-              <b className="text-[var(--cx-ink)] tabular-nums">{Math.max(started - done, 0)}</b> {t("توقفوا قبل النهاية", "stopped early")}
+              <b className="text-[var(--cx-ink)] tabular-nums">{Math.max(started - done, 0)}</b>{" "}
+              {t("توقفوا قبل النهاية", "stopped early")}
             </span>
           </div>
-          <p className="mt-2 text-[11.5px] text-[var(--cx-faint)]">{t("كل الفترات، بلا فلاتر", "All time, ignores filters")}</p>
+          <p className="mt-2 text-[11.5px] text-[var(--cx-faint)]">
+            {t("كل الفترات، بلا فلاتر", "All time, ignores filters")}
+          </p>
         </section>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
-        <Panel title={t("تقييم كل قسم", "Score by section")} description={t("متوسط من 5 · عدد المقيّمين", "Average out of 5 · respondents")}>
+        <Panel
+          title={t("تقييم كل قسم", "Score by section")}
+          description={t("متوسط من 5 · عدد المقيّمين", "Average out of 5 · respondents")}
+        >
           <ul className="space-y-3.5">
             {SECTIONS.map((s) => {
               const v = secAvg(s.key);
               const tone = toneOf(v);
               return (
-                <li key={s.key} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 text-[13px] sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)_auto]">
-                  <span className="truncate font-bold text-[var(--cx-ink-2)]" title={s[lang]}>{s[lang]}</span>
-                  <span className="relative order-last col-span-2 h-2.5 overflow-hidden rounded-full bg-[var(--cx-track)] sm:order-none sm:col-span-1" title={`${f1(v)} / 5`}>
-                    <span className="absolute inset-y-0 start-0 rounded-full" style={{ width: `${((v ?? 0) / 5) * 100}%`, background: TONE_COLOR[tone] }} />
+                <li
+                  key={s.key}
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 text-[13px] sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)_auto]"
+                >
+                  <span className="truncate font-bold text-[var(--cx-ink-2)]" title={s[lang]}>
+                    {s[lang]}
+                  </span>
+                  <span
+                    className="relative order-last col-span-2 h-2.5 overflow-hidden rounded-full bg-[var(--cx-track)] sm:order-none sm:col-span-1"
+                    title={`${f1(v)} / 5`}
+                  >
+                    <span
+                      className="absolute inset-y-0 start-0 rounded-full"
+                      style={{ width: `${((v ?? 0) / 5) * 100}%`, background: TONE_COLOR[tone] }}
+                    />
                   </span>
                   <span className="flex items-center gap-2 whitespace-nowrap">
                     <b className="tabular-nums text-[var(--cx-ink)]">{f1(v)}</b>
-                    <span className="w-7 text-[11.5px] tabular-nums text-[var(--cx-faint)]">{secN(s.key) || ""}</span>
+                    <span className="w-7 text-[11.5px] tabular-nums text-[var(--cx-faint)]">
+                      {secN(s.key) || ""}
+                    </span>
                   </span>
                 </li>
               );
@@ -449,16 +616,25 @@ function Overview({ rows, all, lang }: { rows: Row[]; all: Row[]; lang: Lang }) 
           <ToneLegend lang={lang} />
         </Panel>
 
-        <Panel title={t("توزيع كل التقييمات", "All ratings, 1 to 5")} description={t(`${allRatings.length} تقييماً`, `${allRatings.length} ratings`)}>
+        <Panel
+          title={t("توزيع كل التقييمات", "All ratings, 1 to 5")}
+          description={t(`${allRatings.length} تقييماً`, `${allRatings.length} ratings`)}
+        >
           <RatingStrip dist={dist} total={allRatings.length} lang={lang} />
         </Panel>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Panel title={t("يحتاج انتباهاً", "Needs attention")} description={t("أدنى 5 أسئلة تقييماً", "Lowest-rated 5 questions")}>
+        <Panel
+          title={t("يحتاج انتباهاً", "Needs attention")}
+          description={t("أدنى 5 أسئلة تقييماً", "Lowest-rated 5 questions")}
+        >
           <QList items={sorted.slice(0, 5)} lang={lang} />
         </Panel>
-        <Panel title={t("نقاط القوة", "Strengths")} description={t("أعلى 5 أسئلة تقييماً", "Highest-rated 5 questions")}>
+        <Panel
+          title={t("نقاط القوة", "Strengths")}
+          description={t("أعلى 5 أسئلة تقييماً", "Highest-rated 5 questions")}
+        >
           <QList items={sorted.slice(-5).reverse()} lang={lang} />
         </Panel>
       </div>
@@ -487,15 +663,41 @@ function Overview({ rows, all, lang }: { rows: Row[]; all: Row[]; lang: Lang }) 
                 </linearGradient>
               </defs>
               <CartesianGrid stroke="rgba(184,232,240,0.08)" vertical={false} />
-              <XAxis dataKey="name" fontSize={11} tick={{ fill: "#9fbabe" }} axisLine={{ stroke: "rgba(184,232,240,0.14)" }} tickLine={false} />
-              <YAxis allowDecimals={false} fontSize={11} tick={{ fill: "#9fbabe" }} axisLine={false} tickLine={false} />
+              <XAxis
+                dataKey="name"
+                fontSize={11}
+                tick={{ fill: "#9fbabe" }}
+                axisLine={{ stroke: "rgba(184,232,240,0.14)" }}
+                tickLine={false}
+              />
+              <YAxis
+                allowDecimals={false}
+                fontSize={11}
+                tick={{ fill: "#9fbabe" }}
+                axisLine={false}
+                tickLine={false}
+              />
               <Tooltip
                 cursor={{ stroke: "rgba(184,232,240,0.3)" }}
-                contentStyle={{ background: "#0a2b33", border: "1px solid rgba(184,232,240,0.14)", borderRadius: 12, color: "#e7f1f0", fontSize: 12 }}
+                contentStyle={{
+                  background: "#0a2b33",
+                  border: "1px solid rgba(184,232,240,0.14)",
+                  borderRadius: 12,
+                  color: "#e7f1f0",
+                  fontSize: 12,
+                }}
                 labelStyle={{ color: "#9fbabe" }}
                 formatter={(v) => [v as number, t("إجابات", "Responses")]}
               />
-              <Area type="linear" dataKey="value" stroke="#77e0e8" strokeWidth={2} fill="url(#fsTrend)" dot={{ r: 4, fill: "#77e0e8", stroke: "#0a2b33", strokeWidth: 2 }} activeDot={{ r: 5 }} />
+              <Area
+                type="linear"
+                dataKey="value"
+                stroke="#77e0e8"
+                strokeWidth={2}
+                fill="url(#fsTrend)"
+                dot={{ r: 4, fill: "#77e0e8", stroke: "#0a2b33", strokeWidth: 2 }}
+                activeDot={{ r: 5 }}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -503,20 +705,37 @@ function Overview({ rows, all, lang }: { rows: Row[]; all: Row[]; lang: Lang }) 
 
       <div className="grid gap-4 md:grid-cols-2">
         <Panel title={t("من شارك", "Who answered")}>
-          <BarList data={countBy(USER_TYPES, (r) => (r.user_type ? [r.user_type] : []))} total={rows.length} />
+          <BarList
+            data={countBy(USER_TYPES, (r) => (r.user_type ? [r.user_type] : []))}
+            total={rows.length}
+          />
         </Panel>
-        <Panel title={t("الخدمات المستخدمة", "Services used")} description={t("يمكن اختيار أكثر من خدمة", "Multiple choice")}>
+        <Panel
+          title={t("الخدمات المستخدمة", "Services used")}
+          description={t("يمكن اختيار أكثر من خدمة", "Multiple choice")}
+        >
           <BarList data={countBy(SERVICES, (r) => r.services_used)} total={rows.length} />
         </Panel>
         <Panel title={t("الأجهزة", "Devices")}>
-          <BarList data={countBy(DEVICES, (r) => (r.device_type ? [r.device_type] : []))} total={rows.length} />
+          <BarList
+            data={countBy(DEVICES, (r) => (r.device_type ? [r.device_type] : []))}
+            total={rows.length}
+          />
         </Panel>
         <Panel title={t("المحافظات", "Governorates")}>
-          <BarList data={countBy(GOVERNORATES, (r) => (r.governorate ? [r.governorate] : []))} total={rows.length} limit={8} />
+          <BarList
+            data={countBy(GOVERNORATES, (r) => (r.governorate ? [r.governorate] : []))}
+            total={rows.length}
+            limit={8}
+          />
         </Panel>
       </div>
 
-      <Panel title={t("كل الأسئلة", "Every question")} description={t("متوسط من 5 · عدد التقييمات", "Average out of 5 · number of ratings")} flush>
+      <Panel
+        title={t("كل الأسئلة", "Every question")}
+        description={t("متوسط من 5 · عدد التقييمات", "Average out of 5 · number of ratings")}
+        flush
+      >
         <div className="overflow-x-auto">
           <table className="cx-table w-full text-[13px]">
             <thead>
@@ -530,7 +749,9 @@ function Overview({ rows, all, lang }: { rows: Row[]; all: Row[]; lang: Lang }) 
             <tbody>
               {questions.map((q) => (
                 <tr key={q.key}>
-                  <td className="whitespace-nowrap text-[var(--cx-muted)]">{SECTIONS.find((s) => s.key === QUESTION_BY_KEY.get(q.key)?.section)?.[lang]}</td>
+                  <td className="whitespace-nowrap text-[var(--cx-muted)]">
+                    {SECTIONS.find((s) => s.key === QUESTION_BY_KEY.get(q.key)?.section)?.[lang]}
+                  </td>
                   <td>{q.name}</td>
                   <td className="text-center">
                     <ScoreBar value={q.value} />
@@ -549,7 +770,9 @@ function Overview({ rows, all, lang }: { rows: Row[]; all: Row[]; lang: Lang }) 
 function MiniStat({ label, value }: { label: string; value: number }) {
   return (
     <div className="min-w-0">
-      <div className="text-[22px] font-extrabold leading-none tabular-nums text-[var(--cx-ink)]">{value}</div>
+      <div className="text-[22px] font-extrabold leading-none tabular-nums text-[var(--cx-ink)]">
+        {value}
+      </div>
       <div className="mt-1 truncate text-[12px] text-[var(--cx-muted)]">{label}</div>
     </div>
   );
@@ -558,7 +781,10 @@ function MiniStat({ label, value }: { label: string; value: number }) {
 function ToneTag({ value, lang }: { value: number | null; lang: Lang }) {
   const tone = toneOf(value);
   return (
-    <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[var(--cx-line)] px-2.5 py-0.5 text-[12px] font-bold" style={{ color: TONE_COLOR[tone] }}>
+    <span
+      className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[var(--cx-line)] px-2.5 py-0.5 text-[12px] font-bold"
+      style={{ color: TONE_COLOR[tone] }}
+    >
       <span className="h-2 w-2 rounded-full" style={{ background: TONE_COLOR[tone] }} />
       {TONE_LABEL[tone][lang]}
     </span>
@@ -572,7 +798,8 @@ function ToneLegend({ lang }: { lang: Lang }) {
       {(["good", "ok", "low"] as const).map((k) => (
         <span key={k} className="inline-flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full" style={{ background: TONE_COLOR[k] }} />
-          {TONE_LABEL[k][lang]} {k === "good" ? "4+" : k === "ok" ? "3–4" : t("أقل من 3", "under 3")}
+          {TONE_LABEL[k][lang]}{" "}
+          {k === "good" ? "4+" : k === "ok" ? "3–4" : t("أقل من 3", "under 3")}
         </span>
       ))}
     </div>
@@ -608,14 +835,26 @@ function RecGauge({ score }: { score: number | null }) {
       {score !== null && (
         <span
           className="absolute inset-y-0 rounded-full"
-          style={s >= 0 ? { left: "50%", width, background: "var(--cx-teal)" } : { right: "50%", width, background: "var(--cx-red)" }}
+          style={
+            s >= 0
+              ? { left: "50%", width, background: "var(--cx-teal)" }
+              : { right: "50%", width, background: "var(--cx-red)" }
+          }
         />
       )}
     </div>
   );
 }
 
-function RatingStrip({ dist, total, lang }: { dist: { n: number; value: number }[]; total: number; lang: Lang }) {
+function RatingStrip({
+  dist,
+  total,
+  lang,
+}: {
+  dist: { n: number; value: number }[];
+  total: number;
+  lang: Lang;
+}) {
   if (!total) return <p className="text-[13px] text-[var(--cx-muted)]">—</p>;
   const pct = (v: number) => Math.round((v / total) * 100);
   return (
@@ -626,7 +865,11 @@ function RatingStrip({ dist, total, lang }: { dist: { n: number; value: number }
             <div
               key={d.n}
               className="grid min-w-[6px] place-items-center text-[12px] font-extrabold"
-              style={{ flexGrow: d.value, background: SCALE[d.n - 1], color: d.n === 3 || d.n === 1 || d.n === 5 ? "#fff" : "#0a2b33" }}
+              style={{
+                flexGrow: d.value,
+                background: SCALE[d.n - 1],
+                color: d.n === 3 || d.n === 1 || d.n === 5 ? "#fff" : "#0a2b33",
+              }}
               title={`${d.n} · ${RATING_LABELS[lang][d.n]}: ${d.value} (${pct(d.value)}%)`}
             >
               {pct(d.value) >= 8 ? `${pct(d.value)}%` : ""}
@@ -638,7 +881,10 @@ function RatingStrip({ dist, total, lang }: { dist: { n: number; value: number }
         {[...dist].reverse().map((d) => (
           <li key={d.n} className="flex items-center justify-between gap-3">
             <span className="flex min-w-0 items-center gap-2">
-              <span className="h-3 w-3 shrink-0 rounded-[4px]" style={{ background: SCALE[d.n - 1] }} />
+              <span
+                className="h-3 w-3 shrink-0 rounded-[4px]"
+                style={{ background: SCALE[d.n - 1] }}
+              />
               <b className="tabular-nums text-[var(--cx-ink)]">{d.n}</b>
               <span className="truncate text-[var(--cx-ink-2)]">{RATING_LABELS[lang][d.n]}</span>
             </span>
@@ -652,10 +898,24 @@ function RatingStrip({ dist, total, lang }: { dist: { n: number; value: number }
   );
 }
 
-function BarList({ data, total, limit }: { data: { name: string; value: number }[]; total: number; limit?: number }) {
+function BarList({
+  data,
+  total,
+  limit,
+}: {
+  data: { name: string; value: number }[];
+  total: number;
+  limit?: number;
+}) {
   if (!data.length) return <p className="text-[13px] text-[var(--cx-muted)]">—</p>;
   const max = Math.max(...data.map((d) => d.value));
-  const shown = limit && data.length > limit ? [...data.slice(0, limit - 1), { name: "…", value: data.slice(limit - 1).reduce((a, b) => a + b.value, 0) }] : data;
+  const shown =
+    limit && data.length > limit
+      ? [
+          ...data.slice(0, limit - 1),
+          { name: "…", value: data.slice(limit - 1).reduce((a, b) => a + b.value, 0) },
+        ]
+      : data;
   return (
     <ul className="space-y-2.5">
       {shown.map((d) => (
@@ -663,11 +923,15 @@ function BarList({ data, total, limit }: { data: { name: string; value: number }
           <div className="mb-1 flex items-baseline justify-between gap-3">
             <span className="truncate text-[var(--cx-ink-2)]">{d.name}</span>
             <span className="shrink-0 tabular-nums text-[var(--cx-muted)]">
-              <b className="text-[var(--cx-ink)]">{d.value}</b> · {Math.round((d.value / Math.max(total, 1)) * 100)}%
+              <b className="text-[var(--cx-ink)]">{d.value}</b> ·{" "}
+              {Math.round((d.value / Math.max(total, 1)) * 100)}%
             </span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-[var(--cx-track)]">
-            <div className="h-full rounded-full bg-[var(--cx-teal)]" style={{ width: `${(d.value / max) * 100}%` }} />
+            <div
+              className="h-full rounded-full bg-[var(--cx-teal)]"
+              style={{ width: `${(d.value / max) * 100}%` }}
+            />
           </div>
         </li>
       ))}
@@ -680,26 +944,41 @@ function ScoreBar({ value }: { value: number | null }) {
   return (
     <span className="inline-flex items-center gap-2">
       <span className="inline-block h-1.5 w-20 overflow-hidden rounded-full bg-[var(--cx-track)]">
-        <span className="block h-full rounded-full" style={{ width: `${pct}%`, background: TONE_COLOR[toneOf(value)] }} />
+        <span
+          className="block h-full rounded-full"
+          style={{ width: `${pct}%`, background: TONE_COLOR[toneOf(value)] }}
+        />
       </span>
       <b className="tabular-nums">{f1(value)}</b>
     </span>
   );
 }
 
-function QList({ items, lang }: { items: { key: string; name: string; value: number | null; n: number }[]; lang: Lang }) {
+function QList({
+  items,
+  lang,
+}: {
+  items: { key: string; name: string; value: number | null; n: number }[];
+  lang: Lang;
+}) {
   if (!items.length) return <p className="text-[13px] text-[var(--cx-muted)]">—</p>;
   return (
     <ol className="space-y-2.5">
       {items.map((q) => {
         const sec = SECTIONS.find((s) => s.key === QUESTION_BY_KEY.get(q.key)?.section);
         return (
-          <li key={q.key} className="flex items-center justify-between gap-3 rounded-xl bg-[var(--cx-raise)] px-3 py-2.5 text-[13px]">
+          <li
+            key={q.key}
+            className="flex items-center justify-between gap-3 rounded-xl bg-[var(--cx-raise)] px-3 py-2.5 text-[13px]"
+          >
             <span className="min-w-0">
               <span className="block text-[var(--cx-ink)]">{q.name}</span>
               <span className="text-[11.5px] text-[var(--cx-faint)]">{sec?.[lang]}</span>
             </span>
-            <span className="shrink-0 rounded-lg px-2 py-1 text-[13px] font-extrabold tabular-nums" style={{ color: TONE_COLOR[toneOf(q.value)], background: "var(--cx-raise-2)" }}>
+            <span
+              className="shrink-0 rounded-lg px-2 py-1 text-[13px] font-extrabold tabular-nums"
+              style={{ color: TONE_COLOR[toneOf(q.value)], background: "var(--cx-raise-2)" }}
+            >
               {f1(q.value)}
             </span>
           </li>
@@ -718,39 +997,74 @@ function StatusPill({ status, lang }: { status: string; lang: Lang }) {
     contacted: "bg-[var(--cx-green-50)] text-[var(--cx-green)]",
     closed: "bg-[var(--cx-raise-2)] text-[var(--cx-ink-2)]",
   };
-  return <span className={`inline-block rounded-full px-2.5 py-0.5 text-[12px] font-bold ${tone[status] ?? ""}`}>{choiceLabel(REVIEW_STATUSES, status, lang)}</span>;
+  return (
+    <span
+      className={`inline-block rounded-full px-2.5 py-0.5 text-[12px] font-bold ${tone[status] ?? ""}`}
+    >
+      {choiceLabel(REVIEW_STATUSES, status, lang)}
+    </span>
+  );
 }
 
-function Responses({ rows, lang, onOpen }: { rows: Row[]; lang: Lang; onOpen: (id: string) => void }) {
+function Responses({
+  rows,
+  lang,
+  onOpen,
+}: {
+  rows: Row[];
+  lang: Lang;
+  onOpen: (id: string) => void;
+}) {
   const t = (a: string, e: string) => (lang === "ar" ? a : e);
   const [q, setQ] = useState("");
-  const [sort, setSort] = useState<{ key: "date" | "overall" | "avg"; dir: 1 | -1 }>({ key: "date", dir: -1 });
+  const [sort, setSort] = useState<{ key: "date" | "overall" | "avg"; dir: 1 | -1 }>({
+    key: "date",
+    dir: -1,
+  });
   const [page, setPage] = useState(0);
   const PER = 20;
   const list = useMemo(() => {
     const s = q.trim().toLowerCase();
     const f = s
       ? rows.filter((r) =>
-          [r.contact_name, r.contact_email, r.contact_phone, ...NOTE_KEYS.map((k) => r[k])].some((v) => v?.toLowerCase().includes(s)),
+          [r.contact_name, r.contact_email, r.contact_phone, ...NOTE_KEYS.map((k) => r[k])].some(
+            (v) => v?.toLowerCase().includes(s),
+          ),
         )
       : rows;
-    const val = (r: Row) => (sort.key === "date" ? (r.submitted_at ?? r.created_at) : sort.key === "overall" ? (r.overall_rating ?? 0) : (r.avgAll ?? 0));
+    const val = (r: Row) =>
+      sort.key === "date"
+        ? (r.submitted_at ?? r.created_at)
+        : sort.key === "overall"
+          ? (r.overall_rating ?? 0)
+          : (r.avgAll ?? 0);
     return [...f].sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * sort.dir);
   }, [rows, q, sort]);
   useEffect(() => setPage(0), [q, rows]);
   const pages = Math.max(1, Math.ceil(list.length / PER));
   const th = (key: typeof sort.key, label: string) => (
     <th>
-      <button type="button" className="font-bold" onClick={() => setSort((s) => ({ key, dir: s.key === key ? (-s.dir as 1 | -1) : -1 }))}>
+      <button
+        type="button"
+        className="font-bold"
+        onClick={() => setSort((s) => ({ key, dir: s.key === key ? (-s.dir as 1 | -1) : -1 }))}
+      >
         {label} {sort.key === key ? (sort.dir === 1 ? "▲" : "▼") : ""}
       </button>
     </th>
   );
-  if (!rows.length) return <EmptyState title={t("لا توجد إجابات مطابقة", "No matching responses")} />;
+  if (!rows.length)
+    return <EmptyState title={t("لا توجد إجابات مطابقة", "No matching responses")} />;
   return (
     <Panel flush>
       <div className="p-4">
-        <input className="cx-input h-10 w-full max-w-md" placeholder={t("بحث في الاسم أو البريد أو الملاحظات…", "Search name, email or notes…")} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t("بحث", "Search")} />
+        <input
+          className="cx-input h-10 w-full max-w-md"
+          placeholder={t("بحث في الاسم أو البريد أو الملاحظات…", "Search name, email or notes…")}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          aria-label={t("بحث", "Search")}
+        />
       </div>
       <div className="overflow-x-auto">
         <table className="cx-table w-full text-[13px]">
@@ -787,7 +1101,11 @@ function Responses({ rows, lang, onOpen }: { rows: Row[]; lang: Lang; onOpen: (i
                   <StatusPill status={r.review_status} lang={lang} />
                 </td>
                 <td>
-                  <button type="button" className="cx-btn cx-btn-ghost h-9" onClick={() => onOpen(r.id)}>
+                  <button
+                    type="button"
+                    className="cx-btn cx-btn-ghost h-9"
+                    onClick={() => onOpen(r.id)}
+                  >
                     {t("عرض", "Open")}
                   </button>
                 </td>
@@ -801,10 +1119,20 @@ function Responses({ rows, lang, onOpen }: { rows: Row[]; lang: Lang; onOpen: (i
           {t(`${list.length} إجابة`, `${list.length} responses`)} · {page + 1} / {pages}
         </span>
         <div className="flex gap-2">
-          <button type="button" className="cx-btn cx-btn-ghost h-9" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+          <button
+            type="button"
+            className="cx-btn cx-btn-ghost h-9"
+            disabled={page === 0}
+            onClick={() => setPage((p) => p - 1)}
+          >
             {t("السابق", "Previous")}
           </button>
-          <button type="button" className="cx-btn cx-btn-ghost h-9" disabled={page >= pages - 1} onClick={() => setPage((p) => p + 1)}>
+          <button
+            type="button"
+            className="cx-btn cx-btn-ghost h-9"
+            disabled={page >= pages - 1}
+            onClick={() => setPage((p) => p + 1)}
+          >
             {t("التالي", "Next")}
           </button>
         </div>
@@ -815,7 +1143,15 @@ function Responses({ rows, lang, onOpen }: { rows: Row[]; lang: Lang; onOpen: (i
 
 /* ---------------- Comments ---------------- */
 
-function Comments({ rows, lang, onOpen }: { rows: Row[]; lang: Lang; onOpen: (id: string) => void }) {
+function Comments({
+  rows,
+  lang,
+  onOpen,
+}: {
+  rows: Row[];
+  lang: Lang;
+  onOpen: (id: string) => void;
+}) {
   const t = (a: string, e: string) => (lang === "ar" ? a : e);
   const [group, setGroup] = useState("");
   const [section, setSection] = useState("");
@@ -828,7 +1164,9 @@ function Comments({ rows, lang, onOpen }: { rows: Row[]; lang: Lang; onOpen: (id
       question: n[lang],
       date: r.submitted_at ?? r.created_at,
       overall: r.overall_rating,
-      low: r.answers.some((a) => a.rating && a.rating <= 2 && (!section || a.section_key === section)),
+      low: r.answers.some(
+        (a) => a.rating && a.rating <= 2 && (!section || a.section_key === section),
+      ),
       sectionRated: !section || r.answers.some((a) => a.section_key === section),
       status: r.review_status,
     })),
@@ -838,8 +1176,20 @@ function Comments({ rows, lang, onOpen }: { rows: Row[]; lang: Lang; onOpen: (id
     <div className="space-y-4">
       <Panel>
         <div className="flex flex-wrap gap-3">
-          <Sel label={t("التصنيف", "Group")} value={group} onChange={setGroup} options={COMMENT_GROUPS} lang={lang} />
-          <Sel label={t("القسم المقيَّم", "Rated section")} value={section} onChange={setSection} options={SECTIONS.map((s) => ({ value: s.key, ar: s.ar, en: s.en }))} lang={lang} />
+          <Sel
+            label={t("التصنيف", "Group")}
+            value={group}
+            onChange={setGroup}
+            options={COMMENT_GROUPS}
+            lang={lang}
+          />
+          <Sel
+            label={t("القسم المقيَّم", "Rated section")}
+            value={section}
+            onChange={setSection}
+            options={SECTIONS.map((s) => ({ value: s.key, ar: s.ar, en: s.en }))}
+            lang={lang}
+          />
         </div>
         <p className="mt-3 text-[12px] text-[var(--cx-muted)]">
           {t(
@@ -849,7 +1199,10 @@ function Comments({ rows, lang, onOpen }: { rows: Row[]; lang: Lang; onOpen: (id
         </p>
       </Panel>
       {!shown.length ? (
-        <EmptyState icon={MessageSquareText} title={t("لا توجد تعليقات مطابقة", "No matching comments")} />
+        <EmptyState
+          icon={MessageSquareText}
+          title={t("لا توجد تعليقات مطابقة", "No matching comments")}
+        />
       ) : (
         COMMENT_GROUPS.filter((g) => !group || g.value === group).map((g) => {
           const list = shown.filter((i) => i.group === g.value);
@@ -858,14 +1211,25 @@ function Comments({ rows, lang, onOpen }: { rows: Row[]; lang: Lang; onOpen: (id
             <Panel key={g.value} title={`${g[lang]} (${list.length})`}>
               <ul className="space-y-3">
                 {list.map((i) => (
-                  <li key={i.id} className={`rounded-xl border p-3 ${i.low ? "border-[var(--cx-red-line)] bg-[var(--cx-red-50)]" : "border-[var(--cx-line-2)] bg-[var(--cx-raise)]"}`}>
+                  <li
+                    key={i.id}
+                    className={`rounded-xl border p-3 ${i.low ? "border-[var(--cx-red-line)] bg-[var(--cx-red-50)]" : "border-[var(--cx-line-2)] bg-[var(--cx-raise)]"}`}
+                  >
                     <div className="mb-1 flex flex-wrap items-center justify-between gap-2 text-[12px] text-[var(--cx-muted)]">
                       <span>
-                        {fmtDate(i.date, lang, true)} · {t("الرضا العام", "Overall")}: {i.overall ?? "—"}/5 {i.low && <b className="text-[var(--cx-red)]">· {t("تقييم منخفض", "Low rating")}</b>}
+                        {fmtDate(i.date, lang, true)} · {t("الرضا العام", "Overall")}:{" "}
+                        {i.overall ?? "—"}/5{" "}
+                        {i.low && (
+                          <b className="text-[var(--cx-red)]">· {t("تقييم منخفض", "Low rating")}</b>
+                        )}
                       </span>
                       <span className="flex items-center gap-2">
                         <StatusPill status={i.status} lang={lang} />
-                        <button type="button" className="font-bold text-[var(--cx-teal)] underline" onClick={() => onOpen(i.subId)}>
+                        <button
+                          type="button"
+                          className="font-bold text-[var(--cx-teal)] underline"
+                          onClick={() => onOpen(i.subId)}
+                        >
                           {t("فتح الإجابة", "Open response")}
                         </button>
                       </span>
@@ -885,7 +1249,17 @@ function Comments({ rows, lang, onOpen }: { rows: Row[]; lang: Lang; onOpen: (id
 
 /* ---------------- Detail ---------------- */
 
-function Detail({ row, lang, onClose, onUpdate }: { row: Row; lang: Lang; onClose: () => void; onUpdate: (id: string, p: Partial<Sub>) => void }) {
+function Detail({
+  row,
+  lang,
+  onClose,
+  onUpdate,
+}: {
+  row: Row;
+  lang: Lang;
+  onClose: () => void;
+  onUpdate: (id: string, p: Partial<Sub>) => void;
+}) {
   const t = (a: string, e: string) => (lang === "ar" ? a : e);
   const [note, setNote] = useState(row.internal_admin_note ?? "");
   const [saving, setSaving] = useState(false);
@@ -928,15 +1302,33 @@ function Detail({ row, lang, onClose, onUpdate }: { row: Row; lang: Lang; onClos
     [t("المحافظة", "Governorate"), choiceLabel(GOVERNORATES, row.governorate, lang)],
     [t("تكرار الاستخدام", "Frequency"), choiceLabel(FREQUENCIES, row.usage_frequency, lang)],
     [t("الجهاز", "Device"), choiceLabel(DEVICES, row.device_type, lang)],
-    [t("الخدمات", "Services"), row.services_used.map((s) => choiceLabel(SERVICES, s, lang)).join("، ")],
+    [
+      t("الخدمات", "Services"),
+      row.services_used.map((s) => choiceLabel(SERVICES, s, lang)).join("، "),
+    ],
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/40" role="dialog" aria-modal="true" aria-label={t("تفاصيل الإجابة", "Response details")} onClick={onClose}>
-      <div className="h-full w-full max-w-3xl overflow-y-auto p-5 shadow-xl" onClick={(e) => e.stopPropagation()} style={{ background: "var(--cx-card-solid)" }}>
+    <div
+      className="fixed inset-0 z-50 flex justify-end bg-black/40"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("تفاصيل الإجابة", "Response details")}
+      onClick={onClose}
+    >
+      <div
+        className="h-full w-full max-w-3xl overflow-y-auto p-5 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+        style={{ background: "var(--cx-card-solid)" }}
+      >
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-[18px] font-extrabold">{t("تفاصيل الإجابة", "Response details")}</h2>
-          <button type="button" className="cx-btn cx-btn-ghost h-10 w-10 p-0" onClick={onClose} aria-label={t("إغلاق", "Close")}>
+          <button
+            type="button"
+            className="cx-btn cx-btn-ghost h-10 w-10 p-0"
+            onClick={onClose}
+            aria-label={t("إغلاق", "Close")}
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -946,7 +1338,12 @@ function Detail({ row, lang, onClose, onUpdate }: { row: Row; lang: Lang; onClos
             <div className="grid gap-3 sm:grid-cols-[200px_minmax(0,1fr)]">
               <label className="flex flex-col gap-1 text-[12px] font-bold text-[var(--cx-muted)]">
                 {t("الحالة", "Status")}
-                <select className="cx-input h-10" value={row.review_status} disabled={saving} onChange={(e) => save({ review_status: e.target.value as Sub["review_status"] })}>
+                <select
+                  className="cx-input h-10"
+                  value={row.review_status}
+                  disabled={saving}
+                  onChange={(e) => save({ review_status: e.target.value as Sub["review_status"] })}
+                >
                   {REVIEW_STATUSES.map((s) => (
                     <option key={s.value} value={s.value}>
                       {s[lang]}
@@ -956,11 +1353,21 @@ function Detail({ row, lang, onClose, onUpdate }: { row: Row; lang: Lang; onClos
               </label>
               <label className="flex flex-col gap-1 text-[12px] font-bold text-[var(--cx-muted)]">
                 {t("ملاحظة داخلية (لا تظهر للمشارك)", "Internal note (private)")}
-                <textarea className="cx-input min-h-[80px] p-2" value={note} maxLength={4000} onChange={(e) => setNote(e.target.value)} />
+                <textarea
+                  className="cx-input min-h-[80px] p-2"
+                  value={note}
+                  maxLength={4000}
+                  onChange={(e) => setNote(e.target.value)}
+                />
               </label>
             </div>
             <div className="mt-3 flex justify-end">
-              <button type="button" className="cx-btn cx-btn-primary" disabled={saving} onClick={() => save({ internal_admin_note: note.trim() || null })}>
+              <button
+                type="button"
+                className="cx-btn cx-btn-primary"
+                disabled={saving}
+                onClick={() => save({ internal_admin_note: note.trim() || null })}
+              >
                 {t("حفظ الملاحظة", "Save note")}
               </button>
             </div>
@@ -977,7 +1384,17 @@ function Detail({ row, lang, onClose, onUpdate }: { row: Row; lang: Lang; onClos
             </dl>
             {row.wants_contact && (
               <div className="mt-3 rounded-xl bg-[var(--cx-teal-50)] p-3 text-[13px]">
-                <b>{t("طلب التواصل", "Requested contact")}:</b> {row.contact_name || "—"} · <span dir="ltr">{row.contact_email || row.contact_phone || "—"}</span> · {choiceLabel([{ value: "email", ar: "بريد", en: "Email" }, { value: "phone", ar: "هاتف", en: "Phone" }, { value: "whatsapp", ar: "واتساب", en: "WhatsApp" }], row.preferred_contact_method, lang) || "—"}
+                <b>{t("طلب التواصل", "Requested contact")}:</b> {row.contact_name || "—"} ·{" "}
+                <span dir="ltr">{row.contact_email || row.contact_phone || "—"}</span> ·{" "}
+                {choiceLabel(
+                  [
+                    { value: "email", ar: "بريد", en: "Email" },
+                    { value: "phone", ar: "هاتف", en: "Phone" },
+                    { value: "whatsapp", ar: "واتساب", en: "WhatsApp" },
+                  ],
+                  row.preferred_contact_method,
+                  lang,
+                ) || "—"}
               </div>
             )}
           </Panel>
@@ -1009,7 +1426,11 @@ function Detail({ row, lang, onClose, onUpdate }: { row: Row; lang: Lang; onClos
                       <li key={q.key} className="flex flex-wrap justify-between gap-2 py-2">
                         <span className="min-w-0">{q[lang]}</span>
                         <b className={a?.rating && a.rating <= 2 ? "text-[var(--cx-red)]" : ""}>
-                          {a?.rating ? `${"★".repeat(a.rating)} ${a.rating} · ${RATING_LABELS[lang][a.rating]}` : a?.not_applicable ? NA_LABEL[lang] : "—"}
+                          {a?.rating
+                            ? `${"★".repeat(a.rating)} ${a.rating} · ${RATING_LABELS[lang][a.rating]}`
+                            : a?.not_applicable
+                              ? NA_LABEL[lang]
+                              : "—"}
                         </b>
                       </li>
                     );
@@ -1029,10 +1450,16 @@ function Detail({ row, lang, onClose, onUpdate }: { row: Row; lang: Lang; onClos
               ))}
               {row.screenshot_path && (
                 <div>
-                  <p className="text-[12px] font-bold text-[var(--cx-muted)]">{t("لقطة الشاشة", "Screenshot")}</p>
+                  <p className="text-[12px] font-bold text-[var(--cx-muted)]">
+                    {t("لقطة الشاشة", "Screenshot")}
+                  </p>
                   {shot ? (
                     <a href={shot} target="_blank" rel="noreferrer">
-                      <img src={shot} alt={t("لقطة شاشة مرفقة", "Attached screenshot")} className="mt-1 max-h-96 rounded-lg border" />
+                      <img
+                        src={shot}
+                        alt={t("لقطة شاشة مرفقة", "Attached screenshot")}
+                        className="mt-1 max-h-96 rounded-lg border"
+                      />
                     </a>
                   ) : (
                     <Loading />
@@ -1074,7 +1501,10 @@ function exportCsv(rows: Row[], lang: Lang) {
     ...NOTE_FIELDS.map((n) => n[lang]),
     L("الحالة", "Status"),
     L("ملاحظة داخلية", "Internal note"),
-    ...ALL_QUESTIONS.flatMap((q) => [`${q.key} ${L("(رقم)", "(value)")}`, `${q.key} ${L("(التسمية)", "(label)")}`]),
+    ...ALL_QUESTIONS.flatMap((q) => [
+      `${q.key} ${L("(رقم)", "(value)")}`,
+      `${q.key} ${L("(التسمية)", "(label)")}`,
+    ]),
   ];
   const lines = rows.map((r) => {
     const m = new Map(r.answers.map((a) => [a.question_key, a]));
@@ -1116,7 +1546,10 @@ function exportCsv(rows: Row[], lang: Lang) {
   a.click();
   URL.revokeObjectURL(a.href);
   // Question key legend as a second file for readability in Excel.
-  const blob2 = new Blob(["\uFEFF" + [L("المفتاح,السؤال", "Key,Question"), ...legend].join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const blob2 = new Blob(
+    ["\uFEFF" + [L("المفتاح,السؤال", "Key,Question"), ...legend].join("\r\n")],
+    { type: "text/csv;charset=utf-8" },
+  );
   const b = document.createElement("a");
   b.href = URL.createObjectURL(blob2);
   b.download = `saae-feedback-questions.csv`;

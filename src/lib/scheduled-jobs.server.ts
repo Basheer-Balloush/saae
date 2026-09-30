@@ -3,7 +3,7 @@ export async function runScheduledJobs(): Promise<void> {
   // Run sequentially to avoid two background batches competing for Resend.
   if (process.env.ENABLE_EMAIL_QUEUES === "true") {
     try {
-      const { dispatchEmailQueues } = await import("./email-queue.server");
+      const { dispatchEmailQueues } = await import("./email/email-queue.server");
       const result = await dispatchEmailQueues();
       console.log(JSON.stringify({ event: "email_queue_run", ...result }));
       failed ||= result.failed > 0 || result.deadLettered > 0;
@@ -15,7 +15,7 @@ export async function runScheduledJobs(): Promise<void> {
   }
   if (process.env.ENABLE_TRAINER_OUTBOX === "true") {
     try {
-      const { processOutbox } = await import("./lms-outbox.server");
+      const { processOutbox } = await import("../features/lms/lib/outbox.server");
       const result = await processOutbox(10);
       console.log(JSON.stringify({ event: "trainer_outbox_run", ...result }));
       failed ||= result.failed > 0 || result.retried > 0;

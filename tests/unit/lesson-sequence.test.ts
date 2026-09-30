@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { openLessonIds, orderLessons, upNextLesson } from "@/lib/lesson-sequence";
+import { openLessonIds, orderLessons, upNextLesson } from "@/features/lms/lib/lesson-sequence";
 
 const sections = [
   { id: "s2", display_order: 2 },
@@ -53,7 +53,8 @@ describe("open lessons", () => {
 
 describe("up next", () => {
   const ordered = orderLessons(sections, lessons);
-  const after = (id: string, ...done: string[]) => upNextLesson(ordered, id, new Set(done))?.id ?? null;
+  const after = (id: string, ...done: string[]) =>
+    upNextLesson(ordered, id, new Set(done))?.id ?? null;
 
   it("moves on to the next lesson once the current one is completed", () => {
     expect(after("a1", "a1")).toBe("a2");

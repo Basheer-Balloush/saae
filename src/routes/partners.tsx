@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { loadPartners } from "@/features/website/partners/data";
 import { applyPartnerDirectory } from "@/features/website/partners/render";
-import pageHtml from "@/components/cinematic/html/partners.html?raw";
-import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
+import pageHtml from "@/features/website/cinematic/html/partners.html?raw";
+import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
 
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/language.js" },

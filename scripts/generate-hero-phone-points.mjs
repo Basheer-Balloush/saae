@@ -64,13 +64,27 @@ function inputsHash() {
   feed(svg.toString("utf8"));
   feed(JSON.stringify(SYRIA_RING));
   feed(String(SYRIA_LAT0));
-  feed([VERSION, PITCH, K_FLOOR, SUBJECT_X, SUBJECT_H, ORIGIN_LON, ORIGIN_LAT, TREE_W, TREE_H, SYRIA_H].join(","));
+  feed(
+    [
+      VERSION,
+      PITCH,
+      K_FLOOR,
+      SUBJECT_X,
+      SUBJECT_H,
+      ORIGIN_LON,
+      ORIGIN_LAT,
+      TREE_W,
+      TREE_H,
+      SYRIA_H,
+    ].join(","),
+  );
   return h >>> 0;
 }
 
 /* ---- copied from hero-instrument.js ---- */
 function coverage(mask, u, v, cellU, cellV) {
-  let sum = 0, n = 0;
+  let sum = 0,
+    n = 0;
   for (let sy = -1; sy <= 1; sy++) {
     for (let sx = -1; sx <= 1; sx++) {
       const px = Math.round((u + sx * cellU * 0.33) * (mask.w - 1));
@@ -88,7 +102,8 @@ function scanCells(box, pitch, test, collect) {
   let n = 0;
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      const u = (c + 0.5) / cols, v = (r + 0.5) / rows;
+      const u = (c + 0.5) / cols,
+        v = (r + 0.5) / rows;
       const weight = test(box.x0 + u * box.w, box.y1 - v * box.h, u, v, 1 / cols, 1 / rows);
       if (weight <= 0.001) continue;
       n++;
@@ -104,14 +119,20 @@ function sampleShape(box, pitch, test) {
 }
 function expand(flat, K, keyOf) {
   const n = flat.length / 3;
-  let cx = 0, cy = 0;
-  for (let i = 0; i < n; i++) { cx += flat[i * 3]; cy += flat[i * 3 + 1]; }
-  cx /= n; cy /= n;
+  let cx = 0,
+    cy = 0;
+  for (let i = 0; i < n; i++) {
+    cx += flat[i * 3];
+    cy += flat[i * 3 + 1];
+  }
+  cx /= n;
+  cy /= n;
   const order = new Array(n);
   for (let i = 0; i < n; i++) order[i] = [Math.atan2(flat[i * 3 + 1] - cy, flat[i * 3] - cx), i];
   order.sort((a, b) => a[0] - b[0]);
   const keys = new Float32Array(n);
-  let kmin = Infinity, kmax = -Infinity;
+  let kmin = Infinity,
+    kmax = -Infinity;
   for (let i = 0; i < n; i++) {
     const k = keyOf(flat[i * 3], flat[i * 3 + 1]);
     keys[i] = k;
@@ -136,17 +157,22 @@ function expand(flat, K, keyOf) {
 function syriaProjection(ring, heightPx) {
   const k = Math.cos((SYRIA_LAT0 * Math.PI) / 180);
   const proj = ring.map(([lon, lat]) => [lon * k, lat]);
-  const xs = proj.map((p) => p[0]), ys = proj.map((p) => p[1]);
-  const minX = Math.min(...xs), maxX = Math.max(...xs);
-  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const xs = proj.map((p) => p[0]),
+    ys = proj.map((p) => p[1]);
+  const minX = Math.min(...xs),
+    maxX = Math.max(...xs);
+  const minY = Math.min(...ys),
+    maxY = Math.max(...ys);
   const aspect = (maxX - minX) / (maxY - minY);
   const pad = 0.03;
   const h = heightPx;
   const w = Math.round(heightPx * aspect);
-  const toX = (x) => ((x - minX) / (maxX - minX) * (1 - pad * 2) + pad) * w;
-  const toY = (y) => (1 - ((y - minY) / (maxY - minY) * (1 - pad * 2) + pad)) * h;
+  const toX = (x) => (((x - minX) / (maxX - minX)) * (1 - pad * 2) + pad) * w;
+  const toY = (y) => (1 - (((y - minY) / (maxY - minY)) * (1 - pad * 2) + pad)) * h;
   return {
-    w, h, aspect,
+    w,
+    h,
+    aspect,
     outline: proj.map(([px, py]) => [toX(px), toY(py)]),
     project: (lon, lat) => [toX(lon * k), toY(lat)],
   };
@@ -163,7 +189,8 @@ function syriaMaskFromOutline(proj) {
     for (let i = 0; i < outline.length; i++) {
       const [x1, y1] = outline[i];
       const [x2, y2] = outline[(i + 1) % outline.length];
-      if ((y1 <= y && y2 > y) || (y2 <= y && y1 > y)) xs.push(x1 + ((y - y1) / (y2 - y1)) * (x2 - x1));
+      if ((y1 <= y && y2 > y) || (y2 <= y && y1 > y))
+        xs.push(x1 + ((y - y1) / (y2 - y1)) * (x2 - x1));
     }
     xs.sort((p, q) => p - q);
     for (let i = 0; i + 1 < xs.length; i += 2) {
@@ -186,7 +213,14 @@ for (let i = 0; i < treeAlpha.a.length; i++) treeAlpha.a[i] = data[i * 4 + 3] / 
 const syria = syriaProjection(SYRIA_RING, SYRIA_H);
 const syriaAlpha = syriaMaskFromOutline(syria);
 
-const box = (w, h) => ({ x0: SUBJECT_X - w / 2, x1: SUBJECT_X + w / 2, y0: -h / 2, y1: h / 2, w, h });
+const box = (w, h) => ({
+  x0: SUBJECT_X - w / 2,
+  x1: SUBJECT_X + w / 2,
+  y0: -h / 2,
+  y1: h / 2,
+  w,
+  h,
+});
 const treeBox = box(SUBJECT_H * 1.1 * (TREE_W / TREE_H), SUBJECT_H * 1.1);
 const mapBox = box(SUBJECT_H * 1.19 * syria.aspect, SUBJECT_H * 1.19);
 const mapToWorld = (px, py) => [
@@ -229,7 +263,9 @@ const outDir = join(root, "public/cinematic/points");
 mkdirSync(outDir, { recursive: true });
 writeFileSync(join(outDir, "hero-phone.bin"), body);
 const manifest = {
-  version: VERSION, hash: `0x${hash.toString(16).padStart(8, "0")}`, K,
+  version: VERSION,
+  hash: `0x${hash.toString(16).padStart(8, "0")}`,
+  K,
   tree: { w: TREE_W, h: TREE_H, cells: R0.length / 3 },
   syria: { w: syria.w, h: syria.h, cells: R4.length / 3 },
   bytes: body.length,

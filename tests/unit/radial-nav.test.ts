@@ -1,9 +1,9 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, it, expect } from "vitest";
-import { radialNavHtml, withSiteChrome } from "@/components/cinematic/radial-nav";
+import { radialNavHtml, withSiteChrome } from "@/features/website/cinematic/radial-nav";
 
-const HTML_DIR = path.resolve(import.meta.dirname, "../../src/components/cinematic/html");
+const HTML_DIR = path.resolve(import.meta.dirname, "../../src/features/website/cinematic/html");
 const PUBLIC_JS_DIR = path.resolve(import.meta.dirname, "../../public/cinematic/js");
 const pages = readdirSync(HTML_DIR).filter((f) => f.endsWith(".html"));
 const page = (name: string) => readFileSync(path.join(HTML_DIR, name), "utf8");

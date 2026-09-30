@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { loadAllPublicCourses, loadPublicInstructorCourses } from "@/lib/lms-public-catalog";
+import {
+  loadAllPublicCourses,
+  loadPublicInstructorCourses,
+} from "@/features/lms/lib/public-catalog";
 
 const { rpc } = vi.hoisted(() => ({ rpc: vi.fn() }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { rpc } }));

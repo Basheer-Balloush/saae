@@ -1,16 +1,16 @@
 import { useEffect, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import pageHtml from "@/components/cinematic/html/about.html?raw";
-import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
-import { useLang } from "@/lib/i18n";
-import { applyPublicLanguage } from "@/lib/public-site/language";
+import pageHtml from "@/features/website/cinematic/html/about.html?raw";
+import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
+import { useLang } from "@/lib/i18n/i18n";
+import { applyPublicLanguage } from "@/features/website/lib/public-language";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MEMBER_COLUMNS,
   applyMembers,
   renderMembersHtml,
   type MemberRow,
-} from "@/lib/cinematic-db-content";
+} from "@/features/website/lib/cinematic-db-content";
 
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/about-inline.js" },
@@ -34,12 +34,14 @@ export const Route = createFileRoute("/about")({
       { title: "About SAAE | AI, Education & Entrepreneurship in Syria" },
       {
         name: "description",
-        content: "Learn how SAAE connects AI education, research, communities and entrepreneurship to build practical capability across Syria.",
+        content:
+          "Learn how SAAE connects AI education, research, communities and entrepreneurship to build practical capability across Syria.",
       },
       { property: "og:title", content: "About SAAE | AI, Education & Entrepreneurship in Syria" },
       {
         property: "og:description",
-        content: "Meet the Syrian association turning AI knowledge into practical skills, research and public value.",
+        content:
+          "Meet the Syrian association turning AI knowledge into practical skills, research and public value.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

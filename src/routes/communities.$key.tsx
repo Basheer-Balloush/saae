@@ -1,15 +1,15 @@
 import { useEffect, useMemo } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import pageHtml from "@/components/cinematic/html/communities.html?raw";
-import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
+import pageHtml from "@/features/website/cinematic/html/communities.html?raw";
+import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
 import { supabase } from "@/integrations/supabase/client";
 import {
   COMMUNITY_KEYS,
   COMMUNITY_LABELS_AR,
   COMMUNITY_LABELS_EN,
   type CommunityKey,
-} from "@/lib/communityCategories";
-import { COMMUNITY_ICON_SVG } from "@/lib/communityIcons";
+} from "@/features/website/lib/community-categories";
+import { COMMUNITY_ICON_SVG } from "@/features/website/lib/community-icons";
 import {
   DEFAULT_METRICS,
   DETAILS,

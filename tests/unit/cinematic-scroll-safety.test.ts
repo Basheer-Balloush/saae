@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { installCinematicScrollSafety } from "../../src/components/cinematic/scroll-safety";
+import { installCinematicScrollSafety } from "../../src/features/website/cinematic/scroll-safety";
 
 describe("cinematic scroll safety", () => {
   let classes: Set<string>;
@@ -13,16 +13,19 @@ describe("cinematic scroll safety", () => {
     classes = new Set(["site-loading"]);
     loaderClasses = new Set();
     const classList = (values: Set<string>) => ({
-      add: (...names: string[]) => names.forEach(name => values.add(name)),
-      remove: (...names: string[]) => names.forEach(name => values.delete(name)),
+      add: (...names: string[]) => names.forEach((name) => values.add(name)),
+      remove: (...names: string[]) => names.forEach((name) => values.delete(name)),
       contains: (name: string) => values.has(name),
     });
-    scope = { querySelector: () => ({ classList: classList(loaderClasses) }) } as unknown as HTMLElement;
+    scope = {
+      querySelector: () => ({ classList: classList(loaderClasses) }),
+    } as unknown as HTMLElement;
     checkpointsDestroy = vi.fn();
     scrollDestroy = vi.fn();
     vi.stubGlobal("document", { documentElement: { classList: classList(classes) } });
     vi.stubGlobal("window", {
-      setTimeout, clearTimeout,
+      setTimeout,
+      clearTimeout,
       saaeCheckpointsDestroy: checkpointsDestroy,
       saaeScrollDestroy: scrollDestroy,
     });
@@ -57,7 +60,9 @@ describe("cinematic scroll safety", () => {
 
   it("still tears down the scroll engine if checkpoint cleanup fails", () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
-    checkpointsDestroy.mockImplementation(() => { throw new Error("stale scene"); });
+    checkpointsDestroy.mockImplementation(() => {
+      throw new Error("stale scene");
+    });
     const cleanup = installCinematicScrollSafety(scope);
     expect(cleanup).not.toThrow();
     expect(classes.has("site-loading")).toBe(false);

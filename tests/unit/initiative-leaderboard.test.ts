@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialsFor, safeLogoUrl } from "../../src/components/initiative/live-leaderboard";
+import { initialsFor, safeLogoUrl } from "../../src/features/website/initiative/live-leaderboard";
 
 describe("the badge a sponsor gets when we hold no logo", () => {
   it("takes one initial from each of the first two words", () => {

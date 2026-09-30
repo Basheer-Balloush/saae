@@ -14,14 +14,14 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 import appCss from "../styles.css?url";
-import { LanguageProvider, useLang } from "@/lib/i18n";
+import { LanguageProvider, useLang } from "@/lib/i18n/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "@/components/ui/sonner";
-import { AssistantFab } from "@/components/site/AssistantFab";
-import { RouteProgress } from "@/components/site/RouteProgress";
-import { ScrollToHash } from "@/components/site/ScrollToHash";
+import { AssistantFab } from "@/features/chat/AssistantFab";
+import { RouteProgress } from "@/components/app/RouteProgress";
+import { ScrollToHash } from "@/components/app/ScrollToHash";
 import { ConfirmProvider } from "@/hooks/useConfirm";
-import { isSkinnedLmsPath } from "@/components/lms-skin/skin";
+import { isSkinnedLmsPath } from "@/features/lms/skin/skin";
 
 function NotFoundComponent() {
   const isAr = typeof document !== "undefined" && document.documentElement.lang === "ar";
@@ -314,7 +314,8 @@ function ScrollRestoration() {
     };
     // A whole-page Back (from a page outside the app) arrives as a load.
     const entry = performance.getEntriesByType?.("navigation")[0] as
-      PerformanceNavigationTiming | undefined;
+      | PerformanceNavigationTiming
+      | undefined;
     if (entry?.type === "back_forward") hold();
 
     let ticking = false;

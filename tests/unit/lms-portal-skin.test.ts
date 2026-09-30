@@ -11,7 +11,9 @@ describe("LMS skin on portalled dialogs", () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it("wraps LMS dialogs in an invisible skin box, leaving the panel's classes alone", () => {
-    vi.stubGlobal("window", { location: { pathname: "/learning-management-system/instructor/courses/x" } });
+    vi.stubGlobal("window", {
+      location: { pathname: "/learning-management-system/instructor/courses/x" },
+    });
     expect(renderToStaticMarkup(createElement(LmsPortalSkin, null, panel))).toBe(
       '<div class="lms-dashboard-wrap lms-skin dark" style="display:contents"><div role="alertdialog" class="fixed z-50">x</div></div>',
     );

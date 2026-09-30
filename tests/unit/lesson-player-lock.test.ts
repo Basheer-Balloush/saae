@@ -3,7 +3,10 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const player = readFileSync(
-  path.resolve(__dirname, "../../src/routes/learning-management-system.student.player.$courseId.tsx"),
+  path.resolve(
+    __dirname,
+    "../../src/routes/learning-management-system/student/player/$courseId.tsx",
+  ),
   "utf8",
 );
 

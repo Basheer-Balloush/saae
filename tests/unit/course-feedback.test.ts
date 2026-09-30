@@ -13,8 +13,8 @@ import {
   otherKey,
   type ChoiceQuestion,
   type FormDefinition,
-} from "@/lib/course-feedback-survey";
-import { feedbackState } from "@/lib/course-feedback-state";
+} from "@/features/lms/course-feedback/lib/survey";
+import { feedbackState } from "@/features/lms/course-feedback/lib/state";
 
 const form = DEFAULT_FORM;
 const choices = (f: FormDefinition = form) =>

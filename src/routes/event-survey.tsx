@@ -7,7 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { CheckCircle2 } from "lucide-react";
 
@@ -36,13 +40,25 @@ function EventSurvey() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [f, setF] = useState({
-    project_name: "", contact_name: "", phone: "", email: "", city: "",
-    website: "", facebook_url: "", instagram_url: "", linkedin_url: "",
-    field: "", description: "", problem_solved: "", stage: "",
-    team_size: "", notes: "",
+    project_name: "",
+    contact_name: "",
+    phone: "",
+    email: "",
+    city: "",
+    website: "",
+    facebook_url: "",
+    instagram_url: "",
+    linkedin_url: "",
+    field: "",
+    description: "",
+    problem_solved: "",
+    stage: "",
+    team_size: "",
+    notes: "",
   });
-  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setF((s) => ({ ...s, [k]: e.target.value }));
+  const set =
+    (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setF((s) => ({ ...s, [k]: e.target.value }));
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +86,10 @@ function EventSurvey() {
       notes: f.notes.trim() || null,
     });
     setSubmitting(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setDone(true);
     toast.success("تم إرسال الاستبيان بنجاح");
   };
@@ -91,11 +110,12 @@ function EventSurvey() {
     <div dir="rtl" className="min-h-screen bg-background py-10 px-4">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold">استبيان المشاريع والشركات الناشئة</h1>
-        <p className="text-muted-foreground mt-2">
-          يرجى تعبئة البيانات التالية عن مشروعك.
-        </p>
+        <p className="text-muted-foreground mt-2">يرجى تعبئة البيانات التالية عن مشروعك.</p>
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-5 bg-card border border-border rounded-2xl p-6">
+        <form
+          onSubmit={onSubmit}
+          className="mt-8 space-y-5 bg-card border border-border rounded-2xl p-6"
+        >
           <Field label="اسم المشروع أو الشركة الناشئة" required>
             <Input value={f.project_name} onChange={set("project_name")} required maxLength={200} />
           </Field>
@@ -104,10 +124,24 @@ function EventSurvey() {
           </Field>
           <div className="grid md:grid-cols-2 gap-4">
             <Field label="رقم الهاتف" required>
-              <Input dir="ltr" type="tel" value={f.phone} onChange={set("phone")} required maxLength={40} />
+              <Input
+                dir="ltr"
+                type="tel"
+                value={f.phone}
+                onChange={set("phone")}
+                required
+                maxLength={40}
+              />
             </Field>
             <Field label="البريد الإلكتروني" required>
-              <Input dir="ltr" type="email" value={f.email} onChange={set("email")} required maxLength={200} />
+              <Input
+                dir="ltr"
+                type="email"
+                value={f.email}
+                onChange={set("email")}
+                required
+                maxLength={200}
+              />
             </Field>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
@@ -115,7 +149,14 @@ function EventSurvey() {
               <Input value={f.city} onChange={set("city")} required maxLength={100} />
             </Field>
             <Field label="الموقع الإلكتروني (إن وجد)">
-              <Input dir="ltr" type="url" value={f.website} onChange={set("website")} maxLength={300} placeholder="https://" />
+              <Input
+                dir="ltr"
+                type="url"
+                value={f.website}
+                onChange={set("website")}
+                maxLength={300}
+                placeholder="https://"
+              />
             </Field>
           </div>
 
@@ -123,13 +164,31 @@ function EventSurvey() {
             <p className="text-sm font-semibold mb-2">روابط صفحات المشروع (إن وجدت)</p>
             <div className="space-y-3">
               <Field label="Facebook">
-                <Input dir="ltr" value={f.facebook_url} onChange={set("facebook_url")} maxLength={300} placeholder="https://facebook.com/..." />
+                <Input
+                  dir="ltr"
+                  value={f.facebook_url}
+                  onChange={set("facebook_url")}
+                  maxLength={300}
+                  placeholder="https://facebook.com/..."
+                />
               </Field>
               <Field label="Instagram">
-                <Input dir="ltr" value={f.instagram_url} onChange={set("instagram_url")} maxLength={300} placeholder="https://instagram.com/..." />
+                <Input
+                  dir="ltr"
+                  value={f.instagram_url}
+                  onChange={set("instagram_url")}
+                  maxLength={300}
+                  placeholder="https://instagram.com/..."
+                />
               </Field>
               <Field label="LinkedIn">
-                <Input dir="ltr" value={f.linkedin_url} onChange={set("linkedin_url")} maxLength={300} placeholder="https://linkedin.com/..." />
+                <Input
+                  dir="ltr"
+                  value={f.linkedin_url}
+                  onChange={set("linkedin_url")}
+                  maxLength={300}
+                  placeholder="https://linkedin.com/..."
+                />
               </Field>
             </div>
           </div>
@@ -139,21 +198,39 @@ function EventSurvey() {
           </Field>
 
           <Field label="صف مشروعك (50 - 150 كلمة)" required>
-            <Textarea value={f.description} onChange={set("description")} required rows={5} maxLength={2000} />
+            <Textarea
+              value={f.description}
+              onChange={set("description")}
+              required
+              rows={5}
+              maxLength={2000}
+            />
             <p className="text-xs text-muted-foreground mt-1">
               عدد الكلمات: {f.description.trim().split(/\s+/).filter(Boolean).length}
             </p>
           </Field>
 
           <Field label="ما المشكلة التي يحلها مشروعك؟" required>
-            <Textarea value={f.problem_solved} onChange={set("problem_solved")} required rows={3} maxLength={1500} />
+            <Textarea
+              value={f.problem_solved}
+              onChange={set("problem_solved")}
+              required
+              rows={3}
+              maxLength={1500}
+            />
           </Field>
 
           <Field label="في أي مرحلة يوجد المشروع الآن؟" required>
             <Select value={f.stage} onValueChange={(v) => setF((s) => ({ ...s, stage: v }))}>
-              <SelectTrigger><SelectValue placeholder="اختر المرحلة" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="اختر المرحلة" />
+              </SelectTrigger>
               <SelectContent>
-                {STAGES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                {STAGES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Field>
@@ -175,7 +252,15 @@ function EventSurvey() {
   );
 }
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <div>
       <Label className="mb-1.5 block">

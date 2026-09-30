@@ -4,7 +4,7 @@ import {
   redactMetadata,
   newCorrelationId,
   AUDIT_SCHEMA_VERSION,
-} from "@/lib/audit-events";
+} from "@/lib/auth/audit-events";
 
 describe("audit event contract", () => {
   it("redacts secret-bearing keys at any depth", () => {

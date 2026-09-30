@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const state = vi.hoisted(() => ({ queue: vi.fn(), outbox: vi.fn() }));
-vi.mock("@/lib/email-queue.server", () => ({ dispatchEmailQueues: state.queue }));
-vi.mock("@/lib/lms-outbox.server", () => ({ processOutbox: state.outbox }));
+vi.mock("@/lib/email/email-queue.server", () => ({ dispatchEmailQueues: state.queue }));
+vi.mock("@/features/lms/lib/outbox.server", () => ({ processOutbox: state.outbox }));
 import { runScheduledJobs } from "@/lib/scheduled-jobs.server";
 beforeEach(() => {
   vi.stubEnv("ENABLE_EMAIL_QUEUES", "true");

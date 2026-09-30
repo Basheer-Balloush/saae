@@ -1,12 +1,12 @@
-import { defineConfig } from '@lovable.dev/vite-tanstack-config';
-import { cloudflare } from '@cloudflare/vite-plugin';
+import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { cloudflare } from "@cloudflare/vite-plugin";
 
 // Local dev only: the Cloudflare worker environment is populated from .env /
 // .dev.vars, so platform-injected secrets available to the Vite process (e.g.
 // LOVABLE_API_KEY) never reach server code. Inline them during `vite dev` so the
 // chat route can use the Lovable AI Gateway in preview. Never inlined in builds.
-const isDevServer = process.argv.includes('dev') || process.argv.includes('serve');
-const devOnlySecrets = ['LOVABLE_API_KEY'];
+const isDevServer = process.argv.includes("dev") || process.argv.includes("serve");
+const devOnlySecrets = ["LOVABLE_API_KEY"];
 const define: Record<string, string> = {};
 if (isDevServer) {
   for (const name of devOnlySecrets) {
@@ -20,6 +20,6 @@ if (isDevServer) {
 // Keep the helper's existing React, Tailwind, aliases and import protection.
 export default defineConfig({
   nitro: false,
-  tanstackStart: { server: { entry: 'server' } },
-  vite: { plugins: [cloudflare({ viteEnvironment: { name: 'ssr' } })], define },
+  tanstackStart: { server: { entry: "server" } },
+  vite: { plugins: [cloudflare({ viteEnvironment: { name: "ssr" } })], define },
 });

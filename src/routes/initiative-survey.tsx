@@ -31,7 +31,13 @@ export const Route = createFileRoute("/initiative-survey")({
 
 const OTHER = "أخرى";
 
-const HEARD_OPTIONS = ["من صديق أو زميل", "وسائل التواصل الاجتماعي", "موقع الجمعية", "فعالية أو ندوة", OTHER];
+const HEARD_OPTIONS = [
+  "من صديق أو زميل",
+  "وسائل التواصل الاجتماعي",
+  "موقع الجمعية",
+  "فعالية أو ندوة",
+  OTHER,
+];
 
 const AI_RELATION = [
   "لم أجرّبها إطلاقًا",
@@ -157,14 +163,18 @@ function SurveyPage() {
     });
   };
 
-  const resolve = (value: string, other: string) => (value === OTHER ? other.trim() || OTHER : value);
+  const resolve = (value: string, other: string) =>
+    value === OTHER ? other.trim() || OTHER : value;
 
   const submit = async () => {
     if (!form.full_name.trim() || !form.phone.trim() || !form.email.trim()) {
       toast.error("الرجاء تعبئة الاسم ورقم الهاتف والبريد الإلكتروني");
       return;
     }
-    const nameWords = form.full_name.trim().split(/\s+/).filter((w) => w.length >= 2);
+    const nameWords = form.full_name
+      .trim()
+      .split(/\s+/)
+      .filter((w) => w.length >= 2);
     if (nameWords.length < 2) {
       toast.error("الرجاء إدخال الاسم الكامل (كلمتين على الأقل)");
       return;
@@ -183,7 +193,10 @@ function SurveyPage() {
       toast.error("الرجاء اختيار نمط الاشتراك");
       return;
     }
-    if (form.subscription_type === "self_and_donate" && (!form.donation_amount || Number(form.donation_amount) < 1)) {
+    if (
+      form.subscription_type === "self_and_donate" &&
+      (!form.donation_amount || Number(form.donation_amount) < 1)
+    ) {
       toast.error("الرجاء إدخال مبلغ التبرّع (دولار واحد على الأقل)");
       return;
     }
@@ -241,8 +254,8 @@ function SurveyPage() {
           <CheckCircle2 className="mx-auto h-16 w-16 text-primary" />
           <h1 className="mt-6 text-3xl font-bold">شكراً لمشاركتك!</h1>
           <p className="mt-4 text-muted-foreground">
-            تم استلام إجاباتك بنجاح، وسنعتمد عليها لبناء أفضل تجربة تعليمية لك ضمن مبادرة مليون مستخدم ذكاء اصطناعي
-            سوري.
+            تم استلام إجاباتك بنجاح، وسنعتمد عليها لبناء أفضل تجربة تعليمية لك ضمن مبادرة مليون
+            مستخدم ذكاء اصطناعي سوري.
           </p>
           <Link to="/initiative">
             <Button className="mt-8">العودة لصفحة المبادرة</Button>
@@ -253,7 +266,10 @@ function SurveyPage() {
   }
 
   return (
-    <div dir="rtl" className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-12 px-4">
+    <div
+      dir="rtl"
+      className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-12 px-4"
+    >
       <div className="mx-auto max-w-3xl">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm text-primary font-semibold">
@@ -261,18 +277,20 @@ function SurveyPage() {
           </div>
           <h1 className="mt-4 text-3xl sm:text-4xl font-bold">شاركنا رأيك — دقيقتان فقط</h1>
           <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
-            إجاباتك ستساعدنا في تصميم مسار تدريبي يناسب احتياجاتك، ويأخذ بعين الاعتبار ظروفك وأدواتك.
+            إجاباتك ستساعدنا في تصميم مسار تدريبي يناسب احتياجاتك، ويأخذ بعين الاعتبار ظروفك
+            وأدواتك.
           </p>
           {responseCount !== null && (
             <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-5 py-2 shadow-sm">
               <Users className="h-4 w-4 text-primary" />
               <span className="text-sm text-muted-foreground">شارك حتى الآن</span>
-              <span className="text-base font-bold text-primary">{responseCount.toLocaleString("ar-EG")}</span>
+              <span className="text-base font-bold text-primary">
+                {responseCount.toLocaleString("ar-EG")}
+              </span>
               <span className="text-sm text-muted-foreground">شخص</span>
             </div>
           )}
         </div>
-
 
         <div className="space-y-6">
           {/* Contact */}
@@ -297,7 +315,10 @@ function SurveyPage() {
                 />
               </Field>
               <Field label="رقم الهاتف / واتساب *">
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                <Input
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
               </Field>
               <Field label="البريد الإلكتروني *">
                 <Input
@@ -413,7 +434,11 @@ function SurveyPage() {
           </Section>
 
           <Section title="٦. ما الجهاز الذي ستستخدمه غالبًا؟">
-            <RadioList value={form.device} onChange={(v) => setForm({ ...form, device: v })} options={DEVICES} />
+            <RadioList
+              value={form.device}
+              onChange={(v) => setForm({ ...form, device: v })}
+              options={DEVICES}
+            />
           </Section>
 
           <Section title="٧. مدى التزامك بإكمال مسار كامل؟">
@@ -491,7 +516,9 @@ function SurveyPage() {
             </RadioGroup>
             {form.subscription_type === "self_and_donate" && (
               <div className="mt-4 rounded-xl border border-border bg-background p-4">
-                <Label className="mb-1.5 block text-sm font-medium">مبلغ التبرّع (بالدولار) *</Label>
+                <Label className="mb-1.5 block text-sm font-medium">
+                  مبلغ التبرّع (بالدولار) *
+                </Label>
                 <Input
                   type="number"
                   min={1}
@@ -515,7 +542,12 @@ function SurveyPage() {
             />
           </Section>
 
-          <Button size="lg" className="w-full h-14 text-base font-bold" onClick={submit} disabled={submitting}>
+          <Button
+            size="lg"
+            className="w-full h-14 text-base font-bold"
+            onClick={submit}
+            disabled={submitting}
+          >
             {submitting ? "جاري الإرسال..." : "إرسال الاستبيان"}
           </Button>
           <p className="text-center text-xs text-muted-foreground">
@@ -561,14 +593,24 @@ function OtherInput({
   );
 }
 
-function RadioList({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
+function RadioList({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
   return (
     <RadioGroup value={value} onValueChange={onChange} className="space-y-2">
       {options.map((opt) => (
         <label
           key={opt}
           className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition ${
-            value === opt ? "border-primary bg-primary/5" : "border-border bg-background hover:bg-muted/50"
+            value === opt
+              ? "border-primary bg-primary/5"
+              : "border-border bg-background hover:bg-muted/50"
           }`}
         >
           <RadioGroupItem value={opt} />

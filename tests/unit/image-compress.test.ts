@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { COMPRESS_ABOVE_BYTES, fitWithin, shouldCompress, webpPath } from "../../src/lib/image-compress";
+import {
+  COMPRESS_ABOVE_BYTES,
+  fitWithin,
+  shouldCompress,
+  webpPath,
+} from "../../src/lib/image-compress";
 
 describe("which uploads get compressed", () => {
   it("compresses the phone photographs that caused the egress bill", () => {

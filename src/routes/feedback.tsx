@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { StarRating } from "@/components/feedback/StarRating";
+import { StarRating } from "@/features/feedback-survey/StarRating";
 import {
   AGE_RANGES,
   CONTACT_METHODS,
@@ -22,13 +22,13 @@ import {
   type Lang,
   type NoteKey,
   type RatingSection,
-} from "@/lib/feedback-survey";
+} from "@/features/feedback-survey/lib/feedback-survey";
 import {
   getFeedbackUploadUrl,
   startFeedbackSurvey,
   submitFeedbackSurvey,
-} from "@/lib/feedback-survey.functions";
-import "@/components/feedback/feedback.css";
+} from "@/features/feedback-survey/lib/feedback-survey.functions";
+import "@/features/feedback-survey/feedback.css";
 
 export const Route = createFileRoute("/feedback")({
   validateSearch: (s) => z.object({ lang: z.enum(["ar", "en"]).optional() }).parse(s),
@@ -37,7 +37,8 @@ export const Route = createFileRoute("/feedback")({
       { title: "شاركنا رأيك — استبيان التجربة الرقمية | SAAE" },
       {
         name: "description",
-        content: "رأيك يساعدنا على تطوير موقع الجمعية السورية للذكاء الاصطناعي وريادة الأعمال ومنصتها التعليمية وخدماتها الرقمية.",
+        content:
+          "رأيك يساعدنا على تطوير موقع الجمعية السورية للذكاء الاصطناعي وريادة الأعمال ومنصتها التعليمية وخدماتها الرقمية.",
       },
       { property: "og:title", content: "شاركنا رأيك — استبيان التجربة الرقمية لجمعية SAAE" },
       {
@@ -90,7 +91,13 @@ const EMPTY: Draft = {
   device_type: "",
   services_used: [],
   answers: {},
-  notes: { positive_notes: "", improvement_notes: "", problem_notes: "", requested_feature: "", general_notes: "" },
+  notes: {
+    positive_notes: "",
+    improvement_notes: "",
+    problem_notes: "",
+    requested_feature: "",
+    general_notes: "",
+  },
   wants_contact: false,
   contact_name: "",
   contact_value: "",
@@ -152,9 +159,11 @@ const TX = {
   },
   en: {
     title: "Share your feedback",
-    subtitle: "Your opinion helps us improve SAAE's website, learning platform and digital services.",
+    subtitle:
+      "Your opinion helps us improve SAAE's website, learning platform and digital services.",
     time: "The survey takes 4 to 6 minutes.",
-    privacy: "You can take part without giving your name. Answers are used only to improve our services.",
+    privacy:
+      "You can take part without giving your name. Answers are used only to improve our services.",
     step: (a: number, b: number) => `Step ${a} of ${b}`,
     about: "About you",
     aboutHint: "Every field in this section is optional.",
@@ -203,7 +212,11 @@ const TX = {
   },
 };
 
-type StepDef = { kind: "profile" } | { kind: "section"; section: RatingSection } | { kind: "notes" } | { kind: "review" };
+type StepDef =
+  | { kind: "profile" }
+  | { kind: "section"; section: RatingSection }
+  | { kind: "notes" }
+  | { kind: "review" };
 
 function FeedbackPage() {
   const search = Route.useSearch();
@@ -273,7 +286,9 @@ function FeedbackPage() {
     setDraft((d) => ({ ...d, answers: { ...d.answers, [key]: v } }));
 
   const sectionMissing = (s: RatingSection) =>
-    s.allowNA ? [] : s.questions.filter((q) => draft.answers[q.key] === undefined).map((q) => q.key);
+    s.allowNA
+      ? []
+      : s.questions.filter((q) => draft.answers[q.key] === undefined).map((q) => q.key);
   const contactInvalid = draft.wants_contact && draft.contact_value.trim().length < 5;
 
   const stepValid = (st: StepDef) => {
@@ -286,20 +301,25 @@ function FeedbackPage() {
     setShowErrors(false);
     setError(null);
     set("step", i);
-    requestAnimationFrame(() => topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    requestAnimationFrame(() =>
+      topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
   };
   const next = () => {
     if (!stepValid(step)) {
       setShowErrors(true);
       requestAnimationFrame(() => {
-        document.querySelector<HTMLElement>(".fb-q.is-invalid button, .fb-field.is-invalid input")?.focus();
+        document
+          .querySelector<HTMLElement>(".fb-q.is-invalid button, .fb-field.is-invalid input")
+          ?.focus();
       });
       return;
     }
     goTo(stepIdx + 1);
   };
 
-  const switchLang = () => navigate({ to: "/feedback", search: { lang: lang === "ar" ? "en" : undefined } });
+  const switchLang = () =>
+    navigate({ to: "/feedback", search: { lang: lang === "ar" ? "en" : undefined } });
 
   const onFile = (f: File | null) => {
     setFileError(false);
@@ -331,7 +351,11 @@ function FeedbackPage() {
       if (file && draft.submissionId) {
         try {
           const up = await uploadUrl({
-            data: { submissionId: draft.submissionId, contentType: file.type as "image/png", size: file.size },
+            data: {
+              submissionId: draft.submissionId,
+              contentType: file.type as "image/png",
+              size: file.size,
+            },
           });
           const { error: upErr } = await supabase.storage
             .from("feedback-screenshots")
@@ -346,7 +370,9 @@ function FeedbackPage() {
       const visibleKeys = new Set(
         steps.flatMap((s) => (s.kind === "section" ? s.section.questions.map((q) => q.key) : [])),
       );
-      const answers = Object.fromEntries(Object.entries(draft.answers).filter(([k]) => visibleKeys.has(k)));
+      const answers = Object.fromEntries(
+        Object.entries(draft.answers).filter(([k]) => visibleKeys.has(k)),
+      );
       const res = await submit({
         data: {
           submissionId: draft.submissionId,
@@ -370,7 +396,13 @@ function FeedbackPage() {
         } as never,
       });
       if (!res.ok) {
-        setError(res.error === "rate_limited" ? tr.rate : res.error === "missing_required" ? tr.missing : tr.error);
+        setError(
+          res.error === "rate_limited"
+            ? tr.rate
+            : res.error === "missing_required"
+              ? tr.missing
+              : tr.error,
+        );
         return;
       }
       localStorage.removeItem(DRAFT_KEY);
@@ -378,9 +410,7 @@ function FeedbackPage() {
       requestAnimationFrame(() => topRef.current?.scrollIntoView({ block: "start" }));
     } catch (e) {
       console.error("[feedback] submit failed", e);
-      setError(
-        import.meta.env.DEV && e instanceof Error ? `${tr.error} (${e.message})` : tr.error,
-      );
+      setError(import.meta.env.DEV && e instanceof Error ? `${tr.error} (${e.message})` : tr.error);
     } finally {
       setSending(false);
     }
@@ -402,7 +432,15 @@ function FeedbackPage() {
       <header className="fb-header">
         <div className="fb-header-inner">
           <a href="/" className="fb-logo-link" aria-label="SAAE">
-            <img src={LOGO} alt={lang === "ar" ? "شعار الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" : "SAAE logo"} className="fb-logo" width={374} height={400} />
+            <img
+              src={LOGO}
+              alt={
+                lang === "ar" ? "شعار الجمعية السورية للذكاء الاصطناعي وريادة الأعمال" : "SAAE logo"
+              }
+              className="fb-logo"
+              width={374}
+              height={400}
+            />
           </a>
           <button type="button" className="fb-lang" onClick={switchLang}>
             {tr.switchLang}
@@ -440,7 +478,13 @@ function FeedbackPage() {
                 <span>{tr.step(stepIdx + 1, steps.length)}</span>
                 <span>{progress}%</span>
               </div>
-              <div className="fb-progress-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
+              <div
+                className="fb-progress-bar"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progress}
+              >
                 <span style={{ inlineSize: `${progress}%` }} />
               </div>
             </div>
@@ -460,13 +504,45 @@ function FeedbackPage() {
                 <>
                   <h2 className="fb-h2">{tr.about}</h2>
                   <p className="fb-hint">{tr.aboutHint}</p>
-                  <ChoiceGroup legend={tr.userType} options={USER_TYPES} value={draft.user_type} onChange={(v) => set("user_type", v)} lang={lang} />
+                  <ChoiceGroup
+                    legend={tr.userType}
+                    options={USER_TYPES}
+                    value={draft.user_type}
+                    onChange={(v) => set("user_type", v)}
+                    lang={lang}
+                  />
                   <div className="fb-grid-2">
-                    <SelectField label={tr.age} options={AGE_RANGES} value={draft.age_range} onChange={(v) => set("age_range", v)} lang={lang} placeholder={tr.choose} />
-                    <SelectField label={tr.gov} options={GOVERNORATES} value={draft.governorate} onChange={(v) => set("governorate", v)} lang={lang} placeholder={tr.choose} />
+                    <SelectField
+                      label={tr.age}
+                      options={AGE_RANGES}
+                      value={draft.age_range}
+                      onChange={(v) => set("age_range", v)}
+                      lang={lang}
+                      placeholder={tr.choose}
+                    />
+                    <SelectField
+                      label={tr.gov}
+                      options={GOVERNORATES}
+                      value={draft.governorate}
+                      onChange={(v) => set("governorate", v)}
+                      lang={lang}
+                      placeholder={tr.choose}
+                    />
                   </div>
-                  <ChoiceGroup legend={tr.freq} options={FREQUENCIES} value={draft.usage_frequency} onChange={(v) => set("usage_frequency", v)} lang={lang} />
-                  <ChoiceGroup legend={tr.device} options={DEVICES} value={draft.device_type} onChange={(v) => set("device_type", v)} lang={lang} />
+                  <ChoiceGroup
+                    legend={tr.freq}
+                    options={FREQUENCIES}
+                    value={draft.usage_frequency}
+                    onChange={(v) => set("usage_frequency", v)}
+                    lang={lang}
+                  />
+                  <ChoiceGroup
+                    legend={tr.device}
+                    options={DEVICES}
+                    value={draft.device_type}
+                    onChange={(v) => set("device_type", v)}
+                    lang={lang}
+                  />
                   <fieldset className="fb-group">
                     <legend className="fb-q-label">{tr.services}</legend>
                     <p className="fb-hint">{tr.servicesHint}</p>
@@ -483,7 +559,8 @@ function FeedbackPage() {
                                   ? draft.services_used.filter((x) => x !== s.value)
                                   : [...draft.services_used, s.value];
                                 if (s.value === "none" && !on) list = ["none"];
-                                else if (s.value !== "none") list = list.filter((x) => x !== "none");
+                                else if (s.value !== "none")
+                                  list = list.filter((x) => x !== "none");
                                 set("services_used", list);
                               }}
                             />
@@ -500,7 +577,12 @@ function FeedbackPage() {
                 <>
                   <h2 className="fb-h2">{step.section[lang]}</h2>
                   <p className="fb-hint">
-                    {step.section.allowNA ? tr.naAllowed : `${tr.required}: ${RATING_LABELS[lang].slice(1).map((l, i) => `${i + 1} ${l}`).join(" · ")}`}
+                    {step.section.allowNA
+                      ? tr.naAllowed
+                      : `${tr.required}: ${RATING_LABELS[lang]
+                          .slice(1)
+                          .map((l, i) => `${i + 1} ${l}`)
+                          .join(" · ")}`}
                   </p>
                   {step.section.questions.map((q) => (
                     <StarRating
@@ -511,7 +593,9 @@ function FeedbackPage() {
                       onChange={(v) => setAnswer(q.key, v)}
                       allowNA={step.section.allowNA}
                       lang={lang}
-                      invalid={showErrors && !step.section.allowNA && draft.answers[q.key] === undefined}
+                      invalid={
+                        showErrors && !step.section.allowNA && draft.answers[q.key] === undefined
+                      }
                     />
                   ))}
                 </>
@@ -540,7 +624,12 @@ function FeedbackPage() {
                       {tr.screenshot}
                     </label>
                     <p className="fb-hint">{tr.screenshotHint}</p>
-                    <input id="fb-file" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => onFile(e.target.files?.[0] ?? null)} />
+                    <input
+                      id="fb-file"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={(e) => onFile(e.target.files?.[0] ?? null)}
+                    />
                     {file && (
                       <p className="fb-file">
                         {file.name}{" "}
@@ -549,14 +638,26 @@ function FeedbackPage() {
                         </button>
                       </p>
                     )}
-                    {fileError && <p className="fb-err" role="alert">{tr.screenshotBad}</p>}
+                    {fileError && (
+                      <p className="fb-err" role="alert">
+                        {tr.screenshotBad}
+                      </p>
+                    )}
                   </div>
                   <fieldset className="fb-group">
                     <legend className="fb-q-label">{tr.wantsContact}</legend>
                     <div className="fb-chips">
                       {[true, false].map((v) => (
-                        <label key={String(v)} className={`fb-chip ${draft.wants_contact === v ? "is-on" : ""}`}>
-                          <input type="radio" name="wants_contact" checked={draft.wants_contact === v} onChange={() => set("wants_contact", v)} />
+                        <label
+                          key={String(v)}
+                          className={`fb-chip ${draft.wants_contact === v ? "is-on" : ""}`}
+                        >
+                          <input
+                            type="radio"
+                            name="wants_contact"
+                            checked={draft.wants_contact === v}
+                            onChange={() => set("wants_contact", v)}
+                          />
                           <span>{v ? tr.yes : tr.no}</span>
                         </label>
                       ))}
@@ -565,15 +666,45 @@ function FeedbackPage() {
                   {draft.wants_contact && (
                     <div className="fb-grid-2">
                       <div className="fb-field">
-                        <label htmlFor="fb-name" className="fb-q-label">{tr.name}</label>
-                        <input id="fb-name" maxLength={120} value={draft.contact_name} onChange={(e) => set("contact_name", e.target.value)} autoComplete="name" />
+                        <label htmlFor="fb-name" className="fb-q-label">
+                          {tr.name}
+                        </label>
+                        <input
+                          id="fb-name"
+                          maxLength={120}
+                          value={draft.contact_name}
+                          onChange={(e) => set("contact_name", e.target.value)}
+                          autoComplete="name"
+                        />
                       </div>
-                      <div className={`fb-field ${showErrors && contactInvalid ? "is-invalid" : ""}`}>
-                        <label htmlFor="fb-contact" className="fb-q-label">{tr.contactValue}</label>
-                        <input id="fb-contact" dir="ltr" maxLength={200} value={draft.contact_value} onChange={(e) => set("contact_value", e.target.value)} aria-invalid={showErrors && contactInvalid} />
-                        {showErrors && contactInvalid && <p className="fb-err" role="alert">{tr.contactRequired}</p>}
+                      <div
+                        className={`fb-field ${showErrors && contactInvalid ? "is-invalid" : ""}`}
+                      >
+                        <label htmlFor="fb-contact" className="fb-q-label">
+                          {tr.contactValue}
+                        </label>
+                        <input
+                          id="fb-contact"
+                          dir="ltr"
+                          maxLength={200}
+                          value={draft.contact_value}
+                          onChange={(e) => set("contact_value", e.target.value)}
+                          aria-invalid={showErrors && contactInvalid}
+                        />
+                        {showErrors && contactInvalid && (
+                          <p className="fb-err" role="alert">
+                            {tr.contactRequired}
+                          </p>
+                        )}
                       </div>
-                      <SelectField label={tr.method} options={CONTACT_METHODS} value={draft.preferred_contact_method} onChange={(v) => set("preferred_contact_method", v)} lang={lang} placeholder={tr.choose} />
+                      <SelectField
+                        label={tr.method}
+                        options={CONTACT_METHODS}
+                        value={draft.preferred_contact_method}
+                        onChange={(v) => set("preferred_contact_method", v)}
+                        lang={lang}
+                        placeholder={tr.choose}
+                      />
                     </div>
                   )}
                 </>
@@ -589,7 +720,9 @@ function FeedbackPage() {
                       <div className="fb-review" key={s.section.key}>
                         <div className="fb-review-head">
                           <h3>{s.section[lang]}</h3>
-                          <button type="button" className="fb-link" onClick={() => goTo(i)}>{tr.edit}</button>
+                          <button type="button" className="fb-link" onClick={() => goTo(i)}>
+                            {tr.edit}
+                          </button>
                         </div>
                         <ul>
                           {s.section.questions.map((q) => {
@@ -598,7 +731,11 @@ function FeedbackPage() {
                               <li key={q.key}>
                                 <span>{q[lang]}</span>
                                 <strong>
-                                  {typeof v === "number" ? `${"★".repeat(v)} ${v}/5 · ${RATING_LABELS[lang][v]}` : v === "na" ? NA_LABEL[lang] : tr.unanswered}
+                                  {typeof v === "number"
+                                    ? `${"★".repeat(v)} ${v}/5 · ${RATING_LABELS[lang][v]}`
+                                    : v === "na"
+                                      ? NA_LABEL[lang]
+                                      : tr.unanswered}
                                 </strong>
                               </li>
                             );
@@ -607,22 +744,43 @@ function FeedbackPage() {
                       </div>
                     );
                   })}
-                  <label className={`fb-consent ${showErrors && !draft.consent ? "is-invalid" : ""}`}>
-                    <input type="checkbox" checked={draft.consent} onChange={(e) => set("consent", e.target.checked)} />
+                  <label
+                    className={`fb-consent ${showErrors && !draft.consent ? "is-invalid" : ""}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={draft.consent}
+                      onChange={(e) => set("consent", e.target.checked)}
+                    />
                     <span>{tr.consent}</span>
                   </label>
-                  {showErrors && !draft.consent && <p className="fb-err" role="alert">{tr.consentRequired}</p>}
+                  {showErrors && !draft.consent && (
+                    <p className="fb-err" role="alert">
+                      {tr.consentRequired}
+                    </p>
+                  )}
                 </>
               )}
 
               {showErrors && step.kind === "section" && !stepValid(step) && (
-                <p className="fb-err fb-err-box" role="alert">{tr.missing}</p>
+                <p className="fb-err fb-err-box" role="alert">
+                  {tr.missing}
+                </p>
               )}
-              {error && <p className="fb-err fb-err-box" role="alert">{error}</p>}
+              {error && (
+                <p className="fb-err fb-err-box" role="alert">
+                  {error}
+                </p>
+              )}
 
               <div className="fb-actions">
                 {stepIdx > 0 && (
-                  <button type="button" className="fb-btn fb-btn-ghost" onClick={() => goTo(stepIdx - 1)} disabled={sending}>
+                  <button
+                    type="button"
+                    className="fb-btn fb-btn-ghost"
+                    onClick={() => goTo(stepIdx - 1)}
+                    disabled={sending}
+                  >
                     {tr.back}
                   </button>
                 )}
@@ -673,7 +831,13 @@ function ChoiceGroup({
       <div className="fb-chips">
         {options.map((o) => (
           <label key={o.value} className={`fb-chip ${value === o.value ? "is-on" : ""}`}>
-            <input type="radio" name={name} checked={value === o.value} onChange={() => onChange(o.value)} onClick={() => value === o.value && onChange("")} />
+            <input
+              type="radio"
+              name={name}
+              checked={value === o.value}
+              onChange={() => onChange(o.value)}
+              onClick={() => value === o.value && onChange("")}
+            />
             <span>{o[lang]}</span>
           </label>
         ))}
@@ -700,11 +864,15 @@ function SelectField({
   const id = `sel-${options[0]?.value}`;
   return (
     <div className="fb-field">
-      <label htmlFor={id} className="fb-q-label">{label}</label>
+      <label htmlFor={id} className="fb-q-label">
+        {label}
+      </label>
       <select id={id} value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">{placeholder}</option>
         {options.map((o) => (
-          <option key={o.value} value={o.value}>{o[lang]}</option>
+          <option key={o.value} value={o.value}>
+            {o[lang]}
+          </option>
         ))}
       </select>
     </div>

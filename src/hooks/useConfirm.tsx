@@ -1,4 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useLang } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n/i18n";
 
 /**
  * Accessible replacement for native window.confirm() — Phase 10 (CF-06).
@@ -87,7 +96,9 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
         <AlertDialogContent dir={isAr ? "rtl" : "ltr"}>
           <AlertDialogHeader>
             <AlertDialogTitle>{opts?.title ?? ""}</AlertDialogTitle>
-            {opts?.description && <AlertDialogDescription>{opts.description}</AlertDialogDescription>}
+            {opts?.description && (
+              <AlertDialogDescription>{opts.description}</AlertDialogDescription>
+            )}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => settle(false)}>{cancelLabel}</AlertDialogCancel>

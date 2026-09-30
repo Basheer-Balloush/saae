@@ -1,11 +1,22 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { Mic, Landmark, Presentation, Link2, MessageSquare, Users, Boxes, Clock, Calendar, MapPin } from "lucide-react";
-import ministryEconomy from "@/assets/ministry-economy.png.asset.json";
-import ministryComms from "@/assets/ministry-communications-v2.png.asset.json";
-import { useLang } from "@/lib/i18n";
+import { Navbar } from "@/features/website/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import {
+  Mic,
+  Landmark,
+  Presentation,
+  Link2,
+  MessageSquare,
+  Users,
+  Boxes,
+  Clock,
+  Calendar,
+  MapPin,
+} from "lucide-react";
+import ministryEconomy from "@/assets/ministries/ministry-economy.png.asset.json";
+import ministryComms from "@/assets/ministries/ministry-communications-v2.png.asset.json";
+import { useLang } from "@/lib/i18n/i18n";
 
 // 30 July 2026, 11:00 AM Damascus time (UTC+3, no DST)
 const TARGET_MS = Date.UTC(2026, 6, 30, 8, 0, 0);
@@ -83,12 +94,23 @@ const CONTENT = {
       title: "International Business Bridge to Syrian Talent — SAAE",
       description:
         "International Business Bridge to Syrian Talent conference — July 30, 2026, National Library, Damascus.",
-      ogDescription: "Connecting talent with opportunities, building the future of business and technology.",
+      ogDescription:
+        "Connecting talent with opportunities, building the future of business and technology.",
     },
   },
 } as const;
 
-const AGENDA_ICONS = [Mic, Landmark, Landmark, Presentation, Presentation, Link2, MessageSquare, Users, Boxes];
+const AGENDA_ICONS = [
+  Mic,
+  Landmark,
+  Landmark,
+  Presentation,
+  Presentation,
+  Link2,
+  MessageSquare,
+  Users,
+  Boxes,
+];
 
 function useCountdown(target: number) {
   const [now, setNow] = useState<number | null>(null);
@@ -105,7 +127,6 @@ function useCountdown(target: number) {
   const seconds = Math.floor((safe % 60_000) / 1000);
   return { days, hours, minutes, seconds, done: now !== null && diff === 0, ready: now !== null };
 }
-
 
 export const Route = createFileRoute("/international-business-bridge")({
   head: () => ({
@@ -125,9 +146,7 @@ export const Route = createFileRoute("/international-business-bridge")({
       { property: "og:url", content: "https://aisyria.org/international-business-bridge" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [
-      { rel: "canonical", href: "https://aisyria.org/international-business-bridge" },
-    ],
+    links: [{ rel: "canonical", href: "https://aisyria.org/international-business-bridge" }],
   }),
   component: IbbPage,
 });
@@ -167,9 +186,7 @@ function IbbPage() {
         </section>
 
         <section className="mt-12">
-          <p className="text-center text-lg sm:text-xl text-muted-foreground">
-            {t.sponsors}
-          </p>
+          <p className="text-center text-lg sm:text-xl text-muted-foreground">{t.sponsors}</p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-10 sm:gap-20">
             <div className="flex flex-col items-center gap-3">
               <img
@@ -189,16 +206,10 @@ function IbbPage() {
         </section>
 
         <section className="mt-16">
-          <h2 className="text-center text-2xl sm:text-3xl font-semibold">
-            {t.countdownTitle}
-          </h2>
-          <p className="mt-2 text-center text-sm text-muted-foreground">
-            {t.countdownSub}
-          </p>
+          <h2 className="text-center text-2xl sm:text-3xl font-semibold">{t.countdownTitle}</h2>
+          <p className="mt-2 text-center text-sm text-muted-foreground">{t.countdownSub}</p>
           {done ? (
-            <p className="mt-6 text-center text-xl font-semibold text-primary">
-              {t.started}
-            </p>
+            <p className="mt-6 text-center text-xl font-semibold text-primary">{t.started}</p>
           ) : (
             <div className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4" dir="ltr">
               <Cell value={days} label={t.days} />
@@ -210,9 +221,7 @@ function IbbPage() {
         </section>
 
         <section className="mt-16">
-          <h2 className="text-center text-2xl sm:text-3xl font-semibold">
-            {t.agendaTitle}
-          </h2>
+          <h2 className="text-center text-2xl sm:text-3xl font-semibold">{t.agendaTitle}</h2>
           <ol className="mx-auto mt-8 max-w-3xl space-y-3">
             {t.agenda.map((text, i) => {
               const Icon = AGENDA_ICONS[i] ?? Mic;
@@ -225,7 +234,9 @@ function IbbPage() {
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="flex-1 pt-1.5 text-base sm:text-lg leading-relaxed">
-                    <span className={`${l === "ar" ? "ml-2" : "mr-2"} text-sm font-semibold text-primary tabular-nums`}>
+                    <span
+                      className={`${l === "ar" ? "ml-2" : "mr-2"} text-sm font-semibold text-primary tabular-nums`}
+                    >
                       {String(i + 1).padStart(2, "0")}.
                     </span>
                     {text}
@@ -256,7 +267,6 @@ function IbbPage() {
             ))}
           </div>
         </section>
-
       </main>
       <Footer />
     </div>

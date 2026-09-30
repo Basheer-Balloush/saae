@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { useLang } from "@/lib/i18n";
-import ministryLogo from "@/assets/ministry-communications.png.asset.json";
+import { Navbar } from "@/features/website/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { useLang } from "@/lib/i18n/i18n";
+import ministryLogo from "@/assets/ministries/ministry-communications.png.asset.json";
 
 import {
   Target,
@@ -38,9 +38,7 @@ export const Route = createFileRoute("/one-million-initiative")({
       { property: "og:url", content: "https://aisyria.org/one-million-initiative" },
       { property: "og:type", content: "website" },
     ],
-    links: [
-      { rel: "canonical", href: "https://aisyria.org/one-million-initiative" },
-    ],
+    links: [{ rel: "canonical", href: "https://aisyria.org/one-million-initiative" }],
   }),
   component: OneMillionInitiativePage,
 });
@@ -127,8 +125,7 @@ const content = {
         body: "استناداً إلى تفعيل المسؤولية المجتمعية للمؤسسات والشركات والأفراد، فتحنا باب التبرع للمؤسسات لرعاية المقاعد التدريبية. يدخل الأفراد غير القادرين على الدفع في قوائم انتظار منظمة للحصول على هذه المقاعد المجانية فور توفرها.",
       },
     },
-    infraIntro:
-      "يعتمد المشروع على منصة رقمية متطورة توفر أعلى درجات الشفافية والمتابعة اللحظية.",
+    infraIntro: "يعتمد المشروع على منصة رقمية متطورة توفر أعلى درجات الشفافية والمتابعة اللحظية.",
     infra: [
       {
         title: "لوحة إحصائيات حية",
@@ -156,8 +153,7 @@ const content = {
   },
   en: {
     ministryAlt: "Ministry of Communications and Information Technology",
-    badge:
-      "National Initiative — Implemented by the Syrian Association for AI & Entrepreneurship",
+    badge: "National Initiative — Implemented by the Syrian Association for AI & Entrepreneurship",
     heroTitle: "One Million Syrian AI Users",
     heroBody:
       "A strategic proposal for a national initiative to eradicate AI illiteracy, empower Syrian human capital with the tools of the future, and build career paths aligned with the demands of the modern labor market.",
@@ -181,7 +177,10 @@ const content = {
     s2: { eyebrow: "Section Two", title: "Academic Methodology and Quality Standards" },
     s3: { eyebrow: "Section Three", title: "Innovative Economic Model and Project Sustainability" },
     s4: { eyebrow: "Section Four", title: "Technological Infrastructure and Transparency" },
-    s5: { eyebrow: "Section Five", title: "Cooperation Horizons and Required Ministerial Endorsement" },
+    s5: {
+      eyebrow: "Section Five",
+      title: "Cooperation Horizons and Required Ministerial Endorsement",
+    },
     goals: [
       {
         title: "Building Capacity at Scale",
@@ -369,9 +368,7 @@ function Stats({ items }: { items: ReadonlyArray<{ value: string; label: string 
                 : "text-center"
             }
           >
-            <div className="text-2xl font-bold text-primary sm:text-3xl lg:text-4xl">
-              {s.value}
-            </div>
+            <div className="text-2xl font-bold text-primary sm:text-3xl lg:text-4xl">{s.value}</div>
             <div className="mt-2 text-xs font-medium text-muted-foreground sm:text-sm">
               {s.label}
             </div>
@@ -397,9 +394,7 @@ function Section({
   variant?: "default" | "muted";
 }) {
   return (
-    <section
-      className={variant === "muted" ? "border-y border-border bg-muted/30" : ""}
-    >
+    <section className={variant === "muted" ? "border-y border-border bg-muted/30" : ""}>
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-24">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -408,9 +403,7 @@ function Section({
           <p className="mt-5 text-xs font-semibold uppercase tracking-widest text-secondary">
             {eyebrow}
           </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-            {title}
-          </h2>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
         </div>
         <div className="mt-12">{children}</div>
       </div>
@@ -433,9 +426,7 @@ function GoalsGrid({ goals }: { goals: ReadonlyArray<{ title: string; body: stri
             </span>
             <div>
               <h3 className="text-lg font-bold text-foreground">{g.title}</h3>
-              <p className="mt-3 text-sm leading-loose text-muted-foreground">
-                {g.body}
-              </p>
+              <p className="mt-3 text-sm leading-loose text-muted-foreground">{g.body}</p>
             </div>
           </div>
         </article>
@@ -465,12 +456,8 @@ function MethodologyGrid({
           >
             <CheckCircle2 className="h-6 w-6 flex-none text-primary" />
             <div>
-              <h3 className="text-base font-bold text-foreground sm:text-lg">
-                {it.title}
-              </h3>
-              <p className="mt-2 text-sm leading-loose text-muted-foreground">
-                {it.body}
-              </p>
+              <h3 className="text-base font-bold text-foreground sm:text-lg">{it.title}</h3>
+              <p className="mt-2 text-sm leading-loose text-muted-foreground">{it.body}</p>
             </div>
           </div>
         ))}
@@ -546,9 +533,7 @@ function Infrastructure({
               <p className="mt-1 text-xs font-mono uppercase tracking-wider text-muted-foreground">
                 {it.en}
               </p>
-              <p className="mt-4 text-sm leading-loose text-muted-foreground">
-                {it.body}
-              </p>
+              <p className="mt-4 text-sm leading-loose text-muted-foreground">{it.body}</p>
             </article>
           );
         })}
@@ -580,9 +565,7 @@ function Collaboration({
               {String(i + 1).padStart(2, "0")}
             </span>
             <h3 className="mt-2 text-xl font-bold">{it.title}</h3>
-            <p className="mt-4 text-sm leading-loose text-muted-foreground">
-              {it.body}
-            </p>
+            <p className="mt-4 text-sm leading-loose text-muted-foreground">{it.body}</p>
           </article>
         ))}
       </div>
@@ -766,8 +749,6 @@ function GeographySection({
           </div>
         </div>
 
-
-
         {/* Text cards */}
         <div className="space-y-6">
           <article className="rounded-3xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-soft">
@@ -775,9 +756,7 @@ function GeographySection({
               <Archive className="h-6 w-6" />
             </div>
             <h3 className="mt-5 text-xl font-bold">{geo.lead1}</h3>
-            <p className="mt-4 text-sm leading-loose text-muted-foreground">
-              {geo.body1}
-            </p>
+            <p className="mt-4 text-sm leading-loose text-muted-foreground">{geo.body1}</p>
           </article>
 
           <article className="rounded-3xl border border-border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-soft">
@@ -785,13 +764,10 @@ function GeographySection({
               <MapPin className="h-6 w-6" />
             </div>
             <h3 className="mt-5 text-xl font-bold">{geo.lead2}</h3>
-            <p className="mt-4 text-sm leading-loose text-muted-foreground">
-              {geo.body2}
-            </p>
+            <p className="mt-4 text-sm leading-loose text-muted-foreground">{geo.body2}</p>
           </article>
         </div>
       </div>
     </div>
   );
 }
-

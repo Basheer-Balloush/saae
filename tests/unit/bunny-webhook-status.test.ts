@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   lessonStatusFromBunnyVideo,
   lessonStatusFromBunnyWebhook,
-} from "../../src/lib/bunny-webhook-status";
+} from "../../src/features/lms/lib/bunny-webhook-status";
 
 describe("Bunny webhook status", () => {
   it("marks the lesson playable when encoding finishes or the first resolution is ready", () => {
@@ -30,6 +30,7 @@ describe("Bunny video object status", () => {
     expect(lessonStatusFromBunnyVideo(8)).toBe("ready");
     expect(lessonStatusFromBunnyVideo(5)).toBe("failed");
     expect(lessonStatusFromBunnyVideo(6)).toBe("failed");
-    for (const s of [0, 1, 2, 3, 7, undefined]) expect(lessonStatusFromBunnyVideo(s)).toBe("processing");
+    for (const s of [0, 1, 2, 3, 7, undefined])
+      expect(lessonStatusFromBunnyVideo(s)).toBe("processing");
   });
 });

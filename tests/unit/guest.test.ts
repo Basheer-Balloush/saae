@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { User } from "@supabase/supabase-js";
-import { guestLabel, isGuestUser } from "@/lib/guest";
-import { couponErrorMessage } from "@/lib/coupons";
+import { guestLabel, isGuestUser } from "@/features/lms/lib/guest";
+import { couponErrorMessage } from "@/features/lms/lib/coupons";
 
 const user = (extra: Partial<User>) => ({ id: "u", ...extra }) as User;
 

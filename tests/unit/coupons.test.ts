@@ -14,7 +14,7 @@ import {
   randomCode,
   whatsappNumber,
   type PaymentEntry,
-} from "@/lib/coupons";
+} from "@/features/lms/lib/coupons";
 
 describe("codes", () => {
   it("ignore capitals and spaces", () => {

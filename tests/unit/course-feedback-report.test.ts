@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { FormDefinition } from "@/lib/course-feedback-survey";
+import type { FormDefinition } from "@/features/lms/course-feedback/lib/survey";
 import {
   feedbackCsv,
   responseLines,
   summarizeFeedback,
   versionKey,
   type ReportResponse,
-} from "@/lib/course-feedback-report";
+} from "@/features/lms/course-feedback/lib/report";
 
 const F = "00000000-0000-0000-0000-00000000000f";
 

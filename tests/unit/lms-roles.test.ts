@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveLmsRole } from "../../src/lib/lms-roles";
+import { resolveLmsRole } from "../../src/features/lms/lib/roles";
 
 describe("canonical LMS role", () => {
   it("recognizes a single admin without an instructor or student record", () => {

@@ -8,7 +8,7 @@ import {
   saveWatch,
   watchedSeconds,
   watchedShare,
-} from "@/lib/lesson-watch";
+} from "@/features/lms/lib/lesson-watch";
 
 /** Plays from `from` to `to` at `rate`, reporting every 250 ms of wall time. */
 function play(t: WatchTracker, clock: { now: number }, from: number, to: number, rate = 1) {

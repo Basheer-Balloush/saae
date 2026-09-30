@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { getUnansweredQuestions, isQuestionAnswered } from "../../src/lib/quiz-validation";
-import { isConsoleLmsPath, isSkinnedLmsPath } from "../../src/components/lms-skin/skin";
+import {
+  getUnansweredQuestions,
+  isQuestionAnswered,
+} from "../../src/features/lms/lib/quiz-validation";
+import { isConsoleLmsPath, isSkinnedLmsPath } from "../../src/features/lms/skin/skin";
 
 const questions = [
   { question_key: "first", choices: ["A", "B"] },

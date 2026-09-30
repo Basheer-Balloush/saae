@@ -14,8 +14,8 @@ const state = vi.hoisted(() => ({
 vi.mock("@supabase/supabase-js", () => ({
   createClient: () => ({ rpc: state.rpc, from: state.from }),
 }));
-import { dispatchEmailQueues, processEmailQueues } from "@/lib/email-queue.server";
-import { renderQueuedEmail } from "@/lib/queued-email.server";
+import { dispatchEmailQueues, processEmailQueues } from "@/lib/email/email-queue.server";
+import { renderQueuedEmail } from "@/lib/email/queued-email.server";
 
 const address = "tester@example.test";
 const token = "a".repeat(48);

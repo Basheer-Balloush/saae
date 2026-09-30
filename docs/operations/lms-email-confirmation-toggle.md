@@ -3,7 +3,7 @@
 The LMS signup flow reads a single server-controlled switch:
 `public.lms_settings.email_confirmation_required` (boolean, default `true`).
 It is read only server-side (`isEmailConfirmationRequired()` in
-`src/lib/lms-auth-email.server.ts`) through the service-role client, and it
+`src/features/lms/lib/auth-email.server.ts`) through the service-role client, and it
 **fails closed** — any lookup error, missing row or non-boolean value is
 treated as "confirmation required". The browser cannot set or override it.
 

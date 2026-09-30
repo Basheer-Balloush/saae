@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
-import { COMMUNITY_KEYS } from "@/lib/communityCategories";
+import { COMMUNITY_KEYS } from "@/features/website/lib/community-categories";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const BASE_URL = "https://aisyria.org";
@@ -27,8 +27,16 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/learning-management-system/catalog", changefreq: "daily", priority: "0.8" },
           { path: "/learning-management-system/login", changefreq: "monthly", priority: "0.4" },
           { path: "/learning-management-system/signup", changefreq: "monthly", priority: "0.4" },
-          { path: "/learning-management-system/forgot-password", changefreq: "yearly", priority: "0.2" },
-          { path: "/learning-management-system/reset-password", changefreq: "yearly", priority: "0.2" },
+          {
+            path: "/learning-management-system/forgot-password",
+            changefreq: "yearly",
+            priority: "0.2",
+          },
+          {
+            path: "/learning-management-system/reset-password",
+            changefreq: "yearly",
+            priority: "0.2",
+          },
           { path: "/learning-management-system/verify", changefreq: "yearly", priority: "0.2" },
           { path: "/attendance-management-system", changefreq: "monthly", priority: "0.4" },
           { path: "/attendance-management-system/login", changefreq: "yearly", priority: "0.2" },

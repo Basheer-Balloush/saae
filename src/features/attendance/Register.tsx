@@ -18,8 +18,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toUserMessage } from "@/lib/safe-error";
 import { confirmDialog } from "@/hooks/useConfirm";
-import { sendCertificateEmail } from "@/lib/certificate-email.functions";
-import { addAmsRegistrantWithLms } from "@/lib/ams-registrant.functions";
+import { sendCertificateEmail } from "@/features/lms/certificates/lib/certificate-email.functions";
+import { addAmsRegistrantWithLms } from "@/features/attendance/lib/registrant.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -43,8 +43,12 @@ import {
   useT,
 } from "@/components/console/ui";
 import "@/components/console/console.css";
-import { PAYMENT_STATE_LABELS, paymentSummary, type PaymentState } from "@/lib/coupons";
-import { loadCoursePayments } from "@/lib/coupons-db";
+import {
+  PAYMENT_STATE_LABELS,
+  paymentSummary,
+  type PaymentState,
+} from "@/features/lms/lib/coupons";
+import { loadCoursePayments } from "@/features/lms/lib/coupons-db";
 
 export type PaymentStatus = "paid" | "unpaid" | "partial" | "waived";
 type Session = { id: string; title: string; session_date: string; lms_section_id: string | null };
@@ -729,15 +733,13 @@ function AddPerson({
             : t("أُضيف", "Added"),
         );
       } else {
-        const { error } = await supabase
-          .from("ams_registrants")
-          .insert({
-            course_id: amsId,
-            full_name: name,
-            email: email || null,
-            phone: f.phone.trim() || null,
-            payment_status: f.payment_status,
-          });
+        const { error } = await supabase.from("ams_registrants").insert({
+          course_id: amsId,
+          full_name: name,
+          email: email || null,
+          phone: f.phone.trim() || null,
+          payment_status: f.payment_status,
+        });
         if (error) throw error;
         toast.success(t("أُضيف", "Added"));
       }

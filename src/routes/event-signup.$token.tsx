@@ -3,13 +3,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 
-import { useLang } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n/i18n";
 import {
   resolveSignupLink,
   submitEventSignup,
   SignupFormSchema,
   type PublicSignupState,
-} from "@/lib/event-signup.functions";
+} from "@/features/crm/lib/event-signup.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

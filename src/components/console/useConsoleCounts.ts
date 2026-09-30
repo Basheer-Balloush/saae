@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { adminInternshipsOverview } from "@/lib/lms-internships-admin.functions";
+import { adminInternshipsOverview } from "@/features/lms/internships/lib/admin.functions";
 
 /* Everything that waits for an admin's decision, counted in one place so the
    sidebar badges, the admin home and the LMS overview always agree. */

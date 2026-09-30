@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resizedImage, resizedSrcSet } from "@/lib/image-url";
-import { sortOpenFirst } from "@/lib/lms-course-ended";
-import { currentLmsReturn } from "@/lib/lms-redirect";
+import { sortOpenFirst } from "@/features/lms/lib/course-ended";
+import { currentLmsReturn } from "@/features/lms/lib/redirect";
 
 const STORE = "https://x.supabase.co/storage/v1/object/public/lms-media/a/cover.png";
 
