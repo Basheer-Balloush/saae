@@ -240,8 +240,8 @@ const COUPON_MESSAGES: Record<string, { ar: string; en: string }> = {
     en: "This course is free and needs no discount code.",
   },
   coupon_recognition_only: {
-    ar: "أدخل كود اعتراف بإكمال الدورة، وليس كود خصم.",
-    en: "Enter a course recognition code, not a discount code.",
+    ar: "كود الخصم يُستخدم في نموذج التسجيل فقط. بعد التسجيل يُقبل كود الاعتراف بإكمال الدورة.",
+    en: "A discount code is used in the enrollment form only. After that, a course recognition code is accepted.",
   },
   already_completed: {
     ar: "هذه الدورة مكتملة بالفعل في حسابك.",

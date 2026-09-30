@@ -14,7 +14,7 @@ import {
   type EnrollmentOutcome,
 } from "@/features/lms/catalog/EnrollmentFormDialog";
 import { EnrollmentBalance } from "@/features/lms/catalog/EnrollmentBalance";
-import { RecognitionCodeBox } from "@/features/lms/catalog/RecognitionCodeBox";
+import { CouponCodeBox } from "@/features/lms/catalog/CouponCodeBox";
 import { loadMyEnrollment } from "@/features/lms/lib/coupons-db";
 import { sendCertificateEmail } from "@/features/lms/certificates/lib/certificate-email.functions";
 import { SubHero } from "@/features/lms/skin/SubHero";
@@ -548,7 +548,7 @@ function CourseDetails() {
             />
           )}
           {!recognized && mine && !mine.certified && !isGuest && (
-            <RecognitionCodeBox courseId={course.id} ar={ar} onRecognized={onRecognized} />
+            <CouponCodeBox courseId={course.id} ar={ar} onRecognized={onRecognized} />
           )}
         </>
       );
@@ -569,7 +569,7 @@ function CourseDetails() {
             {ar ? "طلبك قيد المراجعة" : "Your request is pending"}
           </div>
           {course.delivery_mode !== "onsite" && !isGuest && (
-            <RecognitionCodeBox courseId={course.id} ar={ar} onRecognized={onRecognized} />
+            <CouponCodeBox courseId={course.id} ar={ar} onRecognized={onRecognized} />
           )}
         </>
       );

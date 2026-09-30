@@ -3,10 +3,11 @@ import { Loader2 } from "lucide-react";
 import { couponErrorMessage, normalizeCode } from "@/features/lms/lib/coupons";
 import { redeemRecognitionCode } from "@/features/lms/lib/coupons-db";
 
-/** A learner who attended the course elsewhere enters their recognition code
-    here: while their request is still waiting, or once enrolled (then what
-    they owe does not change). */
-export function RecognitionCodeBox({
+/** The coupon field for a learner who is past the enrollment form: their
+    request is waiting, or they are enrolled. Only a recognition code can still
+    be used then (what they owe does not change); a discount code is refused
+    with a message. */
+export function CouponCodeBox({
   courseId,
   ar,
   onRecognized,
@@ -15,18 +16,9 @@ export function RecognitionCodeBox({
   ar: boolean;
   onRecognized: (certificateId: string | null) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  if (!open) {
-    return (
-      <button type="button" className="enroll-code-toggle" onClick={() => setOpen(true)}>
-        {ar ? "لديك كود اعتراف بإكمال الدورة؟" : "Have a course recognition code?"}
-      </button>
-    );
-  }
 
   const use = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,10 +38,10 @@ export function RecognitionCodeBox({
 
   return (
     <form className="enroll-code" onSubmit={use}>
-      <label htmlFor="recognition-code">{ar ? "كود الاعتراف" : "Recognition code"}</label>
+      <label htmlFor="course-coupon">{ar ? "كود الكوبون" : "Coupon code"}</label>
       <div className="enroll-code-row">
         <input
-          id="recognition-code"
+          id="course-coupon"
           dir="ltr"
           autoComplete="off"
           spellCheck={false}
