@@ -23,6 +23,7 @@ import {
 } from "@/components/console/ui";
 import { useLmsAdminActions, type CourseStatus } from "@/features/lms/console/actions";
 import { NewCourseDialog } from "@/features/lms/console/NewCourseDialog";
+import { listWaitingRecognitions } from "@/features/lms/lib/coupons-db";
 
 type StatusFilter = "all" | CourseStatus;
 
@@ -61,7 +62,7 @@ function useCourses() {
     queryKey: ADMIN_COURSES_KEY,
     staleTime: 30_000,
     queryFn: async (): Promise<Row[]> => {
-      const [{ data: cs, error }, { data: ins }, { data: reqs }] = await Promise.all([
+      const [{ data: cs, error }, { data: ins }, { data: reqs }, codes] = await Promise.all([
         supabase
           .from("lms_courses")
           .select(
@@ -70,6 +71,8 @@ function useCourses() {
           .order("updated_at", { ascending: false }),
         supabase.from("lms_instructors").select("user_id,full_name"),
         supabase.from("lms_enrollment_requests").select("course_id").eq("status", "pending"),
+        // Recognition codes from enrolled learners wait with the requests.
+        listWaitingRecognitions().catch(() => []),
       ]);
       if (error) throw error;
       const names = Object.fromEntries(
@@ -79,7 +82,7 @@ function useCourses() {
         ]),
       );
       const pending: Record<string, number> = {};
-      for (const r of (reqs as { course_id: string }[]) ?? [])
+      for (const r of [...((reqs as { course_id: string }[]) ?? []), ...codes])
         pending[r.course_id] = (pending[r.course_id] ?? 0) + 1;
       return ((cs as Omit<Row, "instructor" | "pendingRequests">[]) ?? []).map((c) => ({
         ...c,

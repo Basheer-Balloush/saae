@@ -14,6 +14,7 @@ import {
   useT,
 } from "@/components/console/ui";
 import { EnrollmentRequestsPanel } from "@/features/lms/console/EnrollmentRequestsPanel";
+import { listWaitingRecognitions } from "@/features/lms/lib/coupons-db";
 
 type CourseSummary = {
   id: string;
@@ -21,6 +22,7 @@ type CourseSummary = {
   title_en: string | null;
   cover_url: string | null;
   created_at: string;
+  /** Requests waiting, plus recognition codes from enrolled learners. */
   pending: number;
   total: number;
   /** When the newest request for this course came in. */
@@ -43,7 +45,10 @@ function useCourseSummaries() {
         // Newest first, so the 1000-row cap would drop the oldest, never the newest.
         .order("created_at", { ascending: false });
       const list = (reqs as { course_id: string; status: string; created_at: string }[]) ?? [];
-      const ids = [...new Set(list.map((r) => r.course_id))];
+      // A recognition code from an enrolled learner waits like a request,
+      // without being one.
+      const codes = await listWaitingRecognitions().catch(() => []);
+      const ids = [...new Set([...list, ...codes].map((r) => r.course_id))];
       if (!ids.length) return [];
       const { data: cs } = await supabase
         .from("lms_courses")
@@ -58,15 +63,19 @@ function useCourseSummaries() {
       return ids.map((id) => {
         const c = byId.get(id);
         const mine = list.filter((r) => r.course_id === id);
+        const myCodes = codes.filter((u) => u.course_id === id);
         return {
           id,
           title_ar: c?.title_ar ?? id,
           title_en: c?.title_en ?? null,
           cover_url: c?.cover_url ?? null,
           created_at: c?.created_at ?? "",
-          pending: mine.filter((r) => r.status === "pending").length,
+          pending: mine.filter((r) => r.status === "pending").length + myCodes.length,
           total: mine.length,
-          last_request_at: mine.reduce((m, r) => (r.created_at > m ? r.created_at : m), ""),
+          last_request_at: [...mine, ...myCodes].reduce(
+            (m, r) => (r.created_at > m ? r.created_at : m),
+            "",
+          ),
         };
       });
     },

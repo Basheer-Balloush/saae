@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type {
   Coupon,
+  CouponEffect,
   CouponQuote,
   CouponUse,
   PaymentEntry,
@@ -29,8 +30,17 @@ export async function checkCoupon(courseId: string, code: string): Promise<Coupo
   return unwrap(await db.rpc("lms_check_coupon", { _course_id: courseId, _code: code }));
 }
 
+/** "pending": the request, or the recognition code on its own, waits for an
+    admin. "recognized" comes only from a database that still applies a
+    recognition code at once (before migration 20260930150000). */
 export type EnrollResult =
-  | { ok: true; status: "pending"; request_id: string; final_price: number | null }
+  | {
+      ok: true;
+      status: "pending";
+      request_id: string | null;
+      effect?: CouponEffect | null;
+      final_price?: number | null;
+    }
   | {
       ok: true;
       status: "recognized";
@@ -57,6 +67,25 @@ export async function submitEnrollment(input: {
 
 export async function redeemRecognitionCode(courseId: string, code: string): Promise<EnrollResult> {
   return unwrap(await db.rpc("lms_redeem_recognition_code", { _course_id: courseId, _code: code }));
+}
+
+export type MyRecognitionUse = Pick<CouponUse, "id" | "status" | "request_id" | "note">;
+
+/** The learner's latest recognition code on a course: waiting for an admin,
+    applied, or given back (refused, when it had no request). */
+export async function loadMyRecognitionUse(
+  courseId: string,
+  userId: string,
+): Promise<MyRecognitionUse | null> {
+  const { data } = await db
+    .from("lms_coupon_redemptions")
+    .select("id, status, request_id, note")
+    .eq("course_id", courseId)
+    .eq("user_id", userId)
+    .eq("effect", "recognition")
+    .order("created_at", { ascending: false })
+    .limit(1);
+  return ((data ?? [])[0] as MyRecognitionUse | undefined) ?? null;
 }
 
 export type EnrollNote = { ar: string | null; en: string | null };
@@ -140,21 +169,66 @@ export async function listCouponUses(filter: { couponId?: string; courseId?: str
   return rows.map(({ lms_coupons, ...u }) => ({ ...u, code: lms_coupons?.code ?? null }));
 }
 
-/** Uses that still count against each coupon's limit. */
-export async function countActiveUses(): Promise<Record<string, number>> {
+/** Per coupon: the uses that still count against its limit, and how many of
+    them wait for an admin. */
+export async function countCouponUses(): Promise<{
+  active: Record<string, number>;
+  waiting: Record<string, number>;
+}> {
   const rows = unwrap(
     await db
       .from("lms_coupon_redemptions")
-      .select("coupon_id")
+      .select("coupon_id, status")
       .in("status", ["pending", "applied"]),
-  ) as { coupon_id: string }[];
-  const counts: Record<string, number> = {};
-  for (const r of rows) counts[r.coupon_id] = (counts[r.coupon_id] ?? 0) + 1;
-  return counts;
+  ) as { coupon_id: string; status: "pending" | "applied" }[];
+  const active: Record<string, number> = {};
+  const waiting: Record<string, number> = {};
+  for (const r of rows) {
+    active[r.coupon_id] = (active[r.coupon_id] ?? 0) + 1;
+    if (r.status === "pending") waiting[r.coupon_id] = (waiting[r.coupon_id] ?? 0) + 1;
+  }
+  return { active, waiting };
+}
+
+/** Recognition codes entered by learners who were already enrolled, waiting
+    for an admin. They have no enrollment request, so they are counted next to
+    the requests. Anyone but an admin counts none (row-level security). */
+export function waitingRecognitionsQuery(courseId?: string) {
+  const query = db
+    .from("lms_coupon_redemptions")
+    .select("id", { count: "exact", head: true })
+    .eq("effect", "recognition")
+    .eq("status", "pending")
+    .is("request_id", null);
+  return courseId ? query.eq("course_id", courseId) : query;
+}
+
+/** The same uses, with their course and date, for the requests board. */
+export async function listWaitingRecognitions() {
+  return unwrap(
+    await db
+      .from("lms_coupon_redemptions")
+      .select("id, course_id, created_at")
+      .eq("effect", "recognition")
+      .eq("status", "pending")
+      .is("request_id", null),
+  ) as { id: string; course_id: string; created_at: string }[];
 }
 
 export async function cancelRecognition(useId: string, note: string) {
   unwrap(await db.rpc("lms_admin_cancel_recognition", { _redemption_id: useId, _note: note }));
+}
+
+/** Accepts or refuses a waiting recognition code. One that came with an
+    enrollment request decides that request too. */
+export async function decideRecognition(useId: string, approve: boolean, note: string | null) {
+  return unwrap(
+    await db.rpc("lms_admin_decide_recognition", {
+      _redemption_id: useId,
+      _approve: approve,
+      _note: note,
+    }),
+  ) as { ok: true; status: "applied" | "released"; request_id: string | null };
 }
 
 /* ---------- admins: payments ---------- */

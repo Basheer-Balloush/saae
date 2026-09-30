@@ -15,7 +15,7 @@ import {
   useT,
 } from "@/components/console/ui";
 import { formatSP, type Coupon } from "@/features/lms/lib/coupons";
-import { countActiveUses, listCoupons } from "@/features/lms/lib/coupons-db";
+import { countCouponUses, listCoupons } from "@/features/lms/lib/coupons-db";
 import { getEmailsForUsers } from "@/features/lms/lib/admin-users.functions";
 import { NewCouponDialog } from "./NewCouponDialog";
 import { CouponDetailsDialog } from "./CouponDetailsDialog";
@@ -33,13 +33,16 @@ import {
 type Filter = CouponKind | "all";
 
 /** Every coupon: create, find, open one. Recognition codes are listed but
-    have no tab of their own and are not created here (see ADMIN_KINDS). */
+    have no tab of their own and are not created here (see ADMIN_KINDS). A
+    coupon with uses waiting for an admin says so; they are decided in the
+    coupon's dialog or with the course's enrollment requests. */
 export function CouponsPage() {
   const { t, ar, lang } = useT();
   const refs = useCouponRefs();
   const fetchNames = useServerFn(getEmailsForUsers);
   const [coupons, setCoupons] = useState<Coupon[] | null>(null);
   const [used, setUsed] = useState<Record<string, number>>({});
+  const [waiting, setWaiting] = useState<Record<string, number>>({});
   const [names, setNames] = useState<Record<string, string>>({});
   const [failed, setFailed] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
@@ -49,9 +52,10 @@ export function CouponsPage() {
 
   const load = useCallback(async () => {
     try {
-      const [list, counts] = await Promise.all([listCoupons(), countActiveUses()]);
+      const [list, counts] = await Promise.all([listCoupons(), countCouponUses()]);
       setCoupons(list);
-      setUsed(counts);
+      setUsed(counts.active);
+      setWaiting(counts.waiting);
       setFailed(false);
       const ids = [...new Set(list.map((c) => c.user_id).filter((x): x is string => !!x))];
       if (ids.length) {
@@ -103,8 +107,8 @@ export function CouponsPage() {
         eyebrow={t("منصّة التعلّم", "Learning platform")}
         title={t("الكوبونات", "Coupons")}
         description={t(
-          "كل الكوبونات وأكوادها. في كل دورة يستخدم المتعلّم كوبون خصم واحداً.",
-          "Every coupon and its code. In each course a learner uses one discount coupon.",
+          "كل الكوبونات وأكوادها. في كل دورة يستخدم المتعلّم كوبون خصم واحداً، وكل كود يدخله متعلّم ينتظر موافقة الإدارة.",
+          "Every coupon and its code. In each course a learner uses one discount coupon, and every code a learner enters waits for an admin's approval.",
         )}
         actions={
           <Button onClick={() => setCreating(true)} disabled={refs.loading}>
@@ -200,6 +204,13 @@ export function CouponsPage() {
                       </td>
                       <td className="whitespace-nowrap text-[13px] tabular-nums">
                         {n} / {c.max_uses ?? "∞"} {ar ? USES_UNIT[kind].ar : USES_UNIT[kind].en}
+                        {waiting[c.id] > 0 && (
+                          <div className="mt-1">
+                            <Pill tone="orange">
+                              {t(`${waiting[c.id]} بانتظار القرار`, `${waiting[c.id]} waiting`)}
+                            </Pill>
+                          </div>
+                        )}
                       </td>
                       <td className="whitespace-nowrap text-[13px] text-[var(--cx-muted)]">
                         {c.expires_at ? fmtDate(c.expires_at, lang) : "—"}

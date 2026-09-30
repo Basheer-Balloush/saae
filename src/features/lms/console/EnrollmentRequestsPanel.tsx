@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   AlertTriangle,
+  Check,
   Download,
   FileText,
   Inbox,
@@ -31,6 +32,7 @@ import {
   EmptyState,
   Loading,
   Pill,
+  ReasonDialog,
   RequestStatusPill,
   Seg,
   fmtDate,
@@ -38,8 +40,10 @@ import {
   useT,
 } from "@/components/console/ui";
 import { ConfirmationMessagesDialog } from "./ConfirmationMessagesDialog";
-import { listCouponUses } from "@/features/lms/lib/coupons-db";
-import { formatSP, type CouponUse } from "@/features/lms/lib/coupons";
+import { decideRecognition, listCouponUses } from "@/features/lms/lib/coupons-db";
+import { formatSP, recognitionDecisionError, type CouponUse } from "@/features/lms/lib/coupons";
+
+type UseWithCode = CouponUse & { code: string | null };
 
 type ReqStatus = "pending" | "approved" | "rejected" | "cancelled";
 type Filter = ReqStatus | "all";
@@ -89,7 +93,9 @@ function normalizePhone(raw: string): string {
 
 /* Enrollment requests for one course. Admins decide (approve with email or
    WhatsApp, reject, add notes, export, edit the confirmation messages);
-   instructors see the same list read-only, since only admins may approve. */
+   instructors see the same list read-only, since only admins may approve.
+   Admins also decide here the recognition codes entered by learners who are
+   already enrolled: those have no request of their own. */
 export function EnrollmentRequestsPanel({
   courseId,
   canDecide,
@@ -120,7 +126,10 @@ export function EnrollmentRequestsPanel({
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   // The coupon on each request, with the price the learner was quoted.
-  const [coupons, setCoupons] = useState<Record<string, CouponUse & { code: string | null }>>({});
+  const [coupons, setCoupons] = useState<Record<string, UseWithCode>>({});
+  // Recognition codes from enrolled learners, waiting for an admin.
+  const [waitingCodes, setWaitingCodes] = useState<UseWithCode[]>([]);
+  const [refusing, setRefusing] = useState<UseWithCode | null>(null);
 
   const load = useCallback(async () => {
     const [{ data: list }, { data: c }] = await Promise.all([
@@ -142,14 +151,26 @@ export function EnrollmentRequestsPanel({
     const rows = (list as Req[]) ?? [];
     setReqs(rows);
     setCourse((c as CourseInfo | null) ?? null);
+    let waiting: UseWithCode[] = [];
     if (canDecide) {
       const uses = await listCouponUses({ courseId }).catch(() => []);
-      const byRequest: Record<string, CouponUse & { code: string | null }> = {};
-      for (const u of uses) if (u.request_id) byRequest[u.request_id] = u;
+      // Newest first. A request shows the code that counts: a recognition
+      // code replaces the discount coupon it was sent with (given back).
+      const byRequest: Record<string, UseWithCode> = {};
+      for (const u of uses) {
+        if (!u.request_id) continue;
+        const shown = byRequest[u.request_id];
+        if (!shown || (shown.status === "released" && u.status !== "released"))
+          byRequest[u.request_id] = u;
+      }
       setCoupons(byRequest);
+      waiting = uses.filter(
+        (u) => u.effect === "recognition" && u.status === "pending" && !u.request_id,
+      );
+      setWaitingCodes(waiting);
     }
-    if (canDecide && rows.length) {
-      const ids = [...new Set(rows.map((r) => r.user_id))];
+    if (canDecide && (rows.length || waiting.length)) {
+      const ids = [...new Set([...rows, ...waiting].map((r) => r.user_id))];
       const [profs, emails] = await Promise.all([
         selectInBatches<{ user_id: string; full_name: string | null; phone: string | null }>(
           "lms_user_profiles",
@@ -304,6 +325,22 @@ export function EnrollmentRequestsPanel({
       onChanged?.();
     } catch (e) {
       toast.error(enrollmentErrorMessage(e, ar));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const decideCode = async (use: UseWithCode, accept: boolean, note: string | null) => {
+    if (busy) return;
+    setBusy(use.id);
+    try {
+      await decideRecognition(use.id, accept, note);
+      toast.success(accept ? t("قُبل الكود", "Code accepted") : t("رُفض الكود", "Code refused"));
+      await load();
+      qc.invalidateQueries({ queryKey: CONSOLE_COUNTS_KEY });
+      onChanged?.();
+    } catch (e) {
+      toast.error(recognitionDecisionError(e, ar));
     } finally {
       setBusy(null);
     }
@@ -511,6 +548,72 @@ export function EnrollmentRequestsPanel({
         </div>
       )}
 
+      {canDecide && waitingCodes.length > 0 && (filter === "pending" || filter === "all") && (
+        <section
+          aria-labelledby="waiting-codes-h"
+          className="mb-3 rounded-xl border border-[var(--cx-line)] bg-[var(--cx-field)] p-4"
+        >
+          <h4 id="waiting-codes-h" className="text-[14.5px] font-extrabold">
+            {t(
+              "أكواد اعتراف من متعلّمين مسجّلين، بانتظار القرار",
+              "Recognition codes from enrolled learners, waiting",
+            )}
+          </h4>
+          <p className="mt-0.5 text-[12.5px] text-[var(--cx-muted)]">
+            {t(
+              "قبول الكود يسجّل الدورة مكتملة للمتعلّم، ويبقى استبيان التقييم قبل الشهادة. ما عليه وما دفعه لا يتغيّر.",
+              "Accepting a code marks the course completed for the learner; the feedback form still comes before the certificate. What they owe and paid stays.",
+            )}
+          </p>
+          <ul className="mt-3 space-y-2">
+            {waitingCodes.map((u) => (
+              <li
+                key={u.id}
+                className="flex flex-wrap items-center gap-2 border-t border-[var(--cx-line-2)] pt-2"
+              >
+                <span className="text-[14.5px] font-bold">{nameOf(u.user_id)}</span>
+                <Pill tone="teal">
+                  <span dir="ltr" className="font-mono">
+                    {u.code}
+                  </span>
+                </Pill>
+                <span className="text-[12.5px] text-[var(--cx-muted)]">
+                  {profiles[u.user_id]?.email && (
+                    <span dir="ltr" className="me-2">
+                      {profiles[u.user_id].email}
+                    </span>
+                  )}
+                  {t("أُدخل في", "Entered")} {fmtDate(u.created_at, lang)}
+                </span>
+                <span className="ms-auto flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => decideCode(u, true, null)}
+                    disabled={busy === u.id}
+                  >
+                    {busy === u.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
+                    {t("قبول الكود", "Accept code")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setRefusing(u)}
+                    disabled={busy === u.id}
+                  >
+                    <X className="h-4 w-4" />
+                    {t("رفض", "Refuse")}
+                  </Button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {reqs === null ? (
         <Loading />
       ) : shown.length === 0 ? (
@@ -626,6 +729,15 @@ export function EnrollmentRequestsPanel({
                         onChange={(e) => setNotes({ ...notes, [r.id]: e.target.value })}
                       />
                     )}
+                    {coupons[r.id]?.effect === "recognition" &&
+                      coupons[r.id].status === "pending" && (
+                        <p className="mb-2 text-[12.5px] text-[var(--cx-muted)]">
+                          {t(
+                            "الطلب يحمل كود اعتراف. قبوله يسجّل المتعلّم بلا رسوم والدورة مكتملة، ويبقى استبيان التقييم قبل الشهادة. رفضه يعيد الاستخدام إلى الكود.",
+                            "This request carries a recognition code. Approving it enrolls the learner for nothing with the course completed; the feedback form still comes before the certificate. Rejecting it gives the use back to the code.",
+                          )}
+                        </p>
+                      )}
                     <div className="flex flex-wrap items-center gap-2">
                       {!p?.guest && (
                         <Button
@@ -707,6 +819,20 @@ export function EnrollmentRequestsPanel({
           courseId={courseId}
         />
       )}
+      <ReasonDialog
+        open={!!refusing}
+        onOpenChange={(v) => !v && setRefusing(null)}
+        title={t("رفض كود الاعتراف؟", "Refuse this recognition code?")}
+        description={t(
+          "يبقى المتعلّم مسجّلاً كما هو ويعود الاستخدام إلى الكود. يرى المتعلّم ما تكتبه هنا.",
+          "The learner stays enrolled as they are and the use goes back to the code. The learner sees what you write here.",
+        )}
+        confirmLabel={t("رفض الكود", "Refuse code")}
+        destructive
+        onConfirm={async (reason) => {
+          if (refusing) await decideCode(refusing, false, reason || null);
+        }}
+      />
       {canDecide && (
         <ConfirmationMessagesDialog
           courseId={courseId}

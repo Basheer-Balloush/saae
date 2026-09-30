@@ -228,8 +228,8 @@ const COUPON_MESSAGES: Record<string, { ar: string; en: string }> = {
     en: "This code does not apply to this course.",
   },
   coupon_already_used_here: {
-    ar: "استخدمت كوداً في هذه الدورة من قبل، ولا يمكن استخدام كود آخر فيها.",
-    en: "You already used a code on this course, and only one is allowed.",
+    ar: "أدخلت كوداً في هذه الدورة من قبل، ولا يمكن استخدام كود آخر فيها.",
+    en: "You already entered a code on this course, and only one is allowed.",
   },
   coupon_already_used: {
     ar: "استخدمت هذا الكود في دورة أخرى من قبل.",
@@ -259,6 +259,41 @@ const COUPON_MESSAGES: Record<string, { ar: string; en: string }> = {
   course_not_found: { ar: "الدورة غير موجودة.", en: "Course not found." },
 };
 
+/** Why an admin's decision on a waiting recognition code was refused. */
+const DECISION_MESSAGES: Record<string, { ar: string; en: string }> = {
+  coupon_use_not_pending: {
+    ar: "اتُّخذ القرار في هذا الكود من قبل.",
+    en: "This code has already been decided.",
+  },
+  request_not_pending: {
+    ar: "اتُّخذ القرار في طلب التسجيل من قبل.",
+    en: "The enrollment request has already been decided.",
+  },
+  not_enrolled: {
+    ar: "المتعلّم لم يعد مسجّلاً في الدورة. ارفض الكود.",
+    en: "The learner is no longer enrolled in the course. Refuse the code.",
+  },
+  course_not_published: {
+    ar: "الدورة غير منشورة، فلا يمكن التسجيل فيها.",
+    en: "The course is not published, so nobody can be enrolled in it.",
+  },
+  payment_review_required: {
+    ar: "راجع دفعة هذا الطلب أولاً.",
+    en: "Review this request's payment first.",
+  },
+  forbidden: {
+    ar: "هذا الإجراء لمديري المنصّة فقط.",
+    en: "Only platform admins can do this.",
+  },
+};
+
+export function recognitionDecisionError(error: unknown, ar: boolean): string {
+  const raw = error instanceof Error ? error.message : typeof error === "string" ? error : "";
+  const key = Object.keys(DECISION_MESSAGES).find((k) => raw.includes(k));
+  if (key) return ar ? DECISION_MESSAGES[key].ar : DECISION_MESSAGES[key].en;
+  return ar ? "تعذّر حفظ القرار. حاول مجدداً." : "The decision could not be saved. Try again.";
+}
+
 export function couponErrorMessage(code: string | null | undefined, ar: boolean): string {
   const m = code ? COUPON_MESSAGES[code] : undefined;
   if (m) return ar ? m.ar : m.en;
@@ -269,8 +304,8 @@ export function couponErrorMessage(code: string | null | undefined, ar: boolean)
 export function quoteSummary(q: Extract<CouponQuote, { ok: true }>, ar: boolean): string {
   if (q.effect === "recognition") {
     return ar
-      ? "كود اعتراف: ستظهر الدورة مكتملة في ملفك، ثم تجيب عن استبيان التقييم وتحصل على شهادتك."
-      : "Recognition code: the course shows as completed on your profile, then you answer the feedback form and get your certificate.";
+      ? "كود اعتراف: بعد موافقة الإدارة تظهر الدورة مكتملة في ملفك، ثم تجيب عن استبيان التقييم وتحصل على شهادتك."
+      : "Recognition code: once an admin approves it, the course shows as completed on your profile, then you answer the feedback form and get your certificate.";
   }
   const pct = Number(q.percent_off);
   const floor = q.min_discount != null ? Number(q.min_discount) : null;

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { adminInternshipsOverview } from "@/features/lms/internships/lib/admin.functions";
+import { waitingRecognitionsQuery } from "@/features/lms/lib/coupons-db";
 
 /* Everything that waits for an admin's decision, counted in one place so the
    sidebar badges, the admin home and the LMS overview always agree. */
@@ -67,6 +68,7 @@ export function useConsoleCounts(enabled: boolean) {
         newMessages,
         internships,
         newSurveys,
+        waitingCodes,
       ] = await Promise.all([
         count(supabase.from("lms_instructors").select("user_id", head).eq("approved", false)),
         count(supabase.from("lms_courses").select("id", head).eq("status", "pending")),
@@ -87,11 +89,13 @@ export function useConsoleCounts(enabled: boolean) {
             .eq("completed", true)
             .eq("review_status", "new"),
         ),
+        // Recognition codes from enrolled learners: decided with the requests.
+        count(waitingRecognitionsQuery()),
       ]);
       return {
         instructorRequests,
         coursesToReview,
-        enrollmentRequests,
+        enrollmentRequests: enrollmentRequests + waitingCodes,
         reviewsToModerate,
         trainerApplications,
         internshipApplications: internships?.applications?.pending_review ?? 0,

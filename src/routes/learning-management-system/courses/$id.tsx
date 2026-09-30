@@ -15,7 +15,11 @@ import {
 } from "@/features/lms/catalog/EnrollmentFormDialog";
 import { EnrollmentBalance } from "@/features/lms/catalog/EnrollmentBalance";
 import { CouponCodeBox } from "@/features/lms/catalog/CouponCodeBox";
-import { loadMyEnrollment } from "@/features/lms/lib/coupons-db";
+import {
+  loadMyEnrollment,
+  loadMyRecognitionUse,
+  type MyRecognitionUse,
+} from "@/features/lms/lib/coupons-db";
 import { sendCertificateEmail } from "@/features/lms/certificates/lib/certificate-email.functions";
 import { SubHero } from "@/features/lms/skin/SubHero";
 import { IconCategoryAI } from "@/features/lms/skin/icons";
@@ -297,6 +301,8 @@ function CourseDetails() {
   const [busy, setBusy] = useState(false);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [mine, setMine] = useState<Awaited<ReturnType<typeof loadMyEnrollment>>>(null);
+  // The learner's recognition code on this course, which waits for an admin.
+  const [myCode, setMyCode] = useState<MyRecognitionUse | null>(null);
   const emailCertificate = useServerFn(sendCertificateEmail);
   const [hasQuiz, setHasQuiz] = useState(false);
 
@@ -305,6 +311,7 @@ function CourseDetails() {
       setEnrolled(false);
       setPendingRequest(false);
       setMine(null);
+      setMyCode(null);
       return;
     }
     let cancelled = false;
@@ -327,7 +334,13 @@ function CourseDetails() {
       if (cancelled) return;
       setEnrolled(!!e);
       setPendingRequest(!!req);
-      setMine(e ? await loadMyEnrollment(course.id, user.id).catch(() => null) : null);
+      const [enrollment, codeUse] = await Promise.all([
+        e ? loadMyEnrollment(course.id, user.id).catch(() => null) : null,
+        e || req ? loadMyRecognitionUse(course.id, user.id).catch(() => null) : null,
+      ]);
+      if (cancelled) return;
+      setMine(enrollment);
+      setMyCode(codeUse);
       if (e) {
         const { data: q } = await supabase
           .from("lms_quizzes")
@@ -394,9 +407,17 @@ function CourseDetails() {
     }
   };
 
+  // The code was accepted and waits for an admin.
+  const onCodeWaiting = async () => {
+    if (!user) return;
+    const use = await loadMyRecognitionUse(course.id, user.id).catch(() => null);
+    setMyCode(use ?? { id: "", status: "pending", request_id: null, note: null });
+  };
+
   const onSubmitted = (outcome: EnrollmentOutcome) => {
-    if (outcome.status === "recognized") onRecognized(outcome.certificateId);
-    else setPendingRequest(true);
+    if (outcome.status === "recognized") return onRecognized(outcome.certificateId);
+    setPendingRequest(true);
+    if (outcome.withCode) onCodeWaiting();
   };
 
   const title = lang === "ar" ? course.title_ar : course.title_en || course.title_ar;
@@ -547,9 +568,41 @@ function CourseDetails() {
               ar={ar}
             />
           )}
-          {!recognized && mine && !mine.certified && !isGuest && (
-            <CouponCodeBox courseId={course.id} ar={ar} onRecognized={onRecognized} />
+          {!recognized && mine && !mine.certified && !isGuest && myCode?.status === "pending" && (
+            <div className="enroll-note is-pending">
+              <Clock />
+              {ar
+                ? "كود الاعتراف بانتظار موافقة الإدارة"
+                : "Your recognition code is waiting for approval"}
+              <span className="enroll-hint">
+                {ar
+                  ? "بعد الموافقة تظهر الدورة مكتملة، ثم تجيب عن استبيان التقييم وتحصل على شهادتك."
+                  : "Once approved, the course shows as completed, then you answer the feedback form and get your certificate."}
+              </span>
+            </div>
           )}
+          {/* A cancelled recognition cannot be followed by another code. */}
+          {!recognized &&
+            mine &&
+            !mine.certified &&
+            !isGuest &&
+            myCode?.status !== "pending" &&
+            myCode?.status !== "cancelled" && (
+              <>
+                {myCode?.status === "released" && myCode.request_id === null && (
+                  <p className="enroll-code-error" role="status">
+                    {ar ? "لم يُقبل الكود الذي أدخلته." : "The code you entered was not accepted."}
+                    {myCode.note ? ` ${myCode.note}` : ""}
+                  </p>
+                )}
+                <CouponCodeBox
+                  courseId={course.id}
+                  ar={ar}
+                  onWaiting={onCodeWaiting}
+                  onRecognized={onRecognized}
+                />
+              </>
+            )}
         </>
       );
     }
@@ -568,8 +621,22 @@ function CourseDetails() {
             <Clock />
             {ar ? "طلبك قيد المراجعة" : "Your request is pending"}
           </div>
-          {course.delivery_mode !== "onsite" && !isGuest && (
-            <CouponCodeBox courseId={course.id} ar={ar} onRecognized={onRecognized} />
+          {myCode?.status === "pending" ? (
+            <p className="enroll-hint">
+              {ar
+                ? "أدخلت كود اعتراف مع طلبك. عند قبول الطلب تظهر الدورة مكتملة، ثم تجيب عن استبيان التقييم وتحصل على شهادتك."
+                : "You entered a recognition code with your request. When the request is approved, the course shows as completed, then you answer the feedback form and get your certificate."}
+            </p>
+          ) : (
+            course.delivery_mode !== "onsite" &&
+            !isGuest && (
+              <CouponCodeBox
+                courseId={course.id}
+                ar={ar}
+                onWaiting={onCodeWaiting}
+                onRecognized={onRecognized}
+              />
+            )
           )}
         </>
       );

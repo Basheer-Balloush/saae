@@ -43,6 +43,7 @@ import {
 import { DraftNotice } from "@/components/console/DraftNotice";
 import { Button } from "@/components/ui/button";
 import { CONSOLE_COUNTS_KEY } from "@/components/console/useConsoleCounts";
+import { waitingRecognitionsQuery } from "@/features/lms/lib/coupons-db";
 import {
   CourseStatusPill,
   ErrorNote,
@@ -126,17 +127,24 @@ export function CourseEditor({
   const load = useCallback(async () => {
     // No draft saving while a fresh copy arrives piece by piece.
     setLoadedEdits(null);
-    const [{ data: c, error }, { data: cats }, { data: links }, { count: pending }] =
-      await Promise.all([
-        supabase.from("lms_courses").select("*").eq("id", courseId).maybeSingle(),
-        supabase.from("lms_categories").select("id,name_ar,name_en").order("display_order"),
-        supabase.from("lms_course_categories").select("category_id").eq("course_id", courseId),
-        supabase
-          .from("lms_enrollment_requests")
-          .select("id", { count: "exact", head: true })
-          .eq("course_id", courseId)
-          .eq("status", "pending"),
-      ]);
+    const [
+      { data: c, error },
+      { data: cats },
+      { data: links },
+      { count: pending },
+      { count: waitingCodes },
+    ] = await Promise.all([
+      supabase.from("lms_courses").select("*").eq("id", courseId).maybeSingle(),
+      supabase.from("lms_categories").select("id,name_ar,name_en").order("display_order"),
+      supabase.from("lms_course_categories").select("category_id").eq("course_id", courseId),
+      supabase
+        .from("lms_enrollment_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("course_id", courseId)
+        .eq("status", "pending"),
+      // Recognition codes from enrolled learners wait with the requests.
+      waitingRecognitionsQuery(courseId),
+    ]);
     if (error || !c) {
       setLoadError(true);
       return;
@@ -150,7 +158,7 @@ export function CourseEditor({
     setCourse(c as Course);
     setCategories((cats as Category[]) ?? []);
     setSelectedCategoryIds(catIds);
-    setPendingRequests(pending ?? 0);
+    setPendingRequests((pending ?? 0) + (waitingCodes ?? 0));
     const { data: secs } = await supabase
       .from("lms_sections")
       .select("id,title,title_ar,title_en,display_order")

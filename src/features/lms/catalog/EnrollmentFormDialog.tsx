@@ -67,10 +67,11 @@ export const BASE_FIELD_IDS = {
   email: "__base_email",
 } as const;
 
-/** How sending the form ended: a request for an admin, or (with a
-    recognition code) an enrollment that goes straight to the feedback form. */
+/** How sending the form ended: a request for an admin (withCode: it carries
+    a recognition code, which the approval applies). "recognized" comes only
+    from a database that still applies a recognition code at once. */
 export type EnrollmentOutcome =
-  | { status: "pending" }
+  | { status: "pending"; withCode: boolean }
   | {
       status: "recognized";
       certificateId: string | null;
@@ -288,10 +289,15 @@ export function EnrollmentFormDialog({
         );
         onSubmitted({ status: "recognized", certificateId: res.certificate_id });
       } else {
+        const withCode = res.effect === "recognition";
         toast.success(
-          ar
-            ? "تم إرسال طلبك. سيتم التواصل معك قريباً."
-            : "Request submitted. We will contact you soon.",
+          withCode
+            ? ar
+              ? "تم إرسال طلبك مع كود الاعتراف. بعد موافقة الإدارة تظهر الدورة مكتملة في حسابك."
+              : "Request submitted with your recognition code. Once an admin approves it, the course shows as completed in your account."
+            : ar
+              ? "تم إرسال طلبك. سيتم التواصل معك قريباً."
+              : "Request submitted. We will contact you soon.",
         );
         if (isGuest && user) {
           // Admins see a guest by the name and phone they gave here.
@@ -305,7 +311,7 @@ export function EnrollmentFormDialog({
               if (error) console.error("Could not save the guest's name", error.message);
             });
         }
-        onSubmitted({ status: "pending" });
+        onSubmitted({ status: "pending", withCode });
       }
       onOpenChange(false);
     } catch (e) {
@@ -591,13 +597,7 @@ export function EnrollmentFormDialog({
             <div className="flex gap-2 pt-2 border-t border-border">
               <Button onClick={submit} disabled={busy} className="flex-1">
                 {busy && <Loader2 className="h-4 w-4 animate-spin mx-1" />}
-                {quote?.ok === true && quote.effect === "recognition"
-                  ? ar
-                    ? "التسجيل والانتقال إلى التقييم"
-                    : "Enroll and go to the feedback form"
-                  : ar
-                    ? "إرسال الطلب"
-                    : "Submit request"}
+                {ar ? "إرسال الطلب" : "Submit request"}
               </Button>
               <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
                 {ar ? "إلغاء" : "Cancel"}

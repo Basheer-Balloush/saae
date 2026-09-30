@@ -6,14 +6,18 @@ import { redeemRecognitionCode } from "@/features/lms/lib/coupons-db";
 /** The coupon field for a learner who is past the enrollment form: their
     request is waiting, or they are enrolled. Only a recognition code can still
     be used then (what they owe does not change); a discount code is refused
-    with a message. */
+    with a message. The code waits for an admin before it takes effect. */
 export function CouponCodeBox({
   courseId,
   ar,
+  onWaiting,
   onRecognized,
 }: {
   courseId: string;
   ar: boolean;
+  /** The code was accepted and now waits for an admin. */
+  onWaiting: () => void;
+  /** Only from a database that still applies a code at once. */
   onRecognized: (certificateId: string | null) => void;
 }) {
   const [code, setCode] = useState("");
@@ -29,6 +33,7 @@ export function CouponCodeBox({
       const res = await redeemRecognitionCode(courseId, code);
       if (!res.ok) setError(couponErrorMessage(res.error, ar));
       else if (res.status === "recognized") onRecognized(res.certificate_id);
+      else onWaiting();
     } catch (err) {
       setError(couponErrorMessage(err instanceof Error ? err.message : null, ar));
     } finally {

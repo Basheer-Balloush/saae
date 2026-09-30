@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Copy, Loader2, Mail, MessageCircle, Ticket, Trash2, Undo2 } from "lucide-react";
+import { Check, Copy, Loader2, Mail, MessageCircle, Ticket, Trash2, Undo2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,16 +25,19 @@ import {
 import {
   couponWhatsappText,
   formatSP,
+  recognitionDecisionError,
   whatsappNumber,
   type Coupon,
   type CouponUse,
 } from "@/features/lms/lib/coupons";
 import {
   cancelRecognition,
+  decideRecognition,
   deleteCoupon,
   listCouponUses,
   updateCoupon,
 } from "@/features/lms/lib/coupons-db";
+import { sendEnrollmentApprovedEmail } from "@/features/lms/lib/enrollment-email.functions";
 import {
   getCouponLearner,
   sendPersonalCouponEmail,
@@ -92,6 +95,9 @@ export function CouponDetailsDialog({
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
   const [cancelling, setCancelling] = useState<CouponUse | null>(null);
+  const sendApprovedEmail = useServerFn(sendEnrollmentApprovedEmail);
+  const [deciding, setDeciding] = useState<string | null>(null);
+  const [refusing, setRefusing] = useState<CouponUse | null>(null);
 
   const load = useCallback(async () => {
     if (!coupon) return;
@@ -185,6 +191,33 @@ export function CouponDetailsDialog({
       },
       t("حُفظت التغييرات", "Changes saved"),
     );
+  };
+
+  // A waiting recognition code. One that came with an enrollment request
+  // decides that request too, so an accepted learner gets the approval email.
+  const decide = async (use: CouponUse, accept: boolean, note: string | null) => {
+    if (deciding) return;
+    setDeciding(use.id);
+    try {
+      const res = await decideRecognition(use.id, accept, note);
+      toast.success(accept ? t("قُبل الكود", "Code accepted") : t("رُفض الكود", "Code refused"));
+      if (accept && res.request_id) {
+        await sendApprovedEmail({ data: { requestId: res.request_id, lang } }).catch(() =>
+          toast.warning(
+            t(
+              "قُبل الكود لكن تعذّر إرسال بريد القبول.",
+              "The code was accepted but the approval email could not be sent.",
+            ),
+          ),
+        );
+      }
+      await load();
+      onChanged();
+    } catch (e) {
+      toast.error(recognitionDecisionError(e, ar));
+    } finally {
+      setDeciding(null);
+    }
   };
 
   const remove = async () => {
@@ -442,9 +475,10 @@ export function CouponDetailsDialog({
           )}
         </div>
 
+        {/* min-w-0: a wide table scrolls in its own box, not the dialog. */}
         <section
           aria-labelledby="coupon-uses-h"
-          className="border-t border-[var(--cx-line-2)] pt-4"
+          className="min-w-0 border-t border-[var(--cx-line-2)] pt-4"
         >
           <h3 id="coupon-uses-h" className="mb-2 text-[15px] font-extrabold">
             {t("من استخدمه", "Who used it")}
@@ -463,7 +497,7 @@ export function CouponDetailsDialog({
                 <thead>
                   <tr>
                     <th>{t("المتعلّم", "Learner")}</th>
-                    <th>{t("الدورة", "Course")}</th>
+                    {coupon.scope !== "course" && <th>{t("الدورة", "Course")}</th>}
                     <th>{t("السعر", "Price")}</th>
                     <th>{t("الحالة", "Status")}</th>
                     <th>{t("التاريخ", "Date")}</th>
@@ -474,7 +508,10 @@ export function CouponDetailsDialog({
                   {uses.map((u) => (
                     <tr key={u.id}>
                       <td className="font-semibold">{names[u.user_id] ?? "—"}</td>
-                      <td className="text-[13px]">{refs.courseName(u.course_id, ar)}</td>
+                      {/* A course coupon's uses are all on its one course. */}
+                      {coupon.scope !== "course" && (
+                        <td className="text-[13px]">{refs.courseName(u.course_id, ar)}</td>
+                      )}
                       <td className="whitespace-nowrap text-[13px] tabular-nums">
                         {u.effect === "recognition" ? (
                           u.request_id === null ? (
@@ -502,7 +539,32 @@ export function CouponDetailsDialog({
                       <td className="whitespace-nowrap text-[13px] text-[var(--cx-muted)]">
                         {fmtDate(u.created_at, lang)}
                       </td>
-                      <td>
+                      <td className="whitespace-nowrap">
+                        {u.effect === "recognition" && u.status === "pending" && (
+                          <span className="flex flex-col gap-1.5">
+                            <Button
+                              size="sm"
+                              onClick={() => decide(u, true, null)}
+                              disabled={deciding === u.id}
+                            >
+                              {deciding === u.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Check className="h-4 w-4" />
+                              )}
+                              {t("قبول", "Accept")}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setRefusing(u)}
+                              disabled={deciding === u.id}
+                            >
+                              <X className="h-4 w-4" />
+                              {t("رفض", "Refuse")}
+                            </Button>
+                          </span>
+                        )}
                         {u.effect === "recognition" && u.status === "applied" && (
                           <Button size="sm" variant="ghost" onClick={() => setCancelling(u)}>
                             <Undo2 className="h-4 w-4" />
@@ -517,6 +579,28 @@ export function CouponDetailsDialog({
             </div>
           )}
         </section>
+
+        <ReasonDialog
+          open={!!refusing}
+          onOpenChange={(v) => !v && setRefusing(null)}
+          title={t("رفض كود الاعتراف؟", "Refuse this recognition code?")}
+          description={
+            refusing?.request_id === null
+              ? t(
+                  "يبقى المتعلّم مسجّلاً كما هو ويعود الاستخدام إلى الكود. يرى المتعلّم ما تكتبه هنا.",
+                  "The learner stays enrolled as they are and the use goes back to the code. The learner sees what you write here.",
+                )
+              : t(
+                  "يُرفض طلب التسجيل الذي جاء معه الكود ويعود الاستخدام إلى الكود. ما تكتبه هنا يُحفظ ملاحظةً على الطلب.",
+                  "The enrollment request the code came with is rejected and the use goes back to the code. What you write here is kept as a note on the request.",
+                )
+          }
+          confirmLabel={t("رفض الكود", "Refuse code")}
+          destructive
+          onConfirm={async (reason) => {
+            if (refusing) await decide(refusing, false, reason || null);
+          }}
+        />
 
         <ReasonDialog
           open={!!cancelling}
