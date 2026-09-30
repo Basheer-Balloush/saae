@@ -192,6 +192,10 @@ const DARK_GROUND = { backgroundColor: "#06232a", colorScheme: "dark" } as const
 /* The admin console, the instructor workspace and the attendance app. */
 const CONSOLE_PATH =
   /^\/(admin(\/|$)|attendance-management-system(\/|$)|learning-management-system\/(admin|instructor)(\/|$))/;
+/* Private card pages. Case-insensitive: printed QR codes open them in capitals
+   (/PROFILE/…), which keeps the code small. */
+const isProfilePath = (pathname: string) => /^\/profile\//i.test(pathname);
+
 const isDarkPath = (pathname: string) =>
   CINEMATIC_PATH.test(pathname) || isSkinnedLmsPath(pathname) || CONSOLE_PATH.test(pathname);
 
@@ -200,7 +204,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
   const ground = isDarkPath(pathname) ? DARK_GROUND : undefined;
   /* Private profile pages must never reach analytics: the slug in their
      address is the secret. */
-  const analytics = !pathname.startsWith("/profile/");
+  const analytics = !isProfilePath(pathname);
   const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');if(/^\\/(admin(\\/|$)|attendance-management-system(\\/|$)|learning-management-system\\/(admin|instructor)(\\/|$))/.test(location.pathname))document.documentElement.classList.add('cx-dark','dark');var l=localStorage.getItem('saae-lang')==='en'?'en':'ar';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning style={ground}>
@@ -414,7 +418,7 @@ function RootComponent() {
     location.pathname.startsWith("/super-admin") ||
     location.pathname.startsWith("/learning-management-system/admin");
   const isStandaloneProfile =
-    location.pathname.startsWith("/profile/") || location.pathname === "/feedback";
+    isProfilePath(location.pathname) || location.pathname === "/feedback";
   /* Console pages share one frame; keeping one key stops the sidebar and its
      data from remounting on every click inside the console. */
   const isConsole =
