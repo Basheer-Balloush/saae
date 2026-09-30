@@ -82,7 +82,7 @@ export function AssistantChatModal({
   const suggestions = [
     {
       icon: GraduationCap,
-      text: isRtl ? "أنا مهتم ببرامج التدريب" : "I'm interested in training programs",
+      text: isRtl ? "رشّح لي مساراً مناسباً" : "Recommend a suitable path",
     },
     {
       icon: Handshake,
