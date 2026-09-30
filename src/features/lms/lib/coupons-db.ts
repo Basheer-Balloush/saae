@@ -79,10 +79,10 @@ export type MyEnrollment = {
 /** The signed-in learner's enrollment in a course, with what they owe and
     have paid, and whether their certificate is already issued. */
 export async function loadMyEnrollment(courseId: string, userId: string) {
+  // The money columns are not readable from the table (instructors read it).
   const { data: e } = await db
-    .from("lms_enrollments")
+    .rpc("lms_enrollment_billing", { _course_id: courseId })
     .select("id, completion_source, amount_due")
-    .eq("course_id", courseId)
     .eq("student_id", userId)
     .maybeSingle();
   if (!e) return null;
@@ -171,12 +171,7 @@ export type CourseEnrollmentMoney = {
 
 export async function loadCoursePayments(courseId: string) {
   const [enr, entries, uses] = await Promise.all([
-    db
-      .from("lms_enrollments")
-      .select(
-        "id, student_id, completion_source, list_price, discount, amount_due, amount_due_note",
-      )
-      .eq("course_id", courseId),
+    db.rpc("lms_enrollment_billing", { _course_id: courseId }),
     db
       .from("lms_payment_entries")
       .select("*")
