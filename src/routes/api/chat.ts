@@ -522,8 +522,7 @@ export const Route = createFileRoute("/api/chat")({
         // so they run side by side. A button press or a greeting asks for no
         // association facts, so it skips the search.
         const previous = messages[messages.length - 2] as
-          | { role?: string; parts?: unknown }
-          | undefined;
+          { role?: string; parts?: unknown } | undefined;
         const previousChoices =
           previous?.role === "assistant"
             ? parseChoices(extractTextFromMessage(previous)).choices
@@ -578,12 +577,11 @@ export const Route = createFileRoute("/api/chat")({
             ? storedMessages
             : [{ id: "live-0", role: "user", parts: [{ type: "text", text: lastUserText }] }];
 
-        const replyLang: ChatLanguage = messageLanguage(
-          lastUserText,
-          lang === "en" ? "en" : "ar",
-        );
+        const replyLang: ChatLanguage = messageLanguage(lastUserText, lang === "en" ? "en" : "ar");
         const knownFacts = knownVisitorFacts(
-          history.filter((message) => message.role === "user").map((message) => message.content ?? ""),
+          history
+            .filter((message) => message.role === "user")
+            .map((message) => message.content ?? ""),
         );
         const sessionContext = knownFacts.length
           ? `\n\n# معلومات ذكرها الزائر سابقاً\n${knownFacts.join("، ")}\nلا تعد سؤال الزائر عن أي حقل معروف هنا. ابدأ بأول حقل مجهول في رحلة الترشيح.`
@@ -647,9 +645,7 @@ export const Route = createFileRoute("/api/chat")({
               const rows = (data ?? []) as unknown as CatalogRow[];
               const selectedRows = rows
                 .filter((row) =>
-                  replyLang === "ar"
-                    ? row.title_ar || row.title_en
-                    : row.title_en || row.title_ar,
+                  replyLang === "ar" ? row.title_ar || row.title_en : row.title_en || row.title_ar,
                 )
                 .slice(0, 3);
               const basic = toCourseOptions(selectedRows, replyLang);
@@ -660,7 +656,9 @@ export const Route = createFileRoute("/api/chat")({
                     const detail = await getPublicCourse(row.slug || row.id);
                     return enrichCourseOption(option, row, detail, replyLang);
                   } catch (detailError) {
-                    console.error("[chat] find_courses detail failed", detailError, { conversationId });
+                    console.error("[chat] find_courses detail failed", detailError, {
+                      conversationId,
+                    });
                     return enrichCourseOption(option, row, null, replyLang);
                   }
                 }),

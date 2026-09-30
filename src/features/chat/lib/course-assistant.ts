@@ -28,11 +28,58 @@ export type PublicCoursePayload = {
 };
 
 const STOP_WORDS = new Set([
-  "شو", "ما", "هي", "هو", "عن", "من", "في", "عندكم", "عندكن", "بدي", "قصدي", "خبرني",
-  "احكيلي", "تفاصيل", "تفصيل", "دوره", "دورات", "برنامج", "متي", "متى", "كانت", "موعدها",
-  "سعرها", "محتواها", "بها", "فيها", "التسجيل", "سجل", "سجلت", "هل", "كيف", "وين", "فييني",
-  "فيني", "the", "a", "an", "of", "in", "about", "course", "details", "what", "when", "price",
-  "can", "i", "register", "for", "please", "tell", "me",
+  "شو",
+  "ما",
+  "هي",
+  "هو",
+  "عن",
+  "من",
+  "في",
+  "عندكم",
+  "عندكن",
+  "بدي",
+  "قصدي",
+  "خبرني",
+  "احكيلي",
+  "تفاصيل",
+  "تفصيل",
+  "دوره",
+  "دورات",
+  "برنامج",
+  "متي",
+  "متى",
+  "كانت",
+  "موعدها",
+  "سعرها",
+  "محتواها",
+  "بها",
+  "فيها",
+  "التسجيل",
+  "سجل",
+  "سجلت",
+  "هل",
+  "كيف",
+  "وين",
+  "فييني",
+  "فيني",
+  "the",
+  "a",
+  "an",
+  "of",
+  "in",
+  "about",
+  "course",
+  "details",
+  "what",
+  "when",
+  "price",
+  "can",
+  "i",
+  "register",
+  "for",
+  "please",
+  "tell",
+  "me",
 ]);
 
 function normalizeToken(token: string): string {
@@ -123,16 +170,23 @@ export function enrichCourseOption(
     end_date: detail?.end_date ?? row.end_date ?? null,
     schedule_time_from: detail?.schedule_time_from ?? null,
     schedule_time_to: detail?.schedule_time_to ?? null,
-    location: lang === "ar"
-      ? (detail?.location_ar ?? detail?.location_en ?? null)
-      : (detail?.location_en ?? detail?.location_ar ?? null),
-    description: lang === "ar"
-      ? (detail?.description_ar ?? detail?.description_en ?? null)
-      : (detail?.description_en ?? detail?.description_ar ?? null),
-    topics: payload?.sections?.map((section) => section.title).filter((title): title is string => !!title).slice(0, 4) ?? [],
-    registration_status: courseRegistrationStatus(
-      { ...detail, end_date: detail?.end_date ?? row.end_date ?? null },
-    ),
+    location:
+      lang === "ar"
+        ? (detail?.location_ar ?? detail?.location_en ?? null)
+        : (detail?.location_en ?? detail?.location_ar ?? null),
+    description:
+      lang === "ar"
+        ? (detail?.description_ar ?? detail?.description_en ?? null)
+        : (detail?.description_en ?? detail?.description_ar ?? null),
+    topics:
+      payload?.sections
+        ?.map((section) => section.title)
+        .filter((title): title is string => !!title)
+        .slice(0, 4) ?? [],
+    registration_status: courseRegistrationStatus({
+      ...detail,
+      end_date: detail?.end_date ?? row.end_date ?? null,
+    }),
     // A registration button does not establish that a seat has been confirmed.
     seats_confirmed: false,
   };
@@ -149,11 +203,7 @@ function displayDate(raw: string, lang: ChatLanguage): string {
   }).format(value);
 }
 
-export function courseAnswer(
-  row: CatalogRow,
-  option: CourseOption,
-  lang: ChatLanguage,
-): string {
+export function courseAnswer(row: CatalogRow, option: CourseOption, lang: ChatLanguage): string {
   const ar = lang === "ar";
   const lines: string[] = [ar ? `دورة «${option.title}»:` : `${option.title}:`];
   lines.push(
@@ -164,15 +214,21 @@ export function courseAnswer(
   if (option.start_date || option.end_date) {
     const from = option.start_date ? displayDate(option.start_date, lang) : "";
     const to = option.end_date ? displayDate(option.end_date, lang) : "";
-    lines.push(`${ar ? "التاريخ" : "Dates"}: ${[from, to].filter(Boolean).join(ar ? " إلى " : " to ")}.`);
+    lines.push(
+      `${ar ? "التاريخ" : "Dates"}: ${[from, to].filter(Boolean).join(ar ? " إلى " : " to ")}.`,
+    );
   }
   if (option.schedule_time_from || option.schedule_time_to)
-    lines.push(`${ar ? "الوقت" : "Time"}: ${[option.schedule_time_from, option.schedule_time_to].filter(Boolean).join("–")}.`);
+    lines.push(
+      `${ar ? "الوقت" : "Time"}: ${[option.schedule_time_from, option.schedule_time_to].filter(Boolean).join("–")}.`,
+    );
   if (option.location) lines.push(`${ar ? "المكان" : "Location"}: ${option.location}.`);
   if (option.topics.length)
     lines.push(`${ar ? "المحتوى" : "Topics"}: ${option.topics.join(ar ? "، " : ", ")}.`);
   else if (option.description)
-    lines.push(`${ar ? "المحتوى" : "Content"}: ${option.description.slice(0, 320)}${option.description.length > 320 ? "…" : ""}`);
+    lines.push(
+      `${ar ? "المحتوى" : "Content"}: ${option.description.slice(0, 320)}${option.description.length > 320 ? "…" : ""}`,
+    );
   const status = option.registration_status;
   lines.push(
     ar

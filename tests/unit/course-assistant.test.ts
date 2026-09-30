@@ -62,10 +62,16 @@ describe("course answers grounded in the LMS", () => {
 
   it("distinguishes an application from a confirmed seat", () => {
     expect(
-      courseRegistrationStatus({ enrollment_open: true, end_date: "2026-10-08" }, new Date("2026-09-30")),
+      courseRegistrationStatus(
+        { enrollment_open: true, end_date: "2026-10-08" },
+        new Date("2026-09-30"),
+      ),
     ).toBe("open");
     expect(
-      courseRegistrationStatus({ enrollment_open: true, end_date: "2026-07-16" }, new Date("2026-09-30")),
+      courseRegistrationStatus(
+        { enrollment_open: true, end_date: "2026-07-16" },
+        new Date("2026-09-30"),
+      ),
     ).toBe("ended");
   });
 
