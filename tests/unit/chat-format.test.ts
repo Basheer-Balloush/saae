@@ -47,7 +47,7 @@ describe("links in answers", () => {
     ).toEqual([
       { text: "سجّل هنا: ", bold: false },
       {
-        text: "https://www.aisyria.org/learning-management-system/courses/gen-ai-09",
+        text: "تفاصيل الدورة",
         bold: false,
         href: "https://www.aisyria.org/learning-management-system/courses/gen-ai-09",
       },
