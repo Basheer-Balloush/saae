@@ -1,6 +1,8 @@
 /* Shared question catalogue for the digital-experience feedback survey.
    Used by the public form, the server validator, the admin dashboard and exports. */
 
+import { SYRIA_GOVERNORATES } from "@/lib/syria-governorates";
+
 export type Lang = "ar" | "en";
 export type Choice = { value: string; ar: string; en: string };
 export type RatingQuestion = { key: string; ar: string; en: string };
@@ -51,23 +53,7 @@ export const AGE_RANGES: Choice[] = [
   c("45-54", "45 – 54", "45 – 54"),
   c("55plus", "55 فأكثر", "55+"),
 ];
-export const GOVERNORATES: Choice[] = [
-  c("damascus", "دمشق", "Damascus"),
-  c("rif-dimashq", "ريف دمشق", "Rif Dimashq"),
-  c("aleppo", "حلب", "Aleppo"),
-  c("homs", "حمص", "Homs"),
-  c("hama", "حماة", "Hama"),
-  c("latakia", "اللاذقية", "Latakia"),
-  c("tartus", "طرطوس", "Tartus"),
-  c("idlib", "إدلب", "Idlib"),
-  c("deir-ez-zor", "دير الزور", "Deir ez-Zor"),
-  c("raqqa", "الرقة", "Raqqa"),
-  c("hasakah", "الحسكة", "Al-Hasakah"),
-  c("daraa", "درعا", "Daraa"),
-  c("suwayda", "السويداء", "As-Suwayda"),
-  c("quneitra", "القنيطرة", "Quneitra"),
-  c("abroad", "خارج سوريا", "Outside Syria"),
-];
+export const GOVERNORATES: Choice[] = SYRIA_GOVERNORATES.map((g) => c(g.key, g.ar, g.en));
 export const FREQUENCIES: Choice[] = [
   c("first", "هذه أول زيارة", "This is my first visit"),
   c("rarely", "نادراً", "Rarely"),

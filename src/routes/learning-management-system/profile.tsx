@@ -36,6 +36,7 @@ import { SubHero } from "@/features/lms/skin/SubHero";
 import { IconDocument } from "@/features/lms/skin/icons";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { resizedImage } from "@/lib/image-url";
+import { LocationCard } from "@/features/user-location/LocationCard";
 
 export const Route = createFileRoute("/learning-management-system/profile")({
   head: () => ({
@@ -248,6 +249,7 @@ function ProfilePage() {
         <div className="page-shell profile-grid">
           <div className="profile-main">
             <IdentityCard data={data} onSaved={load} lang={lang} />
+            {!isGuest && <LocationCard lang={lang} />}
             <CoursesCard data={data} lang={lang} />
             <CertificatesCard data={data} lang={lang} />
             <ApplicationsCard lang={lang} />

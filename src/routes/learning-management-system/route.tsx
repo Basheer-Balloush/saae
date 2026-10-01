@@ -8,6 +8,12 @@ import { LmsNavbar } from "@/features/lms/LmsNavbar";
 import { Footer } from "@/components/layout/Footer";
 import { LmsSkinShell } from "@/features/lms/skin/LmsSkinShell";
 import { isConsoleLmsPath, isSkinnedLmsPath, LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
+import { LocationGate } from "@/features/user-location/LocationGate";
+
+/* Signed-in users must say where they live before using the platform; the
+   pages that sign them in, up or back are left alone. */
+const AUTH_PATHS =
+  /^\/learning-management-system\/(login|signup|forgot-password|reset-password|confirm-account)\/?$/;
 
 export const Route = createFileRoute("/learning-management-system")({
   head: () => ({
@@ -47,8 +53,13 @@ function LmsLayout() {
     navigate({ to: "/learning-management-system" });
   };
 
-  /* The admin console and the instructor workspace bring their own frame. */
+  /* The admin console and the instructor workspace bring their own frame
+     (and their own location gate, in ConsoleShell). */
   if (isConsoleLmsPath(pathname)) return <Outlet />;
+
+  const locationGate = user && !isGuest && !AUTH_PATHS.test(pathname) && (
+    <LocationGate userId={user.id} lang={lang} />
+  );
 
   /* Cinematic routes share the LMS ambient background, navigation, and footer.
      Other LMS pages keep the standard navbar and footer below. */
@@ -56,6 +67,7 @@ function LmsLayout() {
     return (
       <LmsSkinShell role={role} isAuthed={!!user} isGuest={isGuest} onSignOut={handleSignOut}>
         <Outlet />
+        {locationGate}
       </LmsSkinShell>
     );
   }
@@ -71,6 +83,7 @@ function LmsLayout() {
         <Outlet />
       </main>
       <Footer />
+      {locationGate}
     </div>
   );
 }

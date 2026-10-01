@@ -6,7 +6,12 @@ import {
   keepValidAnswers,
   type FormDefinition,
 } from "@/features/lms/course-feedback/lib/survey";
-import { feedbackState, type FeedbackState } from "@/features/lms/course-feedback/lib/state";
+import {
+  feedbackState,
+  isClosed,
+  type FeedbackState,
+  type FeedbackStatus,
+} from "@/features/lms/course-feedback/lib/state";
 import type { Db, EffectiveForm } from "@/features/lms/course-feedback/lib/feedback.server";
 
 /*
@@ -41,6 +46,16 @@ export type CourseFeedbackView = {
   /** What a finished course's certificate still waits for: what the learner
       owes, or (for a guest) their account. */
   waitingFor: "payment" | "account" | null;
+  /** True when the learner skipped the form instead of sending it. */
+  skipped: boolean;
+};
+
+/** The answer to sending or skipping the form. */
+export type FeedbackCloseResult = {
+  status: "submitted" | "skipped";
+  certificateId: string | null;
+  waitingFor: CourseFeedbackView["waitingFor"];
+  skipped: boolean;
 };
 
 const server = () => import("@/features/lms/course-feedback/lib/feedback.server");
@@ -52,7 +67,7 @@ type Basics = {
   course: { id: string; delivery_mode: string | null; title_ar: string; title_en: string | null };
   enrollmentId: string | null;
   row: {
-    status: "draft" | "submitted";
+    status: FeedbackStatus;
     answers: Record<string, string> | null;
     notes: Record<string, string> | null;
   } | null;
@@ -111,7 +126,7 @@ async function inspect(db: Db, userId: string, courseId: string) {
   const b = await loadBasics(db, userId, courseId);
   const form: EffectiveForm = await effectiveForm(db, courseId);
   const onsite = b.course.delivery_mode === "onsite";
-  const submitted = b.row?.status === "submitted";
+  const submitted = isClosed(b.row?.status);
   let reason: string | null = "not_enrolled";
   let certificateId: string | null = null;
   let waitingFor: CourseFeedbackView["waitingFor"] = null;
@@ -151,9 +166,41 @@ async function inspect(db: Db, userId: string, courseId: string) {
     notes: submitted ? {} : draft.notes,
     certificateId,
     waitingFor,
+    skipped: b.row?.status === "skipped",
   };
   return { view, enrollmentId: b.enrollmentId };
 }
+
+/** After the form is closed (sent or skipped): issues the certificate when the
+    course's other requirements are met, and emails it. A failure here never
+    undoes the closed form. */
+async function certificateAfterFeedback(
+  db: Db,
+  userId: string,
+  courseId: string,
+  lang: "ar" | "en",
+) {
+  let certificateId: string | null = null;
+  let waitingFor: CourseFeedbackView["waitingFor"] = null;
+  try {
+    const res = await evaluate(db, userId, courseId);
+    certificateId = res.certificateId;
+    waitingFor = waitingForOf(res.reason);
+    if (!certificateId) certificateId = await existingCertificate(db, userId, courseId);
+  } catch (e) {
+    console.error("[course-feedback] certificate check failed", e instanceof Error ? e.message : e);
+  }
+  if (certificateId) await emailCertificate(userId, courseId, lang);
+  return { certificateId, waitingFor };
+}
+
+/** What a closed form already says, for a retried send or skip. */
+const closedResult = (view: CourseFeedbackView): FeedbackCloseResult => ({
+  status: view.skipped ? "skipped" : "submitted",
+  certificateId: view.certificateId,
+  waitingFor: view.waitingFor,
+  skipped: view.skipped,
+});
 
 /** Sends the certificate email once (it does nothing when already sent). A
     failure is logged; the certificate itself is already issued. */
@@ -191,7 +238,7 @@ export const saveCourseFeedbackDraft = createServerFn({ method: "POST" })
     const b = await loadBasics(db, context.userId, data.courseId);
     if (!b.enrollmentId) throw new Error("Forbidden: not enrolled");
     if (b.course.delivery_mode === "onsite") throw new Error("feedback_not_open");
-    if (b.row?.status === "submitted") return { status: "submitted" as const };
+    if (isClosed(b.row?.status)) return { status: "submitted" as const };
     const form = await effectiveForm(db, data.courseId);
     if (!form.enabled) throw new Error("feedback_not_open");
     // A draft never fails over a question the admin just removed.
@@ -223,17 +270,12 @@ export const saveCourseFeedbackDraft = createServerFn({ method: "POST" })
 export const submitCourseFeedback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => submitInput.parse(input))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<FeedbackCloseResult> => {
     const { serviceClient } = await server();
     const db = await serviceClient();
     const userId = context.userId;
     const { view, enrollmentId } = await inspect(db, userId, data.courseId);
-    if (view.state === "submitted")
-      return {
-        status: "submitted" as const,
-        certificateId: view.certificateId,
-        waitingFor: view.waitingFor,
-      };
+    if (view.state === "submitted") return closedResult(view);
     if (view.state !== "open") throw new Error(`feedback_not_open:${view.state}`);
     // The page reloads the new form and keeps the answers that still fit.
     if (view.formId !== data.formId || view.formVersion !== data.formVersion)
@@ -258,21 +300,61 @@ export const submitCourseFeedback = createServerFn({ method: "POST" })
       },
       { onConflict: "enrollment_id" },
     );
-    if (error && !alreadySubmitted(error.message)) throw new Error("Could not save your feedback");
-
-    let certificateId: string | null = null;
-    let waitingFor: CourseFeedbackView["waitingFor"] = null;
-    try {
-      const res = await evaluate(db, userId, data.courseId);
-      certificateId = res.certificateId;
-      waitingFor = waitingForOf(res.reason);
-      if (!certificateId) certificateId = await existingCertificate(db, userId, data.courseId);
-    } catch (e) {
-      console.error(
-        "[course-feedback] certificate check failed",
-        e instanceof Error ? e.message : e,
-      );
+    if (error) {
+      if (!alreadySubmitted(error.message)) throw new Error("Could not save your feedback");
+      // Closed meanwhile, in another tab: report what it is.
+      return closedResult((await inspect(db, userId, data.courseId)).view);
     }
-    if (certificateId) await emailCertificate(userId, data.courseId, data.lang);
-    return { status: "submitted" as const, certificateId, waitingFor };
+
+    const { certificateId, waitingFor } = await certificateAfterFeedback(
+      db,
+      userId,
+      data.courseId,
+      data.lang,
+    );
+    return { status: "submitted", certificateId, waitingFor, skipped: false };
+  });
+
+/** Skips the feedback. The form closes as skipped and keeps any answers the
+    learner already gave; then, as after sending it, the certificate is issued
+    when the course's other requirements are met. Safe to retry. */
+export const skipCourseFeedback = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => responseInput.parse(input))
+  .handler(async ({ data, context }): Promise<FeedbackCloseResult> => {
+    const { serviceClient } = await server();
+    const db = await serviceClient();
+    const userId = context.userId;
+    const { view, enrollmentId } = await inspect(db, userId, data.courseId);
+    if (view.state === "submitted") return closedResult(view);
+    if (view.state !== "open") throw new Error(`feedback_not_open:${view.state}`);
+
+    const kept = keepValidAnswers(view.form, { answers: data.answers, notes: data.notes });
+    const { error } = await db.from("lms_course_feedback").upsert(
+      {
+        enrollment_id: enrollmentId,
+        course_id: data.courseId,
+        student_id: userId,
+        form_id: view.formId,
+        form_version: view.formVersion,
+        lang: data.lang,
+        answers: kept.answers,
+        notes: kept.notes,
+        status: "skipped",
+        submitted_at: new Date().toISOString(),
+      },
+      { onConflict: "enrollment_id" },
+    );
+    if (error) {
+      if (!alreadySubmitted(error.message)) throw new Error("Could not skip the feedback");
+      return closedResult((await inspect(db, userId, data.courseId)).view);
+    }
+
+    const { certificateId, waitingFor } = await certificateAfterFeedback(
+      db,
+      userId,
+      data.courseId,
+      data.lang,
+    );
+    return { status: "skipped", certificateId, waitingFor, skipped: true };
   });
