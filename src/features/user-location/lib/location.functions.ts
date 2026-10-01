@@ -16,25 +16,13 @@ export const getMyLocationStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<LocationStatus> => {
     const { supabase, userId } = context as unknown as { supabase: SupabaseClient; userId: string };
-    const [loc, prompt] = await Promise.all([
-      supabase
-        .from("user_locations")
-        .select("governorate, city")
-        .eq("user_id", userId)
-        .maybeSingle(),
-      supabase
-        .from("user_location_prompts")
-        .select("dismissed_count, last_dismissed_at")
-        .eq("user_id", userId)
-        .maybeSingle(),
-    ]);
-    if (loc.error) throw new Error(loc.error.message);
-    if (prompt.error) throw new Error(prompt.error.message);
-    return {
-      location: loc.data ? { governorate: loc.data.governorate, city: loc.data.city } : null,
-      dismissedCount: prompt.data?.dismissed_count ?? 0,
-      lastDismissedAt: prompt.data?.last_dismissed_at ?? null,
-    };
+    const { data, error } = await supabase
+      .from("user_locations")
+      .select("governorate, city")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { location: data ? { governorate: data.governorate, city: data.city } : null };
   });
 
 export const saveMyLocation = createServerFn({ method: "POST" })
@@ -45,15 +33,6 @@ export const saveMyLocation = createServerFn({ method: "POST" })
     const { error } = await supabase
       .from("user_locations")
       .upsert({ user_id: userId, governorate: data.governorate, city: data.city });
-    if (error) throw new Error(error.message);
-    return { ok: true as const };
-  });
-
-export const dismissLocationPrompt = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { supabase } = context as unknown as { supabase: SupabaseClient };
-    const { error } = await supabase.rpc("dismiss_location_prompt");
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });

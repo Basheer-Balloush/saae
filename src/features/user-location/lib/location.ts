@@ -39,45 +39,29 @@ export function checkLocation(draft: {
   return { missing: field === "governorate" ? "governorate" : "city" };
 }
 
-/* After this many "Later" presses the prompt stops; the profile still has the field. */
-export const PROMPT_MAX_DISMISSALS = 3;
-/* Days between prompts after a "Later". */
-export const PROMPT_PAUSE_DAYS = 3;
-
-export type LocationStatus = {
-  location: UserLocation | null;
-  dismissedCount: number;
-  lastDismissedAt: string | null;
-};
-
-export function shouldPrompt(status: LocationStatus, now = Date.now()): boolean {
-  if (status.location) return false;
-  if (status.dismissedCount >= PROMPT_MAX_DISMISSALS) return false;
-  if (!status.lastDismissedAt) return true;
-  return now - Date.parse(status.lastDismissedAt) >= PROMPT_PAUSE_DAYS * 86_400_000;
-}
-
-export type GovernorateStats = {
-  key: string;
-  name_ar: string;
-  name_en: string;
-  people: number;
-  /** People here with the instructor role. */
-  instructors: number;
-  /** People here enrolled in, or asking to join, at least one course. */
-  with_courses: number;
-  /** Category id → people here interested in it (enrolled or asked). */
-  interests: Record<string, number>;
-  cities: { city: string; people: number }[];
-};
+export type LocationStatus = { location: UserLocation | null };
 
 export type CourseCategory = { id: string; name_ar: string; name_en: string };
+export type GovernorateName = { key: string; name_ar: string; name_en: string };
+
+/* One person who answered, without name or email (admin_user_location_stats). */
+export type PersonRow = {
+  governorate: string;
+  city: string;
+  city_key: string;
+  instructor: boolean;
+  /** Enrolled in, or asked to join, at least one course. */
+  has_course: boolean;
+  /** Categories of those courses. */
+  categories: string[];
+  answered_at: string;
+};
 
 export type LocationStats = {
   accounts: number;
-  answered: number;
   categories: CourseCategory[];
-  governorates: GovernorateStats[];
+  governorates: GovernorateName[];
+  people: PersonRow[];
 };
 
 export type LocationExportRow = {

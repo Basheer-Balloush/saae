@@ -37,7 +37,15 @@ import {
 } from "@/components/console/ui";
 import { exportRowsToXlsx } from "@/lib/admin-xlsx-export";
 import { getLocationStats, listLocationsForExport } from "./lib/location.functions";
-import type { GovernorateStats, LocationStats } from "./lib/location";
+import type { LocationStats } from "./lib/location";
+import {
+  NO_FILTER,
+  countBy,
+  filterPeople,
+  isFiltered,
+  topCities,
+  type StatsFilter,
+} from "./lib/location-stats";
 
 /* Mid-tone colours that read on both console themes. */
 const PALETTE = [
@@ -115,8 +123,8 @@ export function LocationStatsAdmin() {
       eyebrow={t("إدارة الموقع · التفاعل", "Website · Engagement")}
       title={t("مواقع المستخدمين", "User locations")}
       description={t(
-        "أين يقيم أصحاب الحسابات، وما الذي يهتمّ به الناس في كل محافظة حسب تصنيفات الدورات التي سجّلوا فيها أو طلبوها.",
-        "Where account holders live, and what people in each governorate are interested in, by the categories of the courses they joined or asked for.",
+        "أين يقيم أصحاب الحسابات، وما الذي يهتمّ به الناس في كل محافظة حسب تصنيفات الدورات التي سجّلوا فيها أو طلبوها. صفِّ الصفحة بالمحافظة أو الاهتمام أو الدور أو التاريخ.",
+        "Where account holders live, and what people in each governorate are interested in, by the categories of the courses they joined or asked for. Filter by governorate, interest, role or date.",
       )}
       actions={
         <>
@@ -133,7 +141,7 @@ export function LocationStatsAdmin() {
             type="button"
             className="cx-btn cx-btn-primary"
             onClick={onExport}
-            disabled={exporting || !q.data?.answered}
+            disabled={exporting || !q.data?.people.length}
           >
             {exporting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -175,112 +183,202 @@ export function LocationStatsAdmin() {
 
 function StatsBody({ data }: { data: LocationStats }) {
   const { t, lang } = useT();
-  const [selected, setSelected] = useState<string | null>(null);
-  const { accounts, answered, governorates, categories } = data;
-  const gName = (g: { name_ar: string; name_en: string }) =>
-    lang === "ar" ? g.name_ar : g.name_en;
+  const [filter, setFilter] = useState<StatsFilter>(NO_FILTER);
+  const { accounts, people, categories, governorates } = data;
+  const name = (x: { name_ar: string; name_en: string }) => (lang === "ar" ? x.name_ar : x.name_en);
+  const set = (patch: Partial<StatsFilter>) => setFilter((f) => ({ ...f, ...patch }));
+  const toggle = (key: "governorate" | "category", value: string) =>
+    setFilter((f) => ({ ...f, [key]: f[key] === value ? "all" : value }));
 
-  const ranked = useMemo(
-    () => governorates.filter((g) => g.people > 0).sort((a, b) => b.people - a.people),
-    [governorates],
-  );
+  const govByKey = useMemo(() => new Map(governorates.map((g) => [g.key, g])), [governorates]);
   const catColor = useMemo(
     () => new Map(categories.map((c, i) => [c.id, PALETTE[i % PALETTE.length]])),
     [categories],
   );
-  const govColor = useMemo(
-    () => new Map(ranked.map((g, i) => [g.key, i < PIE_SLICES ? PALETTE[i] : OTHERS_COLOR])),
-    [ranked],
+
+  /* Each chart leaves its own side of the filter open, so it still shows
+     every option, with the chosen one highlighted. */
+  const matching = filterPeople(people, filter);
+  const forGovernorates = filterPeople(people, filter, ["governorate"]);
+  const forInterests = filterPeople(people, filter, ["category"]);
+  const forMatrix = filterPeople(people, filter, ["governorate", "category"]);
+
+  const govCounts = countBy(forGovernorates, (p) => [p.governorate]);
+  const rankedGovs = [...govCounts.entries()].sort((a, b) => b[1] - a[1]);
+  const govColor = new Map(
+    rankedGovs.map(([k], i) => [k, i < PIE_SLICES ? PALETTE[i] : OTHERS_COLOR]),
   );
-
-  const current = governorates.find((g) => g.key === selected) ?? null;
-  const scope: GovernorateStats[] = current ? [current] : ranked;
-  const scopePeople = scope.reduce((n, g) => n + g.people, 0);
-  const scopeWithCourses = scope.reduce((n, g) => n + g.with_courses, 0);
-  const scopeInstructors = scope.reduce((n, g) => n + g.instructors, 0);
-
-  const govSlices: Slice[] = ranked.slice(0, PIE_SLICES).map((g) => ({
-    key: g.key,
-    name: gName(g),
-    value: g.people,
-    color: govColor.get(g.key)!,
+  const govSlices: Slice[] = rankedGovs.slice(0, PIE_SLICES).map(([k, v]) => ({
+    key: k,
+    name: govByKey.get(k) ? name(govByKey.get(k)!) : k,
+    value: v,
+    color: govColor.get(k)!,
   }));
-  const restPeople = ranked.slice(PIE_SLICES).reduce((n, g) => n + g.people, 0);
-  if (restPeople)
+  const restGovs = rankedGovs.slice(PIE_SLICES).reduce((n, [, v]) => n + v, 0);
+  if (restGovs)
     govSlices.push({
       key: "others",
       name: t("غيرها", "Others"),
-      value: restPeople,
+      value: restGovs,
       color: OTHERS_COLOR,
     });
 
+  const catCounts = countBy(forInterests, (p) => p.categories);
+  const noCourse = forInterests.filter((p) => !p.has_course).length;
   const interestSlices: Slice[] = categories
     .map((c) => ({
       key: c.id,
-      name: gName(c),
-      value: scope.reduce((n, g) => n + (g.interests[c.id] ?? 0), 0),
+      name: name(c),
+      value: catCounts.get(c.id) ?? 0,
       color: catColor.get(c.id)!,
     }))
     .filter((s) => s.value > 0)
     .sort((a, b) => b.value - a.value);
+  if (noCourse)
+    interestSlices.push({
+      key: "none",
+      name: t("لا دورة بعد", "No course yet"),
+      value: noCourse,
+      color: OTHERS_COLOR,
+    });
 
-  const stackRows = ranked.map((g) => {
-    const row: Record<string, string | number> = { name: gName(g), key: g.key };
-    for (const c of categories) row[c.id] = g.interests[c.id] ?? 0;
+  const matrixGovs = [...countBy(forMatrix, (p) => [p.governorate]).entries()].sort(
+    (a, b) => b[1] - a[1],
+  );
+  const stackRows = matrixGovs.map(([k]) => {
+    const here = forMatrix.filter((p) => p.governorate === k);
+    const counts = countBy(here, (p) => p.categories);
+    const row: Record<string, string | number> = {
+      key: k,
+      name: govByKey.get(k) ? name(govByKey.get(k)!) : k,
+    };
+    for (const c of categories) row[c.id] = counts.get(c.id) ?? 0;
     return row;
   });
 
-  const inSyria = governorates.filter((g) => g.key !== "abroad");
-  const covered = inSyria.filter((g) => g.people > 0).length;
-  const abroad = governorates.find((g) => g.key === "abroad");
-  const coverage = accounts ? Math.round((answered / accounts) * 100) : 0;
-  const withCoursesAll = governorates.reduce((n, g) => n + g.with_courses, 0);
+  const instructors = matching.filter((p) => p.instructor).length;
+  const withCourse = matching.filter((p) => p.has_course).length;
+  const cities = topCities(matching).slice(0, 15);
+  const abroad = matching.filter((p) => p.governorate === "abroad").length;
+  const coveredGovs = new Set(matching.map((p) => p.governorate).filter((g) => g !== "abroad"))
+    .size;
+  const pct = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0);
+  const filtered = isFiltered(filter);
 
   return (
     <>
+      <div className="cx-card mb-4 p-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto] lg:items-end">
+          <FilterSelect
+            label={t("المحافظة", "Governorate")}
+            value={filter.governorate}
+            onChange={(v) => set({ governorate: v })}
+            options={governorates.map((g) => ({ value: g.key, label: name(g) }))}
+          />
+          <FilterSelect
+            label={t("الاهتمام (تصنيف الدورة)", "Interest (course category)")}
+            value={filter.category}
+            onChange={(v) => set({ category: v })}
+            options={[
+              ...categories.map((c) => ({ value: c.id, label: name(c) })),
+              { value: "none", label: t("لا دورة بعد", "No course yet") },
+            ]}
+          />
+          <FilterSelect
+            label={t("الدور", "Role")}
+            value={filter.role}
+            onChange={(v) => set({ role: v as StatsFilter["role"] })}
+            options={[
+              { value: "learners", label: t("متعلّمون", "Learners") },
+              { value: "instructors", label: t("مدرّبون", "Instructors") },
+            ]}
+          />
+          <FilterSelect
+            label={t("تاريخ الإجابة", "Answered")}
+            value={filter.since}
+            onChange={(v) => set({ since: v as StatsFilter["since"] })}
+            allLabel={t("كل الأوقات", "Any time")}
+            options={[
+              { value: "7", label: t("آخر ٧ أيام", "Last 7 days") },
+              { value: "30", label: t("آخر ٣٠ يوماً", "Last 30 days") },
+              { value: "90", label: t("آخر ٩٠ يوماً", "Last 90 days") },
+            ]}
+          />
+          <button
+            type="button"
+            className="cx-btn cx-btn-ghost h-10"
+            onClick={() => setFilter(NO_FILTER)}
+            disabled={!filtered}
+          >
+            <X className="h-4 w-4" />
+            <span>{t("مسح الفلاتر", "Clear filters")}</span>
+          </button>
+        </div>
+      </div>
+
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile
           icon={UsersRound}
-          label={t("أجابوا", "Answered")}
-          value={fmtNum(answered, lang)}
-          hint={t(
-            `من ${fmtNum(accounts, lang)} حساب (${fmtNum(coverage, lang)}٪)`,
-            `of ${fmtNum(accounts, lang)} accounts (${coverage}%)`,
-          )}
+          label={filtered ? t("يطابقون الفلاتر", "Match the filters") : t("أجابوا", "Answered")}
+          value={fmtNum(matching.length, lang)}
+          hint={
+            filtered
+              ? t(`من ${fmtNum(people.length, lang)} أجابوا`, `of ${people.length} who answered`)
+              : t(
+                  `من ${fmtNum(accounts, lang)} حساب (${fmtNum(pct(people.length, accounts), lang)}٪)`,
+                  `of ${fmtNum(accounts, lang)} accounts (${pct(people.length, accounts)}%)`,
+                )
+          }
         />
         <StatTile
           icon={MapPin}
           label={t("محافظات فيها مستخدمون", "Governorates with users")}
-          value={`${fmtNum(covered, lang)} / ${fmtNum(inSyria.length, lang)}`}
+          value={`${fmtNum(coveredGovs, lang)} / ${fmtNum(governorates.length - 1, lang)}`}
           tone="green"
         />
         <StatTile
           icon={BookOpen}
           label={t("لديهم دورة", "Joined a course")}
-          value={fmtNum(withCoursesAll, lang)}
+          value={fmtNum(withCourse, lang)}
           hint={t(
-            `${fmtNum(answered ? Math.round((withCoursesAll / answered) * 100) : 0, lang)}٪ ممن أجابوا`,
-            `${answered ? Math.round((withCoursesAll / answered) * 100) : 0}% of those who answered`,
+            `${fmtNum(pct(withCourse, matching.length), lang)}٪`,
+            `${pct(withCourse, matching.length)}%`,
           )}
           tone="orange"
         />
         <StatTile
           icon={Globe2}
           label={t("خارج سوريا", "Outside Syria")}
-          value={fmtNum(abroad?.people ?? 0, lang)}
+          value={fmtNum(abroad, lang)}
           tone="gray"
         />
       </div>
 
-      {answered === 0 ? (
+      {people.length === 0 ? (
         <Panel>
           <EmptyState
             icon={MapPin}
             title={t("لا توجد إجابات بعد", "No answers yet")}
             text={t(
-              "تظهر الإجابات هنا عندما يختار المستخدمون محافظتهم عند التسجيل أو من ملفهم الشخصي.",
-              "Answers appear here as users choose their governorate when signing up or from their profile.",
+              "تظهر الإجابات هنا عندما يختار المستخدمون محافظتهم عند التسجيل أو الدخول.",
+              "Answers appear here as users choose their governorate when they sign up or sign in.",
             )}
+          />
+        </Panel>
+      ) : matching.length === 0 ? (
+        <Panel>
+          <EmptyState
+            icon={MapPin}
+            title={t("لا أحد يطابق هذه الفلاتر", "No one matches these filters")}
+            action={
+              <button
+                type="button"
+                className="cx-btn cx-btn-ghost"
+                onClick={() => setFilter(NO_FILTER)}
+              >
+                {t("مسح الفلاتر", "Clear filters")}
+              </button>
+            }
           />
         </Panel>
       ) : (
@@ -289,39 +387,36 @@ function StatsBody({ data }: { data: LocationStats }) {
             <Panel
               title={t("الناس حسب المحافظة", "People by governorate")}
               description={t(
-                "اضغط على محافظة لترى اهتمامات أهلها ومدنها",
-                "Click a governorate to see its interests and cities",
+                "اضغط على محافظة لتصفية الصفحة بها",
+                "Click a governorate to filter the page",
               )}
             >
               <Donut
                 slices={govSlices}
-                total={answered}
+                total={forGovernorates.length}
                 centerLabel={t("شخص", "people")}
-                activeKey={selected}
-                onSelect={(key) => key !== "others" && setSelected(key === selected ? null : key)}
+                activeKey={filter.governorate === "all" ? null : filter.governorate}
+                onSelect={(k) => k !== "others" && toggle("governorate", k)}
               />
             </Panel>
             <Panel
-              title={
-                current
-                  ? t(`الاهتمامات في ${current.name_ar}`, `Interests in ${current.name_en}`)
-                  : t("الاهتمامات", "Interests")
-              }
+              title={t("الاهتمامات", "Interests")}
               description={t(
-                `تصنيفات الدورات التي سجّل فيها الناس أو طلبوها. ${fmtNum(scopePeople - scopeWithCourses, lang)} من ${fmtNum(scopePeople, lang)} لم يسجّلوا في أي دورة بعد.`,
-                `Categories of the courses people joined or asked for. ${scopePeople - scopeWithCourses} of ${scopePeople} have no course yet.`,
+                "تصنيفات الدورات التي سجّل فيها الناس أو طلبوها. اضغط على تصنيف لتصفية الصفحة به.",
+                "Categories of the courses people joined or asked for. Click one to filter the page.",
               )}
-              actions={current && <ClearFilter onClear={() => setSelected(null)} />}
             >
               {interestSlices.length ? (
                 <Donut
                   slices={interestSlices}
                   total={interestSlices.reduce((n, s) => n + s.value, 0)}
                   centerLabel={t("اهتمام", "interests")}
+                  activeKey={filter.category === "all" ? null : filter.category}
+                  onSelect={(k) => toggle("category", k)}
                 />
               ) : (
                 <p className="py-10 text-center text-[13px] text-[var(--cx-muted)]">
-                  {t("لم يسجّل أحد هنا في دورة بعد", "No one here has joined a course yet")}
+                  {t("لا بيانات", "No data")}
                 </p>
               )}
             </Panel>
@@ -331,8 +426,8 @@ function StatsBody({ data }: { data: LocationStats }) {
             className="mb-4"
             title={t("الاهتمامات في كل محافظة", "Interests across governorates")}
             description={t(
-              "عدد الأشخاص المهتمين بكل تصنيف في كل محافظة. قد يهتمّ الشخص الواحد بأكثر من تصنيف.",
-              "People interested in each category, per governorate. One person can count in several categories.",
+              "عدد المهتمين بكل تصنيف في كل محافظة. قد يهتمّ الشخص الواحد بأكثر من تصنيف. اضغط على محافظة لتصفية الصفحة بها.",
+              "People interested in each category, per governorate. One person can count in several. Click a governorate to filter.",
             )}
           >
             <div style={{ height: Math.max(160, stackRows.length * 44 + 70) }} dir="ltr">
@@ -343,7 +438,7 @@ function StatsBody({ data }: { data: LocationStats }) {
                   margin={{ top: 4, right: 12, bottom: 4, left: 12 }}
                   onClick={(e) => {
                     const key = (e?.activePayload?.[0]?.payload as { key?: string })?.key;
-                    if (key) setSelected(key === selected ? null : key);
+                    if (key) toggle("governorate", key);
                   }}
                 >
                   <XAxis
@@ -377,9 +472,10 @@ function StatsBody({ data }: { data: LocationStats }) {
                     <Bar
                       key={c.id}
                       dataKey={c.id}
-                      name={gName(c)}
+                      name={name(c)}
                       stackId="interests"
                       fill={catColor.get(c.id)}
+                      fillOpacity={filter.category === "all" || filter.category === c.id ? 1 : 0.25}
                       maxBarSize={26}
                       cursor="pointer"
                     />
@@ -390,53 +486,37 @@ function StatsBody({ data }: { data: LocationStats }) {
           </Panel>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <Panel
-              title={
-                current
-                  ? t(`المدن في ${current.name_ar}`, `Cities in ${current.name_en}`)
-                  : t("أكثر المدن", "Top cities")
-              }
-              actions={current && <ClearFilter onClear={() => setSelected(null)} />}
-            >
+            <Panel title={t("أكثر المدن", "Top cities")}>
               <CityList
-                cities={
-                  current
-                    ? current.cities
-                    : ranked
-                        .flatMap((g) =>
-                          g.cities.map((c) => ({ ...c, city: `${c.city} · ${gName(g)}` })),
-                        )
-                        .sort((a, b) => b.people - a.people)
-                        .slice(0, 12)
-                }
-                total={scopePeople}
+                cities={cities.map((c) => ({
+                  people: c.people,
+                  city:
+                    filter.governorate === "all" && govByKey.get(c.governorate)
+                      ? `${c.city} · ${name(govByKey.get(c.governorate)!)}`
+                      : c.city,
+                }))}
+                total={matching.length}
               />
             </Panel>
-            <Panel
-              title={
-                current
-                  ? t(`من هم في ${current.name_ar}`, `Who they are in ${current.name_en}`)
-                  : t("من هم", "Who they are")
-              }
-            >
+            <Panel title={t("من هم", "Who they are")}>
               <div className="grid gap-2 sm:grid-cols-2">
                 <Donut
                   small
                   slices={[
                     {
-                      key: "students",
+                      key: "learners",
                       name: t("متعلّمون", "Learners"),
-                      value: scopePeople - scopeInstructors,
+                      value: matching.length - instructors,
                       color: PALETTE[0],
                     },
                     {
                       key: "instructors",
                       name: t("مدرّبون", "Instructors"),
-                      value: scopeInstructors,
+                      value: instructors,
                       color: PALETTE[2],
                     },
                   ].filter((s) => s.value > 0)}
-                  total={scopePeople}
+                  total={matching.length}
                   centerLabel={t("شخص", "people")}
                 />
                 <Donut
@@ -445,17 +525,17 @@ function StatsBody({ data }: { data: LocationStats }) {
                     {
                       key: "with",
                       name: t("لديهم دورة", "Joined a course"),
-                      value: scopeWithCourses,
+                      value: withCourse,
                       color: PALETTE[1],
                     },
                     {
                       key: "without",
                       name: t("لا دورة بعد", "No course yet"),
-                      value: scopePeople - scopeWithCourses,
+                      value: matching.length - withCourse,
                       color: OTHERS_COLOR,
                     },
                   ].filter((s) => s.value > 0)}
-                  total={scopePeople}
+                  total={matching.length}
                   centerLabel={t("شخص", "people")}
                 />
               </div>
@@ -464,6 +544,35 @@ function StatsBody({ data }: { data: LocationStats }) {
         </>
       )}
     </>
+  );
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+  allLabel,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  allLabel?: string;
+}) {
+  const { t } = useT();
+  return (
+    <label className="flex min-w-0 flex-col gap-1 text-[12px] font-bold text-[var(--cx-muted)]">
+      {label}
+      <select className="cx-input h-10" value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="all">{allLabel ?? t("الكل", "All")}</option>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
@@ -587,15 +696,5 @@ function CityList({
         </li>
       ))}
     </ul>
-  );
-}
-
-function ClearFilter({ onClear }: { onClear: () => void }) {
-  const { t } = useT();
-  return (
-    <button type="button" className="cx-btn cx-btn-ghost" onClick={onClear}>
-      <X className="h-4 w-4" />
-      <span>{t("كل المحافظات", "All governorates")}</span>
-    </button>
   );
 }

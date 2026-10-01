@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { checkLocation, shouldPrompt } from "../../src/features/user-location/lib/location";
+import { checkLocation, type PersonRow } from "../../src/features/user-location/lib/location";
+import {
+  NO_FILTER,
+  filterPeople,
+  isFiltered,
+  topCities,
+} from "../../src/features/user-location/lib/location-stats";
 import { isValidCity, SYRIA_GOVERNORATES, tidyCity } from "../../src/lib/syria-governorates";
 import { GOVERNORATES } from "../../src/features/feedback-survey/lib/feedback-survey";
 
@@ -29,26 +35,68 @@ describe("location form check", () => {
   });
 });
 
-describe("location prompt", () => {
-  const base = { location: null, dismissedCount: 0, lastDismissedAt: null };
+describe("admin location filters", () => {
   const now = Date.parse("2026-10-01T12:00:00Z");
+  const day = 86_400_000;
+  const person = (p: Partial<PersonRow>): PersonRow => ({
+    governorate: "homs",
+    city: "حمص",
+    city_key: "حمص",
+    instructor: false,
+    has_course: false,
+    categories: [],
+    answered_at: new Date(now - day).toISOString(),
+    ...p,
+  });
+  const people = [
+    person({ has_course: true, categories: ["prog"] }),
+    person({
+      governorate: "rif-dimashq",
+      city: "ببيلا",
+      city_key: "ببيلا",
+      has_course: true,
+      categories: ["prog", "health"],
+    }),
+    person({ governorate: "rif-dimashq", city: "ببيلة", city_key: "ببيلا", instructor: true }),
+    person({
+      governorate: "abroad",
+      city: "Istanbul",
+      city_key: "istanbul",
+      answered_at: new Date(now - 40 * day).toISOString(),
+    }),
+  ];
 
-  it("asks a user with no location", () => {
-    expect(shouldPrompt(base, now)).toBe(true);
+  it("keeps everyone with no filter", () => {
+    expect(filterPeople(people, NO_FILTER, [], now)).toHaveLength(4);
+    expect(isFiltered(NO_FILTER)).toBe(false);
   });
-  it("never asks once a location is saved", () => {
-    expect(shouldPrompt({ ...base, location: { governorate: "homs", city: "حمص" } }, now)).toBe(
-      false,
-    );
+
+  it("filters by governorate, interest, no course, role and date", () => {
+    const f = (patch: Partial<typeof NO_FILTER>) =>
+      filterPeople(people, { ...NO_FILTER, ...patch }, [], now);
+    expect(f({ governorate: "rif-dimashq" })).toHaveLength(2);
+    expect(f({ category: "prog" })).toHaveLength(2);
+    expect(f({ category: "health" })).toHaveLength(1);
+    expect(f({ category: "none" })).toHaveLength(2);
+    expect(f({ role: "instructors" })).toHaveLength(1);
+    expect(f({ role: "learners" })).toHaveLength(3);
+    expect(f({ since: "30" })).toHaveLength(3);
+    expect(f({ governorate: "rif-dimashq", category: "prog" })).toHaveLength(1);
   });
-  it("waits three days after Later, and stops after three", () => {
-    const twoDays = new Date(now - 2 * 86_400_000).toISOString();
-    const fourDays = new Date(now - 4 * 86_400_000).toISOString();
-    expect(shouldPrompt({ ...base, dismissedCount: 1, lastDismissedAt: twoDays }, now)).toBe(false);
-    expect(shouldPrompt({ ...base, dismissedCount: 2, lastDismissedAt: fourDays }, now)).toBe(true);
-    expect(shouldPrompt({ ...base, dismissedCount: 3, lastDismissedAt: fourDays }, now)).toBe(
-      false,
-    );
+
+  it("leaves one side open for the chart of that side", () => {
+    const filter = { ...NO_FILTER, governorate: "rif-dimashq", category: "prog" };
+    expect(filterPeople(people, filter, ["governorate"], now)).toHaveLength(2);
+    expect(filterPeople(people, filter, ["category"], now)).toHaveLength(2);
+  });
+
+  it("groups spellings of one city and shows the most common", () => {
+    const cities = topCities([
+      ...people,
+      person({ governorate: "rif-dimashq", city: "ببيلا", city_key: "ببيلا" }),
+    ]);
+    expect(cities[0]).toEqual({ governorate: "rif-dimashq", city: "ببيلا", people: 3 });
+    expect(cities).toHaveLength(3);
   });
 });
 
