@@ -81,6 +81,9 @@ export type CourseFeedbackAdmin = {
   versions: VersionMap;
   /** Learners who started the form but have not sent it. */
   drafts: number;
+  /** Learners who skipped the form. Their partial answers are not in the
+      responses or the summary. */
+  skipped: number;
   names: Record<string, string | null>;
 };
 
@@ -139,6 +142,11 @@ export const getCourseFeedbackAdmin = createServerFn({ method: "POST" })
       .select("id", { count: "exact", head: true })
       .eq("course_id", data.courseId)
       .eq("status", "draft");
+    const { count: skipped } = await db
+      .from("lms_course_feedback")
+      .select("id", { count: "exact", head: true })
+      .eq("course_id", data.courseId)
+      .eq("status", "skipped");
 
     const responses: ReportResponse[] = ((rows ?? []) as ResponseRow[]).map((r) => ({
       id: r.id,
@@ -171,6 +179,7 @@ export const getCourseFeedbackAdmin = createServerFn({ method: "POST" })
       responses,
       versions,
       drafts: drafts ?? 0,
+      skipped: skipped ?? 0,
       names: await learnerNames(db, [...new Set(responses.map((r) => r.studentId))]),
     };
   });
