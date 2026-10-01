@@ -34,6 +34,9 @@ import {
   submitEnrollment,
   type EnrollNote,
 } from "@/features/lms/lib/coupons-db";
+import { PaymentMethodPicker } from "@/features/lms/payments/PaymentMethodPicker";
+import { ShamCashPayment } from "@/features/lms/payments/ShamCashPayment";
+import { submitPaidEnrollment } from "@/features/lms/payments/lib/payments-api";
 
 type FieldType =
   | "short_text"
@@ -82,11 +85,15 @@ export function EnrollmentFormDialog({
   onOpenChange,
   courseId,
   onSubmitted,
+  payment,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   courseId: string;
   onSubmitted: (outcome: EnrollmentOutcome) => void;
+  /** Paid course: choose a method, fill the form, then pay (Sham Cash).
+      `amount` is the price before any coupon. */
+  payment?: { amount: number } | null;
 }) {
   const { user, isGuest } = useLmsAuth();
   const { lang } = useLang();
@@ -95,6 +102,11 @@ export function EnrollmentFormDialog({
   const [fields, setFields] = useState<Field[]>([]);
   const [values, setValues] = useState<Record<string, AnswerValue>>({});
   const [busy, setBusy] = useState(false);
+  // Paid courses walk method → details → payment; free courses only have details.
+  const [step, setStep] = useState<"method" | "details" | "sham_cash">("details");
+  const isPaid = !!payment;
+  // What the Sham Cash step asks for: the course price, or the coupon's price.
+  const [amountDue, setAmountDue] = useState(0);
   const [fileProgress, setFileProgress] = useState<
     Record<string, { pct: number; loaded: number; total: number; name: string }>
   >({});
@@ -114,6 +126,7 @@ export function EnrollmentFormDialog({
 
   useEffect(() => {
     if (!open) return;
+    setStep(isPaid ? "method" : "details");
     (async () => {
       setLoading(true);
       const { data: f } = await supabase
@@ -162,7 +175,7 @@ export function EnrollmentFormDialog({
       setPhone(meta.phone ?? "");
       setLoading(false);
     })();
-  }, [open, courseId, user]);
+  }, [open, courseId, user, isPaid]);
 
   const setVal = (id: string, v: AnswerValue) => setValues((p) => ({ ...p, [id]: v }));
 
@@ -217,36 +230,35 @@ export function EnrollmentFormDialog({
     }
   };
 
-  const submit = async () => {
-    if (!user) return;
+  const validate = (): boolean => {
     // Validate base fields
     const trimmedName = fullName.trim();
     if (!trimmedName) {
       toast.error(ar ? "الاسم الكامل مطلوب" : "Full name is required");
-      return;
+      return false;
     }
     // Must be Arabic letters only (allow spaces and Arabic diacritics)
     if (
       !/^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]+$/.test(trimmedName)
     ) {
       toast.error(ar ? "يجب إدخال الاسم باللغة العربية فقط" : "Name must be in Arabic only");
-      return;
+      return false;
     }
     if (trimmedName.replace(/\s/g, "").length < 2) {
       toast.error(ar ? "الاسم قصير جداً" : "Name is too short");
-      return;
+      return false;
     }
     if (!phone.trim()) {
       toast.error(ar ? "رقم الهاتف مطلوب" : "Phone number is required");
-      return;
+      return false;
     }
     if (!isGuest && !userEmail) {
       toast.error(ar ? "الإيميل غير متوفر في حسابك" : "Email is missing from your account");
-      return;
+      return false;
     }
     if (isGuest && guestEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim())) {
       toast.error(ar ? "البريد الإلكتروني غير صالح" : "The email address is not valid");
-      return;
+      return false;
     }
     // validate all required custom fields
     for (const f of fields) {
@@ -256,18 +268,25 @@ export function EnrollmentFormDialog({
       if (empty) {
         const label = ar ? f.label_ar : f.label_en || f.label_ar;
         toast.error(ar ? `الحقل "${label}" مطلوب` : `Field "${label}" is required`);
-        return;
+        return false;
       }
     }
+    return true;
+  };
+
+  const buildAnswers = () => [
+    { field_id: BASE_FIELD_IDS.fullName, value: fullName.trim() },
+    { field_id: BASE_FIELD_IDS.phone, value: phone.trim() },
+    { field_id: BASE_FIELD_IDS.email, value: isGuest ? guestEmail.trim() : userEmail },
+    ...fields.map((f) => ({ field_id: f.id, value: values[f.id] ?? null })),
+  ];
+
+  const submit = async () => {
+    if (!user || !validate()) return;
+    const trimmedName = fullName.trim();
     setBusy(true);
     try {
-      const baseAnswers = [
-        { field_id: BASE_FIELD_IDS.fullName, value: fullName.trim() },
-        { field_id: BASE_FIELD_IDS.phone, value: phone.trim() },
-        { field_id: BASE_FIELD_IDS.email, value: isGuest ? guestEmail.trim() : userEmail },
-      ];
-      const customAnswers = fields.map((f) => ({ field_id: f.id, value: values[f.id] ?? null }));
-      const answers = [...baseAnswers, ...customAnswers];
+      const answers = buildAnswers();
 
       // The request, its answers and any coupon are written together server-side.
       const res = await submitEnrollment({
@@ -313,6 +332,85 @@ export function EnrollmentFormDialog({
         }
         onSubmitted({ status: "pending", withCode });
       }
+      onOpenChange(false);
+    } catch (e) {
+      toast.error(enrollmentErrorMessage(e, ar));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const couponToSend = () => (!isGuest && normalizeCode(code) ? code : null);
+
+  /* Paid course, details done. A coupon is checked first: a recognition code,
+     or a discount that leaves nothing to pay, goes to the admins as an
+     ordinary request; otherwise the student pays what the coupon leaves. */
+  const continueToPayment = async () => {
+    if (!payment || !validate()) return;
+    let q = quote;
+    if (couponToSend() && !q) {
+      setChecking(true);
+      try {
+        q = await checkCoupon(courseId, code);
+      } catch (e) {
+        q = { ok: false, error: e instanceof Error ? e.message : "" };
+      } finally {
+        setChecking(false);
+      }
+      setQuote(q);
+    }
+    if (couponToSend() && q) {
+      if (!q.ok) {
+        toast.error(couponErrorMessage(q.error, ar));
+        return;
+      }
+      if (q.effect === "recognition" || Number(q.final_price) <= 0) {
+        await submit();
+        return;
+      }
+      setAmountDue(Number(q.final_price));
+    } else {
+      setAmountDue(payment.amount);
+    }
+    setStep("sham_cash");
+  };
+
+  // Request, answers, coupon and payment (with its receipts) are written in one transaction.
+  const submitPaid = async (receiptPaths: string[]) => {
+    if (!user || !validate()) return;
+    setBusy(true);
+    try {
+      const res = await submitPaidEnrollment({
+        courseId,
+        method: "sham_cash",
+        receiptPaths,
+        answers: buildAnswers(),
+        coupon: couponToSend(),
+      });
+      if ("ok" in res && res.ok === false) {
+        // The coupon was refused on the server: nothing was written.
+        setQuote(res);
+        setStep("details");
+        toast.error(couponErrorMessage(res.error, ar));
+        return;
+      }
+      toast.success(
+        ar
+          ? "تم إرسال إيصال الدفع. ستُفتح الدورة بعد تحقّق الإدارة من وصول المبلغ."
+          : "Payment receipt sent. The course opens once the administration verifies the payment.",
+      );
+      if (isGuest && user) {
+        await supabase
+          .from("lms_user_profiles")
+          .upsert(
+            { user_id: user.id, full_name: fullName.trim(), phone: phone.trim() },
+            { onConflict: "user_id" },
+          )
+          .then(({ error }) => {
+            if (error) console.error("Could not save the guest's name", error.message);
+          });
+      }
+      onSubmitted({ status: "pending", withCode: false });
       onOpenChange(false);
     } catch (e) {
       toast.error(enrollmentErrorMessage(e, ar));
@@ -445,14 +543,51 @@ export function EnrollmentFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{ar ? "نموذج التسجيل" : "Enrollment form"}</DialogTitle>
+          <DialogTitle>
+            {step === "method"
+              ? ar
+                ? "طريقة الدفع"
+                : "Payment method"
+              : step === "sham_cash"
+                ? ar
+                  ? "الدفع عبر شام كاش"
+                  : "Pay with Sham Cash"
+                : ar
+                  ? "نموذج التسجيل"
+                  : "Enrollment form"}
+          </DialogTitle>
           <DialogDescription>
-            {ar
-              ? "يرجى تعبئة الحقول التالية لإكمال طلب التسجيل."
-              : "Please fill these fields to complete your enrollment request."}
+            {step === "method"
+              ? ar
+                ? "اختر الطريقة التي تناسبك لدفع رسوم الدورة."
+                : "Choose how you would like to pay the course fee."
+              : step === "sham_cash"
+                ? ar
+                  ? "حوّل المبلغ إلى حساب الجمعية ثم أرفق إيصال التحويل."
+                  : "Transfer the amount to the association's account, then attach the receipt."
+                : ar
+                  ? "يرجى تعبئة الحقول التالية لإكمال طلب التسجيل."
+                  : "Please fill these fields to complete your enrollment request."}
           </DialogDescription>
         </DialogHeader>
-        {loading ? (
+        {step === "method" ? (
+          <PaymentMethodPicker
+            ar={ar}
+            onPick={(m) => {
+              if (m === "sham_cash") setStep("details");
+            }}
+          />
+        ) : step === "sham_cash" && user && payment ? (
+          <ShamCashPayment
+            ar={ar}
+            userId={user.id}
+            courseId={courseId}
+            amount={amountDue}
+            busy={busy}
+            onPay={submitPaid}
+            onBack={() => setStep("details")}
+          />
+        ) : loading ? (
           <p className="text-sm text-muted-foreground text-center py-6">
             {ar ? "جاري التحميل..." : "Loading..."}
           </p>
@@ -595,13 +730,35 @@ export function EnrollmentFormDialog({
             )}
 
             <div className="flex gap-2 pt-2 border-t border-border">
-              <Button onClick={submit} disabled={busy} className="flex-1">
-                {busy && <Loader2 className="h-4 w-4 animate-spin mx-1" />}
-                {ar ? "إرسال الطلب" : "Submit request"}
-              </Button>
-              <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
-                {ar ? "إلغاء" : "Cancel"}
-              </Button>
+              {isPaid ? (
+                <>
+                  <Button
+                    onClick={continueToPayment}
+                    disabled={busy || checking}
+                    className="flex-1"
+                  >
+                    {(busy || checking) && <Loader2 className="h-4 w-4 animate-spin mx-1" />}
+                    {ar ? "متابعة إلى الدفع" : "Continue to payment"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep("method")}
+                    disabled={busy || checking}
+                  >
+                    {ar ? "رجوع" : "Back"}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button onClick={submit} disabled={busy} className="flex-1">
+                    {busy && <Loader2 className="h-4 w-4 animate-spin mx-1" />}
+                    {ar ? "إرسال الطلب" : "Submit request"}
+                  </Button>
+                  <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
+                    {ar ? "إلغاء" : "Cancel"}
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}

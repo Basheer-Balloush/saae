@@ -28,7 +28,7 @@ export const isSkinnedLmsPath = (pathname: string) => {
 /* The admin console and the instructor workspace draw their own frame
    (ConsoleShell), so the LMS layout leaves them bare. */
 export const isConsoleLmsPath = (pathname: string) =>
-  /^\/learning-management-system\/(admin|instructor)(\/|$)/.test(pathname);
+  /^\/learning-management-system\/(admin|instructor|payments)(\/|$)/.test(pathname);
 
 /* The eight category gradients in lms.css (cat-* classes). Our category
    slugs are free text, so each category takes one by its display order. */

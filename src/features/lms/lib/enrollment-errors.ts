@@ -20,7 +20,21 @@ export type EnrollmentErrorCode =
   | "invalid_answers"
   | "missing_required_fields"
   | "request_already_pending"
-  | "invalid_channel";
+  | "invalid_channel"
+  | "payment_review_required"
+  | "payment_method_unavailable"
+  | "course_is_free"
+  | "enrollment_suspended"
+  | "receipt_required"
+  | "too_many_receipts"
+  | "invalid_receipt"
+  | "amount_not_confirmed"
+  | "payment_not_found"
+  | "payment_not_pending"
+  | "payment_not_approved"
+  | "payment_not_suspended"
+  | "coupon_not_for_payment"
+  | "nothing_to_pay";
 
 const MESSAGES: Record<EnrollmentErrorCode, { ar: string; en: string }> = {
   course_instructor_cannot_enroll: {
@@ -58,6 +72,53 @@ const MESSAGES: Record<EnrollmentErrorCode, { ar: string; en: string }> = {
     en: "You already have a pending request for this course",
   },
   invalid_channel: { ar: "بيانات غير صالحة", en: "Invalid data" },
+  payment_review_required: {
+    ar: "هذا الطلب مرتبط بدفعة، ويُعتمد أو يُرفض من صفحة مراجعة المدفوعات",
+    en: "This request carries a payment; it is decided on the payment review page",
+  },
+  payment_method_unavailable: {
+    ar: "طريقة الدفع هذه غير متاحة حالياً",
+    en: "This payment method is not available yet",
+  },
+  course_is_free: { ar: "هذه الدورة مجانية ولا تحتاج إلى دفع", en: "This course is free" },
+  enrollment_suspended: {
+    ar: "تم إيقاف وصولك إلى هذه الدورة. يرجى التواصل مع الإدارة",
+    en: "Your access to this course is suspended. Please contact the administration",
+  },
+  receipt_required: {
+    ar: "يرجى إرفاق صورة واحدة على الأقل من إيصال التحويل",
+    en: "Please attach at least one receipt",
+  },
+  too_many_receipts: {
+    ar: "يمكن إرفاق ثلاثة إيصالات كحدّ أقصى",
+    en: "You can attach up to three receipts",
+  },
+  invalid_receipt: {
+    ar: "تعذّر التحقق من أحد الإيصالات، يرجى رفعه من جديد",
+    en: "A receipt could not be verified; please upload it again",
+  },
+  amount_not_confirmed: {
+    ar: "يجب تأكيد وصول المبلغ قبل الموافقة",
+    en: "Confirm the amount arrived before approving",
+  },
+  payment_not_found: { ar: "الدفعة غير موجودة", en: "Payment not found" },
+  payment_not_pending: {
+    ar: "تمت معالجة هذه الدفعة مسبقاً",
+    en: "This payment has already been decided",
+  },
+  payment_not_approved: {
+    ar: "لا يمكن إيقاف دورة لم تُعتمد دفعتها",
+    en: "Only an approved payment can be suspended",
+  },
+  payment_not_suspended: { ar: "هذه الدورة غير موقوفة", en: "This course is not suspended" },
+  coupon_not_for_payment: {
+    ar: "كود الاعتراف لا يحتاج إلى دفع؛ أرسل الطلب بدون إيصال",
+    en: "A recognition code needs no payment; send the request without a receipt",
+  },
+  nothing_to_pay: {
+    ar: "لا يوجد مبلغ للدفع بعد الخصم؛ أرسل الطلب بدون إيصال",
+    en: "Nothing is left to pay after the discount; send the request without a receipt",
+  },
 };
 
 function extractCode(error: unknown): EnrollmentErrorCode | null {

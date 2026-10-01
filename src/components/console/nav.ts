@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   Link2,
   Newspaper,
+  Receipt,
   Settings,
   Smartphone,
   Sparkles,
@@ -26,7 +27,7 @@ import {
 } from "lucide-react";
 import type { CountKey } from "./useConsoleCounts";
 
-export type ConsoleSystem = "home" | "cms" | "lms" | "ams" | "instructor";
+export type ConsoleSystem = "home" | "cms" | "lms" | "ams" | "instructor" | "payments";
 
 export type NavItem = {
   to: string;
@@ -45,6 +46,7 @@ export type NavGroup = { ar?: string; en?: string; items: NavItem[] };
 
 export const LMS_ADMIN = "/learning-management-system/admin";
 export const LMS_INSTRUCTOR = "/learning-management-system/instructor";
+export const LMS_PAYMENTS = "/learning-management-system/payments";
 
 const HOME_ITEM: NavItem = {
   to: "/admin",
@@ -181,6 +183,7 @@ export const NAV: Record<ConsoleSystem, NavGroup[]> = {
           count: LMS_ATTENTION,
           also: /^\/learning-management-system\/admin\/(enrollment-requests|reviews|trainer-applications)/,
         },
+        { to: LMS_PAYMENTS, ar: "مراجعة المدفوعات", en: "Payment review", icon: Receipt },
       ],
     },
     {
@@ -253,6 +256,11 @@ export const NAV: Record<ConsoleSystem, NavGroup[]> = {
       ],
     },
   ],
+  payments: [
+    {
+      items: [{ to: LMS_PAYMENTS, ar: "مراجعة المدفوعات", en: "Payment review", icon: Receipt }],
+    },
+  ],
 };
 
 export function systemForPath(pathname: string, isAdmin: boolean): ConsoleSystem {
@@ -261,6 +269,7 @@ export function systemForPath(pathname: string, isAdmin: boolean): ConsoleSystem
   if (p.startsWith("/admin/attendance")) return "ams";
   if (p.startsWith("/admin")) return "cms";
   if (p.startsWith(LMS_ADMIN)) return "lms";
+  if (p.startsWith(LMS_PAYMENTS)) return isAdmin ? "lms" : "payments";
   if (p.startsWith(LMS_INSTRUCTOR)) return isAdmin ? "lms" : "instructor";
   return "home";
 }

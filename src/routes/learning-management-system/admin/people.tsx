@@ -22,6 +22,7 @@ import { listLmsStudents } from "@/features/crm/lib/crm.functions";
 import { getEmailsForUsers, grantRoleByEmail } from "@/features/lms/lib/admin-users.functions";
 import { exportRowsToXlsx } from "@/lib/admin-xlsx-export";
 import { AdminInstructorEditDialog } from "@/features/lms/console/AdminInstructorEditDialog";
+import { setPaymentReviewer } from "@/features/lms/payments/lib/payments-api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useConsoleCounts } from "@/components/console/useConsoleCounts";
@@ -404,7 +405,7 @@ function StudentsTab() {
 
 type RoleRow = { id: string; user_id: string; role: string; created_at: string };
 
-const MANAGEABLE = ["admin", "lms_instructor", "lms_student"] as const;
+const MANAGEABLE = ["admin", "lms_instructor", "lms_student", "lms_payment_admin"] as const;
 const ROLE_LABELS: Record<
   string,
   { ar: string; en: string; tone: "teal" | "green" | "gray" | "orange" }
@@ -413,6 +414,7 @@ const ROLE_LABELS: Record<
   lms_admin: { ar: "مدير منصّة التعلّم", en: "Learning admin", tone: "orange" },
   lms_instructor: { ar: "مدرّب", en: "Instructor", tone: "teal" },
   lms_student: { ar: "طالب", en: "Student", tone: "gray" },
+  lms_payment_admin: { ar: "مراجع المدفوعات", en: "Payment reviewer", tone: "green" },
   attendance_admin: { ar: "مدير نظام الحضور", en: "Attendance admin", tone: "gray" },
   attendance_user: { ar: "مستخدم نظام الحضور", en: "Attendance user", tone: "gray" },
   user: { ar: "مستخدم", en: "User", tone: "gray" },
@@ -525,6 +527,22 @@ function RolesTab() {
     load();
   };
 
+  const removeReviewer = async (r: RoleRow) => {
+    if (
+      !(await confirmDialog({
+        title: t("إزالة دور مراجع المدفوعات؟", "Remove the payment reviewer role?"),
+        destructive: true,
+      }))
+    )
+      return;
+    try {
+      await setPaymentReviewer(r.user_id, false);
+      load();
+    } catch (err) {
+      toast.error(toUserMessage(err));
+    }
+  };
+
   const label = (role: string) => {
     const l = ROLE_LABELS[role];
     return l ? (ar ? l.ar : l.en) : role;
@@ -635,6 +653,16 @@ function RolesTab() {
                     variant="ghost"
                     onClick={() => toStudent(r)}
                     aria-label={t("تغيير إلى طالب", "Change to student")}
+                  >
+                    <X className="h-4 w-4 text-[var(--cx-red)]" />
+                  </Button>
+                )}
+                {r.role === "lms_payment_admin" && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => removeReviewer(r)}
+                    aria-label={t("إزالة الدور", "Remove role")}
                   >
                     <X className="h-4 w-4 text-[var(--cx-red)]" />
                   </Button>

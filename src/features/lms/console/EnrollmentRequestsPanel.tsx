@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -11,6 +12,7 @@ import {
   Loader2,
   Mail,
   MessageCircle,
+  Receipt,
   StickyNote,
   X,
 } from "lucide-react";
@@ -25,6 +27,11 @@ import { enrollmentErrorMessage } from "@/features/lms/lib/enrollment-errors";
 import { BASE_FIELD_IDS } from "@/features/lms/catalog/EnrollmentFormDialog";
 import { EnrollmentResponseViewer } from "@/features/lms/console/EnrollmentResponseViewer";
 import { guestLabel } from "@/features/lms/lib/guest";
+import {
+  PAYMENT_METHOD_LABEL,
+  getPaymentsForRequests,
+  type PaymentStatus,
+} from "@/features/lms/payments/lib/payments-api";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CONSOLE_COUNTS_KEY } from "@/components/console/useConsoleCounts";
@@ -118,6 +125,10 @@ export function EnrollmentRequestsPanel({
   const [reqs, setReqs] = useState<Req[] | null>(null);
   const [course, setCourse] = useState<CourseInfo | null>(null);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
+  // Requests paid by transfer are decided on the payment review page.
+  const [payments, setPayments] = useState<
+    Record<string, { method: string; status: PaymentStatus }>
+  >({});
   const [filter, setFilter] = useState<Filter>(initialFilter);
   const [busy, setBusy] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -149,6 +160,7 @@ export function EnrollmentRequestsPanel({
         .maybeSingle(),
     ]);
     const rows = (list as Req[]) ?? [];
+    setPayments(await getPaymentsForRequests(rows.map((r) => r.id)));
     setReqs(rows);
     setCourse((c as CourseInfo | null) ?? null);
     let waiting: UseWithCode[] = [];
@@ -633,6 +645,7 @@ export function EnrollmentRequestsPanel({
           {shown.map((r) => {
             const p = profiles[r.user_id];
             const pending = r.status === "pending";
+            const pay = payments[r.id];
             return (
               <li
                 key={r.id}
@@ -647,11 +660,21 @@ export function EnrollmentRequestsPanel({
                       <span className="text-[15px] font-bold">{nameOf(r.user_id)}</span>
                       {p?.guest && <Pill tone="orange">{t("زائر", "Guest")}</Pill>}
                       <RequestStatusPill status={r.status} />
-                      <Pill tone="gray">
-                        {r.payment_method === "manual"
-                          ? t("دفع يدوي", "Manual payment")
-                          : t("دفع إلكتروني", "Online payment")}
-                      </Pill>
+                      {pay ? (
+                        <Pill tone={pay.status === "pending" ? "orange" : "teal"} icon={Receipt}>
+                          {ar
+                            ? (PAYMENT_METHOD_LABEL[pay.method]?.ar ?? pay.method)
+                            : (PAYMENT_METHOD_LABEL[pay.method]?.en ?? pay.method)}
+                          {pay.status === "pending" && t(" · بانتظار التحقق", " · awaiting check")}
+                          {pay.status === "suspended" && t(" · الدورة موقوفة", " · course stopped")}
+                        </Pill>
+                      ) : (
+                        <Pill tone="gray">
+                          {r.payment_method === "manual"
+                            ? t("دفع يدوي", "Manual payment")
+                            : t("دفع إلكتروني", "Online payment")}
+                        </Pill>
+                      )}
                       {coupons[r.id] && (
                         <Pill tone={coupons[r.id].status === "released" ? "gray" : "teal"}>
                           <span dir="ltr" className="font-mono">
@@ -714,7 +737,23 @@ export function EnrollmentRequestsPanel({
                   </div>
                 )}
 
-                {canDecide && pending && (
+                {canDecide && pending && pay && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[var(--cx-line-2)] pt-3 text-[13px] text-[var(--cx-muted)]">
+                    <Receipt className="h-4 w-4" />
+                    {t(
+                      "دفع بالتحويل: يُعتمد بعد تحقّق مراجع المدفوعات من وصول المبلغ.",
+                      "Paid by transfer: approved once the payment reviewer checks the amount arrived.",
+                    )}
+                    <Link
+                      to="/learning-management-system/payments"
+                      className="font-bold text-[var(--cx-teal)] hover:underline"
+                    >
+                      {t("مراجعة المدفوعات", "Payment review")}
+                    </Link>
+                  </div>
+                )}
+
+                {canDecide && pending && !pay && (
                   <div className="mt-3 border-t border-[var(--cx-line-2)] pt-3">
                     {noteOpen[r.id] && (
                       <Textarea

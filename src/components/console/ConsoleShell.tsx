@@ -4,7 +4,7 @@ import { ExternalLink, Languages, LogOut, Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n/i18n";
-import { NAV, SYSTEM_ENTRY, isNavActive, systemForPath, type NavItem } from "./nav";
+import { LMS_PAYMENTS, NAV, SYSTEM_ENTRY, isNavActive, systemForPath, type NavItem } from "./nav";
 import { useConsoleCounts, type ConsoleCounts } from "./useConsoleCounts";
 import "./console.css";
 
@@ -47,18 +47,24 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
       ? ar
         ? "مساحة المدرّب"
         : "Instructor workspace"
-      : ar
-        ? "لوحة الإدارة"
-        : "Admin console";
+      : system === "payments"
+        ? ar
+          ? "مراجعة المدفوعات"
+          : "Payment review"
+        : ar
+          ? "لوحة الإدارة"
+          : "Admin console";
+  const home = isAdmin
+    ? "/admin"
+    : system === "payments"
+      ? LMS_PAYMENTS
+      : "/learning-management-system/instructor";
 
   return (
     <div className="cx" dir={dir} data-nav-open={open}>
       <ConsoleAmbient />
       <aside className="cx-side" aria-label={ar ? "القائمة الرئيسية" : "Main menu"}>
-        <Link
-          to={isAdmin ? "/admin" : "/learning-management-system/instructor"}
-          className="cx-brand"
-        >
+        <Link to={home as never} className="cx-brand">
           <span className="cx-brand-tree" aria-hidden="true" />
           <span>
             <span className="cx-brand-name">SAAE</span>

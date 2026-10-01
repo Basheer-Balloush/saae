@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useRouter, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { PlayCircle, Loader2, Lock, Clock, CheckCircle } from "lucide-react";
+import { PlayCircle, Loader2, Lock, Clock, CheckCircle, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCourseTeachingStatus } from "@/features/lms/hooks/useCourseTeachingStatus";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
@@ -21,6 +21,10 @@ import {
   type MyRecognitionUse,
 } from "@/features/lms/lib/coupons-db";
 import { sendCertificateEmail } from "@/features/lms/certificates/lib/certificate-email.functions";
+import {
+  getMyLatestCoursePayment,
+  type MyCoursePayment,
+} from "@/features/lms/payments/lib/payments-api";
 import { SubHero } from "@/features/lms/skin/SubHero";
 import { IconCategoryAI } from "@/features/lms/skin/icons";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
@@ -305,6 +309,7 @@ function CourseDetails() {
   const [myCode, setMyCode] = useState<MyRecognitionUse | null>(null);
   const emailCertificate = useServerFn(sendCertificateEmail);
   const [hasQuiz, setHasQuiz] = useState(false);
+  const [myPayment, setMyPayment] = useState<MyCoursePayment | null>(null);
 
   useEffect(() => {
     if (!course || !user) {
@@ -312,11 +317,12 @@ function CourseDetails() {
       setPendingRequest(false);
       setMine(null);
       setMyCode(null);
+      setMyPayment(null);
       return;
     }
     let cancelled = false;
     (async () => {
-      const [{ data: e }, { data: req }] = await Promise.all([
+      const [{ data: e }, { data: req }, pay] = await Promise.all([
         supabase
           .from("lms_enrollments")
           .select("id")
@@ -330,10 +336,14 @@ function CourseDetails() {
           .eq("user_id", user.id)
           .eq("status", "pending")
           .maybeSingle(),
+        course.is_free
+          ? Promise.resolve(null)
+          : getMyLatestCoursePayment(course.id, user.id).catch(() => null),
       ]);
       if (cancelled) return;
       setEnrolled(!!e);
       setPendingRequest(!!req);
+      setMyPayment(pay);
       const [enrollment, codeUse] = await Promise.all([
         e ? loadMyEnrollment(course.id, user.id).catch(() => null) : null,
         e || req ? loadMyRecognitionUse(course.id, user.id).catch(() => null) : null,
@@ -418,7 +428,20 @@ function CourseDetails() {
     if (outcome.status === "recognized") return onRecognized(outcome.certificateId);
     setPendingRequest(true);
     if (outcome.withCode) onCodeWaiting();
+    // A paid course may have sent a Sham Cash payment with the request.
+    if (!course.is_free && user)
+      getMyLatestCoursePayment(course.id, user.id)
+        .then(setMyPayment)
+        .catch(() => undefined);
   };
+
+  // What the student pays before any coupon: the sale price when it is set and lower.
+  const amountDue =
+    course.sale_price != null &&
+    Number(course.sale_price) >= 0 &&
+    Number(course.sale_price) < Number(course.price)
+      ? Number(course.sale_price)
+      : Number(course.price);
 
   const title = lang === "ar" ? course.title_ar : course.title_en || course.title_ar;
   const desc = lang === "ar" ? course.description_ar : course.description_en;
@@ -614,14 +637,30 @@ function CourseDetails() {
         </div>
       );
     }
+    if (myPayment?.status === "suspended") {
+      return (
+        <div className="enroll-note is-closed">
+          <Ban />
+          {ar
+            ? "تم إيقاف وصولك إلى هذه الدورة. يرجى التواصل مع الإدارة."
+            : "Your access to this course is suspended. Please contact the administration."}
+        </div>
+      );
+    }
     if (pendingRequest) {
       return (
         <>
           <div className="enroll-note is-pending">
             <Clock />
-            {ar ? "طلبك قيد المراجعة" : "Your request is pending"}
+            {myPayment?.status === "pending"
+              ? ar
+                ? "تم استلام إيصال الدفع، وستُفتح الدورة بعد التحقق من وصول المبلغ"
+                : "Receipt received. The course opens once the payment is verified"
+              : ar
+                ? "طلبك قيد المراجعة"
+                : "Your request is pending"}
           </div>
-          {myCode?.status === "pending" ? (
+          {myPayment?.status === "pending" ? null : myCode?.status === "pending" ? (
             <p className="enroll-hint">
               {ar
                 ? "أدخلت كود اعتراف مع طلبك. عند قبول الطلب تظهر الدورة مكتملة، ثم تجيب عن استبيان التقييم وتحصل على شهادتك."
@@ -674,11 +713,19 @@ function CourseDetails() {
     if (course.is_free) return enrollButton;
     return (
       <>
+        {myPayment?.status === "rejected" && (
+          <p className="enroll-hint">
+            {ar
+              ? "لم يتم تأكيد دفعتك السابقة. يمكنك الدفع وإرسال الإيصال من جديد."
+              : "Your previous payment was not confirmed. You can pay and send the receipt again."}
+            {myPayment.reviewer_notes ? ` (${myPayment.reviewer_notes})` : ""}
+          </p>
+        )}
         {enrollButton}
         <p className="enroll-hint">
           {ar
-            ? "سجّل وعبّئ النموذج. بعد قبولك في الدورة سيتم التواصل معك لترتيب الدفع."
-            : "Register and fill the form. Once accepted, we'll contact you to arrange payment."}
+            ? "اختر طريقة الدفع وأرفق إيصال التحويل. تُفتح الدورة بعد تحقّق الإدارة من وصول المبلغ."
+            : "Choose a payment method and attach the receipt. The course opens once the payment is verified."}
         </p>
       </>
     );
@@ -860,6 +907,7 @@ function CourseDetails() {
         open={formDialogOpen && teaching.status === "no" && !!user}
         onOpenChange={setFormDialogOpen}
         courseId={course?.id ?? id}
+        payment={course.is_free ? null : { amount: amountDue }}
         onSubmitted={onSubmitted}
       />
     </>

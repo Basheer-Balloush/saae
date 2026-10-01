@@ -23,7 +23,7 @@ async function assertLmsAdmin(userId: string) {
   if (!data || data.length === 0) throw new Error("Forbidden: admin role required");
 }
 
-const MANAGEABLE = ["admin", "lms_instructor", "lms_student"] as const;
+const MANAGEABLE = ["admin", "lms_instructor", "lms_student", "lms_payment_admin"] as const;
 
 export const grantRoleByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -56,10 +56,18 @@ export const grantRoleByEmail = createServerFn({ method: "POST" })
     }
     if (!foundId) throw new Error("لم يتم العثور على مستخدم بهذا الإيميل / User not found");
 
-    const { error: roleError } = await context.supabase.rpc("lms_set_user_role", {
-      _user_id: foundId,
-      _role: data.role,
-    });
+    // The payment reviewer is added next to the account's other roles, not
+    // instead of them (migration 20260930120100_course_payments_sham_cash.sql).
+    const { error: roleError } =
+      data.role === "lms_payment_admin"
+        ? await context.supabase.rpc(
+            "lms_set_payment_reviewer" as never,
+            { _user_id: foundId, _enabled: true } as never,
+          )
+        : await context.supabase.rpc("lms_set_user_role", {
+            _user_id: foundId,
+            _role: data.role,
+          });
     if (roleError) throw new Error(roleError.message);
     return { ok: true, userId: foundId };
   });
