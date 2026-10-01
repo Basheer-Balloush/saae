@@ -4,8 +4,8 @@ import {
   escapeHtml,
   formatNewsDate,
   replaceRegion,
-} from "@/lib/cinematic-db-content";
-import { communityLabel } from "@/lib/communityCategories";
+} from "@/features/website/lib/cinematic-db-content";
+import { communityLabel } from "@/features/website/lib/community-categories";
 import { resizedImage } from "@/lib/image-url";
 
 export type Bilingual = { en: string; ar: string };

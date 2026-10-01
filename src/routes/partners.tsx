@@ -2,9 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { loadPartners } from "@/features/website/partners/data";
 import { applyPartnerDirectory } from "@/features/website/partners/render";
-import pageHtml from "@/components/cinematic/html/partners.html?raw";
-import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
-import { DesktopMotionFooter } from "@/components/home/DesktopMotionFooter";
+import pageHtml from "@/features/website/cinematic/html/partners.html?raw";
+import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
 
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/language.js" },
@@ -22,6 +21,7 @@ export const Route = createFileRoute("/partners")({
       { rel: "stylesheet", href: "/cinematic/css/partners-inline.css" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
       { rel: "stylesheet", href: "/cinematic/css/db-content.css" },
+      { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
     ],
   }),
   component: Page,
@@ -30,10 +30,5 @@ export const Route = createFileRoute("/partners")({
 function Page() {
   const partners = Route.useLoaderData();
   const html = useMemo(() => applyPartnerDirectory(pageHtml, partners), [partners]);
-  return (
-    <>
-      <CinematicPage html={html} scripts={SCRIPTS} />
-      <DesktopMotionFooter targetSelector="#partners-motion-footer-root" />
-    </>
-  );
+  return <CinematicPage html={html} scripts={SCRIPTS} />;
 }

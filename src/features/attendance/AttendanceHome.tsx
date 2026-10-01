@@ -158,7 +158,12 @@ export function AttendanceHome({
             ) : undefined
           }
         />
-        <Register amsId={current.id} lmsCourseId={current.lms_course_id} canDelete={canManage} />
+        <Register
+          amsId={current.id}
+          lmsCourseId={current.lms_course_id}
+          canDelete={canManage}
+          showPayments={isAdmin}
+        />
         {canManage && (
           <button
             type="button"
@@ -299,13 +304,11 @@ function NewCourse({
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return void setSaving(false);
-    const { error } = await supabase
-      .from("ams_courses")
-      .insert({
-        name_ar: nameAr.trim().slice(0, 200),
-        name_en: nameEn.trim().slice(0, 200) || null,
-        created_by: u.user.id,
-      });
+    const { error } = await supabase.from("ams_courses").insert({
+      name_ar: nameAr.trim().slice(0, 200),
+      name_en: nameEn.trim().slice(0, 200) || null,
+      created_by: u.user.id,
+    });
     setSaving(false);
     if (error) return void toast.error(toUserMessage(error));
     toast.success(t("أُنشئت الدورة", "Course created"));

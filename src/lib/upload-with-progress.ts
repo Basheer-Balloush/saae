@@ -39,7 +39,8 @@ export async function uploadToSupabaseStorage(args: UploadArgs): Promise<UploadR
   const contentType = compressed ? "image/webp" : args.contentType;
 
   const SUPABASE_URL =
-    import.meta.env.VITE_SUPABASE_URL || (typeof process !== "undefined" ? process.env.SUPABASE_URL : undefined);
+    import.meta.env.VITE_SUPABASE_URL ||
+    (typeof process !== "undefined" ? process.env.SUPABASE_URL : undefined);
   const SUPABASE_KEY =
     import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
     (typeof process !== "undefined" ? process.env.SUPABASE_PUBLISHABLE_KEY : undefined);

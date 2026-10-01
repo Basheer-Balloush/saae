@@ -1,0 +1,15 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/server.ts",
+    "src/start.ts",
+    "src/router.tsx",
+    "src/routes/**/*.{ts,tsx}",
+    "scripts/**/*.mjs",
+    "tests/**/*.{ts,mjs}",
+    "vite.preview.config.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.mjs", "tests/**/*.{ts,mjs}"],
+  "ignoreDependencies": ["tailwindcss", "tw-animate-css", "@tanstack/router-plugin"],
+  "ignoreBinaries": ["playwright"]
+}

@@ -26,6 +26,11 @@ const RULES: Entry[] = [
     en: "The AI provider couldn't process the text. Try again shortly.",
   },
   {
+    match: (l) => l.includes("lesson locked"),
+    ar: "هذا الدرس مقفل — أكمل الدروس السابقة أولاً.",
+    en: "This lesson is locked — finish the earlier lessons first.",
+  },
+  {
     match: (l) => l.includes("on-site courses"),
     ar: "هذه الدورة محفوظة كدورة حضورية — غيّر نمط التقديم إلى «أونلاين» أولاً.",
     en: "This course is saved as on-site — switch the delivery mode to Online first.",
@@ -36,7 +41,10 @@ const RULES: Entry[] = [
     en: "You don't have permission to perform this action.",
   },
   {
-    match: (l) => l.includes("duplicate key") || l.includes("unique constraint") || l.includes("already exists"),
+    match: (l) =>
+      l.includes("duplicate key") ||
+      l.includes("unique constraint") ||
+      l.includes("already exists"),
     ar: "هذا العنصر موجود مسبقاً.",
     en: "This item already exists.",
   },
@@ -46,12 +54,20 @@ const RULES: Entry[] = [
     en: "Related record is missing or invalid.",
   },
   {
-    match: (l) => l.includes("not null") || l.includes("invalid input") || l.includes("violates check") || l.includes("check constraint"),
+    match: (l) =>
+      l.includes("not null") ||
+      l.includes("invalid input") ||
+      l.includes("violates check") ||
+      l.includes("check constraint"),
     ar: "بعض البيانات المطلوبة ناقصة أو غير صالحة.",
     en: "Some required information is missing or invalid.",
   },
   {
-    match: (l) => l.includes("network") || l.includes("failed to fetch") || l.includes("fetch failed") || l.includes("networkerror"),
+    match: (l) =>
+      l.includes("network") ||
+      l.includes("failed to fetch") ||
+      l.includes("fetch failed") ||
+      l.includes("networkerror"),
     ar: "خطأ في الشبكة — يرجى التحقق من اتصالك بالإنترنت.",
     en: "Network error — please check your connection.",
   },
@@ -61,7 +77,12 @@ const RULES: Entry[] = [
     en: "Request timed out — please try again.",
   },
   {
-    match: (l) => l.includes("jwt") || l.includes("unauthenticated") || l.includes("not authenticated") || l.includes("unauthorized") || l.includes("401"),
+    match: (l) =>
+      l.includes("jwt") ||
+      l.includes("unauthenticated") ||
+      l.includes("not authenticated") ||
+      l.includes("unauthorized") ||
+      l.includes("401"),
     ar: "يرجى تسجيل الدخول للمتابعة.",
     en: "Please sign in to continue.",
   },
@@ -81,7 +102,8 @@ const RULES: Entry[] = [
     en: "Too many attempts — please wait a moment and try again.",
   },
   {
-    match: (l) => l.includes("payload too large") || l.includes("file size") || l.includes("too large"),
+    match: (l) =>
+      l.includes("payload too large") || l.includes("file size") || l.includes("too large"),
     ar: "حجم الملف كبير جداً.",
     en: "The file is too large.",
   },
@@ -97,7 +119,11 @@ const RULES: Entry[] = [
   },
 ];
 
-export function toUserMessage(err: unknown, fallbackOrLang?: string | Lang, langArg?: Lang): string {
+export function toUserMessage(
+  err: unknown,
+  fallbackOrLang?: string | Lang,
+  langArg?: Lang,
+): string {
   if (err) {
     // eslint-disable-next-line no-console
     console.error("[error]", err);
@@ -109,7 +135,8 @@ export function toUserMessage(err: unknown, fallbackOrLang?: string | Lang, lang
       ? fallbackOrLang
       : undefined;
   const fallback =
-    customFallback ?? (lang === "ar" ? "حدث خطأ — يرجى المحاولة مرة أخرى." : "Operation failed — please try again.");
+    customFallback ??
+    (lang === "ar" ? "حدث خطأ — يرجى المحاولة مرة أخرى." : "Operation failed — please try again.");
 
   const msg = typeof err === "string" ? err : (err as { message?: string })?.message;
   if (!msg) return fallback;

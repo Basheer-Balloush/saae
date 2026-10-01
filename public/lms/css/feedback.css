@@ -1,0 +1,101 @@
+/* Course feedback form: three steps of questions after the lessons and the
+   quiz, the last step before the certificate. Scoped to .lms-skin like the
+   other LMS sheets. Choices are labels around hidden radio inputs, so
+   lms-db.css's pill skin (which targets buttons) leaves them alone. */
+
+.lms-skin .feedback-page { position: relative; z-index: 1; display: grid; gap: 22px; max-width: 880px; margin-inline: auto; padding-block: 4px 90px; }
+
+/* Header */
+.lms-skin .feedback-head { display: grid; gap: 12px; }
+.lms-skin .feedback-eyebrow { display: flex; align-items: center; gap: 8px; color: var(--lms-lift); font-size: .86rem; font-weight: 800; }
+.lms-skin .feedback-eyebrow svg { width: 18px; height: 18px; }
+.lms-skin .feedback-head h1 { font-size: clamp(1.8rem, 3.6vw, 2.6rem); line-height: 1.3; letter-spacing: -.02em; }
+.lms-skin .feedback-page[dir="rtl"] .feedback-head h1 { letter-spacing: 0; }
+.lms-skin .feedback-intro { max-width: 64ch; color: rgba(231, 241, 240, .86); font-size: 1rem; line-height: 1.85; }
+.lms-skin .feedback-meta { color: var(--lms-muted); font-size: .88rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.lms-skin .feedback-privacy { max-width: 64ch; padding: 10px 14px; border: 1px solid var(--lms-border); border-radius: 12px; background: rgba(2, 16, 20, .45); color: var(--lms-muted); font-size: .86rem; font-weight: 700; line-height: 1.75; }
+
+/* Steps and progress */
+/* Admins choose how many steps a form has: they share one row. */
+.lms-skin .feedback-steps { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px; margin: 6px 0 0; padding: 0; list-style: none; counter-reset: none; }
+.lms-skin .feedback-steps li { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--lms-muted); font-size: .9rem; font-weight: 800; line-height: 1.4; }
+.lms-skin .feedback-step-num { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border: 1px solid var(--lms-border); border-radius: 50%; font-size: .82rem; font-variant-numeric: tabular-nums; }
+.lms-skin .feedback-steps li.is-current { color: var(--lms-paper); }
+.lms-skin .feedback-steps li.is-current .feedback-step-num { border-color: var(--lms-lift); background: var(--lms-lift); color: #05242c; }
+.lms-skin .feedback-steps li.is-past .feedback-step-num { border-color: rgba(168, 207, 126, .6); color: var(--lms-green); }
+.lms-skin .feedback-progress { position: relative; height: 6px; overflow: hidden; border-radius: 999px; background: rgba(184, 232, 240, .12); }
+.lms-skin .feedback-progress > span { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: inherit; background: linear-gradient(90deg, var(--lms-turquoise), var(--lms-lift)); transition: inline-size .4s ease; }
+.lms-skin .feedback-page[dir="rtl"] .feedback-progress > span { background: linear-gradient(270deg, var(--lms-turquoise), var(--lms-lift)); }
+
+/* Form */
+.lms-skin .feedback-form { display: grid; gap: 18px; padding: 26px; border: 1px solid var(--lms-border); border-radius: 22px; background: linear-gradient(165deg, rgba(12, 48, 58, .78), rgba(4, 23, 28, .9)); }
+.lms-skin .feedback-step-title { font-size: 1.2rem; line-height: 1.5; letter-spacing: 0; }
+.lms-skin .feedback-alert { padding: 10px 14px; border: 1px solid rgba(252, 165, 165, .4); border-radius: 12px; background: rgba(248, 113, 113, .08); color: #fecaca; font-size: .9rem; font-weight: 700; }
+
+.lms-skin .feedback-q { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 18px 0 20px; border: 0; border-top: 1px solid var(--lms-border); }
+.lms-skin .feedback-q legend, .lms-skin .feedback-text > label { display: flex; align-items: baseline; gap: 10px; float: left; width: 100%; margin: 0; padding: 0; color: var(--lms-paper); font-size: 1rem; font-weight: 800; line-height: 1.7; }
+.lms-skin .feedback-page[dir="rtl"] .feedback-q legend { float: right; }
+.lms-skin .feedback-q legend + * { clear: both; }
+.lms-skin .feedback-q legend:focus { outline: none; }
+.lms-skin .feedback-q legend:focus-visible { outline: 2px solid var(--lms-lift); outline-offset: 4px; border-radius: 6px; }
+.lms-skin .feedback-q-num { flex: none; min-width: 1.6em; color: var(--lms-lift); font-variant-numeric: tabular-nums; }
+.lms-skin .feedback-q legend small, .lms-skin .feedback-text > label small { margin-inline-start: auto; color: var(--lms-muted); font-size: .78rem; font-weight: 700; }
+.lms-skin .feedback-q.is-missing legend, .lms-skin .feedback-text.is-missing > label { color: #fecaca; }
+.lms-skin .feedback-q-error { color: #fca5a5; font-size: .84rem; font-weight: 700; }
+
+.lms-skin .feedback-choices { display: grid; gap: 8px; }
+.lms-skin .feedback-choices.is-scale { grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); }
+.lms-skin .feedback-choices.is-list { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.lms-skin .feedback-choice { position: relative; display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 10px 12px; border: 1px solid rgba(184, 232, 240, .21); border-radius: 12px; background: rgba(1, 15, 21, .3); color: rgba(231, 241, 240, .88); font-size: .9rem; font-weight: 700; line-height: 1.45; text-align: center; cursor: pointer; transition: border-color .15s, background-color .15s; }
+.lms-skin .feedback-choices.is-list .feedback-choice { justify-content: flex-start; text-align: start; }
+.lms-skin .feedback-choice:hover { border-color: rgba(119, 224, 232, .6); background: rgba(119, 224, 232, .05); }
+.lms-skin .feedback-choice.is-selected { border-color: var(--lms-lift); background: rgba(119, 224, 232, .14); color: var(--lms-paper); }
+.lms-skin .feedback-choice input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.lms-skin .feedback-choice:has(input:focus-visible) { outline: 3px solid var(--lms-lift); outline-offset: 2px; }
+.lms-skin .feedback-q.is-missing .feedback-choice { border-color: rgba(252, 165, 165, .45); }
+.lms-skin .feedback-other { max-width: 520px; }
+.lms-skin .feedback-other input[type="text"] { height: 48px; }
+.lms-skin .feedback-count { text-align: end; font-variant-numeric: tabular-nums; }
+/* Digits read left to right in Arabic too ("0 / 2000"), as in the player. */
+.lms-skin .feedback-page[dir="rtl"] .feedback-count { direction: ltr; text-align: left; }
+
+/* Footer: save note, back and next */
+.lms-skin .feedback-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; padding-top: 18px; border-top: 1px solid var(--lms-border); }
+.lms-skin .feedback-save { flex: 1 1 260px; min-height: 1.6em; color: var(--lms-muted); font-size: .84rem; font-weight: 700; }
+.lms-skin .feedback-buttons { display: flex; align-items: center; gap: 20px; }
+.lms-skin .feedback-cert-note { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--lms-muted); font-size: .88rem; font-weight: 700; }
+.lms-skin .feedback-cert-note svg { width: 18px; height: 18px; color: var(--lms-lift); }
+.lms-skin .feedback-cert-note a { color: var(--lms-lift); }
+
+/* Sent */
+.lms-skin .feedback-done { display: grid; justify-items: center; gap: 14px; padding: 44px 26px; border: 1px solid rgba(168, 207, 126, .35); border-radius: 22px; background: rgba(8, 36, 44, .72); text-align: center; }
+.lms-skin .feedback-done > svg { width: 56px; height: 56px; color: var(--lms-green); }
+.lms-skin .feedback-done h1 { font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.4; letter-spacing: 0; }
+.lms-skin .feedback-done p { max-width: 52ch; color: rgba(231, 241, 240, .86); line-height: 1.8; }
+.lms-skin .feedback-done-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 6px; }
+
+/* The next-step prompt shown on the player and the quiz pages. */
+.lms-skin .course-next-step { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; margin-block: 4px 22px; padding: 18px 22px; border: 1px solid var(--lms-border); border-radius: 18px; background: rgba(8, 36, 44, .78); text-align: start; }
+.lms-skin .course-next-step > svg { flex: none; width: 28px; height: 28px; color: var(--lms-lift); }
+.lms-skin .course-next-step > div { display: grid; gap: 4px; flex: 1 1 280px; min-width: 0; }
+.lms-skin .course-next-step p { color: rgba(231, 241, 240, .82); font-size: .92rem; line-height: 1.7; }
+.lms-skin .course-next-step .course-next-step-title { color: var(--lms-paper); font-size: 1rem; font-weight: 800; }
+.lms-skin .course-next-step.is-feedback { border-color: rgba(119, 224, 232, .55); box-shadow: 0 0 0 1px rgba(119, 224, 232, .14), 0 18px 44px rgba(0, 139, 157, .2); }
+.lms-skin .course-next-step.is-done { border-color: rgba(168, 207, 126, .4); }
+.lms-skin .course-next-step.is-done > svg { color: var(--lms-green); }
+.lms-skin .quiz-result .course-next-step { margin-top: 22px; }
+
+@media (max-width: 680px) {
+  .lms-skin .feedback-form { padding: 18px 16px; border-radius: 18px; }
+  .lms-skin .feedback-steps { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .lms-skin .feedback-steps li:not(.is-current) { display: none; }
+  .lms-skin .feedback-choices.is-scale { grid-template-columns: minmax(0, 1fr); }
+  .lms-skin .feedback-choices.is-scale .feedback-choice { justify-content: flex-start; text-align: start; min-height: 48px; }
+  .lms-skin .feedback-buttons { width: 100%; justify-content: space-between; }
+  .lms-skin .course-next-step { padding: 16px; }
+  .lms-skin .course-next-step > .action { width: 100%; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lms-skin .feedback-progress > span, .lms-skin .feedback-choice { transition: none; }
+}

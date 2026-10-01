@@ -1,0 +1,36 @@
+import { describe, expect, it } from "vitest";
+import {
+  lessonStatusFromBunnyVideo,
+  lessonStatusFromBunnyWebhook,
+} from "../../src/features/lms/lib/bunny-webhook-status";
+
+describe("Bunny webhook status", () => {
+  it("marks the lesson playable when encoding finishes or the first resolution is ready", () => {
+    expect(lessonStatusFromBunnyWebhook(3)).toBe("ready");
+    expect(lessonStatusFromBunnyWebhook(4)).toBe("ready");
+  });
+
+  it("marks failed encodes and failed uploads as failed", () => {
+    expect(lessonStatusFromBunnyWebhook(5)).toBe("failed");
+    expect(lessonStatusFromBunnyWebhook(8)).toBe("failed");
+  });
+
+  it("keeps queued, encoding and upload-progress events as processing", () => {
+    for (const s of [0, 1, 2, 6, 7]) expect(lessonStatusFromBunnyWebhook(s)).toBe("processing");
+  });
+
+  it("ignores captions, generated titles and unknown codes", () => {
+    for (const s of [9, 10, 42, undefined, "3"]) expect(lessonStatusFromBunnyWebhook(s)).toBeNull();
+  });
+});
+
+describe("Bunny video object status", () => {
+  it("maps Stream API codes, which differ from webhook codes", () => {
+    expect(lessonStatusFromBunnyVideo(4)).toBe("ready");
+    expect(lessonStatusFromBunnyVideo(8)).toBe("ready");
+    expect(lessonStatusFromBunnyVideo(5)).toBe("failed");
+    expect(lessonStatusFromBunnyVideo(6)).toBe("failed");
+    for (const s of [0, 1, 2, 3, 7, undefined])
+      expect(lessonStatusFromBunnyVideo(s)).toBe("processing");
+  });
+});

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import pageHtml from "@/components/cinematic/html/contact.html?raw";
-import { CinematicPage, type CinematicScript } from "@/components/cinematic/CinematicPage";
+import pageHtml from "@/features/website/cinematic/html/contact.html?raw";
+import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
 import { supabase } from "@/integrations/supabase/client";
 
 const SCRIPTS: CinematicScript[] = [
@@ -51,7 +51,7 @@ export const Route = createFileRoute("/contact")({
       { name: "theme-color", content: "#144248" },
     ],
     links: [
-      { rel: "stylesheet", href: "/cinematic/css/contact.css?v=contact-circuit-2" },
+      { rel: "stylesheet", href: "/cinematic/css/contact.css?v=contact-circuit-3" },
       { rel: "stylesheet", href: "/cinematic/css/navigation.css" },
       { rel: "stylesheet", href: "/cinematic/css/motion-button.css" },
     ],

@@ -171,7 +171,7 @@ The SAAE brand system is implemented in `src/styles.css`:
 
 ### 5.3 Language and direction behavior
 
-`src/lib/i18n.tsx` provides `LanguageProvider` and `useLang()`.
+`src/lib/i18n/i18n.tsx` provides `LanguageProvider` and `useLang()`.
 
 - Supported languages: `ar` and `en`.
 - Persistence key: `saae-lang`.
@@ -188,7 +188,7 @@ The UI uses Radix primitives and shared components for dialogs, alerts, inputs, 
 
 ## 6. Route architecture
 
-Routes live in `src/routes`. The filename determines the route ID; dynamic segments use `$name`, folders/dots map to slashes, and layout routes render `<Outlet />`. The route tree is generated automatically.
+Routes live in `src/routes`. The filename determines the route ID; dynamic segments use `$name`, folders/dots map to slashes, and layout routes render `<Outlet />`. Products with several pages have their own folder (`admin/`, `learning-management-system/`, `attendance-management-system/`, `news/`, `initiative/`), and a folder's layout route is its `route.tsx`. The route tree is generated automatically.
 
 ### 6.1 Public website routes
 
@@ -197,8 +197,8 @@ Routes live in `src/routes`. The filename determines the route ID; dynamic segme
 | `/` | `index.tsx` | Home page with news, LMS CTA, initiative CTA, partners, achievements, communities, footer |
 | `/about` | `about.tsx` | Bilingual organizational information and members |
 | `/contact` | `contact.tsx` | Public contact form and map |
-| `/news` | `news.index.tsx` | News listing |
-| `/news/$id` | `news.$id.tsx` | News article, media, related stories |
+| `/news` | `news/index.tsx` | News listing |
+| `/news/$id` | `news/$id.tsx` | News article, media, related stories |
 | `/communities/$key` | `communities.$key.tsx` | Community detail pages with validated community key |
 | `/resources/ai-tools` | `resources.ai-tools.tsx` | Static curated AI tools directory |
 | `/registration` | `registration.tsx` | Legacy redirect to LMS |
@@ -208,7 +208,7 @@ Routes live in `src/routes`. The filename determines the route ID; dynamic segme
 | `/join/$token` | `join.$token.tsx` | Token-scoped CRM registration link form |
 | `/initiative-survey` | `initiative-survey.tsx` | One Million Initiative survey |
 | `/international-business-bridge` | `international-business-bridge.tsx` | Static conference/event page |
-| `/initiative/claim` | `initiative.claim.tsx` | Initiative seat claim and account sign-in flow |
+| `/initiative/claim` | `initiative/claim.tsx` | Initiative seat claim and account sign-in flow |
 | `/one-million-initiative` | `one-million-initiative.tsx` | Initiative public entry/compatibility page |
 | `/one-million-initiative/home` | `one-million-initiative-home.tsx` | Initiative home experience |
 | `/one-million-initiative/donors` | `one-million-initiative-donors.tsx` | Initiative donor view |
@@ -219,12 +219,12 @@ Public forms and token links use Zod validation, server functions, rate limiting
 
 ### 6.2 LMS routes
 
-The LMS layout is `learning-management-system.tsx`. It supplies the LMS navbar, main content region, footer, and sign-out behavior.
+The LMS layout is `learning-management-system/route.tsx`. It supplies the LMS navbar, main content region, footer, and sign-out behavior.
 
 | URL family | Files / purpose |
 |---|---|
 | `/learning-management-system` | LMS layout and entry |
-| `/learning-management-system/` | LMS home/catalog entry (`learning-management-system.index.tsx`) |
+| `/learning-management-system/` | LMS home/catalog entry (`learning-management-system/index.tsx`) |
 | `/learning-management-system/catalog` | Catalog, category filters, search, URL state |
 | `/learning-management-system/courses/$id` | Public course detail, enrollment and access flow |
 | `/learning-management-system/instructors/$id` | Instructor profile/detail |
@@ -268,9 +268,9 @@ The LMS layout is `learning-management-system.tsx`. It supplies the LMS navbar, 
 
 | URL | File | Purpose |
 |---|---|---|
-| `/attendance-management-system` | `attendance-management-system.tsx` | AMS layout |
-| `/attendance-management-system/` | `attendance-management-system.index.tsx` | Attendance dashboard |
-| `/attendance-management-system/login` | `attendance-management-system.login.tsx` | AMS sign-in |
+| `/attendance-management-system` | `attendance-management-system/route.tsx` | AMS layout |
+| `/attendance-management-system/` | `attendance-management-system/index.tsx` | Attendance dashboard |
+| `/attendance-management-system/login` | `attendance-management-system/login.tsx` | AMS sign-in |
 
 The instructor dashboard exposes attendance navigation for onsite courses and passes the linked AMS course identifier. The AMS service worker is registered only in secure, top-level, non-preview contexts and is scoped to `/attendance-management-system/`.
 
@@ -354,7 +354,7 @@ Course access is authorization-aware. Public course detail can be viewed without
 
 ### 7.3 LMS authentication and account lifecycle
 
-`src/lib/lms-auth.functions.ts` and `src/lib/lms-auth-email.server.ts` support:
+`src/features/lms/lib/auth.functions.ts` and `src/features/lms/lib/auth-email.server.ts` support:
 
 - Bilingual student and instructor signup.
 - Arabic full-name validation requirements.
@@ -456,7 +456,7 @@ Trainer applications support:
 - Instructor profile behavior and approved-instructor cleanup protections.
 - Approval and reinstructor email notifications.
 
-Scoring constants are maintained in `src/lib/trainer-scoring.ts`; final score and phase minimum rules are domain logic and are covered by unit tests.
+Scoring thresholds live in the database table `trainer_accreditation_settings` (`min_evaluators`, `pass_final_score`, `pass_phase_min`) and are enforced by the accreditation database functions.
 
 ### 7.10 Attendance Management System
 
@@ -690,7 +690,7 @@ Some are used for IDs, secure functions, embeddings/RAG, queueing, scheduled wor
 
 ### 10.1 Server function pattern
 
-Client-callable server functions live in `src/lib/*.functions.ts` and use `createServerFn` from `@tanstack/react-start`. Server-only helpers use `.server.ts` filenames and are not imported directly by client components.
+Client-callable server functions live in `*.functions.ts` files inside each area's `lib/` folder (for example `src/features/lms/lib/*.functions.ts`; see the README folder map) and use `createServerFn` from `@tanstack/react-start`. Server-only helpers use `.server.ts` filenames and are not imported directly by client components.
 
 Protected functions use:
 
@@ -734,7 +734,7 @@ Used by:
 - Public assistant streaming chat.
 - Embeddings for knowledge retrieval.
 
-Endpoint wrapper: `src/lib/ai-gateway.ts`.
+Endpoint wrapper: `src/features/chat/lib/ai-gateway.ts`.
 
 Required server secret: `LOVABLE_API_KEY`.
 
@@ -752,7 +752,7 @@ Used for:
 - AMS account creation.
 - Auth/webhook and queue-driven transactional emails.
 
-Email templates are implemented with React Email in `src/lib/email-templates/`. The connector gateway URL is used server-side. Required secret names include `LOVABLE_API_KEY` and `RESEND_API_KEY`.
+Email templates are implemented with React Email in `src/lib/email/templates/`. The connector gateway URL is used server-side. Required secret names include `LOVABLE_API_KEY` and `RESEND_API_KEY`.
 
 ### 11.3 Bunny Stream
 
@@ -760,11 +760,12 @@ Used for instructor video upload, secure playback, status refresh, and webhook-b
 
 Required secret names:
 
-- `BUNNY_STREAM_LIBRARY_ID`
-- `BUNNY_STREAM_API_KEY`
-- `BUNNY_STREAM_CDN_HOSTNAME`
-- `BUNNY_STREAM_TOKEN_KEY`
-- `BUNNY_WEBHOOK_SECRET`
+- `BUNNY_STREAM_LIBRARY_ID` — upload, status and playback
+- `BUNNY_STREAM_API_KEY` — upload and status; the video library's API key (Stream → library → API), not the account key
+- `BUNNY_STREAM_TOKEN_KEY` — playback (library Security → Token Authentication Key)
+- `BUNNY_WEBHOOK_SECRET` — webhook readiness updates
+
+`BUNNY_STREAM_CDN_HOSTNAME` is no longer read: playback goes through the signed iframe, not the CDN.
 
 ### 11.4 Maps
 
@@ -818,7 +819,6 @@ The service-role key is server-only and is not available for client code. Ordina
 
 - `BUNNY_STREAM_LIBRARY_ID`
 - `BUNNY_STREAM_API_KEY`
-- `BUNNY_STREAM_CDN_HOSTNAME`
 - `BUNNY_STREAM_TOKEN_KEY`
 - `BUNNY_WEBHOOK_SECRET`
 
@@ -973,10 +973,10 @@ An attempts count must equal persisted real submissions, not quiz opens or faile
 
 Check:
 
-1. All Bunny server secrets exist.
+1. All Bunny server secrets exist. The instructor page names any missing secret, a rejected API key (401/403) or a wrong library id (404) in its error message.
 2. Lesson has `video_provider='bunny'` and a valid `video_uid`.
 3. Upload finished at Bunny.
-4. Webhook secret/path is correct, or run status refresh.
+4. Webhook secret/path is correct. Without it, the instructor page polls Bunny every 20 seconds while a lesson is processing, and student playback checks Bunny before reporting "processing".
 5. `video_status` and `video_ready` are consistent.
 6. Playback caller is enrolled, instructor, or admin.
 7. Signed embed URL has not expired.
@@ -1078,16 +1078,16 @@ Primary implementation references:
 - `src/start.ts`
 - `src/server.ts`
 - `src/styles.css`
-- `src/lib/i18n.tsx`
+- `src/lib/i18n/i18n.tsx`
 - `src/lib/theme.tsx`
-- `src/lib/lms-auth-email.server.ts`
-- `src/lib/bunny-stream.functions.ts`
+- `src/features/lms/lib/auth-email.server.ts`
+- `src/features/lms/lib/bunny-stream.functions.ts`
 - `src/routes/api/chat.ts`
-- `src/lib/crm.functions.ts`
-- `src/lib/dynamic-forms.functions.ts`
-- `src/lib/trainer-application.functions.ts`
-- `src/lib/lms-internships-*.ts`
-- `src/lib/ams-*.ts`
+- `src/features/crm/lib/crm.functions.ts`
+- `src/features/crm/lib/dynamic-forms.functions.ts`
+- `src/features/lms/instructors/lib/trainer-application.functions.ts`
+- `src/features/lms/internships/lib/*.ts`
+- `src/features/attendance/lib/*.ts`
 - `docs/operations/lms-email-confirmation-toggle.md`
 - `supabase/migrations/*.sql`
 - `tests/unit/*`, `tests/integration/*`, and `tests/db/*`

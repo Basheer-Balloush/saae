@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { adminInternshipsOverview } from "@/lib/lms-internships-admin.functions";
+import { adminInternshipsOverview } from "@/features/lms/internships/lib/admin.functions";
+import { waitingRecognitionsQuery } from "@/features/lms/lib/coupons-db";
 
 /* Everything that waits for an admin's decision, counted in one place so the
    sidebar badges, the admin home and the LMS overview always agree. */
@@ -15,6 +16,7 @@ export type ConsoleCounts = {
   chatFeedback: number;
   newLeads: number;
   newMessages: number;
+  newSurveys: number;
 };
 
 export type CountKey = keyof ConsoleCounts;
@@ -29,6 +31,7 @@ const EMPTY: ConsoleCounts = {
   chatFeedback: 0,
   newLeads: 0,
   newMessages: 0,
+  newSurveys: 0,
 };
 
 export const CONSOLE_COUNTS_KEY = ["console-counts"] as const;
@@ -64,6 +67,8 @@ export function useConsoleCounts(enabled: boolean) {
         newLeads,
         newMessages,
         internships,
+        newSurveys,
+        waitingCodes,
       ] = await Promise.all([
         count(supabase.from("lms_instructors").select("user_id", head).eq("approved", false)),
         count(supabase.from("lms_courses").select("id", head).eq("status", "pending")),
@@ -76,17 +81,28 @@ export function useConsoleCounts(enabled: boolean) {
         count(supabase.from("individual_leads").select("id", head).eq("status", "new")),
         count(supabase.from("contact_messages").select("id", head).eq("status", "new")),
         overview().catch(() => null),
+        // Full admins only (RLS); everyone else counts 0.
+        count(
+          supabase
+            .from("feedback_survey_submissions")
+            .select("id", head)
+            .eq("completed", true)
+            .eq("review_status", "new"),
+        ),
+        // Recognition codes from enrolled learners: decided with the requests.
+        count(waitingRecognitionsQuery()),
       ]);
       return {
         instructorRequests,
         coursesToReview,
-        enrollmentRequests,
+        enrollmentRequests: enrollmentRequests + waitingCodes,
         reviewsToModerate,
         trainerApplications,
         internshipApplications: internships?.applications?.pending_review ?? 0,
         chatFeedback,
         newLeads,
         newMessages,
+        newSurveys,
       };
     },
   });

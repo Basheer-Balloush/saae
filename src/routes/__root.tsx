@@ -14,14 +14,14 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 import appCss from "../styles.css?url";
-import { LanguageProvider, useLang } from "@/lib/i18n";
+import { LanguageProvider, useLang } from "@/lib/i18n/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "@/components/ui/sonner";
-import { AssistantFab } from "@/components/site/AssistantFab";
-import { RouteProgress } from "@/components/site/RouteProgress";
-import { ScrollToHash } from "@/components/site/ScrollToHash";
+import { AssistantFab } from "@/features/chat/AssistantFab";
+import { RouteProgress } from "@/components/app/RouteProgress";
+import { ScrollToHash } from "@/components/app/ScrollToHash";
 import { ConfirmProvider } from "@/hooks/useConfirm";
-import { isSkinnedLmsPath } from "@/components/lms-skin/skin";
+import { isSkinnedLmsPath } from "@/features/lms/skin/skin";
 
 function NotFoundComponent() {
   const isAr = typeof document !== "undefined" && document.documentElement.lang === "ar";
@@ -192,22 +192,33 @@ const DARK_GROUND = { backgroundColor: "#06232a", colorScheme: "dark" } as const
 /* The admin console, the instructor workspace and the attendance app. */
 const CONSOLE_PATH =
   /^\/(admin(\/|$)|attendance-management-system(\/|$)|learning-management-system\/(admin|instructor)(\/|$))/;
+/* Private card pages. Case-insensitive: printed QR codes open them in capitals
+   (/PROFILE/…), which keeps the code small. */
+const isProfilePath = (pathname: string) => /^\/profile\//i.test(pathname);
+
 const isDarkPath = (pathname: string) =>
   CINEMATIC_PATH.test(pathname) || isSkinnedLmsPath(pathname) || CONSOLE_PATH.test(pathname);
 
 function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = useLocation({ select: (location) => location.pathname });
   const ground = isDarkPath(pathname) ? DARK_GROUND : undefined;
+  /* Private profile pages must never reach analytics: the slug in their
+     address is the secret. */
+  const analytics = !isProfilePath(pathname);
   const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');if(/^\\/(admin(\\/|$)|attendance-management-system(\\/|$)|learning-management-system\\/(admin|instructor)(\\/|$))/.test(location.pathname))document.documentElement.classList.add('cx-dark','dark');var l=localStorage.getItem('saae-lang')==='en'?'en':'ar';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning style={ground}>
       <head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM4Y7E9Y96" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-MM4Y7E9Y96');`,
-          }}
-        />
+        {analytics && (
+          <>
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM4Y7E9Y96" />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-MM4Y7E9Y96');`,
+              }}
+            />
+          </>
+        )}
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <HeadContent />
       </head>
@@ -307,7 +318,8 @@ function ScrollRestoration() {
     };
     // A whole-page Back (from a page outside the app) arrives as a load.
     const entry = performance.getEntriesByType?.("navigation")[0] as
-      PerformanceNavigationTiming | undefined;
+      | PerformanceNavigationTiming
+      | undefined;
     if (entry?.type === "back_forward") hold();
 
     let ticking = false;
@@ -337,7 +349,7 @@ function ScrollRestoration() {
 
   useEffect(() => {
     const state = pending.current;
-    const target = location.pathname === "/contact" ? 0 : state.target ?? 0;
+    const target = location.pathname === "/contact" ? 0 : (state.target ?? 0);
     state.target = null;
     type Engine = { scrollTo: (y: number, o?: { immediate?: boolean }) => void };
     const go = (y: number) => {
@@ -405,6 +417,8 @@ function RootComponent() {
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/super-admin") ||
     location.pathname.startsWith("/learning-management-system/admin");
+  const isStandaloneProfile =
+    isProfilePath(location.pathname) || location.pathname === "/feedback";
   /* Console pages share one frame; keeping one key stops the sidebar and its
      data from remounting on every click inside the console. */
   const isConsole =
@@ -433,7 +447,7 @@ function RootComponent() {
               </motion.div>
             </AnimatePresence>
             {/* The homepage's Abu Al-Joud opens the chat there, on every screen size. */}
-            {!isAms && !isLms && !isAdmin && (
+            {!isAms && !isLms && !isAdmin && !isStandaloneProfile && (
               <AssistantFab hideTrigger={location.pathname === "/"} />
             )}
             <Toaster richColors position="top-center" />

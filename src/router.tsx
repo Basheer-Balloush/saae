@@ -1,6 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
+import { RouteErrorFallback } from "./components/app/RouteErrorFallback";
 
 export const getRouter = () => {
   const queryClient = new QueryClient({
@@ -29,8 +30,9 @@ export const getRouter = () => {
     // Avoid loading-flash for fast routes; show pending UI only if >150ms
     defaultPendingMs: 150,
     defaultPendingMinMs: 100,
+    // Every page gets its own error screen so a failure never blanks the app.
+    defaultErrorComponent: RouteErrorFallback,
   });
 
   return router;
 };
-

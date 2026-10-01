@@ -3,9 +3,9 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { MobileHomeView } from "@/components/home/MobileHome";
-import homeHtml from "@/components/cinematic/html/home.html?raw";
-import directoryHtml from "@/components/cinematic/html/partners.html?raw";
+import { MobileHomeView } from "@/features/website/home/MobileHome";
+import homeHtml from "@/features/website/cinematic/html/home.html?raw";
+import directoryHtml from "@/features/website/cinematic/html/partners.html?raw";
 import {
   loadPartners,
   normalisePartner,

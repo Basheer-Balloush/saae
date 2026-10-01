@@ -2,6 +2,7 @@ import {
   BarChart3,
   BookOpen,
   Bot,
+  ClipboardList,
   Briefcase,
   Globe,
   Mail,
@@ -17,6 +18,7 @@ import {
   Settings,
   Smartphone,
   Sparkles,
+  Ticket,
   UserCircle,
   Users,
   UsersRound,
@@ -68,7 +70,7 @@ export const LMS_ATTENTION: CountKey[] = [
   "trainerApplications",
   "internshipApplications",
 ];
-export const CMS_ATTENTION: CountKey[] = ["newMessages", "chatFeedback", "newLeads"];
+export const CMS_ATTENTION: CountKey[] = ["newMessages", "chatFeedback", "newLeads", "newSurveys"];
 
 export const NAV: Record<ConsoleSystem, NavGroup[]> = {
   home: [
@@ -156,6 +158,13 @@ export const NAV: Record<ConsoleSystem, NavGroup[]> = {
           count: "chatFeedback",
           also: /^\/admin\/crm\/feedback/,
         },
+        {
+          to: "/admin/feedback-survey",
+          ar: "استبيان التجربة الرقمية",
+          en: "Digital experience survey",
+          icon: ClipboardList,
+          count: "newSurveys",
+        },
       ],
     },
   ],
@@ -193,6 +202,7 @@ export const NAV: Record<ConsoleSystem, NavGroup[]> = {
           also: /^\/learning-management-system\/admin\/users/,
         },
         { to: `${LMS_ADMIN}/internships`, ar: "فرص التدريب", en: "Internships", icon: Briefcase },
+        { to: `${LMS_ADMIN}/coupons`, ar: "الكوبونات", en: "Coupons", icon: Ticket },
       ],
     },
     {

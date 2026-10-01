@@ -17,8 +17,7 @@ export type ExportOpts<T> = {
   boolLabels?: { true: string; false: string };
 };
 
-const XLSX_MIME =
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 // Excel worksheet names: max 31 chars, cannot contain : \ / ? * [ ]
 function sanitizeSheetName(name: string): string {
@@ -104,7 +103,7 @@ export async function exportRowsToXlsx<T>(opts: ExportOpts<T>): Promise<void> {
   const { filenameBase, sheetName, rtl = false, columns, rows, boolLabels } = opts;
 
   const ExcelJS = (await import("exceljs")).default;
-    const wb = new ExcelJS.Workbook();
+  const wb = new ExcelJS.Workbook();
   wb.created = new Date();
   const ws = wb.addWorksheet(sanitizeSheetName(sheetName), {
     views: [{ rightToLeft: rtl }],

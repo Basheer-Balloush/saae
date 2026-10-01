@@ -7,7 +7,7 @@ import {
   ORG_EMAIL,
   ORG_PHONE,
   type CatalogRow,
-} from "../../src/lib/chat-intake";
+} from "../../src/features/chat/lib/chat-intake";
 
 const row = (over: Partial<CatalogRow> = {}): CatalogRow => ({
   id: "11111111-1111-1111-1111-111111111111",
@@ -28,7 +28,9 @@ describe("course options offered by the assistant", () => {
     const [en] = toCourseOptions([row()], "en");
     expect(ar.title).toBe("أساسيات الذكاء الاصطناعي");
     expect(en.title).toBe("AI Foundations");
-    expect(ar.url).toBe("https://www.aisyria.org/learning-management-system/courses/ai-foundations");
+    expect(ar.url).toBe(
+      "https://www.aisyria.org/learning-management-system/courses/ai-foundations",
+    );
   });
 
   it("falls back to the course id when a course has no slug", () => {
@@ -39,7 +41,9 @@ describe("course options offered by the assistant", () => {
 
   it("falls back to the other language rather than showing an empty title", () => {
     expect(toCourseOptions([row({ title_ar: null })], "ar")[0].title).toBe("AI Foundations");
-    expect(toCourseOptions([row({ title_en: null })], "en")[0].title).toBe("أساسيات الذكاء الاصطناعي");
+    expect(toCourseOptions([row({ title_en: null })], "en")[0].title).toBe(
+      "أساسيات الذكاء الاصطناعي",
+    );
   });
 
   it("drops a course that has no title in either language", () => {
@@ -58,8 +62,19 @@ describe("course options offered by the assistant", () => {
   });
 
   it("offers at most three courses so the answer stays readable", () => {
-    expect(toCourseOptions(Array.from({ length: 9 }, () => row()), "ar")).toHaveLength(3);
-    expect(toCourseOptions(Array.from({ length: 9 }, () => row()), "ar", 1)).toHaveLength(1);
+    expect(
+      toCourseOptions(
+        Array.from({ length: 9 }, () => row()),
+        "ar",
+      ),
+    ).toHaveLength(3);
+    expect(
+      toCourseOptions(
+        Array.from({ length: 9 }, () => row()),
+        "ar",
+        1,
+      ),
+    ).toHaveLength(1);
   });
 
   it("gives the association's phone and email when nothing matches", () => {

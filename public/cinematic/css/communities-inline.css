@@ -583,7 +583,10 @@
 
   @media (max-width: 900px) {
     .community-hero { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 110px; }
-    .community-markstage { order: -1; }
+    .community-hero-copy { display: flex; flex-direction: column; }
+    .community-title { order: -2; }
+    .community-label { order: -1; margin-top: 18px; }
+    .community-markstage { order: 1; }
     .community-mark { font-size: clamp(96px, 26vw, 150px); }
     .community-roots { width: min(100%, 340px); }
     .community-ghost { font-size: clamp(52px, 15vw, 100px); }

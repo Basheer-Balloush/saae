@@ -275,11 +275,18 @@ html {
     border-color: var(--color-border);
   }
 
+  /* No page may scroll sideways on any screen. iOS also stops enlarging text
+     on its own when a phone turns to landscape. */
   html {
     scroll-behavior: smooth;
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
+    overflow-x: clip;
+    overflow-wrap: break-word;
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
@@ -511,12 +518,19 @@ html {
     }
   }
   @keyframes net-pulse {
-    0% { stroke-dashoffset: 40; opacity: 0.15; }
-    50% { opacity: 0.85; }
-    100% { stroke-dashoffset: 0; opacity: 0.15; }
+    0% {
+      stroke-dashoffset: 40;
+      opacity: 0.15;
+    }
+    50% {
+      opacity: 0.85;
+    }
+    100% {
+      stroke-dashoffset: 0;
+      opacity: 0.15;
+    }
   }
 }
-
 
 /* Ended-course card treatment (shared by all course card surfaces). */
 @utility course-card-ended {
@@ -562,8 +576,13 @@ html {
 }
 
 @media (max-width: 768px) {
-  .text-display-1, .display-1 { font-size: clamp(2rem, 9vw, 2.75rem); }
-  h1 { font-size: clamp(1.5rem, 7vw, 2rem); }
+  .text-display-1,
+  .display-1 {
+    font-size: clamp(2rem, 9vw, 2.75rem);
+  }
+  h1 {
+    font-size: clamp(1.5rem, 7vw, 2rem);
+  }
 }
 
 /* Breakpoint contract (PR2-1): Base 0-479, sm 480-767, md 768-1023, lg 1024-1279, xl 1280+. */
@@ -594,13 +613,19 @@ html {
     --gutter: 16px;
   }
   @media (min-width: 480px) {
-    :root { --gutter: 20px; }
+    :root {
+      --gutter: 20px;
+    }
   }
   @media (min-width: 768px) {
-    :root { --gutter: 24px; }
+    :root {
+      --gutter: 24px;
+    }
   }
   @media (min-width: 1024px) {
-    :root { --gutter: 32px; }
+    :root {
+      --gutter: 32px;
+    }
   }
   .page-container {
     padding-inline: var(--gutter);

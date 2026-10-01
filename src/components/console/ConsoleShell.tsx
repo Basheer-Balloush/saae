@@ -3,7 +3,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ExternalLink, Languages, LogOut, Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
-import { useLang } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n/i18n";
 import { NAV, SYSTEM_ENTRY, isNavActive, systemForPath, type NavItem } from "./nav";
 import { useConsoleCounts, type ConsoleCounts } from "./useConsoleCounts";
 import "./console.css";

@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { splitKnowledgeSections } from "../../src/lib/knowledge-sections";
+import { splitKnowledgeSections } from "../../src/features/chat/lib/knowledge-sections";
 
 describe("splitting an uploaded knowledge file", () => {
   it("makes one entry per ## heading, titled by the heading", () => {
-    const md = "# ملف المعرفة\nملاحظة للمراجع\n\n## عن الجمعية\nالجمعية غير ربحية في سوريا.\n\n---\n\n## التواصل\n```\nالبريد: info@aisyria.org\n```\n";
+    const md =
+      "# ملف المعرفة\nملاحظة للمراجع\n\n## عن الجمعية\nالجمعية غير ربحية في سوريا.\n\n---\n\n## التواصل\n```\nالبريد: info@aisyria.org\n```\n";
     expect(splitKnowledgeSections("ignored", md)).toEqual([
       { title: "عن الجمعية", text: "الجمعية غير ربحية في سوريا." },
       { title: "التواصل", text: "البريد: info@aisyria.org" },

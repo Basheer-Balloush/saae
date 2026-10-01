@@ -914,6 +914,158 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback_survey_answers: {
+        Row: {
+          created_at: string
+          id: string
+          not_applicable: boolean
+          question_key: string
+          rating: number | null
+          section_key: string
+          submission_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          not_applicable?: boolean
+          question_key: string
+          rating?: number | null
+          section_key: string
+          submission_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          not_applicable?: boolean
+          question_key?: string
+          rating?: number | null
+          section_key?: string
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_survey_answers_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_survey_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_survey_rate_limits: {
+        Row: {
+          hits: number
+          ip_hash: string
+          window_start: string
+        }
+        Insert: {
+          hits?: number
+          ip_hash: string
+          window_start: string
+        }
+        Update: {
+          hits?: number
+          ip_hash?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      feedback_survey_submissions: {
+        Row: {
+          age_range: string | null
+          completed: boolean
+          consent: boolean
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          device_type: string | null
+          general_notes: string | null
+          governorate: string | null
+          id: string
+          improvement_notes: string | null
+          internal_admin_note: string | null
+          lang: string
+          overall_rating: number | null
+          positive_notes: string | null
+          preferred_contact_method: string | null
+          problem_notes: string | null
+          recommendation_rating: number | null
+          requested_feature: string | null
+          review_status: Database["public"]["Enums"]["feedback_review_status"]
+          screenshot_path: string | null
+          services_used: string[]
+          submitted_at: string | null
+          survey_version: string
+          updated_at: string
+          usage_frequency: string | null
+          user_type: string | null
+          wants_contact: boolean
+        }
+        Insert: {
+          age_range?: string | null
+          completed?: boolean
+          consent?: boolean
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          device_type?: string | null
+          general_notes?: string | null
+          governorate?: string | null
+          id?: string
+          improvement_notes?: string | null
+          internal_admin_note?: string | null
+          lang?: string
+          overall_rating?: number | null
+          positive_notes?: string | null
+          preferred_contact_method?: string | null
+          problem_notes?: string | null
+          recommendation_rating?: number | null
+          requested_feature?: string | null
+          review_status?: Database["public"]["Enums"]["feedback_review_status"]
+          screenshot_path?: string | null
+          services_used?: string[]
+          submitted_at?: string | null
+          survey_version?: string
+          updated_at?: string
+          usage_frequency?: string | null
+          user_type?: string | null
+          wants_contact?: boolean
+        }
+        Update: {
+          age_range?: string | null
+          completed?: boolean
+          consent?: boolean
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          device_type?: string | null
+          general_notes?: string | null
+          governorate?: string | null
+          id?: string
+          improvement_notes?: string | null
+          internal_admin_note?: string | null
+          lang?: string
+          overall_rating?: number | null
+          positive_notes?: string | null
+          preferred_contact_method?: string | null
+          problem_notes?: string | null
+          recommendation_rating?: number | null
+          requested_feature?: string | null
+          review_status?: Database["public"]["Enums"]["feedback_review_status"]
+          screenshot_path?: string | null
+          services_used?: string[]
+          submitted_at?: string | null
+          survey_version?: string
+          updated_at?: string
+          usage_frequency?: string | null
+          user_type?: string | null
+          wants_contact?: boolean
+        }
+        Relationships: []
+      }
       individual_leads: {
         Row: {
           address: string | null
@@ -2118,11 +2270,6 @@ export type Database = {
           course_id: string
           email_error: string | null
           id: string
-          pdf_error: string | null
-          pdf_generated_at: string | null
-          pdf_path: string | null
-          recipient_gender: string | null
-          recipient_name: string | null
           issued_at: string
           sent_at: string | null
           serial: string
@@ -2132,11 +2279,6 @@ export type Database = {
           course_id: string
           email_error?: string | null
           id?: string
-          pdf_error?: string | null
-          pdf_generated_at?: string | null
-          pdf_path?: string | null
-          recipient_gender?: string | null
-          recipient_name?: string | null
           issued_at?: string
           sent_at?: string | null
           serial: string
@@ -2146,11 +2288,6 @@ export type Database = {
           course_id?: string
           email_error?: string | null
           id?: string
-          pdf_error?: string | null
-          pdf_generated_at?: string | null
-          pdf_path?: string | null
-          recipient_gender?: string | null
-          recipient_name?: string | null
           issued_at?: string
           sent_at?: string | null
           serial?: string
@@ -2439,12 +2576,15 @@ export type Database = {
           approval_whatsapp_message_en: string | null
           category_id: string | null
           certificate_pdf_enabled: boolean
+          certificate_requires_payment: boolean
           cover_url: string | null
           created_at: string
           delivery_mode: Database["public"]["Enums"]["lms_delivery_mode"]
           description_ar: string | null
           description_en: string | null
           duration_hours: number | null
+          enroll_note_ar: string | null
+          enroll_note_en: string | null
           end_date: string | null
           enrollment_deadline: string | null
           enrollment_open: boolean
@@ -2480,12 +2620,15 @@ export type Database = {
           approval_whatsapp_message_en?: string | null
           category_id?: string | null
           certificate_pdf_enabled?: boolean
+          certificate_requires_payment?: boolean
           cover_url?: string | null
           created_at?: string
           delivery_mode?: Database["public"]["Enums"]["lms_delivery_mode"]
           description_ar?: string | null
           description_en?: string | null
           duration_hours?: number | null
+          enroll_note_ar?: string | null
+          enroll_note_en?: string | null
           end_date?: string | null
           enrollment_deadline?: string | null
           enrollment_open?: boolean
@@ -2521,12 +2664,15 @@ export type Database = {
           approval_whatsapp_message_en?: string | null
           category_id?: string | null
           certificate_pdf_enabled?: boolean
+          certificate_requires_payment?: boolean
           cover_url?: string | null
           created_at?: string
           delivery_mode?: Database["public"]["Enums"]["lms_delivery_mode"]
           description_ar?: string | null
           description_en?: string | null
           duration_hours?: number | null
+          enroll_note_ar?: string | null
+          enroll_note_en?: string | null
           end_date?: string | null
           enrollment_deadline?: string | null
           enrollment_open?: boolean
@@ -2658,25 +2804,40 @@ export type Database = {
       lms_enrollments: {
         Row: {
           completed_at: string | null
+          amount_due: number | null
+          amount_due_note: string | null
+          completion_source: string
+          discount: number | null
           course_id: string
           enrolled_at: string
           id: string
+          list_price: number | null
           progress: number
           student_id: string
         }
         Insert: {
           completed_at?: string | null
+          amount_due?: number | null
+          amount_due_note?: string | null
+          completion_source?: string
+          discount?: number | null
           course_id: string
           enrolled_at?: string
           id?: string
+          list_price?: number | null
           progress?: number
           student_id: string
         }
         Update: {
           completed_at?: string | null
+          amount_due?: number | null
+          amount_due_note?: string | null
+          completion_source?: string
+          discount?: number | null
           course_id?: string
           enrolled_at?: string
           id?: string
+          list_price?: number | null
           progress?: number
           student_id?: string
         }
@@ -3434,8 +3595,6 @@ export type Database = {
         Row: {
           avatar_file_id: string | null
           biography: string | null
-          certificate_name: string | null
-          gender: string | null
           created_at: string
           cv_file_id: string | null
           full_name: string | null
@@ -3448,8 +3607,6 @@ export type Database = {
         Insert: {
           avatar_file_id?: string | null
           biography?: string | null
-          certificate_name?: string | null
-          gender?: string | null
           created_at?: string
           cv_file_id?: string | null
           full_name?: string | null
@@ -3462,8 +3619,6 @@ export type Database = {
         Update: {
           avatar_file_id?: string | null
           biography?: string | null
-          certificate_name?: string | null
-          gender?: string | null
           created_at?: string
           cv_file_id?: string | null
           full_name?: string | null
@@ -3500,6 +3655,7 @@ export type Database = {
           full_name_ar: string
           full_name_en: string | null
           id: string
+          is_published: boolean
           photo_url: string | null
           position_ar: string
           position_en: string | null
@@ -3514,6 +3670,7 @@ export type Database = {
           full_name_ar: string
           full_name_en?: string | null
           id?: string
+          is_published?: boolean
           photo_url?: string | null
           position_ar: string
           position_en?: string | null
@@ -3528,6 +3685,7 @@ export type Database = {
           full_name_ar?: string
           full_name_en?: string | null
           id?: string
+          is_published?: boolean
           photo_url?: string | null
           position_ar?: string
           position_en?: string | null
@@ -4852,6 +5010,7 @@ export type Database = {
         | "archived"
       dynamic_form_status: "draft" | "published" | "hidden" | "archived"
       event_registration_status: "pending" | "approved" | "rejected"
+      feedback_review_status: "new" | "in_review" | "contacted" | "closed"
       initiative_donation_status: "pending" | "confirmed" | "cancelled"
       initiative_donor_type: "individual" | "company"
       initiative_payment_status: "pending" | "confirmed" | "cancelled"
@@ -5053,6 +5212,7 @@ export const Constants = {
       ],
       dynamic_form_status: ["draft", "published", "hidden", "archived"],
       event_registration_status: ["pending", "approved", "rejected"],
+      feedback_review_status: ["new", "in_review", "contacted", "closed"],
       initiative_donation_status: ["pending", "confirmed", "cancelled"],
       initiative_donor_type: ["individual", "company"],
       initiative_payment_status: ["pending", "confirmed", "cancelled"],

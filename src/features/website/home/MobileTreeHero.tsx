@@ -1,0 +1,807 @@
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import {
+  Building2,
+  ChevronLeft,
+  ChevronRight,
+  CodeXml,
+  Database,
+  FlaskConical,
+  HeartPulse,
+  Megaphone,
+  Presentation,
+  TrendingUp,
+} from "lucide-react";
+import MotionButton from "@/features/website/motion/motion-button";
+import { ACHIEVEMENTS, COMMUNITIES, OPENING, OPENING_HEADLINE } from "./mobile-home-content";
+
+/* The phone hero plays the desktop hero's whole journey: the pixel tree from
+   public/cinematic/js/hero-instrument.js in its centred portrait layout, with
+   the same six captions on the same schedule as home-inline.js. The section is
+   a tall scroll runway; the stage sticks for its length. The scene takes the
+   top of the screen and the captions sit under it. */
+
+type Lang = "ar" | "en";
+export type TreeMode = "loading" | "live" | "static";
+
+type HeroInstance = {
+  render: (progress: number) => void;
+  setProgress?: (progress: number) => void;
+  resize: () => void;
+  dispose: () => void;
+  startEntrance: () => void;
+  setCommunity?: (index: number) => void;
+  setCalm?: (y: number, w: number) => void;
+  setRoom?: (captionTop: number) => void;
+  warmup?: () => void;
+};
+
+/* The desktop schedule (home-inline.js CAPTION_CUES / heroBeatThresholds),
+   which is tree-story.js's own: a caption arrives over the back of the camera
+   move that brings its subject in, and leaves over the front of the next. */
+const CUES: Array<{ enter: [number, number] | null; exit: [number, number] | null }> = [
+  { enter: null, exit: [0.055, 0.135] },
+  { enter: [0.055, 0.135], exit: [0.32, 0.372] },
+  { enter: [0.32, 0.372], exit: [0.492, 0.544] },
+  { enter: [0.492, 0.544], exit: [0.664, 0.716] },
+  { enter: [0.664, 0.716], exit: [0.836, 0.874] },
+  { enter: [0.836, 0.874], exit: null },
+];
+const BEATS = [0.095, 0.346, 0.518, 0.69, 0.855];
+const HANDOFF = 0.46;
+const COMMUNITY_FLIP_MS = 5000;
+
+const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
+const smooth = (t: number) => t * t * (3 - 2 * t);
+
+function bandOpacity(index: number, p: number): number {
+  const cue = CUES[index];
+  let o = 1;
+  if (cue.enter) {
+    const [a, b] = cue.enter;
+    const start = b - (b - a) * HANDOFF;
+    o *= smooth(clamp01((p - start) / (b - start)));
+  }
+  if (cue.exit) {
+    const [a, b] = cue.exit;
+    const end = a + (b - a) * HANDOFF;
+    o *= 1 - smooth(clamp01((p - a) / (end - a)));
+  }
+  return o;
+}
+
+const bandAt = (p: number) => {
+  const next = BEATS.findIndex((t) => p < t);
+  return next === -1 ? BEATS.length : next;
+};
+
+function supportsWebGl2(): boolean {
+  try {
+    return Boolean(document.createElement("canvas").getContext("webgl2"));
+  } catch {
+    return false;
+  }
+}
+
+/* The scene script, loaded once per visit: returning to the homepage calls
+   window.saaeHeroBoot() for the new canvas rather than downloading the script
+   again under a fresh URL. */
+const HERO_SCRIPT_SRC = "/cinematic/js/hero-instrument.js?phone";
+type HeroWindow = Window & { saaeHeroBoot?: () => Promise<HeroInstance | null> };
+
+/* Everything the scene needs before it can form without stalling, fetched up
+   front behind the loading screen: the precomputed tree and country (the
+   heaviest, so the bar weighs it most), the scene's modules, the Cairo cuts
+   it rasterises text in, and Abu Al-Joud's poses. All best-effort: a file
+   that fails or is slow only moves the bar on; the scene still boots and
+   fetches what it lacks itself. */
+const PHONE_POINTS_URL = "/cinematic/points/hero-phone.bin";
+const HERO_MODULE_URLS = [
+  HERO_SCRIPT_SRC,
+  "/cinematic/js/three.module.min.js",
+  "/cinematic/js/three.core.min.js",
+  "/cinematic/js/fruit-content.js",
+  "/cinematic/js/community-content.js",
+  "/cinematic/js/syria-outline.js",
+  "/cinematic/js/tree-story.js",
+  "/cinematic/js/syria-network.js",
+  "/cinematic/js/syria-cities.js",
+];
+const HERO_FONT_LOADS: Array<[string, string]> = [
+  ["600 44px Cairo", "Damascus"],
+  ["600 44px Cairo", "دمشق حلب الحسكة القامشلي"],
+  ["900 50px Cairo", "متدرّب شريك مجتمعات مستخدم سوري للذكاء الاصطناعي"],
+  ["900 143px Cairo", "1,000,000"],
+];
+const HERO_IMAGE_URLS = [
+  "/cinematic/images/initiative-tree.svg",
+  "/cinematic/images/abu-al-joud-comic-welcome.webp",
+  "/cinematic/images/abu-al-joud-comic-curious.webp",
+  "/cinematic/images/abu-al-joud-comic-celebrate.webp",
+  "/cinematic/images/abu-al-joud-comic-vision.webp",
+];
+const PRELOAD_TIMEOUT_MS = 8000;
+
+function fetchTimeout(url: string, ms: number): Promise<void> {
+  const controller = typeof AbortController === "undefined" ? null : new AbortController();
+  const timer = window.setTimeout(() => controller?.abort(), ms);
+  return fetch(url, { cache: "force-cache", signal: controller?.signal })
+    .then((res) => res.arrayBuffer())
+    .then(() => undefined)
+    .finally(() => window.clearTimeout(timer));
+}
+
+function imageTimeout(url: string, ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const timer = window.setTimeout(resolve, ms);
+    const done = () => {
+      window.clearTimeout(timer);
+      resolve();
+    };
+    img.onload = () => (img.decode ? img.decode().then(done, done) : done());
+    img.onerror = done;
+    img.src = url;
+  });
+}
+
+function preloadHeroAssets(onTick: (share: number) => void): Promise<void> {
+  const jobs: Array<[number, () => Promise<unknown>]> = [
+    [4, () => fetchTimeout(PHONE_POINTS_URL, PRELOAD_TIMEOUT_MS)],
+    ...HERO_MODULE_URLS.map(
+      (url) => [1, () => fetchTimeout(url, PRELOAD_TIMEOUT_MS)] as [number, () => Promise<unknown>],
+    ),
+    ...HERO_FONT_LOADS.map(
+      ([font, text]) =>
+        [
+          0.5,
+          () =>
+            Promise.race([
+              document.fonts?.load(font, text) ?? Promise.resolve(),
+              new Promise((r) => window.setTimeout(r, PRELOAD_TIMEOUT_MS)),
+            ]),
+        ] as [number, () => Promise<unknown>],
+    ),
+    ...HERO_IMAGE_URLS.map(
+      (url) =>
+        [0.6, () => imageTimeout(url, PRELOAD_TIMEOUT_MS)] as [number, () => Promise<unknown>],
+    ),
+  ];
+  const total = jobs.reduce((sum, [weight]) => sum + weight, 0);
+  let done = 0;
+  return Promise.all(
+    jobs.map(([weight, job]) =>
+      job()
+        .catch(() => undefined)
+        .then(() => {
+          done += weight;
+          onTick(done / total);
+        }),
+    ),
+  ).then(() => undefined);
+}
+
+function useTreeJourney(
+  sectionRef: RefObject<HTMLElement | null>,
+  bandRefs: RefObject<Array<HTMLElement | null>>,
+  instanceRef: RefObject<HeroInstance | null>,
+) {
+  const [mode, setMode] = useState<TreeMode>("loading");
+  const [band, setBand] = useState(0);
+  const [openingReady, setOpeningReady] = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !supportsWebGl2()) {
+      setMode("static");
+      setOpeningReady(true);
+      return;
+    }
+
+    let frame = 0;
+    let eased = 0;
+    let lastTime = performance.now();
+    let bandNow = 0;
+    let disposed = false;
+    let fellBack = false;
+
+    /* Measured from the sticky stage (100svh), not innerHeight: on iPhones
+       innerHeight grows and shrinks as Safari's toolbar hides and shows, and
+       the progress would jump each time it did. */
+    const stage = section.querySelector<HTMLElement>(".mh-tree-stage");
+    const readProgress = () => {
+      const rect = section.getBoundingClientRect();
+      const view = stage?.offsetHeight || window.innerHeight;
+      return clamp01(-rect.top / Math.max(1, rect.height - view));
+    };
+
+    /* Where each caption starts, in px from the top of the stage. Captions
+       differ in height, and so does the stage from phone to phone; the scene
+       fits its subject above whichever caption is showing, and the scrim
+       darkens everything from just above it down. */
+    let captionTops: number[] = [];
+    const measure = () => {
+      captionTops = (bandRefs.current ?? []).map((el) => {
+        if (!el) return 0;
+        const bands = el.parentElement as HTMLElement | null;
+        return (bands?.offsetTop ?? 0) + el.offsetTop;
+      });
+    };
+
+    const paint = (p: number) => {
+      section.style.setProperty("--mh-tree-t", p.toFixed(4));
+      let topSum = 0;
+      let weight = 0;
+      bandRefs.current?.forEach((el, i) => {
+        if (!el) return;
+        const o = bandOpacity(i, p);
+        if (captionTops[i]) {
+          topSum += captionTops[i] * (o + 1e-4);
+          weight += o + 1e-4;
+        }
+        el.style.opacity = o.toFixed(3);
+        // Leaves upward, the way the camera pulls away; arrives from just below.
+        const exit = CUES[i].exit;
+        const lift = exit && p > exit[0] ? -22 * (1 - o) : 14 * (1 - o);
+        el.style.transform = `translateY(${lift.toFixed(1)}px)`;
+      });
+      if (weight) {
+        const top = topSum / weight;
+        const view = stage?.offsetHeight || window.innerHeight;
+        section.style.setProperty("--mh-caption-h", `${Math.round(view - top)}px`);
+        instanceRef.current?.setRoom?.(top);
+      }
+      const next = bandAt(p);
+      if (next !== bandNow) {
+        bandNow = next;
+        setBand(next);
+      }
+      const instance = instanceRef.current;
+      if (instance) {
+        instance.setCalm?.(-0.5, 0.6);
+        // The scene's own frame loop draws it: one draw per frame, not two.
+        if (instance.setProgress) instance.setProgress(p);
+        else instance.render(p);
+      }
+    };
+
+    const tick = (now: number) => {
+      frame = 0;
+      const dt = Math.min(0.1, (now - lastTime) / 1000);
+      lastTime = now;
+      // Below the hero there is nothing to draw: the rest of the page scrolls
+      // without the scene or the captions doing any work.
+      const rect = section.getBoundingClientRect();
+      if (rect.bottom <= 0 || rect.top >= window.innerHeight) {
+        eased = readProgress();
+        return;
+      }
+      const target = readProgress();
+      // Time-based, so a 120Hz phone eases at the same pace as a 60Hz one.
+      eased += (target - eased) * Math.min(1, dt * 4.5);
+      if (Math.abs(target - eased) < 0.0003) eased = target;
+      paint(eased);
+      if (eased !== target) frame = requestAnimationFrame(tick);
+    };
+
+    const schedule = () => {
+      if (frame || disposed) return;
+      lastTime = performance.now();
+      frame = requestAnimationFrame(tick);
+    };
+
+    let openingTimer = 0;
+    const onReady = (event: Event) => {
+      const arrived = (event as CustomEvent<HeroInstance>).detail;
+      // Too late: the page already settled on the drawn tree, so don't jump it.
+      if (disposed || fellBack) {
+        arrived.dispose();
+        return;
+      }
+      instanceRef.current = arrived;
+      if (canvas) canvasSize = `${canvas.clientWidth}x${canvas.clientHeight}`;
+      arrived.resize();
+      arrived.startEntrance();
+      setMode("live");
+      // The tree forms first; the opening headline follows once it has, and
+      // the shapes still to come are built in idle time after that.
+      openingTimer = window.setTimeout(() => {
+        setOpeningReady(true);
+        arrived.warmup?.();
+      }, 1700);
+      schedule();
+    };
+
+    /* Safari fires resize every time its toolbar hides or shows, which is
+       every time a scroll starts. The canvas is sized by the 100svh stage, so
+       it has not changed; resizing it anyway reallocates the scene's buffers
+       and drops a frame. Only a real change (rotation) resizes the scene. */
+    const canvas = section.querySelector<HTMLCanvasElement>("canvas");
+    let canvasSize = "";
+    const onResize = () => {
+      measure();
+      const size = canvas ? `${canvas.clientWidth}x${canvas.clientHeight}` : "";
+      if (size !== canvasSize) {
+        canvasSize = size;
+        instanceRef.current?.resize();
+      }
+      schedule();
+    };
+
+    // Captions change height with the language, the fonts and the community card.
+    const sizes =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(() => {
+            measure();
+            paint(eased);
+          });
+    bandRefs.current?.forEach((el) => el && sizes?.observe(el));
+    measure();
+
+    section.addEventListener("saae:hero-ready", onReady);
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
+    eased = readProgress();
+    paint(eased);
+
+    /* The loading screen holds the page until the scene's files are in, so a
+       slow phone forms the scene once, in one go, instead of stuttering
+       through it while the reader is already scrolling. Then the scene boots:
+       by calling the already-loaded module again if this is a return visit,
+       or by loading it once. */
+    let script: HTMLScriptElement | null = null;
+    let fallback = 0;
+    const boot = () => {
+      if (disposed) return;
+      // No scene in time (lost context, a phone that cannot build it): the
+      // drawn tree and all captions.
+      fallback = window.setTimeout(() => {
+        if (!instanceRef.current && !disposed) {
+          fellBack = true;
+          setMode("static");
+          setOpeningReady(true);
+        }
+      }, 9000);
+      const w = window as HeroWindow;
+      if (w.saaeHeroBoot) {
+        w.saaeHeroBoot()
+          .then((instance) => {
+            if (instance) return;
+            // Nothing to boot here (reduced motion, no scene): settle now.
+            if (!disposed && !instanceRef.current) {
+              fellBack = true;
+              setMode("static");
+              setOpeningReady(true);
+            }
+          })
+          .catch(() => undefined);
+        return;
+      }
+      // The "?phone" module does not boot itself: boot it once it has run.
+      script = document.createElement("script");
+      script.type = "module";
+      script.src = HERO_SCRIPT_SRC;
+      script.onload = () => {
+        if (!disposed) (window as HeroWindow).saaeHeroBoot?.().catch(() => undefined);
+      };
+      document.head.appendChild(script);
+    };
+    preloadHeroAssets((share) => {
+      if (!disposed) setLoadProgress(share);
+    }).then(boot);
+
+    return () => {
+      disposed = true;
+      sizes?.disconnect();
+      window.clearTimeout(fallback);
+      window.clearTimeout(openingTimer);
+      if (frame) cancelAnimationFrame(frame);
+      section.removeEventListener("saae:hero-ready", onReady);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", onResize);
+      instanceRef.current?.dispose();
+      instanceRef.current = null;
+      script?.remove();
+    };
+  }, [sectionRef, bandRefs, instanceRef]);
+
+  // Static mode lays the captions out as a column, so every one of them is up.
+  useEffect(() => {
+    if (mode !== "static") return;
+    bandRefs.current?.forEach((el) => {
+      if (!el) return;
+      el.style.opacity = "";
+      el.style.transform = "";
+    });
+  }, [mode, bandRefs]);
+
+  return { mode, band, openingReady, loadProgress };
+}
+
+const COPY = {
+  communities: {
+    eyebrow: { ar: "مجتمعات الجمعية", en: "SAAE communities" },
+    title: {
+      ar: "مجتمعات متخصصة، وجذور تجمعنا",
+      en: "Specialized communities, one shared foundation",
+    },
+    action: { ar: "استكشف المجتمعات", en: "Explore communities" },
+    previous: { ar: "المجتمع السابق", en: "Previous community" },
+    next: { ar: "المجتمع التالي", en: "Next community" },
+    choose: { ar: "اختر مجتمعاً", en: "Choose a community" },
+  },
+  learning: {
+    eyebrow: { ar: "المنصة التعليمية التدريبية", en: "The learning platform" },
+    title: { ar: "تعلّم ينمو من مجتمعاتنا", en: "Learning, grown from our communities" },
+    body: {
+      ar: "مسارات تدريب معتمدة تبني مهارات مهنية وتقنية، ومتاحة للجميع في سورية.",
+      en: "Certified training tracks that build professional and technical skill, open to anyone in Syria.",
+    },
+    action: { ar: "استفسر عن التعلّم", en: "Ask about learning" },
+  },
+  achievements: {
+    eyebrow: { ar: "انجازات الجمعية", en: "SAAE achievements" },
+    title: { ar: "مجتمع يتجاوز 5,000 متعلم", en: "A community of 5,000+ learners" },
+  },
+  million: {
+    eyebrow: {
+      ar: "مبادرة مليون مستخدم سوري للذكاء الاصطناعي",
+      en: "The Million Syrian AI Users initiative",
+    },
+    title: {
+      ar: "مليون شخص خطوة وطنية إلى الأمام",
+      en: "One million people One national step forward",
+    },
+    body: {
+      ar: "مبادرة وطنية تمكّن مليون سوري من استخدام الذكاء الاصطناعي بثقة في العمل والدراسة والحياة اليومية.",
+      en: "A national initiative enabling one million Syrians to use AI confidently at work, in study, and in everyday life.",
+    },
+    action: { ar: "استكشف المبادرة", en: "Explore the initiative" },
+  },
+  syria: {
+    eyebrow: { ar: "إلى كل سورية", en: "Across Syria" },
+    title: { ar: "ننمو معاً في كل سورية", en: "Growing together across Syria" },
+    body: {
+      ar: "من مجتمعاتنا تنمو المعرفة، ومع مبادرة المليون نحملها من دمشق إلى كل سورية.",
+      en: "From our communities knowledge grows, and with the Million initiative we carry it from Damascus to all of Syria.",
+    },
+    action: { ar: "استكشف المبادرة", en: "Explore the initiative" },
+  },
+  cue: { ar: "مرّر للبدء", en: "Scroll to begin" },
+  loading: { ar: "جاري تجهيز المشهد…", en: "Preparing the scene…" },
+} as const;
+
+/* Abu Al-Joud's line for each beat, the same as the desktop guide's. */
+const GUIDE = [
+  {
+    image: "/cinematic/images/abu-al-joud-comic-welcome.webp",
+    ar: "أهلاً، أنا أبو الجود. سأرافقك في هذه الرحلة.",
+    en: "Hello, I am Abu Al-Joud. I will guide you through this journey.",
+    prefill: { ar: "عرّفني على الجمعية ورؤيتها", en: "Introduce me to SAAE and its vision" },
+  },
+  {
+    image: "/cinematic/images/abu-al-joud-comic-curious.webp",
+    ar: "هنا تبدأ جذور المعرفة والتخصص.",
+    en: "The roots of knowledge and expertise begin here.",
+    prefill: { ar: "ما هي مجتمعات الجمعية التسعة؟", en: "What are SAAE's nine communities?" },
+  },
+  {
+    image: "/cinematic/images/abu-al-joud-comic-curious.webp",
+    ar: "ومن هذه الجذور ينمو التعلّم.",
+    en: "Learning grows from those roots.",
+    prefill: {
+      ar: "أخبرني عن منصة التعلّم ودورات الجمعية",
+      en: "Tell me about SAAE's learning platform and courses",
+    },
+  },
+  {
+    image: "/cinematic/images/abu-al-joud-comic-celebrate.webp",
+    ar: "الأثر يظهر في الأرقام والناس.",
+    en: "Impact becomes visible through people and results.",
+    prefill: { ar: "أخبرني أكثر عن إنجازات الجمعية", en: "Tell me more about SAAE's achievements" },
+  },
+  {
+    image: "/cinematic/images/abu-al-joud-comic-vision.webp",
+    ar: "وهنا تتحول الرؤية إلى خطوة وطنية.",
+    en: "Here, the vision becomes a national step.",
+    prefill: {
+      ar: "اشرح لي مبادرة مليون مستخدم سوري للذكاء الاصطناعي",
+      en: "Explain the Million Syrian AI Users initiative",
+    },
+  },
+  {
+    image: "/cinematic/images/abu-al-joud-comic-vision.webp",
+    ar: "وتصل الرحلة من دمشق إلى كل سورية.",
+    en: "The journey reaches from Damascus across Syria.",
+    prefill: {
+      ar: "كيف تصل برامج الجمعية إلى مختلف المحافظات السورية؟",
+      en: "How do SAAE's programmes reach communities across Syria?",
+    },
+  },
+] as const;
+
+const GUIDE_LABEL = { ar: "تحدّث مع أبو الجود", en: "Talk to Abu Al-Joud" } as const;
+
+const COMMUNITY_ICONS = [
+  CodeXml,
+  Database,
+  Building2,
+  HeartPulse,
+  FlaskConical,
+  TrendingUp,
+  Presentation,
+  Megaphone,
+] as const;
+
+const OPENING_LINES = {
+  ar: ["ذكاء", "وريادة", "لوطن", "ينهض"],
+  en: ["Intelligence", "and entrepreneurship", "for a nation", "on the rise."],
+} as const;
+
+/** Abu Al-Joud: a line for each beat, shown for a few seconds as the beat arrives. */
+function HeroGuide({ lang, band }: { lang: Lang; band: number }) {
+  const [shown, setShown] = useState(false);
+  const [talking, setTalking] = useState(true);
+  const beat = GUIDE[band] ?? GUIDE[0];
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShown(true), 900);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    setTalking(true);
+    const timer = window.setTimeout(() => setTalking(false), 5200);
+    return () => window.clearTimeout(timer);
+  }, [band, lang]);
+
+  const open = () => {
+    window.dispatchEvent(
+      new CustomEvent("assistant:open", { detail: { prefill: beat.prefill[lang] } }),
+    );
+  };
+
+  return (
+    <button
+      type="button"
+      className={`mh-hero-guide${shown ? " mh-is-shown" : ""}${talking ? " mh-is-talking" : ""}`}
+      onClick={open}
+      aria-label={GUIDE_LABEL[lang]}
+    >
+      <span className="mh-hero-guide-bubble" key={`${lang}-${band}`} aria-live="polite">
+        {beat[lang]}
+      </span>
+      <img
+        className="mh-hero-guide-figure"
+        src={beat.image}
+        alt=""
+        width={512}
+        height={768}
+        decoding="async"
+      />
+    </button>
+  );
+}
+
+function CommunityCard({
+  lang,
+  index,
+  onSelect,
+}: {
+  lang: Lang;
+  index: number;
+  onSelect: (index: number) => void;
+}) {
+  const community = COMMUNITIES[index];
+  const Icon = COMMUNITY_ICONS[index % COMMUNITY_ICONS.length];
+  const count = COMMUNITIES.length;
+  const copy = COPY.communities;
+  const rtl = lang === "ar";
+  return (
+    <>
+      <div className="mh-tree-card" key={community.key}>
+        <span className="mh-tree-card-icon">
+          <Icon size={20} aria-hidden="true" />
+        </span>
+        <div className="mh-tree-card-text">
+          <a className="mh-tree-card-name" href={community.href}>
+            {community.name[lang]}
+          </a>
+          <p>{community.tagline[lang]}</p>
+        </div>
+        <div className="mh-tree-card-nav">
+          <button
+            type="button"
+            aria-label={copy.previous[lang]}
+            onClick={() => onSelect((index - 1 + count) % count)}
+          >
+            {rtl ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+          <span aria-live="polite">
+            {index + 1} / {count}
+          </span>
+          <button
+            type="button"
+            aria-label={copy.next[lang]}
+            onClick={() => onSelect((index + 1) % count)}
+          >
+            {rtl ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+          </button>
+        </div>
+      </div>
+      <div className="mh-tree-pips" role="group" aria-label={copy.choose[lang]}>
+        {COMMUNITIES.map((c, i) => (
+          <button
+            key={c.key}
+            type="button"
+            className={i === index ? "mh-is-current" : undefined}
+            aria-label={c.name[lang]}
+            aria-pressed={i === index}
+            onClick={() => onSelect(i)}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+export function MobileTreeHero({
+  lang,
+  sentinelRef,
+}: {
+  lang: Lang;
+  sentinelRef: RefObject<HTMLDivElement | null>;
+}) {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const bandRefs = useRef<Array<HTMLElement | null>>([]);
+  const instanceRef = useRef<HeroInstance | null>(null);
+  const { mode, band, openingReady, loadProgress } = useTreeJourney(
+    sectionRef,
+    bandRefs,
+    instanceRef,
+  );
+
+  const [community, setCommunity] = useState(0);
+  const [browsed, setBrowsed] = useState(false);
+
+  const selectCommunity = useCallback((index: number) => {
+    setBrowsed(true);
+    setCommunity(index);
+  }, []);
+
+  // The field draws the community the card shows.
+  useEffect(() => {
+    instanceRef.current?.setCommunity?.(community);
+  }, [community, mode]);
+
+  // Like the desktop card, it turns by itself until the reader takes over.
+  useEffect(() => {
+    if (band !== 1 || browsed || mode === "static") return;
+    const timer = window.setInterval(() => {
+      if (!document.hidden) setCommunity((i) => (i + 1) % COMMUNITIES.length);
+    }, COMMUNITY_FLIP_MS);
+    return () => window.clearInterval(timer);
+  }, [band, browsed, mode]);
+
+  const pick = <T,>(text: Record<Lang, T>) => text[lang];
+  const live = mode !== "static";
+  const bandProps = (i: number) => ({
+    ref: (el: HTMLElement | null) => {
+      bandRefs.current[i] = el;
+    },
+    className: "mh-band",
+    "data-band": i,
+    "aria-hidden": live && band !== i ? true : undefined,
+    inert: live && band !== i ? true : undefined,
+  });
+
+  const headline = pick(OPENING_HEADLINE);
+
+  return (
+    <section
+      className={`mh-hero mh-tree-hero${openingReady ? " mh-opening-ready" : ""}`}
+      id="hero-sec"
+      aria-labelledby="mh-hero-title"
+      data-hero-layout="centred"
+      data-tree={mode}
+      ref={sectionRef}
+    >
+      <div ref={sentinelRef} className="mh-hero-sentinel" aria-hidden="true" />
+      <div className="mh-tree-stage">
+        <canvas className="mh-tree-canvas" id="hero-canvas" aria-hidden="true" />
+        <img
+          className="mh-tree-still"
+          src="/cinematic/images/initiative-tree.svg"
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+        />
+        <div className="mh-hero-scrim" aria-hidden="true" />
+
+        <div className="mh-bands mh-wrap">
+          <article {...bandProps(0)}>
+            <div className="mh-band-opening">
+              <h1 className="mh-title" id="mh-hero-title">
+                <span className="mh-sr-only">{headline}</span>
+                {/* The desktop opening's four lines (home.css .hero-opening-line):
+                    ink ramp, photo fill, white, photo fill. */}
+                <span aria-hidden="true" className="mh-open-title">
+                  {OPENING_LINES[lang].map((line) => (
+                    <span key={line} className="mh-open-line">
+                      {line}
+                    </span>
+                  ))}
+                </span>
+              </h1>
+              <p className="mh-eyebrow">{pick(OPENING.eyebrow)}</p>
+            </div>
+          </article>
+
+          <article {...bandProps(1)}>
+            <h2 className="mh-band-title">{pick(COPY.communities.title)}</h2>
+            <p className="mh-eyebrow">{pick(COPY.communities.eyebrow)}</p>
+            <CommunityCard lang={lang} index={community} onSelect={selectCommunity} />
+            <MotionButton label={pick(COPY.communities.action)} href="/about#communities-h" />
+          </article>
+
+          <article {...bandProps(2)}>
+            <h2 className="mh-band-title">{pick(COPY.learning.title)}</h2>
+            <p className="mh-eyebrow">{pick(COPY.learning.eyebrow)}</p>
+            <p className="mh-band-body">{pick(COPY.learning.body)}</p>
+            <MotionButton label={pick(COPY.learning.action)} href={OPENING.primary.href} />
+          </article>
+
+          <article {...bandProps(3)}>
+            <h2 className="mh-band-title">{pick(COPY.achievements.title)}</h2>
+            <p className="mh-eyebrow">{pick(COPY.achievements.eyebrow)}</p>
+            <dl className="mh-tree-stats">
+              {ACHIEVEMENTS.map((s) => (
+                <div key={s.value}>
+                  <dt>{pick(s.label)}</dt>
+                  <dd>{s.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+
+          <article {...bandProps(4)}>
+            <h2 className="mh-band-title">{pick(COPY.million.title)}</h2>
+            <p className="mh-eyebrow">{pick(COPY.million.eyebrow)}</p>
+            <p className="mh-band-body">{pick(COPY.million.body)}</p>
+            <MotionButton label={pick(COPY.million.action)} href={OPENING.secondary.href} />
+          </article>
+
+          <article {...bandProps(5)}>
+            <h2 className="mh-band-title">{pick(COPY.syria.title)}</h2>
+            <p className="mh-eyebrow">{pick(COPY.syria.eyebrow)}</p>
+            <p className="mh-band-body">{pick(COPY.syria.body)}</p>
+            <MotionButton label={pick(COPY.syria.action)} href={OPENING.secondary.href} />
+          </article>
+        </div>
+
+        <p className="mh-tree-cue" aria-hidden="true">
+          <span>{pick(COPY.cue)}</span>
+        </p>
+        <HeroGuide lang={lang} band={band} />
+      </div>
+      {mode === "loading" ? (
+        <div className="mh-hero-loader" role="status" aria-live="polite">
+          <img
+            className="mh-hero-loader-mark"
+            src="/cinematic/images/logo-tree-transparent.png"
+            alt=""
+            width={96}
+            height={98}
+          />
+          <div className="mh-hero-loader-bar" aria-hidden="true">
+            <span style={{ transform: `scaleX(${Math.max(0.04, loadProgress).toFixed(3)})` }} />
+          </div>
+          <p className="mh-hero-loader-text">{pick(COPY.loading)}</p>
+        </div>
+      ) : null}
+    </section>
+  );
+}

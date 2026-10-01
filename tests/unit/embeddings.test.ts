@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { embedTexts, geminiInput } from "../../src/lib/embeddings.server";
+import { embedTexts, geminiInput } from "../../src/features/chat/lib/embeddings.server";
 
 const vector = (n: number) => Array.from({ length: 1536 }, () => n);
 
@@ -12,8 +12,11 @@ describe("knowledge embeddings", () => {
   it("uses Gemini when its key is set, asking for 1536 numbers", async () => {
     vi.stubEnv("GEMINI_API_KEY", "g-key");
     vi.stubEnv("OPENAI_API_KEY", "");
-    const fetchMock = vi.fn(async () =>
-      new Response(JSON.stringify({ embeddings: [{ values: vector(0.1) }, { values: vector(0.2) }] })),
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({ embeddings: [{ values: vector(0.1) }, { values: vector(0.2) }] }),
+        ),
     );
     vi.stubGlobal("fetch", fetchMock);
 
@@ -29,13 +32,18 @@ describe("knowledge embeddings", () => {
   });
 
   it("formats search questions and untitled documents the way Gemini expects", () => {
-    expect(geminiInput("كيف أنضم؟", { kind: "query" })).toBe("task: search result | query: كيف أنضم؟");
+    expect(geminiInput("كيف أنضم؟", { kind: "query" })).toBe(
+      "task: search result | query: كيف أنضم؟",
+    );
     expect(geminiInput("نص", { kind: "document" })).toBe("title: none | text: نص");
   });
 
   it("rejects vectors of the wrong size", async () => {
     vi.stubEnv("GEMINI_API_KEY", "g-key");
-    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ embeddings: [{ values: [1, 2, 3] }] }))));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify({ embeddings: [{ values: [1, 2, 3] }] }))),
+    );
     await expect(embedTexts(["أ"])).rejects.toThrow(/dimensions/);
   });
 

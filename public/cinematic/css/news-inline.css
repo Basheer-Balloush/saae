@@ -43,27 +43,61 @@
   .page-shell { width: var(--page); margin-inline: auto; }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-  /* The same ground as the landing page: a deep vertical grade, two orbs,
-     a vignette and a static grain. Fixed, never sticky. */
-  .ambient { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
-    background: linear-gradient(180deg, #08333d 0%, #05242c 38%, #041b22 70%, #02131a 100%); }
-  .ambient span { position: absolute; z-index: 1; display: block; border-radius: 50%; will-change: transform, opacity; }
-  .orb-petrol { width: 98vw; height: 74vh; left: 1vw; top: -16vh; background: radial-gradient(closest-side, rgba(184, 232, 240, .085), rgba(184, 232, 240, 0)); animation: amb-a 26s ease-in-out infinite alternate; }
-  .orb-olive { width: 64vw; height: 44vh; left: 18vw; top: 22vh; background: radial-gradient(closest-side, rgba(4, 128, 144, .19), rgba(4, 128, 144, 0)); animation: amb-b 34s ease-in-out infinite alternate; }
-  .ambient::before { content: ""; position: absolute; inset: 0; z-index: 2; background: radial-gradient(116% 80% at 50% 24%, transparent 32%, rgba(1, 9, 13, .88) 100%); }
-  .ambient::after { content: ""; position: absolute; inset: 0; z-index: 3; opacity: .05; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 180px 180px; }
-  @keyframes amb-a { from { transform: scale(.96); opacity: .78; } to { transform: scale(1.07); opacity: 1; } }
-  @keyframes amb-b { from { transform: translate3d(0, 3vh, 0) scale(1); opacity: .7; } to { transform: translate3d(0, -3vh, 0) scale(1.12); opacity: 1; } }
+/* The circuit field shared by the news list and article pages. */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint style;
+  background: #061820;
+}
+
+.ambient span {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  display: block;
+  width: min(360px, 30%);
+  opacity: .34;
+  background: url("/cinematic/images/news-circuit-pattern.svg") left top / 280px 560px repeat-y;
+  mask-image: linear-gradient(90deg, #000 35%, transparent);
+}
+
+.orb-petrol { left: 0; }
+.orb-olive { right: 0; transform: scaleX(-1); background-position-y: 220px; }
+
+.ambient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    radial-gradient(circle, rgba(114, 214, 223, .32) 1px, transparent 1.5px),
+    linear-gradient(rgba(114, 214, 223, .08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(114, 214, 223, .08) 1px, transparent 1px);
+  background-size: 192px 192px, 96px 96px, 96px 96px;
+  background-position: 48px 48px;
+  mask-image: linear-gradient(90deg, #000, rgba(0, 0, 0, .2) 24%, transparent 40%, transparent 60%, rgba(0, 0, 0, .2) 76%, #000);
+}
+
+.ambient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
 
   .content { position: relative; z-index: 1; }
 
   .head { padding: clamp(64px, 9vw, 118px) 0 clamp(38px, 5vw, 60px); text-align: center; }
-  .eyebrow { margin: 0 0 16px; color: var(--petrol-lift); font-size: .76rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-  h1 { margin: 0 0 22px; font-size: clamp(2.6rem, 6vw, 5.2rem); font-weight: 900; letter-spacing: -.05em; line-height: 1.03; }
-  /* SAAE photo-fill display head: the panoramic collage poured through the
-     letterforms under a teal veil, in the mark-photo recipe. This page has
-     no Arabic mode, so no RTL guard is needed. Solid ink remains where
-     background-clip:text is unavailable. */
+  .head h1 { margin: 0 0 22px; font: 900 clamp(3rem, 4.8vw, 4.7rem)/1.12 "Cairo", sans-serif; letter-spacing: -.065em; }
+  /* Match the pale cyan photo-filled headings used on Contact and About. */
   @supports ((-webkit-background-clip: text) or (background-clip: text)) {
     .photo-head {
       background-image:
@@ -86,12 +120,11 @@
     }
   }
   .head p { max-width: 66ch; margin-block: 0; margin-inline: auto; color: var(--ink-muted); font-size: clamp(1.02rem, 1.5vw, 1.25rem); }
-  .rule { width: 108px; height: 3px; margin-top: 30px; margin-inline: auto; background: linear-gradient(90deg, var(--petrol), var(--accent)); }
+  .rule { width: 108px; height: 3px; margin-top: 30px; margin-inline: auto; background: linear-gradient(90deg, #5ed8e6, #698f3f); }
   /* Arabic mode (language.js): joined script needs open leading and no
      Latin tracking; dates, phone and email stay LTR-isolated. */
-  html[dir="rtl"] h1 { letter-spacing: 0; line-height: 1.3; }
+  html[dir="rtl"] .head h1 { letter-spacing: 0; line-height: 1.32; }
   html[dir="rtl"] .photo-head { hyphens: manual; }
-  html[dir="rtl"] .eyebrow { letter-spacing: 0; }
   html[dir="rtl"] time,
   html[dir="rtl"] a[href^="mailto:"],
   html[dir="rtl"] a[href^="tel:"] { direction: ltr; unicode-bidi: isolate; }
@@ -119,17 +152,12 @@
     vertical-align: middle;
     background: var(--line);
   }
-  .news-excerpt {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    overflow: hidden;
-    margin: 0;
-    color: var(--type);
-    font-size: .87rem;
-    line-height: 1.5;
-  }
   .news-cta {
+    --motion-circle-inset: .4rem;
+    --motion-circle-size: 2.7rem;
+    --motion-icon-size: 2.7rem;
+    --motion-icon-offset: -1.35rem;
+    --motion-arrow-size: 1.2rem;
     align-self: flex-start;
     display: inline-flex;
     align-items: center;
@@ -149,19 +177,21 @@
     text-decoration: none;
     transition: transform 260ms var(--ease-out), box-shadow 260ms ease, border-color 260ms ease;
   }
-  .news-cta svg { width: 13px; height: 13px; transition: transform 440ms var(--ease-out); }
+  .news-cta svg { transition: transform 440ms var(--ease-out); }
   .news-cta:hover { border-color: var(--saae-turquoise-lift); box-shadow: 0 16px 36px rgba(0, 139, 157, .42); transform: translate3d(0, -3px, 0); }
   .news-cta:hover svg { transform: translate3d(3px, -3px, 0); }
   .news-cta:focus-visible { outline: 2px solid var(--saae-turquoise-lift); outline-offset: 3px; box-shadow: 0 0 0 4px rgba(119, 224, 232, .24), 0 16px 36px rgba(0, 139, 157, .42); }
 
-  /* The lead story: the newest item, given the room the ring never had. */
+  /* Editorial lead: the photograph carries the headline on a dark fade. */
   .featured {
-    display: grid;
-    grid-template-columns: .92fr 1.08fr;
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    border: 1px solid rgba(184, 232, 240, .14);
-    border-radius: 22px;
-    background: var(--panel);
+    border: 1px solid rgba(94, 216, 230, .24);
+    border-radius: 26px;
+    background: rgba(8, 32, 40, .85);
     box-shadow: 0 18px 44px rgba(0, 0, 0, .5);
     transition: border-color 820ms ease, box-shadow 820ms ease;
   }
@@ -169,36 +199,49 @@
     border-color: rgba(184, 232, 240, .3);
     box-shadow: 0 30px 70px rgba(0, 0, 0, .62), 0 0 40px rgba(var(--tint, 4, 128, 144), .2);
   }
-  .featured-media { position: relative; min-height: 430px; overflow: hidden; }
+  .featured-media { position: relative; aspect-ratio: 2.2 / 1; overflow: hidden; }
   .featured-media img {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center 36%;
     transform: scale(1.04);
     transition: transform 1200ms var(--ease-out);
   }
   .featured:hover .featured-media img { transform: scale(1.09); }
-  .featured-veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4, 23, 28, .34) 0%, rgba(4, 23, 28, 0) 26%, rgba(4, 23, 28, 0) 74%, rgba(4, 23, 28, .4) 100%); }
+  .featured-veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4, 23, 28, .04) 35%, rgba(4, 23, 28, .28) 60%, rgba(4, 23, 28, .84)); }
   .featured-copy {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 14px;
-    padding: clamp(28px, 4vw, 56px);
+    align-items: center;
+    gap: 16px;
+    margin-top: -190px;
+    padding: 58px clamp(24px, 6vw, 72px) clamp(36px, 4vw, 52px);
+    background: linear-gradient(180deg, rgba(7, 31, 39, .36), rgba(7, 31, 39, .88) 105px, rgba(8, 32, 40, .84) 190px);
+    text-align: center;
   }
+  .featured .news-meta { justify-content: center; }
   .featured-headline {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
     margin: 0;
+    max-width: 36ch;
     color: var(--paper);
-    font-size: clamp(1.5rem, 2.4vw, 2.15rem);
+    font-size: clamp(1.4rem, 2.2vw, 2.15rem);
     font-weight: 900;
     letter-spacing: -.03em;
-    line-height: 1.16;
+    line-height: 1.35;
   }
-  .featured .news-excerpt { -webkit-line-clamp: 4; font-size: .95rem; }
+  .featured .news-cta, .story .news-cta { align-self: center; }
+  .featured .news-cta { margin-top: 12px; }
 
-  /* The rest of the record: the ring's cards, stood up in a row. */
+  /* Smaller stories separate the photograph from the reading panel. */
   .story-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -209,11 +252,12 @@
   }
   .story {
     position: relative;
-    display: block;
+    isolation: isolate;
+    display: flex;
     overflow: hidden;
-    border: 1px solid rgba(184, 232, 240, .14);
+    border: 1px solid rgba(94, 216, 230, .24);
     border-radius: 20px;
-    background: var(--panel);
+    background: rgba(8, 32, 40, .85);
     box-shadow: 0 18px 44px rgba(0, 0, 0, .5);
     transition: border-color 420ms ease, box-shadow 420ms ease, transform 620ms var(--ease-out);
   }
@@ -222,40 +266,74 @@
     box-shadow: 0 26px 56px rgba(0, 0, 0, .62), 0 0 34px rgba(var(--tint, 4, 128, 144), .18);
     transform: translate3d(0, -5px, 0);
   }
-  .story-media { position: relative; aspect-ratio: 4 / 5; overflow: hidden; }
+  .story article { display: flex; flex: 1; min-width: 0; }
+  .story-media { position: relative; display: flex; flex-direction: column; width: 100%; overflow: hidden; }
   .story-media img {
-    position: absolute;
-    inset: 0;
+    position: relative;
     width: 100%;
-    height: 100%;
+    height: clamp(220px, 18vw, 260px);
     object-fit: cover;
-    transform: scale(1.04);
+    object-position: center 36%;
+    transform: scale(1);
     transition: transform 1200ms var(--ease-out);
   }
-  .story:hover .story-media img { transform: scale(1.1); }
-  .story-veil {
-    position: absolute;
-    inset: 0;
-    z-index: 10;
-    background: linear-gradient(180deg, rgba(4, 23, 28, .34) 0%, rgba(4, 23, 28, .04) 18%, rgba(4, 23, 28, .74) 40%, rgba(4, 23, 28, .97) 66%);
-  }
+  .story:hover .story-media img { transform: scale(1.04); }
+  .story-veil { display: none; }
   .story-copy {
-    position: absolute;
-    inset: auto 0 0;
-    z-index: 20;
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
-    gap: 9px;
-    padding: clamp(17px, 1.7vw, 26px);
+    flex: 1;
+    gap: 13px;
+    padding: clamp(22px, 2vw, 30px);
+    background: linear-gradient(155deg, rgba(21, 54, 64, .86), rgba(10, 39, 48, .87));
   }
   .story-headline {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
     margin: 0;
     color: var(--paper);
     font-size: clamp(1.04rem, 1.42vw, 1.32rem);
     font-weight: 900;
     letter-spacing: -.028em;
-    line-height: 1.2;
+    line-height: 1.35;
   }
+  .story .news-cta { margin-top: auto; }
+
+  /* Contact-style paths and light pulses weave through the card surfaces. */
+  .news-card-circuit {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: .72;
+    mask-image: linear-gradient(90deg, #000 0%, transparent 34%, transparent 66%, #000 100%);
+  }
+  .news-card-circuit-traces, .news-card-circuit-pulses {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .news-card-circuit-traces { stroke: rgba(156, 210, 218, .34); stroke-width: 2; }
+  .news-card-circuit-nodes { fill: rgba(157, 211, 220, .5); }
+  .news-card-circuit-pulses {
+    stroke: #8ef5ff;
+    stroke-width: 3;
+    filter: drop-shadow(0 0 5px rgba(112, 232, 245, .8));
+  }
+  .news-card-circuit-pulses path {
+    stroke-dasharray: 9 91;
+    animation: news-circuit-flow 8s linear infinite;
+    animation-delay: var(--circuit-offset, 0s);
+  }
+  .news-card-circuit-pulses path:nth-child(2) { animation-duration: 10s; }
+  .news-card-circuit-pulses path:nth-child(3) { animation-duration: 9s; }
+  @keyframes news-circuit-flow { to { stroke-dashoffset: -100; } }
 
   .note {
     max-width: 72ch;
@@ -382,7 +460,7 @@
   }
 
   /* Quiet, one-way reveals: the same ease the landing page uses. */
-  .reveal { opacity: 0; transform: translate3d(0, 26px, 0); transition: opacity 700ms ease, transform 820ms var(--ease-out); }
+  .reveal { opacity: 0; transform: translate3d(0, 38px, 0); transition: opacity 750ms ease, transform 900ms var(--ease-out); }
   .reveal.is-in { opacity: 1; transform: none; }
 
   @media (max-width: 1020px) {
@@ -390,17 +468,22 @@
     .footer-main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 860px) {
-    .featured { grid-template-columns: 1fr; }
-    .featured-media { min-height: 0; aspect-ratio: 16 / 11; }
+    .featured-media { aspect-ratio: 4 / 3; }
   }
   @media (max-width: 640px) {
+    .featured-media { aspect-ratio: 5 / 4; }
+    .featured-copy { margin-top: -145px; padding-top: 42px; background: linear-gradient(180deg, rgba(7, 31, 39, .5), rgba(7, 31, 39, .94) 90px, rgba(8, 32, 40, .86) 145px); }
+    .featured-headline { max-width: 100%; }
+    .story-media img { height: clamp(230px, 56vw, 300px); }
     .story-grid { grid-template-columns: 1fr; }
     .footer-main { grid-template-columns: minmax(0, 1fr); }
+    .ambient span { width: 52%; opacity: .52; background-size: 240px 480px; }
+    .orb-olive { background-position-y: 72px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .ambient span { animation: none; }
     .reveal { opacity: 1; transform: none; transition: none; }
     .featured-media img, .story-media img { transition: none; }
+    .news-card-circuit-pulses path { animation: none; }
   }
   /* ---- teal footer with map card (shared design, matches aisyria.org) ---- */
   .site-footer { background: #04171c; color: #fff; }

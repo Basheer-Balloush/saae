@@ -1,9 +1,9 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, it, expect } from "vitest";
-import { radialNavHtml, withSiteChrome } from "@/components/cinematic/radial-nav";
+import { radialNavHtml, withSiteChrome } from "@/features/website/cinematic/radial-nav";
 
-const HTML_DIR = path.resolve(import.meta.dirname, "../../src/components/cinematic/html");
+const HTML_DIR = path.resolve(import.meta.dirname, "../../src/features/website/cinematic/html");
 const PUBLIC_JS_DIR = path.resolve(import.meta.dirname, "../../public/cinematic/js");
 const pages = readdirSync(HTML_DIR).filter((f) => f.endsWith(".html"));
 const page = (name: string) => readFileSync(path.join(HTML_DIR, name), "utf8");
@@ -84,13 +84,14 @@ describe("page actions", () => {
     expect(count(home, 'href="/learning-management-system"')).toBeGreaterThanOrEqual(2);
   });
 
-  it("wires the initiative buttons to the real forms, not the placeholder pay dialog", () => {
+  it("wires the initiative buttons to the real forms, not the placeholder pay dialog or the old initiative pages", () => {
     const html = page("initiative.html");
-    expect(count(html, 'data-initiative-action="pay"')).toBe(2);
+    expect(count(html, 'data-initiative-action="pay"')).toBe(1);
     expect(count(html, 'data-initiative-action="waitlist"')).toBe(1);
     expect(count(html, 'data-initiative-action="donate"')).toBe(1);
     expect(html).not.toContain("data-pay-open");
     expect(html).not.toContain('id="pay-modal"');
-    expect(html).toContain('href="/one-million-initiative-donors"');
+    expect(html).toContain('href="/initiative/sponsors"');
+    expect(html).not.toContain("/one-million-initiative");
   });
 });
