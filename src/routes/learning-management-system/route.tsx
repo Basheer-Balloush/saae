@@ -8,6 +8,13 @@ import { LmsNavbar } from "@/features/lms/LmsNavbar";
 import { Footer } from "@/components/layout/Footer";
 import { LmsSkinShell } from "@/features/lms/skin/LmsSkinShell";
 import { isConsoleLmsPath, isSkinnedLmsPath, LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
+import { LocationPrompt } from "@/features/user-location/LocationPrompt";
+
+/* Pages where a signed-in user may be asked where they live: browsing pages,
+   never sign-in pages, lessons, quizzes, certificates or the profile (which
+   has its own location card). */
+const LOCATION_PROMPT_PATHS =
+  /^\/learning-management-system(\/(catalog|student|student\/requests|courses\/[^/]+|internships(\/[^/]+)?))?\/?$/;
 
 export const Route = createFileRoute("/learning-management-system")({
   head: () => ({
@@ -56,6 +63,9 @@ function LmsLayout() {
     return (
       <LmsSkinShell role={role} isAuthed={!!user} isGuest={isGuest} onSignOut={handleSignOut}>
         <Outlet />
+        {user && !isGuest && LOCATION_PROMPT_PATHS.test(pathname) && (
+          <LocationPrompt userId={user.id} lang={lang} />
+        )}
       </LmsSkinShell>
     );
   }
