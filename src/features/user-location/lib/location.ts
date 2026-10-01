@@ -2,7 +2,7 @@ import { z } from "zod";
 import { CITY_MAX, GOVERNORATE_KEYS, isValidCity, tidyCity } from "@/lib/syria-governorates";
 
 /* Where a user lives now. The database checks the same rules
-   (migration 20261001120000_user_locations.sql). */
+   (migration 20261001121000_user_locations.sql). */
 export const locationSchema = z.object({
   governorate: z.enum(GOVERNORATE_KEYS),
   city: z

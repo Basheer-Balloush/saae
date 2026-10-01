@@ -1,5 +1,5 @@
 -- 1. The location is now required at sign-in, with no "Later", so the
---    prompt counter from 20261001120000 goes (it never held a row).
+--    prompt counter from 20261001121000 goes (it never held a row).
 -- 2. The admin totals become one anonymous row per person (governorate,
 --    city, role, course categories, date; no name or email), so the admin
 --    page can filter by any mix of governorate, interest, role and date.

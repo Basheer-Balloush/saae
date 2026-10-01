@@ -1,5 +1,5 @@
 /* The 14 governorates plus "outside Syria", in display order. The same keys
-   live in the syria_governorates table (migration 20261001120000) and in the
+   live in the syria_governorates table (migration 20261001121000) and in the
    /feedback survey, so answers from both count together. pcode is the OCHA
    admin-1 code, for joining a map later. */
 
