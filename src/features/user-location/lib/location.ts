@@ -62,12 +62,21 @@ export type GovernorateStats = {
   name_ar: string;
   name_en: string;
   people: number;
+  /** People here with the instructor role. */
+  instructors: number;
+  /** People here enrolled in, or asking to join, at least one course. */
+  with_courses: number;
+  /** Category id → people here interested in it (enrolled or asked). */
+  interests: Record<string, number>;
   cities: { city: string; people: number }[];
 };
+
+export type CourseCategory = { id: string; name_ar: string; name_en: string };
 
 export type LocationStats = {
   accounts: number;
   answered: number;
+  categories: CourseCategory[];
   governorates: GovernorateStats[];
 };
 
