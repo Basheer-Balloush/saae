@@ -60,7 +60,10 @@ export async function uploadToSupabaseStorage(args: UploadArgs): Promise<UploadR
     xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     xhr.setRequestHeader("apikey", SUPABASE_KEY);
     xhr.setRequestHeader("x-upsert", upsert ? "true" : "false");
-    xhr.setRequestHeader("cache-control", "max-age=3600");
+    // Every caller builds a fresh name (a UUID or a timestamp), so a stored file
+    // never changes under its URL and browsers can keep it for a year instead of
+    // downloading it again every hour — each re-download is egress.
+    xhr.setRequestHeader("cache-control", "max-age=31536000");
     if (contentType || (file as File).type) {
       xhr.setRequestHeader("content-type", contentType || (file as File).type);
     }
