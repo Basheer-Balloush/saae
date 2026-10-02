@@ -21,11 +21,17 @@ export function useLmsAuth() {
     // new sign-in flipped `loading` on, and gated layouts unmounted their pages,
     // wiping whatever an admin was typing.
     let resolvedUserId: string | null = null;
-    const resolve = async (session: Session | null) => {
+    // Account currently shown to pages, whether or not its role has loaded yet.
+    let shownUserId: string | null = null;
+    // `quiet`: the same account is already on screen and only its role is being
+    // fetched again, so pages stay mounted instead of flashing a loading state.
+    const resolve = async (session: Session | null, quiet = false) => {
       const current = ++revision;
       if (disposed) return;
       resolvedUserId = null;
-      setState({ session, user: session?.user ?? null, role: null, loading: !!session });
+      shownUserId = session?.user.id ?? null;
+      if (!quiet)
+        setState({ session, user: session?.user ?? null, role: null, loading: !!session });
       if (!session) return;
       try {
         const { data, error } = await supabase
@@ -34,20 +40,25 @@ export function useLmsAuth() {
           .eq("user_id", session.user.id);
         if (!disposed && current === revision) {
           resolvedUserId = error ? null : session.user.id;
-          setState({
+          setState((prev) => ({
             session,
-            user: session.user,
-            role: error ? null : resolveLmsRole((data ?? []).map((r) => r.role)),
+            user: quiet ? prev.user : session.user,
+            role: error ? prev.role : resolveLmsRole((data ?? []).map((r) => r.role)),
             loading: false,
-          });
+          }));
         }
       } catch {
         if (!disposed && current === revision)
-          setState({ session, user: session.user, role: null, loading: false });
+          setState((prev) => ({
+            session,
+            user: quiet ? prev.user : session.user,
+            role: prev.role,
+            loading: false,
+          }));
       }
     };
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && resolvedUserId === session.user.id) {
+      if (session && shownUserId === session.user.id) {
         // Same account: take the fresh tokens, but keep the `user` object (pages key
         // their data loads on it) unless the account details actually changed.
         setState((prev) => ({
@@ -55,6 +66,15 @@ export function useLmsAuth() {
           session,
           user: event === "USER_UPDATED" ? session.user : prev.user,
         }));
+        // An earlier role lookup failed (say, a dropped connection): try again
+        // without unmounting anything. Treating this as a new sign-in used to swap
+        // the student's quiz for a loading screen and throw their answers away.
+        if (resolvedUserId !== session.user.id) {
+          const ticket = ++revision;
+          setTimeout(() => {
+            if (!disposed && ticket === revision) void resolve(session, true);
+          }, 0);
+        }
         return;
       }
       // Supabase auth callbacks must finish before making further authenticated queries.

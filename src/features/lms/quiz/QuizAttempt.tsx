@@ -10,6 +10,7 @@ import {
   TimerReset,
 } from "lucide-react";
 import { getUnansweredQuestions, isQuestionAnswered } from "@/features/lms/lib/quiz-validation";
+import type { DraftSaveStatus } from "@/features/lms/lib/quiz-draft";
 
 export type QuizQuestion = {
   question_key: string;
@@ -31,7 +32,26 @@ type Props = {
   cooldownMinutes: number;
   canAttempt: boolean;
   submitting: boolean;
+  /** Where the answers picked so far are kept (see lib/quiz-draft). */
+  saveStatus?: DraftSaveStatus;
   ar: boolean;
+};
+
+const SAVE_NOTE: Record<DraftSaveStatus, { ar: string; en: string }> = {
+  idle: {
+    ar: "تُحفظ إجاباتك تلقائياً أثناء الحل، ولا تضيع حتى ترسل الاختبار.",
+    en: "Your answers are saved as you go and kept until you submit.",
+  },
+  saving: { ar: "جارٍ حفظ إجاباتك…", en: "Saving your answers…" },
+  saved: { ar: "إجاباتك محفوظة.", en: "Your answers are saved." },
+  retrying: {
+    ar: "إجاباتك محفوظة على هذا الجهاز، وسنحفظها على الخادم عند عودة الاتصال.",
+    en: "Your answers are saved on this device and will be saved online when the connection is back.",
+  },
+  device: {
+    ar: "إجاباتك محفوظة على هذا الجهاز حتى ترسل الاختبار.",
+    en: "Your answers are saved on this device until you submit.",
+  },
 };
 
 export function QuizAttempt({
@@ -48,6 +68,7 @@ export function QuizAttempt({
   cooldownMinutes,
   canAttempt,
   submitting,
+  saveStatus = "idle",
   ar,
 }: Props) {
   const [showMissing, setShowMissing] = useState(false);
@@ -141,6 +162,9 @@ export function QuizAttempt({
             {ar
               ? `أجبت عن ${answered} من ${questions.length} سؤالاً`
               : `${answered} of ${questions.length} questions answered`}
+          </p>
+          <p className="quiz-progress-copy quiz-draft-note" role="status">
+            {SAVE_NOTE[saveStatus][ar ? "ar" : "en"]}
           </p>
           <nav
             className="quiz-question-nav"
