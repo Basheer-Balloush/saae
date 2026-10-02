@@ -7,39 +7,37 @@
  * written back to the SAME path, so no database row or page link has to change;
  * only the bytes and the content type change.
  *
- *   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/compress-storage-images.mjs
- *   ... node scripts/compress-storage-images.mjs --apply        # actually write
- *   ... node scripts/compress-storage-images.mjs --min-kb 500   # only the big ones
+ *   SUPABASE_SERVICE_ROLE_KEY=... node --env-file=.env scripts/compress-storage-images.mjs
+ *   ... node --env-file=.env scripts/compress-storage-images.mjs --apply        # actually write
+ *   ... node --env-file=.env scripts/compress-storage-images.mjs --min-kb 500   # only the big ones
  *
- * Without --apply it only reports what it would do. Needs cwebp:  brew install webp
+ * Without --apply it only reports what it would do. The project URL comes from
+ * SUPABASE_URL, or VITE_SUPABASE_URL in .env.
  */
-import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import sharp from "sharp";
 
-const URL_BASE = process.env.SUPABASE_URL?.replace(/\/+$/, "");
+const URL_BASE = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL)?.replace(/\/+$/, "");
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!URL_BASE || !KEY) {
   console.error(
-    "Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (Cloudflare → Settings → Runtime variables).",
+    "Set SUPABASE_SERVICE_ROLE_KEY (Supabase → Project Settings → API keys), and SUPABASE_URL or VITE_SUPABASE_URL.",
   );
   process.exit(1);
 }
 const args = process.argv.slice(2);
 const APPLY = args.includes("--apply");
-const MIN_BYTES = Number(args[args.indexOf("--min-kb") + 1] || 200) * 1024;
+// Read the value only when the flag is there: indexOf(-1) + 1 would pick up the
+// first argument ("--apply"), which made every size comparison NaN and false.
+const MIN_BYTES =
+  (args.includes("--min-kb") ? Number(args[args.indexOf("--min-kb") + 1]) : 200) * 1024;
+if (!(MIN_BYTES > 0)) {
+  console.error("--min-kb needs a positive number, e.g. --min-kb 500");
+  process.exit(1);
+}
 const BUCKETS = args.includes("--bucket")
   ? [args[args.indexOf("--bucket") + 1]]
   : ["news-images", "lms-media", "internship-covers"];
 const COMPRESSIBLE = /\.(png|jpe?g)$/i;
-
-try {
-  execFileSync("cwebp", ["-version"], { stdio: "ignore" });
-} catch {
-  console.error("cwebp is not installed. Run: brew install webp");
-  process.exit(1);
-}
 
 const api = (path, init = {}) =>
   fetch(`${URL_BASE}/storage/v1/${path}`, {
@@ -76,68 +74,71 @@ async function listAll(bucket, prefix = "") {
 }
 
 const kb = (n) => `${Math.round(n / 1024)} KB`;
-const work = mkdtempSync(join(tmpdir(), "saae-img-"));
 let before = 0;
 let after = 0;
 let changed = 0;
 
-try {
-  for (const bucket of BUCKETS) {
-    let files;
-    try {
-      files = await listAll(bucket);
-    } catch (error) {
-      console.error(`skipping ${bucket}: ${error.message}`);
+for (const bucket of BUCKETS) {
+  let files;
+  try {
+    files = await listAll(bucket);
+  } catch (error) {
+    console.error(`skipping ${bucket}: ${error.message}`);
+    continue;
+  }
+  // A rewritten file keeps its .png/.jpg name but is stored as image/webp; skipping
+  // those makes a second run harmless instead of re-encoding (and degrading) them.
+  const targets = files.filter(
+    (f) => COMPRESSIBLE.test(f.path) && f.type !== "image/webp" && f.size > MIN_BYTES,
+  );
+  console.log(`\n${bucket}: ${targets.length} of ${files.length} files above ${kb(MIN_BYTES)}`);
+
+  for (const file of targets) {
+    const res = await api(
+      `object/${bucket}/${file.path.split("/").map(encodeURIComponent).join("/")}`,
+    );
+    if (!res.ok) {
+      console.error(`  ! download ${file.path}: ${res.status}`);
       continue;
     }
-    const targets = files.filter((f) => COMPRESSIBLE.test(f.path) && f.size > MIN_BYTES);
-    console.log(`\n${bucket}: ${targets.length} of ${files.length} files above ${kb(MIN_BYTES)}`);
-
-    for (const file of targets) {
-      const res = await api(
-        `object/${bucket}/${file.path.split("/").map(encodeURIComponent).join("/")}`,
-      );
-      if (!res.ok) {
-        console.error(`  ! download ${file.path}: ${res.status}`);
-        continue;
-      }
-      const source = join(work, "in");
-      const target = join(work, "out.webp");
-      writeFileSync(source, Buffer.from(await res.arrayBuffer()));
-      try {
-        execFileSync("cwebp", ["-quiet", "-q", "82", "-resize", "1600", "0", source, "-o", target]);
-      } catch {
-        console.error(`  ! could not encode ${file.path}`);
-        continue;
-      }
-      const bytes = readFileSync(target);
-      // Re-encoding a small or already efficient image can make it bigger.
-      if (bytes.length >= file.size) {
-        console.log(`  = ${file.path} (${kb(file.size)}) already efficient`);
-        continue;
-      }
-      before += file.size;
-      after += bytes.length;
-      changed += 1;
-      console.log(`  ${APPLY ? "→" : "·"} ${file.path}  ${kb(file.size)} → ${kb(bytes.length)}`);
-      if (!APPLY) continue;
-      const put = await api(
-        `object/${bucket}/${file.path.split("/").map(encodeURIComponent).join("/")}`,
-        {
-          method: "PUT",
-          headers: {
-            "content-type": "image/webp",
-            "cache-control": "max-age=31536000",
-            "x-upsert": "true",
-          },
-          body: bytes,
-        },
-      );
-      if (!put.ok) console.error(`  ! upload ${file.path}: ${put.status} ${await put.text()}`);
+    let bytes;
+    try {
+      // Same limits as uploads (src/lib/image-compress.ts): longest edge at most
+      // 1600px, never enlarged, quality 82. rotate() applies the EXIF orientation
+      // before it is dropped, so phone photos stay upright.
+      bytes = await sharp(Buffer.from(await res.arrayBuffer()))
+        .rotate()
+        .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toBuffer();
+    } catch {
+      console.error(`  ! could not encode ${file.path}`);
+      continue;
     }
+    // Re-encoding a small or already efficient image can make it bigger.
+    if (bytes.length >= file.size) {
+      console.log(`  = ${file.path} (${kb(file.size)}) already efficient`);
+      continue;
+    }
+    before += file.size;
+    after += bytes.length;
+    changed += 1;
+    console.log(`  ${APPLY ? "→" : "·"} ${file.path}  ${kb(file.size)} → ${kb(bytes.length)}`);
+    if (!APPLY) continue;
+    const put = await api(
+      `object/${bucket}/${file.path.split("/").map(encodeURIComponent).join("/")}`,
+      {
+        method: "PUT",
+        headers: {
+          "content-type": "image/webp",
+          "cache-control": "max-age=31536000",
+          "x-upsert": "true",
+        },
+        body: bytes,
+      },
+    );
+    if (!put.ok) console.error(`  ! upload ${file.path}: ${put.status} ${await put.text()}`);
   }
-} finally {
-  rmSync(work, { recursive: true, force: true });
 }
 
 console.log(

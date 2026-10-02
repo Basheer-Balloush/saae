@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage } from "@/lib/image-compress";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useRecordDraft } from "@/hooks/useFormDraft";
 import { formDraftKey } from "@/lib/form-draft";
@@ -968,11 +969,18 @@ function Cover({
       return void toast.error(t("JPEG أو PNG أو WebP فقط", "JPEG, PNG or WebP only"));
     setBusy(true);
     try {
-      const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+      // Same shrinking as every other upload (uploadToSupabaseStorage): this one
+      // talks to Storage directly, so it has to ask for it itself.
+      const image = await compressImage(file);
+      const ext = image.type === "image/png" ? "png" : image.type === "image/webp" ? "webp" : "jpg";
       const newPath = `opps/${id}/${Date.now()}.${ext}`;
       const { error } = await supabase.storage
         .from("internship-covers")
-        .upload(newPath, file, { contentType: file.type, upsert: true });
+        .upload(newPath, image, {
+          contentType: image.type,
+          upsert: true,
+          cacheControl: "31536000",
+        });
       if (error) throw error;
       const { error: e2 } = await supabase
         .from("internship_opportunities")
