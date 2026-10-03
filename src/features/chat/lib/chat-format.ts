@@ -43,12 +43,7 @@ function splitLinks(segment: Segment): Segment[] {
     if (!href) continue;
     if (match.index > last)
       out.push({ text: segment.text.slice(last, match.index), bold: segment.bold });
-    const shortCourseLabel = href.includes("/learning-management-system/courses/")
-      ? /[\u0600-\u06FF]/.test(segment.text)
-        ? "تفاصيل الدورة"
-        : "Course details"
-      : href;
-    out.push({ text: label ?? shortCourseLabel, bold: segment.bold, href });
+    out.push({ text: label ?? href, bold: segment.bold, href });
     last = end;
     LINK.lastIndex = end;
   }
