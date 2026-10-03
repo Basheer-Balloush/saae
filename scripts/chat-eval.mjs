@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 /* Asks Abu Al-Joud real visitor questions and checks each answer.
    Usage: node scripts/chat-eval.mjs [base-url]   (default https://www.aisyria.org)
+   EVAL_PAUSE_MS sets the pause between questions (default 6000).
    Every question runs in a fresh chat session. Each case lists patterns the
    answer must contain and patterns it must not; a case passes when all hold.
    Answers that send the visitor to the email or phone are counted apart: that
    should be the last resort, so the count should stay near zero. */
 
 const BASE = (process.argv[2] || "https://www.aisyria.org").replace(/\/$/, "");
+// Each question can take several model calls (one per tool step); pacing keeps
+// the run inside the provider's per-minute limit.
+const PAUSE_MS = Number(process.env.EVAL_PAUSE_MS ?? 6000);
 const CONTACT = /info@aisyria\.org|930 763 547/;
 
 const CASES = [
@@ -23,7 +27,25 @@ const CASES = [
     must: [/انتهت|منتهية/],
     mustNot: [/التسجيل مفتوح/],
   },
-  { q: "بدي شي دورة مجانية", must: [/مجاني/] },
+  { q: "بدي شي دورة مجانية", must: [/مجاني/], mustNot: [/10,000|3,500|4,950/] },
+  // "Available" means joinable today: not started, deadline not passed, not ended.
+  {
+    q: "شو الدورات المتاحة حالياً؟",
+    must: [/التوليدي 09/],
+    mustNot: [/تسويق 360|تطوير المشروع البحثي|بناء الهوية التدريسية|المنهجية الحديثة/],
+  },
+  {
+    q: "بدي سجل بدورة تسويق 360",
+    must: [/انتهى موعد التسجيل|بلّشت|بدأت|مغلق|ما عاد/],
+    mustNot: [/التسجيل (مفتوح|متاح)/],
+  },
+  // A repeated question is answered again, not refused.
+  {
+    turns: ["عرّفني على الجمعية ورؤيتها"],
+    q: "عرّفني على الجمعية ورؤيتها",
+    must: [/الذكاء الاصطناعي/],
+    mustNot: [/سبق وحكينا|سبق أن|كما ذكرت|ذكرت سابقاً/],
+  },
   // Internships: the published MultiOmics opportunity was denied to visitors.
   {
     q: "كان في فرصة تدريب بالمعلوماتية الحيوية مع MultiOmics، كيف بقدم؟",
@@ -52,8 +74,7 @@ const CASES = [
   { q: "Is UNICEF a partner of SAAE?", must: [/not/i] },
 ];
 
-async function ask(question) {
-  const sessionId = `eval-${Math.random().toString(36).slice(2, 10)}`;
+async function ask(question, sessionId = `eval-${Math.random().toString(36).slice(2, 10)}`) {
   const res = await fetch(`${BASE}/api/chat`, {
     method: "POST",
     headers: { "content-type": "application/json", origin: "https://www.aisyria.org" },
@@ -71,6 +92,7 @@ async function ask(question) {
     try {
       const event = JSON.parse(line.slice(6));
       if (event.type === "text-delta") text += event.delta;
+      if (event.type === "error") return { text, error: `stream error: ${event.errorText ?? "?"}` };
     } catch {
       // keep-alive or [DONE]
     }
@@ -81,7 +103,13 @@ async function ask(question) {
 let passed = 0;
 let contact = 0;
 for (const c of CASES) {
-  const { text, error } = await ask(c.q);
+  // A case with turns replays them in one session; only the last reply is checked.
+  const sessionId = `eval-${Math.random().toString(36).slice(2, 10)}`;
+  for (const turn of c.turns ?? []) {
+    await ask(turn, sessionId);
+    await new Promise((r) => setTimeout(r, PAUSE_MS));
+  }
+  const { text, error } = await ask(c.q, sessionId);
   const failures = [
     ...(error ? [error] : []),
     ...(c.must ?? []).filter((re) => !re.test(text)).map((re) => `missing ${re}`),
@@ -90,6 +118,7 @@ for (const c of CASES) {
   if (CONTACT.test(text)) contact += 1;
   if (failures.length === 0) passed += 1;
   console.log(`${failures.length ? "✗" : "✓"} ${c.q}`);
+  await new Promise((r) => setTimeout(r, PAUSE_MS));
   if (failures.length) console.log(`    ${failures.join("; ")}\n    → ${text.replace(/\s+/g, " ").slice(0, 300)}`);
 }
 console.log(`\n${passed}/${CASES.length} passed · ${contact} answers sent the visitor to email/phone`);

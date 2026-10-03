@@ -17,41 +17,81 @@ const clip = (text: string | null, max: number) =>
 
 // ---------- Courses ----------
 
+/** The registration fields the catalogue listing does not carry. */
+export type CourseState = {
+  id: string;
+  start_date: string | null;
+  enrollment_open: boolean | null;
+  enrollment_deadline: string | null;
+  max_students: number | null;
+  students_count: number | null;
+};
+
 export type CourseListItem = {
   ref: string;
   title: string;
   url: string;
   level: string | null;
   price: string;
+  is_free: boolean;
   delivery_mode: string | null;
-  ended: boolean;
+  start_date: string | null;
+  end_date: string | null;
+  status: Registration;
+  seats_left: number | null;
 };
 
-export function toCourseListItem(row: CatalogRow, lang: Lang): CourseListItem | null {
+export function toCourseListItem(
+  row: CatalogRow,
+  state: CourseState | undefined,
+  lang: Lang,
+  now = new Date(),
+): CourseListItem | null {
   const title = pick(lang, row.title_ar, row.title_en);
   if (!title) return null;
+  const course = {
+    end_date: row.end_date ?? null,
+    delivery_mode: row.delivery_mode,
+    start_date: state?.start_date ?? null,
+    enrollment_open: state?.enrollment_open ?? null,
+    enrollment_deadline: state?.enrollment_deadline ?? null,
+    max_students: state?.max_students ?? null,
+    students_count: state?.students_count ?? null,
+  };
   return {
     ref: row.slug || row.id,
     title,
     url: courseUrl(row),
     level: row.level,
     price: priceLabel(row, lang),
+    is_free: !!row.is_free,
     delivery_mode: row.delivery_mode,
-    ended: isCourseEnded(row as { end_date?: string | null; delivery_mode?: string | null }),
+    start_date: day(course.start_date),
+    end_date: day(course.end_date),
+    // Without its registration fields a course cannot be called joinable.
+    status: state ? registrationStatus(course, now) : "closed",
+    seats_left:
+      course.max_students != null
+        ? Math.max(course.max_students - (course.students_count ?? 0), 0)
+        : null,
   };
 }
 
-/** Courses a visitor can still join come first; ended ones only when asked for. */
+/** Joinable courses first, soonest start first; the rest after, in catalogue order. */
 export function courseList(
   rows: CatalogRow[],
+  states: CourseState[],
   lang: Lang,
-  includeEnded: boolean,
+  now = new Date(),
 ): CourseListItem[] {
+  const byId = new Map(states.map((st) => [st.id, st]));
   const items = rows
-    .map((row) => toCourseListItem(row, lang))
+    .map((row) => toCourseListItem(row, byId.get(row.id), lang, now))
     .filter((c): c is CourseListItem => !!c);
-  const open = items.filter((c) => !c.ended);
-  return includeEnded ? [...open, ...items.filter((c) => c.ended)] : open;
+  const open = items
+    .filter((c) => c.status === "open")
+    .sort((a, b) => (a.start_date ?? "9999").localeCompare(b.start_date ?? "9999"));
+  return [...open, ...items.filter((c) => c.status !== "open")];
 }
 
 export type PublicCoursePayload = {
@@ -96,17 +136,32 @@ export type PublicCoursePayload = {
   }> | null;
 };
 
-export type Registration = "open" | "closed" | "deadline_passed" | "full" | "ended";
+export type Registration = "open" | "in_progress" | "closed" | "deadline_passed" | "full" | "ended";
 
-/** The course page's own order: ended, closed, deadline passed, full, open. */
+/* The course page's own order (ended, closed, deadline passed, full), then a
+   course held in person that has already started: it is not offered to new
+   visitors even while its form stays open. Online courses are self-paced. */
 export function registrationStatus(
-  c: PublicCoursePayload["course"],
+  c: Pick<
+    PublicCoursePayload["course"],
+    | "end_date"
+    | "delivery_mode"
+    | "start_date"
+    | "enrollment_open"
+    | "enrollment_deadline"
+    | "max_students"
+    | "students_count"
+  >,
   now = new Date(),
 ): Registration {
   if (isCourseEnded(c)) return "ended";
   if (!c.enrollment_open) return "closed";
   if (c.enrollment_deadline && new Date(c.enrollment_deadline) < now) return "deadline_passed";
   if (c.max_students != null && (c.students_count ?? 0) >= c.max_students) return "full";
+  const today = now.toISOString().slice(0, 10);
+  const started = day(c.start_date);
+  if ((c.delivery_mode ?? "").toLowerCase() !== "online" && started && started < today)
+    return "in_progress";
   return "open";
 }
 

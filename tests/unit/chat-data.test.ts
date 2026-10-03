@@ -8,6 +8,7 @@ import {
   toInitiativeStatus,
   toInternship,
   toNewsList,
+  type CourseState,
   type InternshipRow,
   type PublicCoursePayload,
 } from "@/features/chat/lib/chat-data";
@@ -28,19 +29,70 @@ const row = (over: Partial<CatalogRow>): CatalogRow => ({
 });
 
 describe("courseList", () => {
+  const now = new Date("2026-10-03T12:00:00Z");
+  const state = (id: string, over: Partial<CourseState> = {}): CourseState => ({
+    id,
+    start_date: null,
+    enrollment_open: true,
+    enrollment_deadline: null,
+    max_students: null,
+    students_count: 0,
+    ...over,
+  });
+  // The courses the bot listed as "available" on 2026-10-03.
   const rows = [
-    row({ slug: "old", title_ar: "قديمة", end_date: "2020-01-01" }),
-    row({ slug: "new", title_ar: "جديدة", end_date: "2999-01-01" }),
-    row({ slug: "online", title_ar: "أونلاين", delivery_mode: "online", end_date: "2020-01-01" }),
+    row({ id: "marketing", slug: "marketing", end_date: "2026-11-11" }),
+    row({ id: "research", slug: "research", end_date: "2026-10-15" }),
+    row({ id: "teaching", slug: "teaching" }),
+    row({ id: "media", slug: "media", end_date: "2026-10-17" }),
+    row({ id: "genai", slug: "genai", end_date: "2026-10-08" }),
+    row({ id: "teams", slug: "teams", end_date: "2026-10-20" }),
+    row({ id: "architects", slug: "architects", delivery_mode: "online", end_date: "2026-12-30" }),
+    row({ id: "software", slug: "software", end_date: "2026-07-16" }),
   ];
+  const states = [
+    state("marketing", {
+      start_date: "2026-08-29",
+      enrollment_deadline: "2026-09-05",
+      max_students: 50,
+      students_count: 26,
+    }),
+    state("research", { start_date: "2026-08-15" }),
+    state("teaching", { enrollment_deadline: "2026-06-15", max_students: 20, students_count: 6 }),
+    state("media", { start_date: "2026-10-05" }),
+    state("genai", { start_date: "2026-10-04" }),
+    state("teams", { start_date: "2026-10-04", max_students: 25, students_count: 22 }),
+    state("architects", { start_date: "2026-09-27" }),
+    state("software", { start_date: "2026-07-12" }),
+  ];
+  const list = courseList(rows, states, "ar", now);
+  const statusOf = (ref: string) => list.find((c) => c.ref === ref)?.status;
 
-  it("hides ended courses unless asked, and online courses never end", () => {
-    expect(courseList(rows, "ar", false).map((c) => c.ref)).toEqual(["new", "online"]);
-    expect(courseList(rows, "ar", true).map((c) => c.ref)).toEqual(["new", "online", "old"]);
+  it("calls a course joinable only when a visitor can apply today", () => {
+    expect(statusOf("marketing")).toBe("deadline_passed");
+    expect(statusOf("research")).toBe("in_progress");
+    expect(statusOf("teaching")).toBe("deadline_passed");
+    expect(statusOf("software")).toBe("ended");
+    expect(statusOf("architects")).toBe("open"); // online and self-paced
+    expect(list.filter((c) => c.status === "open").map((c) => c.ref)).toEqual([
+      "architects",
+      "genai",
+      "teams",
+      "media",
+    ]);
+  });
+
+  it("reports the places left and the start date", () => {
+    const teams = list.find((c) => c.ref === "teams");
+    expect(teams).toMatchObject({ seats_left: 3, start_date: "2026-10-04" });
+  });
+
+  it("never calls a course joinable without its registration fields", () => {
+    expect(courseList([row({})], [], "ar", now)[0].status).toBe("closed");
   });
 
   it("quotes the sale price in Syrian pounds and gives the ref and link", () => {
-    const [c] = courseList([row({})], "ar", false);
+    const [c] = courseList([row({})], [state("id-1")], "ar", now);
     expect(c.price).toBe("ل.س 500");
     expect(c.ref).toBe("course-1");
     expect(c.url).toBe("https://www.aisyria.org/learning-management-system/courses/course-1");
@@ -83,6 +135,10 @@ describe("registrationStatus", () => {
       "deadline_passed",
     );
     expect(registrationStatus(course({ max_students: 25 }), now)).toBe("full");
+    expect(registrationStatus(course({ start_date: "2026-09-01" }), now)).toBe("in_progress");
+    expect(
+      registrationStatus(course({ start_date: "2026-09-01", delivery_mode: "online" }), now),
+    ).toBe("open");
     expect(registrationStatus(course({}), now)).toBe("open");
   });
 });
