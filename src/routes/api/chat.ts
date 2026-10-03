@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createChatModelForRequest } from "@/features/chat/lib/ai-gateway.server";
 import { parseChoices } from "@/features/chat/lib/chat-choices";
 import { needsKnowledgeSearch } from "@/features/chat/lib/chat-routing";
+import { cleanPartnerNames, partnersContext } from "@/features/chat/lib/chat-partners";
 import {
   noCourseFallback,
   providerBusyMessage,
@@ -82,50 +83,17 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 
 # === مرجع المعرفة الوحيد (وثيقة الجمعية) ===
 
-# الهوية والاختصاص
-الجمعية السورية للذكاء الاصطناعي وريادة الأعمال (SAAE) منظمة غير ربحية مرخّصة في سوريا، مقرّها الرئيسي في دمشق قرب وزارة التعليم العالي. تعمل على ثلاثة محاور:
-- التعليم والتدريب: مسارات من Python حتى تعلُّم الآلة والذكاء الاصطناعي التوليدي.
-- دعم ريادة الأعمال: استشارات وتشبيك مع مستثمرين لتحويل الأفكار إلى Startups.
-- التحول الرقمي: حلول أتمتة وخدمات ذكية للقطاعَين العام والخاص.
+# الهوية
+الجمعية السورية للذكاء الاصطناعي وريادة الأعمال (SAAE) جمعية غير ربحية في سوريا، مقرّها دمشق، تقدّم نفسها كأول جهة سورية رسمية مختصّة بالذكاء الاصطناعي. هدفها أن تصبح معرفة الذكاء الاصطناعي مهارة عملية يستخدمها الناس في عملهم ودراستهم. تعمل على ثلاثة محاور:
+- التعلّم: برامج ودورات عبر منصة التعلّم للطلاب والمهنيين والمعلّمين.
+- البحث: مختصّون وباحثون من تخصصات مختلفة يختبرون الأفكار ويبنون المعرفة.
+- البناء: ريادة الأعمال والشراكات مع المؤسسات لتحويل العمل الواعد إلى مشاريع وخدمات.
+للجمعية ثمانية مجتمعات تخصصية: البيانات، العمراني الذكي، الرعاية الصحية، البحث الذكي، البرمجيات، الاقتصاد الذكي، المدربين، الإعلام. ولها مبادرة وطنية اسمها «مليون مستخدم ذكاء اصطناعي سوري».
 
-# الانتشار والنموذج
-- نموذج هجين: منصة LMS للتعلّم الذاتي + تدريب حضوري في مراكز متخصّصة.
-- مجتمعات متخصّصة: «المرأة في الذكاء الاصطناعي»، «الذكاء الاصطناعي الآمن للطفل»، مجتمعات البيانات/البحث/الطب/العمارة/ريادة الأعمال.
-- مؤتمر سنوي في أيار يجمع الطلاب برواد الأعمال والمستثمرين.
-
-# الشراكات الرئيسية
-- نقابة المهندسين السوريين (اتفاقية 23 شباط 2026): اعتماد مهني وتدريب وتطوير مجلة المهندسين كمجلة علمية محكّمة.
-- الجمعية العلمية السورية للمعلوماتية (SCS): شريك في مؤتمر Sync Spring 2026 والأولمبياد العالمي للذكاء الاصطناعي.
-- منظمة SYNC: تنظيم مشترك للمؤتمرات وربط الكفاءات بفرص عمل.
-- شركاء داعمون: Devsta، Sarda Tech.
-- اليونيسف (UNICEF): معايير حماية الأطفال في برامج «AI الآمن للطفل».
-- المنظمة العربية لتكنولوجيات الاتصال: توحيد معايير التدريب.
-
-# البرامج والمسارات (للأفراد)
-- مسار التأسيس: Python والرياضيات البرمجية من الصفر.
-- مسار الذكاء الاصطناعي التوليدي: GPT وLLMs.
-- ورشات إنترنت الأشياء (IoT).
-- دبلوم ريادة الأعمال التقنية: نماذج العمل وتطوير المشاريع.
-- معسكرات AI Kids للأطفال.
-- جلسات Mentorship تفاعلية لمختلف المحافظات.
-
-# ما نقدّمه للشركات
-- شراكات استراتيجية ودعم تقني.
-- تدريب موظفين على الذكاء الاصطناعي والتحول الرقمي.
-- استشارات في تبنّي حلول AI داخل الشركة.
-- وصول إلى مواهب مدرَّبة عبر شبكة الجمعية.
-
-# خطط مستقبلية (أهداف، لا إنجازات)
-- حضور في المحافظات السورية وفي بلدان الاغتراب.
-- خطّة 2027: إدخال مناهج AI في المدارس والمعاهد المهنية.
-- هدف 2028: أن تكون الجمعية المستشار الوطني للحكومة في قوانين AI.
-
-# مشاريع بارزة
-- «مُعافى»: نظام حجوزات طبية ذكي.
-- التشخيص الزراعي الذكي (رؤية حاسوبية لأمراض القمح).
-- بوت «قانوني»: مساعد قانوني للقوانين السورية.
-- المترجم الفوري للهجات السورية (قيد العمل).
-- «جسور التعليم»: ربط الخريجين بفرص freelance خارجية.
+# ما لا تعرفه من هذا المرجع
+- الدورات وأسعارها ومواعيدها: من أداة \`find_courses\` فقط. لا تذكر مسارات أو برامج أو ورشات أو معسكرات لم ترجعها الأداة.
+- الشركاء: من قسم «شركاء الجمعية» الملحق أدناه فقط.
+- المشاريع والإنجازات والأرقام والإحصاءات والاتفاقيات والخطط المستقبلية: لا تذكر منها إلا ما ورد حرفياً في «المراجع الإضافية». إذا لم يرد، قل إنها غير متوفرة لديك.
 
 # قنوات التواصل
 - البريد: info@aisyria.org
@@ -295,6 +263,28 @@ async function loadRecentHistory(conversationId: string): Promise<StoredMessage[
   } catch (err) {
     console.error("[chat] history unavailable", err);
     return null;
+  }
+}
+
+// Admins edit partners rarely; a short cache keeps the list off every turn's path
+// while an edit still reaches the bot within minutes.
+const PARTNERS_TTL_MS = 5 * 60_000;
+let partnersCache: { names: string[]; at: number } | null = null;
+
+async function loadPartnerNames(): Promise<string[] | null> {
+  if (partnersCache && Date.now() - partnersCache.at < PARTNERS_TTL_MS) return partnersCache.names;
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("partners")
+      .select("name")
+      .order("display_order", { ascending: true });
+    if (error) throw error;
+    const names = cleanPartnerNames((data ?? []).map((row) => row.name));
+    partnersCache = { names, at: Date.now() };
+    return names;
+  } catch (e) {
+    console.error("[chat] partners unavailable", e);
+    return partnersCache?.names ?? null;
   }
 }
 
@@ -475,9 +465,10 @@ export const Route = createFileRoute("/api/chat")({
         const needsKnowledge =
           last?.role === "user" && needsKnowledgeSearch(lastUserText, previousChoices);
         const retrievalStartedAt = Date.now();
-        const [storedHistory, extraContext] = await Promise.all([
+        const [storedHistory, extraContext, partnerNames] = await Promise.all([
           conversationId ? loadRecentHistory(conversationId) : Promise.resolve(null),
           needsKnowledge ? retrieveKnowledge(lastUserText) : Promise.resolve(""),
+          loadPartnerNames(),
         ]);
         const retrievalMs = Date.now() - retrievalStartedAt;
 
@@ -725,7 +716,7 @@ export const Route = createFileRoute("/api/chat")({
 
         const result = streamText({
           model: chat.model,
-          system: SYSTEM_PROMPT + extraContext,
+          system: SYSTEM_PROMPT + partnersContext(partnerNames) + extraContext,
           tools,
           // Every step and every retry is another provider call, and the provider
           // bills and rate-limits per call. 50 steps with 3 attempts each could

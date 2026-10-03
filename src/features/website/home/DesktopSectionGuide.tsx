@@ -35,7 +35,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
       title: "تسعة مجتمعات، أساس واحد",
       body: "تجمع مجتمعاتنا الخبراء والمهتمين في البيانات والصحة والمدن والبرمجيات وغيرها، ليعمل كل تخصص ضمن شبكة واحدة.",
       speech: "تعرّف إلى مجتمعاتنا",
-      prefill: "ما هي مجتمعات الجمعية التسعة؟",
+      prefill: "ما هي مجتمعات الجمعية الثمانية؟",
     },
     {
       ...SHARED.ar,
@@ -91,7 +91,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
       title: "Nine communities, one foundation",
       body: "Our communities connect specialists across data, health, cities, software and more, working together as one network.",
       speech: "Meet our communities",
-      prefill: "What are SAAE's nine communities?",
+      prefill: "What are SAAE's eight communities?",
     },
     {
       ...SHARED.en,
