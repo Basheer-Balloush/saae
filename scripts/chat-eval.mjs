@@ -28,6 +28,17 @@ const CASES = [
     mustNot: [/التسجيل مفتوح/],
   },
   { q: "بدي شي دورة مجانية", must: [/مجان/], mustNot: [/10,000|3,500|4,950/] },
+  // A recommendation starts by asking about interests; a list request does not.
+  { q: "اقترح علي دورات", must: [/\[\[choices:/], mustNot: [/courses\//] },
+  {
+    turns: ["اقترح علي دورات"],
+    q: "الذكاء الاصطناعي وأدواته",
+    must: [/التوليدي/],
+    mustNot: [/تسويق 360/],
+  },
+  { q: "اقترح علي دورة بالإعلام والكتابة", must: [/التحرير الإعلامي/] },
+  // Links are short clickable labels, not bare long URLs.
+  { q: "عطيني رابط دورة الذكاء الاصطناعي التوليدي 09", must: [/\]\(https:\/\/www\.aisyria\.org\//] },
   // "Available" means joinable today: not started, deadline not passed, not ended.
   {
     q: "شو الدورات المتاحة حالياً؟",
