@@ -15,6 +15,7 @@ export type CatalogRow = {
   price: number | null;
   sale_price: number | null;
   delivery_mode: string | null;
+  end_date?: string | null;
 };
 
 export type CourseOption = {
@@ -32,7 +33,10 @@ export const courseUrl = (row: { slug: string | null; id: string }) =>
    (CoursePrice renders "ل.س 500" / "500 SYP"), so the assistant must quote the
    same currency — a price the visitor cannot compare to the course page is worse
    than no price. */
-function priceLabel(row: CatalogRow, lang: "ar" | "en"): string {
+export function priceLabel(
+  row: Pick<CatalogRow, "is_free" | "price" | "sale_price">,
+  lang: "ar" | "en",
+): string {
   if (row.is_free) return lang === "ar" ? "مجاني" : "Free";
   const effective = row.sale_price != null && row.sale_price > 0 ? row.sale_price : row.price;
   if (effective == null || Number.isNaN(effective))
