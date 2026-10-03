@@ -1,4 +1,5 @@
 import { ABU_AL_JOUD } from "@/features/chat/lib/mascot";
+import { useDraggableGuide } from "@/features/chat/hooks/useDraggableGuide";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowUp, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import React, { useRef } from "react";
@@ -119,6 +120,7 @@ export function MotionFooter({ locale = "ar" }: { locale?: MotionFooterLocale })
   const isVisible = useInView(revealRef, { margin: "-18% 0px -18% 0px", amount: 0.12 });
   const prefersReducedMotion = Boolean(useReducedMotion());
   const copy = COPY[locale];
+  const drag = useDraggableGuide<HTMLButtonElement>(locale);
 
   const openAssistant = () => {
     window.dispatchEvent(new CustomEvent("assistant:open"));
@@ -202,6 +204,7 @@ export function MotionFooter({ locale = "ar" }: { locale?: MotionFooterLocale })
             </div>
 
             <motion.button
+              {...drag.bindings}
               type="button"
               className="hmf-assistant-character"
               onClick={openAssistant}

@@ -1259,6 +1259,7 @@ html:has(.mobile-home .mh-hero-loader) {
     transform 420ms var(--mh-ease);
 }
 .mobile-home .mh-section-guide.mh-is-shown.mh-is-talking .mh-section-guide-card {
+  pointer-events: auto;
   opacity: 1;
   transform: none;
 }

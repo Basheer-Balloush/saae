@@ -1,4 +1,5 @@
 import { ABU_AL_JOUD } from "@/features/chat/lib/mascot";
+import { useDraggableGuide } from "./hooks/useDraggableGuide";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle } from "lucide-react";
@@ -13,6 +14,7 @@ export function AssistantFab({ hideTrigger = false }: { hideTrigger?: boolean })
   const [prefill, setPrefill] = useState<string | null>(null);
   const [footerVisible, setFooterVisible] = useState(false);
   const isRtl = dir === "rtl";
+  const drag = useDraggableGuide<HTMLButtonElement>(`${dir}-${open}-${hideTrigger}`);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -76,6 +78,7 @@ export function AssistantFab({ hideTrigger = false }: { hideTrigger?: boolean })
       <AnimatePresence>
         {!hideTrigger && !footerVisible && !open && (
           <motion.button
+            {...drag.bindings}
             type="button"
             className={`assistant-guide-launcher ${isRtl ? "is-rtl" : "is-ltr"}`}
             dir={dir}
@@ -89,7 +92,7 @@ export function AssistantFab({ hideTrigger = false }: { hideTrigger?: boolean })
             whileTap={{ scale: 0.98 }}
           >
             <span className="assistant-guide-character" aria-hidden="true">
-              <img src={ABU_AL_JOUD.welcome} alt="" />
+              <img src={ABU_AL_JOUD.welcome} alt="" draggable={false} />
             </span>
             <span className="assistant-guide-bubble">
               <MessageCircle aria-hidden="true" />

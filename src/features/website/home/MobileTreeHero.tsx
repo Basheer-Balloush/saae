@@ -1,4 +1,5 @@
 import { ABU_AL_JOUD, preloadMascotPoses } from "@/features/chat/lib/mascot";
+import { useDraggableGuide } from "@/features/chat/hooks/useDraggableGuide";
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import {
   Building2,
@@ -548,6 +549,7 @@ function HeroGuide({ lang, band }: { lang: Lang; band: number }) {
   const [shown, setShown] = useState(false);
   const [talking, setTalking] = useState(true);
   const beat = GUIDE[band] ?? GUIDE[0];
+  const drag = useDraggableGuide<HTMLButtonElement>(`${band}-${lang}`);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setShown(true), 900);
@@ -568,13 +570,17 @@ function HeroGuide({ lang, band }: { lang: Lang; band: number }) {
 
   return (
     <button
+      {...drag.bindings}
       type="button"
-      className={`mh-hero-guide${shown ? " mh-is-shown" : ""}${talking ? " mh-is-talking" : ""}`}
+      className={`mh-hero-guide${shown ? " mh-is-shown" : ""}${talking || drag.isDragging || drag.isMoved ? " mh-is-talking" : ""}`}
       onClick={open}
       aria-label={GUIDE_LABEL[lang]}
     >
       <span className="mh-hero-guide-bubble" key={`${lang}-${band}`} aria-live="polite">
         {beat[lang]}
+        <span className="guide-interaction-hint">
+          {lang === "ar" ? "اضغط للدردشة · اسحب للتحريك" : "Tap to chat · Drag to move"}
+        </span>
       </span>
       <img
         key={band}
@@ -584,6 +590,7 @@ function HeroGuide({ lang, band }: { lang: Lang; band: number }) {
         width={512}
         height={768}
         decoding="async"
+        draggable={false}
       />
     </button>
   );
