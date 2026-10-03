@@ -44,6 +44,9 @@ const CASES = [
   { q: "كيف بتحقق من شهادة صادرة عن الجمعية؟", must: [/verify/] },
   { q: "بدي صير مدرب معكم شو الخطوات؟", must: [/trainer-apply|اعتماد/] },
   { q: "شو المجتمعات التخصصية بالجمعية؟", must: [/ثمان|8/, /البيانات/] },
+  // Tone: warm Damascene courtesy in Arabic.
+  { q: "شكراً كتير على المساعدة", must: [/ولو|تسلم|العفو|الله يسلمك|واجب|على راسي|بالخدمة/] },
+  { q: "بدي تفاصيل دورة الذكاء الاصطناعي التوليدي 09 لو سمحت", must: [/على عيني|على راسي|من عيوني|تكرم|حاضر|تؤمر|أكيد/] },
   // English.
   { q: "Do you have any internships open right now?", must: [/internships/] },
   { q: "Is UNICEF a partner of SAAE?", must: [/not/i] },
