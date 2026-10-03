@@ -6,6 +6,7 @@ import { createChatModelForRequest } from "@/features/chat/lib/ai-gateway.server
 import { parseChoices } from "@/features/chat/lib/chat-choices";
 import { needsKnowledgeSearch } from "@/features/chat/lib/chat-routing";
 import { cleanPartnerNames, partnersContext } from "@/features/chat/lib/chat-partners";
+import { dropToolPreamble } from "@/features/chat/lib/chat-stream";
 import {
   courseList,
   type CourseState,
@@ -85,6 +86,7 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 - \`latest_news\`: لأسئلة الأخبار والفعاليات ونشاطات الجمعية الأخيرة.
 - \`initiative_status\`: لأرقام مبادرة المليون الحالية ورعاتها.
 - \`search_knowledge\`: لكل ما يخص الجمعية ولا تغطيه أداة أخرى: التعريف بها، المجتمعات، الحساب والتسجيل في المنصة، الشهادات، المبادرة وطرق المشاركة، الخدمات للشركات، أن تصبح مدرّباً، دليل الأدوات، الفعاليات السابقة.
+- استدعِ الأداة مباشرة دون أن تكتب أي شيء قبلها: لا «بحث المعرفة عن…» ولا «خليني شوف» ولا «Let me check». الزائر يرى فقط جوابك النهائي.
 - اجمع بين الأدوات عند الحاجة، واقرأ النتيجة جيداً قبل أن تجيب. أجب بما ترجعه الأدوات فقط، واذكر الحقول التي لها قيمة فقط، وضع رابط الصفحة المناسبة.
 
 # قواعد المحادثة
@@ -949,6 +951,7 @@ export const Route = createFileRoute("/api/chat")({
           // burn a daily quota on one conversation.
           maxRetries: 1,
           stopWhen: stepCountIs(12),
+          experimental_transform: dropToolPreamble(),
           messages: await convertToModelMessages(trustedMessages),
           onChunk: ({ chunk }) => {
             if (firstTextMs === null && chunk.type === "text-delta")
