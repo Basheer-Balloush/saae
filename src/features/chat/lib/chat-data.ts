@@ -17,6 +17,10 @@ const clip = (text: string | null, max: number) =>
 
 // ---------- Courses ----------
 
+/* The site's own rule: online courses never end and are taken at the learner's
+   pace, so their start date is not a date a visitor has to meet. */
+const isSelfPaced = (mode: string | null | undefined) => (mode ?? "").toLowerCase() === "online";
+
 /** The registration fields the catalogue listing does not carry. */
 export type CourseState = {
   id: string;
@@ -39,6 +43,8 @@ export type CourseListItem = {
   end_date: string | null;
   status: Registration;
   seats_left: number | null;
+  /** Online courses are self-paced: a visitor starts whenever they like. */
+  self_paced: boolean;
 };
 
 export function toCourseListItem(
@@ -66,10 +72,11 @@ export function toCourseListItem(
     price: priceLabel(row, lang),
     is_free: !!row.is_free,
     delivery_mode: row.delivery_mode,
-    start_date: day(course.start_date),
+    start_date: isSelfPaced(row.delivery_mode) ? null : day(course.start_date),
     end_date: day(course.end_date),
     // Without its registration fields a course cannot be called joinable.
     status: state ? registrationStatus(course, now) : "closed",
+    self_paced: isSelfPaced(row.delivery_mode),
     seats_left:
       course.max_students != null
         ? Math.max(course.max_students - (course.students_count ?? 0), 0)
@@ -184,7 +191,8 @@ export function toCourseDetails(payload: PublicCoursePayload, lang: Lang, now = 
     level: c.level,
     price: priceLabel(c, lang),
     delivery_mode: c.delivery_mode,
-    start_date: day(c.start_date),
+    start_date: isSelfPaced(c.delivery_mode) ? null : day(c.start_date),
+    self_paced: isSelfPaced(c.delivery_mode),
     end_date: day(c.end_date),
     days: (c.schedule_days ?? []).map((d) => DAYS[d]?.[lang]).filter(Boolean),
     time_from: c.schedule_time_from,

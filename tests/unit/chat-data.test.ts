@@ -74,12 +74,20 @@ describe("courseList", () => {
     expect(statusOf("teaching")).toBe("deadline_passed");
     expect(statusOf("software")).toBe("ended");
     expect(statusOf("architects")).toBe("open"); // online and self-paced
+    // Dated courses soonest first; the self-paced online course has no date and comes last.
     expect(list.filter((c) => c.status === "open").map((c) => c.ref)).toEqual([
-      "architects",
       "genai",
       "teams",
       "media",
+      "architects",
     ]);
+  });
+
+  it("gives no start date for a self-paced online course", () => {
+    expect(list.find((c) => c.ref === "architects")).toMatchObject({
+      self_paced: true,
+      start_date: null,
+    });
   });
 
   it("reports the places left and the start date", () => {
