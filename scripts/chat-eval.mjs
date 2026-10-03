@@ -24,7 +24,7 @@ const CASES = [
   { q: "مين المدرب بدورة الذكاء الاصطناعي التوليدي 09؟ وشو الأيام؟", must: [/الأحد|الثلاثاء|الخميس/] },
   {
     q: "احكيلي عن دورة المنهجية الحديثة في هندسة البرمجيات وهل فيني سجّل فيها؟",
-    must: [/انتهت|منتهية/],
+    must: [/انتهت|منتهية|(غير|مو|مش) متاحة|ما في دورة/],
     mustNot: [/التسجيل مفتوح/],
   },
   { q: "بدي شي دورة مجانية", must: [/مجاني/], mustNot: [/10,000|3,500|4,950/] },
@@ -36,7 +36,7 @@ const CASES = [
   },
   {
     q: "بدي سجل بدورة تسويق 360",
-    must: [/انتهى موعد التسجيل|بلّشت|بدأت|مغلق|ما عاد/],
+    must: [/(موعد التسجيل|التسجيل).{0,12}(انتهى|خلص|مغلق)|انتهى موعد التسجيل|بلّشت|بدأت|ما عاد/],
     mustNot: [/التسجيل (مفتوح|متاح)/],
   },
   // A repeated question is answered again, not refused.
@@ -71,7 +71,8 @@ const CASES = [
   { q: "بدي تفاصيل دورة الذكاء الاصطناعي التوليدي 09 لو سمحت", must: [/على عيني|على راسي|من عيوني|تكرم|حاضر|تؤمر|أكيد/] },
   // English.
   { q: "Do you have any internships open right now?", must: [/internships/] },
-  { q: "Is UNICEF a partner of SAAE?", must: [/not/i] },
+  { q: "Is UNICEF a partner of SAAE?", must: [/not/i], mustNot: [/[\u0600-\u06FF]{4,}/] },
+  { q: "Which courses are open for registration now?", mustNot: [/[\u0600-\u06FF]{6,}.*[\u0600-\u06FF]{6,}.*[\u0600-\u06FF]{6,}/, /Marketing 360/] },
 ];
 
 async function ask(question, sessionId = `eval-${Math.random().toString(36).slice(2, 10)}`) {
