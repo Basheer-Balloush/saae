@@ -486,7 +486,7 @@ const GUIDE = [
     image: "/cinematic/images/abu-al-joud-comic-curious.webp",
     ar: "هنا تبدأ جذور المعرفة والتخصص.",
     en: "The roots of knowledge and expertise begin here.",
-    prefill: { ar: "ما هي مجتمعات الجمعية التسعة؟", en: "What are SAAE's nine communities?" },
+    prefill: { ar: "ما هي مجتمعات الجمعية الثمانية؟", en: "What are SAAE's eight communities?" },
   },
   {
     image: "/cinematic/images/abu-al-joud-comic-curious.webp",
