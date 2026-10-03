@@ -1,3 +1,4 @@
+import { ABU_AL_JOUD } from "@/features/chat/lib/mascot";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle } from "lucide-react";
@@ -88,7 +89,7 @@ export function AssistantFab({ hideTrigger = false }: { hideTrigger?: boolean })
             whileTap={{ scale: 0.98 }}
           >
             <span className="assistant-guide-character" aria-hidden="true">
-              <img src="/cinematic/images/abu-al-joud-comic-welcome.webp" alt="" />
+              <img src={ABU_AL_JOUD.welcome} alt="" />
             </span>
             <span className="assistant-guide-bubble">
               <MessageCircle aria-hidden="true" />

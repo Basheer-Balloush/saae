@@ -1,3 +1,4 @@
+import { ABU_AL_JOUD } from "@/features/chat/lib/mascot";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowUp, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import React, { useRef } from "react";
@@ -217,7 +218,7 @@ export function MotionFooter({ locale = "ar" }: { locale?: MotionFooterLocale })
             >
               <span className="hmf-character-halo" aria-hidden="true" />
               <img
-                src="/cinematic/images/abu-al-joud-comic-welcome.webp"
+                src={ABU_AL_JOUD.welcome}
                 alt={copy.assistantLabel}
                 width="480"
                 height="720"

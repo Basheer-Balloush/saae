@@ -526,15 +526,26 @@
   inline-size: 58px;
   block-size: auto;
   filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45));
-  animation: mh-guide-bob 3.6s ease-in-out infinite;
+  transform-origin: center bottom;
+  animation: mh-guide-bob 5.2s ease-in-out both;
 }
 @keyframes mh-guide-bob {
-  0%,
+  0% {
+    opacity: 0;
+    transform: translateY(6px) rotate(-2deg);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(-3px) rotate(1deg);
+  }
+  26%,
+  58%,
   100% {
+    opacity: 1;
     transform: translateY(0);
   }
-  50% {
-    transform: translateY(-5px);
+  42% {
+    transform: translateY(-2px);
   }
 }
 
@@ -1291,10 +1302,12 @@ html:has(.mobile-home .mh-hero-loader) {
   inline-size: 62px;
   block-size: auto;
   filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45));
-  animation: mh-guide-bob 3.6s ease-in-out infinite;
+  transform-origin: center bottom;
+  animation: mh-guide-bob 6s ease-in-out both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .mobile-home .mh-section-guide-figure img {
+  .mobile-home .mh-section-guide-figure img,
+  .mobile-home .mh-hero-guide-figure {
     animation: none;
   }
 }

@@ -98,7 +98,14 @@ export function MobileSectionGuide({ lang }: { lang: Locale }) {
         title={copy.label}
         tabIndex={active ? undefined : -1}
       >
-        <img src={SECTION_COMIC_IMAGES[section]} alt="" width={512} height={768} decoding="async" />
+        <img
+          key={section}
+          src={SECTION_COMIC_IMAGES[section]}
+          alt=""
+          width={512}
+          height={768}
+          decoding="async"
+        />
       </button>
     </aside>
   );
