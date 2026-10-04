@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { useAmsAuth } from "@/features/attendance/hooks/useAmsAuth";
+import { canUseAms, useAmsAuth } from "@/features/attendance/hooks/useAmsAuth";
+import { resolveLmsRole } from "@/features/lms/lib/roles";
 import { useLang } from "@/lib/i18n/i18n";
 import { amsT } from "@/features/attendance/lib/i18n";
 import { localizeAuthError } from "@/lib/i18n/auth-error-i18n";
@@ -63,8 +64,12 @@ function AmsLogin() {
       const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
       if (error) throw error;
 
-      const { data: allowed, error: accessError } = await supabase.rpc("has_ams_portal_access");
-      if (accessError || !allowed) {
+      const { data: roleRows, error: accessError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id);
+      const role = resolveLmsRole((roleRows ?? []).map((r) => r.role));
+      if (accessError || !canUseAms(role)) {
         await supabase.auth.signOut();
         toast.error(tr.noAccess);
         return;

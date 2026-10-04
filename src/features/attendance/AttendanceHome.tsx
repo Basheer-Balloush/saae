@@ -30,6 +30,7 @@ import {
   useT,
 } from "@/components/console/ui";
 import { Register } from "./Register";
+import { GRACE_DAYS, isInAttendanceWindow } from "./lib/course-window";
 
 type Course = {
   id: string;
@@ -47,13 +48,16 @@ export function AttendanceHome({
   onCourseChange,
   isAdmin,
   canManage = isAdmin,
+  instructorView = false,
 }: {
   courseId?: string;
   onCourseChange: (id: string | undefined) => void;
   /** Links into the admin side of the learning platform. */
   isAdmin: boolean;
-  /** Create and delete courses, people and sessions (the phone app keeps its old rights). */
+  /** Create and delete courses, add and remove people, delete sessions. */
   canManage?: boolean;
+  /** An instructor's own list: current courses, and those ended in the last two weeks. */
+  instructorView?: boolean;
 }) {
   const { t, ar, lang } = useT();
   const [courses, setCourses] = useState<Course[] | null>(null);
@@ -70,7 +74,24 @@ export function AttendanceHome({
       .select("*")
       .order("created_at", { ascending: false });
     if (e) return void setError(true);
-    const list = (data as Course[]) ?? [];
+    let list = (data as Course[]) ?? [];
+    if (instructorView) {
+      // The database already limits an instructor to the courses they teach;
+      // this keeps the list to the ones still running or just finished.
+      const linked = list.map((c) => c.lms_course_id).filter((id): id is string => !!id);
+      const { data: dates } = linked.length
+        ? await supabase.from("lms_courses").select("id,end_date,delivery_mode").in("id", linked)
+        : { data: [] };
+      const byId = new Map(
+        (
+          (dates ?? []) as { id: string; end_date: string | null; delivery_mode: string | null }[]
+        ).map((d) => [d.id, d]),
+      );
+      list = list.filter((c) => {
+        const lms = c.lms_course_id ? byId.get(c.lms_course_id) : undefined;
+        return !lms || isInAttendanceWindow(lms);
+      });
+    }
     setCourses(list);
     const ids = list.map((c) => c.id);
     if (!ids.length) return;
@@ -87,7 +108,7 @@ export function AttendanceHome({
       if (!o.last || s.session_date > o.last) o.last = s.session_date;
     }
     setStats(out);
-  }, []);
+  }, [instructorView]);
   useEffect(() => {
     load();
   }, [load]);
@@ -162,6 +183,7 @@ export function AttendanceHome({
           amsId={current.id}
           lmsCourseId={current.lms_course_id}
           canDelete={canManage}
+          canAddPeople={canManage}
           showPayments={isAdmin}
         />
         {canManage && (
@@ -189,11 +211,20 @@ export function AttendanceHome({
     <div>
       <PageHeader
         eyebrow={t("نظام الحضور", "Attendance")}
-        title={t("دورات الحضور", "Attendance courses")}
-        description={t(
-          "كل دورة تُسجَّل فيها الحضور. الدورات الحضورية على منصّة التعلّم تظهر هنا تلقائياً عند نشرها.",
-          "Every course that takes attendance. In-person courses on the learning platform appear here on their own once published.",
-        )}
+        title={
+          instructorView ? t("دوراتك", "Your courses") : t("دورات الحضور", "Attendance courses")
+        }
+        description={
+          instructorView
+            ? t(
+                `الدورات التي تدرّسها الآن، والتي انتهت خلال آخر ${GRACE_DAYS} يوماً. افتح الدورة لتسجيل الحضور.`,
+                `The courses you teach now, and those that ended in the last ${GRACE_DAYS} days. Open a course to take attendance.`,
+              )
+            : t(
+                "كل دورة تُسجَّل فيها الحضور. الدورات الحضورية على منصّة التعلّم تظهر هنا تلقائياً عند نشرها.",
+                "Every course that takes attendance. In-person courses on the learning platform appear here on their own once published.",
+              )
+        }
         actions={
           canManage ? (
             <Button onClick={() => setAdding(true)}>
@@ -204,23 +235,25 @@ export function AttendanceHome({
         }
       />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <Seg
-          value={kind}
-          onChange={setKind}
-          options={[
-            { value: "all", label: t("الكل", "All"), count: courses.length },
-            {
-              value: "linked",
-              label: t("من منصّة التعلّم", "From the platform"),
-              count: courses.filter((c) => c.lms_course_id).length,
-            },
-            {
-              value: "own",
-              label: t("مستقلة", "Stand-alone"),
-              count: courses.filter((c) => !c.lms_course_id).length,
-            },
-          ]}
-        />
+        {!instructorView && (
+          <Seg
+            value={kind}
+            onChange={setKind}
+            options={[
+              { value: "all", label: t("الكل", "All"), count: courses.length },
+              {
+                value: "linked",
+                label: t("من منصّة التعلّم", "From the platform"),
+                count: courses.filter((c) => c.lms_course_id).length,
+              },
+              {
+                value: "own",
+                label: t("مستقلة", "Stand-alone"),
+                count: courses.filter((c) => !c.lms_course_id).length,
+              },
+            ]}
+          />
+        )}
         <SearchInput
           value={q}
           onChange={setQ}
@@ -229,7 +262,18 @@ export function AttendanceHome({
       </div>
       {shown.length === 0 ? (
         <Panel>
-          <EmptyState icon={CalendarCheck} title={t("لا توجد دورات هنا", "No courses here")} />
+          {instructorView && courses.length === 0 ? (
+            <EmptyState
+              icon={CalendarCheck}
+              title={t("لا توجد دورات حالية لك", "You have no current courses")}
+              text={t(
+                "تظهر هنا الدورات الحضورية التي تدرّسها عند نشرها على منصّة التعلّم.",
+                "The in-person courses you teach appear here once they are published on the learning platform.",
+              )}
+            />
+          ) : (
+            <EmptyState icon={CalendarCheck} title={t("لا توجد دورات هنا", "No courses here")} />
+          )}
         </Panel>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
