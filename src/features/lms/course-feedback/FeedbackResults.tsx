@@ -1,5 +1,12 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, Download, FileText, MessageSquareText, PencilLine } from "lucide-react";
+import {
+  ChevronDown,
+  Download,
+  FileText,
+  MessageSquareText,
+  PencilLine,
+  SkipForward,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   EmptyState,
@@ -65,7 +72,7 @@ export function FeedbackResults({
         ) : undefined
       }
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
         <StatTile
           icon={MessageSquareText}
           label={t("أرسلوا التقييم", "Sent their feedback")}
@@ -76,6 +83,12 @@ export function FeedbackResults({
           icon={PencilLine}
           label={t("بدؤوا ولم يرسلوا", "Started, not sent")}
           value={fmtNum(data.drafts, lang)}
+          tone="gray"
+        />
+        <StatTile
+          icon={SkipForward}
+          label={t("تخطّوا التقييم", "Skipped the feedback")}
+          value={fmtNum(data.skipped, lang)}
           tone="gray"
         />
       </div>

@@ -61,6 +61,7 @@ import { Route as AdminPartnersRouteImport } from './routes/admin/partners'
 import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
 import { Route as AdminMembersRouteImport } from './routes/admin/members'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminLocationsRouteImport } from './routes/admin/locations'
 import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
 import { Route as AdminInitiativeSurveyRouteImport } from './routes/admin/initiative-survey'
 import { Route as AdminInitiativeRouteImport } from './routes/admin/initiative'
@@ -413,6 +414,11 @@ const AdminMembersRoute = AdminMembersRouteImport.update({
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminLocationsRoute = AdminLocationsRouteImport.update({
+  id: '/locations',
+  path: '/locations',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminLeadsRoute = AdminLeadsRouteImport.update({
@@ -877,6 +883,7 @@ export interface FileRoutesByFullPath {
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/leads': typeof AdminLeadsRoute
+  '/admin/locations': typeof AdminLocationsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -998,6 +1005,7 @@ export interface FileRoutesByTo {
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/leads': typeof AdminLeadsRoute
+  '/admin/locations': typeof AdminLocationsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -1126,6 +1134,7 @@ export interface FileRoutesById {
   '/admin/initiative': typeof AdminInitiativeRoute
   '/admin/initiative-survey': typeof AdminInitiativeSurveyRoute
   '/admin/leads': typeof AdminLeadsRoute
+  '/admin/locations': typeof AdminLocationsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/messages': typeof AdminMessagesRoute
@@ -1257,6 +1266,7 @@ export interface FileRouteTypes {
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/leads'
+    | '/admin/locations'
     | '/admin/login'
     | '/admin/members'
     | '/admin/messages'
@@ -1378,6 +1388,7 @@ export interface FileRouteTypes {
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/leads'
+    | '/admin/locations'
     | '/admin/login'
     | '/admin/members'
     | '/admin/messages'
@@ -1505,6 +1516,7 @@ export interface FileRouteTypes {
     | '/admin/initiative'
     | '/admin/initiative-survey'
     | '/admin/leads'
+    | '/admin/locations'
     | '/admin/login'
     | '/admin/members'
     | '/admin/messages'
@@ -2009,6 +2021,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/locations': {
+      id: '/admin/locations'
+      path: '/locations'
+      fullPath: '/admin/locations'
+      preLoaderRoute: typeof AdminLocationsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/leads': {
@@ -2663,6 +2682,7 @@ interface AdminRouteRouteChildren {
   AdminInitiativeRoute: typeof AdminInitiativeRoute
   AdminInitiativeSurveyRoute: typeof AdminInitiativeSurveyRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
+  AdminLocationsRoute: typeof AdminLocationsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMembersRoute: typeof AdminMembersRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
@@ -2684,6 +2704,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminInitiativeRoute: AdminInitiativeRoute,
   AdminInitiativeSurveyRoute: AdminInitiativeSurveyRoute,
   AdminLeadsRoute: AdminLeadsRoute,
+  AdminLocationsRoute: AdminLocationsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminMembersRoute: AdminMembersRoute,
   AdminMessagesRoute: AdminMessagesRoute,

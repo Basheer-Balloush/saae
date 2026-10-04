@@ -14,7 +14,7 @@ import {
   type ChoiceQuestion,
   type FormDefinition,
 } from "@/features/lms/course-feedback/lib/survey";
-import { feedbackState } from "@/features/lms/course-feedback/lib/state";
+import { feedbackState, isClosed } from "@/features/lms/course-feedback/lib/state";
 
 const form = DEFAULT_FORM;
 const choices = (f: FormDefinition = form) =>
@@ -223,6 +223,15 @@ describe("a draft after the admin edits the form", () => {
       answers: { platform: "4", improve: "other" },
       notes: { comments: "far too lo", improve_other: "subtitles" },
     });
+  });
+});
+
+describe("a closed form", () => {
+  it("is a sent or a skipped one; a draft stays open", () => {
+    expect(isClosed("submitted")).toBe(true);
+    expect(isClosed("skipped")).toBe(true);
+    expect(isClosed("draft")).toBe(false);
+    expect(isClosed(undefined)).toBe(false);
   });
 });
 

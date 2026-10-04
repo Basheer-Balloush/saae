@@ -109,6 +109,34 @@
   pointer-events: none;
 }
 
+/* A short speaking gesture, then a still pose while the visitor reads. */
+.guide-mascot-gesture {
+  transform-origin: 50% 92%;
+  animation: guide-mascot-arrive 5.8s ease-in-out both;
+}
+
+@keyframes guide-mascot-arrive {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) rotate(-2deg);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(-3px) rotate(1deg);
+  }
+  22% {
+    transform: translateY(0) rotate(0);
+  }
+  35% {
+    transform: translateY(-2px) rotate(-0.6deg);
+  }
+  48%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .community-comic-speaker:focus-visible {
   border-radius: 8px;
   outline: 2px solid var(--guide-accent);
@@ -529,6 +557,9 @@ html[lang="en"]
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .guide-mascot-gesture {
+    animation: none;
+  }
   .section-guide-model .aj3d-loading-ring {
     animation: none;
   }

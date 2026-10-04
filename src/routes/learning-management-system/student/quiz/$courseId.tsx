@@ -12,6 +12,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { QuizMenu, type QuizListItem } from "@/features/lms/quiz/QuizMenu";
 import { QuizAttempt } from "@/features/lms/quiz/QuizAttempt";
 import { getUnansweredQuestions } from "@/features/lms/lib/quiz-validation";
+import {
+  clearQuizDraft,
+  loadQuizDraft,
+  pickDraft,
+  QuizDraftSync,
+  quizDraftKey,
+  readServerDraft,
+  saveQuizDraft,
+  type DraftSaveStatus,
+  type QuizDraftAnswers,
+} from "@/features/lms/lib/quiz-draft";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { sendCertificateEmail } from "@/features/lms/certificates/lib/certificate-email.functions";
 import { CourseFeedbackPrompt } from "@/features/lms/course-feedback/CourseFeedbackPrompt";
@@ -100,6 +111,19 @@ function QuizPage() {
   const [review, setReview] = useState<ReviewData | null>(null);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<DraftSaveStatus>("idle");
+  // The server syncer and the attempt it saves for.
+  const draftSync = useRef<{
+    sync: QuizDraftSync;
+    quizId: string;
+    version: number;
+    attempt: number;
+  } | null>(null);
+  // A restored device copy newer than the server's, sent once syncing starts.
+  const draftToUpload = useRef<QuizDraftAnswers | null>(null);
+  // The answers on screen right now, for code that runs after an await.
+  const latestAnswers = useRef(answers);
+  latestAnswers.current = answers;
   const submitInFlight = useRef(false);
   const [result, setResult] = useState<Result | null>(null);
   const [showReview, setShowReview] = useState(false);
@@ -159,9 +183,11 @@ function QuizPage() {
       setResult(null);
       setShowReview(false);
       setAnswers({});
-      const [attemptRes, reviewRes] = await Promise.all([
+      draftToUpload.current = null;
+      const [attemptRes, reviewRes, draftRes] = await Promise.all([
         supabase.rpc("lms_get_quiz_for_attempt" as never, { _quiz_id: selectedQuizId } as never),
         supabase.rpc("lms_get_quiz_review" as never, { _quiz_id: selectedQuizId } as never),
+        supabase.rpc("lms_get_quiz_draft" as never, { _quiz_id: selectedQuizId } as never),
       ]);
       if (cancelled) return;
       if (attemptRes.error) {
@@ -170,7 +196,41 @@ function QuizPage() {
         setLoading(false);
         return;
       }
-      setState(attemptRes.data as unknown as LoadedState);
+      const loaded = attemptRes.data as unknown as LoadedState;
+      setState(loaded);
+      // Bring back everything already answered for this attempt, from the server or
+      // this device, whichever copy is further along. A passed or used-up quiz has
+      // nothing left to answer, so its device copy goes.
+      const key = quizDraftKey(userId, loaded.quiz.id, loaded.quiz.version);
+      if (loaded.has_passed || loaded.attempts_remaining <= 0) clearQuizDraft(key);
+      else {
+        const device = loadQuizDraft(key, loaded.questions, loaded.attempts_used);
+        // Unreachable server copy: the device copy still restores.
+        const server = draftRes.error
+          ? null
+          : readServerDraft(
+              draftRes.data,
+              loaded.questions,
+              loaded.quiz.version,
+              loaded.attempts_used,
+            );
+        const draft = pickDraft(device, server);
+        if (draft) setAnswers(draft.answers);
+        setSaveStatus(draft && draft === server ? "saved" : "idle");
+        // Answered offline or before the server copy existed: send it up, through
+        // the syncer already running for this attempt or the next one to start.
+        if (draft && draft !== server) {
+          const live = draftSync.current;
+          if (
+            live &&
+            live.quizId === loaded.quiz.id &&
+            live.version === loaded.quiz.version &&
+            live.attempt === loaded.attempts_used
+          )
+            live.sync.save(draft.answers);
+          else draftToUpload.current = draft.answers;
+        }
+      }
       setReview(reviewRes.error ? null : (reviewRes.data as unknown as ReviewData));
       setLoading(false);
     })();
@@ -209,6 +269,72 @@ function QuizPage() {
     </Button>
   );
 
+  // Server saves for the attempt in progress: one syncer per quiz, version and
+  // attempt, kept going (and retrying) until it is submitted.
+  const syncQuizId = state?.quiz.id ?? null;
+  const syncVersion = state?.quiz.version ?? null;
+  const syncAttempt = state?.attempts_used ?? null;
+  const syncOpen = !!state?.can_attempt;
+  useEffect(() => {
+    if (!userId || !syncQuizId || syncVersion === null || syncAttempt === null || !syncOpen) return;
+    let active = true;
+    const sync = new QuizDraftSync({
+      send: async (next) => {
+        const { error } = await supabase.rpc(
+          "lms_save_quiz_draft" as never,
+          {
+            _quiz_id: syncQuizId,
+            _quiz_version: syncVersion,
+            _attempts_used: syncAttempt,
+            _answers: next,
+          } as never,
+        );
+        if (error) throw error;
+      },
+      // Retrying cannot fix these; the device copy keeps the answers meanwhile.
+      isFinal: (error) =>
+        /already_submitted|quiz_changed|not enrolled|could not find the function/i.test(
+          String((error as { message?: string })?.message ?? error),
+        ),
+      onStatus: (status) => {
+        if (active) setSaveStatus(status);
+      },
+    });
+    const entry = { sync, quizId: syncQuizId, version: syncVersion, attempt: syncAttempt };
+    draftSync.current = entry;
+    if (draftToUpload.current) {
+      sync.save(draftToUpload.current);
+      draftToUpload.current = null;
+    }
+    // Send at once when the student switches away or the connection comes back.
+    const flush = () => sync.flush();
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") sync.flush();
+    };
+    window.addEventListener("online", flush);
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      active = false;
+      window.removeEventListener("online", flush);
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibility);
+      // Leaving the quiz: whatever is still queued goes now and keeps retrying.
+      sync.flush();
+      if (draftSync.current === entry) draftSync.current = null;
+    };
+  }, [userId, syncQuizId, syncVersion, syncAttempt, syncOpen]);
+
+  const draftKey = state && userId ? quizDraftKey(userId, state.quiz.id, state.quiz.version) : null;
+
+  const answerQuestion = (key: string, index: number) => {
+    const next = { ...answers, [key]: index };
+    setAnswers(next);
+    // On the device at once, on the server a moment later.
+    if (draftKey && state) saveQuizDraft(draftKey, next, state.attempts_used);
+    draftSync.current?.sync.save(next);
+  };
+
   const onSubmit = async () => {
     if (
       !state ||
@@ -221,6 +347,11 @@ function QuizPage() {
     if (getUnansweredQuestions(state.questions, answers).length) return;
     submitInFlight.current = true;
     setSubmitting(true);
+    // Hold server saves while submitting, so none can land after the attempt.
+    // Unless the attempt is recorded (or can no longer be), they start again.
+    const sync = draftSync.current?.sync;
+    let keepDraft = true;
+    await sync?.stop();
     try {
       const { data, error } = await supabase.rpc(
         "lms_submit_quiz_v2" as never,
@@ -244,9 +375,13 @@ function QuizPage() {
               : "Please answer every question. If the quiz changed, reload it before trying again.",
           );
         } else if (msg.includes("already_passed")) {
+          keepDraft = false;
+          if (draftKey) clearQuizDraft(draftKey);
           toast.error(tr.quizLockedPassed);
           setReloadKey((k) => k + 1);
         } else if (msg.includes("attempts_exhausted")) {
+          keepDraft = false;
+          if (draftKey) clearQuizDraft(draftKey);
           toast.error(tr.quizLockedAttempts);
           setReloadKey((k) => k + 1);
         } else if (msg.includes("cooldown_active")) {
@@ -266,6 +401,9 @@ function QuizPage() {
         }
         return;
       }
+      // Recorded: the server deletes its copy itself (lms_quiz_attempts trigger).
+      keepDraft = false;
+      if (draftKey) clearQuizDraft(draftKey);
       setResult(data as Result);
       // Refresh list statuses and the saved-attempt review data WITHOUT remounting
       // the attempt loader (that would wipe the freshly shown result).
@@ -286,6 +424,7 @@ function QuizPage() {
     } catch (error) {
       toast.error(toUserMessage(error));
     } finally {
+      if (keepDraft) sync?.resume(latestAnswers.current);
       submitInFlight.current = false;
       setSubmitting(false);
     }
@@ -608,7 +747,8 @@ function QuizPage() {
       title={title}
       questions={state.questions}
       answers={answers}
-      onAnswer={(key, index) => setAnswers((current) => ({ ...current, [key]: index }))}
+      onAnswer={answerQuestion}
+      saveStatus={saveStatus}
       onSubmit={onSubmit}
       onBack={goToList}
       onReview={reviewData ? () => setShowReview(true) : undefined}

@@ -142,9 +142,13 @@ export function CourseFeedbackPrompt({ courseId, ar, context }: Props) {
             {ar ? "شهادتك جاهزة" : "Your certificate is ready"}
           </p>
           <p>
-            {ar
-              ? "أكملت الدورة وأرسلت تقييمك. شكراً لك!"
-              : "You finished the course and sent your feedback. Thank you!"}
+            {view.skipped
+              ? ar
+                ? "أكملت الدورة. يمكنك الحصول على شهادتك الآن."
+                : "You finished the course. You can get your certificate now."
+              : ar
+                ? "أكملت الدورة وأرسلت تقييمك. شكراً لك!"
+                : "You finished the course and sent your feedback. Thank you!"}
           </p>
         </div>
         <Link

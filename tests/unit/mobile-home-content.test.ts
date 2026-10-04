@@ -206,7 +206,7 @@ describe("mobile homepage rendered output", () => {
       expect(hero).not.toContain("<video");
       expect(hero).not.toContain("mh-is-revealed");
       expect(hero).toContain("mh-hero-guide");
-      expect(hero).toContain("/cinematic/images/abu-al-joud-comic-welcome.webp");
+      expect(hero).toContain("/mascot/abu-al-joud/welcome.webp");
     }
   });
 
@@ -285,7 +285,12 @@ describe("mobile homepage rendered output", () => {
     const nonNewsAssets = new Set([
       "/cinematic/images/initiative-tree.svg",
       "/cinematic/images/logo-tree-transparent.png",
-      "/cinematic/images/abu-al-joud-comic-welcome.webp",
+      "/mascot/abu-al-joud/welcome.webp",
+      "/mascot/abu-al-joud/explain.webp",
+      "/mascot/abu-al-joud/think.webp",
+      "/mascot/abu-al-joud/celebrate.webp",
+      "/mascot/abu-al-joud/vision.webp",
+      "/mascot/abu-al-joud/avatar.webp",
       "/cinematic/images/faq-phone-mockup.avif",
       // MotionFooter, the desktop's footer.
       "/cinematic/images/saae-logo-ar.png",

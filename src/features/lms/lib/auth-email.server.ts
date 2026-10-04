@@ -7,6 +7,8 @@ import * as React from "react";
 import { createHash } from "crypto";
 import { render } from "@react-email/components";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { saveSignupLocation } from "@/features/user-location/lib/location.server";
+import type { UserLocation } from "@/features/user-location/lib/location";
 import { SignupEmail } from "@/lib/email/templates/signup";
 import { RecoveryEmail } from "@/lib/email/templates/recovery";
 
@@ -18,6 +20,7 @@ type SignupInput = {
   password: string;
   asInstructor: boolean;
   lang: Lang;
+  location?: UserLocation;
 };
 
 type ResetInput = {
@@ -183,6 +186,7 @@ export async function createLmsAccount(input: SignupInput): Promise<CreateAccoun
 
     const userId = data.user?.id;
     if (userId) await assignLmsRoles(userId, input);
+    if (userId && input.location) await saveSignupLocation(userId, input.location);
 
     return { sentTo: email, email, confirmationRequired: false };
   }
@@ -202,6 +206,7 @@ export async function createLmsAccount(input: SignupInput): Promise<CreateAccoun
 
   const userId = data.user?.id;
   if (userId) await assignLmsRoles(userId, input);
+  if (userId && input.location) await saveSignupLocation(userId, input.location);
 
   const confirmationUrl = getActionLink(data);
   const siteName = SITE_NAMES[input.lang];

@@ -57,7 +57,7 @@ export const grantRoleByEmail = createServerFn({ method: "POST" })
     if (!foundId) throw new Error("لم يتم العثور على مستخدم بهذا الإيميل / User not found");
 
     // The payment reviewer is added next to the account's other roles, not
-    // instead of them (migration 20260930120100_course_payments_sham_cash.sql).
+    // instead of them (migration 20261004120000_course_payments_sham_cash.sql).
     const { error: roleError } =
       data.role === "lms_payment_admin"
         ? await context.supabase.rpc(

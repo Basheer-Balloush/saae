@@ -6,6 +6,7 @@ import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n/i18n";
 import { LMS_PAYMENTS, NAV, SYSTEM_ENTRY, isNavActive, systemForPath, type NavItem } from "./nav";
 import { useConsoleCounts, type ConsoleCounts } from "./useConsoleCounts";
+import { LocationGate } from "@/features/user-location/LocationGate";
 import "./console.css";
 
 /* The one frame around every management page: CMS, LMS admin, the
@@ -16,7 +17,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
   const ar = lang === "ar";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const { user, role } = useLmsAuth();
+  const { user, role, isGuest } = useLmsAuth();
   const isAdmin = role === "admin";
   const system = systemForPath(pathname, isAdmin);
   const { data: counts } = useConsoleCounts(isAdmin);
@@ -165,6 +166,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
         </div>
         <main className="cx-content">{children}</main>
       </div>
+      {user && !isGuest && <LocationGate userId={user.id} lang={lang} />}
     </div>
   );
 }

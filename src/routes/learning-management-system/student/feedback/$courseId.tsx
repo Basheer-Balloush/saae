@@ -9,6 +9,7 @@ import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import {
   getCourseFeedback,
   saveCourseFeedbackDraft,
+  skipCourseFeedback,
   submitCourseFeedback,
   type CourseFeedbackView,
 } from "@/features/lms/course-feedback/lib/feedback.functions";
@@ -40,6 +41,7 @@ function CourseFeedback() {
   const load = useServerFn(getCourseFeedback);
   const saveDraft = useServerFn(saveCourseFeedbackDraft);
   const submit = useServerFn(submitCourseFeedback);
+  const skipForm = useServerFn(skipCourseFeedback);
 
   const [view, setView] = useState<CourseFeedbackView | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -50,9 +52,11 @@ function CourseFeedback() {
   const [showMissing, setShowMissing] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [submitting, setSubmitting] = useState(false);
+  const [skipping, setSkipping] = useState(false);
   const [done, setDone] = useState<{
     certificateId: string | null;
     waitingFor: "payment" | "account" | null;
+    skipped: boolean;
   } | null>(null);
   const topRef = useRef<HTMLDivElement | null>(null);
   const dirty = useRef(false);
@@ -163,7 +167,11 @@ function CourseFeedback() {
         },
       });
       dirty.current = false;
-      setDone({ certificateId: res.certificateId, waitingFor: res.waitingFor });
+      setDone({
+        certificateId: res.certificateId,
+        waitingFor: res.waitingFor,
+        skipped: res.skipped,
+      });
       topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
@@ -190,6 +198,29 @@ function CourseFeedback() {
       );
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // Skipping needs no answers: the form closes and the certificate follows.
+  const skip = async () => {
+    setSkipping(true);
+    try {
+      const res = await skipForm({ data: { courseId, answers, notes, lang } });
+      dirty.current = false;
+      setDone({
+        certificateId: res.certificateId,
+        waitingFor: res.waitingFor,
+        skipped: res.skipped,
+      });
+      topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch {
+      toast.error(
+        ar
+          ? "تعذّر تخطّي التقييم. حاول مجدداً بعد قليل."
+          : "The feedback could not be skipped. Try again in a moment.",
+      );
+    } finally {
+      setSkipping(false);
     }
   };
 
@@ -244,19 +275,30 @@ function CourseFeedback() {
   const certificateId = done?.certificateId ?? view.certificateId;
   const waitingFor = certificateId ? null : (done?.waitingFor ?? view.waitingFor);
   const waitingForPayment = waitingFor === "payment";
+  const skipped = done?.skipped ?? view.skipped;
 
   if (done || view.state === "submitted") {
     return shell(
       <section className="feedback-done" aria-labelledby="feedback-done-h">
         <CheckCircle2 aria-hidden="true" />
         <h1 id="feedback-done-h">
-          {ar ? "شكراً لك! وصلنا تقييمك." : "Thank you. Your feedback is in."}
+          {skipped
+            ? ar
+              ? "تخطّيت التقييم."
+              : "You skipped the feedback."
+            : ar
+              ? "شكراً لك! وصلنا تقييمك."
+              : "Thank you. Your feedback is in."}
         </h1>
         <p>
           {certificateId
-            ? ar
-              ? "أكملت جميع متطلبات الدورة، وشهادتك جاهزة."
-              : "You have met every requirement of the course, and your certificate is ready."
+            ? skipped
+              ? ar
+                ? "أكملت الدورة، وشهادتك جاهزة."
+                : "You have finished the course, and your certificate is ready."
+              : ar
+                ? "أكملت جميع متطلبات الدورة، وشهادتك جاهزة."
+                : "You have met every requirement of the course, and your certificate is ready."
             : waitingFor === "account"
               ? ar
                 ? "أكملت الدورة! أنشئ حسابك لتصدر شهادتك باسمك، وتبقى فيه كل دوراتك وتقدّمك."
@@ -468,7 +510,25 @@ function CourseFeedback() {
                 {ar ? "السابق" : "Back"}
               </button>
             ) : null}
-            <button type="submit" className="action action-primary" disabled={submitting}>
+            <button
+              type="button"
+              className="action action-secondary feedback-skip"
+              disabled={submitting || skipping}
+              onClick={() => void skip()}
+            >
+              {skipping
+                ? ar
+                  ? "جارٍ التخطّي…"
+                  : "Skipping…"
+                : ar
+                  ? "تخطّي التقييم"
+                  : "Skip feedback"}
+            </button>
+            <button
+              type="submit"
+              className="action action-primary"
+              disabled={submitting || skipping}
+            >
               {last
                 ? submitting
                   ? ar

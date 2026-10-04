@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { RECEIPTS_BUCKET } from "../config";
 
-/* Course payments (migration 20260930120100_course_payments_sham_cash.sql).
+/* Course payments (migration 20261004120000_course_payments_sham_cash.sql).
    The generated Supabase types predate these tables and functions, so this
    module talks to them untyped and owns their types. Regenerating
    src/integrations/supabase/types.ts later does not change anything here. */

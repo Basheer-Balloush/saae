@@ -1,3 +1,4 @@
+import { ABU_AL_JOUD } from "@/features/chat/lib/mascot";
 /* Abu Al-Joud's page-guide copy, shared by the desktop guide
    (DesktopSectionGuide) and the phone one (MobileSectionGuide). */
 
@@ -115,8 +116,8 @@ export const SECTION_COPY: Record<Exclude<GuideContext, "hero">, Record<Locale, 
 };
 
 export const SECTION_COMIC_IMAGES: Record<Exclude<GuideContext, "hero">, string> = {
-  news: "/cinematic/images/abu-al-joud-comic-welcome.webp",
-  partners: "/cinematic/images/abu-al-joud-comic-celebrate.webp",
-  mission: "/cinematic/images/abu-al-joud-comic-curious.webp",
-  faq: "/cinematic/images/abu-al-joud-comic-vision.webp",
+  news: ABU_AL_JOUD.explain,
+  partners: ABU_AL_JOUD.vision,
+  mission: ABU_AL_JOUD.explain,
+  faq: ABU_AL_JOUD.think,
 };

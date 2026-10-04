@@ -17,6 +17,13 @@ import { lmsRedirectSearchSchema } from "@/features/lms/lib/redirect";
 import { AuthLayout } from "@/features/lms/skin/AuthLayout";
 import { NewPasswordFields } from "@/features/lms/skin/NewPasswordFields";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
+import { LocationFields } from "@/features/user-location/LocationFields";
+import {
+  EMPTY_LOCATION,
+  checkLocation,
+  locationErrorMessage,
+} from "@/features/user-location/lib/location";
+import { saveMyLocation } from "@/features/user-location/lib/location.functions";
 
 export const Route = createFileRoute("/learning-management-system/signup")({
   head: () => ({
@@ -76,6 +83,7 @@ function LmsSignup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [asInstructor, setAsInstructor] = useState(false);
+  const [location, setLocation] = useState(EMPTY_LOCATION);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ email: string; confirmationRequired: boolean } | null>(
     null,
@@ -89,6 +97,7 @@ function LmsSignup() {
   const resendConfirmation = useServerFn(resendLmsConfirmationEmail);
   const upgradeGuest = useServerFn(startGuestUpgrade);
   const resendUpgrade = useServerFn(resendGuestUpgrade);
+  const saveLocation = useServerFn(saveMyLocation);
 
   // A guest's name from the enrollment form fills the name field.
   useEffect(() => {
@@ -180,9 +189,17 @@ function LmsSignup() {
       }
       return;
     }
+    const checkedLocation = checkLocation(location);
+    if ("missing" in checkedLocation) {
+      toast.error(locationErrorMessage(lang, checkedLocation.missing));
+      return;
+    }
     setSubmitting(true);
     try {
       if (isGuest) {
+        // The guest is signed in already, so the location is saved as theirs
+        // now; the account keeps it. A failure here must not block the account.
+        await saveLocation({ data: checkedLocation.location }).catch(() => undefined);
         // The guest account itself becomes the new account.
         const res = await upgradeGuest({
           data: {
@@ -209,6 +226,7 @@ function LmsSignup() {
           password,
           asInstructor,
           lang,
+          location: checkedLocation.location,
         },
       });
       // The server is the single source of truth for whether confirmation is required.
@@ -345,6 +363,12 @@ function LmsSignup() {
                 placeholder="name@example.com"
               />
             </div>
+            <LocationFields
+              value={location}
+              onChange={setLocation}
+              lang={lang}
+              idPrefix="signup-loc"
+            />
             {!isGuest && (
               <NewPasswordFields
                 password={password}

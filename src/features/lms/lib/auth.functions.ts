@@ -6,6 +6,7 @@ import {
   resendLmsConfirmation,
 } from "./auth-email.server";
 import { PASSWORD_MIN } from "@/lib/auth/password-policy";
+import { locationSchema } from "@/features/user-location/lib/location";
 
 const langSchema = z.enum(["ar", "en"]);
 
@@ -29,6 +30,8 @@ const signupSchema = z.object({
   password: z.string().min(PASSWORD_MIN).max(72),
   asInstructor: z.boolean(),
   lang: langSchema,
+  // Optional here so a page opened before this field existed can still sign up.
+  location: locationSchema.optional(),
 });
 
 const resetSchema = z.object({

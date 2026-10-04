@@ -91,7 +91,10 @@
   .lms-skin .feedback-steps li:not(.is-current) { display: none; }
   .lms-skin .feedback-choices.is-scale { grid-template-columns: minmax(0, 1fr); }
   .lms-skin .feedback-choices.is-scale .feedback-choice { justify-content: flex-start; text-align: start; min-height: 48px; }
-  .lms-skin .feedback-buttons { width: 100%; justify-content: space-between; }
+  .lms-skin .feedback-buttons { width: 100%; flex-wrap: wrap; justify-content: space-between; gap: 12px 20px; }
+  .lms-skin .feedback-buttons button[type="submit"] { margin-inline-start: auto; }
+  /* Skipping gets its own full-width row under Back and Next. */
+  .lms-skin .feedback-buttons .feedback-skip { order: 3; flex: 1 1 100%; }
   .lms-skin .course-next-step { padding: 16px; }
   .lms-skin .course-next-step > .action { width: 100%; justify-content: center; }
 }

@@ -16,8 +16,6 @@ export type CatalogRow = {
   sale_price: number | null;
   delivery_mode: string | null;
   end_date?: string | null;
-  description_ar?: string | null;
-  description_en?: string | null;
 };
 
 export type CourseOption = {
@@ -26,15 +24,6 @@ export type CourseOption = {
   level: string | null;
   price: string;
   delivery_mode: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  schedule_time_from: string | null;
-  schedule_time_to: string | null;
-  location: string | null;
-  description: string | null;
-  topics: string[];
-  registration_status: "ended" | "full" | "closed" | "open" | "unknown";
-  seats_confirmed: false;
 };
 
 export const courseUrl = (row: { slug: string | null; id: string }) =>
@@ -44,7 +33,10 @@ export const courseUrl = (row: { slug: string | null; id: string }) =>
    (CoursePrice renders "ل.س 500" / "500 SYP"), so the assistant must quote the
    same currency — a price the visitor cannot compare to the course page is worse
    than no price. */
-function priceLabel(row: CatalogRow, lang: "ar" | "en"): string {
+export function priceLabel(
+  row: Pick<CatalogRow, "is_free" | "price" | "sale_price">,
+  lang: "ar" | "en",
+): string {
   if (row.is_free) return lang === "ar" ? "مجاني" : "Free";
   const effective = row.sale_price != null && row.sale_price > 0 ? row.sale_price : row.price;
   if (effective == null || Number.isNaN(effective))
@@ -66,15 +58,6 @@ export function toCourseOptions(rows: CatalogRow[], lang: "ar" | "en", limit = 3
       level: row.level,
       price: priceLabel(row, lang),
       delivery_mode: row.delivery_mode,
-      start_date: null,
-      end_date: row.end_date ?? null,
-      schedule_time_from: null,
-      schedule_time_to: null,
-      location: null,
-      description: lang === "ar" ? (row.description_ar ?? null) : (row.description_en ?? null),
-      topics: [],
-      registration_status: "unknown",
-      seats_confirmed: false,
     }));
 }
 
