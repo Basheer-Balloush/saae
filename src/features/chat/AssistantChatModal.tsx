@@ -307,7 +307,7 @@ export function AssistantChatModal({
                         key={message.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`assistant-chat-message ${isUser ? "is-user" : "is-assistant"}`}
+                        className={`assistant-chat-message ${isUser ? "is-user" : "is-assistant"}${showChoices ? " has-choices" : ""}`}
                       >
                         {!isUser && (
                           <span className="assistant-chat-message-avatar" aria-hidden="true">
