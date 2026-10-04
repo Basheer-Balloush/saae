@@ -80,11 +80,14 @@ export function Register({
   amsId,
   lmsCourseId,
   canDelete = true,
+  canAddPeople = true,
   showPayments = false,
 }: {
   amsId: string;
   lmsCourseId: string | null;
   canDelete?: boolean;
+  /** Admins add people by hand; instructors take attendance for the enrolled. */
+  canAddPeople?: boolean;
   /** LMS admins: on a course linked to the learning platform, payments come
       from the course's payment record instead of the status here. */
   showPayments?: boolean;
@@ -359,10 +362,12 @@ export function Register({
         )}
         actions={
           <>
-            <Button size="sm" onClick={() => setAdding("person")}>
-              <UserPlus className="h-4 w-4" />
-              {t("إضافة شخص", "Add person")}
-            </Button>
+            {canAddPeople && (
+              <Button size="sm" onClick={() => setAdding("person")}>
+                <UserPlus className="h-4 w-4" />
+                {t("إضافة شخص", "Add person")}
+              </Button>
+            )}
             {!linked && (
               <Button size="sm" variant="outline" onClick={() => setAdding("session")}>
                 <CalendarPlus className="h-4 w-4" />

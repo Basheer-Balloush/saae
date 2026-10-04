@@ -1,33 +1,21 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
+import type { LmsRole } from "@/features/lms/lib/roles";
+
+/* Admins and every instructor may sign in. Which courses an instructor sees is
+   decided in the database (can_access_ams_course: only courses they teach), so
+   an instructor without a current course gets an empty list rather than a
+   refused sign-in. */
+export function canUseAms(role: LmsRole): boolean {
+  return role === "admin" || role === "lms_instructor";
+}
 
 export function useAmsAuth() {
-  const { user, session, role, loading: authLoading } = useLmsAuth();
-  const key = `${user?.id ?? ""}:${role ?? ""}`;
-  const [result, setResult] = useState<{ key: string; allowed: boolean } | null>(null);
-  useEffect(() => {
-    if (authLoading || !user || role !== "lms_instructor") return;
-    let cancelled = false;
-    supabase.rpc("has_ams_portal_access").then(
-      ({ data, error }) => {
-        if (!cancelled) setResult({ key, allowed: !error && !!data });
-      },
-      () => {
-        if (!cancelled) setResult({ key, allowed: false });
-      },
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [key, user?.id, role, authLoading]);
-  const pending = role === "lms_instructor" && result?.key !== key;
+  const { user, session, role, loading } = useLmsAuth();
   return {
     user,
     session,
-    loading: authLoading || pending,
-    hasAccess:
-      !authLoading &&
-      (role === "admin" || (role === "lms_instructor" && result?.key === key && result.allowed)),
+    role,
+    loading,
+    hasAccess: !loading && canUseAms(role),
   };
 }

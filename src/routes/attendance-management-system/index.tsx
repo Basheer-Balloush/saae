@@ -24,7 +24,9 @@ export const Route = createFileRoute("/attendance-management-system/")({
   component: AmsHome,
 });
 
-/* The phone app: the same attendance screens as the console, in the site's colours. */
+/* The phone app: the same attendance screens as the console, in the site's colours.
+   Admins manage everything; an instructor sees their current courses and takes
+   attendance (sessions of a linked course come from its sections). */
 function AmsHome() {
   useConsoleRoot();
   const search = Route.useSearch();
@@ -37,7 +39,8 @@ function AmsHome() {
     >
       <AttendanceHome
         isAdmin={role === "admin"}
-        canManage
+        canManage={role === "admin"}
+        instructorView={role !== "admin"}
         courseId={search.course}
         onCourseChange={(id) => navigate({ search: id ? { course: id } : {} })}
       />
