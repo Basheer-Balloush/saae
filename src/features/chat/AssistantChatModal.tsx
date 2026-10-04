@@ -42,13 +42,16 @@ export function AssistantChatModal({
     typeof window === "undefined" ? SSR_SESSION : loadChatSession(),
   );
   const sessionId = session.id;
+  // Read at send time, so a message always goes to the conversation the
+  // visitor is looking at, even when the session changed in the same render.
+  const sessionIdRef = useRef(session.id);
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: { sessionId, lang },
+        body: () => ({ sessionId: sessionIdRef.current, lang }),
       }),
-    [sessionId, lang],
+    [lang],
   );
 
   const { messages, sendMessage, setMessages, status, error, regenerate, clearError } = useChat({
@@ -56,19 +59,30 @@ export function AssistantChatModal({
     messages: session.messages as UIMessage[],
   });
 
-  // Opening the widget after a long pause starts a fresh conversation.
+  // Opening the widget after a long pause starts a fresh conversation. The
+  // session is settled before a prefilled question (a "join this community"
+  // button, a section guide) is sent: sending first put the question in the
+  // expired conversation, then the switch cleared the window, and the visitor
+  // asked again in a second conversation.
   useEffect(() => {
     if (!open) return;
     const current = loadChatSession();
-    if (current.id === sessionId) return;
-    setSession(current);
-    setMessages(current.messages as UIMessage[]);
-  }, [open, sessionId, setMessages]);
+    if (current.id !== sessionIdRef.current) {
+      sessionIdRef.current = current.id;
+      setSession(current);
+      setMessages(current.messages as UIMessage[]);
+    }
+    if (prefill) {
+      sendMessage({ text: prefill });
+      onPrefillConsumed?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, prefill]);
 
   // Keep this device's copy in step with what the server stores for the conversation.
   useEffect(() => {
     if (messages.length === 0) return;
-    saveChatSession({ id: sessionId, lastActivity: Date.now(), messages });
+    saveChatSession({ id: sessionIdRef.current, lastActivity: Date.now(), messages });
   }, [messages, sessionId]);
 
   const isLoading = status === "submitted" || status === "streaming";
@@ -168,14 +182,6 @@ export function AssistantChatModal({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
-
-  useEffect(() => {
-    if (open && prefill) {
-      sendMessage({ text: prefill });
-      onPrefillConsumed?.();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, prefill]);
 
   function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
