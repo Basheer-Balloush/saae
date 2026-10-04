@@ -19,13 +19,24 @@ async function assertAdmin(sb: SupabaseClient, userId: string) {
   if (!data) throw new Error("Forbidden: admin role required");
 }
 
+/* scripts/chat-eval.mjs asks the live bot real questions, one fresh session
+   each, under these session-id prefixes. Those runs are tests, not visitors:
+   the conversation list and its counts leave them out. */
+function withoutTestRuns<Q extends { not: (column: string, op: string, value: string) => Q }>(
+  query: Q,
+): Q {
+  return query.not("session_id", "like", "eval-%").not("session_id", "like", "claude-check%");
+}
+
 export const listConversations = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { data, error } = await context.supabase
-      .from("chat_conversations")
-      .select("id, session_id, lang, message_count, started_at, last_message_at")
+    const { data, error } = await withoutTestRuns(
+      context.supabase
+        .from("chat_conversations")
+        .select("id, session_id, lang, message_count, started_at, last_message_at"),
+    )
       .order("last_message_at", { ascending: false })
       .limit(500);
     if (error) throw new Error(error.message);
@@ -125,15 +136,13 @@ export const getChatStats = createServerFn({ method: "GET" })
     const since = (days: number) => new Date(Date.now() - days * 86400000).toISOString();
 
     const [convAll, conv7, conv30, msgAll, indLeads, compLeads] = await Promise.all([
-      sb.from("chat_conversations").select("id", { count: "exact", head: true }),
-      sb
-        .from("chat_conversations")
-        .select("id", { count: "exact", head: true })
-        .gte("last_message_at", since(7)),
-      sb
-        .from("chat_conversations")
-        .select("id", { count: "exact", head: true })
-        .gte("last_message_at", since(30)),
+      withoutTestRuns(sb.from("chat_conversations").select("id", { count: "exact", head: true })),
+      withoutTestRuns(
+        sb.from("chat_conversations").select("id", { count: "exact", head: true }),
+      ).gte("last_message_at", since(7)),
+      withoutTestRuns(
+        sb.from("chat_conversations").select("id", { count: "exact", head: true }),
+      ).gte("last_message_at", since(30)),
       sb.from("chat_messages").select("id", { count: "exact", head: true }),
       sb.from("individual_leads").select("id", { count: "exact", head: true }),
       sb.from("company_leads").select("id", { count: "exact", head: true }),
