@@ -758,7 +758,7 @@ export const Route = createFileRoute("/api/chat")({
 
           send_to_team: tool({
             description:
-              "Last resort only: send the visitor's question to the association's team, who reply by email. Use it when the tools and knowledge base cannot answer, after the visitor agrees and gives their name and email. Then tell them the team will reply by email, without promising a time.",
+              "Last resort only: send the visitor's question to the association's team, who reply by email. Use it when the tools and knowledge base cannot answer, after the visitor agrees and gives their name and email. Then tell them the team usually replies by email within 24 to 48 hours.",
             inputSchema: z.object({
               full_name: z.string().min(2).max(120),
               email: z.string().email().max(200),
