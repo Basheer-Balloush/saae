@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 import appCss from "../styles.css?url";
+import desktopMotion from "@/lib/desktop-motion.js?raw";
 import { LanguageProvider, useLang } from "@/lib/i18n/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "@/components/ui/sonner";
@@ -209,6 +210,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning style={ground}>
       <head>
+        {/* First, so every later script sees it. */}
+        <script dangerouslySetInnerHTML={{ __html: desktopMotion }} />
         {analytics && (
           <>
             <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM4Y7E9Y96" />
