@@ -328,7 +328,7 @@ export const ACHIEVEMENTS: AchievementEntry[] = [
   { value: "5,000+", count: 5000, label: { ar: "متدربون", en: "trainees" } },
   { value: "120+", count: 120, label: { ar: "دورات", en: "courses" } },
   { value: "30+", count: 30, label: { ar: "شركاء استراتيجيون", en: "strategic partners" } },
-  { value: "9", count: 9, label: { ar: "مجتمعات", en: "communities" } },
+  { value: "8", count: 8, label: { ar: "مجتمعات", en: "communities" } },
 ];
 
 export const NEWS_COPY = {
