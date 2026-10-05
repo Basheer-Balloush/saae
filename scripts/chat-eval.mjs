@@ -71,6 +71,12 @@ const CASES = [
     q: "شو فرص التدريب العملي المتاحة حالياً؟",
     must: [/MultiOmics|المعلوماتية الحيوية/, /إدارة وتشغيل الأعمال/, /شركات ناشئة/],
   },
+  // "فرص التدريب" means internships only, all of the open ones.
+  {
+    q: "شو فرص التدريب حاليا",
+    must: [/MultiOmics|المعلوماتية الحيوية/, /إدارة وتشغيل الأعمال/, /شركات ناشئة/],
+    mustNot: [/courses\//, /المعدات الطبية/],
+  },
   // "Training programme" covers courses and internships alike.
   {
     q: "كم برنامج تدريبي متاح حاليا للتقديم ؟",
