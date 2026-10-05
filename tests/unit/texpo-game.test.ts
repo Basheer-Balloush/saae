@@ -21,6 +21,7 @@ import {
 } from "@/features/texpo/lib/texpo-shared";
 import { safeLmsRedirect } from "@/features/lms/lib/redirect";
 import { assistantPlacement } from "@/features/chat/lib/assistant-placement";
+import { cookieDomain } from "@/features/texpo/lib/play-store";
 
 const bank = TEXPO_QUESTIONS;
 const identity = bank.map(() => [0, 1, 2, 3]);
@@ -176,6 +177,15 @@ describe("sign-in return", () => {
     expect(safeLmsRedirect("/texpo/../admin")).toBeUndefined();
     expect(safeLmsRedirect("//evil.example/texpo")).toBeUndefined();
     expect(safeLmsRedirect("https://evil.example/texpo")).toBeUndefined();
+  });
+});
+
+describe("the saved play", () => {
+  it("is shared between aisyria.org and www.aisyria.org, and stays host-only elsewhere", () => {
+    expect(cookieDomain("aisyria.org")).toBe("aisyria.org");
+    expect(cookieDomain("www.aisyria.org")).toBe("aisyria.org");
+    expect(cookieDomain("localhost")).toBeNull();
+    expect(cookieDomain("notaisyria.org")).toBeNull();
   });
 });
 
