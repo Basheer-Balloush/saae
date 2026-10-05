@@ -63,7 +63,20 @@ const CASES = [
     must: [/MultiOmics|المعلوماتية الحيوية/, /internships\//],
     mustNot: [/غير مدرجة|غير موجودة|غير متوفرة/],
   },
-  { q: "شو فرص التدريب العملي المتاحة حالياً؟", must: [/internships/] },
+  {
+    q: "شو فرص التدريب العملي المتاحة حالياً؟",
+    must: [/MultiOmics|المعلوماتية الحيوية/, /إدارة وتشغيل الأعمال/, /شركات ناشئة/],
+  },
+  // "Training programme" covers courses and internships alike.
+  {
+    q: "كم برنامج تدريبي متاح حاليا للتقديم ؟",
+    must: [/MultiOmics|المعلوماتية الحيوية|إدارة وتشغيل|شركات ناشئة/, /courses\/|دورة|دورات/],
+  },
+  // No invented dialect words.
+  {
+    q: "بالنسبة الى مهندس ذكاء صنعي ai مثلي ...ما هي برامج التدريب التي قد تفيدني",
+    mustNot: [/بهلكونه|عري عيني|فيكفي/],
+  },
   // Partners: a closed list.
   { q: "هل منظمة SYNC شريكة للجمعية؟", must: [/غير مذكورة|ليست|لا تظهر|ليس/], mustNot: [/^نعم/] },
   { q: "مين شركاء الجمعية؟", must: [/partners/], mustNot: [/SYNC|اليونيسف|UNICEF|Sarda Tech/] },
