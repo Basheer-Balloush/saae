@@ -479,7 +479,7 @@ export function Register({
                             <button
                               type="button"
                               onClick={() => removeSession(s)}
-                              className="opacity-0 transition-opacity group-hover:opacity-100 hover:text-[var(--cx-red)]"
+                              className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100 hover:text-[var(--cx-red)]"
                               aria-label={t("حذف الجلسة", "Delete session")}
                             >
                               <Trash2 className="h-3 w-3" />
