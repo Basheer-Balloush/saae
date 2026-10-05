@@ -38,6 +38,8 @@ import {
 } from "@/features/chat/lib/admin-chat.functions";
 import { FEEDBACK_CATEGORIES, feedbackCategoryLabel } from "@/features/chat/lib/chat-feedback";
 import { splitKnowledgeSections } from "@/features/chat/lib/knowledge-sections";
+import { parseChoices } from "@/features/chat/lib/chat-choices";
+import { formatMessage } from "@/features/chat/lib/chat-format";
 import { confirmDialog } from "@/hooks/useConfirm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -891,12 +893,58 @@ function Transcript({ id }: { id: string }) {
               className={`max-w-[82%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed ${user ? "rounded-ee-md bg-[var(--cx-petrol)] text-white" : "rounded-es-md border border-[var(--cx-line)] bg-[var(--cx-raise)]"}`}
               dir="auto"
             >
-              {m.content || <em className="opacity-60">[{m.role}]</em>}
+              {!m.content ? (
+                <em className="opacity-60">[{m.role}]</em>
+              ) : user ? (
+                m.content
+              ) : (
+                <AssistantTranscriptText content={m.content} />
+              )}
             </div>
           </div>
         );
       })}
     </div>
+  );
+}
+
+/* An assistant message as the visitor saw it: short clickable links instead of
+   raw [label](url) markdown (which also scrambled Arabic lines), bold text, and
+   the answer buttons as small labels instead of the [[choices: …]] line. */
+function AssistantTranscriptText({ content }: { content: string }) {
+  const { text, choices } = parseChoices(content);
+  return (
+    <>
+      {formatMessage(text).map((seg, i) =>
+        seg.href ? (
+          <a
+            key={i}
+            href={seg.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-bold text-[var(--cx-teal)] underline underline-offset-2"
+          >
+            {seg.text}
+          </a>
+        ) : seg.bold ? (
+          <strong key={i}>{seg.text}</strong>
+        ) : (
+          <span key={i}>{seg.text}</span>
+        ),
+      )}
+      {choices.length > 0 && (
+        <span className="mt-2 flex flex-wrap gap-1.5">
+          {choices.map((choice) => (
+            <span
+              key={choice}
+              className="rounded-full border border-[var(--cx-line)] px-2.5 py-0.5 text-[12px] text-[var(--cx-muted)]"
+            >
+              {choice}
+            </span>
+          ))}
+        </span>
+      )}
+    </>
   );
 }
 

@@ -539,10 +539,13 @@
   height: 18px;
 }
 
-.assistant-chat-composer > p {
+/* "Abu Al-Joud can make mistakes": shown on every screen, phones included. */
+.assistant-chat-composer > p.assistant-chat-disclaimer {
+  display: block;
   margin: 7px auto 0;
-  color: rgba(159, 186, 190, 0.62);
-  font-size: 9px;
+  color: rgba(159, 186, 190, 0.72);
+  font-size: 11px;
+  line-height: 1.4;
   text-align: center;
 }
 

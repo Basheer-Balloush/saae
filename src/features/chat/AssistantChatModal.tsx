@@ -430,8 +430,8 @@ export function AssistantChatModal({
                   )}
                 </button>
               </div>
-              <p>
-                {isRtl ? "إجابات ذكية من معرفة الجمعية" : "Intelligent answers from SAAE knowledge"}
+              <p className="assistant-chat-disclaimer">
+                {isRtl ? "أبو الجود قد يخطئ" : "Abu Al-Joud can make mistakes"}
               </p>
             </form>
           </motion.section>
