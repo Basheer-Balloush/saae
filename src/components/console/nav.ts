@@ -13,6 +13,7 @@ import {
   Home,
   Inbox,
   LayoutDashboard,
+  Gamepad2,
   Link2,
   MapPin,
   Newspaper,
@@ -150,6 +151,7 @@ export const NAV: Record<ConsoleSystem, NavGroup[]> = {
           en: "Sign-up links",
           icon: Link2,
         },
+        { to: "/admin/crm/texpo", ar: "لعبة تكسبو", en: "Texpo game", icon: Gamepad2 },
         { to: "/admin/initiative", ar: "مبادرة المليون", en: "Initiative", icon: Sparkles },
         {
           to: "/admin/chatbot",

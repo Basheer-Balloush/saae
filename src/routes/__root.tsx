@@ -20,6 +20,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "@/components/ui/sonner";
 import { AssistantFab } from "@/features/chat/AssistantFab";
 import { assistantPlacement } from "@/features/chat/lib/assistant-placement";
+import { TexpoClaimNudge } from "@/features/texpo/TexpoClaimNudge";
 import { RouteProgress } from "@/components/app/RouteProgress";
 import { ScrollToHash } from "@/components/app/ScrollToHash";
 import { ConfirmProvider } from "@/hooks/useConfirm";
@@ -199,7 +200,10 @@ const CONSOLE_PATH =
 const isProfilePath = (pathname: string) => /^\/profile\//i.test(pathname);
 
 const isDarkPath = (pathname: string) =>
-  CINEMATIC_PATH.test(pathname) || isSkinnedLmsPath(pathname) || CONSOLE_PATH.test(pathname);
+  CINEMATIC_PATH.test(pathname) ||
+  isSkinnedLmsPath(pathname) ||
+  CONSOLE_PATH.test(pathname) ||
+  pathname === "/texpo";
 
 function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = useLocation({ select: (location) => location.pathname });
@@ -445,8 +449,10 @@ function RootComponent() {
             </AnimatePresence>
             {/* The homepage's Abu Al-Joud opens the chat there, on every screen size.
                 LMS pages show no floating launcher, but their footer's "Chat with
-                Abu Al-Joud" button opens the chat through the same event. */}
+                Abu Al-Joud" button opens the chat through the same event. On
+                /texpo he is the game's host and the game opens the chat. */}
             {assistant.mounted && <AssistantFab hideTrigger={!assistant.launcher} />}
+            {assistant.mounted && <TexpoClaimNudge />}
             <Toaster richColors position="top-center" />
           </ConfirmProvider>
         </LanguageProvider>
