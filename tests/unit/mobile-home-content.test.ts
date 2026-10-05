@@ -370,7 +370,7 @@ describe("mobile homepage rendered output", () => {
     for (const a of ACHIEVEMENTS.map((x) => x.value)) {
       expect(ar).toContain(a);
     }
-    expect(ar).toContain(">9<");
+    expect(ar).toContain(">8<");
   });
 });
 
