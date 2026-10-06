@@ -17,9 +17,6 @@ export const BADGES: Record<BadgeKey, { image: string; name: Bi; about: Bi }> = 
   "texpo-2026": {
     image: "/badges/texpo-2026.webp",
     name: { ar: "تكسبو 2026", en: "Texpo 2026" },
-    about: {
-      ar: "لعب تحدّي أبو الجود للذكاء الاصطناعي في معرض تكسبو",
-      en: "Played Abu Al-Joud's AI challenge at Texpo",
-    },
+    about: { ar: "حضور معرض تكسبو 2026", en: "Attended Texpo 2026" },
   },
 };
