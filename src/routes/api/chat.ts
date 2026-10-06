@@ -1051,7 +1051,14 @@ export const Route = createFileRoute("/api/chat")({
               firstTextMs = Date.now() - startedAt;
           },
           // Where the time goes, per reply. No message text or personal data.
-          onFinish: ({ steps, totalUsage, finishReason }) => {
+          onFinish: async ({ steps, totalUsage, finishReason }) => {
+            const tools = steps.flatMap((step) => step.toolCalls.map((call) => call.toolName));
+            const usage = {
+              input_tokens: totalUsage.inputTokens ?? null,
+              cached_input_tokens: totalUsage.inputTokenDetails?.cacheReadTokens ?? null,
+              output_tokens: totalUsage.outputTokens ?? null,
+              reasoning_tokens: totalUsage.outputTokenDetails?.reasoningTokens ?? null,
+            };
             console.log("[chat] timing", {
               conversationId,
               model: modelId,
@@ -1062,11 +1069,32 @@ export const Route = createFileRoute("/api/chat")({
               firstTextMs,
               totalMs: Date.now() - startedAt,
               steps: steps.length,
-              tools: steps.flatMap((step) => step.toolCalls.map((call) => call.toolName)),
-              inputTokens: totalUsage.inputTokens,
-              outputTokens: totalUsage.outputTokens,
+              tools,
+              inputTokens: usage.input_tokens,
+              cachedInputTokens: usage.cached_input_tokens,
+              outputTokens: usage.output_tokens,
+              reasoningTokens: usage.reasoning_tokens,
               finishReason,
             });
+            // One row per answer, so the cost calculator can use real traffic.
+            // Best-effort: a missing table (migration not applied yet) or a
+            // failed insert never affects the visitor's answer.
+            try {
+              const { error } = await supabaseAdmin.from("chat_usage" as never).insert({
+                conversation_id: conversationId,
+                is_test: /^(eval-|claude-check)/.test(chatSessionId ?? ""),
+                model: modelId,
+                steps: steps.length,
+                tools,
+                searched_knowledge: needsKnowledge,
+                history_rows: history.length,
+                ...usage,
+                total_ms: Date.now() - startedAt,
+              } as never);
+              if (error) console.error("[chat] usage not recorded", error.message);
+            } catch (e) {
+              console.error("[chat] usage not recorded", e);
+            }
           },
         });
 
