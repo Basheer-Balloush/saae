@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useSingleDeviceSession } from "@/hooks/useSingleDeviceSession";
@@ -6,6 +6,7 @@ import { LmsNavbar } from "@/components/lms/LmsNavbar";
 import { Footer } from "@/components/site/Footer";
 import { LmsSkinShell } from "@/components/lms-skin/LmsSkinShell";
 import { isConsoleLmsPath, isSkinnedLmsPath, LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
+import { useShownPathname } from "@/hooks/useShownPathname";
 
 export const Route = createFileRoute("/learning-management-system")({
   head: () => ({
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/learning-management-system")({
 function LmsLayout() {
   const navigate = useNavigate();
   const { user, role } = useLmsAuth();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const pathname = useShownPathname();
   useSingleDeviceSession(user?.id ?? null);
 
   const handleSignOut = async () => {
