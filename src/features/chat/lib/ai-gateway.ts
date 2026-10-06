@@ -46,5 +46,8 @@ export function createChatModel() {
     name: provider.name,
     baseURL: provider.baseURL,
     headers: { Authorization: `Bearer ${provider.apiKey}` },
+    // Streamed replies carry token counts only when asked for; without this every
+    // answer's usage came back empty and the bot's cost could not be measured.
+    includeUsage: true,
   })(provider.model);
 }
