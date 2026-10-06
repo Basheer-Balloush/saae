@@ -168,7 +168,15 @@ export type AnswerOutcome = {
 
 export type ClaimOutcome =
   | { status: "claimed" | "already_claimed"; reward: Reward; emailed: boolean }
-  | { status: "not_found" | "not_finished" | "no_account" | "guest" | "play_claimed" };
+  | {
+      status:
+        | "not_found"
+        | "not_finished"
+        | "no_account"
+        | "guest"
+        | "play_claimed"
+        | "device_claimed";
+    };
 
 /** A random order of 0..n-1. */
 export function shuffledOrder(
@@ -193,6 +201,11 @@ function randomUint32(n: number): Uint32Array {
 /** Device ids and link codes as the server accepts them. */
 export const DEVICE_ID_RE = /^[A-Za-z0-9_-]{8,64}$/;
 export const LINK_SLUG_RE = /^[a-z0-9][a-z0-9-]{1,39}$/;
+
+/** The booth QR link. Plain /texpo, and a stopped or unknown link, count under it. */
+export const MAIN_LINK_SLUG = "booth";
+/** Texpo coupons work only on the courses of this category (Generative AI). */
+export const COUPON_CATEGORY_SLUG = "generative-ai";
 
 /** "Booth QR – Day 2" -> "booth-qr-day-2"; Arabic-only labels fall back to a random code. */
 export function slugFromLabel(label: string, random: () => string = randomSlug): string {

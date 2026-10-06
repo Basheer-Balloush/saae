@@ -109,7 +109,7 @@ async function personalCoupon(couponId: string) {
   const { data: c } = await (db as unknown as SupabaseClient)
     .from("lms_coupons")
     .select(
-      "id, code, scope, user_id, percent_off, min_discount, max_discount, max_uses, expires_at, active",
+      "id, code, scope, user_id, category_id, percent_off, min_discount, max_discount, max_uses, expires_at, active",
     )
     .eq("id", couponId)
     .maybeSingle();
@@ -118,6 +118,7 @@ async function personalCoupon(couponId: string) {
     code: string;
     scope: string;
     user_id: string | null;
+    category_id: string | null;
     percent_off: number | null;
     min_discount: number | null;
     max_discount: number | null;
@@ -172,13 +173,22 @@ export const sendPersonalCouponEmail = createServerFn({ method: "POST" })
     const React = await import("react");
     const { render } = await import("@react-email/components");
     const { PersonalCouponEmail } = await import("@/lib/email/templates/personal-coupon");
-    const { offer, limits } = couponOffer(coupon, ar);
+    // A personal coupon limited to a category (Texpo coupons) says so.
+    const { data: cat } = coupon.category_id
+      ? await (await admin())
+          .from("lms_categories")
+          .select("slug, name_ar, name_en")
+          .eq("id", coupon.category_id)
+          .maybeSingle()
+      : { data: null };
+    const category = cat ? (ar ? cat.name_ar : cat.name_en || cat.name_ar) : null;
+    const { offer, limits } = couponOffer(coupon, ar, category);
     const siteName = ar
       ? "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال"
       : "Syrian Association for AI & Entrepreneurship";
     const element = React.createElement(PersonalCouponEmail, {
       siteName,
-      catalogUrl: `${getSiteUrl()}/learning-management-system/catalog`,
+      catalogUrl: `${getSiteUrl()}/learning-management-system/catalog${cat?.slug ? `?category=${encodeURIComponent(cat.slug)}` : ""}`,
       fullName: learner.name || learner.email.split("@")[0],
       code: coupon.code,
       offer,

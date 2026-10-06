@@ -11,9 +11,11 @@ import {
 } from "@/features/texpo/lib/engine";
 import {
   ANSWER_GRACE_MS,
+  COUPON_CATEGORY_SLUG,
   FIELDS,
   FIELD_REPLIES,
   LEVELS,
+  MAIN_LINK_SLUG,
   QUESTION_COUNT,
   levelFor,
   shuffledOrder,
@@ -160,10 +162,55 @@ describe("grading", () => {
   });
 });
 
+const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
+const latestMigration = (needle: string) => {
+  const dir = join(process.cwd(), "supabase/migrations");
+  const hit = readdirSync(dir)
+    .filter((f) => f.endsWith(".sql"))
+    .sort()
+    .filter((f) => readFileSync(join(dir, f), "utf8").includes(needle))
+    .pop();
+  return hit ? readFileSync(join(dir, hit), "utf8") : "";
+};
+
 describe("links", () => {
   it("make readable codes from labels", () => {
     expect(slugFromLabel("Booth QR – Day 2")).toBe("booth-qr-day-2");
     expect(slugFromLabel("إنستغرام", () => "lfixed")).toBe("lfixed");
+  });
+
+  it("have no Direct row: visits without a working link count under the booth link", () => {
+    expect(MAIN_LINK_SLUG).toBe("booth");
+    expect(read("src/features/texpo/lib/texpo-admin.functions.ts")).not.toMatch(/"direct"/);
+    expect(read("src/routes/admin/crm/texpo.tsx")).not.toMatch(/"direct"|Direct \(/);
+  });
+});
+
+describe("one gift", () => {
+  const claim = latestMigration("FUNCTION public.game_claim_reward");
+
+  it("per account and per phone, in the claim itself", () => {
+    expect(claim).toContain("'already_claimed'");
+    expect(claim).toContain("'device_claimed'");
+    expect(claim).toContain("game_plays_one_claim_per_device");
+  });
+
+  it("only on the Generative AI courses", () => {
+    expect(COUPON_CATEGORY_SLUG).toBe("generative-ai");
+    expect(claim).toContain(`slug = '${COUPON_CATEGORY_SLUG}'`);
+    expect(claim).toMatch(/INSERT INTO public\.lms_coupons \([^)]*category_id/);
+    expect(latestMigration("FUNCTION public.lms_coupon_quote")).toContain(
+      "v_coupon.category_id IS NOT NULL",
+    );
+  });
+
+  it("with no way to start over on the same phone", () => {
+    const game = read("src/features/texpo/TexpoGame.tsx");
+    expect(game).not.toMatch(/New player|newPlayer/);
+    expect(game).toContain(`catalog?category=\${COUPON_CATEGORY_SLUG}`);
+    expect(read("src/features/texpo/lib/texpo.functions.ts")).toMatch(
+      /deviceClaimed\(sb, data\.device\)\) throw new Error\("device_claimed"\)/,
+    );
   });
 });
 

@@ -74,7 +74,11 @@ export function CouponsPage() {
   const target = (c: Coupon) => {
     const kind = couponKind(c);
     if (kind === "category") return refs.categoryName(c.category_id, ar);
-    if (kind === "personal") return learnerName(c.user_id);
+    if (kind === "personal") {
+      // Texpo coupons are personal and limited to one category.
+      const only = c.category_id ? refs.categoryName(c.category_id, ar) : null;
+      return only ? `${learnerName(c.user_id)} · ${only}` : learnerName(c.user_id);
+    }
     return refs.courseName(c.course_id, ar);
   };
 

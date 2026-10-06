@@ -13,9 +13,11 @@ import {
 } from "./engine";
 import {
   AI_USES,
+  COUPON_CATEGORY_SLUG,
   DEVICE_ID_RE,
   FIELDS,
   LINK_SLUG_RE,
+  MAIN_LINK_SLUG,
   QUESTION_COUNT,
   TEXPO_GAME,
   levelFor,
@@ -106,16 +108,29 @@ async function overLimit(sb: SupabaseClient, bucket: string, windowMs: number, m
   return false;
 }
 
+/** The link a visit counts under: the active link in ?l=, otherwise the main
+    (booth QR) link, so plain /texpo and stopped links have no row of their own. */
 async function resolveLink(sb: SupabaseClient, slug: string | null) {
-  if (!slug) return null;
   const { data } = await sb
     .from("game_links")
-    .select("id, label")
+    .select("id, slug, label, is_active")
     .eq("game", TEXPO_GAME)
-    .eq("slug", slug)
-    .eq("is_active", true)
-    .maybeSingle();
-  return (data as { id: string; label: string } | null) ?? null;
+    .in("slug", slug && slug !== MAIN_LINK_SLUG ? [slug, MAIN_LINK_SLUG] : [MAIN_LINK_SLUG]);
+  const rows = (data ?? []) as { id: string; slug: string; label: string; is_active: boolean }[];
+  const hit =
+    rows.find((r) => r.slug === slug && r.is_active) ?? rows.find((r) => r.slug === MAIN_LINK_SLUG);
+  return hit ? { id: hit.id, label: hit.label } : null;
+}
+
+/** One gift per phone: whether a play on this device was already claimed. */
+async function deviceClaimed(sb: SupabaseClient, dev: string) {
+  const { count } = await sb
+    .from("game_plays")
+    .select("id", { count: "exact", head: true })
+    .eq("game", TEXPO_GAME)
+    .eq("device_id", dev)
+    .not("claimed_at", "is", null);
+  return (count ?? 0) > 0;
 }
 
 async function loadPlay(sb: SupabaseClient, id: string, dev: string): Promise<PlayRow> {
@@ -192,7 +207,7 @@ export const texpoOpen = createServerFn({ method: "POST" })
     await sb
       .from("game_link_opens")
       .insert({ game: TEXPO_GAME, link_id: link?.id ?? null, device_id: data.device });
-    return { link: link?.label ?? null };
+    return { link: link?.label ?? null, deviceClaimed: await deviceClaimed(sb, data.device) };
   });
 
 /* ---------- start: after the two questions about the player ---------- */
@@ -219,6 +234,7 @@ export const texpoStart = createServerFn({ method: "POST" })
     ) {
       throw new Error("rate_limited");
     }
+    if (await deviceClaimed(sb, data.device)) throw new Error("device_claimed");
     const bank = await questions();
     const link = await resolveLink(sb, data.link);
     const now = new Date();
@@ -453,7 +469,7 @@ async function emailReward(
       siteName: ar
         ? "الجمعية السورية للذكاء الاصطناعي وريادة الأعمال"
         : "Syrian Association for AI & Entrepreneurship",
-      catalogUrl: `${getSiteUrl()}/learning-management-system/catalog`,
+      catalogUrl: `${getSiteUrl()}/learning-management-system/catalog?category=${COUPON_CATEGORY_SLUG}`,
       fullName: name || email.split("@")[0],
       code: reward.code,
       offer,

@@ -31,6 +31,7 @@ import {
   AI_USES,
   FIELDS,
   LEVELS,
+  MAIN_LINK_SLUG,
   QUESTION_COUNT,
   type Level,
 } from "@/features/texpo/lib/texpo-shared";
@@ -79,9 +80,9 @@ const LEVEL_COLOR: Record<Level, string> = {
   professional: "#c9971f",
 };
 
-function gameUrl(slug: string | null) {
+function gameUrl(slug: string) {
   const origin = typeof window !== "undefined" ? window.location.origin : "https://www.aisyria.org";
-  return slug ? `${origin}/texpo?l=${slug}` : `${origin}/texpo`;
+  return `${origin}/texpo?l=${slug}`;
 }
 
 function downloadQr(url: string, name: string) {
@@ -129,9 +130,6 @@ function TexpoAdminPage() {
     load();
   }, [load]);
 
-  const linkName = (l: GameLink) =>
-    l.id ? l.label : t("مباشر (texpo/ بلا رابط)", "Direct (/texpo with no link)");
-
   const copy = (url: string) =>
     navigator.clipboard.writeText(url).then(
       () => toast.success(t("نُسخ الرابط", "Link copied")),
@@ -139,7 +137,7 @@ function TexpoAdminPage() {
     );
 
   const toggle = async (l: GameLink) => {
-    if (!l.id) return;
+    if (l.slug === MAIN_LINK_SLUG) return;
     try {
       await toggleFn({ data: { id: l.id, active: !l.is_active } });
       setData((d) =>
@@ -243,7 +241,7 @@ function TexpoAdminPage() {
         },
         {
           header: t("الرابط", "Link"),
-          get: (r) => (r.link === "direct" ? t("مباشر", "Direct") : r.link),
+          get: (r) => r.link,
           width: 20,
         },
         {
@@ -369,12 +367,9 @@ function TexpoAdminPage() {
                     const url = gameUrl(l.slug);
                     const f = l.funnel;
                     return (
-                      <tr
-                        key={l.id ?? "direct"}
-                        className="border-t border-[var(--cx-line-2)] align-top"
-                      >
+                      <tr key={l.id} className="border-t border-[var(--cx-line-2)] align-top">
                         <td className="px-4 py-3">
-                          <div className="font-extrabold">{linkName(l)}</div>
+                          <div className="font-extrabold">{l.label}</div>
                           <div className="mt-1 flex flex-wrap items-center gap-2">
                             <span
                               className="font-mono text-[12px] text-[var(--cx-muted)]"
@@ -390,22 +385,18 @@ function TexpoAdminPage() {
                             >
                               <Copy className="h-4 w-4" />
                             </button>
-                            {l.id && (
-                              <button
-                                type="button"
-                                className="text-[var(--cx-teal)]"
-                                onClick={() => setQr(l)}
-                                aria-label="QR"
-                              >
-                                <QrCode className="h-4 w-4" />
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              className="text-[var(--cx-teal)]"
+                              onClick={() => setQr(l)}
+                              aria-label="QR"
+                            >
+                              <QrCode className="h-4 w-4" />
+                            </button>
                           </div>
-                          {l.created_at && (
-                            <div className="text-[12px] text-[var(--cx-muted)]">
-                              {fmtDate(l.created_at, lang)}
-                            </div>
-                          )}
+                          <div className="text-[12px] text-[var(--cx-muted)]">
+                            {fmtDate(l.created_at, lang)}
+                          </div>
                         </td>
                         <Num n={f.opened} />
                         <Num n={f.started} />
@@ -424,7 +415,9 @@ function TexpoAdminPage() {
                         <Num n={f.used} />
                         <Num n={f.chatted} />
                         <td className="px-4 py-3 text-end">
-                          {l.id ? (
+                          {l.slug === MAIN_LINK_SLUG ? (
+                            <Pill tone="teal">{t("الرابط الرئيسي", "Main link")}</Pill>
+                          ) : (
                             <button
                               type="button"
                               onClick={() => toggle(l)}
@@ -434,8 +427,6 @@ function TexpoAdminPage() {
                                 {l.is_active ? t("فعّال", "Active") : t("متوقف", "Stopped")}
                               </Pill>
                             </button>
-                          ) : (
-                            <span className="text-[12px] text-[var(--cx-muted)]">—</span>
                           )}
                         </td>
                       </tr>
@@ -446,8 +437,8 @@ function TexpoAdminPage() {
             </div>
             <p className="px-4 py-3 text-[12px] text-[var(--cx-muted)]">
               {t(
-                "رابط متوقف يبقى يفتح اللعبة، لكن من يدخل منه يُحسب «مباشراً».",
-                "A stopped link still opens the game; people who use it count as Direct.",
+                "من يفتح اللعبة بلا رابط أو من رابط متوقف يُحسب على الرابط الرئيسي.",
+                "People who open the game with no link, or through a stopped link, count under the main link.",
               )}
             </p>
           </Panel>
@@ -573,9 +564,7 @@ function TexpoAdminPage() {
                             <Pill tone="teal">{t("حساب جديد", "New account")}</Pill>
                           )}
                         </td>
-                        <td className="px-2 py-2.5">
-                          {p.link === "direct" ? t("مباشر", "Direct") : p.link}
-                        </td>
+                        <td className="px-2 py-2.5">{p.link}</td>
                         <td className="px-4 py-2.5 text-end text-[12.5px] text-[var(--cx-muted)]">
                           {fmtDate(p.played_at, lang, true)}
                         </td>
@@ -630,12 +619,7 @@ function TexpoAdminPage() {
 
       <Dialog open={!!qr} onOpenChange={(v) => !v && setQr(null)}>
         <DialogContent className="max-w-sm">
-          {qr && (
-            <QrView
-              link={qr}
-              onDownload={() => downloadQr(gameUrl(qr.slug), qr.slug ?? "direct")}
-            />
-          )}
+          {qr && <QrView link={qr} onDownload={() => downloadQr(gameUrl(qr.slug), qr.slug)} />}
         </DialogContent>
       </Dialog>
     </div>

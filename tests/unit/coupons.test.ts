@@ -238,4 +238,29 @@ describe("personal coupons", () => {
     expect(text).toContain("K7QX-M2PA");
     expect(text).toContain("https://x/catalog");
   });
+
+  it("name the category a personal coupon is limited to", () => {
+    const c = {
+      percent_off: 50,
+      min_discount: null,
+      max_discount: null,
+      max_uses: 1,
+      expires_at: null,
+    };
+    expect(couponOffer(c, true, "الذكاء الاصطناعي التوليدي").limits).toBe(
+      "صالح لدورة واحدة من دورات «الذكاء الاصطناعي التوليدي»",
+    );
+    expect(couponOffer(c, false, "Generative AI").limits).toBe("valid for 1 Generative AI course");
+    expect(couponOffer({ ...c, max_uses: null }, false, "Generative AI").limits).toBe(
+      "on Generative AI courses only",
+    );
+    const text = couponWhatsappText(
+      { ...c, code: "TEXPO-K7QX-M2PA" },
+      "Sara",
+      "https://x",
+      false,
+      "Generative AI",
+    );
+    expect(text).toContain("valid for 1 Generative AI course");
+  });
 });

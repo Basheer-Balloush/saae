@@ -2,7 +2,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { LINK_SLUG_RE, TEXPO_GAME, slugFromLabel, type Level } from "./texpo-shared";
+import {
+  LINK_SLUG_RE,
+  MAIN_LINK_SLUG,
+  TEXPO_GAME,
+  slugFromLabel,
+  type Level,
+} from "./texpo-shared";
 
 /* The Texpo page in the admin CRM: tracked links, each link's funnel, who
    played, and every player with their coupon once they claimed one. Admins only. */
@@ -34,11 +40,11 @@ export type Funnel = {
 };
 
 export type GameLink = {
-  id: string | null;
-  slug: string | null;
+  id: string;
+  slug: string;
   label: string;
   is_active: boolean;
-  created_at: string | null;
+  created_at: string;
   funnel: Funnel;
 };
 
@@ -136,10 +142,14 @@ export const adminTexpoOverview = createServerFn({ method: "POST" })
       ((redemptions.data ?? []) as { coupon_id: string }[]).map((r) => r.coupon_id),
     );
     const linkRows = (links.data ?? []) as Omit<GameLink, "funnel">[];
+    // Visits without a link (before 2026-10-06, or a deleted link) count
+    // under the main link, like plain /texpo does now.
+    const mainId = linkRows.find((l) => l.slug === MAIN_LINK_SLUG)?.id ?? null;
     const funnels = new Map<string | null, Funnel>();
     const funnel = (id: string | null) => {
-      if (!funnels.has(id)) funnels.set(id, emptyFunnel());
-      return funnels.get(id)!;
+      const key = id ?? mainId;
+      if (!funnels.has(key)) funnels.set(key, emptyFunnel());
+      return funnels.get(key)!;
     };
     const total = emptyFunnel();
 
@@ -182,7 +192,7 @@ export const adminTexpoOverview = createServerFn({ method: "POST" })
         used: !!p.coupon_id && usedCoupons.has(p.coupon_id),
         account_new: p.account_new,
         chatted: !!p.chat_opened_at,
-        link: p.link_id ? (labelOf.get(p.link_id) ?? "—") : "direct",
+        link: labelOf.get(p.link_id ?? mainId ?? "") ?? "—",
         played_at: p.finished_at ?? p.started_at,
         claimed_at: p.claimed_at,
       });
@@ -193,15 +203,6 @@ export const adminTexpoOverview = createServerFn({ method: "POST" })
       ...l,
       funnel: funnels.get(l.id) ?? emptyFunnel(),
     }));
-    // Plain /texpo, and links that were later deleted.
-    out.push({
-      id: null,
-      slug: null,
-      label: "direct",
-      is_active: true,
-      created_at: null,
-      funnel: funnels.get(null) ?? emptyFunnel(),
-    });
     return { total, links: out, byField, aiUse, players };
   });
 
@@ -241,11 +242,16 @@ export const adminTexpoSetLinkActive = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = await db();
     await assertAdmin(sb, context.userId);
-    const { error } = await sb
+    // The main link takes every visit without a working link, so it stays on.
+    const { data: row, error } = await sb
       .from("game_links")
       .update({ is_active: data.active })
       .eq("id", data.id)
-      .eq("game", TEXPO_GAME);
+      .eq("game", TEXPO_GAME)
+      .neq("slug", MAIN_LINK_SLUG)
+      .select("id")
+      .maybeSingle();
     if (error) throw new Error("Could not update the link");
+    if (!row) throw new Error("main_link");
     return { ok: true };
   });

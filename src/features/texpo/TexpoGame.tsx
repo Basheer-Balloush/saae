@@ -1,17 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import {
-  Check,
-  Copy,
-  Gift,
-  Lightbulb,
-  Lock,
-  LogOut,
-  MessageCircle,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { Check, Copy, Gift, Lightbulb, Lock, MessageCircle, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import { useLang } from "@/lib/i18n/i18n";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,6 +23,7 @@ import {
 } from "./lib/texpo.functions";
 import {
   AI_USES,
+  COUPON_CATEGORY_SLUG,
   FIELDS,
   FIELD_REPLIES,
   LEVELS,
@@ -77,7 +68,8 @@ type Phase =
 
 const SIGNUP = "/learning-management-system/signup?redirect=%2Ftexpo";
 const LOGIN = "/learning-management-system/login?redirect=%2Ftexpo";
-const CATALOG = "/learning-management-system/catalog";
+/** The courses a Texpo coupon works on. */
+const CATALOG = `/learning-management-system/catalog?category=${COUPON_CATEGORY_SLUG}`;
 const PROFILE_BADGES = "/learning-management-system/profile#profile-badges";
 const LETTERS = { ar: ["أ", "ب", "ج", "د"], en: ["A", "B", "C", "D"] };
 const CHEERS: Bi[] = [
@@ -106,6 +98,11 @@ function questionLine(i: number): Bi {
 const WELCOME: Bi = {
   ar: "أهلاً! أنا أبو الجود. جاهز تختبر معلوماتك عن الذكاء الاصطناعي؟",
   en: "Hi! I'm Abu Al-Joud. Ready to test your AI sense?",
+};
+
+const DEVICE_USED: Bi = {
+  ar: "استُلمت هدية تكسبو على هذا الجهاز من قبل. لكل جهاز ولكل حساب هدية واحدة.",
+  en: "A Texpo gift was already claimed on this device. One gift per device and per account.",
 };
 
 function errorCode(e: unknown): string {
@@ -148,6 +145,8 @@ export function TexpoGame({ link }: { link?: string }) {
   const [claiming, setClaiming] = useState(false);
   const [claimNote, setClaimNote] = useState<Bi | null>(null);
   const [failed, setFailed] = useState<null | (() => void)>(null);
+  /* One gift per phone: a gift was already claimed on this device. */
+  const [deviceUsed, setDeviceUsed] = useState(false);
   const device = useRef<string>("");
   const field = useRef<FieldId | null>(null);
 
@@ -183,7 +182,9 @@ export function TexpoGame({ link }: { link?: string }) {
   useEffect(() => {
     preloadMascotPoses();
     device.current = deviceId();
-    openFn({ data: { device: device.current, link: link ?? null } }).catch(() => {});
+    openFn({ data: { device: device.current, link: link ?? null } })
+      .then((o) => setDeviceUsed(!!o?.deviceClaimed))
+      .catch(() => {});
     const saved = storedPlay();
     if (!saved) {
       setPhase({ name: "intro" });
@@ -240,7 +241,11 @@ export function TexpoGame({ link }: { link?: string }) {
       });
       applyState(s);
     } catch (e) {
-      if (errorCode(e) === "rate_limited") {
+      if (errorCode(e) === "device_claimed") {
+        setDeviceUsed(true);
+        setPhase({ name: "intro" });
+        say(DEVICE_USED, "think");
+      } else if (errorCode(e) === "rate_limited") {
         toast.error(
           t(
             "لعبت كثيراً خلال وقت قصير. حاول بعد دقائق.",
@@ -389,6 +394,12 @@ export function TexpoGame({ link }: { link?: string }) {
           ar: "حسابات الزوار لا تستلم الكوبونات. أنشئ حساباً كاملاً أولاً.",
           en: "Guest accounts can't receive coupons. Create a full account first.",
         });
+      } else if (out.status === "device_claimed") {
+        setDeviceUsed(true);
+        setClaimNote({
+          ar: "استُلمت هدية على هذا الجهاز بحساب آخر. لكل جهاز هدية واحدة.",
+          en: "A gift was already claimed on this device with another account. One gift per device.",
+        });
       } else if (out.status === "play_claimed") {
         setClaimNote({
           ar: "استُلمت هدية هذه النتيجة بحساب آخر.",
@@ -433,23 +444,6 @@ export function TexpoGame({ link }: { link?: string }) {
     if (!myReward) return;
     setPhase({ name: "claimed", playId, result, reward: myReward, emailed: false, earlier: true });
     say({ ar: "هذه هديتك من تكسبو.", en: "Here's your Texpo gift." }, "celebrate", "happy");
-  };
-
-  const newPlayer = async () => {
-    await supabase.auth.signOut().catch(() => {});
-    savePlay(null);
-    field.current = null;
-    setClaimNote(null);
-    setMyReward(null);
-    setPhase({ name: "intro" });
-    say(
-      {
-        ar: "أهلاً بلاعب جديد! جاهز للتحدّي؟",
-        en: "Welcome, new player! Ready for the challenge?",
-      },
-      "welcome",
-      "cheer",
-    );
   };
 
   const copyCode = (code: string) =>
@@ -570,6 +564,18 @@ export function TexpoGame({ link }: { link?: string }) {
                         <Gift aria-hidden="true" />
                         {t("اعرض هديتي", "Show my gift")}
                       </button>
+                    </>
+                  ) : deviceUsed ? (
+                    <>
+                      <p className="tx-note">{pick(DEVICE_USED)}</p>
+                      {!authLoading && !user && (
+                        <a className="tx-btn tx-btn-ghost" href={LOGIN}>
+                          {t(
+                            "سجّل الدخول بالحساب الذي استلمها",
+                            "Sign in with the account that claimed it",
+                          )}
+                        </a>
+                      )}
                     </>
                   ) : (
                     <button
@@ -859,8 +865,8 @@ export function TexpoGame({ link }: { link?: string }) {
                   </div>
                   <p className="tx-lead">
                     {t(
-                      "خصم على دورة مدفوعة واحدة حتى 10 كانون الأول 2026. اختر الدورة، اضغط «سجّل الآن» وأدخل الكود في حقل الكوبون. يعمل مع حسابك فقط، وتراجعه الإدارة.",
-                      "Off one paid course until 10 December 2026. Pick a course, tap Enroll and enter the code in the coupon field. It works with your account only, and the team approves it.",
+                      "خصم على دورة واحدة من دورات الذكاء الاصطناعي التوليدي حتى 10 كانون الأول 2026. اختر الدورة، اضغط «سجّل الآن» وأدخل الكود في حقل الكوبون. يعمل مع حسابك فقط، وتراجعه الإدارة.",
+                      "Off one Generative AI course until 10 December 2026. Pick a course, tap Enroll and enter the code in the coupon field. It works with your account only, and the team approves it.",
                     )}
                   </p>
                   {phase.emailed && (
@@ -879,7 +885,7 @@ export function TexpoGame({ link }: { link?: string }) {
                   </a>
                   <div className="tx-row">
                     <a className="tx-btn tx-btn-primary" href={CATALOG}>
-                      {t("تصفّح الدورات", "Browse courses")}
+                      {t("دورات الذكاء الاصطناعي التوليدي", "Generative AI courses")}
                     </a>
                     <button
                       type="button"
@@ -887,8 +893,8 @@ export function TexpoGame({ link }: { link?: string }) {
                       onClick={() =>
                         openChat(
                           t(
-                            `ربحت كوبون خصم ${phase.reward.percent}٪ في تكسبو. أيّ دورة تنصحني بها؟`,
-                            `I won a ${phase.reward.percent}% coupon at Texpo. Which course do you recommend?`,
+                            `ربحت كوبون خصم ${phase.reward.percent}٪ في تكسبو على دورات الذكاء الاصطناعي التوليدي. أيّ دورة تنصحني بها؟`,
+                            `I won a ${phase.reward.percent}% Texpo coupon for the Generative AI courses. Which one do you recommend?`,
                           ),
                           phase.playId,
                         )
@@ -896,12 +902,6 @@ export function TexpoGame({ link }: { link?: string }) {
                     >
                       <MessageCircle aria-hidden="true" />
                       {t("اسأل أبو الجود عن دورة", "Ask Abu Al-Joud for a course")}
-                    </button>
-                  </div>
-                  <div className="tx-row tx-row-quiet">
-                    <button type="button" className="tx-link" onClick={newPlayer}>
-                      <LogOut aria-hidden="true" />{" "}
-                      {t("لاعب جديد على هذا الجهاز", "New player on this device")}
                     </button>
                   </div>
                 </div>

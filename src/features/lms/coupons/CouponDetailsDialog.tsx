@@ -129,11 +129,14 @@ export function CouponDetailsDialog({
   const status = couponStatus(coupon, used);
   const discount = coupon.effect === "discount";
   const limitsRequired = kind === "recognition" || kind === "category";
+  // A personal coupon may be limited to one category (Texpo coupons).
+  const onlyCategory =
+    kind === "personal" && coupon.category_id ? refs.categoryName(coupon.category_id, ar) : null;
   const target =
     kind === "category"
       ? refs.categoryName(coupon.category_id, ar)
       : kind === "personal"
-        ? learnerName(coupon.user_id)
+        ? `${learnerName(coupon.user_id)}${onlyCategory ? ` · ${t(`دورات «${onlyCategory}» فقط`, `${onlyCategory} courses only`)}` : ""}`
         : refs.courseName(coupon.course_id, ar);
 
   const patch = async (p: Partial<Coupon>, done: string) => {
@@ -282,6 +285,7 @@ export function CouponDetailsDialog({
         learner.name,
         `${window.location.origin}/learning-management-system/catalog`,
         ar,
+        onlyCategory,
       );
       window.open(
         `https://wa.me/${phone}?text=${encodeURIComponent(text)}`,
