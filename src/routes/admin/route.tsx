@@ -1,5 +1,6 @@
-import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { ConsoleShell } from "@/components/console/ConsoleShell";
+import { useShownPathname } from "@/hooks/useShownPathname";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const pathname = useShownPathname();
 
   // /admin/login renders bare (no console frame)
   if (pathname === "/admin/login") {
