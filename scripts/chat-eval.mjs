@@ -116,6 +116,13 @@ const CASES = [
     must: [/اسم|الاسم|بياناتك|رقم|تواصل/],
     mustNot: [/info@aisyria\.org/],
   },
+  // The 2026-10-06 conversation: the visitor turns out to speak for a payments company.
+  {
+    turns: ["منصة فيها دفع الكتروني لشي", "مو مفكرين يحطو كاش موبايل MTN"],
+    q: "لا بس وصل خبر انو حابين نكون وسيلة دفع الكتروني عندكم",
+    must: [/اسم|الشركة|الجهة|بيانات|صفت/],
+    mustNot: [/info@aisyria\.org/],
+  },
   // English.
   { q: "Do you have any internships open right now?", must: [/internships/] },
   { q: "Is UNICEF a partner of SAAE?", must: [/not/i], mustNot: [/[\u0600-\u06FF]{4,}/] },

@@ -7,6 +7,7 @@ import { parseChoices } from "@/features/chat/lib/chat-choices";
 import { needsKnowledgeSearch } from "@/features/chat/lib/chat-routing";
 import { cleanPartnerNames, partnersContext } from "@/features/chat/lib/chat-partners";
 import { dropToolPreamble } from "@/features/chat/lib/chat-stream";
+import { readVisitor, visitorContext } from "@/features/chat/lib/chat-visitor";
 import {
   courseList,
   type CourseState,
@@ -227,6 +228,7 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 - الفرد: لا تطلب بياناته إلا بعد موافقته كما في البند 8: الاسم الثلاثي، ثم الهاتف أو البريد. لا تطلب عنوان السكن أو غيره. بعد أن يعطيها احفظها بأداة \`submit_individual_lead\` مع ما عرفته من الرحلة (الاختصاص، المجال، هدفه باختصار)، وأخبره أن فريق الجمعية سيتواصل معه، دون تحديد موعد.
 - الشركة: ابدأ بفهم ما تحتاجه (تدريب موظفين، شراكة، استشارة AI) وأجب عن أسئلتها. ثم اطلب بالتدريج، سؤالاً في كل رسالة: اسم الشركة، مجال عملها، واسم شخص التواصل مع هاتفه أو بريده. باقي الحقول (الترخيص، المقر، عدد الموظفين، استخدام AI) اسأل عنها فقط إن كانت المحادثة تسمح، ولا تُلحّ. ثم احفظها بأداة \`submit_company_lead\` واقترح خدمات الجمعية الأنسب من المرجع.
 - من هو «شركة»: كل من يتحدث باسم شركة أو جهة أو مؤسسة، أو يعرض خدمة أو شراكة أو رعاية على الجمعية (مثل «حابين نكون وسيلة دفع إلكتروني عندكم»، «أنا منسق علاقات بشركة…»، «عنا مركز تدريب ومنحب نتعاون»). هذا يُحفظ بـ \`submit_company_lead\`، لا \`submit_individual_lead\`: اسم الشركة، اسم الشخص وصفته، وهاتفه أو بريده، وما يعرضه. لا تحِله إلى البريد قبل أن تعرض عليه حفظ بياناته؛ البريد هو الخيار الأخير.
+- اعرف من يحادثك من كلامه طوال المحادثة، لا عند الحفظ فقط: متعلّم يسأل لنفسه، أو مدرّب، أو ممثل شركة أو جهة. إذا وصلك قسم «من يحادثك» فاعتمد عليه ما لم يناقضه كلام الزائر. وإذا لم يكن واضحاً وأنت على وشك أن تطلب بياناته، فاسأله مرة واحدة: «حضرتك عم تسأل لنفسك ولا باسم شركة أو جهة؟» مع [[choices: لنفسي | باسم شركة أو جهة]] (بالإنكليزية: "Are you asking for yourself or on behalf of a company or organisation?" مع [[choices: For myself | For a company or organisation]]).
 - بعد الحفظ قل فقط ما حدث فعلاً: «سجّلت بياناتك وبيتواصل معك فريق الجمعية». لا تقل «بعتت رسالتك للفريق» إلا إذا استخدمت \`send_to_team\` ونجحت.
 - عند نقص المعلومات، اقترح التواصل عبر ${ORG_EMAIL}.
 
@@ -592,6 +594,15 @@ export const Route = createFileRoute("/api/chat")({
         // The prompt, partner list and tool data are mostly Arabic, which pulls
         // replies to English questions into Arabic; the last word of the system
         // prompt settles the language.
+        // Who the visitor is, from everything they have written in this
+        // conversation, so the model handles a company as a company from the
+        // first sign rather than deciding at the moment it saves the lead.
+        const visitorTurns = history
+          .filter((message) => message.role === "user")
+          .map((message) => message.content ?? "");
+        if (!visitorTurns.includes(lastUserText)) visitorTurns.push(lastUserText);
+        const visitorNote = visitorContext(readVisitor(visitorTurns));
+
         const replyLanguageNote =
           replyLang === "en"
             ? "\n\n# Reply language\nThe visitor's last message is in English. Write your whole reply in English, including the choices line (use the English lists), and translate any Arabic you take from tools or references. Keep course and organisation names as the tools return them."
@@ -1019,7 +1030,12 @@ export const Route = createFileRoute("/api/chat")({
 
         const result = streamText({
           model: chat.model,
-          system: SYSTEM_PROMPT + partnersContext(partnerNames) + extraContext + replyLanguageNote,
+          system:
+            SYSTEM_PROMPT +
+            partnersContext(partnerNames) +
+            extraContext +
+            visitorNote +
+            replyLanguageNote,
           tools,
           // Every step and every retry is another provider call, and the provider
           // bills and rate-limits per call. 50 steps with 3 attempts each could
