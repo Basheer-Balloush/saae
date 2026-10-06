@@ -7,14 +7,13 @@ import {
   Globe,
   Mail,
   CalendarCheck,
+  CalendarDays,
   FileText,
   GraduationCap,
   Handshake,
   Home,
   Inbox,
   LayoutDashboard,
-  Gamepad2,
-  Link2,
   MapPin,
   Newspaper,
   Settings,
@@ -135,8 +134,8 @@ export const NAV: Record<ConsoleSystem, NavGroup[]> = {
       ],
     },
     {
-      ar: "التفاعل",
-      en: "Engagement",
+      ar: "الاستقطاب",
+      en: "Outreach",
       items: [
         {
           to: "/admin/forms",
@@ -145,13 +144,15 @@ export const NAV: Record<ConsoleSystem, NavGroup[]> = {
           icon: FileText,
           also: /^\/admin\/crm\/forms/,
         },
+        /* Every tool used at an event or a booth, one tab each: sign-up links
+           (people go straight into Leads) and the Texpo game. */
         {
           to: "/admin/crm/registration-links",
-          ar: "روابط التسجيل",
-          en: "Sign-up links",
-          icon: Link2,
+          ar: "الفعاليات",
+          en: "Events",
+          icon: CalendarDays,
+          also: /^\/admin\/crm\/texpo/,
         },
-        { to: "/admin/crm/texpo", ar: "لعبة تكسبو", en: "Texpo game", icon: Gamepad2 },
         { to: "/admin/initiative", ar: "مبادرة المليون", en: "Initiative", icon: Sparkles },
         {
           to: "/admin/chatbot",
@@ -161,6 +162,12 @@ export const NAV: Record<ConsoleSystem, NavGroup[]> = {
           count: "chatFeedback",
           also: /^\/admin\/crm\/feedback/,
         },
+      ],
+    },
+    {
+      ar: "التقارير",
+      en: "Insights",
+      items: [
         {
           to: "/admin/feedback-survey",
           ar: "استبيان التجربة الرقمية",

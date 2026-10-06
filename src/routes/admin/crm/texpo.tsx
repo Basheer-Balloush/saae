@@ -51,6 +51,7 @@ import {
   fmtNum,
   useT,
 } from "@/components/console/ui";
+import { EventsTabs } from "@/features/crm/EventsTabs";
 
 export const Route = createFileRoute("/admin/crm/texpo")({
   ssr: false,
@@ -237,7 +238,7 @@ function TexpoAdminPage() {
   return (
     <div>
       <PageHeader
-        eyebrow={t("التفاعل", "Engagement")}
+        eyebrow={t("الفعاليات", "Events")}
         title={t("لعبة تكسبو", "Texpo game")}
         description={t(
           "تحدّي أبو الجود في معرض تكسبو (8 إلى 11 تشرين الأول 2026): الروابط وأرقام كل رابط ومن لعب ومن استلم كوبوناً.",
@@ -258,6 +259,7 @@ function TexpoAdminPage() {
           </>
         }
       />
+      <EventsTabs />
 
       {error ? (
         <ErrorNote onRetry={load} />

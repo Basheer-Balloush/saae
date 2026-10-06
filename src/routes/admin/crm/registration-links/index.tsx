@@ -38,6 +38,7 @@ import {
   fmtNum,
   useT,
 } from "@/components/console/ui";
+import { EventsTabs } from "@/features/crm/EventsTabs";
 
 export const Route = createFileRoute("/admin/crm/registration-links/")({
   ssr: false,
@@ -125,7 +126,7 @@ function SignupLinksPage() {
   return (
     <div>
       <PageHeader
-        eyebrow={t("إدارة الموقع", "Website")}
+        eyebrow={t("الفعاليات", "Events")}
         title={t("روابط التسجيل", "Sign-up links")}
         description={t(
           "روابط قصيرة للفعاليات والمعارض. من يسجّل عبرها يظهر في «العملاء المحتملون».",
@@ -138,6 +139,7 @@ function SignupLinksPage() {
           </Button>
         }
       />
+      <EventsTabs />
       {error ? (
         <ErrorNote onRetry={load} />
       ) : rows === null ? (
