@@ -631,7 +631,7 @@
   .assistant-chat-portrait {
     width: 100%;
     min-height: 176px;
-    flex: 0 0 176px;
+    flex: 0 0 clamp(176px, 26vh, 240px);
     align-self: auto;
     border-inline-start: 0;
     border-bottom: 1px solid rgba(114, 214, 223, 0.28);
@@ -642,10 +642,14 @@
     display: none;
   }
 
+  /* The whole figure: the welcome pose starts at the image's top edge, so
+     lifting it (top: -42px, from the older pose) cut his head off. */
   .assistant-chat-portrait img {
-    top: -42px;
-    bottom: auto;
-    width: 215px;
+    top: 12px;
+    bottom: 12px;
+    width: auto;
+    height: calc(100% - 24px);
+    max-height: none;
   }
 
   .assistant-chat-intro {
