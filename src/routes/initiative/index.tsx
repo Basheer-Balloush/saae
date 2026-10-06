@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import pageHtml from "@/features/website/cinematic/html/initiative.html?raw";
@@ -9,13 +9,19 @@ import {
   renderSeatsCovered,
   type Donor,
 } from "@/features/website/initiative/live-leaderboard";
+import {
+  applyMomentum,
+  momentumFrom,
+  paintMomentum,
+  type Momentum,
+} from "@/features/website/initiative/momentum";
 import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
 import { InitiativeActionDialogs } from "@/features/website/initiative/InitiativeActionDialogs";
 
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/language.js" },
   { src: "/cinematic/js/navigation.js" },
-  { src: "/cinematic/js/initiative.js" },
+  { src: "/cinematic/js/initiative.js?v=live-momentum-1" },
   { src: "/cinematic/js/text-effect.js" },
   { src: "/cinematic/js/anime.umd.min.js" },
   { src: "/cinematic/js/motion-anime.js" },
@@ -26,7 +32,19 @@ const HTML_ATTRS = {
   "data-title-ar": "الجمعية | مبادرة مليون مستخدم ذكاء اصطناعي سوري",
 };
 
+/* The momentum figures are read before the page renders, so the first paint
+   already shows the live seat records. If the read fails the markup's own
+   snapshot stays, and the 30-second re-read below fills it in. */
+async function loadMomentum(): Promise<Momentum | null> {
+  try {
+    return momentumFrom(await getInitiativeStats());
+  } catch {
+    return null;
+  }
+}
+
 export const Route = createFileRoute("/initiative/")({
+  loader: () => loadMomentum(),
   head: () => ({
     meta: [
       { title: "SAAE | One Million Syrian AI Users" },
@@ -91,6 +109,7 @@ function useLiveSponsors() {
         .then((stats) => {
           if (!live) return;
           funded.current = stats.totalFunded;
+          paintMomentum(document, momentumFrom(stats));
           paint();
         })
         .catch(() => {});
@@ -111,10 +130,16 @@ function useLiveSponsors() {
 }
 
 function Page() {
+  const momentum = Route.useLoaderData();
+  /* Fixed at first render: a new string would make CinematicPage re-inject the
+     page and re-run its scripts, and the loader can run again while the page
+     is open (opening a "?action=" dialog, for one). Later figures arrive
+     through paintMomentum instead. */
+  const [html] = useState(() => (momentum ? applyMomentum(pageHtml, momentum) : pageHtml));
   useLiveSponsors();
   return (
     <>
-      <CinematicPage html={pageHtml} scripts={SCRIPTS} htmlAttrs={HTML_ATTRS} />
+      <CinematicPage html={html} scripts={SCRIPTS} htmlAttrs={HTML_ATTRS} />
       <InitiativeActionDialogs />
     </>
   );

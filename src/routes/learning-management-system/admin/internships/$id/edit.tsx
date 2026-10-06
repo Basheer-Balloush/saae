@@ -1032,7 +1032,7 @@ function Cover({
           <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
         ) : null}
         <span
-          className={`relative flex flex-col items-center gap-1 text-[13px] font-bold ${url ? "rounded-lg bg-black/60 px-3 py-1.5 text-white opacity-0 group-hover:opacity-100" : "text-[var(--cx-muted)]"}`}
+          className={`relative flex flex-col items-center gap-1 text-[13px] font-bold ${url ? "rounded-lg bg-black/60 px-3 py-1.5 text-white opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100" : "text-[var(--cx-muted)]"}`}
         >
           {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImagePlus className="h-5 w-5" />}
           {path ? t("تغيير الصورة", "Change image") : t("رفع صورة", "Upload image")}

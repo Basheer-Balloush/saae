@@ -219,6 +219,9 @@ html[dir="rtl"] .lms-skin .cats-nav button span { display: inline-block; transfo
 .lms-skin .cats-dots { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
 .lms-skin .cats-dots button { width: 26px; height: 6px; border: 0; border-radius: 999px; background: rgba(184, 232, 240, .22); cursor: pointer; transition: background-color 250ms ease, width 250ms var(--lms-ease); }
 .lms-skin .cats-dots li.is-active button { width: 40px; background: var(--lms-lift); box-shadow: 0 0 12px rgba(119, 224, 232, .7); }
+/* The dots stay 6px tall to the eye; a finger gets a 24px-tall target that meets its neighbours' in the 8px gap. */
+.lms-skin .cats-dots button { position: relative; }
+.lms-skin .cats-dots button::before { content: ""; position: absolute; inset: -9px -4px; }
 .lms-skin .cats-stage { position: relative; min-height: 440px; perspective: 1400px; -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
 .lms-skin .cats-grid { position: relative; display: block; height: 440px; margin: 0; padding: 0; list-style: none; transform-style: preserve-3d; }
 .lms-skin .cat-card { position: absolute; inset-block: 20px; inset-inline-start: 50%; width: min(232px, 60vw); margin: 0; margin-inline-start: calc(min(232px, 60vw) / -2); transition: transform 750ms var(--lms-ease), opacity 500ms ease, filter 500ms ease; will-change: transform, opacity; }

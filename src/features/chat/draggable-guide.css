@@ -1,0 +1,44 @@
+[data-draggable-guide] {
+  cursor: grab !important;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Guides that sit in the page flow (the footer's Abu Al-Joud, the phone hero's
+   guide) are wide on phones; with touch-action none, a swipe that started on
+   them could not scroll the page. Vertical swipes scroll, sideways drags still
+   move them, and a tap still opens the chat. Floating guides keep none. */
+.hmf-assistant-character[data-draggable-guide],
+.mh-hero-guide[data-draggable-guide] {
+  touch-action: pan-y;
+}
+
+[data-draggable-guide] button,
+[data-draggable-guide] img,
+.guide-clickable-card {
+  cursor: grab !important;
+}
+
+[data-draggable-guide] img {
+  -webkit-user-drag: none;
+}
+
+[data-draggable-guide][data-guide-dragging="true"],
+[data-draggable-guide][data-guide-dragging="true"] * {
+  cursor: grabbing !important;
+}
+
+.guide-interaction-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  opacity: 0.72;
+}
+
+.guide-clickable-card:focus-visible {
+  outline: 2px solid #72d6df;
+  outline-offset: 4px;
+}

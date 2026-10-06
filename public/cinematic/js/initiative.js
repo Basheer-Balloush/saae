@@ -103,34 +103,6 @@
     revealItems.forEach(item => revealObserver.observe(item));
   }
 
-  const progress = document.querySelector(".progress-preview");
-  const numbers = Array.from(document.querySelectorAll("[data-count]"));
-  let counted = false;
-  const runCounters = () => {
-    if (counted) return;
-    counted = true;
-    if (reduced) return;
-    const duration = 1400;
-    const start = performance.now();
-    const format = new Intl.NumberFormat("en-US");
-    const tick = now => {
-      const elapsed = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - elapsed, 4);
-      numbers.forEach(node => { node.textContent = format.format(Math.round(Number(node.dataset.count) * eased)); });
-      if (elapsed < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  };
-
-  if (progress && "IntersectionObserver" in window) {
-    const progressObserver = new IntersectionObserver(entries => {
-      if (!entries.some(entry => entry.isIntersecting)) return;
-      runCounters();
-      progressObserver.disconnect();
-    }, { threshold: .22 });
-    progressObserver.observe(progress);
-  } else runCounters();
-
   /* Composition dial: figures spotlight their own arc. Hover previews,
      click pins, Esc or re-click releases. */
   const dialEl = document.querySelector(".progress-dial");
@@ -147,7 +119,16 @@
     if (!key) return document.documentElement.lang === "ar" ? translations.seatsMotion : (english.get(segLabel) || "seats in motion");
     return document.documentElement.lang === "ar" ? translations[segText[key][1]] : segText[key][0];
   };
-  const segNumFor = key => key ? { sponsored: "1,200", waitlist: "24", remaining: "998,776" }[key] : "1,224";
+  /* The figures are the live seat records the server wrote into the cards
+     (src/features/website/initiative/momentum.ts), so the big number reads
+     them back from there: a card's own figure, or with none focused the two
+     dial cards added together. Nothing is counted up or held here. */
+  const seatFormat = new Intl.NumberFormat("en-US");
+  const figureOf = key => {
+    const el = document.querySelector(`.metric-strip article[data-seg="${key}"] strong`);
+    return el ? Number(el.textContent.replace(/[^\d]/g, "")) || 0 : 0;
+  };
+  const segNumFor = key => seatFormat.format(key ? figureOf(key) : figureOf("sponsored") + figureOf("waitlist"));
   const paintFocus = key => {
     if (dialEl) { if (key) dialEl.dataset.focus = key; else delete dialEl.dataset.focus; }
     if (segNum) segNum.textContent = segNumFor(key);

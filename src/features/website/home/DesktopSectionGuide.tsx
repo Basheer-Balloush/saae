@@ -1,3 +1,5 @@
+import { HERO_MASCOT_IMAGES, preloadMascotPoses } from "@/features/chat/lib/mascot";
+import { useDraggableGuide } from "@/features/chat/hooks/useDraggableGuide";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { usePortalTarget } from "@/features/website/home/usePortalTarget";
@@ -131,14 +133,7 @@ const HERO_COPY: Record<Locale, GuideCopy[]> = {
   ],
 };
 
-const HERO_COMIC_IMAGES = [
-  "/cinematic/images/abu-al-joud-comic-welcome.webp",
-  "/cinematic/images/abu-al-joud-comic-curious.webp",
-  "/cinematic/images/abu-al-joud-comic-curious.webp",
-  "/cinematic/images/abu-al-joud-comic-celebrate.webp",
-  "/cinematic/images/abu-al-joud-comic-vision.webp",
-  "/cinematic/images/abu-al-joud-comic-vision.webp",
-] as const;
+const HERO_COMIC_IMAGES = HERO_MASCOT_IMAGES;
 
 function useActiveGuideContext() {
   const [active, setActive] = useState<GuideContext | null>(null);
@@ -222,6 +217,7 @@ function useActiveGuideContext() {
 }
 
 export function DesktopSectionGuide() {
+  useEffect(preloadMascotPoses, []);
   const [locale, setLocale] = useState<Locale>("ar");
   const [heroGuideReady, setHeroGuideReady] = useState(false);
   const [activeBand, setActiveBand] = useState(0);
@@ -389,12 +385,15 @@ export function DesktopSectionGuide() {
 
   const visible = context !== null && (!heroMode || heroGuideReady);
   const cue = `${context}-${activeBand}-${locale}-${communityCopy?.title ?? ""}`;
+  const drag = useDraggableGuide<HTMLElement>(`${context}-${activeBand}-${locale}`);
 
   return (
     <>
       <AnimatePresence>
         {visible && (
           <motion.aside
+            {...drag.bindings}
+            onClick={openConversation}
             className="section-guide"
             data-guide-context="comic"
             data-guide-section={!heroMode && context ? context : undefined}
@@ -409,7 +408,16 @@ export function DesktopSectionGuide() {
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={cue}
-                className="section-guide-copy"
+                className="section-guide-copy guide-clickable-card"
+                role="button"
+                tabIndex={0}
+                aria-label={copy.label}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openConversation();
+                  }
+                }}
                 aria-live="polite"
                 initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: -18, y: 8 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
@@ -422,24 +430,36 @@ export function DesktopSectionGuide() {
                 <p className="section-guide-greeting">{copy.greeting}</p>
                 <h2>{copy.title}</h2>
                 <p className="section-guide-body">{copy.body}</p>
+                <span className="guide-interaction-hint">
+                  {locale === "ar" ? "اضغط للدردشة · اسحب للتحريك" : "Tap to chat · Drag to move"}
+                </span>
               </motion.div>
             </AnimatePresence>
 
-            <motion.button
-              key={comicImage}
-              type="button"
-              className="community-comic-speaker"
-              onClick={openConversation}
-              aria-label={copy.label}
-              title={copy.label}
-              initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: -22, y: 12 }}
-              animate={{ opacity: 1, x: 0, y: 0 }}
-              whileHover={prefersReducedMotion ? undefined : { y: -5, scale: 1.025 }}
-              whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
-              transition={{ duration: prefersReducedMotion ? 0.12 : 0.48, delay: 0.08 }}
-            >
-              <img src={comicImage} alt="" aria-hidden="true" />
-            </motion.button>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.button
+                key={`${context}-${activeBand}-${comicImage}`}
+                type="button"
+                className="community-comic-speaker"
+                aria-label={copy.label}
+                title={copy.label}
+                initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: -22, y: 12 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.98 }}
+                whileHover={prefersReducedMotion ? undefined : { y: -5, scale: 1.025 }}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
+                transition={{ duration: prefersReducedMotion ? 0.12 : 0.48, delay: 0.08 }}
+              >
+                <img
+                  className="guide-mascot-gesture"
+                  src={comicImage}
+                  alt=""
+                  aria-hidden="true"
+                  decoding="async"
+                  draggable={false}
+                />
+              </motion.button>
+            </AnimatePresence>
           </motion.aside>
         )}
       </AnimatePresence>

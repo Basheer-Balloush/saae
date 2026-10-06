@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useDraggableGuide } from "@/features/chat/hooks/useDraggableGuide";
 import { SECTION_COMIC_IMAGES, SECTION_COPY, type Locale } from "./section-guide-copy";
 
 /* Abu Al-Joud below the hero on the phone, as the desktop's floating guide
@@ -73,6 +74,8 @@ export function MobileSectionGuide({ lang }: { lang: Locale }) {
 
   const section = shown ?? "news";
   const copy = SECTION_COPY[section][lang];
+  const drag = useDraggableGuide<HTMLElement>(`${active}-${lang}`);
+  const showCard = talking || drag.isDragging || drag.isMoved;
 
   const open = () => {
     window.dispatchEvent(new CustomEvent("assistant:open", { detail: { prefill: copy.prefill } }));
@@ -80,25 +83,51 @@ export function MobileSectionGuide({ lang }: { lang: Locale }) {
 
   return (
     <aside
-      className={`mh-section-guide${active ? " mh-is-shown" : ""}${talking ? " mh-is-talking" : ""}`}
+      {...drag.bindings}
+      onClick={open}
+      className={`mh-section-guide${active ? " mh-is-shown" : ""}${showCard ? " mh-is-talking" : ""}`}
       dir={lang === "ar" ? "rtl" : "ltr"}
       aria-label={lang === "ar" ? "دليل أبو الجود للصفحة" : "Abu Al-Joud's page guide"}
       aria-hidden={active ? undefined : true}
     >
-      <div className="mh-section-guide-card" key={`${section}-${lang}`} aria-live="polite">
+      <div
+        className="mh-section-guide-card guide-clickable-card"
+        key={`${section}-${lang}`}
+        role="button"
+        tabIndex={active && showCard ? 0 : -1}
+        aria-hidden={!showCard}
+        aria-label={copy.label}
+        aria-live="polite"
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            open();
+          }
+        }}
+      >
         <p className="mh-section-guide-greeting">{copy.greeting}</p>
         <p className="mh-section-guide-title">{copy.title}</p>
         <p className="mh-section-guide-body">{copy.body}</p>
+        <span className="guide-interaction-hint">
+          {lang === "ar" ? "اضغط للدردشة · اسحب للتحريك" : "Tap to chat · Drag to move"}
+        </span>
       </div>
       <button
         type="button"
         className="mh-section-guide-figure"
-        onClick={open}
         aria-label={copy.label}
         title={copy.label}
         tabIndex={active ? undefined : -1}
       >
-        <img src={SECTION_COMIC_IMAGES[section]} alt="" width={512} height={768} decoding="async" />
+        <img
+          key={section}
+          src={SECTION_COMIC_IMAGES[section]}
+          alt=""
+          width={512}
+          height={768}
+          decoding="async"
+          draggable={false}
+        />
       </button>
     </aside>
   );

@@ -1,3 +1,5 @@
+import { ABU_AL_JOUD, preloadMascotPoses } from "@/features/chat/lib/mascot";
+import { useDraggableGuide } from "@/features/chat/hooks/useDraggableGuide";
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import {
   Building2,
@@ -114,10 +116,10 @@ const HERO_FONT_LOADS: Array<[string, string]> = [
 ];
 const HERO_IMAGE_URLS = [
   "/cinematic/images/initiative-tree.svg",
-  "/cinematic/images/abu-al-joud-comic-welcome.webp",
-  "/cinematic/images/abu-al-joud-comic-curious.webp",
-  "/cinematic/images/abu-al-joud-comic-celebrate.webp",
-  "/cinematic/images/abu-al-joud-comic-vision.webp",
+  ABU_AL_JOUD.welcome,
+  ABU_AL_JOUD.explain,
+  ABU_AL_JOUD.celebrate,
+  ABU_AL_JOUD.vision,
 ];
 const PRELOAD_TIMEOUT_MS = 8000;
 
@@ -477,19 +479,19 @@ const COPY = {
 /* Abu Al-Joud's line for each beat, the same as the desktop guide's. */
 const GUIDE = [
   {
-    image: "/cinematic/images/abu-al-joud-comic-welcome.webp",
+    image: ABU_AL_JOUD.welcome,
     ar: "أهلاً، أنا أبو الجود. سأرافقك في هذه الرحلة.",
     en: "Hello, I am Abu Al-Joud. I will guide you through this journey.",
     prefill: { ar: "عرّفني على الجمعية ورؤيتها", en: "Introduce me to SAAE and its vision" },
   },
   {
-    image: "/cinematic/images/abu-al-joud-comic-curious.webp",
+    image: ABU_AL_JOUD.explain,
     ar: "هنا تبدأ جذور المعرفة والتخصص.",
     en: "The roots of knowledge and expertise begin here.",
     prefill: { ar: "ما هي مجتمعات الجمعية الثمانية؟", en: "What are SAAE's eight communities?" },
   },
   {
-    image: "/cinematic/images/abu-al-joud-comic-curious.webp",
+    image: ABU_AL_JOUD.explain,
     ar: "ومن هذه الجذور ينمو التعلّم.",
     en: "Learning grows from those roots.",
     prefill: {
@@ -498,13 +500,13 @@ const GUIDE = [
     },
   },
   {
-    image: "/cinematic/images/abu-al-joud-comic-celebrate.webp",
+    image: ABU_AL_JOUD.celebrate,
     ar: "الأثر يظهر في الأرقام والناس.",
     en: "Impact becomes visible through people and results.",
     prefill: { ar: "أخبرني أكثر عن إنجازات الجمعية", en: "Tell me more about SAAE's achievements" },
   },
   {
-    image: "/cinematic/images/abu-al-joud-comic-vision.webp",
+    image: ABU_AL_JOUD.vision,
     ar: "وهنا تتحول الرؤية إلى خطوة وطنية.",
     en: "Here, the vision becomes a national step.",
     prefill: {
@@ -513,7 +515,7 @@ const GUIDE = [
     },
   },
   {
-    image: "/cinematic/images/abu-al-joud-comic-vision.webp",
+    image: ABU_AL_JOUD.vision,
     ar: "وتصل الرحلة من دمشق إلى كل سورية.",
     en: "The journey reaches from Damascus across Syria.",
     prefill: {
@@ -543,9 +545,11 @@ const OPENING_LINES = {
 
 /** Abu Al-Joud: a line for each beat, shown for a few seconds as the beat arrives. */
 function HeroGuide({ lang, band }: { lang: Lang; band: number }) {
+  useEffect(preloadMascotPoses, []);
   const [shown, setShown] = useState(false);
   const [talking, setTalking] = useState(true);
   const beat = GUIDE[band] ?? GUIDE[0];
+  const drag = useDraggableGuide<HTMLButtonElement>(`${band}-${lang}`);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setShown(true), 900);
@@ -566,21 +570,27 @@ function HeroGuide({ lang, band }: { lang: Lang; band: number }) {
 
   return (
     <button
+      {...drag.bindings}
       type="button"
-      className={`mh-hero-guide${shown ? " mh-is-shown" : ""}${talking ? " mh-is-talking" : ""}`}
+      className={`mh-hero-guide${shown ? " mh-is-shown" : ""}${talking || drag.isDragging || drag.isMoved ? " mh-is-talking" : ""}`}
       onClick={open}
       aria-label={GUIDE_LABEL[lang]}
     >
       <span className="mh-hero-guide-bubble" key={`${lang}-${band}`} aria-live="polite">
         {beat[lang]}
+        <span className="guide-interaction-hint">
+          {lang === "ar" ? "اضغط للدردشة · اسحب للتحريك" : "Tap to chat · Drag to move"}
+        </span>
       </span>
       <img
+        key={band}
         className="mh-hero-guide-figure"
         src={beat.image}
         alt=""
         width={512}
         height={768}
         decoding="async"
+        draggable={false}
       />
     </button>
   );

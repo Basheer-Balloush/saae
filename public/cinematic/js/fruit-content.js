@@ -49,7 +49,7 @@ export function fruitContentMask(kind, language) {
     for(const x of [242,480,718]){line([[x,448],[x,470]]);box(x-64,470,128,64);line([[x-24,499],[x-6,515],[x+27,488]]);}
   }else if(kind===1){
     const labels=language==='ar'?['متدرّب','دورة','شريك استراتيجي','مجتمعات']:['TRAINEES','COURSES','PARTNERS','COMMUNITIES'];
-    const values=['5,000+','120+','30+','9'];
+    const values=['5,000+','120+','30+','8'];
     for(let i=0;i<4;i++){
       const x=i%2?706:254, y=i<2?150:393;
       text(values[i],x,y,116,900); text(labels[i],x,y+92,50,900);

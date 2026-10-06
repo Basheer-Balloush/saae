@@ -159,7 +159,7 @@ export function DetailsTab({
               </div>
             )}
             {course.cover_url && (
-              <span className="absolute bottom-2 end-2 rounded-lg bg-black/60 px-3 py-1.5 text-[12.5px] font-bold text-white opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="absolute bottom-2 end-2 rounded-lg bg-black/60 px-3 py-1.5 text-[12.5px] font-bold text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100">
                 {t("تغيير الصورة", "Change image")}
               </span>
             )}

@@ -1,3 +1,4 @@
+import { ABU_AL_JOUD } from "@/features/chat/lib/mascot";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp, Building2, GraduationCap, Handshake, Loader2, X } from "lucide-react";
@@ -217,7 +218,7 @@ export function AssistantChatModal({
             <header className="assistant-chat-header">
               <div className="assistant-chat-brand">
                 <span className="assistant-chat-avatar" aria-hidden="true">
-                  <img src="/cinematic/images/abu-al-joud-3d.webp" alt="" />
+                  <img src={ABU_AL_JOUD.avatar} alt="" />
                 </span>
                 <div>
                   <p id="assistant-chat-title" className="assistant-chat-name">
@@ -250,7 +251,7 @@ export function AssistantChatModal({
                     aria-hidden="true"
                   >
                     <span className="assistant-chat-portrait-label">SAAE / AI</span>
-                    <img src="/cinematic/images/abu-al-joud-3d.webp" alt="" />
+                    <img src={ABU_AL_JOUD.welcome} alt="" />
                   </motion.div>
 
                   <motion.div
@@ -310,7 +311,7 @@ export function AssistantChatModal({
                       >
                         {!isUser && (
                           <span className="assistant-chat-message-avatar" aria-hidden="true">
-                            <img src="/cinematic/images/abu-al-joud-3d.webp" alt="" />
+                            <img src={ABU_AL_JOUD.avatar} alt="" />
                           </span>
                         )}
                         <div className="assistant-chat-message-content">
@@ -360,7 +361,7 @@ export function AssistantChatModal({
                   {isLoading && !streamingHasText && (
                     <div className="assistant-chat-message is-assistant">
                       <span className="assistant-chat-message-avatar" aria-hidden="true">
-                        <img src="/cinematic/images/abu-al-joud-3d.webp" alt="" />
+                        <img src={ABU_AL_JOUD.avatar} alt="" />
                       </span>
                       <div className="assistant-chat-processing" role="status" aria-live="polite">
                         <Loader2 className="animate-spin" aria-hidden="true" />
