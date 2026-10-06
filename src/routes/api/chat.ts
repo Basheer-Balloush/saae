@@ -226,6 +226,8 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 # حفظ البيانات
 - الفرد: لا تطلب بياناته إلا بعد موافقته كما في البند 8: الاسم الثلاثي، ثم الهاتف أو البريد. لا تطلب عنوان السكن أو غيره. بعد أن يعطيها احفظها بأداة \`submit_individual_lead\` مع ما عرفته من الرحلة (الاختصاص، المجال، هدفه باختصار)، وأخبره أن فريق الجمعية سيتواصل معه، دون تحديد موعد.
 - الشركة: ابدأ بفهم ما تحتاجه (تدريب موظفين، شراكة، استشارة AI) وأجب عن أسئلتها. ثم اطلب بالتدريج، سؤالاً في كل رسالة: اسم الشركة، مجال عملها، واسم شخص التواصل مع هاتفه أو بريده. باقي الحقول (الترخيص، المقر، عدد الموظفين، استخدام AI) اسأل عنها فقط إن كانت المحادثة تسمح، ولا تُلحّ. ثم احفظها بأداة \`submit_company_lead\` واقترح خدمات الجمعية الأنسب من المرجع.
+- من هو «شركة»: كل من يتحدث باسم شركة أو جهة أو مؤسسة، أو يعرض خدمة أو شراكة أو رعاية على الجمعية (مثل «حابين نكون وسيلة دفع إلكتروني عندكم»، «أنا منسق علاقات بشركة…»، «عنا مركز تدريب ومنحب نتعاون»). هذا يُحفظ بـ \`submit_company_lead\`، لا \`submit_individual_lead\`: اسم الشركة، اسم الشخص وصفته، وهاتفه أو بريده، وما يعرضه. لا تحِله إلى البريد قبل أن تعرض عليه حفظ بياناته؛ البريد هو الخيار الأخير.
+- بعد الحفظ قل فقط ما حدث فعلاً: «سجّلت بياناتك وبيتواصل معك فريق الجمعية». لا تقل «بعتت رسالتك للفريق» إلا إذا استخدمت \`send_to_team\` ونجحت.
 - عند نقص المعلومات، اقترح التواصل عبر ${ORG_EMAIL}.
 
 # قواعد إضافية
@@ -875,9 +877,16 @@ export const Route = createFileRoute("/api/chat")({
 
           submit_individual_lead: tool({
             description:
-              "Save an individual visitor's contact info after collecting it conversationally. Call ONLY when full_name and at least one contact (email or phone) are confirmed.",
+              "Save a person's contact info after collecting it conversationally: a learner, trainer or researcher asking for themself. Call ONLY when full_name and at least one contact (email or phone) are confirmed. Someone who speaks for a company or organisation, or offers a service, partnership or sponsorship, is a company lead: use submit_company_lead, and if you use this tool anyway, fill organization.",
             inputSchema: z.object({
               full_name: z.string().min(2),
+              organization: z
+                .string()
+                .nullable()
+                .optional()
+                .describe(
+                  "The company or organisation the person speaks for, if any (e.g. 'كاش موبايل MTN'). When set, the lead is saved as a company lead.",
+                ),
               email: z.string().email().nullable().optional(),
               phone: z.string().nullable().optional(),
               address: z.string().nullable().optional(),
@@ -893,6 +902,37 @@ export const Route = createFileRoute("/api/chat")({
                   error:
                     "No usable contact: the phone is not a real number and there is no email. Ask the visitor again; do not say the details were saved.",
                 };
+              // Someone speaking for a company is a company lead, whichever tool
+              // the model chose: a payments provider offering a partnership had
+              // been filed as a person.
+              const organization = input.organization?.trim();
+              if (organization && organization.length >= 2) {
+                const { error: companyError, data: company } = await supabaseAdmin
+                  .from("company_leads")
+                  .insert({
+                    company_name: organization,
+                    work_field: input.work_field ?? input.specialty ?? null,
+                    contact_name: input.full_name,
+                    contact_email: input.email ?? null,
+                    contact_phone: phone,
+                    raw: { ...input, saved_as_company_from: "submit_individual_lead" },
+                    conversation_id: conversationId,
+                  })
+                  .select("id")
+                  .single();
+                if (companyError) {
+                  console.error(
+                    "[chat] company lead (from individual) failed",
+                    companyError.message,
+                    {
+                      conversationId,
+                    },
+                  );
+                  return { ok: false, error: companyError.message };
+                }
+                console.log("[chat] company_lead saved", { id: company?.id, conversationId });
+                return { ok: true, id: company?.id, saved_as: "company" };
+              }
               const { error, data } = await supabaseAdmin
                 .from("individual_leads")
                 .insert({
@@ -920,7 +960,7 @@ export const Route = createFileRoute("/api/chat")({
           }),
           submit_company_lead: tool({
             description:
-              "Save a company lead after collecting the company form info conversationally. Call ONLY when company_name and at least one contact field are confirmed.",
+              "Save a company lead: a company or organisation asking for training or consulting, or offering a service, partnership or sponsorship (e.g. a payments provider, a training centre, a sponsor). Call ONLY when company_name and at least one contact field are confirmed; put the person's name and role in contact_name, and what they offer or need in work_field.",
             inputSchema: z.object({
               company_name: z.string().min(2),
               work_field: z.string().nullable().optional(),

@@ -110,6 +110,12 @@ const CASES = [
   { q: "أنا طالبة طب، شو بتنصحني؟", mustNot: [/فيكفي/] },
   { q: "شكراً كتير على المساعدة", must: [/ولو|تسلم|العفو|الله يسلمك|واجب|على راسي|بالخدمة/] },
   { q: "بدي تفاصيل دورة الذكاء الاصطناعي التوليدي 09 لو سمحت", must: [/على عيني|على راسي|من عيوني|تكرم|حاضر|تؤمر|أكيد/] },
+  // A company offering a service is a company lead: collect its details, don't send it to the email first.
+  {
+    q: "أنا منسق علاقات بشركة كاش موبايل وحابين نكون وسيلة دفع إلكتروني عندكم",
+    must: [/اسم|الاسم|بياناتك|رقم|تواصل/],
+    mustNot: [/info@aisyria\.org/],
+  },
   // English.
   { q: "Do you have any internships open right now?", must: [/internships/] },
   { q: "Is UNICEF a partner of SAAE?", must: [/not/i], mustNot: [/[\u0600-\u06FF]{4,}/] },
