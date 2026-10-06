@@ -28,10 +28,10 @@ const identity = bank.map(() => [0, 1, 2, 3]);
 const reversed = bank.map(() => [3, 2, 1, 0]);
 
 describe("levels", () => {
-  it("0–4 beginner, 5–7 intermediate, 8–10 professional", () => {
-    expect([0, 4].map(levelFor)).toEqual(["beginner", "beginner"]);
-    expect([5, 7].map(levelFor)).toEqual(["intermediate", "intermediate"]);
-    expect([8, 10].map(levelFor)).toEqual(["professional", "professional"]);
+  it("0–3 beginner, 4–5 intermediate, 6–7 professional", () => {
+    expect([0, 3].map(levelFor)).toEqual(["beginner", "beginner"]);
+    expect([4, 5].map(levelFor)).toEqual(["intermediate", "intermediate"]);
+    expect([6, 7].map(levelFor)).toEqual(["professional", "professional"]);
     expect([
       LEVELS.beginner.percent,
       LEVELS.intermediate.percent,
@@ -41,11 +41,10 @@ describe("levels", () => {
 });
 
 describe("the question set", () => {
-  it("is 10 questions, easy to hard", () => {
+  it("is 7 questions, easy to hard", () => {
+    expect(QUESTION_COUNT).toBe(7);
     expect(bank).toHaveLength(QUESTION_COUNT);
-    expect(bank.map((q) => q.difficulty).join(",")).toBe(
-      "easy,easy,easy,medium,medium,medium,medium,hard,hard,hard",
-    );
+    expect(bank.map((q) => q.difficulty).join(",")).toBe("easy,easy,easy,medium,medium,hard,hard");
   });
 
   it("has four distinct options in both languages, a valid answer, a hint and an explanation", () => {
@@ -64,12 +63,14 @@ describe("the question set", () => {
   });
 
   it("cannot be won by always picking the longest answer", () => {
-    const longestWins = bank.filter((q) => {
-      const lens = q.options.en.map((o) => o.length);
-      return lens.indexOf(Math.max(...lens)) === q.answer;
-    }).length;
-    // Professional needs 8; the longest-answer trick must not get close.
-    expect(longestWins).toBeLessThan(8);
+    for (const lang of ["ar", "en"] as const) {
+      const longestWins = bank.filter((q) => {
+        const lens = q.options[lang].map((o) => o.length);
+        return lens.indexOf(Math.max(...lens)) === q.answer;
+      }).length;
+      // Intermediate needs 4; the longest-answer trick must stay a beginner.
+      expect(longestWins, lang).toBeLessThan(4);
+    }
   });
 
   it("has a host reply for every field", () => {
@@ -145,16 +146,16 @@ describe("grading", () => {
     const answers = bank.map((q, i) => ({
       q: i,
       shown: q.answer,
-      choice: i < 6 ? q.answer : (q.answer + 1) % 4,
-      correct: i < 6,
+      choice: i < 4 ? q.answer : (q.answer + 1) % 4,
+      correct: i < 4,
       ms: 1000,
       hint: false,
     }));
     const r = buildResult(bank, answers);
-    expect(r).toMatchObject({ score: 6, total: 10, level: "intermediate", percent: 35 });
+    expect(r).toMatchObject({ score: 4, total: 7, level: "intermediate", percent: 35 });
     expect(r.review[0].ok).toBe(true);
-    expect(r.review[9].ok).toBe(false);
-    expect(r.review[9].correct.en).toBe(bank[9].options.en[bank[9].answer]);
+    expect(r.review[6].ok).toBe(false);
+    expect(r.review[6].correct.en).toBe(bank[6].options.en[bank[6].answer]);
     expect(buildResult(bank, []).review.every((x) => x.chosen === null)).toBe(true);
   });
 });

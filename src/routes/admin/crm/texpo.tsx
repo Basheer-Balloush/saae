@@ -27,7 +27,13 @@ import {
   type GameLink,
   type TexpoOverview,
 } from "@/features/texpo/lib/texpo-admin.functions";
-import { AI_USES, FIELDS, LEVELS, type Level } from "@/features/texpo/lib/texpo-shared";
+import {
+  AI_USES,
+  FIELDS,
+  LEVELS,
+  QUESTION_COUNT,
+  type Level,
+} from "@/features/texpo/lib/texpo-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -46,6 +52,7 @@ import {
   PageHeader,
   Panel,
   Pill,
+  Seg,
   StatTile,
   fmtDate,
   fmtNum,
@@ -88,7 +95,7 @@ function downloadQr(url: string, name: string) {
 }
 
 /* Texpo in the CRM: the tracked links with a QR code each, how far people
-   got through each link, who played, and who claimed a coupon. */
+   got through each link, who played, and every player with their coupon. */
 function TexpoAdminPage() {
   const { t, ar, lang } = useT();
   const overviewFn = useServerFn(adminTexpoOverview);
@@ -101,6 +108,14 @@ function TexpoAdminPage() {
   const [slug, setSlug] = useState("");
   const [saving, setSaving] = useState(false);
   const [qr, setQr] = useState<GameLink | null>(null);
+  const [show, setShow] = useState<"all" | "claimed" | "unclaimed">("all");
+  const players = useMemo(
+    () =>
+      (data?.players ?? []).filter((p) =>
+        show === "all" ? true : show === "claimed" ? !!p.claimed_at : !p.claimed_at,
+      ),
+    [data, show],
+  );
 
   const load = useCallback(async () => {
     setError(false);
@@ -175,7 +190,7 @@ function TexpoAdminPage() {
   };
 
   const exportPlayers = async () => {
-    if (!data) return;
+    if (!players.length) return;
     const fieldName = (id: string | null) => {
       const f = FIELDS.find((x) => x.id === id);
       return f ? (ar ? f.ar : f.en) : "";
@@ -188,16 +203,22 @@ function TexpoAdminPage() {
       filenameBase: "texpo-players",
       sheetName: t("اللاعبون", "Players"),
       rtl: ar,
-      rows: data.players,
+      rows: players,
       columns: [
         { header: t("الاسم", "Name"), get: (r) => r.name, width: 26 },
         { header: t("البريد", "Email"), get: (r) => r.email, width: 30 },
         {
           header: t("المستوى", "Level"),
-          get: (r) => (ar ? LEVELS[r.level].name.ar : LEVELS[r.level].name.en),
+          get: (r) =>
+            r.level
+              ? ar
+                ? LEVELS[r.level].name.ar
+                : LEVELS[r.level].name.en
+              : t("لم يُكمل", "Didn't finish"),
           width: 14,
         },
         { header: t("النتيجة", "Score"), get: (r) => r.score, width: 8 },
+        { header: t("أجاب عن", "Answered"), get: (r) => r.answered, width: 9 },
         { header: t("المجال", "Field"), get: (r) => fieldName(r.field), width: 26 },
         {
           header: t("استخدام الذكاء الاصطناعي", "AI use"),
@@ -223,6 +244,12 @@ function TexpoAdminPage() {
         {
           header: t("الرابط", "Link"),
           get: (r) => (r.link === "direct" ? t("مباشر", "Direct") : r.link),
+          width: 20,
+        },
+        {
+          header: t("وقت اللعب", "Played at"),
+          type: "date",
+          get: (r) => r.played_at,
           width: 20,
         },
         {
@@ -428,29 +455,52 @@ function TexpoAdminPage() {
           <WhoPlayed data={data} />
 
           <Panel
-            title={t("من استلموا كوبوناً", "Players who claimed a coupon")}
+            title={t("اللاعبون", "Players")}
             description={t(
-              `${fmtNum(data.players.length, lang)} لاعباً`,
-              `${fmtNum(data.players.length, lang)} players`,
+              `${fmtNum(data.players.length, lang)} لاعباً، ${fmtNum(data.total.claimed, lang)} منهم استلموا كوبوناً`,
+              `${fmtNum(data.players.length, lang)} players, ${fmtNum(data.total.claimed, lang)} claimed a coupon`,
             )}
             actions={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={exportPlayers}
-                disabled={!data.players.length}
-              >
-                <Download className="h-4 w-4" />
-                {t("تصدير Excel", "Export Excel")}
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                <Seg
+                  value={show}
+                  onChange={setShow}
+                  options={[
+                    { value: "all", label: t("الكل", "All"), count: data.players.length },
+                    {
+                      value: "claimed",
+                      label: t("استلموا", "Claimed"),
+                      count: data.total.claimed,
+                    },
+                    {
+                      value: "unclaimed",
+                      label: t("لم يستلموا", "Not claimed"),
+                      count: data.players.length - data.total.claimed,
+                    },
+                  ]}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={exportPlayers}
+                  disabled={!players.length}
+                >
+                  <Download className="h-4 w-4" />
+                  {t("تصدير Excel", "Export Excel")}
+                </Button>
+              </div>
             }
             flush
           >
-            {data.players.length === 0 ? (
+            {players.length === 0 ? (
               <EmptyState
                 compact
                 icon={UserPlus}
-                title={t("لم يستلم أحد كوبوناً بعد", "No one has claimed a coupon yet")}
+                title={
+                  data.players.length === 0
+                    ? t("لم يلعب أحد بعد", "No one has played yet")
+                    : t("لا لاعبين هنا", "No players here")
+                }
               />
             ) : (
               <div className="overflow-x-auto">
@@ -466,22 +516,41 @@ function TexpoAdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.players.map((p, i) => (
+                    {players.map((p, i) => (
                       <tr
-                        key={`${p.code}-${i}`}
+                        key={`${p.played_at}-${i}`}
                         className="border-t border-[var(--cx-line-2)] align-top"
                       >
                         <td className="px-4 py-2.5">
-                          <div className="font-bold">{p.name || "—"}</div>
-                          <div className="text-[12px] text-[var(--cx-muted)]" dir="ltr">
-                            {p.email ?? ""}
-                          </div>
+                          {p.claimed_at ? (
+                            <>
+                              <div className="font-bold">{p.name || "—"}</div>
+                              <div className="text-[12px] text-[var(--cx-muted)]" dir="ltr">
+                                {p.email ?? ""}
+                              </div>
+                            </>
+                          ) : (
+                            <div className="text-[var(--cx-muted)]">{t("زائر", "Visitor")}</div>
+                          )}
                         </td>
                         <td className="px-2 py-2.5">
-                          <span className="font-bold" style={{ color: LEVEL_COLOR[p.level] }}>
-                            {ar ? LEVELS[p.level].name.ar : LEVELS[p.level].name.en}
-                          </span>{" "}
-                          <span className="text-[var(--cx-muted)] tabular-nums">{p.score}/10</span>
+                          {p.level ? (
+                            <>
+                              <span className="font-bold" style={{ color: LEVEL_COLOR[p.level] }}>
+                                {ar ? LEVELS[p.level].name.ar : LEVELS[p.level].name.en}
+                              </span>{" "}
+                              <span className="text-[var(--cx-muted)] tabular-nums">
+                                {p.score}/{p.answered}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-[var(--cx-muted)]">
+                              {t(
+                                `لم يُكمل (${p.answered}/${QUESTION_COUNT})`,
+                                `Didn't finish (${p.answered}/${QUESTION_COUNT})`,
+                              )}
+                            </span>
+                          )}
                         </td>
                         <td className="px-2 py-2.5">
                           {(() => {
@@ -490,9 +559,15 @@ function TexpoAdminPage() {
                           })()}
                         </td>
                         <td className="px-2 py-2.5">
-                          <span className="font-mono text-[12.5px]" dir="ltr">
-                            {p.code ?? "—"}
-                          </span>{" "}
+                          {p.code ? (
+                            <span className="font-mono text-[12.5px]" dir="ltr">
+                              {p.code}
+                            </span>
+                          ) : (
+                            <span className="text-[var(--cx-muted)]">
+                              {t("لم يستلم", "Not claimed")}
+                            </span>
+                          )}{" "}
                           {p.used && <Pill tone="green">{t("استُخدم", "Used")}</Pill>}
                           {p.account_new && (
                             <Pill tone="teal">{t("حساب جديد", "New account")}</Pill>
@@ -502,7 +577,7 @@ function TexpoAdminPage() {
                           {p.link === "direct" ? t("مباشر", "Direct") : p.link}
                         </td>
                         <td className="px-4 py-2.5 text-end text-[12.5px] text-[var(--cx-muted)]">
-                          {fmtDate(p.claimed_at, lang, true)}
+                          {fmtDate(p.played_at, lang, true)}
                         </td>
                       </tr>
                     ))}

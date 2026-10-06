@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { LINK_SLUG_RE, TEXPO_GAME, slugFromLabel, type Level } from "./texpo-shared";
 
 /* The Texpo page in the admin CRM: tracked links, each link's funnel, who
-   played, and the players who claimed a coupon. Admins only. */
+   played, and every player with their coupon once they claimed one. Admins only. */
 
 const db = async () => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -45,8 +45,11 @@ export type GameLink = {
 export type Player = {
   name: string | null;
   email: string | null;
-  level: Level;
-  score: number;
+  /** Null until the play is finished. */
+  level: Level | null;
+  score: number | null;
+  /** Questions answered: the whole set once finished. */
+  answered: number;
   field: string | null;
   ai_use: string | null;
   code: string | null;
@@ -54,7 +57,9 @@ export type Player = {
   account_new: boolean | null;
   chatted: boolean;
   link: string;
-  claimed_at: string;
+  /** When they finished, or started if they stopped part way. */
+  played_at: string;
+  claimed_at: string | null;
 };
 
 export type TexpoOverview = {
@@ -72,6 +77,8 @@ type PlayRow = {
   ai_use: string | null;
   level: Level | null;
   score: number | null;
+  current_q: number;
+  started_at: string;
   finished_at: string | null;
   claimed_at: string | null;
   account_new: boolean | null;
@@ -109,7 +116,7 @@ export const adminTexpoOverview = createServerFn({ method: "POST" })
       sb
         .from("game_plays")
         .select(
-          "link_id, field, ai_use, level, score, finished_at, claimed_at, account_new, chat_opened_at, coupon_id, player_name, player_email, lms_coupons(code)",
+          "link_id, field, ai_use, level, score, current_q, started_at, finished_at, claimed_at, account_new, chat_opened_at, coupon_id, player_name, player_email, lms_coupons(code)",
         )
         .eq("game", TEXPO_GAME)
         .order("started_at", { ascending: false })
@@ -163,24 +170,24 @@ export const adminTexpoOverview = createServerFn({ method: "POST" })
         byField[p.field] ??= { beginner: 0, intermediate: 0, professional: 0 };
         byField[p.field][p.level]++;
       }
-      if (p.claimed_at && p.level) {
-        players.push({
-          name: p.player_name,
-          email: p.player_email,
-          level: p.level,
-          score: p.score ?? 0,
-          field: p.field,
-          ai_use: p.ai_use,
-          code: p.lms_coupons?.code ?? null,
-          used: !!p.coupon_id && usedCoupons.has(p.coupon_id),
-          account_new: p.account_new,
-          chatted: !!p.chat_opened_at,
-          link: p.link_id ? (labelOf.get(p.link_id) ?? "—") : "direct",
-          claimed_at: p.claimed_at,
-        });
-      }
+      players.push({
+        name: p.player_name,
+        email: p.player_email,
+        level: p.finished_at ? p.level : null,
+        score: p.finished_at ? p.score : null,
+        answered: p.current_q,
+        field: p.field,
+        ai_use: p.ai_use,
+        code: p.lms_coupons?.code ?? null,
+        used: !!p.coupon_id && usedCoupons.has(p.coupon_id),
+        account_new: p.account_new,
+        chatted: !!p.chat_opened_at,
+        link: p.link_id ? (labelOf.get(p.link_id) ?? "—") : "direct",
+        played_at: p.finished_at ?? p.started_at,
+        claimed_at: p.claimed_at,
+      });
     }
-    players.sort((a, b) => b.claimed_at.localeCompare(a.claimed_at));
+    players.sort((a, b) => b.played_at.localeCompare(a.played_at));
 
     const out: GameLink[] = linkRows.map((l) => ({
       ...l,

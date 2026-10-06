@@ -39,7 +39,7 @@ export function TexpoClaimNudge() {
     >
       <Gift className="h-5 w-5 shrink-0 text-[#57e4ee]" aria-hidden="true" />
       <span className="min-w-0 flex-1 text-sm font-bold">
-        {ar ? "كوبونك من تحدّي تكسبو بانتظارك." : "Your Texpo challenge coupon is waiting."}
+        {ar ? "هديتك من تحدّي تكسبو بانتظارك." : "Your Texpo challenge gift is waiting."}
       </span>
       <a
         href="/texpo"

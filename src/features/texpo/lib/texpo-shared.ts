@@ -6,7 +6,7 @@ export type Lang = "ar" | "en";
 export type Bi = { ar: string; en: string };
 
 export const TEXPO_GAME = "texpo";
-export const QUESTION_COUNT = 10;
+export const QUESTION_COUNT = 7;
 /** Seconds to answer; a hint adds HINT_BONUS_SECONDS to that question. */
 export const QUESTION_SECONDS = 20;
 export const HINT_BONUS_SECONDS = 10;
@@ -22,32 +22,32 @@ export const LEVELS: Record<Level, { percent: number; name: Bi; line: Bi }> = {
     percent: 20,
     name: { ar: "مبتدئ", en: "Beginner" },
     line: {
-      ar: "كل خبير بدأ من هنا. كوبون 20٪ خطوتك الأولى.",
-      en: "Every expert started here. Your 20% coupon is a first step.",
+      ar: "كل خبير بدأ من هنا. هديتك كوبون خصم 20٪.",
+      en: "Every expert started here. Your gift: a 20% coupon.",
     },
   },
   intermediate: {
     percent: 35,
     name: { ar: "متوسط", en: "Intermediate" },
     line: {
-      ar: "تستخدم الذكاء الاصطناعي بوعي. طوّر مهاراتك مع خصم 35٪.",
-      en: "You use AI with good sense. Go further with 35% off.",
+      ar: "تستخدم الذكاء الاصطناعي بوعي. هديتك كوبون خصم 35٪.",
+      en: "You use AI with good sense. Your gift: a 35% coupon.",
     },
   },
   professional: {
     percent: 50,
     name: { ar: "محترف", en: "Professional" },
     line: {
-      ar: "مذهل! تعرف الذكاء الاصطناعي جيداً. خصم 50٪ لك.",
-      en: "Impressive! You really know your AI. 50% off is yours.",
+      ar: "مذهل! تعرف الذكاء الاصطناعي جيداً. هديتك كوبون خصم 50٪.",
+      en: "Impressive! You really know your AI. Your gift: a 50% coupon.",
     },
   },
 };
 
-/** 0–4 right: beginner, 5–7: intermediate, 8–10: professional. */
+/** 0–3 right: beginner, 4–5: intermediate, 6–7: professional. */
 export function levelFor(score: number): Level {
-  if (score >= 8) return "professional";
-  if (score >= 5) return "intermediate";
+  if (score >= 6) return "professional";
+  if (score >= 4) return "intermediate";
   return "beginner";
 }
 

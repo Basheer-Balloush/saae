@@ -16,6 +16,7 @@ import {
   DEVICE_ID_RE,
   FIELDS,
   LINK_SLUG_RE,
+  QUESTION_COUNT,
   TEXPO_GAME,
   levelFor,
   shuffledOrder,
@@ -56,6 +57,11 @@ const PLAY_COLUMNS =
 
 const device = z.string().regex(DEVICE_ID_RE);
 const playId = z.string().uuid();
+const questionIndex = z
+  .number()
+  .int()
+  .min(0)
+  .max(QUESTION_COUNT - 1);
 const linkSlug = z
   .string()
   .trim()
@@ -248,9 +254,7 @@ export const texpoState = createServerFn({ method: "POST" })
 /* ---------- the next question appears when the player taps Next ---------- */
 
 export const texpoShow = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) =>
-    z.object({ device, playId, q: z.number().int().min(0).max(9) }).parse(i),
-  )
+  .inputValidator((i: unknown) => z.object({ device, playId, q: questionIndex }).parse(i))
   .handler(async ({ data }): Promise<PlayState> => {
     const sb = await db();
     // Whatever was asked for, the answer is where the play stands now.
@@ -265,7 +269,7 @@ export const texpoAnswer = createServerFn({ method: "POST" })
       .object({
         device,
         playId,
-        q: z.number().int().min(0).max(9),
+        q: questionIndex,
         shown: z.number().int().min(0).max(3).nullable(),
       })
       .parse(i),
@@ -329,9 +333,7 @@ export const texpoAnswer = createServerFn({ method: "POST" })
 /* ---------- one hint per game: a clue and ten more seconds ---------- */
 
 export const texpoHint = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) =>
-    z.object({ device, playId, q: z.number().int().min(0).max(9) }).parse(i),
-  )
+  .inputValidator((i: unknown) => z.object({ device, playId, q: questionIndex }).parse(i))
   .handler(async ({ data }): Promise<{ hint: Bi; limitMs: number; remainingMs: number }> => {
     const sb = await db();
     const bank = await questions();

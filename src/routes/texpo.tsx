@@ -3,7 +3,7 @@ import { TexpoGame } from "@/features/texpo/TexpoGame";
 
 const TITLE = "تحدّي أبو الجود · Texpo 2026 — SAAE";
 const DESCRIPTION =
-  "10 أسئلة عن الذكاء الاصطناعي في حياتنا اليومية مع أبو الجود. العب واربح كوبون خصم يصل إلى 50٪ على دورة.";
+  "7 أسئلة عن الذكاء الاصطناعي في حياتنا اليومية مع أبو الجود. العب واربح كوبون هدية من الجمعية بخصم يصل إلى 50٪.";
 
 export const Route = createFileRoute("/texpo")({
   // The game runs on the device (timer, saved play), so the server sends the shell only.

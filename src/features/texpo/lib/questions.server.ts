@@ -1,6 +1,6 @@
 import type { Bi } from "./texpo-shared";
 
-/* The Texpo questions: the same 10 for every player, easy to hard, about
+/* The Texpo questions: the same 7 for every player, easy to hard, about
    everyday AI and generative AI tools, for anyone with a phone. Server only:
    `answer` must never reach the browser bundle. Options are listed with the
    right one first; each player sees them in a shuffled order. */
@@ -25,13 +25,13 @@ export const TEXPO_QUESTIONS: BankQuestion[] = [
     options: {
       ar: [
         "تكتب النصوص وتلخّصها وتترجمها",
-        "تبحث عن المواقع فقط مثل غوغل",
+        "تبحث عن المواقع على الإنترنت فقط، مثل غوغل",
         "تجيب عن أسئلة «نعم أو لا» فقط",
         "تصحّح الأخطاء الإملائية فقط",
       ],
       en: [
         "Write, summarise and translate text",
-        "Only search for websites, like Google",
+        "Only search for websites on the internet, like Google",
         "Only answer yes-or-no questions",
         "Only fix spelling mistakes",
       ],
@@ -80,13 +80,13 @@ export const TEXPO_QUESTIONS: BankQuestion[] = [
       ar: [
         "كلمات المرور وبيانات بطاقتك المصرفية",
         "وصفة طعام تريد تحسينها",
-        "فقرة تريد ترجمتها",
+        "فقرة تريد ترجمتها من العربية إلى الإنكليزية",
         "موضوعاً تريد شرحه",
       ],
       en: [
         "Your passwords and bank card details",
         "A recipe you want to improve",
-        "A paragraph you want translated",
+        "A paragraph you want translated from Arabic into English",
         "A topic you want explained",
       ],
     },
@@ -148,63 +148,6 @@ export const TEXPO_QUESTIONS: BankQuestion[] = [
     },
   },
   {
-    difficulty: "medium",
-    text: {
-      ar: "ما أفضل طريقة لتحصل على الصورة التي تريدها من أداة توليد الصور؟",
-      en: "What's the best way to get the picture you want from an AI image tool?",
-    },
-    options: {
-      ar: [
-        "أصف الموضوع والأسلوب والألوان والمكان",
-        "أستخدم أقل عدد ممكن من الكلمات",
-        "أكتب «جودة عالية 4K» فقط",
-        "أكرّر الطلب نفسه عدة مرات",
-      ],
-      en: [
-        "Describe the subject, style, colours and setting",
-        "Use as few words as possible",
-        'Write "high quality, 4K" and nothing else',
-        "Repeat the same request several times",
-      ],
-    },
-    answer: 0,
-    hint: {
-      ar: "تخيّل أنك تصف الصورة لرسّام.",
-      en: "Imagine describing the picture to a painter.",
-    },
-    explanation: {
-      ar: "أدوات الصور ترسم ما تصفه: الموضوع والأسلوب والألوان والمكان.",
-      en: "Image tools draw what you describe: subject, style, colours and setting.",
-    },
-  },
-  {
-    difficulty: "medium",
-    text: { ar: "ما «التزييف العميق» (ديب فيك)؟", en: 'What is a "deepfake"?' },
-    options: {
-      ar: [
-        "فيديو أو صورة أو صوت مزيّف لشخص حقيقي، مصنوع بالذكاء الاصطناعي",
-        "صورة عُدّلت بفلاتر التجميل",
-        "حساب وهمي يرسل رسائل مزعجة",
-        "فيديو قُصّ وأُعيد مونتاجه",
-      ],
-      en: [
-        "An AI-made fake video, photo or voice of a real person",
-        "A photo touched up with beauty filters",
-        "A fake account that sends spam messages",
-        "A video that was cut and re-edited",
-      ],
-    },
-    answer: 0,
-    hint: {
-      ar: "يبدو حقيقياً، لكن الشخص لم يفعله أو يقله قط.",
-      en: "It looks real, but the person never did or said it.",
-    },
-    explanation: {
-      ar: "التزييف العميق يقلّد وجه شخص حقيقي أو صوته بالذكاء الاصطناعي. انتبه لما تصدّقه وتشاركه.",
-      en: "Deepfakes use AI to fake a real person's face or voice. Be careful what you believe and share.",
-    },
-  },
-  {
     difficulty: "hard",
     text: {
       ar: "تصلك رسالة صوتية من قريب يطلب مالاً بشكل عاجل، وصوته يشبه صوته تماماً. ما التصرّف الأذكى؟",
@@ -232,33 +175,6 @@ export const TEXPO_QUESTIONS: BankQuestion[] = [
     explanation: {
       ar: "يستطيع الذكاء الاصطناعي تقليد صوت من ثوانٍ قليلة من التسجيل. اتصل على رقم تعرفه مسبقاً.",
       en: "AI can copy a voice from a few seconds of audio. Call back on a number you already know.",
-    },
-  },
-  {
-    difficulty: "hard",
-    text: {
-      ar: "من دون البحث على الإنترنت، لماذا قد يخطئ روبوت المحادثة في أخبار الأمس؟",
-      en: "Without searching the web, why might a chatbot get yesterday's news wrong?",
-    },
-    options: {
-      ar: [
-        "يعرف فقط ما كان في البيانات التي تدرّب عليها",
-        "يحدّث نفسه مرة واحدة في الأسبوع فقط",
-        "غير مسموح له بالحديث عن الأخبار",
-        "يقرأ موقعاً إخبارياً واحداً فقط",
-      ],
-      en: [
-        "It only knows what was in its training data",
-        "It updates itself only once a week",
-        "It isn't allowed to discuss the news",
-        "It reads only one news website",
-      ],
-    },
-    answer: 0,
-    hint: { ar: "من أين تعلّم كل ما يعرفه؟", en: "Where did it learn everything it knows?" },
-    explanation: {
-      ar: "النموذج يعرف فقط بيانات تدريبه، وللأخبار الحديثة عليه أن يبحث على الإنترنت.",
-      en: "A model knows only its training data. For recent news it has to search the web.",
     },
   },
   {

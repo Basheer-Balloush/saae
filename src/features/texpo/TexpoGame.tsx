@@ -4,11 +4,11 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   Check,
   Copy,
+  Gift,
   Lightbulb,
   Lock,
   LogOut,
   MessageCircle,
-  RotateCcw,
   Sparkles,
   X,
 } from "lucide-react";
@@ -92,7 +92,8 @@ const MISSES: Bi[] = [
 function questionLine(i: number): Bi {
   if (i === 0) return { ar: "لنبدأ بسؤال سهل.", en: "Let's start with an easy one." };
   if (i === 3) return { ar: "الآن يصبح الأمر أمتع.", en: "Now it gets interesting." };
-  if (i === 7) return { ar: "الأسئلة الأخيرة هي الأصعب!", en: "The last ones are the hardest!" };
+  if (i === QUESTION_COUNT - 2)
+    return { ar: "آخر سؤالين هما الأصعب!", en: "The last two are the hardest!" };
   if (i === QUESTION_COUNT - 1) return { ar: "السؤال الأخير!", en: "Last question!" };
   return {
     ar: `السؤال ${i + 1} من ${QUESTION_COUNT}`,
@@ -141,6 +142,7 @@ export function TexpoGame({ link }: { link?: string }) {
   });
   const [confetti, setConfetti] = useState({ n: 0, big: false });
   const [myReward, setMyReward] = useState<(Reward & { used: boolean }) | null>(null);
+  const [rewardPending, setRewardPending] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [claimNote, setClaimNote] = useState<Bi | null>(null);
   const [failed, setFailed] = useState<null | (() => void)>(null);
@@ -196,15 +198,17 @@ export function TexpoGame({ link }: { link?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* A signed-in player who already has their coupon sees it on the intro. */
+  /* A signed-in player who already has their gift sees it instead of a new game. */
   useEffect(() => {
     if (authLoading || !user) {
       setMyReward(null);
       return;
     }
+    setRewardPending(true);
     myRewardFn({})
       .then(setMyReward)
-      .catch(() => setMyReward(null));
+      .catch(() => setMyReward(null))
+      .finally(() => setRewardPending(false));
   }, [user, authLoading, myRewardFn]);
 
   const openChat = (prefill: string, playId?: string) => {
@@ -368,12 +372,12 @@ export function TexpoGame({ link }: { link?: string }) {
         say(
           out.status === "claimed"
             ? {
-                ar: `مبروك! كوبون خصم ${out.reward.percent}٪ صار لك.`,
-                en: `Congratulations! A ${out.reward.percent}% coupon is yours.`,
+                ar: `مبروك! هذه هديتك: كوبون خصم ${out.reward.percent}٪.`,
+                en: `Congratulations! Here is your gift: a ${out.reward.percent}% coupon.`,
               }
             : {
-                ar: "لحسابك كوبون من تكسبو مسبقاً، وهذا هو.",
-                en: "Your account already has its Texpo coupon. Here it is.",
+                ar: "لحسابك هدية من تكسبو مسبقاً، وهذه هي.",
+                en: "Your account already has its Texpo gift. Here it is.",
               },
           "celebrate",
           "cheer",
@@ -385,35 +389,48 @@ export function TexpoGame({ link }: { link?: string }) {
         });
       } else if (out.status === "play_claimed") {
         setClaimNote({
-          ar: "استُلم كوبون هذه النتيجة بحساب آخر. العب مرة أخرى لتربح كوبونك.",
-          en: "This result's coupon went to another account. Play again to win your own.",
+          ar: "استُلمت هدية هذه النتيجة بحساب آخر.",
+          en: "This result's gift was already claimed with another account.",
         });
+      } else if (out.status === "not_found" || out.status === "not_finished") {
+        // No finished result behind this device's saved play: start clean.
+        savePlay(null);
+        setPhase({ name: "intro" });
+        say(
+          {
+            ar: "لم أجد نتيجتك. لنبدأ من جديد!",
+            en: "I couldn't find your result. Let's start again!",
+          },
+          "think",
+        );
       } else {
         setClaimNote({
-          ar: "تعذّر العثور على هذه النتيجة. العب مرة أخرى.",
-          en: "We couldn't find this result. Please play again.",
+          ar: "تعذّر استلام الهدية. حاول مجدداً.",
+          en: "Couldn't claim the gift. Please try again.",
         });
       }
     } catch {
       setClaimNote({
-        ar: "تعذّر استلام الكوبون. تحقّق من الاتصال وحاول مجدداً.",
-        en: "Couldn't claim the coupon. Check your connection and try again.",
+        ar: "تعذّر استلام الهدية. تحقّق من الاتصال وحاول مجدداً.",
+        en: "Couldn't claim the gift. Check your connection and try again.",
       });
     } finally {
       setClaiming(false);
     }
   };
 
-  const playAgain = () => {
-    savePlay(null);
-    field.current = null;
+  /* One round per player: a finished game is never replayed. "Not you?" signs
+     out but keeps the result, so the person who played can sign in and claim. */
+  const switchAccount = async () => {
+    await supabase.auth.signOut().catch(() => {});
     setClaimNote(null);
-    setPhase({ name: "field" });
-    say(
-      { ar: "جولة جديدة! ما مجالك حالياً؟", en: "A new round! What do you do?" },
-      "welcome",
-      "cheer",
-    );
+    setMyReward(null);
+  };
+
+  const showMyReward = (playId: string, result: PlayResult | null) => {
+    if (!myReward) return;
+    setPhase({ name: "claimed", playId, result, reward: myReward, emailed: false, earlier: true });
+    say({ ar: "هذه هديتك من تكسبو.", en: "Here's your Texpo gift." }, "celebrate", "happy");
   };
 
   const newPlayer = async () => {
@@ -518,16 +535,16 @@ export function TexpoGame({ link }: { link?: string }) {
                   <h1 className="tx-title">{t("تحدّي أبو الجود", "Abu Al-Joud's Challenge")}</h1>
                   <p className="tx-lead">
                     {t(
-                      "10 أسئلة عن الذكاء الاصطناعي في حياتنا اليومية. العب واربح كوبون خصم يصل إلى 50٪ على دورة.",
-                      "10 questions about everyday AI. Play and win a course coupon of up to 50% off.",
+                      `${QUESTION_COUNT} أسئلة عن الذكاء الاصطناعي في حياتنا اليومية. العب واربح كوبون هدية من الجمعية بخصم يصل إلى 50٪.`,
+                      `${QUESTION_COUNT} questions about everyday AI. Play and win a gift coupon from SAAE: up to 50% off.`,
                     )}
                   </p>
                   <ul className="tx-facts">
-                    <li>{t("10 أسئلة", "10 questions")}</li>
+                    <li>{t(`${QUESTION_COUNT} أسئلة`, `${QUESTION_COUNT} questions`)}</li>
                     <li>{t("20 ثانية لكل سؤال", "20 seconds each")}</li>
                     <li>{t("تلميح واحد", "1 hint")}</li>
                   </ul>
-                  <ul className="tx-tiers" aria-label={t("الجوائز", "Rewards")}>
+                  <ul className="tx-tiers" aria-label={t("الهدايا حسب المستوى", "Gifts by level")}>
                     {(["beginner", "intermediate", "professional"] as const).map((lv) => (
                       <li key={lv} data-level={lv}>
                         <b>{LEVELS[lv].percent}%</b>
@@ -535,31 +552,43 @@ export function TexpoGame({ link }: { link?: string }) {
                       </li>
                     ))}
                   </ul>
-                  {myReward && (
-                    <p className="tx-note">
-                      {t(
-                        `لديك كوبون تكسبو مسبقاً: ${myReward.code}. يمكنك اللعب للمتعة.`,
-                        `You already have your Texpo coupon: ${myReward.code}. You can still play for fun.`,
-                      )}
-                    </p>
+                  {myReward ? (
+                    <>
+                      <p className="tx-note">
+                        {t(
+                          "لعبت التحدّي واستلمت هديتك من قبل.",
+                          "You've already played and claimed your gift.",
+                        )}
+                      </p>
+                      <button
+                        type="button"
+                        className="tx-btn tx-btn-primary tx-btn-big"
+                        onClick={() => showMyReward("", null)}
+                      >
+                        <Gift aria-hidden="true" />
+                        {t("اعرض هديتي", "Show my gift")}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className="tx-btn tx-btn-primary tx-btn-big"
+                      disabled={authLoading || rewardPending}
+                      onClick={() => {
+                        setPhase({ name: "field" });
+                        say(
+                          {
+                            ar: "قبل أن نبدأ: ما مجالك حالياً؟",
+                            en: "Before we start: what do you do?",
+                          },
+                          "explain",
+                        );
+                      }}
+                    >
+                      <Sparkles aria-hidden="true" />
+                      {t("ابدأ التحدّي", "Start the challenge")}
+                    </button>
                   )}
-                  <button
-                    type="button"
-                    className="tx-btn tx-btn-primary tx-btn-big"
-                    onClick={() => {
-                      setPhase({ name: "field" });
-                      say(
-                        {
-                          ar: "قبل أن نبدأ: ما مجالك حالياً؟",
-                          en: "Before we start: what do you do?",
-                        },
-                        "explain",
-                      );
-                    }}
-                  >
-                    <Sparkles aria-hidden="true" />
-                    {t("ابدأ التحدّي", "Start the challenge")}
-                  </button>
                 </div>
               )}
 
@@ -732,9 +761,21 @@ export function TexpoGame({ link }: { link?: string }) {
                   }
                 >
                   {phase.claimed ? (
-                    <p className="tx-note">
-                      {t("استُلم كوبون هذه النتيجة.", "This result's coupon was already claimed.")}
-                    </p>
+                    <div className="tx-claim">
+                      <p className="tx-note">
+                        {t("استُلمت هدية هذه النتيجة.", "This result's gift has been claimed.")}
+                      </p>
+                      {myReward && (
+                        <button
+                          type="button"
+                          className="tx-btn tx-btn-primary"
+                          onClick={() => showMyReward(phase.playId, phase.result)}
+                        >
+                          <Gift aria-hidden="true" />
+                          {t("اعرض هديتي", "Show my gift")}
+                        </button>
+                      )}
+                    </div>
                   ) : authLoading ? null : user ? (
                     <div className="tx-claim">
                       <button
@@ -746,11 +787,11 @@ export function TexpoGame({ link }: { link?: string }) {
                         <Sparkles aria-hidden="true" />
                         {claiming
                           ? t("جارٍ الاستلام…", "Claiming…")
-                          : t("استلم كوبوني", "Claim my coupon")}
+                          : t("استلم هديتي", "Claim my gift")}
                       </button>
                       <p className="tx-small">
                         {t("مسجّل الدخول باسم", "Signed in as")} <bdi>{user.email ?? ""}</bdi> ·{" "}
-                        <button type="button" className="tx-link" onClick={newPlayer}>
+                        <button type="button" className="tx-link" onClick={switchAccount}>
                           {t("لست أنت؟", "Not you?")}
                         </button>
                       </p>
@@ -759,12 +800,12 @@ export function TexpoGame({ link }: { link?: string }) {
                     <div className="tx-claim">
                       <p className="tx-small">
                         {t(
-                          "أنشئ حساباً على منصة التعلّم لتستلم كوبونك. نتيجتك محفوظة على هذا الجهاز.",
-                          "Create an account on the learning platform to claim your coupon. Your result is saved on this device.",
+                          "أنشئ حساباً مجانياً لتستلم هديتك. نتيجتك محفوظة على هذا الجهاز.",
+                          "Create a free account to claim your gift. Your result is saved on this device.",
                         )}
                       </p>
                       <a className="tx-btn tx-btn-primary tx-btn-big" href={SIGNUP}>
-                        {t("أنشئ حساباً واستلم الكوبون", "Create an account and claim")}
+                        {t("أنشئ حساباً واستلم هديتك", "Create an account and claim your gift")}
                       </a>
                       <a className="tx-btn tx-btn-ghost" href={LOGIN}>
                         {t("لديّ حساب، سجّل دخولي", "I have an account, sign in")}
@@ -779,8 +820,8 @@ export function TexpoGame({ link }: { link?: string }) {
                       onClick={() =>
                         openChat(
                           t(
-                            `أنهيت تحدّي أبو الجود في تكسبو بنتيجة ${phase.result.score} من 10 (مستوى ${LEVELS[phase.result.level].name.ar}). كيف أطوّر استخدامي للذكاء الاصطناعي؟`,
-                            `I finished Abu Al-Joud's Texpo challenge with ${phase.result.score}/10 (${LEVELS[phase.result.level].name.en}). How can I get better at using AI?`,
+                            `أنهيت تحدّي أبو الجود في تكسبو بنتيجة ${phase.result.score} من ${phase.result.total} (مستوى ${LEVELS[phase.result.level].name.ar}). كيف أطوّر استخدامي للذكاء الاصطناعي؟`,
+                            `I finished Abu Al-Joud's Texpo challenge with ${phase.result.score}/${phase.result.total} (${LEVELS[phase.result.level].name.en}). How can I get better at using AI?`,
                           ),
                           phase.playId,
                         )
@@ -788,10 +829,6 @@ export function TexpoGame({ link }: { link?: string }) {
                     >
                       <MessageCircle aria-hidden="true" />
                       {t("تحدّث مع أبو الجود", "Talk to Abu Al-Joud")}
-                    </button>
-                    <button type="button" className="tx-btn tx-btn-ghost" onClick={playAgain}>
-                      <RotateCcw aria-hidden="true" />
-                      {t("العب مرة أخرى", "Play again")}
                     </button>
                   </div>
                 </ResultView>
@@ -801,7 +838,7 @@ export function TexpoGame({ link }: { link?: string }) {
                 <div className="tx-claimed">
                   <p className="tx-kicker">
                     {phase.earlier
-                      ? t("كوبونك من تكسبو", "Your Texpo coupon")
+                      ? t("هديتك من تكسبو", "Your Texpo gift")
                       : t("مبروك!", "Congratulations!")}
                   </p>
                   <div className="tx-ticket" data-level={phase.reward.level}>
@@ -851,9 +888,6 @@ export function TexpoGame({ link }: { link?: string }) {
                     </button>
                   </div>
                   <div className="tx-row tx-row-quiet">
-                    <button type="button" className="tx-link" onClick={playAgain}>
-                      <RotateCcw aria-hidden="true" /> {t("العب للمتعة", "Play for fun")}
-                    </button>
                     <button type="button" className="tx-link" onClick={newPlayer}>
                       <LogOut aria-hidden="true" />{" "}
                       {t("لاعب جديد على هذا الجهاز", "New player on this device")}
