@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle } from "lucide-react";
 import { useLang } from "@/lib/i18n/i18n";
 import { AssistantChatModal } from "./AssistantChatModal";
+import { takeChatLink } from "./lib/chat-link";
 import "./assistant-fab.css";
 
 /** hideTrigger keeps the chat event available while hiding the global launcher. */
@@ -17,6 +18,12 @@ export function AssistantFab({ hideTrigger = false }: { hideTrigger?: boolean })
   const drag = useDraggableGuide<HTMLButtonElement>(`${dir}-${open}-${hideTrigger}`);
 
   useEffect(() => {
+    const rest = takeChatLink(window.location.href);
+    if (rest !== null) {
+      setOpen(true);
+      window.history.replaceState(window.history.state, "", rest);
+    }
+
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail ?? {};
       if (typeof detail.prefill === "string") setPrefill(detail.prefill);
