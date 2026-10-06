@@ -546,7 +546,9 @@ function LearnerPaymentsDialog({
           </form>
         )}
 
-        <section aria-labelledby="pay-history-h">
+        {/* Not <section>: lms.css pads every section under .lms-skin (dialogs on
+            LMS paths) by 72-140px. */}
+        <div role="group" aria-labelledby="pay-history-h">
           <h3 id="pay-history-h" className="mb-2 text-[14.5px] font-extrabold">
             {t("السجل", "History")}
           </h3>
@@ -601,14 +603,15 @@ function LearnerPaymentsDialog({
               })}
             </ul>
           )}
-        </section>
+        </div>
 
-        <section
+        <div
+          role="group"
           aria-labelledby="pay-unenroll-h"
-          className="flex flex-wrap items-center gap-3 rounded-xl border border-[var(--cx-line)] p-4"
+          className="flex flex-wrap items-center gap-3 rounded-xl border border-[var(--cx-red-line)] bg-[var(--cx-red-50)] px-4 py-3"
         >
           <div className="min-w-0 flex-1">
-            <h3 id="pay-unenroll-h" className="text-[14.5px] font-extrabold">
+            <h3 id="pay-unenroll-h" className="cx-danger-title text-[14.5px] font-extrabold">
               {t("إلغاء التسجيل", "Cancel registration")}
             </h3>
             <p className="text-[12.5px] text-[var(--cx-muted)]">
@@ -623,16 +626,17 @@ function LearnerPaymentsDialog({
                   )}
             </p>
           </div>
-          <Button
-            size="sm"
-            variant="destructive"
+          {/* lms-reset keeps the LMS dialog skin off; console.css draws it. */}
+          <button
+            type="button"
+            className="lms-reset cx-btn cx-btn-danger"
             disabled={busy || s.paid > 0}
             onClick={() => setCancellingEnrollment(true)}
           >
             <UserMinus className="h-4 w-4" />
-            {t("إلغاء التسجيل", "Cancel registration")}
-          </Button>
-        </section>
+            <span>{t("إلغاء التسجيل", "Cancel registration")}</span>
+          </button>
+        </div>
 
         <CancelEnrollmentDialog
           enrollmentId={row.id}

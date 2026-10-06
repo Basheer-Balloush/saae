@@ -254,7 +254,12 @@ export function StudentsTab({ ctx }: { ctx: EditorCtx }) {
                       </td>
                       {isAdmin && (
                         <td className="text-end">
-                          <Button size="sm" variant="ghost" onClick={() => setCancelling(e)}>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-[var(--cx-red)] hover:bg-[var(--cx-red-50)] hover:text-[var(--cx-red)]"
+                            onClick={() => setCancelling(e)}
+                          >
                             <UserMinus className="h-4 w-4" />
                             {/* Icon only on phones; screen readers also hear whose. */}
                             <span className="max-sm:sr-only">
