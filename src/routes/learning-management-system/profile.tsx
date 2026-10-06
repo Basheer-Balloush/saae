@@ -37,6 +37,7 @@ import { IconDocument } from "@/features/lms/skin/icons";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { resizedImage } from "@/lib/image-url";
 import { LocationCard } from "@/features/user-location/LocationCard";
+import { BadgesCard } from "@/features/badges/BadgesCard";
 
 export const Route = createFileRoute("/learning-management-system/profile")({
   head: () => ({
@@ -252,6 +253,7 @@ function ProfilePage() {
             {!isGuest && <LocationCard lang={lang} />}
             <CoursesCard data={data} lang={lang} />
             <CertificatesCard data={data} lang={lang} />
+            <BadgesCard lang={lang} />
             <ApplicationsCard lang={lang} />
           </div>
           <aside className="profile-side">

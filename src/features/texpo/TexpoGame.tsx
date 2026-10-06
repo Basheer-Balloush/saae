@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useLang } from "@/lib/i18n/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { BADGES } from "@/features/badges/badges";
 import { preloadMascotPoses } from "@/features/chat/lib/mascot";
 import { AbuHost, type Mood, type Pose } from "./AbuHost";
 import { Confetti, TimerRing } from "./Effects";
@@ -77,6 +78,7 @@ type Phase =
 const SIGNUP = "/learning-management-system/signup?redirect=%2Ftexpo";
 const LOGIN = "/learning-management-system/login?redirect=%2Ftexpo";
 const CATALOG = "/learning-management-system/catalog";
+const PROFILE_BADGES = "/learning-management-system/profile#profile-badges";
 const LETTERS = { ar: ["أ", "ب", "ج", "د"], en: ["A", "B", "C", "D"] };
 const CHEERS: Bi[] = [
   { ar: "أحسنت!", en: "Well done!" },
@@ -866,6 +868,15 @@ export function TexpoGame({ link }: { link?: string }) {
                       {t("أرسلنا الكود إلى بريدك أيضاً.", "We also emailed you the code.")}
                     </p>
                   )}
+                  <a className="tx-badge" href={PROFILE_BADGES}>
+                    <img src={BADGES["texpo-2026"].image} alt="" width={56} height={56} />
+                    <span>
+                      <strong>
+                        {t("وحصلت على شارة تكسبو 2026", "You also earned the Texpo 2026 badge")}
+                      </strong>
+                      <small>{t("تجدها في ملفك الشخصي", "Find it on your profile")}</small>
+                    </span>
+                  </a>
                   <div className="tx-row">
                     <a className="tx-btn tx-btn-primary" href={CATALOG}>
                       {t("تصفّح الدورات", "Browse courses")}

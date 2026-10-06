@@ -1,0 +1,78 @@
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { Loader2 } from "lucide-react";
+import { LEVELS } from "@/features/texpo/lib/texpo-shared";
+import { BADGES, type EarnedBadge } from "./badges";
+import { getMyBadges } from "./badges.functions";
+
+/* The Badges card on the LMS profile (uses the profile's pro-card styles). */
+export function BadgesCard({ lang }: { lang: "ar" | "en" }) {
+  const ar = lang === "ar";
+  const fetchBadges = useServerFn(getMyBadges);
+  const [badges, setBadges] = useState<EarnedBadge[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchBadges()
+      .then((rows) => {
+        if (!cancelled) setBadges(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setBadges([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchBadges]);
+
+  // The Texpo game links here (#profile-badges); the card only exists once the
+  // profile has loaded, so the browser can't jump to it on its own.
+  useEffect(() => {
+    if (badges && window.location.hash === "#profile-badges") {
+      document.getElementById("profile-badges")?.scrollIntoView({ block: "start" });
+    }
+  }, [badges]);
+
+  return (
+    <article className="pro-card" id="profile-badges">
+      <h2>{ar ? "الشارات" : "Badges"}</h2>
+      {badges === null ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : badges.length === 0 ? (
+        <p>
+          {ar
+            ? "لا توجد شارات بعد. تحصل عليها من فعاليات الجمعية وتحدّياتها."
+            : "No badges yet. You earn them at SAAE events and challenges."}
+        </p>
+      ) : (
+        <ul className="badge-list">
+          {badges.map((b) => {
+            const badge = BADGES[b.key];
+            const date = new Date(b.earnedAt).toLocaleDateString(ar ? "ar-SY" : "en-GB", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            });
+            return (
+              <li key={b.key} className="badge-tile">
+                <img src={badge.image} alt="" width={84} height={84} decoding="async" />
+                <span className="badge-copy">
+                  <strong>{ar ? badge.name.ar : badge.name.en}</strong>
+                  <span>{ar ? badge.about.ar : badge.about.en}</span>
+                  <small>
+                    {b.level && (
+                      <>
+                        <b>{ar ? LEVELS[b.level].name.ar : LEVELS[b.level].name.en}</b> ·{" "}
+                      </>
+                    )}
+                    {date}
+                  </small>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </article>
+  );
+}
