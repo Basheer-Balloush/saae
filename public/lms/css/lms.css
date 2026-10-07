@@ -529,7 +529,8 @@ html[dir="rtl"] .lms-skin .footer-logo-ar { display: block; }
 .lms-skin .profile-stats b { color: var(--lms-paper); font-size: clamp(1.8rem, 3.6vw, 2.6rem); font-weight: 900; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
 .lms-skin .profile-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); gap: 20px; align-items: start; }
 .lms-skin .profile-main, .lms-skin .profile-side { display: grid; gap: 20px; align-content: start; min-width: 0; }
-.lms-skin .pro-card { display: grid; gap: 14px; align-content: start; margin: 0; padding: 30px 28px; border: 1px solid var(--lms-border); border-radius: 20px; background: linear-gradient(165deg, rgba(12, 48, 58, .85), rgba(4, 23, 28, .9)); }
+/* Long names and unbroken text must fit the card's allocated grid column. */
+.lms-skin .pro-card { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 14px; align-content: start; margin: 0; padding: 30px 28px; border: 1px solid var(--lms-border); border-radius: 20px; background: linear-gradient(165deg, rgba(12, 48, 58, .85), rgba(4, 23, 28, .9)); overflow-wrap: anywhere; }
 .lms-skin .pro-card h2 { font-size: 1.4rem; }
 .lms-skin .pro-card > p { margin: 0; color: rgba(231, 241, 240, .7); line-height: 1.85; }
 .lms-skin .skill-chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 0; padding: 0; list-style: none; }

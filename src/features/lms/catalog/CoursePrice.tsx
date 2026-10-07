@@ -55,7 +55,7 @@ export function CoursePrice({
     size === "lg" ? "text-base font-medium" : size === "sm" ? "text-[11px]" : "text-[10px]";
 
   return (
-    <span className={`inline-flex flex-nowrap items-center gap-2 ${className ?? ""}`}>
+    <span className={`inline-flex max-w-full flex-wrap items-center gap-2 ${className ?? ""}`}>
       {hasSale && (
         <Amount
           value={Number(price)}

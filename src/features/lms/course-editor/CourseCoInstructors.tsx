@@ -114,7 +114,7 @@ export function CourseCoInstructors({
           {chosen.map((i) => (
             <span
               key={i.user_id}
-              className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary text-xs px-2 py-1"
+              className="inline-flex max-w-full items-center gap-2 rounded-full bg-primary/10 text-primary text-xs px-2 py-1"
             >
               {i.avatar_url ? (
                 <img
@@ -123,7 +123,7 @@ export function CourseCoInstructors({
                   className="h-5 w-5 rounded-full object-cover"
                 />
               ) : null}
-              <span className="font-medium">{nameOf(i)}</span>
+              <span className="min-w-0 break-words font-medium">{nameOf(i)}</span>
               <button
                 type="button"
                 onClick={() => onRemove(i.user_id)}
@@ -142,9 +142,9 @@ export function CourseCoInstructors({
         </p>
       )}
 
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center">
         <select
-          className="h-10 flex-1 rounded-md border border-input bg-background px-3 text-sm"
+          className="h-10 w-full min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm"
           value={pick}
           onChange={(e) => setPick(e.target.value)}
           disabled={busy || availableToAdd.length === 0}
