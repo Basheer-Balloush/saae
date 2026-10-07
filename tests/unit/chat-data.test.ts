@@ -294,5 +294,12 @@ describe("lead contact clean-up", () => {
     expect(withoutContact("يريد استشارة، بريده rami@x.example", null, null)).not.toContain("@");
     expect(withoutContact("رقمه ٠٩٤٤١٢٣٤٥٦ للتواصل", "٠٩٤٤١٢٣٤٥٦", null)).not.toMatch(/[٠-٩]/);
     expect(withoutContact(null, "0933555111")).toBe(null);
+    expect(
+      withoutContact(
+        "يمثلها المدير التنفيذي سامر الخطيب (رقم الهاتف: ٠٩٥٥٤٤٣٣٢٢). طلبت الشركة شراكة تقنية.",
+        "٠٩٥٥٤٤٣٣٢٢",
+        null,
+      ),
+    ).toBe("يمثلها المدير التنفيذي سامر الخطيب. طلبت الشركة شراكة تقنية.");
   });
 });
