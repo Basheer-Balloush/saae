@@ -612,7 +612,8 @@ function CommunityCard({
   const rtl = lang === "ar";
   return (
     <>
-      <div className="mh-tree-card" key={community.key}>
+      {/* A touch stops the card turning, so the tap opens the community it shows. */}
+      <div className="mh-tree-card" key={community.key} onPointerDown={() => onSelect(index)}>
         <span className="mh-tree-card-icon">
           <Icon size={20} aria-hidden="true" />
         </span>
