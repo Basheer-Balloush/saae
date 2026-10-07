@@ -13,6 +13,8 @@ import {
   type CourseState,
   isPersonsOwnName,
   isPlausiblePhone,
+  westernDigits,
+  withoutContact,
   toCourseDetails,
   toInitiativeStatus,
   toInternship,
@@ -891,7 +893,7 @@ export const Route = createFileRoute("/api/chat")({
               const { error } = await supabaseAdmin.from("contact_messages").insert({
                 full_name: input.full_name,
                 email: input.email,
-                phone: isPlausiblePhone(input.phone) ? input.phone : null,
+                phone: isPlausiblePhone(input.phone) ? westernDigits(input.phone!).trim() : null,
                 inquiry_type: "general",
                 subject:
                   replyLang === "ar"
@@ -1015,7 +1017,9 @@ export const Route = createFileRoute("/api/chat")({
                 ),
             }),
             execute: async (input) => {
-              const phone = isPlausiblePhone(input.phone) ? input.phone : null;
+              const phone = isPlausiblePhone(input.phone)
+                ? westernDigits(input.phone!).trim()
+                : null;
               if (!input.email && !phone)
                 return {
                   ok: false,
@@ -1037,8 +1041,8 @@ export const Route = createFileRoute("/api/chat")({
                   contact_name: input.full_name,
                   contact_email: input.email ?? null,
                   contact_phone: phone,
-                  reason: input.reason ?? null,
-                  details: input.details ?? null,
+                  reason: withoutContact(input.reason, input.phone, input.email),
+                  details: withoutContact(input.details, input.phone, input.email),
                   raw: { ...input, saved_as_company_from: "submit_individual_lead" },
                 });
                 if (company.error) {
@@ -1058,8 +1062,8 @@ export const Route = createFileRoute("/api/chat")({
                 specialty: input.specialty ?? null,
                 work_field: input.work_field ?? null,
                 short_description: input.short_description ?? null,
-                reason: input.reason ?? null,
-                details: input.details ?? null,
+                reason: withoutContact(input.reason, input.phone, input.email),
+                details: withoutContact(input.details, input.phone, input.email),
                 raw: input,
               });
               if (saved.error) {
@@ -1083,7 +1087,11 @@ export const Route = createFileRoute("/api/chat")({
               country: z.string().nullable().optional(),
               has_office: z.boolean().nullable().optional(),
               office_address: z.string().nullable().optional(),
-              employee_count: z.string().nullable().optional(),
+              employee_count: z
+                .string()
+                .nullable()
+                .optional()
+                .describe("How many people work there, whenever the visitor said it (e.g. '8')."),
               accepts_training_new_staff: z.boolean().nullable().optional(),
               uses_ai: z.boolean().nullable().optional(),
               contact_name: z.string().nullable().optional(),
@@ -1105,7 +1113,9 @@ export const Route = createFileRoute("/api/chat")({
                 ),
             }),
             execute: async (input) => {
-              const phone = isPlausiblePhone(input.contact_phone) ? input.contact_phone : null;
+              const phone = isPlausiblePhone(input.contact_phone)
+                ? westernDigits(input.contact_phone!).trim()
+                : null;
               if (!input.contact_email && !phone)
                 return {
                   ok: false,
@@ -1132,8 +1142,8 @@ export const Route = createFileRoute("/api/chat")({
                 contact_name: input.contact_name ?? null,
                 contact_email: input.contact_email ?? null,
                 contact_phone: phone,
-                reason: input.reason ?? null,
-                details: input.details ?? null,
+                reason: withoutContact(input.reason, input.contact_phone, input.contact_email),
+                details: withoutContact(input.details, input.contact_phone, input.contact_email),
                 raw: input,
               });
               if (saved.error) {

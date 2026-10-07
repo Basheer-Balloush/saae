@@ -327,12 +327,15 @@ export function toInitiativeStatus(
 
 // ---------- Visitor contact details ----------
 
+/** Arabic-Indic digits ("٠٩٤٤…", as visitors type them) as 0-9, so the
+    team's call button and searches work. */
+export const westernDigits = (text: string) =>
+  text.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660));
+
 /** A phone a person could actually be called on: 7–15 digits, not one digit repeated.
-    Arabic-Indic digits ("٠٩٣٣…") count, as visitors type them. */
+    Arabic-Indic digits count. */
 export function isPlausiblePhone(raw: string | null | undefined): boolean {
-  const digits = (raw ?? "")
-    .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660))
-    .replace(/[^\d]/g, "");
+  const digits = westernDigits(raw ?? "").replace(/[^\d]/g, "");
   if (digits.length < 7 || digits.length > 15) return false;
   return !/^(\d)\1+$/.test(digits);
 }
@@ -354,4 +357,29 @@ export function isPersonsOwnName(companyName: string, personName: string | null 
   const company = plainName(companyName);
   const person = plainName(personName);
   return company === person || (person.length > 0 && person.includes(company));
+}
+
+/** The lead's description without the phone or email in it: those have their
+    own fields, and the description is shown wherever the lead is listed. */
+export function withoutContact(
+  text: string | null | undefined,
+  ...contacts: (string | null | undefined)[]
+): string | null {
+  if (!text) return null;
+  let out = text;
+  for (const contact of contacts) {
+    if (!contact) continue;
+    for (const form of new Set([contact, westernDigits(contact)])) out = out.split(form).join("");
+  }
+  out = out
+    .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "")
+    .replace(
+      /(?:ورقم|رقم)\s+(?:هاتفه|هاتفها|هاتفي|الهاتف|جواله|جوالها)\s*[:،,]?\s*(?=[.،,]|$)/g,
+      "",
+    )
+    .replace(/\s+([.،,])/g, "$1")
+    .replace(/[،,]\s*\./g, ".")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  return out || null;
 }
