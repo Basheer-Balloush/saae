@@ -327,9 +327,31 @@ export function toInitiativeStatus(
 
 // ---------- Visitor contact details ----------
 
-/** A phone a person could actually be called on: 7–15 digits, not one digit repeated. */
+/** A phone a person could actually be called on: 7–15 digits, not one digit repeated.
+    Arabic-Indic digits ("٠٩٣٣…") count, as visitors type them. */
 export function isPlausiblePhone(raw: string | null | undefined): boolean {
-  const digits = (raw ?? "").replace(/[^\d]/g, "");
+  const digits = (raw ?? "")
+    .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660))
+    .replace(/[^\d]/g, "");
   if (digits.length < 7 || digits.length > 15) return false;
   return !/^(\d)\1+$/.test(digits);
+}
+
+const plainName = (text: string) =>
+  text
+    .replace(/[ً-ٰٟـ]/g, "")
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+
+/** True when a "company name" is only the person's own name: a visitor who
+    never named their company was saved under their own name. */
+export function isPersonsOwnName(companyName: string, personName: string | null | undefined) {
+  if (!personName) return false;
+  const company = plainName(companyName);
+  const person = plainName(personName);
+  return company === person || (person.length > 0 && person.includes(company));
 }
