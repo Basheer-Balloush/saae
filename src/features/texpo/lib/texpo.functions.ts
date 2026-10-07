@@ -14,15 +14,15 @@ import {
   type StoredAnswer,
 } from "./engine";
 import {
-  AI_USES,
   COUPON_CATEGORY_SLUG,
   DEVICE_ID_RE,
-  FIELDS,
   LINK_SLUG_RE,
   MAIN_LINK_SLUG,
   QUESTION_COUNT,
+  STATUSES,
   TEXPO_GAME,
   levelFor,
+  profileCode,
   type AnswerOutcome,
   type Bi,
   type ClaimOutcome,
@@ -218,7 +218,7 @@ export const texpoOpen = createServerFn({ method: "POST" })
     return { link: link?.label ?? null, deviceClaimed: await deviceClaimed(sb, data.device) };
   });
 
-/* ---------- start: after the two questions about the player ---------- */
+/* ---------- start: after the two steps about the player ---------- */
 
 export const texpoStart = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) =>
@@ -227,9 +227,10 @@ export const texpoStart = createServerFn({ method: "POST" })
         device,
         link: linkSlug,
         lang: z.enum(["ar", "en"]),
-        field: z.enum(FIELDS.map((f) => f.id) as [string, ...string[]]),
-        aiUse: z.enum(AI_USES.map((a) => a.id) as [string, ...string[]]),
+        status: z.enum(STATUSES.map((st) => st.id) as [string, ...string[]]),
+        answer: z.string().max(20),
       })
+      .refine((d) => profileCode(d.status, d.answer) !== null, { path: ["answer"] })
       .parse(i),
   )
   .handler(async ({ data }): Promise<PlayState> => {
@@ -254,8 +255,7 @@ export const texpoStart = createServerFn({ method: "POST" })
         link_id: link?.id ?? null,
         device_id: data.device,
         lang: data.lang,
-        field: data.field,
-        ai_use: data.aiUse,
+        field: profileCode(data.status, data.answer),
         // This player's 7 questions, each with its own option order.
         option_orders: storeDeck(drawDeck(TEXPO_BANK)),
         question_shown_at: now.toISOString(),

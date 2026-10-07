@@ -22,19 +22,18 @@ import {
   texpoState,
 } from "./lib/texpo.functions";
 import {
-  AI_USES,
   COUPON_CATEGORY_SLUG,
-  FIELDS,
-  FIELD_REPLIES,
   LEVELS,
   QUESTION_COUNT,
+  STATUSES,
+  answersFor,
   type AnswerOutcome,
   type Bi,
-  type FieldId,
   type PlayResult,
   type PlayState,
   type Reward,
   type ServedQuestion,
+  type StatusId,
 } from "./lib/texpo-shared";
 import { chatSessionId, deviceId, savePlay, storedPlay } from "./lib/play-store";
 import "./texpo.css";
@@ -44,8 +43,8 @@ type Feedback = AnswerOutcome & { picked: number | null };
 type Phase =
   | { name: "boot" }
   | { name: "intro" }
-  | { name: "field" }
-  | { name: "aiuse"; field: FieldId }
+  | { name: "status" }
+  | { name: "answer"; status: StatusId }
   | {
       name: "question";
       playId: string;
@@ -148,7 +147,6 @@ export function TexpoGame({ link }: { link?: string }) {
   /* One gift per phone: a gift was already claimed on this device. */
   const [deviceUsed, setDeviceUsed] = useState(false);
   const device = useRef<string>("");
-  const field = useRef<FieldId | null>(null);
 
   const say = useCallback((line: Bi, pose: Pose = "explain", mood: Mood = "idle") => {
     setHost((h) => ({ pose, mood, beat: h.beat + 1, line }));
@@ -224,20 +222,28 @@ export function TexpoGame({ link }: { link?: string }) {
     }, 1500);
   };
 
-  /* ---------- the two questions before the game ---------- */
-  const chooseField = (f: FieldId) => {
-    field.current = f;
-    say(FIELD_REPLIES[f], "celebrate", "happy");
-    setPhase({ name: "aiuse", field: f });
+  /* ---------- the two steps before the game ---------- */
+  const askStatus = () => {
+    setPhase({ name: "status" });
+    say(
+      {
+        ar: "قبل أن نبدأ، عرّفني بنفسك قليلاً.",
+        en: "Before we start, tell me a little about yourself.",
+      },
+      "explain",
+    );
   };
 
-  const start = async (aiUse: string) => {
-    const f = field.current;
-    if (!f) return setPhase({ name: "field" });
+  const chooseStatus = (status: StatusId) => {
+    say(STATUSES.find((st) => st.id === status)!.reply, "celebrate", "happy");
+    setPhase({ name: "answer", status });
+  };
+
+  const start = async (status: StatusId, answer: string) => {
     setFailed(null);
     try {
       const s = await startFn({
-        data: { device: device.current, link: link ?? null, lang, field: f, aiUse },
+        data: { device: device.current, link: link ?? null, lang, status, answer },
       });
       applyState(s);
     } catch (e) {
@@ -253,7 +259,7 @@ export function TexpoGame({ link }: { link?: string }) {
           ),
         );
       } else {
-        setFailed(() => () => start(aiUse));
+        setFailed(() => () => start(status, answer));
       }
     }
   };
@@ -582,16 +588,7 @@ export function TexpoGame({ link }: { link?: string }) {
                       type="button"
                       className="tx-btn tx-btn-primary tx-btn-big"
                       disabled={authLoading || rewardPending}
-                      onClick={() => {
-                        setPhase({ name: "field" });
-                        say(
-                          {
-                            ar: "قبل أن نبدأ: ما مجالك حالياً؟",
-                            en: "Before we start: what do you do?",
-                          },
-                          "explain",
-                        );
-                      }}
+                      onClick={askStatus}
                     >
                       <Sparkles aria-hidden="true" />
                       {t("ابدأ التحدّي", "Start the challenge")}
@@ -600,48 +597,44 @@ export function TexpoGame({ link }: { link?: string }) {
                 </div>
               )}
 
-              {phase.name === "field" && (
+              {phase.name === "status" && (
                 <div className="tx-ask">
                   <p className="tx-step">{t("قبل اللعبة · 1 من 2", "Before the game · 1 of 2")}</p>
-                  <h2 className="tx-q">{t("ما مجالك حالياً؟", "What do you do?")}</h2>
+                  <h2 className="tx-q">{t("ما وضعك حالياً؟", "Which describes you right now?")}</h2>
                   <div className="tx-chips">
-                    {FIELDS.map((f) => (
+                    {STATUSES.map((st) => (
                       <button
-                        key={f.id}
+                        key={st.id}
                         type="button"
                         className="tx-chip"
-                        onClick={() => chooseField(f.id)}
+                        onClick={() => chooseStatus(st.id)}
                       >
-                        {ar ? f.ar : f.en}
+                        {ar ? st.ar : st.en}
                       </button>
                     ))}
                   </div>
                 </div>
               )}
 
-              {phase.name === "aiuse" && (
+              {phase.name === "answer" && (
                 <div className="tx-ask">
                   <p className="tx-step">{t("قبل اللعبة · 2 من 2", "Before the game · 2 of 2")}</p>
                   <h2 className="tx-q">
-                    {t("كم مرة تستخدم أدوات الذكاء الاصطناعي؟", "How often do you use AI tools?")}
+                    {pick(STATUSES.find((st) => st.id === phase.status)!.ask)}
                   </h2>
-                  <div className="tx-chips">
-                    {AI_USES.map((a) => (
+                  <div className="tx-chips tx-chips-compact">
+                    {answersFor(phase.status).map((a) => (
                       <button
                         key={a.id}
                         type="button"
                         className="tx-chip"
-                        onClick={() => start(a.id)}
+                        onClick={() => start(phase.status, a.id)}
                       >
                         {ar ? a.ar : a.en}
                       </button>
                     ))}
                   </div>
-                  <button
-                    type="button"
-                    className="tx-link"
-                    onClick={() => setPhase({ name: "field" })}
-                  >
+                  <button type="button" className="tx-link" onClick={askStatus}>
                     {t("رجوع", "Back")}
                   </button>
                 </div>

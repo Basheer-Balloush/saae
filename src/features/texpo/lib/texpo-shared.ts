@@ -51,65 +51,157 @@ export function levelFor(score: number): Level {
   return "beginner";
 }
 
-/* The two questions before the game. Not graded; they go to the CRM. */
+/* The two steps before the game. Not graded; they go to the CRM.
+   1. Where the player is now (STATUSES).
+   2. Their field (FIELDS) when they study, work or look for work, or what
+      draws them to AI (INTERESTS) when they do neither.
+   Both answers live in game_plays.field as "<status>:<answer>", for example
+   "work:health", so the CRM contact gets them through game_claim_reward with
+   no database change. Plays started before 2026-10-07 hold one of
+   LEGACY_FIELDS instead (readProfile tells them apart). */
+export const STATUSES = [
+  {
+    id: "study",
+    ar: "أدرس",
+    en: "I study",
+    ask: { ar: "ماذا تدرس؟", en: "What do you study?" },
+    reply: {
+      ar: "طالب علم! الذكاء الاصطناعي رفيق دراسة رائع. ماذا تدرس؟",
+      en: "A student! AI makes a great study partner. What do you study?",
+    },
+  },
+  {
+    id: "work",
+    ar: "أعمل",
+    en: "I work",
+    ask: { ar: "في أي مجال تعمل؟", en: "What field do you work in?" },
+    reply: {
+      ar: "رائع! الذكاء الاصطناعي يدخل كل مهنة اليوم. في أي مجال تعمل؟",
+      en: "Great! AI is finding its way into every job. What's your field?",
+    },
+  },
+  {
+    id: "both",
+    ar: "أدرس وأعمل",
+    en: "I study and work",
+    ask: { ar: "ما مجال دراستك أو عملك؟", en: "What field do you study or work in?" },
+    reply: {
+      ar: "تدرس وتعمل معاً؟ همّة عالية! ما مجالك؟",
+      en: "Studying and working? That takes drive! What's your field?",
+    },
+  },
+  {
+    id: "seeking",
+    ar: "أبحث عن عمل",
+    en: "I'm looking for work",
+    ask: { ar: "في أي مجال تبحث عن عمل؟", en: "What field are you looking for work in?" },
+    reply: {
+      ar: "بالتوفيق في بحثك! مهارات الذكاء الاصطناعي تفتح أبواباً كثيرة. في أي مجال؟",
+      en: "Good luck with the search! AI skills open a lot of doors. Which field?",
+    },
+  },
+  {
+    id: "none",
+    ar: "لا أدرس ولا أعمل حالياً",
+    en: "Neither at the moment",
+    ask: {
+      ar: "ما الذي يهمّك أكثر في الذكاء الاصطناعي؟",
+      en: "What interests you most about AI?",
+    },
+    reply: {
+      ar: "أهلاً بك! الفضول أول خطوة. ما الذي يشدّك إلى الذكاء الاصطناعي؟",
+      en: "Welcome! Curiosity is the first step. What draws you to AI?",
+    },
+  },
+] as const;
+export type StatusId = (typeof STATUSES)[number]["id"];
+
+/** Close to SAAE's communities (software, data, city, healthcare, research,
+    economy, trainers, media), plus the fields visitors often come from. */
 export const FIELDS = [
-  { id: "study", ar: "أدرس", en: "I study" },
-  { id: "tech", ar: "أعمل في التقنية أو الهندسة", en: "I work in tech or engineering" },
-  {
-    id: "design",
-    ar: "أعمل في التصميم أو الإعلام أو صناعة المحتوى",
-    en: "I work in design, media or content",
-  },
-  {
-    id: "business",
-    ar: "أدير عملاً أو أعمل في الإدارة",
-    en: "I run a business or work in management",
-  },
-  { id: "teach", ar: "أعلّم أو أدرّب", en: "I teach or train" },
-  { id: "job", ar: "أبحث عن عمل", en: "I'm looking for work" },
-  { id: "other", ar: "شيء آخر", en: "Something else" },
+  { id: "software", ar: "البرمجة وتقنية المعلومات", en: "Software & IT" },
+  { id: "data", ar: "البيانات والذكاء الاصطناعي", en: "Data & AI" },
+  { id: "engineering", ar: "الهندسة والعمارة", en: "Engineering & architecture" },
+  { id: "health", ar: "الطب والصحة", en: "Medicine & health" },
+  { id: "business", ar: "الأعمال والاقتصاد", en: "Business & economics" },
+  { id: "media", ar: "التصميم والإعلام", en: "Design & media" },
+  { id: "education", ar: "التعليم والتدريب", en: "Teaching & training" },
+  { id: "science", ar: "العلوم والبحث العلمي", en: "Science & research" },
+  { id: "humanities", ar: "القانون والآداب", en: "Law & humanities" },
+  { id: "other", ar: "مجال آخر", en: "Something else" },
 ] as const;
 export type FieldId = (typeof FIELDS)[number]["id"];
 
-export const AI_USES = [
-  { id: "daily", ar: "يومياً", en: "Every day" },
-  { id: "weekly", ar: "أسبوعياً", en: "Every week" },
-  { id: "tried", ar: "جرّبتها بضع مرات", en: "I've tried it a few times" },
-  { id: "never", ar: "لم أجرّبها بعد", en: "Not yet" },
+export const INTERESTS = [
+  { id: "everyday", ar: "تسهيل أموري اليومية", en: "Making daily life easier" },
+  { id: "create", ar: "صناعة الصور والفيديو والمحتوى", en: "Making images, video and content" },
+  { id: "learn", ar: "تعلّم مهارة جديدة", en: "Learning a new skill" },
+  { id: "income", ar: "إيجاد عمل أو مصدر دخل", en: "Finding work or an income" },
+  { id: "project", ar: "بدء مشروعي الخاص", en: "Starting my own project" },
+  { id: "curious", ar: "مجرد فضول", en: "Just curious" },
 ] as const;
-export type AiUseId = (typeof AI_USES)[number]["id"];
+export type InterestId = (typeof INTERESTS)[number]["id"];
 
-/** Abu Al-Joud's answer to the "what do you do" pick. */
-export const FIELD_REPLIES: Record<FieldId, Bi> = {
-  study: {
-    ar: "طالب علم! الذكاء الاصطناعي رفيق دراسة رائع. لنرَ ما تعرفه.",
-    en: "A student! AI can be a great study partner. Let's see what you know.",
-  },
-  tech: {
-    ar: "من أهل التقنية! هذه أسئلة عن الاستخدام اليومي، فلا تُفرط في التفكير.",
-    en: "A tech person! These are everyday questions, so don't overthink them.",
-  },
+type Choice = { id: string; ar: string; en: string };
+
+/** The second step's choices for a status: interests for "none", fields otherwise. */
+export function answersFor(status: StatusId): readonly Choice[] {
+  return status === "none" ? INTERESTS : FIELDS;
+}
+
+/** "<status>:<answer>" when the pair is one the page offers, else null. */
+export function profileCode(status: string, answer: string): string | null {
+  const s = STATUSES.find((x) => x.id === status);
+  if (!s || !answersFor(s.id).some((a) => a.id === answer)) return null;
+  return `${s.id}:${answer}`;
+}
+
+/** The single "what do you do" question asked before 2026-10-07. */
+const LEGACY_FIELDS: Record<string, Bi> = {
+  study: { ar: "أدرس", en: "I study" },
+  tech: { ar: "أعمل في التقنية أو الهندسة", en: "I work in tech or engineering" },
   design: {
-    ar: "مبدع! أدوات الصور والنصوص صارت جزءاً من عملك. لنبدأ.",
-    en: "A creative! Image and writing tools are part of your work now. Let's go.",
+    ar: "أعمل في التصميم أو الإعلام أو صناعة المحتوى",
+    en: "I work in design, media or content",
   },
-  business: {
-    ar: "رائد أعمال! الذكاء الاصطناعي يوفّر الوقت والمال. لنرَ معلوماتك.",
-    en: "A business mind! AI saves time and money. Let's test what you know.",
-  },
-  teach: {
-    ar: "معلّم! هذه المرة سأكون أنا من يطرح الأسئلة.",
-    en: "A teacher! This time I'm the one asking the questions.",
-  },
-  job: {
-    ar: "بالتوفيق في بحثك! مهارات الذكاء الاصطناعي تفتح أبواباً كثيرة.",
-    en: "Good luck with the search! AI skills open a lot of doors.",
-  },
-  other: {
-    ar: "أهلاً بك! لا يهم مجالك، فالذكاء الاصطناعي في كل مكان.",
-    en: "Welcome! Whatever you do, AI is everywhere now.",
-  },
+  business: { ar: "أدير عملاً أو أعمل في الإدارة", en: "I run a business or work in management" },
+  teach: { ar: "أعلّم أو أدرّب", en: "I teach or train" },
+  job: { ar: "أبحث عن عمل", en: "I'm looking for work" },
+  other: { ar: "شيء آخر", en: "Something else" },
 };
+
+export type Profile = {
+  status: StatusId | null;
+  field: FieldId | null;
+  interest: InterestId | null;
+  /** The answer to the old single question, for plays from before 2026-10-07. */
+  legacy: Bi | null;
+};
+
+/** A stored game_plays.field read back. */
+export function readProfile(stored: string | null): Profile {
+  const none: Profile = { status: null, field: null, interest: null, legacy: null };
+  if (!stored) return none;
+  const [status, answer] = stored.split(":");
+  if (answer === undefined) return { ...none, legacy: LEGACY_FIELDS[stored] ?? null };
+  if (profileCode(status, answer) === null) return none;
+  return status === "none"
+    ? { ...none, status, interest: answer as InterestId }
+    : { ...none, status: status as StatusId, field: answer as FieldId };
+}
+
+/** The two answers as text, "" where there is none. */
+export function profileText(stored: string | null, lang: Lang): { status: string; answer: string } {
+  const p = readProfile(stored);
+  const label = (c: Choice | Bi | null | undefined) => (c ? c[lang] : "");
+  if (p.legacy) return { status: "", answer: label(p.legacy) };
+  return {
+    status: label(STATUSES.find((s) => s.id === p.status)),
+    answer: label(
+      FIELDS.find((f) => f.id === p.field) ?? INTERESTS.find((i) => i.id === p.interest),
+    ),
+  };
+}
 
 /* What the page receives. */
 export type ServedQuestion = {

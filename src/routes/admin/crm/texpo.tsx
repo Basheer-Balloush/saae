@@ -28,11 +28,13 @@ import {
   type TexpoOverview,
 } from "@/features/texpo/lib/texpo-admin.functions";
 import {
-  AI_USES,
   FIELDS,
+  INTERESTS,
   LEVELS,
   MAIN_LINK_SLUG,
   QUESTION_COUNT,
+  STATUSES,
+  profileText,
   type Level,
 } from "@/features/texpo/lib/texpo-shared";
 import { Button } from "@/components/ui/button";
@@ -189,14 +191,6 @@ function TexpoAdminPage() {
 
   const exportPlayers = async () => {
     if (!players.length) return;
-    const fieldName = (id: string | null) => {
-      const f = FIELDS.find((x) => x.id === id);
-      return f ? (ar ? f.ar : f.en) : "";
-    };
-    const aiUseName = (id: string | null) => {
-      const a = AI_USES.find((x) => x.id === id);
-      return a ? (ar ? a.ar : a.en) : "";
-    };
     await exportRowsToXlsx({
       filenameBase: "texpo-players",
       sheetName: t("اللاعبون", "Players"),
@@ -217,11 +211,11 @@ function TexpoAdminPage() {
         },
         { header: t("النتيجة", "Score"), get: (r) => r.score, width: 8 },
         { header: t("أجاب عن", "Answered"), get: (r) => r.answered, width: 9 },
-        { header: t("المجال", "Field"), get: (r) => fieldName(r.field), width: 26 },
+        { header: t("الوضع", "Status"), get: (r) => profileText(r.field, lang).status, width: 22 },
         {
-          header: t("استخدام الذكاء الاصطناعي", "AI use"),
-          get: (r) => aiUseName(r.ai_use),
-          width: 18,
+          header: t("المجال أو الاهتمام", "Field or interest"),
+          get: (r) => profileText(r.field, lang).answer,
+          width: 30,
         },
         { header: t("الكوبون", "Coupon"), get: (r) => r.code, width: 18 },
         {
@@ -500,7 +494,9 @@ function TexpoAdminPage() {
                     <tr>
                       <th className="px-4 py-2 text-start font-bold">{t("اللاعب", "Player")}</th>
                       <th className="px-2 py-2 text-start font-bold">{t("المستوى", "Level")}</th>
-                      <th className="px-2 py-2 text-start font-bold">{t("المجال", "Field")}</th>
+                      <th className="px-2 py-2 text-start font-bold">
+                        {t("الوضع والمجال", "Status & field")}
+                      </th>
                       <th className="px-2 py-2 text-start font-bold">{t("الكوبون", "Coupon")}</th>
                       <th className="px-2 py-2 text-start font-bold">{t("الرابط", "Link")}</th>
                       <th className="px-4 py-2 text-end font-bold">{t("الوقت", "When")}</th>
@@ -545,8 +541,16 @@ function TexpoAdminPage() {
                         </td>
                         <td className="px-2 py-2.5">
                           {(() => {
-                            const f = FIELDS.find((x) => x.id === p.field);
-                            return f ? (ar ? f.ar : f.en) : "—";
+                            const { status, answer } = profileText(p.field, lang);
+                            if (!status && !answer) return "—";
+                            return (
+                              <>
+                                {status && <div>{status}</div>}
+                                {answer && (
+                                  <div className="text-[12px] text-[var(--cx-muted)]">{answer}</div>
+                                )}
+                              </>
+                            );
                           })()}
                         </td>
                         <td className="px-2 py-2.5">
@@ -669,14 +673,17 @@ function LevelBars({ levels }: { levels: Record<Level, number> }) {
 
 function WhoPlayed({ data }: { data: TexpoOverview }) {
   const { t, ar, lang } = useT();
-  const useTotal = useMemo(
-    () => Object.values(data.aiUse).reduce((s, n) => s + n, 0),
-    [data.aiUse],
-  );
+  const rows = [
+    ...STATUSES.map((st) => ({ id: st.id, label: ar ? st.ar : st.en })),
+    // Plays from before 2026-10-07 answered one "what do you do" question.
+    ...(data.byStatus.earlier
+      ? [{ id: "earlier", label: t("أجابوا عن السؤال القديم", "Answered the old question") }]
+      : []),
+  ];
   return (
     <div className="grid gap-5 lg:grid-cols-2">
       <Panel
-        title={t("ماذا يعمل من أنهوا اللعبة", "What finishers do")}
+        title={t("وضع من أنهوا اللعبة", "What finishers do")}
         description={t("وعدد كل مستوى", "And how many reached each level")}
         flush
       >
@@ -684,7 +691,7 @@ function WhoPlayed({ data }: { data: TexpoOverview }) {
           <table className="w-full min-w-[440px] text-[13.5px]">
             <thead className="bg-[var(--cx-raise)] text-[12px] text-[var(--cx-muted)]">
               <tr>
-                <th className="px-4 py-2 text-start font-bold">{t("المجال", "Field")}</th>
+                <th className="px-4 py-2 text-start font-bold">{t("الوضع", "Status")}</th>
                 {LEVEL_ORDER.map((l) => (
                   <th
                     key={l}
@@ -698,12 +705,16 @@ function WhoPlayed({ data }: { data: TexpoOverview }) {
               </tr>
             </thead>
             <tbody>
-              {FIELDS.map((f) => {
-                const row = data.byField[f.id] ?? { beginner: 0, intermediate: 0, professional: 0 };
+              {rows.map((r) => {
+                const row = data.byStatus[r.id] ?? {
+                  beginner: 0,
+                  intermediate: 0,
+                  professional: 0,
+                };
                 const sum = LEVEL_ORDER.reduce((s, l) => s + row[l], 0);
                 return (
-                  <tr key={f.id} className="border-t border-[var(--cx-line-2)]">
-                    <td className="px-4 py-2">{ar ? f.ar : f.en}</td>
+                  <tr key={r.id} className="border-t border-[var(--cx-line-2)]">
+                    <td className="px-4 py-2">{r.label}</td>
                     {LEVEL_ORDER.map((l) => (
                       <td key={l} className="px-2 py-2 text-end tabular-nums">
                         {fmtNum(row[l], lang)}
@@ -720,32 +731,62 @@ function WhoPlayed({ data }: { data: TexpoOverview }) {
         </div>
       </Panel>
       <Panel
-        title={t("كم مرة يستخدمون الذكاء الاصطناعي", "How often they use AI")}
+        title={t("مجالاتهم واهتماماتهم", "Their fields and interests")}
         description={t("كل من بدأ اللعبة", "Everyone who started")}
       >
-        <div className="space-y-3">
-          {AI_USES.map((a) => {
-            const n = data.aiUse[a.id] ?? 0;
-            const share = useTotal ? Math.round((n / useTotal) * 100) : 0;
-            return (
-              <div key={a.id}>
-                <div className="flex justify-between gap-2 text-[13.5px]">
-                  <span>{ar ? a.ar : a.en}</span>
-                  <span className="font-bold tabular-nums">
-                    {fmtNum(n, lang)} · {share}%
-                  </span>
-                </div>
-                <div className="mt-1 h-2 overflow-hidden rounded-full bg-[var(--cx-raise-2)]">
-                  <div
-                    className="h-full rounded-full bg-[var(--cx-teal)]"
-                    style={{ width: `${share}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
+        <div className="space-y-6">
+          <Shares
+            title={t("من يدرس أو يعمل أو يبحث عن عمل: المجال", "Study, work or job hunting: field")}
+            items={FIELDS}
+            counts={data.byField}
+          />
+          <Shares
+            title={t("لا يدرس ولا يعمل: ما يهمّه", "Neither: what draws them to AI")}
+            items={INTERESTS}
+            counts={data.byInterest}
+          />
         </div>
       </Panel>
+    </div>
+  );
+}
+
+function Shares({
+  title,
+  items,
+  counts,
+}: {
+  title: string;
+  items: readonly { id: string; ar: string; en: string }[];
+  counts: Record<string, number>;
+}) {
+  const { ar, lang } = useT();
+  const total = Object.values(counts).reduce((s, n) => s + n, 0);
+  return (
+    <div className="space-y-3">
+      <h4 className="text-[12.5px] font-bold text-[var(--cx-muted)]">
+        {title} · {fmtNum(total, lang)}
+      </h4>
+      {items.map((a) => {
+        const n = counts[a.id] ?? 0;
+        const share = total ? Math.round((n / total) * 100) : 0;
+        return (
+          <div key={a.id}>
+            <div className="flex justify-between gap-2 text-[13.5px]">
+              <span>{ar ? a.ar : a.en}</span>
+              <span className="font-bold tabular-nums">
+                {fmtNum(n, lang)} · {share}%
+              </span>
+            </div>
+            <div className="mt-1 h-2 overflow-hidden rounded-full bg-[var(--cx-raise-2)]">
+              <div
+                className="h-full rounded-full bg-[var(--cx-teal)]"
+                style={{ width: `${share}%` }}
+              />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

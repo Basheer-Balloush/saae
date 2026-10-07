@@ -6,6 +6,7 @@ import {
   LINK_SLUG_RE,
   MAIN_LINK_SLUG,
   TEXPO_GAME,
+  readProfile,
   slugFromLabel,
   type Level,
 } from "./texpo-shared";
@@ -56,8 +57,8 @@ export type Player = {
   score: number | null;
   /** Questions answered: the whole set once finished. */
   answered: number;
+  /** The two steps before the game, as stored (see readProfile). */
   field: string | null;
-  ai_use: string | null;
   code: string | null;
   used: boolean;
   account_new: boolean | null;
@@ -71,16 +72,18 @@ export type Player = {
 export type TexpoOverview = {
   total: Funnel;
   links: GameLink[];
-  /** field -> level -> count, over finished plays. */
-  byField: Record<string, Record<Level, number>>;
-  aiUse: Record<string, number>;
+  /** First step (status, or "earlier" for the old single question) -> level
+      -> count, over finished plays. */
+  byStatus: Record<string, Record<Level, number>>;
+  /** Second step -> count, over everyone who started. */
+  byField: Record<string, number>;
+  byInterest: Record<string, number>;
   players: Player[];
 };
 
 type PlayRow = {
   link_id: string | null;
   field: string | null;
-  ai_use: string | null;
   level: Level | null;
   score: number | null;
   current_q: number;
@@ -122,7 +125,7 @@ export const adminTexpoOverview = createServerFn({ method: "POST" })
       sb
         .from("game_plays")
         .select(
-          "link_id, field, ai_use, level, score, current_q, started_at, finished_at, claimed_at, account_new, chat_opened_at, coupon_id, player_name, player_email, lms_coupons(code)",
+          "link_id, field, level, score, current_q, started_at, finished_at, claimed_at, account_new, chat_opened_at, coupon_id, player_name, player_email, lms_coupons(code)",
         )
         .eq("game", TEXPO_GAME)
         .order("started_at", { ascending: false })
@@ -158,8 +161,9 @@ export const adminTexpoOverview = createServerFn({ method: "POST" })
       total.opened++;
     }
 
-    const byField: TexpoOverview["byField"] = {};
-    const aiUse: Record<string, number> = {};
+    const byStatus: TexpoOverview["byStatus"] = {};
+    const byField: Record<string, number> = {};
+    const byInterest: Record<string, number> = {};
     const labelOf = new Map(linkRows.map((l) => [l.id, l.label]));
     const players: Player[] = [];
 
@@ -175,10 +179,13 @@ export const adminTexpoOverview = createServerFn({ method: "POST" })
         if (p.coupon_id && usedCoupons.has(p.coupon_id)) f.used++;
         if (p.chat_opened_at) f.chatted++;
       }
-      if (p.ai_use) aiUse[p.ai_use] = (aiUse[p.ai_use] ?? 0) + 1;
-      if (p.finished_at && p.level && p.field) {
-        byField[p.field] ??= { beginner: 0, intermediate: 0, professional: 0 };
-        byField[p.field][p.level]++;
+      const profile = readProfile(p.field);
+      if (profile.field) byField[profile.field] = (byField[profile.field] ?? 0) + 1;
+      if (profile.interest) byInterest[profile.interest] = (byInterest[profile.interest] ?? 0) + 1;
+      const status = profile.status ?? (profile.legacy ? "earlier" : null);
+      if (p.finished_at && p.level && status) {
+        byStatus[status] ??= { beginner: 0, intermediate: 0, professional: 0 };
+        byStatus[status][p.level]++;
       }
       players.push({
         name: p.player_name,
@@ -187,7 +194,6 @@ export const adminTexpoOverview = createServerFn({ method: "POST" })
         score: p.finished_at ? p.score : null,
         answered: p.current_q,
         field: p.field,
-        ai_use: p.ai_use,
         code: p.lms_coupons?.code ?? null,
         used: !!p.coupon_id && usedCoupons.has(p.coupon_id),
         account_new: p.account_new,
@@ -203,7 +209,7 @@ export const adminTexpoOverview = createServerFn({ method: "POST" })
       ...l,
       funnel: funnels.get(l.id) ?? emptyFunnel(),
     }));
-    return { total, links: out, byField, aiUse, players };
+    return { total, links: out, byStatus, byField, byInterest, players };
   });
 
 export const adminTexpoCreateLink = createServerFn({ method: "POST" })

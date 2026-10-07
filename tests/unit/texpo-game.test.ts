@@ -17,11 +17,16 @@ import {
   ANSWER_GRACE_MS,
   COUPON_CATEGORY_SLUG,
   FIELDS,
-  FIELD_REPLIES,
+  INTERESTS,
   LEVELS,
   MAIN_LINK_SLUG,
   QUESTION_COUNT,
+  STATUSES,
+  answersFor,
   levelFor,
+  profileCode,
+  profileText,
+  readProfile,
   shuffledOrder,
   slugFromLabel,
 } from "@/features/texpo/lib/texpo-shared";
@@ -99,9 +104,65 @@ describe("the question bank", () => {
       expect(worst, lang).toBeLessThan(4);
     }
   });
+});
 
-  it("has a host reply for every field", () => {
-    for (const f of FIELDS) expect(FIELD_REPLIES[f.id].ar && FIELD_REPLIES[f.id].en).toBeTruthy();
+describe("the two steps before the game", () => {
+  it("gives every status a reply and a second question in both languages", () => {
+    for (const st of STATUSES) {
+      expect(st.ar && st.en && st.reply.ar && st.reply.en && st.ask.ar && st.ask.en).toBeTruthy();
+    }
+  });
+
+  it("asks about interests only when the player neither studies nor works", () => {
+    for (const st of STATUSES) {
+      expect(answersFor(st.id)).toBe(st.id === "none" ? INTERESTS : FIELDS);
+    }
+  });
+
+  it("keeps every answer pair inside the stored column (40 characters)", () => {
+    for (const st of STATUSES) {
+      for (const a of answersFor(st.id)) {
+        const code = profileCode(st.id, a.id);
+        expect(code).toBe(`${st.id}:${a.id}`);
+        expect(code!.length).toBeLessThanOrEqual(40);
+        expect(a.id.length).toBeLessThanOrEqual(20);
+      }
+    }
+  });
+
+  it("refuses a pair the page never offers", () => {
+    expect(profileCode("none", "health")).toBeNull();
+    expect(profileCode("work", "curious")).toBeNull();
+    expect(profileCode("retired", "health")).toBeNull();
+    expect(profileCode("work", "")).toBeNull();
+  });
+
+  it("reads a stored pair back", () => {
+    expect(readProfile("seeking:engineering")).toEqual({
+      status: "seeking",
+      field: "engineering",
+      interest: null,
+      legacy: null,
+    });
+    expect(readProfile("none:create")).toMatchObject({ status: "none", interest: "create" });
+    expect(profileText("work:health", "en")).toEqual({
+      status: "I work",
+      answer: "Medicine & health",
+    });
+    expect(profileText("none:curious", "ar")).toEqual({
+      status: "لا أدرس ولا أعمل حالياً",
+      answer: "مجرد فضول",
+    });
+  });
+
+  it("still labels plays that answered the old single question", () => {
+    expect(readProfile("tech")).toMatchObject({ status: null, field: null });
+    expect(profileText("tech", "en")).toEqual({
+      status: "",
+      answer: "I work in tech or engineering",
+    });
+    expect(profileText(null, "en")).toEqual({ status: "", answer: "" });
+    expect(profileText("work:nonsense", "en")).toEqual({ status: "", answer: "" });
   });
 });
 

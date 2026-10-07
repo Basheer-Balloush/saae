@@ -462,6 +462,17 @@
   border-color: var(--cyan);
   background: rgba(87, 228, 238, 0.1);
 }
+/* The field list is long: two columns even on a phone. */
+.tx-chips-compact {
+  gap: 8px;
+}
+.tx-chips-compact .tx-chip {
+  flex-basis: 140px;
+  min-height: 48px;
+  padding: 8px 12px;
+  font-size: 15px;
+  line-height: 1.35;
+}
 
 /* ---------- playing ---------- */
 .tx-play-head {
