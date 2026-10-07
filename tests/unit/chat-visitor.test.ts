@@ -21,6 +21,9 @@ describe("readVisitor", () => {
     expect(kind("بدنا تدريب موظفين على الذكاء الاصطناعي")).toBe("company");
     expect(kind("شركتنا مهتمة بالتعاون")).toBe("company");
     expect(kind("We offer cloud hosting and would like to partner")).toBe("company");
+    expect(kind("صاحب شركة أو جهة")).toBe("company");
+    expect(kind("صاحب شركة")).toBe("company");
+    expect(kind("بدي طوّر شغل شركتي")).toBe("company");
   });
 
   it("does not read a learner's questions about companies or partners as a company", () => {

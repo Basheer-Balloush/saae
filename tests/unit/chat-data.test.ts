@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   courseList,
   internshipStatus,
+  isPersonsOwnName,
   isPlausiblePhone,
   registrationStatus,
   toCourseDetails,
@@ -259,5 +260,20 @@ describe("isPlausiblePhone", () => {
     expect(isPlausiblePhone(null)).toBe(false);
     expect(isPlausiblePhone("+963 930 763 547")).toBe(true);
     expect(isPlausiblePhone("0944123456")).toBe(true);
+    expect(isPlausiblePhone("٠٩٣٢٢٣٦٠٢١")).toBe(true);
+  });
+
+  it("refuses a name typed where the phone was asked for (2026-10-06 conversation)", () => {
+    expect(isPlausiblePhone("سنا محمد عادل انكشاري السباعي")).toBe(false);
+  });
+});
+
+describe("isPersonsOwnName", () => {
+  it("catches a company saved under the person's own name", () => {
+    const name = "شنا محمد عادل انكشاري السباعي";
+    expect(isPersonsOwnName(name, name)).toBe(true);
+    expect(isPersonsOwnName("محمد", "شنا محمد عادل")).toBe(true);
+    expect(isPersonsOwnName("كاش موبايل MTN", "حذيفة محمود")).toBe(false);
+    expect(isPersonsOwnName("شركة النور", null)).toBe(false);
   });
 });

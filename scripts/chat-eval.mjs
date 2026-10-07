@@ -21,8 +21,15 @@ const CASES = [
     must: [/بلّشت|بدأت|ما عم تستقبل|غير متاحة|مو متاحة/],
     mustNot: [/ما قدرت أحدد|التسجيل (مفتوح|متاح)/],
   },
-  { q: "ماهي دورة الذكا االاصطناعي التوليدي؟", must: [/التوليدي/], mustNot: [/ما قدرت أحدد|غير موجودة/] },
-  { q: "مين المدرب بدورة الذكاء الاصطناعي التوليدي 09؟ وشو الأيام؟", must: [/الأحد|الثلاثاء|الخميس/] },
+  {
+    q: "ماهي دورة الذكا االاصطناعي التوليدي؟",
+    must: [/التوليدي/],
+    mustNot: [/ما قدرت أحدد|غير موجودة/],
+  },
+  {
+    q: "مين المدرب بدورة الذكاء الاصطناعي التوليدي 09؟ وشو الأيام؟",
+    must: [/الأحد|الثلاثاء|الخميس/],
+  },
   {
     q: "احكيلي عن دورة المنهجية الحديثة في هندسة البرمجيات وهل فيني سجّل فيها؟",
     must: [/انتهت|منتهية|خلصت|(غير|مو|مش) متاحة|ما في دورة/],
@@ -39,7 +46,10 @@ const CASES = [
   },
   { q: "اقترح علي دورة بالإعلام والكتابة", must: [/التحرير الإعلامي/] },
   // Links are short clickable labels, not bare long URLs.
-  { q: "عطيني رابط دورة الذكاء الاصطناعي التوليدي 09", must: [/\]\(https:\/\/www\.aisyria\.org\//] },
+  {
+    q: "عطيني رابط دورة الذكاء الاصطناعي التوليدي 09",
+    must: [/\]\(https:\/\/www\.aisyria\.org\//],
+  },
   // "Available" means joinable today: not started, deadline not passed, not ended.
   {
     q: "شو الدورات المتاحة حالياً؟",
@@ -109,7 +119,10 @@ const CASES = [
   },
   { q: "أنا طالبة طب، شو بتنصحني؟", mustNot: [/فيكفي/] },
   { q: "شكراً كتير على المساعدة", must: [/ولو|تسلم|العفو|الله يسلمك|واجب|على راسي|بالخدمة/] },
-  { q: "بدي تفاصيل دورة الذكاء الاصطناعي التوليدي 09 لو سمحت", must: [/على عيني|على راسي|من عيوني|تكرم|حاضر|تؤمر|أكيد/] },
+  {
+    q: "بدي تفاصيل دورة الذكاء الاصطناعي التوليدي 09 لو سمحت",
+    must: [/على عيني|على راسي|من عيوني|تكرم|حاضر|تؤمر|أكيد/],
+  },
   // A company offering a service is a company lead: collect its details, don't send it to the email first.
   {
     q: "أنا منسق علاقات بشركة كاش موبايل وحابين نكون وسيلة دفع إلكتروني عندكم",
@@ -123,10 +136,43 @@ const CASES = [
     must: [/اسم|الشركة|الجهة|بيانات|صفت/],
     mustNot: [/info@aisyria\.org/],
   },
+  // Student and graduate are separate, and each is asked about their studies or work.
+  {
+    turns: ["رشّح لي مساراً مناسباً"],
+    q: "خريج",
+    must: [/اختصاص|درست/],
+    mustNot: [/courses\//],
+  },
+  {
+    turns: ["رشّح لي مساراً مناسباً"],
+    q: "طالب",
+    must: [/تدرس|سنة/],
+    mustNot: [/courses\//],
+  },
+  // The 2026-10-06 company owner went through the learner questions and got a course.
+  {
+    turns: ["رشّح لي مساراً مناسباً"],
+    q: "صاحب شركة أو جهة",
+    must: [/اسم|شركتك/],
+    mustNot: [/courses\/|مستواك|وين وصلت مع الذكاء|ساعة/],
+  },
+  {
+    turns: [
+      "رشّح لي مساراً مناسباً",
+      "صاحب شركة أو جهة",
+      "شركة النور للتجهيزات الطبية، منبيع أجهزة للمستشفيات",
+    ],
+    q: "استشارة لإدخال الذكاء الاصطناعي بشغلنا",
+    must: [/\?|؟/],
+    mustNot: [/courses\/|مستواك|ساعة/],
+  },
   // English.
   { q: "Do you have any internships open right now?", must: [/internships/] },
   { q: "Is UNICEF a partner of SAAE?", must: [/not/i], mustNot: [/[\u0600-\u06FF]{4,}/] },
-  { q: "Which courses are open for registration now?", mustNot: [/[\u0600-\u06FF]{6,}.*[\u0600-\u06FF]{6,}.*[\u0600-\u06FF]{6,}/, /Marketing 360/] },
+  {
+    q: "Which courses are open for registration now?",
+    mustNot: [/[\u0600-\u06FF]{6,}.*[\u0600-\u06FF]{6,}.*[\u0600-\u06FF]{6,}/, /Marketing 360/],
+  },
 ];
 
 async function ask(question, sessionId = `eval-${Math.random().toString(36).slice(2, 10)}`) {
@@ -174,7 +220,10 @@ for (const c of CASES) {
   if (failures.length === 0) passed += 1;
   console.log(`${failures.length ? "✗" : "✓"} ${c.q}`);
   await new Promise((r) => setTimeout(r, PAUSE_MS));
-  if (failures.length) console.log(`    ${failures.join("; ")}\n    → ${text.replace(/\s+/g, " ").slice(0, 300)}`);
+  if (failures.length)
+    console.log(`    ${failures.join("; ")}\n    → ${text.replace(/\s+/g, " ").slice(0, 300)}`);
 }
-console.log(`\n${passed}/${CASES.length} passed · ${contact} answers sent the visitor to email/phone`);
+console.log(
+  `\n${passed}/${CASES.length} passed · ${contact} answers sent the visitor to email/phone`,
+);
 process.exitCode = passed === CASES.length ? 0 : 1;
