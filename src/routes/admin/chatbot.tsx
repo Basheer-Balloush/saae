@@ -8,6 +8,7 @@ import {
   Bot,
   CheckCircle2,
   ExternalLink,
+  KeyRound,
   Loader2,
   Mail,
   MessageSquare,
@@ -58,9 +59,11 @@ import {
   useT,
 } from "@/components/console/ui";
 import { CONSOLE_COUNTS_KEY } from "@/components/console/useConsoleCounts";
+import { ApiKeysPanel } from "@/features/chat/ApiKeysPanel";
+import { useApiKeys } from "@/features/chat/hooks/useApiKeys";
 
-type Stream = "feedback" | "profiles" | "conversations" | "knowledge";
-const STREAMS: Stream[] = ["feedback", "profiles", "conversations", "knowledge"];
+type Stream = "feedback" | "profiles" | "conversations" | "knowledge" | "api";
+const STREAMS: Stream[] = ["feedback", "profiles", "conversations", "knowledge", "api"];
 
 export const Route = createFileRoute("/admin/chatbot")({
   ssr: false,
@@ -126,6 +129,7 @@ function ChatbotPage() {
   const [convs, setConvs] = useState<Conversation[] | null>(null);
   const [docs, setDocs] = useState<Doc[] | null>(null);
   const [transcript, setTranscript] = useState<string | null>(null);
+  const apiKeys = useApiKeys();
 
   const loadDocs = useCallback(
     () =>
@@ -208,6 +212,13 @@ function ChatbotPage() {
       value: docs?.length ?? null,
       hint: t("نصوص يعتمد عليها في إجاباته", "texts it relies on to answer"),
     },
+    {
+      key: "api",
+      icon: KeyRound,
+      label: t("مفاتيح API", "API keys"),
+      value: apiKeys.active,
+      hint: t("أنظمة أخرى تحادث البوت", "other systems that talk to the bot"),
+    },
   ];
 
   return (
@@ -231,7 +242,7 @@ function ChatbotPage() {
         }
       />
 
-      <div className="-mx-1 mb-6 flex snap-x gap-3 overflow-x-auto px-1 pb-1 md:grid md:grid-cols-4 md:overflow-visible">
+      <div className="-mx-1 mb-6 flex snap-x gap-3 overflow-x-auto px-1 pb-1 md:grid md:grid-cols-3 md:overflow-visible xl:grid-cols-5">
         {tiles.map((x) => (
           <button
             key={x.key}
@@ -239,7 +250,7 @@ function ChatbotPage() {
             onClick={() => go(x.key)}
             data-active={active === x.key}
             aria-pressed={active === x.key}
-            className="cx-card min-w-[210px] snap-start p-4 text-start transition-all hover:border-[var(--cx-teal-100)] data-[active=true]:border-[var(--cx-teal)] data-[active=true]:shadow-[0_0_0_3px_var(--cx-teal-50),0_18px_40px_-20px_rgba(119,224,232,0.45)]"
+            className="cx-card min-w-[210px] snap-start p-4 md:min-w-0 text-start transition-all hover:border-[var(--cx-teal-100)] data-[active=true]:border-[var(--cx-teal)] data-[active=true]:shadow-[0_0_0_3px_var(--cx-teal-50),0_18px_40px_-20px_rgba(119,224,232,0.45)]"
           >
             <div className="flex items-center justify-between gap-2">
               <span
@@ -274,6 +285,9 @@ function ChatbotPage() {
       {active === "conversations" && <ConversationsStream rows={convs} setRows={setConvs} />}
       {active === "knowledge" && (
         <KnowledgeStream rows={docs} setRows={setDocs} reload={loadDocs} />
+      )}
+      {active === "api" && (
+        <ApiKeysPanel rows={apiKeys.rows} failed={apiKeys.failed} reload={apiKeys.reload} />
       )}
 
       <Sheet open={!!transcript} onOpenChange={(v) => !v && setTranscript(null)}>

@@ -125,6 +125,7 @@ import { Route as LearningManagementSystemInstructorAssignmentsCourseIdRouteImpo
 import { Route as LearningManagementSystemAdminInternshipsNewRouteImport } from './routes/learning-management-system/admin/internships/new'
 import { Route as LearningManagementSystemAdminCoursesIdRouteImport } from './routes/learning-management-system/admin/courses/$id'
 import { Route as ApiProfileCardSlugKindRouteImport } from './routes/api/profile-card.$slug.$kind'
+import { Route as ApiV1AbuAlJoudChatRouteImport } from './routes/api/v1/abu-al-joud/chat'
 import { Route as AdminFormsFormIdEditRouteImport } from './routes/admin/forms/$formId/edit'
 import { Route as AdminCrmRegistrationLinksIdRouteImport } from './routes/admin/crm/registration-links/$id'
 import { Route as AdminCrmFormsFormSlugRouteImport } from './routes/admin/crm/forms/$formSlug'
@@ -772,6 +773,11 @@ const ApiProfileCardSlugKindRoute = ApiProfileCardSlugKindRouteImport.update({
   path: '/api/profile-card/$slug/$kind',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AbuAlJoudChatRoute = ApiV1AbuAlJoudChatRouteImport.update({
+  id: '/api/v1/abu-al-joud/chat',
+  path: '/api/v1/abu-al-joud/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminFormsFormIdEditRoute = AdminFormsFormIdEditRouteImport.update({
   id: '/$formId/edit',
   path: '/$formId/edit',
@@ -962,6 +968,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm/registration-links/$id': typeof AdminCrmRegistrationLinksIdRoute
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/api/profile-card/$slug/$kind': typeof ApiProfileCardSlugKindRoute
+  '/api/v1/abu-al-joud/chat': typeof ApiV1AbuAlJoudChatRoute
   '/learning-management-system/admin/courses/$id': typeof LearningManagementSystemAdminCoursesIdRoute
   '/learning-management-system/admin/internships/new': typeof LearningManagementSystemAdminInternshipsNewRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
@@ -1084,6 +1091,7 @@ export interface FileRoutesByTo {
   '/admin/crm/registration-links/$id': typeof AdminCrmRegistrationLinksIdRoute
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/api/profile-card/$slug/$kind': typeof ApiProfileCardSlugKindRoute
+  '/api/v1/abu-al-joud/chat': typeof ApiV1AbuAlJoudChatRoute
   '/learning-management-system/admin/courses/$id': typeof LearningManagementSystemAdminCoursesIdRoute
   '/learning-management-system/admin/internships/new': typeof LearningManagementSystemAdminInternshipsNewRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
@@ -1215,6 +1223,7 @@ export interface FileRoutesById {
   '/admin/crm/registration-links/$id': typeof AdminCrmRegistrationLinksIdRoute
   '/admin/forms/$formId/edit': typeof AdminFormsFormIdEditRoute
   '/api/profile-card/$slug/$kind': typeof ApiProfileCardSlugKindRoute
+  '/api/v1/abu-al-joud/chat': typeof ApiV1AbuAlJoudChatRoute
   '/learning-management-system/admin/courses/$id': typeof LearningManagementSystemAdminCoursesIdRoute
   '/learning-management-system/admin/internships/new': typeof LearningManagementSystemAdminInternshipsNewRoute
   '/learning-management-system/instructor/assignments/$courseId': typeof LearningManagementSystemInstructorAssignmentsCourseIdRoute
@@ -1348,6 +1357,7 @@ export interface FileRouteTypes {
     | '/admin/crm/registration-links/$id'
     | '/admin/forms/$formId/edit'
     | '/api/profile-card/$slug/$kind'
+    | '/api/v1/abu-al-joud/chat'
     | '/learning-management-system/admin/courses/$id'
     | '/learning-management-system/admin/internships/new'
     | '/learning-management-system/instructor/assignments/$courseId'
@@ -1470,6 +1480,7 @@ export interface FileRouteTypes {
     | '/admin/crm/registration-links/$id'
     | '/admin/forms/$formId/edit'
     | '/api/profile-card/$slug/$kind'
+    | '/api/v1/abu-al-joud/chat'
     | '/learning-management-system/admin/courses/$id'
     | '/learning-management-system/admin/internships/new'
     | '/learning-management-system/instructor/assignments/$courseId'
@@ -1600,6 +1611,7 @@ export interface FileRouteTypes {
     | '/admin/crm/registration-links/$id'
     | '/admin/forms/$formId/edit'
     | '/api/profile-card/$slug/$kind'
+    | '/api/v1/abu-al-joud/chat'
     | '/learning-management-system/admin/courses/$id'
     | '/learning-management-system/admin/internships/new'
     | '/learning-management-system/instructor/assignments/$courseId'
@@ -1664,6 +1676,7 @@ export interface RootRouteChildren {
   NewsIndexRoute: typeof NewsIndexRoute
   ApiPublicBunnyWebhookRoute: typeof ApiPublicBunnyWebhookRoute
   ApiProfileCardSlugKindRoute: typeof ApiProfileCardSlugKindRoute
+  ApiV1AbuAlJoudChatRoute: typeof ApiV1AbuAlJoudChatRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -2483,6 +2496,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProfileCardSlugKindRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/abu-al-joud/chat': {
+      id: '/api/v1/abu-al-joud/chat'
+      path: '/api/v1/abu-al-joud/chat'
+      fullPath: '/api/v1/abu-al-joud/chat'
+      preLoaderRoute: typeof ApiV1AbuAlJoudChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/forms/$formId/edit': {
       id: '/admin/forms/$formId/edit'
       path: '/$formId/edit'
@@ -2996,6 +3016,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewsIndexRoute: NewsIndexRoute,
   ApiPublicBunnyWebhookRoute: ApiPublicBunnyWebhookRoute,
   ApiProfileCardSlugKindRoute: ApiProfileCardSlugKindRoute,
+  ApiV1AbuAlJoudChatRoute: ApiV1AbuAlJoudChatRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
