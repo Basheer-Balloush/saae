@@ -5,10 +5,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   buildResult,
+  deckFromStored,
+  drawDeck,
   gradeAnswer,
   limitMs,
   serveQuestion,
-  validOrders,
+  storeDeck,
   type StoredAnswer,
 } from "./engine";
 import {
@@ -21,7 +23,6 @@ import {
   QUESTION_COUNT,
   TEXPO_GAME,
   levelFor,
-  shuffledOrder,
   type AnswerOutcome,
   type Bi,
   type ClaimOutcome,
@@ -30,16 +31,24 @@ import {
   type Reward,
 } from "./texpo-shared";
 
-/* The Texpo game's server side. Every rule is decided here: which question
-   comes next, whether an answer is right and in time, the score, and the
-   claim. The tables are closed to browser roles, so all reads and writes go
-   through the service role (see 20261005120000_texpo_game.sql). */
+/* The Texpo game's server side. Every rule is decided here: which questions a
+   play gets, which comes next, whether an answer is right and in time, the
+   score, and the claim. The tables are closed to browser roles, so all reads
+   and writes go through the service role (see 20261005120000_texpo_game.sql). */
 
 const db = async () => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return supabaseAdmin as unknown as SupabaseClient;
 };
-const questions = async () => (await import("./questions.server")).TEXPO_QUESTIONS;
+const questions = async () => await import("./questions.server");
+
+/** The play's own questions and option orders. A row that fits no deck is broken. */
+async function deckOf(row: { option_orders: unknown }) {
+  const { TEXPO_BANK, LEGACY_QUESTIONS } = await questions();
+  const found = deckFromStored(row.option_orders, TEXPO_BANK, LEGACY_QUESTIONS);
+  if (!found) throw new Error("bad_play");
+  return found;
+}
 
 type PlayRow = {
   id: string;
@@ -170,14 +179,13 @@ async function shownAt(sb: SupabaseClient, row: PlayRow, now: number): Promise<n
 }
 
 async function stateOf(sb: SupabaseClient, row: PlayRow, now = Date.now()): Promise<PlayState> {
-  const bank = await questions();
-  if (!validOrders(row.option_orders, bank)) throw new Error("bad_play");
+  const { deck, orders } = await deckOf(row);
   const answers = row.answers ?? [];
   if (row.finished_at) {
     return {
       phase: "result",
       playId: row.id,
-      result: buildResult(bank, answers),
+      result: buildResult(deck, answers),
       claimed: !!row.claimed_at,
     };
   }
@@ -186,9 +194,9 @@ async function stateOf(sb: SupabaseClient, row: PlayRow, now = Date.now()): Prom
     playId: row.id,
     score: answers.filter((a) => a.correct).length,
     question: serveQuestion(
-      bank,
+      deck,
       row.current_q,
-      row.option_orders,
+      orders,
       await shownAt(sb, row, now),
       now,
       row.hint_q,
@@ -235,7 +243,7 @@ export const texpoStart = createServerFn({ method: "POST" })
       throw new Error("rate_limited");
     }
     if (await deviceClaimed(sb, data.device)) throw new Error("device_claimed");
-    const bank = await questions();
+    const { TEXPO_BANK } = await questions();
     const link = await resolveLink(sb, data.link);
     const now = new Date();
     const ua = getRequest()?.headers.get("user-agent")?.slice(0, 300) ?? null;
@@ -248,7 +256,8 @@ export const texpoStart = createServerFn({ method: "POST" })
         lang: data.lang,
         field: data.field,
         ai_use: data.aiUse,
-        option_orders: bank.map((q) => shuffledOrder(q.options.en.length)),
+        // This player's 7 questions, each with its own option order.
+        option_orders: storeDeck(drawDeck(TEXPO_BANK)),
         question_shown_at: now.toISOString(),
         user_agent: ua,
       })
@@ -292,19 +301,18 @@ export const texpoAnswer = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<AnswerOutcome | { stale: PlayState }> => {
     const sb = await db();
-    const bank = await questions();
     const row = await loadPlay(sb, data.playId, data.device);
     // A double tap or a retry after a lost reply: send where the play is now.
     if (row.finished_at || row.current_q !== data.q || !row.question_shown_at) {
       return { stale: await stateOf(sb, row) };
     }
-    if (!validOrders(row.option_orders, bank)) throw new Error("bad_play");
+    const { deck, orders } = await deckOf(row);
 
     const now = Date.now();
     const graded = gradeAnswer(
-      bank,
+      deck,
       data.q,
-      row.option_orders,
+      orders,
       data.shown,
       new Date(row.question_shown_at).getTime(),
       now,
@@ -312,7 +320,7 @@ export const texpoAnswer = createServerFn({ method: "POST" })
     );
     const { timedOut, correctShown, ...stored } = graded;
     const answers = [...(row.answers ?? []), stored];
-    const last = data.q + 1 >= bank.length;
+    const last = data.q + 1 >= deck.length;
     const score = answers.filter((a) => a.correct).length;
     const patch: Record<string, unknown> = { answers, current_q: data.q + 1 };
     if (last) {
@@ -339,10 +347,10 @@ export const texpoAnswer = createServerFn({ method: "POST" })
       correct: stored.correct,
       timedOut,
       correctShown,
-      explanation: bank[data.q].explanation,
+      explanation: deck[data.q].explanation,
       score,
       nextIndex: last ? null : data.q + 1,
-      result: last ? buildResult(bank, answers) : null,
+      result: last ? buildResult(deck, answers) : null,
     };
   });
 
@@ -352,10 +360,10 @@ export const texpoHint = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ device, playId, q: questionIndex }).parse(i))
   .handler(async ({ data }): Promise<{ hint: Bi; limitMs: number; remainingMs: number }> => {
     const sb = await db();
-    const bank = await questions();
     const row = await loadPlay(sb, data.playId, data.device);
     if (row.finished_at || row.current_q !== data.q || !row.question_shown_at)
       throw new Error("not_current");
+    const { deck } = await deckOf(row);
     if (row.hint_q !== null && row.hint_q !== data.q) throw new Error("hint_used");
     if (row.hint_q === null) {
       const { data: set } = await sb
@@ -369,7 +377,7 @@ export const texpoHint = createServerFn({ method: "POST" })
     }
     const limit = limitMs(data.q, data.q);
     const elapsed = Date.now() - new Date(row.question_shown_at).getTime();
-    return { hint: bank[data.q].hint, limitMs: limit, remainingMs: Math.max(0, limit - elapsed) };
+    return { hint: deck[data.q].hint, limitMs: limit, remainingMs: Math.max(0, limit - elapsed) };
   });
 
 /* ---------- the chat opened from the game (CRM numbers) ---------- */

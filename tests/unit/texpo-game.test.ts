@@ -1,12 +1,16 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { TEXPO_QUESTIONS } from "@/features/texpo/lib/questions.server";
+import { LEGACY_QUESTIONS, TEXPO_BANK } from "@/features/texpo/lib/questions.server";
 import {
+  DECK_SHAPE,
   buildResult,
+  deckFromStored,
+  drawDeck,
   gradeAnswer,
   limitMs,
   serveQuestion,
+  storeDeck,
   validOrders,
 } from "@/features/texpo/lib/engine";
 import {
@@ -25,9 +29,11 @@ import { safeLmsRedirect } from "@/features/lms/lib/redirect";
 import { assistantPlacement } from "@/features/chat/lib/assistant-placement";
 import { cookieDomain } from "@/features/texpo/lib/play-store";
 
-const bank = TEXPO_QUESTIONS;
-const identity = bank.map(() => [0, 1, 2, 3]);
-const reversed = bank.map(() => [3, 2, 1, 0]);
+/** A random source that always returns zeros: the same deck every time. */
+const zeros = (n: number) => new Uint32Array(n);
+const deck = drawDeck(TEXPO_BANK, zeros);
+const identity = deck.map(() => [0, 1, 2, 3]);
+const reversed = deck.map(() => [3, 2, 1, 0]);
 
 describe("levels", () => {
   it("0–3 beginner, 4–5 intermediate, 6–7 professional", () => {
@@ -42,41 +48,110 @@ describe("levels", () => {
   });
 });
 
-describe("the question set", () => {
-  it("is 7 questions, easy to hard", () => {
-    expect(QUESTION_COUNT).toBe(7);
-    expect(bank).toHaveLength(QUESTION_COUNT);
-    expect(bank.map((q) => q.difficulty).join(",")).toBe("easy,easy,easy,medium,medium,hard,hard");
+describe("the question bank", () => {
+  it("has 50 questions: 20 easy, 15 medium, 15 hard, each with its own id", () => {
+    expect(TEXPO_BANK).toHaveLength(50);
+    const count = (d: string) => TEXPO_BANK.filter((q) => q.difficulty === d).length;
+    expect([count("easy"), count("medium"), count("hard")]).toEqual([20, 15, 15]);
+    const ids = [...TEXPO_BANK, ...LEGACY_QUESTIONS].map((q) => q.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("has four distinct options in both languages, a valid answer, a hint and an explanation", () => {
-    for (const q of bank) {
+    for (const q of [...TEXPO_BANK, ...LEGACY_QUESTIONS]) {
       for (const lang of ["ar", "en"] as const) {
-        expect(q.options[lang]).toHaveLength(4);
-        expect(new Set(q.options[lang]).size).toBe(4);
-        expect(q.text[lang].trim()).not.toBe("");
-        expect(q.hint[lang].trim()).not.toBe("");
-        expect(q.explanation[lang].trim()).not.toBe("");
+        expect(q.options[lang], q.id).toHaveLength(4);
+        expect(new Set(q.options[lang]).size, q.id).toBe(4);
+        expect(q.text[lang].trim(), q.id).not.toBe("");
+        expect(q.hint[lang].trim(), q.id).not.toBe("");
+        expect(q.explanation[lang].trim(), q.id).not.toBe("");
       }
       expect(q.answer).toBeGreaterThanOrEqual(0);
       expect(q.answer).toBeLessThan(4);
-      expect(/[؀-ۿ]/.test(q.text.ar + q.options.ar.join(""))).toBe(true);
+      expect(/[؀-ۿ]/.test(q.text.ar + q.options.ar.join("")), q.id).toBe(true);
     }
   });
 
-  it("cannot be won by always picking the longest answer", () => {
+  it("keeps questions and answers short", () => {
+    for (const q of TEXPO_BANK) {
+      for (const lang of ["ar", "en"] as const) {
+        expect(q.text[lang].length, q.id).toBeLessThanOrEqual(100);
+        for (const o of q.options[lang]) expect(o.length, `${q.id} ${o}`).toBeLessThanOrEqual(55);
+      }
+    }
+  });
+
+  it("cannot be won by always picking the longest answer, whatever 7 a player gets", () => {
     for (const lang of ["ar", "en"] as const) {
-      const longestWins = bank.filter((q) => {
-        const lens = q.options[lang].map((o) => o.length);
-        return lens.indexOf(Math.max(...lens)) === q.answer;
-      }).length;
+      // A tie counts against us: the player could pick the right one.
+      const longestWins = (d: string) =>
+        TEXPO_BANK.filter((q) => {
+          if (q.difficulty !== d) return false;
+          const lens = q.options[lang].map((o) => o.length);
+          return lens[q.answer] === Math.max(...lens);
+        }).length;
+      const slots = (d: string) => DECK_SHAPE.filter((x) => x === d).length;
+      const worst = ["easy", "medium", "hard"].reduce(
+        (sum, d) => sum + Math.min(slots(d), longestWins(d)),
+        0,
+      );
       // Intermediate needs 4; the longest-answer trick must stay a beginner.
-      expect(longestWins, lang).toBeLessThan(4);
+      expect(worst, lang).toBeLessThan(4);
     }
   });
 
   it("has a host reply for every field", () => {
     for (const f of FIELDS) expect(FIELD_REPLIES[f.id].ar && FIELD_REPLIES[f.id].en).toBeTruthy();
+  });
+});
+
+describe("each play's questions", () => {
+  it("are 7, easy to hard: 3 easy, 2 medium, 2 hard", () => {
+    expect(QUESTION_COUNT).toBe(7);
+    expect(DECK_SHAPE).toHaveLength(QUESTION_COUNT);
+    expect(deck.map((q) => q.difficulty).join(",")).toBe("easy,easy,easy,medium,medium,hard,hard");
+  });
+
+  it("never repeat a question or a topic", () => {
+    for (let i = 0; i < 500; i++) {
+      const d = drawDeck(TEXPO_BANK);
+      expect(d.map((q) => q.difficulty)).toEqual([...DECK_SHAPE]);
+      expect(new Set(d.map((q) => q.id)).size).toBe(QUESTION_COUNT);
+      expect(new Set(d.map((q) => q.topic)).size).toBe(QUESTION_COUNT);
+    }
+  });
+
+  it("are drawn at random, so players get different questions", () => {
+    const ones = (n: number) => new Uint32Array(n).fill(1);
+    expect(drawDeck(TEXPO_BANK, ones).map((q) => q.id)).not.toEqual(deck.map((q) => q.id));
+    const seen = new Set<string>();
+    for (let i = 0; i < 200; i++) for (const q of drawDeck(TEXPO_BANK)) seen.add(q.id);
+    expect(seen.size).toBeGreaterThan(45);
+  });
+
+  it("are stored with their option orders and read back the same", () => {
+    const stored = JSON.parse(JSON.stringify(storeDeck(deck)));
+    const back = deckFromStored(stored, TEXPO_BANK, LEGACY_QUESTIONS);
+    expect(back?.deck).toEqual(deck);
+    expect(back?.orders).toEqual(stored.map((e: { o: number[] }) => e.o));
+  });
+
+  it("keep working for plays started on the old fixed 7", () => {
+    const old = LEGACY_QUESTIONS.map(() => [2, 0, 3, 1]);
+    const back = deckFromStored(old, TEXPO_BANK, LEGACY_QUESTIONS);
+    expect(back?.deck).toBe(LEGACY_QUESTIONS);
+    expect(back?.orders).toEqual(old);
+  });
+
+  it("refuse rows that fit no deck", () => {
+    const good = storeDeck(deck);
+    const read = (v: unknown) => deckFromStored(v, TEXPO_BANK, LEGACY_QUESTIONS);
+    expect(read("nope")).toBeNull();
+    expect(read(good.slice(1))).toBeNull();
+    expect(read([{ id: "Z99", o: [0, 1, 2, 3] }, ...good.slice(1)])).toBeNull();
+    expect(read([good[0], good[0], ...good.slice(2)])).toBeNull();
+    expect(read([{ id: good[0].id, o: [0, 0, 1, 2] }, ...good.slice(1)])).toBeNull();
+    expect(read([null, ...good.slice(1)])).toBeNull();
   });
 });
 
@@ -93,17 +168,17 @@ describe("shuffling", () => {
   });
 
   it("checks stored orders", () => {
-    expect(validOrders(identity, bank)).toBe(true);
-    expect(validOrders(identity.slice(1), bank)).toBe(false);
-    expect(validOrders([[0, 0, 1, 2], ...identity.slice(1)], bank)).toBe(false);
-    expect(validOrders("nope", bank)).toBe(false);
+    expect(validOrders(identity, deck)).toBe(true);
+    expect(validOrders(identity.slice(1), deck)).toBe(false);
+    expect(validOrders([[0, 0, 1, 2], ...identity.slice(1)], deck)).toBe(false);
+    expect(validOrders("nope", deck)).toBe(false);
   });
 });
 
 describe("serving", () => {
   it("shows options in the player's order and never the answer", () => {
-    const served = serveQuestion(bank, 0, reversed, 1000, 6000, null);
-    expect(served.options.en).toEqual([...bank[0].options.en].reverse());
+    const served = serveQuestion(deck, 0, reversed, 1000, 6000, null);
+    expect(served.options.en).toEqual([...deck[0].options.en].reverse());
     expect(served.remainingMs).toBe(15000);
     expect(JSON.stringify(served)).not.toContain('"answer"');
     expect(served.hint).toBeNull();
@@ -112,40 +187,40 @@ describe("serving", () => {
   it("adds ten seconds and the hint on the hinted question only", () => {
     expect(limitMs(2, 2)).toBe(30000);
     expect(limitMs(3, 2)).toBe(20000);
-    const hinted = serveQuestion(bank, 2, identity, 0, 0, 2);
-    expect(hinted.hint).toEqual(bank[2].hint);
-    expect(serveQuestion(bank, 3, identity, 0, 0, 2).hintUsed).toBe(true);
+    const hinted = serveQuestion(deck, 2, identity, 0, 0, 2);
+    expect(hinted.hint).toEqual(deck[2].hint);
+    expect(serveQuestion(deck, 3, identity, 0, 0, 2).hintUsed).toBe(true);
   });
 });
 
 describe("grading", () => {
   it("maps the tapped position back through the shuffle", () => {
-    const rightShown = reversed[0].indexOf(bank[0].answer);
-    const right = gradeAnswer(bank, 0, reversed, rightShown, 0, 5000, null);
+    const rightShown = reversed[0].indexOf(deck[0].answer);
+    const right = gradeAnswer(deck, 0, reversed, rightShown, 0, 5000, null);
     expect(right).toMatchObject({ correct: true, timedOut: false, correctShown: rightShown });
-    const wrong = gradeAnswer(bank, 0, reversed, (rightShown + 1) % 4, 0, 5000, null);
+    const wrong = gradeAnswer(deck, 0, reversed, (rightShown + 1) % 4, 0, 5000, null);
     expect(wrong.correct).toBe(false);
     expect(wrong.correctShown).toBe(rightShown);
   });
 
   it("counts no answer and late answers as timeouts", () => {
-    const shown = identity[0].indexOf(bank[0].answer);
-    expect(gradeAnswer(bank, 0, identity, null, 0, 1000, null)).toMatchObject({
+    const shown = identity[0].indexOf(deck[0].answer);
+    expect(gradeAnswer(deck, 0, identity, null, 0, 1000, null)).toMatchObject({
       correct: false,
       timedOut: true,
     });
-    expect(gradeAnswer(bank, 0, identity, shown, 0, 20000 + ANSWER_GRACE_MS, null).correct).toBe(
+    expect(gradeAnswer(deck, 0, identity, shown, 0, 20000 + ANSWER_GRACE_MS, null).correct).toBe(
       true,
     );
-    expect(gradeAnswer(bank, 0, identity, shown, 0, 20001 + ANSWER_GRACE_MS, null).timedOut).toBe(
+    expect(gradeAnswer(deck, 0, identity, shown, 0, 20001 + ANSWER_GRACE_MS, null).timedOut).toBe(
       true,
     );
     // The hint's extra ten seconds count.
-    expect(gradeAnswer(bank, 0, identity, shown, 0, 28000, 0).correct).toBe(true);
+    expect(gradeAnswer(deck, 0, identity, shown, 0, 28000, 0).correct).toBe(true);
   });
 
   it("builds the result and the review", () => {
-    const answers = bank.map((q, i) => ({
+    const answers = deck.map((q, i) => ({
       q: i,
       shown: q.answer,
       choice: i < 4 ? q.answer : (q.answer + 1) % 4,
@@ -153,12 +228,12 @@ describe("grading", () => {
       ms: 1000,
       hint: false,
     }));
-    const r = buildResult(bank, answers);
+    const r = buildResult(deck, answers);
     expect(r).toMatchObject({ score: 4, total: 7, level: "intermediate", percent: 35 });
     expect(r.review[0].ok).toBe(true);
     expect(r.review[6].ok).toBe(false);
-    expect(r.review[6].correct.en).toBe(bank[6].options.en[bank[6].answer]);
-    expect(buildResult(bank, []).review.every((x) => x.chosen === null)).toBe(true);
+    expect(r.review[6].correct.en).toBe(deck[6].options.en[deck[6].answer]);
+    expect(buildResult(deck, []).review.every((x) => x.chosen === null)).toBe(true);
   });
 });
 
