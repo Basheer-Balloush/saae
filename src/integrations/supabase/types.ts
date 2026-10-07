@@ -404,7 +404,9 @@ export type Database = {
           licensed_in_syria: boolean | null
           licensed_outside_syria: boolean | null
           office_address: string | null
+          details: string | null
           raw: Json | null
+          reason: string | null
           source: string
           status: Database["public"]["Enums"]["crm_lead_status"]
           tags: string[]
@@ -430,7 +432,9 @@ export type Database = {
           licensed_in_syria?: boolean | null
           licensed_outside_syria?: boolean | null
           office_address?: string | null
+          details?: string | null
           raw?: Json | null
+          reason?: string | null
           source?: string
           status?: Database["public"]["Enums"]["crm_lead_status"]
           tags?: string[]
@@ -456,7 +460,9 @@ export type Database = {
           licensed_in_syria?: boolean | null
           licensed_outside_syria?: boolean | null
           office_address?: string | null
+          details?: string | null
           raw?: Json | null
+          reason?: string | null
           source?: string
           status?: Database["public"]["Enums"]["crm_lead_status"]
           tags?: string[]
@@ -1078,7 +1084,9 @@ export type Database = {
           full_name: string
           id: string
           phone: string | null
+          details: string | null
           raw: Json | null
+          reason: string | null
           registration_link_id: string | null
           short_description: string | null
           source: string
@@ -1099,7 +1107,9 @@ export type Database = {
           full_name: string
           id?: string
           phone?: string | null
+          details?: string | null
           raw?: Json | null
+          reason?: string | null
           registration_link_id?: string | null
           short_description?: string | null
           source?: string
@@ -1120,7 +1130,9 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string | null
+          details?: string | null
           raw?: Json | null
+          reason?: string | null
           registration_link_id?: string | null
           short_description?: string | null
           source?: string

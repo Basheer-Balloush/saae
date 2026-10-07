@@ -225,7 +225,7 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 ز) الأسعار: اذكر السعر كما ترجعه الأداة حرفياً (بالليرة السورية «ل.س»). ممنوع تحويله إلى الدولار أو أي عملة أخرى، وممنوع ذكر رقم سعر لم يأتِ من الأداة.
 
 # حفظ البيانات
-- الفرد: لا تطلب بياناته إلا بعد موافقته كما في البند 8: الاسم الثلاثي، ثم الهاتف أو البريد. لا تطلب عنوان السكن أو غيره. بعد أن يعطيها احفظها بأداة \`submit_individual_lead\` مع ما عرفته من الرحلة (الاختصاص، المجال، هدفه باختصار)، وأخبره أن فريق الجمعية سيتواصل معه، دون تحديد موعد.
+- الفرد: لا تطلب بياناته إلا بعد موافقته كما في البند 8: الاسم الثلاثي، ثم الهاتف أو البريد. لا تطلب عنوان السكن أو غيره. بعد أن يعطيها احفظها بأداة \`submit_individual_lead\` مع ما عرفته من الرحلة (الاختصاص، المجال، هدفه باختصار، وسبب اهتمامه في \`reason\` وتفاصيل طلبه في \`details\`)، وأخبره أن فريق الجمعية سيتواصل معه، دون تحديد موعد.
 - الشركة: ابدأ بفهم ما تحتاجه (تدريب موظفين، شراكة، استشارة AI) وأجب عن أسئلتها. ثم اطلب بالتدريج، سؤالاً في كل رسالة: اسم الشركة، مجال عملها، واسم شخص التواصل مع هاتفه أو بريده. باقي الحقول (الترخيص، المقر، عدد الموظفين، استخدام AI) اسأل عنها فقط إن كانت المحادثة تسمح، ولا تُلحّ. ثم احفظها بأداة \`submit_company_lead\` واقترح خدمات الجمعية الأنسب من المرجع.
 - من هو «شركة»: كل من يتحدث باسم شركة أو جهة أو مؤسسة، أو يعرض خدمة أو شراكة أو رعاية على الجمعية (مثل «حابين نكون وسيلة دفع إلكتروني عندكم»، «أنا منسق علاقات بشركة…»، «عنا مركز تدريب ومنحب نتعاون»). هذا يُحفظ بـ \`submit_company_lead\`، لا \`submit_individual_lead\`: اسم الشركة، اسم الشخص وصفته، وهاتفه أو بريده، وما يعرضه. لا تحِله إلى البريد قبل أن تعرض عليه حفظ بياناته؛ البريد هو الخيار الأخير.
 - اعرف من يحادثك من كلامه طوال المحادثة، لا عند الحفظ فقط: متعلّم يسأل لنفسه، أو مدرّب، أو ممثل شركة أو جهة. إذا وصلك قسم «من يحادثك» فاعتمد عليه ما لم يناقضه كلام الزائر. وإذا لم يكن واضحاً وأنت على وشك أن تطلب بياناته، فاسأله مرة واحدة: «حضرتك عم تسأل لنفسك ولا باسم شركة أو جهة؟» مع [[choices: لنفسي | باسم شركة أو جهة]] (بالإنكليزية: "Are you asking for yourself or on behalf of a company or organisation?" مع [[choices: For myself | For a company or organisation]]).
@@ -904,6 +904,20 @@ export const Route = createFileRoute("/api/chat")({
               specialty: z.string().nullable().optional(),
               work_field: z.string().nullable().optional(),
               short_description: z.string().nullable().optional(),
+              reason: z
+                .string()
+                .nullable()
+                .optional()
+                .describe(
+                  "One short Arabic line for the team on why this is a lead: who they are and what they want (e.g. 'صيدلاني يريد دورات مجانية أونلاين في المعلوماتية الحيوية').",
+                ),
+              details: z
+                .string()
+                .nullable()
+                .optional()
+                .describe(
+                  "3-6 Arabic sentences for the team, from this conversation only: who they are (specialty, work, level), exactly what they asked for or offered, what you suggested or agreed, and the right next step. No phone or email.",
+                ),
             }),
             execute: async (input) => {
               const phone = isPlausiblePhone(input.phone) ? input.phone : null;
@@ -926,6 +940,8 @@ export const Route = createFileRoute("/api/chat")({
                     contact_name: input.full_name,
                     contact_email: input.email ?? null,
                     contact_phone: phone,
+                    reason: input.reason ?? null,
+                    details: input.details ?? null,
                     raw: { ...input, saved_as_company_from: "submit_individual_lead" },
                     conversation_id: conversationId,
                   })
@@ -954,6 +970,8 @@ export const Route = createFileRoute("/api/chat")({
                   specialty: input.specialty ?? null,
                   work_field: input.work_field ?? null,
                   short_description: input.short_description ?? null,
+                  reason: input.reason ?? null,
+                  details: input.details ?? null,
                   raw: input,
                   conversation_id: conversationId,
                 })
@@ -986,6 +1004,20 @@ export const Route = createFileRoute("/api/chat")({
               contact_name: z.string().nullable().optional(),
               contact_email: z.string().email().nullable().optional(),
               contact_phone: z.string().nullable().optional(),
+              reason: z
+                .string()
+                .nullable()
+                .optional()
+                .describe(
+                  "One short Arabic line for the team on why this is a lead: who they are and what they want (e.g. 'صيدلاني يريد دورات مجانية أونلاين في المعلوماتية الحيوية').",
+                ),
+              details: z
+                .string()
+                .nullable()
+                .optional()
+                .describe(
+                  "3-6 Arabic sentences for the team, from this conversation only: who they are (specialty, work, level), exactly what they asked for or offered, what you suggested or agreed, and the right next step. No phone or email.",
+                ),
             }),
             execute: async (input) => {
               const { error, data } = await supabaseAdmin
@@ -1004,6 +1036,8 @@ export const Route = createFileRoute("/api/chat")({
                   contact_name: input.contact_name ?? null,
                   contact_email: input.contact_email ?? null,
                   contact_phone: input.contact_phone ?? null,
+                  reason: input.reason ?? null,
+                  details: input.details ?? null,
                   raw: input,
                   conversation_id: conversationId,
                 })
