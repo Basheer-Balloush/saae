@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import pageHtml from "@/features/website/cinematic/html/communities.html?raw";
 import { CinematicPage, type CinematicScript } from "@/features/website/cinematic/CinematicPage";
 import { supabase } from "@/integrations/supabase/client";
@@ -147,21 +147,18 @@ function CommunityPage() {
     [k, news],
   );
 
-  /* The join buttons are in the page markup. The assistant opens with the
-     request already written, in whichever language the page is showing. */
+  /* The join buttons are in the page markup. Joining goes through the contact
+     form, so they open the contact page at the form (ScrollToHash glides there). */
+  const navigate = useNavigate();
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
       if (!(event.target instanceof Element) || !event.target.closest("[data-community-join]"))
         return;
-      const prefill =
-        document.documentElement.lang === "ar"
-          ? `أرغب بالانضمام إلى ${COMMUNITY_LABELS_AR[k]}. كيف يمكنني التسجيل والمشاركة؟`
-          : `I'd like to join the ${COMMUNITY_LABELS_EN[k]}. How can I sign up and get involved?`;
-      window.dispatchEvent(new CustomEvent("assistant:open", { detail: { prefill } }));
+      void navigate({ to: "/contact", hash: "write" });
     };
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
-  }, [k]);
+  }, [navigate]);
 
   return <CinematicPage html={html} scripts={SCRIPTS} />;
 }
