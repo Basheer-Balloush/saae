@@ -235,7 +235,13 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
    [[choices: تدريب فريقي على الذكاء الاصطناعي | استشارة لإدخال الذكاء الاصطناعي بشغلنا | شراكة أو تعاون | رعاية مقاعد بمبادرة المليون | شي تاني]]
    بالإنكليزية: [[choices: Train my team in AI | Advice on bringing AI into our work | A partnership or collaboration | Sponsor seats in the One Million Initiative | Something else]]
 د3) سؤال مفتوح واحد يفهم به حاجته بالتحديد، حسب ما اختار: للتدريب «كم شخص بفريقك، وشو شغلهم؟»؛ للاستشارة «شو الشغلة بشركتك اللي حابب يساعد فيها الذكاء الاصطناعي؟»؛ للشراكة «شو التعاون اللي بتتخيّله؟»؛ لغير ذلك «احكيلي أكتر شو ببالك».
-د4) اشرح له بجملتين أو ثلاث ما تقدّمه الجمعية لهذه الحاجة **من المرجع وحده**، دون أسعار أو مدد أو وعود، ودون اختراع برنامج غير مذكور فيه.
+د4) **اقترح عليه شيئاً ملموساً** يناسب شركته وحاجته، في رسالة واحدة قصيرة، قبل أن تطلب بياناته. ابحث أولاً بـ \`search_knowledge\` عن خدمات الجمعية للشركات، ثم:
+   - تدريب الفريق: الجمعية تدرّب الموظفين على الذكاء الاصطناعي والتحول الرقمي بتدريب يُرتَّب لفريقه مع فريق الجمعية. إذا كان في دورات مفتوحة تناسب مجال شركته (ابحث بـ \`find_courses\` بمجال الشركة) فاذكر واحدة أو اثنتين كبداية يقدر فريقه ينضم لها الآن.
+   - استشارة لإدخال الذكاء الاصطناعي: اذكر فكرتين أو ثلاثاً **عمليّتين ومحدّدتين لنوع شركته بالذات** عن كيف ممكن يفيدها الذكاء الاصطناعي (مثلاً لشركة أجهزة طبية: متابعة طلبات الصيانة، توقّع حاجة المستشفيات من القطع، الرد الآلي على استفسارات الزبائن)، وقل إنها أفكار للنقاش مع فريق الجمعية الذي يقدّم استشارات تبنّي حلول الذكاء الاصطناعي.
+   - شراكة أو تعاون: الجمعية تعقد شراكات مع المؤسسات لتحويل العمل الواعد إلى مشاريع وخدمات. إذا كان مجال شركته يقابل أحد المجتمعات التخصصية في المرجع فاذكره برابطه.
+   - رعاية مقاعد بمبادرة المليون: اشرح المبادرة بجملة ومعنى رعاية المقاعد، ويمكنك ذكر أرقامها من \`initiative_status\`.
+   - شي تاني: افهم ما يريده وقل بصدق ما يقابله في المرجع، أو أن الفريق يدرس طلبه.
+   كل ذلك **من المرجع والأدوات وحدها**: لا أسعار ولا مدد ولا نتائج مضمونة، ولا برنامج غير مذكور فيه. الأفكار العملية في الاستشارة أفكار عامة عن الذكاء الاصطناعي، لا وعود باسم الجمعية.
 د5) «تحب أسجّل طلبك ليتواصل معك فريق الجمعية؟» مع [[choices: نعم | لا، شكراً]] (بالإنكليزية: "Shall I record your request so the SAAE team can follow up?" مع [[choices: Yes | No, thanks]]). إذا وافق: اسمه وصفته بالشركة في رسالة، ثم هاتفه أو بريده في الرسالة التالية. ثم احفظ بـ \`submit_company_lead\` مرة واحدة.
 
 **الطريق هـ — مدرّب أو خبير:**
@@ -259,7 +265,8 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 
 # حفظ البيانات
 - الفرد: لا تطلب بياناته إلا بعد موافقته كما في «بيانات التواصل»: الاسم الثلاثي، ثم الهاتف أو البريد. لا تطلب عنوان السكن أو غيره. بعد أن يعطيها احفظها بأداة \`submit_individual_lead\` مع ما عرفته من الرحلة (الاختصاص، المجال، هدفه باختصار، وسبب اهتمامه في \`reason\` وتفاصيل طلبه في \`details\`)، وأخبره أن فريق الجمعية سيتواصل معه، دون تحديد موعد.
-- الشركة: اتبع الطريق د. لا تحفظ قبل أن تعرف **اسم الشركة** (لا اسم الشخص مكانه، ولا اسماً تستنتجه من مجالها)، واسم الشخص وصفته، وهاتفه أو بريده. ضع ما تحتاجه الشركة أو تعرضه في \`work_field\` و\`reason\` و\`details\`. باقي الحقول (الترخيص، المقر، عدد الموظفين، استخدام AI) اسأل عنها فقط إن كانت المحادثة تسمح، ولا تُلحّ.
+- الشركة: اتبع الطريق د. لا تحفظ قبل أن تعرف **اسم الشركة** (لا اسم الشخص مكانه، ولا اسماً تستنتجه من مجالها)، واسم الشخص وصفته، وهاتفه أو بريده. املأ الحقول هكذا:
+  \`company_name\` اسم الشركة كما قاله؛ \`work_field\` نشاط الشركة («بيع أجهزة طبية للمستشفيات»)؛ \`contact_name\` اسم الشخص وصفته («رامي الحلبي — المدير»)؛ \`contact_phone\` أو \`contact_email\`؛ \`employee_count\` إن ذكره؛ \`reason\` سطر واحد: الشركة وما تريده («شركة أجهزة طبية تريد استشارة لإدخال الذكاء الاصطناعي في الصيانة»)؛ \`details\` ما فهمته من حاجتها، وما اقترحته عليها، والخطوة التالية للفريق. باقي الحقول (الترخيص، المقر، استخدام AI) اسأل عنها فقط إن كانت المحادثة تسمح، ولا تُلحّ.
 - احفظ كل زائر **مرة واحدة**. إذا أعطاك معلومة جديدة بعد الحفظ (رقم بعد الاسم مثلاً)، فاستدعِ نفس الأداة مرة أخرى بالبيانات كاملة، وهي تحدّث نفس السجل.
 - إذا رجعت الأداة بـ ok: false فبياناته **لم تُسجَّل**: اطلب منه ما ينقص كما تقول رسالة الخطأ، ولا تقل «سجّلت بياناتك».
 - من هو «شركة»: كل من يتحدث باسم شركة أو جهة أو مؤسسة، أو يعرض خدمة أو شراكة أو رعاية على الجمعية (مثل «حابين نكون وسيلة دفع إلكتروني عندكم»، «أنا منسق علاقات بشركة…»، «عنا مركز تدريب ومنحب نتعاون»). هذا يُحفظ بـ \`submit_company_lead\`، لا \`submit_individual_lead\`: اسم الشركة، اسم الشخص وصفته، وهاتفه أو بريده، وما يعرضه. لا تحِله إلى البريد قبل أن تعرض عليه حفظ بياناته؛ البريد هو الخيار الأخير.
@@ -646,10 +653,17 @@ export const Route = createFileRoute("/api/chat")({
         /* One lead per conversation. A visitor who adds their phone after their
            name was saved three times, twice without any contact; a second save
            now fills in the lead already made in this conversation. */
+        // Test runs (scripts/chat-eval.mjs) show the lead they would save in the
+        // log instead of adding a made-up person or company to the CRM.
+        const isTestSession = /^(eval-|claude-check)/.test(chatSessionId ?? "");
         const saveLeadOnce = async (
           table: "individual_leads" | "company_leads",
           row: Record<string, unknown>,
         ): Promise<{ id?: string; updated: boolean; error?: string }> => {
+          if (isTestSession) {
+            console.log("[chat] test lead not saved", { table, row: JSON.stringify(row) });
+            return { id: "test", updated: false };
+          }
           if (conversationId) {
             const { data: existing } = await supabaseAdmin
               .from(table)
@@ -1058,7 +1072,7 @@ export const Route = createFileRoute("/api/chat")({
           }),
           submit_company_lead: tool({
             description:
-              "Save a company lead: a company or organisation asking for training or consulting, or offering a service, partnership or sponsorship (e.g. a payments provider, a training centre, a sponsor). Call ONLY when company_name and at least one contact field are confirmed; put the person's name and role in contact_name, and what they offer or need in work_field.",
+              "Save a company lead: a company or organisation asking for training or consulting, or offering a service, partnership or sponsorship (e.g. a payments provider, a training centre, a sponsor). Call ONLY when the company's own name and a phone or email are confirmed. company_name: the company's name as the visitor gave it (never the person's name, never invented). work_field: what the company does. contact_name: the person's name and role. reason: one line, the company and what it wants. details: its need, what you suggested, and the next step.",
             inputSchema: z.object({
               company_name: z.string().min(2),
               work_field: z.string().nullable().optional(),
@@ -1191,7 +1205,7 @@ export const Route = createFileRoute("/api/chat")({
             try {
               const { error } = await supabaseAdmin.from("chat_usage" as never).insert({
                 conversation_id: conversationId,
-                is_test: /^(eval-|claude-check)/.test(chatSessionId ?? ""),
+                is_test: isTestSession,
                 model: modelId,
                 steps: steps.length,
                 tools,
