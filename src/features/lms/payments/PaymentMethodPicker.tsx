@@ -2,12 +2,14 @@ import { Banknote, ChevronLeft, ChevronRight } from "lucide-react";
 import { PAYMENT_METHODS, type PaymentMethodId } from "./config";
 
 const HINTS: Record<PaymentMethodId, { ar: string; en: string }> = {
-  cash: { ar: "الدفع نقداً لدى الجمعية", en: "Pay in cash at the association" },
+  cash: {
+    ar: "عبّئ بياناتك وادفع نقداً لدى الجمعية",
+    en: "Fill in your details and pay in cash at the association",
+  },
   sham_cash: {
     ar: "حوّل المبلغ عبر تطبيق شام كاش وأرفق الإيصال",
     en: "Transfer with the Sham Cash app and attach the receipt",
   },
-  paymera: { ar: "الدفع الإلكتروني عبر Paymera", en: "Pay online with Paymera" },
 };
 
 /* The first step of a paid enrollment: how the student will pay. */
@@ -31,7 +33,9 @@ export function PaymentMethodPicker({
           className="flex w-full items-center gap-3 rounded-xl border border-input bg-background/40 p-3 text-start transition-colors hover:border-primary hover:bg-muted disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:border-input disabled:hover:bg-background/40"
         >
           {m.logo ? (
-            <img src={m.logo} alt="" className="h-11 w-11 shrink-0 rounded-lg object-contain" />
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white/[0.06]">
+              <img src={m.logo} alt="" className="h-8 w-8 object-contain" />
+            </span>
           ) : (
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-emerald-600/15 text-emerald-500">
               <Banknote className="h-6 w-6" />

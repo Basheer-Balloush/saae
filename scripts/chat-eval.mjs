@@ -17,11 +17,19 @@ const CASES = [
   // Courses: by exact name, with typos, and details the course page shows.
   {
     q: "دورة الذكاء الاصطناعي التوليدي 09: شو موعدها ومكانها وسعرها وهل التسجيل مفتوح؟",
-    must: [/10-04|4 تشرين|٤|تشرين الأول|أكتوبر/, /دمشق|مقر الجمعية/, /500/],
-    mustNot: [/ما قدرت أحدد/],
+    // Started on 2026-10-04: the bot must say so rather than offer registration.
+    must: [/بلّشت|بدأت|ما عم تستقبل|غير متاحة|مو متاحة/],
+    mustNot: [/ما قدرت أحدد|التسجيل (مفتوح|متاح)/],
   },
-  { q: "ماهي دورة الذكا االاصطناعي التوليدي؟", must: [/التوليدي/], mustNot: [/ما قدرت أحدد|غير موجودة/] },
-  { q: "مين المدرب بدورة الذكاء الاصطناعي التوليدي 09؟ وشو الأيام؟", must: [/الأحد|الثلاثاء|الخميس/] },
+  {
+    q: "ماهي دورة الذكا االاصطناعي التوليدي؟",
+    must: [/التوليدي/],
+    mustNot: [/ما قدرت أحدد|غير موجودة/],
+  },
+  {
+    q: "مين المدرب بدورة الذكاء الاصطناعي التوليدي 09؟ وشو الأيام؟",
+    must: [/الأحد|الثلاثاء|الخميس/],
+  },
   {
     q: "احكيلي عن دورة المنهجية الحديثة في هندسة البرمجيات وهل فيني سجّل فيها؟",
     must: [/انتهت|منتهية|خلصت|(غير|مو|مش) متاحة|ما في دورة/],
@@ -33,17 +41,23 @@ const CASES = [
   {
     turns: ["اقترح علي دورات"],
     q: "الذكاء الاصطناعي وأدواته",
-    must: [/التوليدي/],
-    mustNot: [/تسويق 360/],
+    must: [/courses\//],
+    mustNot: [/تسويق 360|التوليدي 09/],
   },
   { q: "اقترح علي دورة بالإعلام والكتابة", must: [/التحرير الإعلامي/] },
   // Links are short clickable labels, not bare long URLs.
-  { q: "عطيني رابط دورة الذكاء الاصطناعي التوليدي 09", must: [/\]\(https:\/\/www\.aisyria\.org\//] },
+  {
+    q: "عطيني رابط دورة الذكاء الاصطناعي التوليدي 09",
+    must: [/\]\(https:\/\/www\.aisyria\.org\//],
+  },
   // "Available" means joinable today: not started, deadline not passed, not ended.
   {
     q: "شو الدورات المتاحة حالياً؟",
-    must: [/التوليدي 09/],
-    mustNot: [/تسويق 360|تطوير المشروع البحثي|بناء الهوية التدريسية|المنهجية الحديثة/],
+    must: [/courses\//],
+    // التوليدي 09 and إدارة الفرق started on 2026-10-04.
+    mustNot: [
+      /تسويق 360|تطوير المشروع البحثي|بناء الهوية التدريسية|المنهجية الحديثة|التوليدي 09|إدارة الفرق والمشاريع/,
+    ],
   },
   {
     q: "بدي سجل بدورة تسويق 360",
@@ -63,7 +77,26 @@ const CASES = [
     must: [/MultiOmics|المعلوماتية الحيوية/, /internships\//],
     mustNot: [/غير مدرجة|غير موجودة|غير متوفرة/],
   },
-  { q: "شو فرص التدريب العملي المتاحة حالياً؟", must: [/internships/] },
+  {
+    q: "شو فرص التدريب العملي المتاحة حالياً؟",
+    must: [/MultiOmics|المعلوماتية الحيوية/, /إدارة وتشغيل الأعمال/, /شركات ناشئة/],
+  },
+  // "فرص التدريب" means internships only, all of the open ones.
+  {
+    q: "شو فرص التدريب حاليا",
+    must: [/MultiOmics|المعلوماتية الحيوية/, /إدارة وتشغيل الأعمال/, /شركات ناشئة/],
+    mustNot: [/courses\//, /المعدات الطبية/],
+  },
+  // "Training programme" covers courses and internships alike.
+  {
+    q: "كم برنامج تدريبي متاح حاليا للتقديم ؟",
+    must: [/MultiOmics|المعلوماتية الحيوية|إدارة وتشغيل|شركات ناشئة/, /courses\/|دورة|دورات/],
+  },
+  // No invented dialect words.
+  {
+    q: "بالنسبة الى مهندس ذكاء صنعي ai مثلي ...ما هي برامج التدريب التي قد تفيدني",
+    mustNot: [/بهلكونه|عري عيني|فيكفي/],
+  },
   // Partners: a closed list.
   { q: "هل منظمة SYNC شريكة للجمعية؟", must: [/غير مذكورة|ليست|لا تظهر|ليس/], mustNot: [/^نعم/] },
   { q: "مين شركاء الجمعية؟", must: [/partners/], mustNot: [/SYNC|اليونيسف|UNICEF|Sarda Tech/] },
@@ -86,11 +119,60 @@ const CASES = [
   },
   { q: "أنا طالبة طب، شو بتنصحني؟", mustNot: [/فيكفي/] },
   { q: "شكراً كتير على المساعدة", must: [/ولو|تسلم|العفو|الله يسلمك|واجب|على راسي|بالخدمة/] },
-  { q: "بدي تفاصيل دورة الذكاء الاصطناعي التوليدي 09 لو سمحت", must: [/على عيني|على راسي|من عيوني|تكرم|حاضر|تؤمر|أكيد/] },
+  {
+    q: "بدي تفاصيل دورة الذكاء الاصطناعي التوليدي 09 لو سمحت",
+    must: [/على عيني|على راسي|من عيوني|تكرم|حاضر|تؤمر|أكيد/],
+  },
+  // A company offering a service is a company lead: collect its details, don't send it to the email first.
+  {
+    q: "أنا منسق علاقات بشركة كاش موبايل وحابين نكون وسيلة دفع إلكتروني عندكم",
+    must: [/اسم|الاسم|بياناتك|رقم|تواصل/],
+    mustNot: [/info@aisyria\.org/],
+  },
+  // The 2026-10-06 conversation: the visitor turns out to speak for a payments company.
+  {
+    turns: ["منصة فيها دفع الكتروني لشي", "مو مفكرين يحطو كاش موبايل MTN"],
+    q: "لا بس وصل خبر انو حابين نكون وسيلة دفع الكتروني عندكم",
+    must: [/اسم|الشركة|الجهة|بيانات|صفت/],
+    mustNot: [/info@aisyria\.org/],
+  },
+  // Student and graduate are separate, and each is asked about their studies or work.
+  {
+    turns: ["رشّح لي مساراً مناسباً"],
+    q: "خريج",
+    must: [/اختصاص|درست/],
+    mustNot: [/courses\//],
+  },
+  {
+    turns: ["رشّح لي مساراً مناسباً"],
+    q: "طالب",
+    must: [/تدرس|سنة/],
+    mustNot: [/courses\//],
+  },
+  // The 2026-10-06 company owner went through the learner questions and got a course.
+  {
+    turns: ["رشّح لي مساراً مناسباً"],
+    q: "صاحب شركة أو جهة",
+    must: [/اسم|شركتك/],
+    mustNot: [/courses\/|مستواك|وين وصلت مع الذكاء|ساعة/],
+  },
+  {
+    turns: [
+      "رشّح لي مساراً مناسباً",
+      "صاحب شركة أو جهة",
+      "شركة النور للتجهيزات الطبية، منبيع أجهزة للمستشفيات",
+    ],
+    q: "استشارة لإدخال الذكاء الاصطناعي بشغلنا",
+    must: [/\?|؟/],
+    mustNot: [/courses\/|مستواك|ساعة/],
+  },
   // English.
   { q: "Do you have any internships open right now?", must: [/internships/] },
   { q: "Is UNICEF a partner of SAAE?", must: [/not/i], mustNot: [/[\u0600-\u06FF]{4,}/] },
-  { q: "Which courses are open for registration now?", mustNot: [/[\u0600-\u06FF]{6,}.*[\u0600-\u06FF]{6,}.*[\u0600-\u06FF]{6,}/, /Marketing 360/] },
+  {
+    q: "Which courses are open for registration now?",
+    mustNot: [/[\u0600-\u06FF]{6,}.*[\u0600-\u06FF]{6,}.*[\u0600-\u06FF]{6,}/, /Marketing 360/],
+  },
 ];
 
 async function ask(question, sessionId = `eval-${Math.random().toString(36).slice(2, 10)}`) {
@@ -138,7 +220,10 @@ for (const c of CASES) {
   if (failures.length === 0) passed += 1;
   console.log(`${failures.length ? "✗" : "✓"} ${c.q}`);
   await new Promise((r) => setTimeout(r, PAUSE_MS));
-  if (failures.length) console.log(`    ${failures.join("; ")}\n    → ${text.replace(/\s+/g, " ").slice(0, 300)}`);
+  if (failures.length)
+    console.log(`    ${failures.join("; ")}\n    → ${text.replace(/\s+/g, " ").slice(0, 300)}`);
 }
-console.log(`\n${passed}/${CASES.length} passed · ${contact} answers sent the visitor to email/phone`);
+console.log(
+  `\n${passed}/${CASES.length} passed · ${contact} answers sent the visitor to email/phone`,
+);
 process.exitCode = passed === CASES.length ? 0 : 1;

@@ -311,6 +311,18 @@ export async function setAmountDue(enrollmentId: string, amount: number, note: s
   ) as { amount_due: number; certificate: CertificateResult };
 }
 
+/** Takes a learner out of a course. Refused while they have payments on record
+    ("enrollment_has_payments") or the course certificate
+    ("enrollment_has_certificate"). */
+export async function cancelEnrollment(enrollmentId: string, reason: string) {
+  return unwrap(
+    await db.rpc("lms_admin_cancel_enrollment", {
+      _enrollment_id: enrollmentId,
+      _reason: reason,
+    }),
+  ) as { ok: true; waivers_cancelled: number; coupon_uses_released: number };
+}
+
 /** The payment rule is admin-only (a database guard refuses anyone else). */
 export async function setCertificateRequiresPayment(courseId: string, value: boolean) {
   unwrap(

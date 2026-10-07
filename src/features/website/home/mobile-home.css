@@ -330,6 +330,7 @@
 
 /* Communities: the card that picks which pictogram the field draws. */
 .mobile-home .mh-tree-card {
+  position: relative;
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 4px 12px;
@@ -356,6 +357,13 @@
   font-weight: 800;
   text-decoration: none;
 }
+/* The whole card opens the community, not only its name; the arrows sit above. */
+.mobile-home .mh-tree-card-name::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
 .mobile-home .mh-tree-card-text p {
   margin: 2px 0 0;
   color: var(--mh-ink-muted);
@@ -363,6 +371,8 @@
   line-height: 1.5;
 }
 .mobile-home .mh-tree-card-nav {
+  position: relative;
+  z-index: 1;
   grid-column: 1 / -1;
   display: flex;
   align-items: center;

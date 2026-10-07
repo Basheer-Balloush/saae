@@ -2,6 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { generateText } from "ai";
+import { createChatModel } from "@/features/chat/lib/ai-gateway";
+import { leadSummaryPrompt, parseLeadSummary } from "@/features/crm/lib/lead-summary";
 
 async function assertAdmin(sb: SupabaseClient, userId: string) {
   const { data, error } = await sb
@@ -486,9 +489,9 @@ const LeadFilters = z.object({
 type LeadFiltersT = z.infer<typeof LeadFilters>;
 
 const INDIVIDUAL_COLS =
-  "id, full_name, email, phone, specialty, work_field, address, short_description, source, status, contact_id, conversation_id, created_at, updated_at";
+  "id, full_name, email, phone, specialty, work_field, address, short_description, reason, details, source, registration_link:crm_registration_links(label), status, contact_id, conversation_id, created_at, updated_at";
 const COMPANY_COLS =
-  "id, company_name, contact_name, contact_email, contact_phone, work_field, country, office_address, source, status, contact_id, conversation_id, created_at, updated_at";
+  "id, company_name, contact_name, contact_email, contact_phone, work_field, country, office_address, reason, details, source, status, contact_id, conversation_id, created_at, updated_at";
 
 function escLike(s: string) {
   return s.replace(/[%_,()]/g, (m) => `\\${m}`);
@@ -505,7 +508,7 @@ function applyIndividualFilters<
   if (f.search) {
     const s = escLike(f.search);
     q = q.or(
-      `full_name.ilike.%${s}%,email.ilike.%${s}%,phone.ilike.%${s}%,specialty.ilike.%${s}%,work_field.ilike.%${s}%`,
+      `full_name.ilike.%${s}%,email.ilike.%${s}%,phone.ilike.%${s}%,specialty.ilike.%${s}%,work_field.ilike.%${s}%,reason.ilike.%${s}%`,
     );
   }
   if (f.status) q = q.eq("status", f.status);
@@ -526,7 +529,7 @@ function applyCompanyFilters<
   if (f.search) {
     const s = escLike(f.search);
     q = q.or(
-      `company_name.ilike.%${s}%,contact_name.ilike.%${s}%,contact_email.ilike.%${s}%,contact_phone.ilike.%${s}%,work_field.ilike.%${s}%`,
+      `company_name.ilike.%${s}%,contact_name.ilike.%${s}%,contact_email.ilike.%${s}%,contact_phone.ilike.%${s}%,work_field.ilike.%${s}%,reason.ilike.%${s}%`,
     );
   }
   if (f.status) q = q.eq("status", f.status);
@@ -623,9 +626,10 @@ async function loadLeadDetail(
   variant: "individual" | "company",
   leadId: string,
 ) {
-  const table = variant === "individual" ? "individual_leads" : "company_leads";
-  const cols = variant === "individual" ? INDIVIDUAL_COLS : COMPANY_COLS;
-  const { data: lead, error } = await sb.from(table).select(cols).eq("id", leadId).maybeSingle();
+  const { data: lead, error } =
+    variant === "individual"
+      ? await sb.from("individual_leads").select(INDIVIDUAL_COLS).eq("id", leadId).maybeSingle()
+      : await sb.from("company_leads").select(COMPANY_COLS).eq("id", leadId).maybeSingle();
   if (error) throw new Error(error.message);
   if (!lead) throw new Error("lead_not_found");
   const leadRow = lead as unknown as {
@@ -753,6 +757,8 @@ const IndividualCreate = z.object({
   work_field: z.string().trim().max(200).optional().or(z.literal("")),
   address: z.string().trim().max(500).optional().or(z.literal("")),
   short_description: z.string().trim().max(2000).optional().or(z.literal("")),
+  reason: z.string().trim().max(300).optional().or(z.literal("")),
+  details: z.string().trim().max(4000).optional().or(z.literal("")),
   source: z.string().trim().max(50).optional(),
   status: LeadStatus.optional(),
   override_conflict: z.boolean().optional(),
@@ -767,6 +773,8 @@ const CompanyCreate = z.object({
   work_field: z.string().trim().max(200).optional().or(z.literal("")),
   country: z.string().trim().max(120).optional().or(z.literal("")),
   office_address: z.string().trim().max(500).optional().or(z.literal("")),
+  reason: z.string().trim().max(300).optional().or(z.literal("")),
+  details: z.string().trim().max(4000).optional().or(z.literal("")),
   source: z.string().trim().max(50).optional(),
   status: LeadStatus.optional(),
   override_conflict: z.boolean().optional(),
@@ -832,6 +840,63 @@ export const updateCompanyLead = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     return result;
+  });
+
+/* Writes why a chatbot lead is a lead (reason + details) from its
+   conversation, for leads saved before Abu Al-Joud filled them itself.
+   Keeps what is already there unless asked to rewrite it. */
+export const writeLeadSummary = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { leadType: "individual" | "company"; leadId: string; rewrite?: boolean }) =>
+    z
+      .object({ leadType: LeadType, leadId: z.string().uuid(), rewrite: z.boolean().optional() })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const table = data.leadType === "individual" ? "individual_leads" : "company_leads";
+    const { data: lead, error } = await context.supabase
+      .from(table)
+      .select("conversation_id, reason, details")
+      .eq("id", data.leadId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    const row = lead as {
+      conversation_id: string | null;
+      reason: string | null;
+      details: string | null;
+    } | null;
+    if (!row) throw new Error("lead_not_found");
+    if (!data.rewrite && row.reason && row.details)
+      return { reason: row.reason, details: row.details };
+    if (!row.conversation_id) throw new Error("no_conversation");
+
+    const { data: lines, error: linesError } = await context.supabase
+      .from("chat_messages")
+      .select("role, content")
+      .eq("conversation_id", row.conversation_id)
+      .order("created_at", { ascending: true });
+    if (linesError) throw new Error(linesError.message);
+    if (!lines?.length) throw new Error("no_conversation");
+
+    const { text } = await generateText({
+      model: createChatModel(),
+      prompt: leadSummaryPrompt(data.leadType, lines),
+      temperature: 0.2,
+    });
+    const summary = parseLeadSummary(text);
+    if (!summary) throw new Error("summary_failed");
+
+    const fn =
+      data.leadType === "individual"
+        ? "crm_update_individual_lead_tx"
+        : "crm_update_company_lead_tx";
+    const { error: saveError } = await context.supabase.rpc(fn, {
+      _lead_id: data.leadId,
+      payload: summary as never,
+    });
+    if (saveError) throw new Error(saveError.message);
+    return summary;
   });
 
 export const setLeadStatus = createServerFn({ method: "POST" })

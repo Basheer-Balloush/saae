@@ -1,0 +1,79 @@
+/* The enrollment and payment popup sits on the LMS page's own background:
+   the same deep petrol with its faint dotted grid (lms.css .ambient), a soft
+   cyan edge in place of the white one, and the close button in the corner
+   the text starts from the other side of. */
+.lms-pay-dialog.lms-pay-dialog[role="dialog"] {
+  border: 1px solid rgba(184, 232, 240, 0.16);
+  border-radius: 22px;
+  background-color: #061820;
+  background-image:
+    radial-gradient(circle, rgba(114, 214, 223, 0.32) 1px, transparent 1.5px),
+    linear-gradient(rgba(114, 214, 223, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(114, 214, 223, 0.06) 1px, transparent 1px);
+  background-size:
+    192px 192px,
+    96px 96px,
+    96px 96px;
+  background-position: 48px 48px;
+  background-attachment: local;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  /* Radix focuses the panel itself between steps; no white ring around it. */
+  outline: none;
+}
+
+/* Each :is(#…) counts as an id: two lift the rule above the LMS skin's
+   white-pill button selector, which carries one id and many classes. */
+.lms-pay-dialog:is(#lms-pay-dialog, [role="dialog"]):is(#lms-pay-dialog, [role="dialog"])
+  > button.absolute {
+  left: auto;
+  right: auto;
+  inset-inline-end: 1rem;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid rgba(184, 232, 240, 0.16) !important;
+  border-radius: 999px;
+  /* The LMS skin paints every dialog button as a white pill. */
+  background: rgba(184, 232, 240, 0.08) !important;
+  box-shadow: none !important;
+  color: #b8e8f0 !important;
+  opacity: 1;
+}
+
+.lms-pay-dialog:is(#lms-pay-dialog, [role="dialog"]):is(#lms-pay-dialog, [role="dialog"])
+  > button.absolute:hover {
+  background: rgba(184, 232, 240, 0.16) !important;
+}
+
+@media (max-width: 639px) {
+  .lms-pay-dialog.lms-pay-dialog[role="dialog"] {
+    width: calc(100% - 24px);
+  }
+}
+
+/* The amount to pay glows softly so it is the first thing the eye finds. */
+.lms-pay-amount {
+  display: inline-block;
+  color: #77e0e8;
+  animation: lms-pay-amount-glow 2.2s ease-in-out infinite;
+}
+
+@keyframes lms-pay-amount-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 4px rgba(119, 224, 232, 0.35);
+  }
+  50% {
+    text-shadow:
+      0 0 10px rgba(119, 224, 232, 0.95),
+      0 0 22px rgba(119, 224, 232, 0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lms-pay-amount {
+    animation: none;
+    text-shadow: 0 0 10px rgba(119, 224, 232, 0.7);
+  }
+}

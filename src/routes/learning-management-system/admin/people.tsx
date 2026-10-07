@@ -22,7 +22,7 @@ import { listLmsStudents } from "@/features/crm/lib/crm.functions";
 import { getEmailsForUsers, grantRoleByEmail } from "@/features/lms/lib/admin-users.functions";
 import { exportRowsToXlsx } from "@/lib/admin-xlsx-export";
 import { AdminInstructorEditDialog } from "@/features/lms/console/AdminInstructorEditDialog";
-import { setPaymentReviewer } from "@/features/lms/payments/lib/payments-api";
+import { listPaymentReviewers, setPaymentReviewer } from "@/features/lms/payments/lib/payments-api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useConsoleCounts } from "@/components/console/useConsoleCounts";
@@ -443,16 +443,25 @@ function RolesTab() {
   const [granting, setGranting] = useState(false);
 
   const load = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("user_roles")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const [{ data, error }, reviewers] = await Promise.all([
+      supabase.from("user_roles").select("*").order("created_at", { ascending: false }),
+      listPaymentReviewers().catch(() => []),
+    ]);
     if (error) {
       toast.error(toUserMessage(error));
       setRoles([]);
       return;
     }
-    const list = (data as RoleRow[]) ?? [];
+    // Payment reviewers keep their main role; each shows as a row of its own.
+    const list = [
+      ...reviewers.map((r) => ({
+        id: `reviewer-${r.user_id}`,
+        user_id: r.user_id,
+        role: "lms_payment_admin",
+        created_at: r.created_at,
+      })),
+      ...((data as RoleRow[]) ?? []),
+    ];
     setRoles(list);
     const uids = Array.from(new Set(list.map((r) => r.user_id)));
     if (!uids.length) return;

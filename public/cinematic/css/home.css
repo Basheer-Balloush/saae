@@ -861,7 +861,7 @@
     .hero-stats dt { color: rgba(224, 242, 243, .76); font-size: .7rem; font-weight: 700; line-height: 1.25; text-transform: uppercase; }
     .hero-stats dd { margin: 4px 0 0; color: var(--saae-turquoise-lift); font-size: clamp(1.25rem, 1.7vw, 1.8rem); font-weight: 900; line-height: 1; }
 
-    /* One card carries the story: it flips through all nine communities while
+    /* One card carries the story: it flips through all eight communities while
        the tree remains completely open and cinematic. */
     .community-flip {
       position: absolute;
@@ -1491,7 +1491,7 @@
        right is what went with it, because all six caption bands live INSIDE
        the stage, and so a phone silently lost:
 
-         the opening statement, all nine communities and their card, the
+         the opening statement, all eight communities and their card, the
          learning platform and its link, the whole counter block (5,000
          trainees, 120 courses, 30 partners, 9 communities), the million-user
          initiative and its button, and the closing map of Syria.

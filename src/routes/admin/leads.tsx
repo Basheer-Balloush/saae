@@ -7,13 +7,17 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  Bot,
   ExternalLink,
   FileText,
+  Link2,
   Loader2,
   Mail,
   MessageSquare,
   Phone,
   Plus,
+  RefreshCw,
+  Sparkles,
   StickyNote,
   UserRound,
   UsersRound,
@@ -33,6 +37,7 @@ import {
   getCompanyLead,
   updateIndividualLead,
   updateCompanyLead,
+  writeLeadSummary,
 } from "@/features/crm/lib/crm.functions";
 import { getConversationMessages } from "@/features/chat/lib/admin-chat.functions";
 import { toUserMessage } from "@/lib/safe-error";
@@ -119,6 +124,37 @@ function useStatusLabel() {
 }
 
 type Row = Record<string, unknown>;
+
+/* Where the lead came from, in words: the chatbot, a registration link (with
+   its name, e.g. the exhibition it was printed for), or the team. */
+function useSourceLabel() {
+  const { t } = useT();
+  return (r: Row) => {
+    const source = String(r.source ?? "");
+    const link = (r.registration_link as { label?: string } | null)?.label;
+    if (source === "assistant_chat")
+      return { icon: Bot, text: t("أبو الجود", "Abu Al-Joud chatbot") };
+    if (source === "registration_link")
+      return {
+        icon: Link2,
+        text: link
+          ? t(`رابط تسجيل: ${link}`, `Registration link: ${link}`)
+          : t("رابط تسجيل", "Registration link"),
+      };
+    if (source === "admin")
+      return { icon: UserRound, text: t("أضافه الفريق", "Added by the team") };
+    return { icon: FileText, text: source || "—" };
+  };
+}
+
+/* The one line on why someone is a lead. Leads saved before `reason` existed
+   fall back to what the chatbot wrote about them then. */
+function leadReason(r: Row, kind: Kind): string {
+  const reason = (r.reason as string | null)?.trim();
+  if (reason) return reason;
+  return ((kind === "people" ? r.short_description : r.work_field) as string | null)?.trim() ?? "";
+}
+
 type Note = {
   id: string;
   contact_id: string;
@@ -136,6 +172,7 @@ function LeadsPage() {
   const kind: Kind = search.kind ?? "people";
   const page = search.page ?? 1;
   const statusLabel = useStatusLabel();
+  const sourceLabel = useSourceLabel();
 
   const listInd = useServerFn(listIndividualLeads);
   const listComp = useServerFn(listCompanyLeads);
@@ -215,7 +252,9 @@ function LeadsPage() {
                 { header: t("المجال", "Work field"), get: (x) => x.work_field },
                 { header: t("العنوان", "Address"), get: (x) => x.address },
                 { header: t("وصف", "Description"), get: (x) => x.short_description },
-                { header: t("المصدر", "Source"), get: (x) => x.source },
+                { header: t("سبب الاهتمام", "Why a lead"), get: (x) => x.reason },
+                { header: t("التفاصيل", "Details"), get: (x) => x.details },
+                { header: t("المصدر", "Source"), get: (x) => sourceLabel(x).text },
                 { header: t("الحالة", "Status"), get: (x) => x.status },
                 { header: t("التاريخ", "Date"), type: "date", get: (x) => x.created_at },
               ]
@@ -227,7 +266,9 @@ function LeadsPage() {
                 { header: t("المجال", "Work field"), get: (x) => x.work_field },
                 { header: t("البلد", "Country"), get: (x) => x.country },
                 { header: t("العنوان", "Office address"), get: (x) => x.office_address },
-                { header: t("المصدر", "Source"), get: (x) => x.source },
+                { header: t("سبب الاهتمام", "Why a lead"), get: (x) => x.reason },
+                { header: t("التفاصيل", "Details"), get: (x) => x.details },
+                { header: t("المصدر", "Source"), get: (x) => sourceLabel(x).text },
                 { header: t("الحالة", "Status"), get: (x) => x.status },
                 { header: t("التاريخ", "Date"), type: "date", get: (x) => x.created_at },
               ],
@@ -325,10 +366,12 @@ function LeadsPage() {
           <EmptyState icon={UsersRound} title={t("لا توجد نتائج", "No leads found")} />
         ) : (
           <div className="overflow-x-auto">
-            <table className="cx-table min-w-[820px]">
+            <table className="cx-table min-w-[1080px]">
               <thead>
                 <tr>
                   <th>{kind === "people" ? t("الشخص", "Person") : t("الشركة", "Company")}</th>
+                  <th>{t("سبب الاهتمام", "Why a lead")}</th>
+                  <th>{t("المصدر", "Source")}</th>
                   <th>{t("التواصل", "Contact")}</th>
                   <th>{t("المرحلة", "Stage")}</th>
                   <th>{t("آخر ملاحظة", "Latest note")}</th>
@@ -339,6 +382,8 @@ function LeadsPage() {
                 {rows.map((r) => {
                   const note = r.contact_id ? notes[String(r.contact_id)] : undefined;
                   const st = (r.status as Status) ?? "new";
+                  const why = leadReason(r, kind);
+                  const src = sourceLabel(r);
                   return (
                     <tr
                       key={String(r.id)}
@@ -363,6 +408,25 @@ function LeadsPage() {
                             )}
                           </div>
                         </div>
+                      </td>
+                      <td className="max-w-[300px]">
+                        {why ? (
+                          <p
+                            className="line-clamp-2 text-[13px] text-[var(--cx-ink-2)]"
+                            dir="auto"
+                            title={why}
+                          >
+                            {why}
+                          </p>
+                        ) : (
+                          <span className="text-[var(--cx-muted)]">—</span>
+                        )}
+                      </td>
+                      <td>
+                        <span className="inline-flex max-w-[180px] items-center gap-1.5 text-[12.5px] text-[var(--cx-ink-2)]">
+                          <src.icon className="h-3.5 w-3.5 shrink-0 text-[var(--cx-teal)]" />
+                          <span className="truncate">{src.text}</span>
+                        </span>
                       </td>
                       <td className="text-[13px]" dir="ltr">
                         <div className="truncate">{email(r) ?? "—"}</div>
@@ -467,6 +531,8 @@ const PEOPLE_FIELDS = [
   ["work_field", "المجال", "Work field", false],
   ["address", "العنوان", "Address", false],
   ["short_description", "وصف قصير", "Short description", false],
+  ["reason", "سبب الاهتمام", "Why a lead", false],
+  ["details", "التفاصيل", "Details", false],
 ] as const;
 const COMPANY_FIELDS = [
   ["contact_name", "اسم جهة التواصل", "Contact name", false],
@@ -475,7 +541,10 @@ const COMPANY_FIELDS = [
   ["work_field", "المجال", "Work field", false],
   ["country", "البلد", "Country", false],
   ["office_address", "عنوان المكتب", "Office address", false],
+  ["reason", "سبب الاهتمام", "Why a lead", false],
+  ["details", "التفاصيل", "Details", false],
 ] as const;
+const LONG_FIELDS = new Set(["short_description", "reason", "details"]);
 
 function LeadDetail({
   kind,
@@ -498,12 +567,15 @@ function LeadDetail({
   const setStatusFn = useServerFn(setLeadStatus);
   const addNoteFn = useServerFn(addLeadNote);
   const fetchMsgs = useServerFn(getConversationMessages);
+  const writeSummaryFn = useServerFn(writeLeadSummary);
+  const sourceLabel = useSourceLabel();
 
   const [data, setData] = useState<Awaited<ReturnType<typeof getIndividualLead>> | null>(null);
   const [form, setForm] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [chat, setChat] = useState<{ id: string; role: string; content: string }[] | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
+  const [writing, setWriting] = useState(false);
   const note = useFormDraft(formDraftKey(user?.id, "crm-lead-note", leadId), "");
 
   const fields = kind === "people" ? PEOPLE_FIELDS : COMPANY_FIELDS;
@@ -523,6 +595,33 @@ function LeadDetail({
   useEffect(() => {
     load();
   }, [load]);
+
+  /* A chatbot lead saved before Abu Al-Joud wrote the reason and details gets
+     them from its conversation the first time it is opened. */
+  const writeSummary = useCallback(
+    async (rewrite: boolean) => {
+      setWriting(true);
+      try {
+        await writeSummaryFn({ data: { leadType: type, leadId, rewrite } });
+        await load();
+        onChanged();
+      } catch (e) {
+        toast.error(toUserMessage(e));
+      } finally {
+        setWriting(false);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [type, leadId, load],
+  );
+  const leadForSummary = data?.lead as Record<string, unknown> | undefined;
+  const missingSummary =
+    !!leadForSummary?.conversation_id && (!leadForSummary.reason || !leadForSummary.details);
+  useEffect(() => {
+    if (missingSummary) writeSummary(false);
+    // Once per opened lead; a failure is not retried in a loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [missingSummary && leadId]);
 
   if (!data) return <Loading />;
   const lead = data.lead as Record<string, unknown>;
@@ -605,7 +704,7 @@ function LeadDetail({
         <SheetTitle>{title}</SheetTitle>
         <p className="text-[13px] text-[var(--cx-muted)]">
           {t("أُضيف في", "Added")} {fmtDate(String(lead.created_at), lang, true)}
-          {lead.source ? ` · ${String(lead.source)}` : ""}
+          {` · ${sourceLabel(lead).text}`}
         </p>
       </SheetHeader>
 
@@ -634,6 +733,55 @@ function LeadDetail({
         )}
       </div>
 
+      <section className="rounded-xl border border-[var(--cx-teal)]/40 bg-[var(--cx-teal-50)] p-4">
+        <div className="mb-2 flex items-center gap-2 text-[14px] font-extrabold">
+          <Sparkles className="h-4 w-4 text-[var(--cx-teal)]" />
+          {t("لماذا هو عميل محتمل", "Why this is a lead")}
+          {!!lead.conversation_id && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="ms-auto h-7 px-2 text-[12px]"
+              disabled={writing}
+              onClick={() => writeSummary(true)}
+              title={t("أعد كتابته من المحادثة", "Rewrite it from the conversation")}
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${writing ? "animate-spin" : ""}`} />
+              {t("من المحادثة", "From the chat")}
+            </Button>
+          )}
+        </div>
+        {writing && !lead.details ? (
+          <p className="flex items-center gap-2 text-[13px] text-[var(--cx-muted)]">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {t("يكتب أبو الجود الوصف من المحادثة…", "Abu Al-Joud is writing it from the chat…")}
+          </p>
+        ) : leadReason(lead, kind) || lead.details ? (
+          <>
+            {leadReason(lead, kind) && (
+              <p className="text-[14.5px] font-bold text-[var(--cx-ink)]" dir="auto">
+                {leadReason(lead, kind)}
+              </p>
+            )}
+            {!!lead.details && (
+              <p
+                className="mt-2 whitespace-pre-wrap text-[13.5px] leading-7 text-[var(--cx-ink-2)]"
+                dir="auto"
+              >
+                {String(lead.details)}
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="text-[13px] text-[var(--cx-muted)]">
+            {t(
+              "لا يوجد وصف بعد. اكتبه في «البيانات» أدناه.",
+              "No description yet. Write it under Details below.",
+            )}
+          </p>
+        )}
+      </section>
+
       <section>
         <div className="mb-2 text-[13px] font-bold text-[var(--cx-ink-2)]">
           {t("المرحلة", "Stage")}
@@ -657,14 +805,11 @@ function LeadDetail({
         <div className="mb-3 text-[14px] font-extrabold">{t("البيانات", "Details")}</div>
         <div className="grid gap-3 sm:grid-cols-2">
           {fields.map(([k, a, e, ltr]) => (
-            <Field
-              key={k}
-              label={t(a, e)}
-              className={k === "short_description" ? "sm:col-span-2" : ""}
-            >
-              {k === "short_description" ? (
+            <Field key={k} label={t(a, e)} className={LONG_FIELDS.has(k) ? "sm:col-span-2" : ""}>
+              {LONG_FIELDS.has(k) ? (
                 <Textarea
-                  rows={3}
+                  rows={k === "details" ? 5 : k === "reason" ? 2 : 3}
+                  dir="auto"
                   value={form[k] ?? ""}
                   onChange={(ev) => setForm({ ...form, [k]: ev.target.value })}
                 />

@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { GraduationCap, LayoutDashboard, LogOut, Presentation } from "lucide-react";
+import { GraduationCap, LayoutDashboard, LogOut, Presentation, Receipt } from "lucide-react";
 import { useLang } from "@/lib/i18n/i18n";
 import { lmsT } from "@/features/lms/lib/i18n";
 import { lmsInternshipsT } from "@/features/lms/lib/internships-i18n";
@@ -20,6 +20,8 @@ import {
 
 type Props = {
   role: LmsRole;
+  /** Shows the link to the payment review page. */
+  paymentReviewer?: boolean;
   isAuthed: boolean;
   isGuest?: boolean;
   onSignOut: () => void;
@@ -28,7 +30,14 @@ type Props = {
 };
 
 /** LMS chrome with homepage ambient ground, language switch, tubelight menu, and official homepage footer. */
-export function LmsSkinShell({ role, isAuthed, isGuest, onSignOut, children }: Props) {
+export function LmsSkinShell({
+  role,
+  paymentReviewer,
+  isAuthed,
+  isGuest,
+  onSignOut,
+  children,
+}: Props) {
   const { lang } = useLang();
   /* "dark" puts the shared components (buttons, fields, reviews) on the
      site's dark palette; lms-db.css tints its tokens to the LMS petrol. */
@@ -43,7 +52,13 @@ export function LmsSkinShell({ role, isAuthed, isGuest, onSignOut, children }: P
           <span className="orb-olive" />
         </div>
         <LanguageSwitch />
-        <TubeNav role={role} isAuthed={isAuthed} isGuest={isGuest} onSignOut={onSignOut} />
+        <TubeNav
+          role={role}
+          paymentReviewer={paymentReviewer}
+          isAuthed={isAuthed}
+          isGuest={isGuest}
+          onSignOut={onSignOut}
+        />
         <main id="main-content">{children}</main>
       </div>
       <Footer />
@@ -71,7 +86,7 @@ function LanguageSwitch() {
 type NavEntry = { to: string; label: string; icon: ReactNode; exact?: boolean };
 
 /* The same links, by role, as the dashboard navbar (LmsNavbar). */
-function TubeNav({ role, isAuthed, isGuest, onSignOut }: Omit<Props, "children">) {
+function TubeNav({ role, paymentReviewer, isAuthed, isGuest, onSignOut }: Omit<Props, "children">) {
   const { lang } = useLang();
   const ar = lang === "ar";
   const tr = lmsT[lang];
@@ -116,6 +131,13 @@ function TubeNav({ role, isAuthed, isGuest, onSignOut }: Omit<Props, "children">
       icon: <LayoutDashboard />,
     });
   }
+  if (paymentReviewer) {
+    links.push({
+      to: "/learning-management-system/payments",
+      label: ar ? "مراجعة المدفوعات" : "Payment review",
+      icon: <Receipt />,
+    });
+  }
 
   /* The lamp spans the active item, measured from the pill's padding edge. */
   const moveLamp = useCallback(() => {
@@ -137,7 +159,7 @@ function TubeNav({ role, isAuthed, isGuest, onSignOut }: Omit<Props, "children">
   useEffect(() => {
     const frame = requestAnimationFrame(moveLamp);
     return () => cancelAnimationFrame(frame);
-  }, [moveLamp, open, lang, pathname, isAuthed, role]);
+  }, [moveLamp, open, lang, pathname, isAuthed, role, paymentReviewer]);
 
   useEffect(() => {
     window.addEventListener("resize", moveLamp, { passive: true });

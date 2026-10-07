@@ -1,0 +1,53 @@
+/* The reviewer's payment profile: the close button sits opposite the title,
+   and the four tabs share the full width so none of them is cut off. */
+.pay-profile-dialog:is(#pay-profile-dialog, [role="dialog"]):is(
+    #pay-profile-dialog,
+    [role="dialog"]
+  )
+  > button.absolute {
+  left: auto;
+  right: auto;
+  inset-inline-end: 1rem;
+  top: 1.25rem;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid rgba(184, 232, 240, 0.16) !important;
+  border-radius: 999px;
+  background: rgba(184, 232, 240, 0.08) !important;
+  box-shadow: none !important;
+  color: #b8e8f0 !important;
+  opacity: 1;
+}
+
+.pay-profile-dialog[role="dialog"] {
+  outline: none;
+}
+
+.pay-profile-tabs .cx-tabs {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.pay-profile-tabs .cx-tab {
+  flex: 1 1 0;
+  justify-content: center;
+  padding-inline: 10px;
+}
+
+.pay-profile-tabs .cx-tab {
+  min-width: 0;
+}
+
+/* Phones: four labels without their icons still fit on one line. */
+@media (max-width: 479px) {
+  .pay-profile-tabs .cx-tab {
+    gap: 4px;
+    padding-inline: 4px;
+    font-size: 13px;
+  }
+  .pay-profile-tabs .cx-tab > svg {
+    display: none;
+  }
+}

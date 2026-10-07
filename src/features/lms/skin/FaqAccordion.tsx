@@ -39,7 +39,9 @@ const FAQ = [
   },
 ];
 
-/** Hover opens an item (and closes the rest); click toggles for keyboard and touch. */
+/** A mouse hover opens an item (and closes the rest); click toggles for keyboard and touch.
+ *  Only a real mouse counts as hover: a tap also fires mouseenter right before its
+ *  click, which opened the item and then toggled it shut again on phones. */
 export function FaqAccordion() {
   const { lang } = useLang();
   const [open, setOpen] = useState<number | null>(null);
@@ -51,8 +53,8 @@ export function FaqAccordion() {
           <div
             key={item.q.en}
             className="faq-item"
-            onMouseEnter={() => setOpen(i)}
-            onMouseLeave={() => setOpen(null)}
+            onPointerEnter={(e) => e.pointerType === "mouse" && setOpen(i)}
+            onPointerLeave={(e) => e.pointerType === "mouse" && setOpen(null)}
           >
             <button
               type="button"

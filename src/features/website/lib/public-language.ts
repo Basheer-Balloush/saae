@@ -206,7 +206,7 @@ export function applyPublicLanguage(lang: "ar" | "en"): void {
     "courses turning AI into a working skill": "دورة تحوّل الذكاء الاصطناعي إلى مهارة عملية",
     "strategic partners across Syria": "شريكاً استراتيجياً في أنحاء سورية",
     "specialist communities": "مجتمعات متخصصة",
-    "Nine fields, one shared method.": "تسعة مجالات، ومنهج واحد مشترك.",
+    "Eight fields, one shared method.": "ثمانية مجالات، ومنهج واحد مشترك.",
     "Each community brings specialists together around distinct questions. A shared method allows knowledge and solutions to move across every community.":
       "يجمع كل مجتمع متخصصين حول أسئلة مميزة، وتتيح المنهجية المشتركة تبادل المعرفة والحلول بين جميع المجتمعات.",
     "Works on": "يعمل على",

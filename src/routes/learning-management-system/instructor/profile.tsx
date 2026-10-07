@@ -190,7 +190,7 @@ function InstructorProfile() {
                     {initial}
                   </span>
                 )}
-                <span className="absolute inset-0 grid place-items-center bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="absolute inset-0 grid place-items-center bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100">
                   {upload ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (

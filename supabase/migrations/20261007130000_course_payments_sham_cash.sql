@@ -1,10 +1,12 @@
--- Paid course enrollment by manual transfer (Sham Cash now; Paymera and cash later).
+-- Paid course enrollment by Sham Cash transfer or by cash at the association.
 --
--- The student transfers the course price to the association's wallet, uploads
--- one to three receipts and submits. That creates a normal enrollment request
--- plus a payment row. The course opens only when a payment reviewer (role
+-- Sham Cash: the student transfers the course price to the association's
+-- wallet, uploads one to three receipts and submits. Cash: the student fills
+-- the form and says they will pay in cash; there is no receipt. Either way
+-- that creates a normal enrollment request plus a payment row. The course
+-- opens only when a payment reviewer (role
 -- lms_payment_admin, or the super admin) confirms the money reached the
--- association's account. The reviewer can later suspend the student's access
+-- association (the transfer arrived, or the cash was handed over). The reviewer can later suspend the student's access
 -- without deleting the enrollment or its progress, and restore it.
 --
 -- Works with the coupons and course payments of 20260929150000/150100: a
@@ -212,8 +214,9 @@ DECLARE
   v_payment uuid;
 BEGIN
   IF v_uid IS NULL THEN RAISE EXCEPTION 'unauthenticated' USING ERRCODE = '42501'; END IF;
-  -- Only Sham Cash is live; Paymera and cash are listed as coming soon.
-  IF _method IS DISTINCT FROM 'sham_cash' THEN RAISE EXCEPTION 'payment_method_unavailable'; END IF;
+  IF _method IS NULL OR _method NOT IN ('sham_cash', 'cash') THEN
+    RAISE EXCEPTION 'payment_method_unavailable';
+  END IF;
 
   SELECT * INTO v_course FROM public.lms_courses WHERE id = _course_id;
   IF NOT FOUND THEN RAISE EXCEPTION 'course_not_found'; END IF;
@@ -232,11 +235,17 @@ BEGIN
     RAISE EXCEPTION 'enrollment_suspended';
   END IF;
 
-  -- One to three receipts, each a file this student uploaded to their own folder.
+  -- Sham Cash: one to three receipts, each a file this student uploaded to
+  -- their own folder. Cash is handed over at the association: no receipt.
   SELECT array_agg(DISTINCT btrim(p)) INTO v_paths
     FROM unnest(COALESCE(_receipt_paths, '{}'::text[])) AS p
    WHERE btrim(p) <> '';
-  IF v_paths IS NULL OR cardinality(v_paths) < 1 THEN RAISE EXCEPTION 'receipt_required'; END IF;
+  IF _method = 'cash' THEN
+    v_paths := '{}'::text[];
+  END IF;
+  IF _method = 'sham_cash' AND (v_paths IS NULL OR cardinality(v_paths) < 1) THEN
+    RAISE EXCEPTION 'receipt_required';
+  END IF;
   IF cardinality(v_paths) > 3 THEN RAISE EXCEPTION 'too_many_receipts'; END IF;
   FOREACH v_path IN ARRAY v_paths LOOP
     IF split_part(v_path, '/', 1) <> v_uid::text
@@ -458,7 +467,7 @@ GRANT EXECUTE ON FUNCTION public.lms_payment_review_detail(uuid) TO authenticate
 -- 9. Reviewer decisions
 -- ============================================================
 
--- Approve: only after the reviewer confirms the amount reached the account.
+-- Approve: only after the reviewer confirms the amount reached the association.
 -- Deadline and "enrollment open" are not re-checked: they held when the
 -- student paid. Capacity is, because a seat must actually exist.
 CREATE OR REPLACE FUNCTION public.lms_payment_approve(
@@ -526,19 +535,23 @@ BEGIN
   -- (students_count follows from the enrollments trigger; the request's
   -- coupon, if any, was applied to amount_due by the request status trigger.)
 
-  -- The transfer counts towards what the student owes, so the certificate
+  -- The payment counts towards what the student owes, so the certificate
   -- rule (lms_evaluate_certificate) sees the course as paid.
   INSERT INTO public.lms_payment_entries
     (course_id, student_id, kind, amount, method, paid_on, reference, note, recorded_by)
   VALUES
-    (v_pay.course_id, v_pay.user_id, 'payment', round(v_pay.amount, 2), 'transfer',
-     current_date, 'Sham Cash', 'lms_course_payments ' || v_pay.id::text, v_uid);
+    (v_pay.course_id, v_pay.user_id, 'payment', round(v_pay.amount, 2),
+     CASE WHEN v_pay.method = 'cash' THEN 'cash' ELSE 'transfer' END,
+     current_date,
+     CASE WHEN v_pay.method = 'cash' THEN 'Cash' ELSE 'Sham Cash' END,
+     'lms_course_payments ' || v_pay.id::text, v_uid);
 
   RETURN jsonb_build_object('payment_id', v_pay.id, 'enrollment_id', v_enr, 'status', 'approved');
 END;
 $$;
 
--- Reject: the receipts do not match a transfer. The student may pay again.
+-- Reject: the receipts do not match a transfer, or the cash never came.
+-- The student may pay again.
 CREATE OR REPLACE FUNCTION public.lms_payment_reject(_payment_id uuid, _notes text DEFAULT NULL)
 RETURNS jsonb
 LANGUAGE plpgsql

@@ -139,6 +139,20 @@ html[dir] .lms-skin .lms-hero-copy h1.course-page-title { font-size: clamp(2rem,
 .lms-skin .apply-list .apply-list-main { display: grid; gap: 2px; min-width: 0; }
 .lms-skin .apply-list small { color: var(--lms-muted); font-size: .78rem; }
 .lms-skin .attempt-chip { padding: 3px 10px; border-radius: 999px; background: rgba(184, 232, 240, .08); color: var(--lms-muted); font-size: .7rem; font-weight: 800; }
+.lms-skin #profile-badges { scroll-margin-block-start: 110px; }
+.lms-skin .badge-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.lms-skin .badge-tile { display: flex; align-items: center; gap: 16px; padding: 14px 18px; padding-inline-start: 14px; border: 1px solid var(--lms-border); border-radius: 18px; background: rgba(2, 16, 20, .3); }
+.lms-skin .badge-tile img { flex: none; width: 84px; height: 84px; border-radius: 50%; filter: drop-shadow(0 6px 18px rgba(87, 228, 238, .3)); transition: transform .6s var(--lms-ease); }
+.lms-skin .badge-tile:hover img { transform: rotate(-8deg) scale(1.05); }
+.lms-skin .badge-copy { display: grid; gap: 3px; min-width: 0; }
+.lms-skin .badge-copy strong { color: var(--lms-paper); font-size: 1.05rem; }
+.lms-skin .badge-copy span { color: rgba(231, 241, 240, .78); font-size: .9rem; line-height: 1.6; }
+.lms-skin .badge-copy small { color: var(--lms-muted); font-size: .8rem; }
+.lms-skin .badge-copy small b { color: var(--lms-cyan); }
+@media (prefers-reduced-motion: reduce) {
+  .lms-skin .badge-tile img { transition: none; }
+  .lms-skin .badge-tile:hover img { transform: none; }
+}
 .lms-skin .instructor-bio { margin-bottom: 8px; }
 @media (max-width: 680px) {
   .lms-skin .profile-stats-3 { grid-template-columns: minmax(0, 1fr); }

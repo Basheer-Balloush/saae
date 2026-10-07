@@ -23,7 +23,7 @@ export type FormAnswer = { field_id: string; value: unknown };
 /** A refused coupon comes back as { ok: false } and writes nothing. */
 export function submitPaidEnrollment(args: {
   courseId: string;
-  method: "sham_cash";
+  method: "sham_cash" | "cash";
   receiptPaths: string[];
   answers: FormAnswer[];
   coupon?: string | null;
@@ -42,6 +42,7 @@ export function submitPaidEnrollment(args: {
 
 export type MyCoursePayment = {
   id: string;
+  method: string;
   status: PaymentStatus;
   reviewer_notes: string | null;
   created_at: string;
@@ -54,7 +55,7 @@ export async function getMyLatestCoursePayment(
 ): Promise<MyCoursePayment | null> {
   const { data, error } = await db
     .from("lms_course_payments")
-    .select("id,status,reviewer_notes,created_at")
+    .select("id,method,status,reviewer_notes,created_at")
     .eq("course_id", courseId)
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
@@ -199,11 +200,21 @@ export async function getPaymentsForRequests(
   return map;
 }
 
-/** Whether the signed-in account may review payments (dedicated role or super admin). */
-export async function isPaymentReviewer(userId: string): Promise<boolean> {
-  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+/** Whether the account may review payments: listed in lms_payment_reviewers,
+    or the super admin (migration 20261007170000). */
+export const isPaymentReviewer = (userId: string) =>
+  rpc<boolean>("is_lms_payment_reviewer", { _user_id: userId });
+
+export type PaymentReviewerRow = { user_id: string; created_at: string };
+
+/** Every payment reviewer, for the super admin's People page. */
+export async function listPaymentReviewers(): Promise<PaymentReviewerRow[]> {
+  const { data, error } = await db
+    .from("lms_payment_reviewers")
+    .select("user_id,created_at")
+    .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []).some((r) => (r.role as string) === "lms_payment_admin" || r.role === "admin");
+  return (data ?? []) as PaymentReviewerRow[];
 }
 
 export const setPaymentReviewer = (userId: string, enabled: boolean) =>
@@ -211,6 +222,5 @@ export const setPaymentReviewer = (userId: string, enabled: boolean) =>
 
 export const PAYMENT_METHOD_LABEL: Record<string, { ar: string; en: string }> = {
   sham_cash: { ar: "شام كاش", en: "Sham Cash" },
-  paymera: { ar: "Paymera", en: "Paymera" },
   cash: { ar: "كاش", en: "Cash" },
 };

@@ -21,7 +21,7 @@ export function PaymentDecisionButtons({
   payment,
   onDone,
 }: {
-  payment: { id: string; status: PaymentStatus; amount: number; currency: string };
+  payment: { id: string; method: string; status: PaymentStatus; amount: number; currency: string };
   onDone: () => void;
 }) {
   const { t, ar } = useT();
@@ -43,14 +43,27 @@ export function PaymentDecisionButtons({
     }
   };
 
+  const cash = payment.method === "cash";
+
   const approve = async () => {
+    const amountAr = formatAmount(payment.amount, payment.currency, true);
+    const amountEn = formatAmount(payment.amount, payment.currency, false);
     const ok = await confirm({
-      title: t("تأكيد وصول المبلغ", "Confirm the payment arrived"),
-      description: t(
-        `هل تحقّقت من وصول مبلغ ${formatAmount(payment.amount, payment.currency, true)} كاملاً إلى حساب الجمعية؟ بعد التأكيد تُفتح الدورة للطالب مباشرةً.`,
-        `Have you checked that the full ${formatAmount(payment.amount, payment.currency, false)} reached the association's account? Once you confirm, the course opens for the student.`,
-      ),
-      confirmLabel: t("نعم، تحقّقت من وصول المبلغ", "Yes, the amount arrived"),
+      title: cash
+        ? t("تأكيد استلام المبلغ نقداً", "Confirm the cash was received")
+        : t("تأكيد وصول المبلغ", "Confirm the payment arrived"),
+      description: cash
+        ? t(
+            `هل استلمت مبلغ ${amountAr} كاملاً نقداً من الطالب؟ بعد التأكيد تُفتح الدورة للطالب مباشرةً.`,
+            `Did you receive the full ${amountEn} in cash from the student? Once you confirm, the course opens for the student.`,
+          )
+        : t(
+            `هل تحقّقت من وصول مبلغ ${amountAr} كاملاً إلى حساب الجمعية؟ بعد التأكيد تُفتح الدورة للطالب مباشرةً.`,
+            `Have you checked that the full ${amountEn} reached the association's account? Once you confirm, the course opens for the student.`,
+          ),
+      confirmLabel: cash
+        ? t("نعم، استلمت المبلغ", "Yes, I received it")
+        : t("نعم، تحقّقت من وصول المبلغ", "Yes, the amount arrived"),
       cancelLabel: t("ليس بعد", "Not yet"),
     });
     if (!ok) return;
@@ -114,10 +127,17 @@ export function PaymentDecisionButtons({
         open={rejectOpen}
         onOpenChange={setRejectOpen}
         title={t("رفض الدفعة", "Reject payment")}
-        description={t(
-          "يرى الطالب سبب الرفض، ويمكنه الدفع وإرسال إيصال جديد.",
-          "The student sees the reason and can pay and send a new receipt.",
-        )}
+        description={
+          cash
+            ? t(
+                "يرى الطالب سبب الرفض، ويمكنه إرسال طلب دفع جديد.",
+                "The student sees the reason and can send a new payment request.",
+              )
+            : t(
+                "يرى الطالب سبب الرفض، ويمكنه الدفع وإرسال إيصال جديد.",
+                "The student sees the reason and can pay and send a new receipt.",
+              )
+        }
         confirmLabel={t("رفض الدفعة", "Reject payment")}
         required
         destructive

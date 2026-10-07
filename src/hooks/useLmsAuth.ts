@@ -2,15 +2,24 @@ import { useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveLmsRole, type LmsRole } from "@/features/lms/lib/roles";
+import { isPaymentReviewer } from "@/features/lms/payments/lib/payments-api";
 export type { LmsRole } from "@/features/lms/lib/roles";
 
-type LmsAuthState = { session: Session | null; user: User | null; role: LmsRole; loading: boolean };
+type LmsAuthState = {
+  session: Session | null;
+  user: User | null;
+  role: LmsRole;
+  /** Reviews course payments (lms_payment_admin, or the super admin). */
+  paymentReviewer: boolean;
+  loading: boolean;
+};
 
 export function useLmsAuth() {
   const [state, setState] = useState<LmsAuthState>({
     session: null,
     user: null,
     role: null,
+    paymentReviewer: false,
     loading: true,
   });
   useEffect(() => {
@@ -31,28 +40,36 @@ export function useLmsAuth() {
       resolvedUserId = null;
       shownUserId = session?.user.id ?? null;
       if (!quiet)
-        setState({ session, user: session?.user ?? null, role: null, loading: !!session });
+        setState({
+          session,
+          user: session?.user ?? null,
+          role: null,
+          paymentReviewer: false,
+          loading: !!session,
+        });
       if (!session) return;
       try {
-        const { data, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id);
+        // Payment reviewers are listed apart from user_roles (one main role per account).
+        const [{ data, error }, reviewer] = await Promise.all([
+          supabase.from("user_roles").select("role").eq("user_id", session.user.id),
+          isPaymentReviewer(session.user.id).catch(() => null),
+        ]);
         if (!disposed && current === revision) {
           resolvedUserId = error ? null : session.user.id;
           setState((prev) => ({
             session,
             user: quiet ? prev.user : session.user,
             role: error ? prev.role : resolveLmsRole((data ?? []).map((r) => r.role)),
+            paymentReviewer: reviewer ?? prev.paymentReviewer,
             loading: false,
           }));
         }
       } catch {
         if (!disposed && current === revision)
           setState((prev) => ({
+            ...prev,
             session,
             user: quiet ? prev.user : session.user,
-            role: prev.role,
             loading: false,
           }));
       }
@@ -80,7 +97,13 @@ export function useLmsAuth() {
       // Supabase auth callbacks must finish before making further authenticated queries.
       const ticket = ++revision;
       if (!disposed)
-        setState({ session, user: session?.user ?? null, role: null, loading: !!session });
+        setState({
+          session,
+          user: session?.user ?? null,
+          role: null,
+          paymentReviewer: false,
+          loading: !!session,
+        });
       setTimeout(() => {
         if (!disposed && ticket === revision) void resolve(session);
       }, 0);
@@ -92,7 +115,13 @@ export function useLmsAuth() {
       },
       () => {
         if (!disposed && revision === initialRevision)
-          setState({ session: null, user: null, role: null, loading: false });
+          setState({
+            session: null,
+            user: null,
+            role: null,
+            paymentReviewer: false,
+            loading: false,
+          });
       },
     );
     return () => {

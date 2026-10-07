@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   courseList,
   internshipStatus,
+  isPersonsOwnName,
   isPlausiblePhone,
   registrationStatus,
+  westernDigits,
+  withoutContact,
   toCourseDetails,
   toInitiativeStatus,
   toInternship,
@@ -259,5 +262,44 @@ describe("isPlausiblePhone", () => {
     expect(isPlausiblePhone(null)).toBe(false);
     expect(isPlausiblePhone("+963 930 763 547")).toBe(true);
     expect(isPlausiblePhone("0944123456")).toBe(true);
+    expect(isPlausiblePhone("٠٩٣٢٢٣٦٠٢١")).toBe(true);
+  });
+
+  it("refuses a name typed where the phone was asked for (2026-10-06 conversation)", () => {
+    expect(isPlausiblePhone("سنا محمد عادل انكشاري السباعي")).toBe(false);
+  });
+});
+
+describe("isPersonsOwnName", () => {
+  it("catches a company saved under the person's own name", () => {
+    const name = "شنا محمد عادل انكشاري السباعي";
+    expect(isPersonsOwnName(name, name)).toBe(true);
+    expect(isPersonsOwnName("محمد", "شنا محمد عادل")).toBe(true);
+    expect(isPersonsOwnName("كاش موبايل MTN", "حذيفة محمود")).toBe(false);
+    expect(isPersonsOwnName("شركة النور", null)).toBe(false);
+  });
+});
+
+describe("lead contact clean-up", () => {
+  it("turns Arabic-Indic digits into 0-9", () => {
+    expect(westernDigits("٠٩٤٤١٢٣٤٥٦")).toBe("0944123456");
+  });
+
+  it("takes the phone and email out of the description (live test, 2026-10-07)", () => {
+    const details =
+      "صاحبة مكتب محاسبة في حلب لديها 8 موظفين. تم تدبير التواصل مع هبة الأمين بصفتها مديرة المكتب، ورقم هاتفها 0933555111.";
+    const clean = withoutContact(details, "0933555111", null);
+    expect(clean).not.toContain("0933555111");
+    expect(clean).toContain("لديها 8 موظفين");
+    expect(withoutContact("يريد استشارة، بريده rami@x.example", null, null)).not.toContain("@");
+    expect(withoutContact("رقمه ٠٩٤٤١٢٣٤٥٦ للتواصل", "٠٩٤٤١٢٣٤٥٦", null)).not.toMatch(/[٠-٩]/);
+    expect(withoutContact(null, "0933555111")).toBe(null);
+    expect(
+      withoutContact(
+        "يمثلها المدير التنفيذي سامر الخطيب (رقم الهاتف: ٠٩٥٥٤٤٣٣٢٢). طلبت الشركة شراكة تقنية.",
+        "٠٩٥٥٤٤٣٣٢٢",
+        null,
+      ),
+    ).toBe("يمثلها المدير التنفيذي سامر الخطيب. طلبت الشركة شراكة تقنية.");
   });
 });

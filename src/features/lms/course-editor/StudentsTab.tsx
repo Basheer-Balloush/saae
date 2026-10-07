@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Users } from "lucide-react";
+import { UserMinus, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCourseParticipantNames } from "@/features/lms/hooks/useCourseParticipantNames";
 import { CourseFormBuilder } from "@/features/lms/course-editor/CourseFormBuilder";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -16,18 +17,22 @@ import {
   fmtNum,
 } from "@/components/console/ui";
 import { EnrollmentRequestsPanel } from "@/features/lms/console/EnrollmentRequestsPanel";
+import { CancelEnrollmentDialog } from "./CancelEnrollmentDialog";
 import { PaymentsPanel } from "./PaymentsPanel";
 import type { EditorCtx } from "./types";
 
 type Enrolled = { id: string; student_id: string; enrolled_at: string; progress: number };
 
 export function StudentsTab({ ctx }: { ctx: EditorCtx }) {
-  const { course, update, t, lang, user, isAdmin } = ctx;
+  const { course, update, commit, t, lang, user, isAdmin } = ctx;
   const participants = useCourseParticipantNames(course.id, user?.id, !user);
   const [enrolled, setEnrolled] = useState<Enrolled[] | null>(null);
   const [q, setQ] = useState("");
   // Reloads the payments after a request is approved.
   const [paymentsKey, setPaymentsKey] = useState(0);
+  // Reloads the requests after a registration is cancelled.
+  const [requestsKey, setRequestsKey] = useState(0);
+  const [cancelling, setCancelling] = useState<Enrolled | null>(null);
 
   const loadEnrolled = useCallback(async () => {
     const { data } = await supabase
@@ -40,6 +45,13 @@ export function StudentsTab({ ctx }: { ctx: EditorCtx }) {
   useEffect(() => {
     loadEnrolled();
   }, [loadEnrolled]);
+
+  const afterCancel = async () => {
+    commit({ students_count: Math.max(0, course.students_count - 1) });
+    setPaymentsKey((k) => k + 1);
+    setRequestsKey((k) => k + 1);
+    await loadEnrolled();
+  };
 
   const nameOf = (uid: string) =>
     participants.names[uid]?.trim() ||
@@ -152,6 +164,7 @@ export function StudentsTab({ ctx }: { ctx: EditorCtx }) {
         }
       >
         <EnrollmentRequestsPanel
+          key={requestsKey}
           courseId={course.id}
           canDecide={isAdmin}
           onChanged={() => {
@@ -161,7 +174,14 @@ export function StudentsTab({ ctx }: { ctx: EditorCtx }) {
         />
       </Panel>
 
-      {isAdmin && <PaymentsPanel key={paymentsKey} ctx={ctx} nameOf={nameOf} />}
+      {isAdmin && (
+        <PaymentsPanel
+          key={paymentsKey}
+          ctx={ctx}
+          nameOf={nameOf}
+          onEnrollmentCancelled={afterCancel}
+        />
+      )}
 
       <Panel
         title={t("الطلاب المسجّلون", "Enrolled students")}
@@ -200,6 +220,11 @@ export function StudentsTab({ ctx }: { ctx: EditorCtx }) {
                   <th>{t("الطالب", "Student")}</th>
                   <th>{t("تاريخ التسجيل", "Enrolled")}</th>
                   <th className="w-[40%]">{t("التقدّم", "Progress")}</th>
+                  {isAdmin && (
+                    <th>
+                      <span className="sr-only">{t("إجراءات", "Actions")}</span>
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -227,6 +252,23 @@ export function StudentsTab({ ctx }: { ctx: EditorCtx }) {
                           </span>
                         </div>
                       </td>
+                      {isAdmin && (
+                        <td className="text-end">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-[var(--cx-red)] hover:bg-[var(--cx-red-50)] hover:text-[var(--cx-red)]"
+                            onClick={() => setCancelling(e)}
+                          >
+                            <UserMinus className="h-4 w-4" />
+                            {/* Icon only on phones; screen readers also hear whose. */}
+                            <span className="max-sm:sr-only">
+                              {t("إلغاء التسجيل", "Cancel registration")}
+                            </span>
+                            <span className="sr-only"> · {nameOf(e.student_id)}</span>
+                          </Button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -235,6 +277,16 @@ export function StudentsTab({ ctx }: { ctx: EditorCtx }) {
           </div>
         )}
       </Panel>
+
+      {cancelling && (
+        <CancelEnrollmentDialog
+          enrollmentId={cancelling.id}
+          name={nameOf(cancelling.student_id)}
+          open
+          onOpenChange={(v) => !v && setCancelling(null)}
+          onCancelled={afterCancel}
+        />
+      )}
 
       <CourseFormBuilder courseId={course.id} />
     </div>

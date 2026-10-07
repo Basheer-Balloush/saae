@@ -652,13 +652,17 @@ function CourseDetails() {
         <>
           <div className="enroll-note is-pending">
             <Clock />
-            {myPayment?.status === "pending"
+            {myPayment?.status === "pending" && myPayment.method === "cash"
               ? ar
-                ? "تم استلام إيصال الدفع، وستُفتح الدورة بعد التحقق من وصول المبلغ"
-                : "Receipt received. The course opens once the payment is verified"
-              : ar
-                ? "طلبك قيد المراجعة"
-                : "Your request is pending"}
+                ? "طلبك بانتظار الدفع نقداً لدى الجمعية، وستُفتح الدورة بعد أن يؤكّد المحاسب استلام المبلغ"
+                : "Pay in cash at the association. The course opens once the accountant confirms the payment"
+              : myPayment?.status === "pending"
+                ? ar
+                  ? "تم استلام إيصال الدفع، وستُفتح الدورة بعد التحقق من وصول المبلغ"
+                  : "Receipt received. The course opens once the payment is verified"
+                : ar
+                  ? "طلبك قيد المراجعة"
+                  : "Your request is pending"}
           </div>
           {myPayment?.status === "pending" ? null : myCode?.status === "pending" ? (
             <p className="enroll-hint">
@@ -716,16 +720,16 @@ function CourseDetails() {
         {myPayment?.status === "rejected" && (
           <p className="enroll-hint">
             {ar
-              ? "لم يتم تأكيد دفعتك السابقة. يمكنك الدفع وإرسال الإيصال من جديد."
-              : "Your previous payment was not confirmed. You can pay and send the receipt again."}
+              ? "لم يتم تأكيد دفعتك السابقة. يمكنك إرسال طلب الدفع من جديد."
+              : "Your previous payment was not confirmed. You can send the payment request again."}
             {myPayment.reviewer_notes ? ` (${myPayment.reviewer_notes})` : ""}
           </p>
         )}
         {enrollButton}
         <p className="enroll-hint">
           {ar
-            ? "اختر طريقة الدفع وأرفق إيصال التحويل. تُفتح الدورة بعد تحقّق الإدارة من وصول المبلغ."
-            : "Choose a payment method and attach the receipt. The course opens once the payment is verified."}
+            ? "اختر طريقة الدفع: نقداً لدى الجمعية، أو تحويلاً عبر شام كاش مع الإيصال. تُفتح الدورة بعد تأكيد الإدارة استلام المبلغ."
+            : "Choose how to pay: cash at the association, or a Sham Cash transfer with its receipt. The course opens once the payment is confirmed."}
         </p>
       </>
     );

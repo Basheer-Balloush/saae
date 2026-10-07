@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Download, Loader2, Pencil, Undo2, Wallet } from "lucide-react";
+import { Download, Loader2, Pencil, Undo2, UserMinus, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -44,6 +44,7 @@ import {
 import { sendCertificateEmail } from "@/features/lms/certificates/lib/certificate-email.functions";
 import { exportRowsToXlsx } from "@/lib/admin-xlsx-export";
 import { toUserMessage } from "@/lib/safe-error";
+import { CancelEnrollmentDialog } from "./CancelEnrollmentDialog";
 import type { EditorCtx } from "./types";
 
 type Row = CourseEnrollmentMoney & {
@@ -58,9 +59,12 @@ type Row = CourseEnrollmentMoney & {
 export function PaymentsPanel({
   ctx,
   nameOf,
+  onEnrollmentCancelled,
 }: {
   ctx: EditorCtx;
   nameOf: (uid: string) => string;
+  /** The page reloads its lists (this panel included) after a cancellation. */
+  onEnrollmentCancelled: () => void | Promise<void>;
 }) {
   const { course, lang } = ctx;
   const { t, ar } = useT();
@@ -306,6 +310,10 @@ export function PaymentsPanel({
           lang={lang}
           onClose={() => setOpenId(null)}
           onChanged={load}
+          onEnrollmentCancelled={async () => {
+            setOpenId(null);
+            await onEnrollmentCancelled();
+          }}
         />
       )}
     </Panel>
@@ -324,12 +332,14 @@ function LearnerPaymentsDialog({
   lang,
   onClose,
   onChanged,
+  onEnrollmentCancelled,
 }: {
   row: Row;
   ctx: EditorCtx;
   lang: "ar" | "en";
   onClose: () => void;
   onChanged: () => Promise<void>;
+  onEnrollmentCancelled: () => Promise<void>;
 }) {
   const { t, ar } = useT();
   const emailCertificate = useServerFn(sendCertificateEmail);
@@ -343,6 +353,7 @@ function LearnerPaymentsDialog({
   const [cancelling, setCancelling] = useState<PaymentEntry | null>(null);
   const [waiving, setWaiving] = useState(false);
   const [editingDue, setEditingDue] = useState(false);
+  const [cancellingEnrollment, setCancellingEnrollment] = useState(false);
 
   // A payment that completes the course issues the certificate: email it.
   const afterCertificateCheck = async (c: CertificateResult | undefined) => {
@@ -535,7 +546,9 @@ function LearnerPaymentsDialog({
           </form>
         )}
 
-        <section aria-labelledby="pay-history-h">
+        {/* Not <section>: lms.css pads every section under .lms-skin (dialogs on
+            LMS paths) by 72-140px. */}
+        <div role="group" aria-labelledby="pay-history-h">
           <h3 id="pay-history-h" className="mb-2 text-[14.5px] font-extrabold">
             {t("السجل", "History")}
           </h3>
@@ -590,8 +603,48 @@ function LearnerPaymentsDialog({
               })}
             </ul>
           )}
-        </section>
+        </div>
 
+        <div
+          role="group"
+          aria-labelledby="pay-unenroll-h"
+          className="flex flex-wrap items-center gap-3 rounded-xl border border-[var(--cx-red-line)] bg-[var(--cx-red-50)] px-4 py-3"
+        >
+          <div className="min-w-0 flex-1">
+            <h3 id="pay-unenroll-h" className="cx-danger-title text-[14.5px] font-extrabold">
+              {t("إلغاء التسجيل", "Cancel registration")}
+            </h3>
+            <p className="text-[12.5px] text-[var(--cx-muted)]">
+              {s.paid > 0
+                ? t(
+                    "ألغِ الدفعات المسجّلة أعلاه أولاً (استرداد)، ثم ألغِ التسجيل.",
+                    "Cancel the payments above first (refund), then the registration.",
+                  )
+                : t(
+                    "يخرج الطالب من الدورة، ويستطيع التسجيل من جديد لاحقاً.",
+                    "The student leaves the course and may register again later.",
+                  )}
+            </p>
+          </div>
+          {/* lms-reset keeps the LMS dialog skin off; console.css draws it. */}
+          <button
+            type="button"
+            className="lms-reset cx-btn cx-btn-danger"
+            disabled={busy || s.paid > 0}
+            onClick={() => setCancellingEnrollment(true)}
+          >
+            <UserMinus className="h-4 w-4" />
+            <span>{t("إلغاء التسجيل", "Cancel registration")}</span>
+          </button>
+        </div>
+
+        <CancelEnrollmentDialog
+          enrollmentId={row.id}
+          name={row.name}
+          open={cancellingEnrollment}
+          onOpenChange={setCancellingEnrollment}
+          onCancelled={onEnrollmentCancelled}
+        />
         <ReasonDialog
           open={!!cancelling}
           onOpenChange={(v) => !v && setCancelling(null)}

@@ -73,8 +73,8 @@ export function PaymentReviewBoard() {
         eyebrow={t("منصّة التعلّم", "Learning platform")}
         title={t("مراجعة المدفوعات", "Payment review")}
         description={t(
-          "تحقّق من وصول كل مبلغ إلى حساب الجمعية قبل الموافقة؛ لا تُفتح الدورة للطالب إلا بعد موافقتك.",
-          "Check that each amount reached the association's account before approving; the course opens only after your approval.",
+          "تحقّق من وصول كل مبلغ إلى حساب الجمعية، أو من استلامه نقداً، قبل الموافقة؛ لا تُفتح الدورة للطالب إلا بعد موافقتك.",
+          "Check that each amount reached the association's account, or was paid in cash, before approving; the course opens only after your approval.",
         )}
       />
 
@@ -169,8 +169,12 @@ export function PaymentReviewBoard() {
                         </span>
                       )}
                       {t("أُرسلت في", "Sent")} {fmtDate(r.created_at, lang, true)}
-                      {" · "}
-                      {t(`${r.receipt_count} إيصال`, `${r.receipt_count} receipt(s)`)}
+                      {r.method !== "cash" && (
+                        <>
+                          {" · "}
+                          {t(`${r.receipt_count} إيصال`, `${r.receipt_count} receipt(s)`)}
+                        </>
+                      )}
                     </div>
                     {r.reviewer_notes && (
                       <p className="mt-2 rounded-lg bg-[var(--cx-raise-2)] px-3 py-1.5 text-[13px]">

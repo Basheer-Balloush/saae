@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { confirmDialog } from "@/hooks/useConfirm";
@@ -9,6 +9,7 @@ import { Footer } from "@/components/layout/Footer";
 import { LmsSkinShell } from "@/features/lms/skin/LmsSkinShell";
 import { isConsoleLmsPath, isSkinnedLmsPath, LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { LocationGate } from "@/features/user-location/LocationGate";
+import { useShownPathname } from "@/hooks/useShownPathname";
 
 /* Signed-in users must say where they live before using the platform; the
    pages that sign them in, up or back are left alone. */
@@ -28,9 +29,9 @@ export const Route = createFileRoute("/learning-management-system")({
 
 function LmsLayout() {
   const navigate = useNavigate();
-  const { user, role, isGuest } = useLmsAuth();
+  const { user, role, paymentReviewer, isGuest } = useLmsAuth();
   const { lang } = useLang();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const pathname = useShownPathname();
   useSingleDeviceSession(user?.id ?? null);
 
   const handleSignOut = async () => {
@@ -65,7 +66,13 @@ function LmsLayout() {
      Other LMS pages keep the standard navbar and footer below. */
   if (isSkinnedLmsPath(pathname)) {
     return (
-      <LmsSkinShell role={role} isAuthed={!!user} isGuest={isGuest} onSignOut={handleSignOut}>
+      <LmsSkinShell
+        role={role}
+        paymentReviewer={paymentReviewer}
+        isAuthed={!!user}
+        isGuest={isGuest}
+        onSignOut={handleSignOut}
+      >
         <Outlet />
         {locationGate}
       </LmsSkinShell>
@@ -78,7 +85,13 @@ function LmsLayout() {
         <span className="orb-petrol" />
         <span className="orb-olive" />
       </div>
-      <LmsNavbar role={role} isAuthed={!!user} isGuest={isGuest} onSignOut={handleSignOut} />
+      <LmsNavbar
+        role={role}
+        paymentReviewer={paymentReviewer}
+        isAuthed={!!user}
+        isGuest={isGuest}
+        onSignOut={handleSignOut}
+      />
       <main className="flex-1 pt-20 relative z-[1]">
         <Outlet />
       </main>

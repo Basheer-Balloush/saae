@@ -1,14 +1,16 @@
 /**
  * Safe internal return URLs for the LMS auth flow.
- * Only same-origin paths inside /learning-management-system/ are accepted;
+ * Only same-origin paths inside /learning-management-system/, and the Texpo
+ * game (/texpo, where players sign in to claim their coupon), are accepted;
  * anything else (absolute URLs, protocol-relative, traversal) is rejected.
  */
 const PREFIX = "/learning-management-system/";
+const TEXPO = /^\/texpo(\?|$)/;
 
 export function safeLmsRedirect(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const v = value.trim();
-  if (!v.startsWith(PREFIX)) return undefined;
+  if (!v.startsWith(PREFIX) && !TEXPO.test(v)) return undefined;
   if (v.startsWith("//") || v.includes("\\")) return undefined;
   if (v.includes("://") || v.includes("..")) return undefined;
   return v;

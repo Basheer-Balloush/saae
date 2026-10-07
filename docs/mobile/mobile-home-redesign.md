@@ -1,6 +1,6 @@
 # Mobile homepage redesign
 
-The phone homepage includes the complete association landing page, opening with **ذكاء وريادة لوطن ينهض**. Cairo and the existing petrol, turquoise, and olive palette are preserved. A cinematic tree opening leads into learning and participation, the initiative, nine communities, news, mission, achievements, 23 partner logos, FAQ, a closing invitation, and comprehensive footer navigation.
+The phone homepage includes the complete association landing page, opening with **ذكاء وريادة لوطن ينهض**. Cairo and the existing petrol, turquoise, and olive palette are preserved. A cinematic tree opening leads into learning and participation, the initiative, eight communities, news, mission, achievements, 23 partner logos, FAQ, a closing invitation, and comprehensive footer navigation.
 
 ## Behavior
 

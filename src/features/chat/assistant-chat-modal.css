@@ -302,10 +302,12 @@
     background 180ms ease;
 }
 
-.assistant-chat-suggestion:hover {
-  transform: translateY(-1px);
-  border-color: rgba(114, 214, 223, 0.56);
-  background: rgba(20, 66, 72, 0.7);
+@media (hover: hover) {
+  .assistant-chat-suggestion:hover {
+    transform: translateY(-1px);
+    border-color: rgba(114, 214, 223, 0.56);
+    background: rgba(20, 66, 72, 0.7);
+  }
 }
 
 .assistant-chat-suggestion > svg:first-child {
@@ -537,10 +539,13 @@
   height: 18px;
 }
 
-.assistant-chat-composer > p {
+/* "Abu Al-Joud can make mistakes": shown on every screen, phones included. */
+.assistant-chat-composer > p.assistant-chat-disclaimer {
+  display: block;
   margin: 7px auto 0;
-  color: rgba(159, 186, 190, 0.62);
-  font-size: 9px;
+  color: rgba(159, 186, 190, 0.72);
+  font-size: 11px;
+  line-height: 1.4;
   text-align: center;
 }
 
@@ -626,7 +631,7 @@
   .assistant-chat-portrait {
     width: 100%;
     min-height: 176px;
-    flex: 0 0 176px;
+    flex: 0 0 clamp(176px, 26vh, 240px);
     align-self: auto;
     border-inline-start: 0;
     border-bottom: 1px solid rgba(114, 214, 223, 0.28);
@@ -637,10 +642,14 @@
     display: none;
   }
 
+  /* The whole figure: the welcome pose starts at the image's top edge, so
+     lifting it (top: -42px, from the older pose) cut his head off. */
   .assistant-chat-portrait img {
-    top: -42px;
-    bottom: auto;
-    width: 215px;
+    top: 12px;
+    bottom: 12px;
+    width: auto;
+    height: calc(100% - 24px);
+    max-height: none;
   }
 
   .assistant-chat-intro {
@@ -784,10 +793,62 @@
     transform 0.18s ease;
 }
 
-.assistant-chat-choice:hover {
+@media (hover: hover) {
+  .assistant-chat-choice:hover {
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
+}
+
+.assistant-chat-choice:active {
   background: color-mix(in srgb, var(--primary) 22%, transparent);
-  border-color: var(--primary);
-  transform: translateY(-1px);
+}
+
+/* On a phone, pills sized to their labels wrapped into rows of different
+   lengths, so every row ended at a different place. Two equal columns across
+   the message width line them up on every screen; a lone last answer takes the
+   full width. */
+@media (max-width: 760px) {
+  .assistant-chat-choices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .assistant-chat-choice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 42px;
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 12px;
+    line-height: 1.35;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .assistant-chat-choice:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  /* A short question ("تحب أسجّل بياناتك؟") made the message, and so the
+     answers under it, narrow; the answers get the full row instead, while the
+     question keeps its own width. */
+  .assistant-chat-message.has-choices {
+    width: 92%;
+  }
+
+  .assistant-chat-message.has-choices .assistant-chat-message-content {
+    flex: 1;
+  }
+
+  .assistant-chat-message.has-choices .assistant-chat-message-content p {
+    width: fit-content;
+    max-width: 100%;
+  }
 }
 
 .assistant-chat-choice:focus-visible {

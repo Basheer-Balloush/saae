@@ -49,6 +49,7 @@ import { Route as LearningManagementSystemForgotPasswordRouteImport } from './ro
 import { Route as LearningManagementSystemConfirmAccountRouteImport } from './routes/learning-management-system/confirm-account'
 import { Route as LearningManagementSystemCatalogRouteImport } from './routes/learning-management-system/catalog'
 import { Route as JoinTokenRouteImport } from './routes/join.$token'
+import { Route as TexpoRouteImport } from './routes/texpo'
 import { Route as InitiativeSponsorsRouteImport } from './routes/initiative/sponsors'
 import { Route as InitiativeClaimRouteImport } from './routes/initiative/claim'
 import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
@@ -102,6 +103,7 @@ import { Route as AdminNewsIdRouteImport } from './routes/admin/news/$id'
 import { Route as AdminFormsNewRouteImport } from './routes/admin/forms/new'
 import { Route as AdminCrmStudentsRouteImport } from './routes/admin/crm/students'
 import { Route as AdminCrmFeedbackRouteImport } from './routes/admin/crm/feedback'
+import { Route as AdminCrmTexpoRouteImport } from './routes/admin/crm/texpo'
 import { Route as AdminCrmLeadsRouteRouteImport } from './routes/admin/crm/leads/route'
 import { Route as AdminCrmFormsRouteRouteImport } from './routes/admin/crm/forms/route'
 import { Route as AdminCrmContactsRouteRouteImport } from './routes/admin/crm/contacts/route'
@@ -353,6 +355,11 @@ const LearningManagementSystemCatalogRoute =
 const JoinTokenRoute = JoinTokenRouteImport.update({
   id: '/join/$token',
   path: '/join/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TexpoRoute = TexpoRouteImport.update({
+  id: '/texpo',
+  path: '/texpo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InitiativeSponsorsRoute = InitiativeSponsorsRouteImport.update({
@@ -643,6 +650,11 @@ const AdminCrmFeedbackRoute = AdminCrmFeedbackRouteImport.update({
   path: '/feedback',
   getParentRoute: () => AdminCrmRouteRoute,
 } as any)
+const AdminCrmTexpoRoute = AdminCrmTexpoRouteImport.update({
+  id: '/texpo',
+  path: '/texpo',
+  getParentRoute: () => AdminCrmRouteRoute,
+} as any)
 const AdminCrmLeadsRouteRoute = AdminCrmLeadsRouteRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -897,6 +909,7 @@ export interface FileRoutesByFullPath {
   '/initiative/claim': typeof InitiativeClaimRoute
   '/initiative/sponsors': typeof InitiativeSponsorsRoute
   '/join/$token': typeof JoinTokenRoute
+  '/texpo': typeof TexpoRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/confirm-account': typeof LearningManagementSystemConfirmAccountRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
@@ -923,6 +936,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm/forms': typeof AdminCrmFormsRouteRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteRouteWithChildren
   '/admin/crm/feedback': typeof AdminCrmFeedbackRoute
+  '/admin/crm/texpo': typeof AdminCrmTexpoRoute
   '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
   '/admin/news/$id': typeof AdminNewsIdRoute
@@ -1019,6 +1033,7 @@ export interface FileRoutesByTo {
   '/initiative/claim': typeof InitiativeClaimRoute
   '/initiative/sponsors': typeof InitiativeSponsorsRoute
   '/join/$token': typeof JoinTokenRoute
+  '/texpo': typeof TexpoRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/confirm-account': typeof LearningManagementSystemConfirmAccountRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
@@ -1044,6 +1059,7 @@ export interface FileRoutesByTo {
   '/admin/crm/contacts': typeof AdminCrmContactsRouteRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteRouteWithChildren
   '/admin/crm/feedback': typeof AdminCrmFeedbackRoute
+  '/admin/crm/texpo': typeof AdminCrmTexpoRoute
   '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
   '/admin/news/$id': typeof AdminNewsIdRoute
@@ -1148,6 +1164,7 @@ export interface FileRoutesById {
   '/initiative/claim': typeof InitiativeClaimRoute
   '/initiative/sponsors': typeof InitiativeSponsorsRoute
   '/join/$token': typeof JoinTokenRoute
+  '/texpo': typeof TexpoRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/confirm-account': typeof LearningManagementSystemConfirmAccountRoute
   '/learning-management-system/forgot-password': typeof LearningManagementSystemForgotPasswordRoute
@@ -1174,6 +1191,7 @@ export interface FileRoutesById {
   '/admin/crm/forms': typeof AdminCrmFormsRouteRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteRouteWithChildren
   '/admin/crm/feedback': typeof AdminCrmFeedbackRoute
+  '/admin/crm/texpo': typeof AdminCrmTexpoRoute
   '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
   '/admin/news/$id': typeof AdminNewsIdRoute
@@ -1280,6 +1298,7 @@ export interface FileRouteTypes {
     | '/initiative/claim'
     | '/initiative/sponsors'
     | '/join/$token'
+    | '/texpo'
     | '/learning-management-system/catalog'
     | '/learning-management-system/confirm-account'
     | '/learning-management-system/forgot-password'
@@ -1306,6 +1325,7 @@ export interface FileRouteTypes {
     | '/admin/crm/forms'
     | '/admin/crm/leads'
     | '/admin/crm/feedback'
+    | '/admin/crm/texpo'
     | '/admin/crm/students'
     | '/admin/forms/new'
     | '/admin/news/$id'
@@ -1402,6 +1422,7 @@ export interface FileRouteTypes {
     | '/initiative/claim'
     | '/initiative/sponsors'
     | '/join/$token'
+    | '/texpo'
     | '/learning-management-system/catalog'
     | '/learning-management-system/confirm-account'
     | '/learning-management-system/forgot-password'
@@ -1427,6 +1448,7 @@ export interface FileRouteTypes {
     | '/admin/crm/contacts'
     | '/admin/crm/leads'
     | '/admin/crm/feedback'
+    | '/admin/crm/texpo'
     | '/admin/crm/students'
     | '/admin/forms/new'
     | '/admin/news/$id'
@@ -1530,6 +1552,7 @@ export interface FileRouteTypes {
     | '/initiative/claim'
     | '/initiative/sponsors'
     | '/join/$token'
+    | '/texpo'
     | '/learning-management-system/catalog'
     | '/learning-management-system/confirm-account'
     | '/learning-management-system/forgot-password'
@@ -1556,6 +1579,7 @@ export interface FileRouteTypes {
     | '/admin/crm/forms'
     | '/admin/crm/leads'
     | '/admin/crm/feedback'
+    | '/admin/crm/texpo'
     | '/admin/crm/students'
     | '/admin/forms/new'
     | '/admin/news/$id'
@@ -1641,6 +1665,7 @@ export interface RootRouteChildren {
   InitiativeClaimRoute: typeof InitiativeClaimRoute
   InitiativeSponsorsRoute: typeof InitiativeSponsorsRoute
   JoinTokenRoute: typeof JoinTokenRoute
+  TexpoRoute: typeof TexpoRoute
   NewsIdRoute: typeof NewsIdRoute
   NewsBuildexAleppoRoute: typeof NewsBuildexAleppoRoute
   NewsInitiativeLaunchRoute: typeof NewsInitiativeLaunchRoute
@@ -1937,6 +1962,13 @@ declare module '@tanstack/react-router' {
       path: '/join/$token'
       fullPath: '/join/$token'
       preLoaderRoute: typeof JoinTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/texpo': {
+      id: '/texpo'
+      path: '/texpo'
+      fullPath: '/texpo'
+      preLoaderRoute: typeof TexpoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/initiative/sponsors': {
@@ -2310,6 +2342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCrmFeedbackRouteImport
       parentRoute: typeof AdminCrmRouteRoute
     }
+    '/admin/crm/texpo': {
+      id: '/admin/crm/texpo'
+      path: '/texpo'
+      fullPath: '/admin/crm/texpo'
+      preLoaderRoute: typeof AdminCrmTexpoRouteImport
+      parentRoute: typeof AdminCrmRouteRoute
+    }
     '/admin/crm/leads': {
       id: '/admin/crm/leads'
       path: '/leads'
@@ -2632,6 +2671,7 @@ interface AdminCrmRouteRouteChildren {
   AdminCrmFormsRouteRoute: typeof AdminCrmFormsRouteRouteWithChildren
   AdminCrmLeadsRouteRoute: typeof AdminCrmLeadsRouteRouteWithChildren
   AdminCrmFeedbackRoute: typeof AdminCrmFeedbackRoute
+  AdminCrmTexpoRoute: typeof AdminCrmTexpoRoute
   AdminCrmStudentsRoute: typeof AdminCrmStudentsRoute
   AdminCrmIndexRoute: typeof AdminCrmIndexRoute
   AdminCrmRegistrationLinksIdRoute: typeof AdminCrmRegistrationLinksIdRoute
@@ -2643,6 +2683,7 @@ const AdminCrmRouteRouteChildren: AdminCrmRouteRouteChildren = {
   AdminCrmFormsRouteRoute: AdminCrmFormsRouteRouteWithChildren,
   AdminCrmLeadsRouteRoute: AdminCrmLeadsRouteRouteWithChildren,
   AdminCrmFeedbackRoute: AdminCrmFeedbackRoute,
+  AdminCrmTexpoRoute: AdminCrmTexpoRoute,
   AdminCrmStudentsRoute: AdminCrmStudentsRoute,
   AdminCrmIndexRoute: AdminCrmIndexRoute,
   AdminCrmRegistrationLinksIdRoute: AdminCrmRegistrationLinksIdRoute,
@@ -2966,6 +3007,7 @@ const rootRouteChildren: RootRouteChildren = {
   InitiativeClaimRoute: InitiativeClaimRoute,
   InitiativeSponsorsRoute: InitiativeSponsorsRoute,
   JoinTokenRoute: JoinTokenRoute,
+  TexpoRoute: TexpoRoute,
   NewsIdRoute: NewsIdRoute,
   NewsBuildexAleppoRoute: NewsBuildexAleppoRoute,
   NewsInitiativeLaunchRoute: NewsInitiativeLaunchRoute,

@@ -36,6 +36,9 @@ import {
 } from "@/features/lms/lib/coupons-db";
 import { PaymentMethodPicker } from "@/features/lms/payments/PaymentMethodPicker";
 import { ShamCashPayment } from "@/features/lms/payments/ShamCashPayment";
+import { CashPayment } from "@/features/lms/payments/CashPayment";
+import type { PaymentMethodId } from "@/features/lms/payments/config";
+import "@/features/lms/payments/payment-dialog.css";
 import { submitPaidEnrollment } from "@/features/lms/payments/lib/payments-api";
 
 type FieldType =
@@ -91,7 +94,7 @@ export function EnrollmentFormDialog({
   onOpenChange: (v: boolean) => void;
   courseId: string;
   onSubmitted: (outcome: EnrollmentOutcome) => void;
-  /** Paid course: choose a method, fill the form, then pay (Sham Cash).
+  /** Paid course: choose a method, fill the form, then pay (cash or Sham Cash).
       `amount` is the price before any coupon. */
   payment?: { amount: number } | null;
 }) {
@@ -103,9 +106,10 @@ export function EnrollmentFormDialog({
   const [values, setValues] = useState<Record<string, AnswerValue>>({});
   const [busy, setBusy] = useState(false);
   // Paid courses walk method → details → payment; free courses only have details.
-  const [step, setStep] = useState<"method" | "details" | "sham_cash">("details");
+  const [step, setStep] = useState<"method" | "details" | "pay">("details");
+  const [method, setMethod] = useState<PaymentMethodId>("sham_cash");
   const isPaid = !!payment;
-  // What the Sham Cash step asks for: the course price, or the coupon's price.
+  // What the payment step asks for: the course price, or the coupon's price.
   const [amountDue, setAmountDue] = useState(0);
   const [fileProgress, setFileProgress] = useState<
     Record<string, { pct: number; loaded: number; total: number; name: string }>
@@ -372,17 +376,17 @@ export function EnrollmentFormDialog({
     } else {
       setAmountDue(payment.amount);
     }
-    setStep("sham_cash");
+    setStep("pay");
   };
 
-  // Request, answers, coupon and payment (with its receipts) are written in one transaction.
+  // Request, answers, coupon and payment (with any receipts) are written in one transaction.
   const submitPaid = async (receiptPaths: string[]) => {
     if (!user || !validate()) return;
     setBusy(true);
     try {
       const res = await submitPaidEnrollment({
         courseId,
-        method: "sham_cash",
+        method,
         receiptPaths,
         answers: buildAnswers(),
         coupon: couponToSend(),
@@ -395,9 +399,13 @@ export function EnrollmentFormDialog({
         return;
       }
       toast.success(
-        ar
-          ? "تم إرسال إيصال الدفع. ستُفتح الدورة بعد تحقّق الإدارة من وصول المبلغ."
-          : "Payment receipt sent. The course opens once the administration verifies the payment.",
+        method === "cash"
+          ? ar
+            ? "تم إرسال طلبك. ادفع المبلغ نقداً لدى الجمعية، وستُفتح الدورة بعد أن يؤكّد المحاسب استلامه."
+            : "Request sent. Pay in cash at the association; the course opens once the accountant confirms it."
+          : ar
+            ? "تم إرسال إيصال الدفع. ستُفتح الدورة بعد تحقّق الإدارة من وصول المبلغ."
+            : "Payment receipt sent. The course opens once the administration verifies the payment.",
       );
       if (isGuest && user) {
         await supabase
@@ -541,17 +549,21 @@ export function EnrollmentFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent className="lms-pay-dialog max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="pe-10 text-start sm:text-start">
+          <DialogTitle className="text-2xl font-extrabold">
             {step === "method"
               ? ar
                 ? "طريقة الدفع"
                 : "Payment method"
-              : step === "sham_cash"
-                ? ar
-                  ? "الدفع عبر شام كاش"
-                  : "Pay with Sham Cash"
+              : step === "pay"
+                ? method === "cash"
+                  ? ar
+                    ? "الدفع نقداً"
+                    : "Pay in cash"
+                  : ar
+                    ? "الدفع عبر شام كاش"
+                    : "Pay with Sham Cash"
                 : ar
                   ? "نموذج التسجيل"
                   : "Enrollment form"}
@@ -561,10 +573,14 @@ export function EnrollmentFormDialog({
               ? ar
                 ? "اختر الطريقة التي تناسبك لدفع رسوم الدورة."
                 : "Choose how you would like to pay the course fee."
-              : step === "sham_cash"
-                ? ar
-                  ? "حوّل المبلغ إلى حساب الجمعية ثم أرفق إيصال التحويل."
-                  : "Transfer the amount to the association's account, then attach the receipt."
+              : step === "pay"
+                ? method === "cash"
+                  ? ar
+                    ? "أكّد طلبك ثم ادفع المبلغ لدى الجمعية."
+                    : "Confirm your request, then pay at the association."
+                  : ar
+                    ? "حوّل المبلغ إلى حساب الجمعية ثم أرفق إيصال التحويل."
+                    : "Transfer the amount to the association's account, then attach the receipt."
                 : ar
                   ? "يرجى تعبئة الحقول التالية لإكمال طلب التسجيل."
                   : "Please fill these fields to complete your enrollment request."}
@@ -574,10 +590,19 @@ export function EnrollmentFormDialog({
           <PaymentMethodPicker
             ar={ar}
             onPick={(m) => {
-              if (m === "sham_cash") setStep("details");
+              setMethod(m);
+              setStep("details");
             }}
           />
-        ) : step === "sham_cash" && user && payment ? (
+        ) : step === "pay" && method === "cash" && user && payment ? (
+          <CashPayment
+            ar={ar}
+            amount={amountDue}
+            busy={busy}
+            onConfirm={() => submitPaid([])}
+            onBack={() => setStep("details")}
+          />
+        ) : step === "pay" && user && payment ? (
           <ShamCashPayment
             ar={ar}
             userId={user.id}

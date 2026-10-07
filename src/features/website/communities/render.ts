@@ -66,7 +66,7 @@ function titleHtml(short: Bilingual): string {
   );
 }
 
-/* One shared foundation: nine roots from a single trunk, this community's
+/* One shared foundation: eight roots from a single trunk, this community's
    root lit and ending in its seal. Drawn left to right in community order;
    the stylesheet mirrors it for Arabic and counter-mirrors the icon. */
 function rootsSvg(p: CommunityPageData): string {

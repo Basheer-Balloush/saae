@@ -15,7 +15,7 @@ import { getAllDonors } from "@/features/website/lib/initiative.functions";
 const SCRIPTS: CinematicScript[] = [
   { src: "/cinematic/js/language.js" },
   { src: "/cinematic/js/navigation.js" },
-  { src: "/cinematic/js/initiative.js" },
+  { src: "/cinematic/js/initiative.js?v=live-momentum-1" },
   { src: "/cinematic/js/text-effect.js" },
   { src: "/cinematic/js/anime.umd.min.js" },
   { src: "/cinematic/js/motion-anime.js" },

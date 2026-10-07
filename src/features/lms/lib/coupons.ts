@@ -152,10 +152,12 @@ export function whatsappNumber(raw: string | null | undefined): string {
 }
 
 /** What a personal coupon offers, for the email and the WhatsApp message:
-    { offer: "خصم 20٪ بحد أقصى 400 ل.س", limits: "صالح لـ 2 دورات حتى …" }. */
+    { offer: "خصم 20٪ بحد أقصى 400 ل.س", limits: "صالح لـ 2 دورات حتى …" }.
+    `category` names the category a coupon is limited to, if any. */
 export function couponOffer(
   c: Pick<Coupon, "percent_off" | "min_discount" | "max_discount" | "max_uses" | "expires_at">,
   ar: boolean,
+  category: string | null = null,
 ) {
   const pct = Number(c.percent_off ?? 0);
   const floor = c.min_discount != null ? formatSP(Number(c.min_discount), ar) : null;
@@ -164,15 +166,18 @@ export function couponOffer(
     ? `خصم ${pct}٪${floor ? ` بحد أدنى ${floor} (حتى سعر الدورة)` : ""}${cap ? ` بحد أقصى ${cap}` : ""}`
     : `${pct}% off${floor ? `, at least ${floor} (up to the course price)` : ""}${cap ? `, at most ${cap}` : ""}`;
   const parts: string[] = [];
+  const of = category ? (ar ? ` من دورات «${category}»` : ` ${category}`) : "";
   if (c.max_uses != null) {
     const n = Number(c.max_uses);
     parts.push(
       ar
         ? n === 1
-          ? "صالح لدورة واحدة"
-          : `صالح لـ ${n} دورات`
-        : `valid for ${n} course${n === 1 ? "" : "s"}`,
+          ? `صالح لدورة واحدة${of}`
+          : `صالح لـ ${n} دورات${of}`
+        : `valid for ${n}${of} course${n === 1 ? "" : "s"}`,
     );
+  } else if (category) {
+    parts.push(ar ? `على دورات «${category}» فقط` : `on ${category} courses only`);
   }
   if (c.expires_at) {
     const d = new Date(c.expires_at).toLocaleDateString(ar ? "ar-SY" : "en-GB", {
@@ -194,8 +199,9 @@ export function couponWhatsappText(
   name: string | null,
   catalogUrl: string,
   ar: boolean,
+  category: string | null = null,
 ) {
-  const { offer, limits } = couponOffer(c, ar);
+  const { offer, limits } = couponOffer(c, ar, category);
   return ar
     ? `مرحباً ${name ?? ""}،\nلديك كوبون خاص بك على منصة التعلّم: ${offer}${limits ? ` (${limits})` : ""}.\nالكود: ${c.code}\nافتح الدورة التي تريدها واضغط «سجّل الآن»، ثم أدخل الكود في حقل «كود الكوبون». يعمل الكود مع حسابك فقط.\n${catalogUrl}`
     : `Hello ${name ?? ""},\nYou have a coupon of your own on the learning platform: ${offer}${limits ? ` (${limits})` : ""}.\nCode: ${c.code}\nOpen the course you want, press Enroll, then enter the code in the "Coupon code" field. It works only with your account.\n${catalogUrl}`;

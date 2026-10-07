@@ -14,10 +14,13 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 import appCss from "../styles.css?url";
+import desktopMotion from "@/lib/desktop-motion.js?raw";
 import { LanguageProvider, useLang } from "@/lib/i18n/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "@/components/ui/sonner";
 import { AssistantFab } from "@/features/chat/AssistantFab";
+import { assistantPlacement } from "@/features/chat/lib/assistant-placement";
+import { TexpoClaimNudge } from "@/features/texpo/TexpoClaimNudge";
 import { RouteProgress } from "@/components/app/RouteProgress";
 import { ScrollToHash } from "@/components/app/ScrollToHash";
 import { ConfirmProvider } from "@/hooks/useConfirm";
@@ -197,7 +200,10 @@ const CONSOLE_PATH =
 const isProfilePath = (pathname: string) => /^\/profile\//i.test(pathname);
 
 const isDarkPath = (pathname: string) =>
-  CINEMATIC_PATH.test(pathname) || isSkinnedLmsPath(pathname) || CONSOLE_PATH.test(pathname);
+  CINEMATIC_PATH.test(pathname) ||
+  isSkinnedLmsPath(pathname) ||
+  CONSOLE_PATH.test(pathname) ||
+  pathname === "/texpo";
 
 function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = useLocation({ select: (location) => location.pathname });
@@ -209,6 +215,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning style={ground}>
       <head>
+        {/* First, so every later script sees it. */}
+        <script dangerouslySetInnerHTML={{ __html: desktopMotion }} />
         {analytics && (
           <>
             <script async src="https://www.googletagmanager.com/gtag/js?id=G-MM4Y7E9Y96" />
@@ -411,14 +419,7 @@ function ScrollRestoration() {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const location = useLocation();
-  const isAms = location.pathname.startsWith("/attendance-management-system");
-  const isLms = location.pathname.startsWith("/learning-management-system");
-  const isAdmin =
-    location.pathname.startsWith("/admin") ||
-    location.pathname.startsWith("/super-admin") ||
-    location.pathname.startsWith("/learning-management-system/admin");
-  const isStandaloneProfile =
-    isProfilePath(location.pathname) || location.pathname === "/feedback";
+  const assistant = assistantPlacement(location.pathname);
   /* Console pages share one frame; keeping one key stops the sidebar and its
      data from remounting on every click inside the console. */
   const isConsole =
@@ -446,10 +447,12 @@ function RootComponent() {
                 <Outlet />
               </motion.div>
             </AnimatePresence>
-            {/* The homepage's Abu Al-Joud opens the chat there, on every screen size. */}
-            {!isAms && !isLms && !isAdmin && !isStandaloneProfile && (
-              <AssistantFab hideTrigger={location.pathname === "/"} />
-            )}
+            {/* The homepage's Abu Al-Joud opens the chat there, on every screen size.
+                LMS pages show no floating launcher, but their footer's "Chat with
+                Abu Al-Joud" button opens the chat through the same event. On
+                /texpo he is the game's host and the game opens the chat. */}
+            {assistant.mounted && <AssistantFab hideTrigger={!assistant.launcher} />}
+            {assistant.mounted && <TexpoClaimNudge />}
             <Toaster richColors position="top-center" />
           </ConfirmProvider>
         </LanguageProvider>

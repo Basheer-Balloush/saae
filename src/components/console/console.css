@@ -849,6 +849,51 @@ html.cx-dark
 .cx-btn-ghost:hover:not(:disabled) {
   background: var(--cx-hover);
 }
+/* Solid red, for an action that cannot be undone. Windows on LMS paths sit
+   inside .lms-skin: the button carries .lms-reset, which most of the LMS
+   button skin skips, and the .lms-skin selector below outranks
+   `.lms-skin .lms-reset`. The skin's dialog rule still forces its colours
+   with !important, and an !important inside a cascade layer outranks every
+   un-layered one, so the colours sit in a layer. */
+@layer cx-danger {
+  .cx-btn-danger {
+    background: #e11d48 !important;
+    color: #fff !important;
+    border: 1px solid transparent !important;
+    box-shadow: 0 8px 22px rgba(225, 29, 72, 0.28) !important;
+  }
+  .cx-btn-danger:hover:not(:disabled) {
+    background: #be123c !important;
+  }
+  .cx-btn-danger:disabled {
+    box-shadow: none !important;
+  }
+}
+.cx-btn-danger,
+.lms-skin .cx-btn.cx-btn-danger {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+.cx-btn-danger:disabled,
+.lms-skin .cx-btn.cx-btn-danger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* Its heading: lms.css paints every h1-h3 under .lms-skin white. */
+.cx-danger-title,
+.lms-skin .cx-danger-title {
+  color: var(--cx-red);
+}
+.cx-btn-danger:focus-visible,
+.lms-skin .cx-btn.cx-btn-danger:focus-visible {
+  outline: 2px solid #fecdd3;
+  outline-offset: 2px;
+}
 .cx-input {
   border: 1px solid var(--cx-line);
   background: var(--cx-field);

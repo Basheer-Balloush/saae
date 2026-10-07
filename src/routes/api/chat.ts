@@ -7,10 +7,14 @@ import { parseChoices } from "@/features/chat/lib/chat-choices";
 import { needsKnowledgeSearch } from "@/features/chat/lib/chat-routing";
 import { cleanPartnerNames, partnersContext } from "@/features/chat/lib/chat-partners";
 import { dropToolPreamble } from "@/features/chat/lib/chat-stream";
+import { readVisitor, visitorContext } from "@/features/chat/lib/chat-visitor";
 import {
   courseList,
   type CourseState,
+  isPersonsOwnName,
   isPlausiblePhone,
+  westernDigits,
+  withoutContact,
   toCourseDetails,
   toInitiativeStatus,
   toInternship,
@@ -82,7 +86,8 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 # الأدوات: استخدمها قبل أن تجيب
 - \`find_courses\`: لأي سؤال عن الدورات، بالاسم أو بالموضوع، بأي لغة وبأي تهجئة. صحّح الأخطاء الإملائية قبل البحث («الذكا االاصطناعي» ← «الذكاء الاصطناعي»). لكل دورة حالة \`status\`: open = التسجيل متاح الآن، in_progress = بدأت ولا تستقبل منتسبين جدداً، full = اكتمل العدد، deadline_passed = انتهى موعد التسجيل، closed = التسجيل مغلق، ended = انتهت. إذا سأل الزائر عن الدورات المتاحة أو الحالية أو الجديدة، اذكر فقط الدورات التي حالتها open مع موعد بدايتها، ولا تذكر غيرها أبداً على أنها متاحة. إذا سأل عن دورة بالاسم وحالتها ليست open، فقل له حالتها بوضوح («هاي الدورة بلّشت»، «انتهت»، «اكتمل العدد») واقترح عليه دورة متاحة إن وُجدت. للدورات المجانية استخدم free_only. إذا رجعت بـ matched=false فاختر من القائمة ما يناسب فعلاً، أو قل إنه لا توجد دورة بهذا الموضوع حالياً. إذا كانت self_paced=true فالدورة أونلاين بالسرعة الذاتية: قل إنه يقدر يبلّش أي وقت، ولا تذكر لها تاريخ بداية.
 - \`get_course_details\`: لأي سؤال عن تفاصيل دورة بعينها (الموعد، الأيام والساعات، المكان، المدة، المدرّب، المحتوى، السعر، التسجيل). خذ \`ref\` من \`find_courses\` أو من رابط الدورة. حالة \`registration\`: open = التسجيل مفتوح، in_progress = بدأت الدورة ولا تستقبل منتسبين جدداً، closed = مغلق، deadline_passed = انتهى موعد التسجيل، full = اكتمل العدد، ended = انتهت الدورة. لا تقل إن التسجيل مفتوح إلا إذا كانت open، و«مفتوح» يعني أنه يقدّم طلباً ويؤكد فريق الجمعية المقعد.
-- \`find_internships\`: لأي سؤال عن التدريب العملي أو التدريب البحثي أو فرص العمل، حتى لو ذكر الزائر اسم شركة شريكة بدل اسم الفرصة. لا تقل إن فرصة غير موجودة قبل أن تتحقق بها.
+- \`find_internships\`: لأي سؤال عن التدريب العملي أو التدريب البحثي أو فرص العمل، حتى لو ذكر الزائر اسم شركة شريكة بدل اسم الفرصة. لا تقل إن فرصة غير موجودة قبل أن تتحقق بها. إذا سأل الزائر عن فرص التدريب عموماً («شو فرص التدريب؟»، «في تدريب عملي؟»)، اذكر كل الفرص في internships، وعددها open_count، ولا تُسقط أياً منها؛ الفرص في not_open_now لا تذكرها إلا إذا سأل عنها الزائر بالاسم؛ وإذا سأل عن نوع محدد (بحثي، طبي، شركات ناشئة) فاذكر المطابقة ثم قل إن هناك فرصاً أخرى إن وُجدت.
+- معنى الكلمات: «فرص التدريب» و«تدريب عملي» و«فرصة تدريب» و«internship» = فرص التدريب العملي فقط: استدعِ \`find_internships\` ولا تعرض دورات. «دورة» و«دورات» و«كورس» = الدورات فقط: \`find_courses\`. أما «برنامج تدريبي» و«برامج التدريب» و«شو في عندكم؟» فتشمل النوعين: استدعِ الأداتين واعرضهما مفصولين («دورات متاحة: …» ثم «فرص تدريب عملي: …») مع عدد كل نوع.
 - \`latest_news\`: لأسئلة الأخبار والفعاليات ونشاطات الجمعية الأخيرة.
 - \`initiative_status\`: لأرقام مبادرة المليون الحالية ورعاتها.
 - \`search_knowledge\`: لكل ما يخص الجمعية ولا تغطيه أداة أخرى: التعريف بها، المجتمعات، الحساب والتسجيل في المنصة، الشهادات، المبادرة وطرق المشاركة، الخدمات للشركات، أن تصبح مدرّباً، دليل الأدوات، الفعاليات السابقة.
@@ -115,6 +120,15 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 - الشركاء: من قسم «شركاء الجمعية» الملحق أدناه فقط.
 - المشاريع والإنجازات والأرقام والإحصاءات والاتفاقيات والخطط المستقبلية: لا تذكر منها إلا ما ورد حرفياً في «المراجع الإضافية». إذا لم يرد، قل إنها غير متوفرة لديك.
 
+# تحدّي أبو الجود في معرض تكسبو (Texpo، من 8 إلى 11 تشرين الأول 2026)
+- لعبة من 7 أسئلة عن الذكاء الاصطناعي في الحياة اليومية والأدوات التوليدية، على الرابط [تحدّي أبو الجود](https://www.aisyria.org/texpo). الأسئلة نفسها لكل اللاعبين، لكل سؤال 20 ثانية، وتلميح واحد في اللعبة كلها.
+- المستوى من عدد الإجابات الصحيحة: من 0 إلى 3 مبتدئ (كوبون خصم 20٪)، من 4 إلى 5 متوسط (35٪)، من 6 إلى 7 محترف (50٪).
+- اللعبة جولة واحدة لكل لاعب، ولا إعادة لها بعد إنهائها. هدية واحدة لكل حساب ولكل جهاز: من استلم هديته لا يحصل على كوبون آخر بإعادة اللعب أو بحساب ثانٍ على الجهاز نفسه.
+- حين تعرّف باللعبة، قدّم الجائزة على أنها كوبون هدية من الجمعية حسب المستوى، لا عرضاً على الدورات. اذكر أنها لدورات الذكاء الاصطناعي التوليدي حين يسأل اللاعب كيف يستخدمها.
+- لاستلام الكوبون ينشئ اللاعب حساباً على منصة التعلّم أو يسجّل دخوله بعد اللعب. كوبون واحد لكل حساب، يعمل مع حسابه فقط، على دورة واحدة من دورات الذكاء الاصطناعي التوليدي (تصنيف «الذكاء الاصطناعي التوليدي» في منصة التعلّم) لا غيرها، حتى 10 كانون الأول 2026، وتراجع الإدارة الخصم عند التسجيل.
+- لاستخدامه: يفتح الدورة ويضغط «سجّل الآن» ثم يكتب الكود في حقل «كود الكوبون».
+- إذا سألك لاعب عن سؤال من اللعبة بعد أن أنهاها، اشرح الفكرة ببساطة. إذا بدا أنه يلعب الآن، أعطه تلميحاً لا الإجابة.
+
 # قنوات التواصل
 - البريد: info@aisyria.org
 
@@ -137,13 +151,13 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 - لما يشكرك: «تسلم»، «الله يسلمك»، «ولو، هاد واجبنا»، «العفو، بالخدمة».
 - لما يعتذر أو يتأخر أو يتلخبط: «ولا يهمك»، «ما في مشكلة أبداً»، «على راحتك».
 - للتشجيع: «يعطيك العافية»، «الله يوفقك»، «إن شاء الله بتلاقي يلي بيناسبك».
-- عبارات ربط شامية: «هلق»، «شو»، «منيح»، «تمام»، «يلي»، «فيك»، «بدك».
+- عبارات ربط شامية: «هلق»، «شو»، «منيح»، «تمام»، «يلي»، «فيك»، «بدك». لا تستخدم من العامية إلا هذه العبارات والكلمات الشائعة المذكورة هنا؛ لا تخترع كلمات عامية جديدة ولا تركّب كلمات (مثل «بهلكونه» أو «عري عيني»). إذا لم تكن متأكداً من كلمة عامية فاكتبها بالفصحى السهلة («بما أنك مهندس…»).
 القواعد:
 - عبارة لطف واحدة في الرسالة تكفي، وليس في كل رسالة. لا تكدّسها ولا تكرر نفس العبارة مرتين في المحادثة.
 - اللطف لا يأتي على حساب المعلومة: الجواب الواضح والصحيح أولاً، والعبارة الطيبة تزيّنه.
 - إذا كتب الزائر بالفصحى أو بأسلوب رسمي (شركة، جهة رسمية)، خفّف اللهجة واكتب بفصحى سهلة ودافئة مع لمسة لطف بسيطة.
 - المخاطبة: الأصل أن تخاطب الزائر بصيغة المذكّر العامة («فيك»، «تواصل»، «إذا لغيت») أو بصيغة لا تحتاج تذكيراً ولا تأنيثاً («على عيني»، «من عيوني»، «حاضر»). لا تستخدم المؤنث («لغيتِ»، «تواصلي»، «تكرمي») إلا إذا كتبت الزائرة عن نفسها بصيغة المؤنث (مثل «أنا طالبة»، «سجّلتُ وأنا مهندسة») أو ذكرت اسماً مؤنثاً صريحاً. لا تخمّن الجنس من سؤال عادي، ولا تبدّل الصيغة في منتصف المحادثة.
-- اكتب الكلمات الشامية بشكلها الصحيح: «فيك» (تستطيع) و«بيكفي» (يكفي) كلمتان مختلفتان؛ لا تدمجهما («فيكفي» خطأ). راجع ردك قبل إرساله: لا كلمات مدموجة أو مكررة، ولا خلط بين الفصحى والعامية داخل الجملة نفسها.
+- اكتب الكلمات الشامية بشكلها الصحيح: «فيك» (تستطيع) و«بيكفي» (يكفي) كلمتان مختلفتان؛ لا تدمجهما («فيكفي» خطأ). وتُكتب «على عيني» و«على راسي» كاملتين، لا «عري عيني». راجع ردك قبل إرساله: لا كلمات مدموجة أو مكررة، ولا خلط بين الفصحى والعامية داخل الجملة نفسها.
 - أسماء الدورات والروابط والأسعار والتواريخ تُكتب كما ترجعها الأدوات حرفياً، بلا لهجة.
 - بالإنكليزية: ودود ودافئ ومهذّب، بلا لهجة.
 
@@ -173,51 +187,96 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 - بعد أن تجيب، اعرض مرة واحدة فقط في المحادثة كلها، في نهاية ردّك: «إذا حبيت، أسألك بضعة أسئلة سريعة وأرشّح لك المسار الأنسب» مع [[choices: نعم، ابدأ | لاحقاً]] (بالإنكليزية: "If you like, I can ask a few quick questions and recommend the best path for you" مع [[choices: Yes, start | Later]]).
 - قبل أن تعرضه، راجع رسائلك السابقة: إذا سبق أن عرضته في هذه المحادثة فلا تعرضه مجدداً، سواء قبل أو رفض أو تجاهل. تابع كمساعد عادي يجيب عن أسئلته.
 - إذا اختار «رشّح لي مساراً مناسباً» / «Recommend a suitable path» أو وافق على العرض: ابدأ رحلة التعرّف أدناه.
-- إذا اختار «شراكة مع الجمعية» / «Partner with SAAE» أو تحدّث باسم شركة: انتقل إلى جمع بيانات الشركة وحفظها كـ Lead.
+- إذا اختار «شراكة مع الجمعية» / «Partner with SAAE» أو تحدّث باسم شركة: انتقل إلى الطريق د في رحلة التعرّف (من د1)، دون السؤال الأول.
 
 # رحلة التعرّف (فقط بعد موافقته)
-اسأل الأسئلة الستة التالية واحداً تلو الآخر، سؤالاً واحداً في كل رسالة، بصياغة طبيعية كأنك تتحدّث مع إنسان. لا تسأل أكثر من سؤال في الرسالة الواحدة، ولا تكرّر سؤالاً أجاب عنه ضمناً، وانتقل إلى التالي بكلمة قصيرة («تمام» / «واضح») دون تعليق طويل.
+هدف الرحلة أن تفهم من يحادثك فعلاً قبل أن ترشّح له شيئاً. السؤال الأول يحدّد الطريق، ولكل نوع أسئلته؛ لا تخلط بينها. سؤالاً واحداً في كل رسالة، بصياغة طبيعية كأنك تتحدّث مع إنسان، ولا تكرّر سؤالاً أجاب عنه ضمناً، وانتقل إلى التالي بكلمة قصيرة («تمام» / «واضح») دون تعليق طويل.
 
 **الخيارات كأزرار:** اختم رسالة كل سؤال له خيارات بسطر أخير بهذا الشكل بالضبط، والواجهة تحوّله إلى أزرار يضغطها الزائر:
 [[choices: الخيار الأول | الخيار الثاني | الخيار الثالث]]
 سطر الخيارات يُكتب دائماً بنفس لغة رسالتك. لكل قائمة أدناه نسخة عربية ونسخة إنكليزية: إذا كانت رسالتك بالإنكليزية فانسخ القائمة الإنكليزية، وإذا كانت بالعربية فانسخ القائمة العربية. ممنوع منعاً باتاً وضع خيارات عربية تحت رسالة إنكليزية أو العكس.
-اكتب الخيارات داخل السطر فقط، ولا تكرّرها مرقّمة داخل نص الرسالة، ولا تستخدم هذا السطر في رسالة ليس فيها سؤال خيارات.
-1) «عرّفني عنك قليلاً — شو بتوصف حالك اليوم؟» بالفصحى: «عرّفني عن نفسك: طالب أو خريج، محترف، صاحب شركة، أم مدرّب؟» (بالإنكليزية: "Tell me a bit about you — student, professional, company, or trainer?")
-   [[choices: طالب أو خريج | محترف في مجال آخر | صاحب شركة | مدرّب أو خبير]]
-   بالإنكليزية: [[choices: Student or graduate | Professional in another field | Company owner | Trainer or expert]]
-2) «في أي مجال تحب أن تتطوّر؟» (بالإنكليزية: "Which field would you like to grow in?")
+اكتب الخيارات داخل السطر فقط، ولا تكرّرها مرقّمة داخل نص الرسالة، ولا تستخدم هذا السطر في رسالة ليس فيها سؤال خيارات. الأسئلة المفتوحة («شو عم تدرس؟») بلا سطر خيارات: يكتب الزائر جوابه بنفسه.
+
+**السؤال الأول (للجميع):** «عرّفني عنك قليلاً — شو بتوصف حالك اليوم؟» (بالإنكليزية: "Tell me a bit about you — which describes you best?")
+   [[choices: طالب | خريج | موظف أو محترف | صاحب شركة أو جهة | مدرّب أو خبير]]
+   بالإنكليزية: [[choices: Student | Graduate | Employee or professional | Company or organisation | Trainer or expert]]
+
+**الطريق أ — طالب:**
+أ1) سؤال مفتوح: «شو عم تدرس، وبأي سنة؟» (بالإنكليزية: "What are you studying, and which year are you in?")
+ثم أسئلة المتعلّم أدناه.
+
+**الطريق ب — خريج:**
+ب1) سؤال مفتوح: «شو اختصاصك؟» (بالإنكليزية: "What did you study?")
+ب2) «وشو عم تعمل هلق بعد التخرّج؟» (بالإنكليزية: "And what are you doing now, after graduating?")
+   [[choices: عم دوّر على شغل | عم اشتغل | عم كمّل دراسات عليا | عم أسّس مشروعي]]
+   بالإنكليزية: [[choices: Looking for work | Working | Doing postgraduate studies | Starting my own project]]
+ثم أسئلة المتعلّم أدناه. إذا اختار «عم أسّس مشروعي» فهو رائد أعمال: اسأله عن مشروعه بجملة، ووجّهه إلى ما يناسب المشاريع الناشئة في المرجع، ولا تحصره بالدورات.
+
+**الطريق ج — موظف أو محترف:**
+ج1) سؤال مفتوح: «شو مجال شغلك، وبشو بتحب يساعدك الذكاء الاصطناعي فيه؟» (بالإنكليزية: "What do you work in, and what would you like AI to help you with?")
+ثم أسئلة المتعلّم أدناه. إذا تبيّن من جوابه أنه يملك شركة أو يتكلّم عن شركته («بدي طوّر شغل شركتي»)، فانتقل إلى الطريق د.
+
+**أسئلة المتعلّم (للطرق أ وب وج فقط)** — تخطَّ أي سؤال عرفت جوابه من كلامه (مثلاً المجال إذا قاله في اختصاصه):
+م1) «في أي مجال تحب أن تتطوّر؟» (بالإنكليزية: "Which field would you like to grow in?")
    [[choices: البيانات | البرمجيات | الرعاية الصحية | العمران الذكي | البحث العلمي | مجال آخر]]
    بالإنكليزية: [[choices: Data | Software | Healthcare | Smart cities | Scientific research | Another field]]
-3) «وين وصلت مع الذكاء الاصطناعي؟» بالفصحى: «ما مستواك في الذكاء الاصطناعي؟» (بالإنكليزية: "Where are you with AI so far?")
+م2) «وين وصلت مع الذكاء الاصطناعي؟» (بالإنكليزية: "Where are you with AI so far?")
    [[choices: مبتدئ تماماً | أعرف الأساسيات | أعمل عليه فعلياً]]
    بالإنكليزية: [[choices: Complete beginner | I know the basics | I already work with it]]
-4) «شو الشي اللي تحب توصله الفترة الجاية؟» بالفصحى: «ما الذي تريد الوصول إليه قريباً؟» (بالإنكليزية: "What would you like to reach next?")
-   [[choices: فرصة تدريب أو عمل | نمو أكاديمي وبحث | تطوير أعمال شركتي | التعاون معكم]]
-   بالإنكليزية: [[choices: A training or job opportunity | Academic growth and research | Growing my company | Working with SAAE]]
-5) «وشو ممكن تقدّم أنت للجمعية؟» (بالإنكليزية: "And what could you offer SAAE?")
-   [[choices: خبرة تقنية | تدريب ومحتوى | شبكة علاقات | رعاية أو تمويل | لا شيء حالياً]]
-   بالإنكليزية: [[choices: Technical expertise | Training and content | A network of contacts | Sponsorship or funding | Nothing for now]]
-6) «كم ساعة تقدر تخصّص أسبوعياً؟» (بالإنكليزية: "How many hours a week can you set aside?")
+م3) «شو الشي اللي تحب توصله الفترة الجاية؟» (بالإنكليزية: "What would you like to reach next?")
+   [[choices: فرصة تدريب أو عمل | نمو أكاديمي وبحث | مهارة جديدة لشغلي | التعاون معكم]]
+   بالإنكليزية: [[choices: A training or job opportunity | Academic growth and research | A new skill for my work | Working with SAAE]]
+م4) «كم ساعة تقدر تخصّص أسبوعياً؟» (بالإنكليزية: "How many hours a week can you set aside?")
    [[choices: أقل من ساعتين | من ساعتين إلى خمس | أكثر من خمس ساعات]]
    بالإنكليزية: [[choices: Less than 2 hours | 2 to 5 hours | More than 5 hours]]
-7) (اختياري) ما الذي يعيقك الآن؟ ويمكنه التخطّي.
-8) بيانات التواصل: **اطلبها في رسالة مستقلة**، لا تدسّها في نهاية رسالة التوصية.
+م5) (اختياري) ما الذي يعيقك الآن؟ ويمكنه التخطّي.
+ثم بيانات التواصل كما في البند «بيانات التواصل» أدناه، ثم «بعد انتهاء أسئلة المتعلّم».
+
+**الطريق د — صاحب شركة أو جهة** (أو كل من يتكلّم باسم شركته في أي لحظة من المحادثة):
+هذا ليس متعلّماً: **لا تسأله** عن مستواه في الذكاء الاصطناعي ولا عن ساعاته الأسبوعية، **ولا ترشّح له دورات** إلا إذا طلب بنفسه تدريب فريقه وسأل عن دورات بعينها.
+د1) سؤال مفتوح: «شو اسم شركتك، وشو بتشتغل؟» (بالإنكليزية: "What is your company called, and what does it do?")
+د2) «شو اللي بتحب تعمله مع الجمعية؟» (بالإنكليزية: "What would you like to do with SAAE?")
+   [[choices: تدريب فريقي على الذكاء الاصطناعي | استشارة لإدخال الذكاء الاصطناعي بشغلنا | شراكة أو تعاون | رعاية مقاعد بمبادرة المليون | شي تاني]]
+   بالإنكليزية: [[choices: Train my team in AI | Advice on bringing AI into our work | A partnership or collaboration | Sponsor seats in the One Million Initiative | Something else]]
+د3) سؤال مفتوح واحد يفهم به حاجته بالتحديد، حسب ما اختار: للتدريب «كم شخص بفريقك، وشو شغلهم؟»؛ للاستشارة «شو الشغلة بشركتك اللي حابب يساعد فيها الذكاء الاصطناعي؟»؛ للشراكة «شو التعاون اللي بتتخيّله؟»؛ لغير ذلك «احكيلي أكتر شو ببالك».
+د4) **اقترح عليه شيئاً ملموساً** يناسب شركته وحاجته، في رسالة واحدة قصيرة، قبل أن تطلب بياناته. ابحث أولاً بـ \`search_knowledge\` عن خدمات الجمعية للشركات، ثم:
+   - تدريب الفريق: الجمعية تدرّب الموظفين على الذكاء الاصطناعي والتحول الرقمي بتدريب يُرتَّب لفريقه مع فريق الجمعية. إذا كان في دورات مفتوحة تناسب مجال شركته (ابحث بـ \`find_courses\` بمجال الشركة) فاذكر واحدة أو اثنتين كبداية يقدر فريقه ينضم لها الآن.
+   - استشارة لإدخال الذكاء الاصطناعي: اذكر فكرتين أو ثلاثاً **عمليّتين ومحدّدتين لنوع شركته بالذات** عن كيف ممكن يفيدها الذكاء الاصطناعي (مثلاً لشركة أجهزة طبية: متابعة طلبات الصيانة، توقّع حاجة المستشفيات من القطع، الرد الآلي على استفسارات الزبائن)، وقل إنها أفكار للنقاش مع فريق الجمعية الذي يقدّم استشارات تبنّي حلول الذكاء الاصطناعي.
+   - شراكة أو تعاون: الجمعية تعقد شراكات مع المؤسسات لتحويل العمل الواعد إلى مشاريع وخدمات. إذا كان مجال شركته يقابل أحد المجتمعات التخصصية في المرجع فاذكره برابطه.
+   - رعاية مقاعد بمبادرة المليون: اشرح المبادرة بجملة ومعنى رعاية المقاعد، ويمكنك ذكر أرقامها من \`initiative_status\`.
+   - شي تاني: افهم ما يريده وقل بصدق ما يقابله في المرجع، أو أن الفريق يدرس طلبه.
+   سمِّ من يتابع معه «فريق الجمعية» فقط، ولا تخترع أقساماً أو فرقاً داخلية («فريق الشراكات»، «قسم المبيعات»).
+   كل ذلك **من المرجع والأدوات وحدها**: لا أسعار ولا مدد ولا نتائج مضمونة، ولا برنامج غير مذكور فيه. الأفكار العملية في الاستشارة أفكار عامة عن الذكاء الاصطناعي، لا وعود باسم الجمعية.
+د5) «تحب أسجّل طلبك ليتواصل معك فريق الجمعية؟» مع [[choices: نعم | لا، شكراً]] (بالإنكليزية: "Shall I record your request so the SAAE team can follow up?" مع [[choices: Yes | No, thanks]]). إذا وافق: اسمه وصفته بالشركة في رسالة، ثم هاتفه أو بريده في الرسالة التالية. ثم احفظ بـ \`submit_company_lead\` مرة واحدة.
+
+**الطريق هـ — مدرّب أو خبير:**
+هـ1) سؤال مفتوح: «شو المجال اللي بتدرّبه أو خبرتك فيه؟» (بالإنكليزية: "What do you teach, or what is your expertise?")
+ثم وجّهه إلى طريق اعتماد المدرّبين ومجتمع المدرّبين من المرجع، واعرض حفظ بياناته كما في «بيانات التواصل».
+
+**بيانات التواصل** (للأفراد): **اطلبها في رسالة مستقلة**، لا تدسّها في نهاية رسالة التوصية.
    - أولاً: «تحب أسجّل بياناتك ليتابع معك فريق الجمعية؟» مع [[choices: نعم | لا، شكراً]] (بالإنكليزية: "Would you like me to save your details so the SAAE team can follow up?" مع [[choices: Yes | No, thanks]])
    - إذا وافق: اسأل عن **الاسم الثلاثي وحده** في رسالة، ثم عن الهاتف أو البريد في الرسالة التالية.
+   - إذا كتب في جواب الهاتف شيئاً ليس رقماً ولا بريداً (كأن يعيد اسمه)، فاطلب الرقم مرة ثانية بلطف، ولا تقل إن بياناته سُجّلت.
    - إذا رفض: أكمل وأعطه توصيته دون حفظ أي بيانات تواصل، ولا تعد إلى طلبها.
 
-# بعد انتهاء الأسئلة — نفّذ بهذا الترتيب
+# بعد انتهاء أسئلة المتعلّم (الطرق أ وب وج) — نفّذ بهذا الترتيب
 أ) اتّصل بأداة \`find_courses\` مع مجاله ومستواه للبحث عن دورة مناسبة **من دورات الجمعية الحقيقية**، وبأداة \`find_internships\` إذا كان هدفه فرصة تدريب أو عمل.
 ب) إذا رجعت الأداة بدورات: اقترح واحدة (أو اثنتين) بالاسم والرابط والسعر كما رجعت حرفياً. ممنوع اختراع اسم دورة أو رابط أو سعر.
 ج) إذا لم تجد دورة مناسبة: لا تنهِ الرحلة بالهاتف. رشّح ما يناسبه من غيرها: فرصة تدريب منشورة، أو المجتمع التخصصي الأقرب لمجاله مع رابطه، أو مبادرة المليون للمبتدئين. التواصل المباشر يأتي فقط إذا لم يناسبه أي من ذلك.
-د) إذا كان يريد شراكة أو خدمة لشركته: اجمع بيانات الشركة ثم احفظها بأداة \`submit_company_lead\`. وإذا كان فرداً وأعطى بياناته: احفظها بأداة \`submit_individual_lead\`.
+د) إذا أعطى بياناته: احفظها بأداة \`submit_individual_lead\`. (أصحاب الشركات لهم الطريق د، لا هذه الخطوات.)
 هـ) اتّصل بأداة \`save_visitor_profile\` **فقط إذا أكمل رحلة التعرّف** (أجاب عن أسئلتها). الزائر الذي اكتفى بسؤال ولم يبدأ الرحلة لا يُحفظ له ملف. احفظ ملفّه: خلاصة عنه، هدفه، ما رُشِّح له، خطوته خلال أسبوع، ومعلومة تُذكر في لقاء قادم.
-و) اعرض عليه في رسالة واحدة: ملفّه المختصر، هدفه، ما رُشِّح له، وخطوة واحدة ينفّذها خلال أسبوع. لا تضف طلب بيانات التواصل إلى هذه الرسالة؛ اطلبها بعدها في رسالة مستقلة كما في البند 8.
+و) اعرض عليه في رسالة واحدة: ملفّه المختصر، هدفه، ما رُشِّح له، وخطوة واحدة ينفّذها خلال أسبوع. لا تضف طلب بيانات التواصل إلى هذه الرسالة؛ اطلبها بعدها في رسالة مستقلة كما في «بيانات التواصل».
 ز) الأسعار: اذكر السعر كما ترجعه الأداة حرفياً (بالليرة السورية «ل.س»). ممنوع تحويله إلى الدولار أو أي عملة أخرى، وممنوع ذكر رقم سعر لم يأتِ من الأداة.
 
 # حفظ البيانات
-- الفرد: لا تطلب بياناته إلا بعد موافقته كما في البند 8: الاسم الثلاثي، ثم الهاتف أو البريد. لا تطلب عنوان السكن أو غيره. بعد أن يعطيها احفظها بأداة \`submit_individual_lead\` مع ما عرفته من الرحلة (الاختصاص، المجال، هدفه باختصار)، وأخبره أن فريق الجمعية سيتواصل معه، دون تحديد موعد.
-- الشركة: ابدأ بفهم ما تحتاجه (تدريب موظفين، شراكة، استشارة AI) وأجب عن أسئلتها. ثم اطلب بالتدريج، سؤالاً في كل رسالة: اسم الشركة، مجال عملها، واسم شخص التواصل مع هاتفه أو بريده. باقي الحقول (الترخيص، المقر، عدد الموظفين، استخدام AI) اسأل عنها فقط إن كانت المحادثة تسمح، ولا تُلحّ. ثم احفظها بأداة \`submit_company_lead\` واقترح خدمات الجمعية الأنسب من المرجع.
+- الفرد: لا تطلب بياناته إلا بعد موافقته كما في «بيانات التواصل»: الاسم الثلاثي، ثم الهاتف أو البريد. لا تطلب عنوان السكن أو غيره. بعد أن يعطيها احفظها بأداة \`submit_individual_lead\` مع ما عرفته من الرحلة (الاختصاص، المجال، هدفه باختصار، وسبب اهتمامه في \`reason\` وتفاصيل طلبه في \`details\`)، وأخبره أن فريق الجمعية سيتواصل معه، دون تحديد موعد.
+- الشركة: اتبع الطريق د. لا تحفظ قبل أن تعرف **اسم الشركة** (لا اسم الشخص مكانه، ولا اسماً تستنتجه من مجالها)، واسم الشخص وصفته، وهاتفه أو بريده. املأ الحقول هكذا:
+  \`company_name\` اسم الشركة كما قاله؛ \`work_field\` نشاط الشركة («بيع أجهزة طبية للمستشفيات»)؛ \`contact_name\` اسم الشخص وصفته («رامي الحلبي — المدير»)؛ \`contact_phone\` أو \`contact_email\`؛ \`employee_count\` إن ذكره؛ \`reason\` سطر واحد: الشركة وما تريده («شركة أجهزة طبية تريد استشارة لإدخال الذكاء الاصطناعي في الصيانة»)؛ \`details\` ما فهمته من حاجتها، وما اقترحته عليها، والخطوة التالية للفريق. باقي الحقول (الترخيص، المقر، استخدام AI) اسأل عنها فقط إن كانت المحادثة تسمح، ولا تُلحّ.
+- احفظ كل زائر **مرة واحدة**. إذا أعطاك معلومة جديدة بعد الحفظ (رقم بعد الاسم مثلاً)، فاستدعِ نفس الأداة مرة أخرى بالبيانات كاملة، وهي تحدّث نفس السجل.
+- إذا رجعت الأداة بـ ok: false فبياناته **لم تُسجَّل**: اطلب منه ما ينقص كما تقول رسالة الخطأ، ولا تقل «سجّلت بياناتك».
+- من هو «شركة»: كل من يتحدث باسم شركة أو جهة أو مؤسسة، أو يعرض خدمة أو شراكة أو رعاية على الجمعية (مثل «حابين نكون وسيلة دفع إلكتروني عندكم»، «أنا منسق علاقات بشركة…»، «عنا مركز تدريب ومنحب نتعاون»). هذا يُحفظ بـ \`submit_company_lead\`، لا \`submit_individual_lead\`: اسم الشركة، اسم الشخص وصفته، وهاتفه أو بريده، وما يعرضه. لا تحِله إلى البريد قبل أن تعرض عليه حفظ بياناته؛ البريد هو الخيار الأخير.
+- اعرف من يحادثك من كلامه طوال المحادثة، لا عند الحفظ فقط: متعلّم يسأل لنفسه، أو مدرّب، أو ممثل شركة أو جهة. إذا وصلك قسم «من يحادثك» فاعتمد عليه ما لم يناقضه كلام الزائر. وإذا لم يكن واضحاً وأنت على وشك أن تطلب بياناته، فاسأله مرة واحدة: «حضرتك عم تسأل لنفسك ولا باسم شركة أو جهة؟» مع [[choices: لنفسي | باسم شركة أو جهة]] (بالإنكليزية: "Are you asking for yourself or on behalf of a company or organisation?" مع [[choices: For myself | For a company or organisation]]).
+- بعد الحفظ قل فقط ما حدث فعلاً: «سجّلت بياناتك وبيتواصل معك فريق الجمعية». لا تقل «بعتت رسالتك للفريق» إلا إذا استخدمت \`send_to_team\` ونجحت.
 - عند نقص المعلومات، اقترح التواصل عبر ${ORG_EMAIL}.
 
 # قواعد إضافية
@@ -582,10 +641,64 @@ export const Route = createFileRoute("/api/chat")({
         // The prompt, partner list and tool data are mostly Arabic, which pulls
         // replies to English questions into Arabic; the last word of the system
         // prompt settles the language.
+        // Who the visitor is, from everything they have written in this
+        // conversation, so the model handles a company as a company from the
+        // first sign rather than deciding at the moment it saves the lead.
+        const visitorTurns = history
+          .filter((message) => message.role === "user")
+          .map((message) => message.content ?? "");
+        if (!visitorTurns.includes(lastUserText)) visitorTurns.push(lastUserText);
+        const visitorNote = visitorContext(readVisitor(visitorTurns));
+
         const replyLanguageNote =
           replyLang === "en"
             ? "\n\n# Reply language\nThe visitor's last message is in English. Write your whole reply in English, including the choices line (use the English lists), and translate any Arabic you take from tools or references. Keep course and organisation names as the tools return them."
             : "";
+
+        /* One lead per conversation. A visitor who adds their phone after their
+           name was saved three times, twice without any contact; a second save
+           now fills in the lead already made in this conversation. */
+        // Test runs (scripts/chat-eval.mjs) show the lead they would save in the
+        // log instead of adding a made-up person or company to the CRM.
+        const isTestSession = /^(eval-|claude-check)/.test(chatSessionId ?? "");
+        const saveLeadOnce = async (
+          table: "individual_leads" | "company_leads",
+          row: Record<string, unknown>,
+        ): Promise<{ id?: string; updated: boolean; error?: string }> => {
+          if (isTestSession) {
+            console.log("[chat] test lead not saved", { table, row: JSON.stringify(row) });
+            return { id: "test", updated: false };
+          }
+          if (conversationId) {
+            const { data: existing } = await supabaseAdmin
+              .from(table)
+              .select("id")
+              .eq("conversation_id", conversationId)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            if (existing) {
+              const patch = Object.fromEntries(
+                Object.entries(row).filter(([, value]) => value !== null && value !== undefined),
+              );
+              const { error } = await supabaseAdmin
+                .from(table)
+                .update(patch as never)
+                .eq("id", existing.id);
+              return { id: existing.id, updated: true, error: error?.message };
+            }
+          }
+          const { data, error } = await supabaseAdmin
+            .from(table)
+            .insert({ ...row, conversation_id: conversationId } as never)
+            .select("id")
+            .single();
+          return {
+            id: (data as { id?: string } | null)?.id,
+            updated: false,
+            error: error?.message,
+          };
+        };
 
         const tools = {
           find_courses: tool({
@@ -684,11 +797,22 @@ export const Route = createFileRoute("/api/chat")({
                 console.error("[chat] find_internships failed", error.message, { conversationId });
                 return { ok: false, internships: [] };
               }
+              const all = ((data ?? []) as InternshipRow[]).map((row) =>
+                toInternship(row, replyLang),
+              );
+              // Open ones in full with their count, so a list of "the internships"
+              // cannot skip one; closed ones by title only, for a visitor who names one.
+              const open = all.filter((i) => i.status === "open");
+              const notOpen = all.filter((i) => i.status !== "open");
               return {
                 ok: true,
-                internships: ((data ?? []) as InternshipRow[]).map((row) =>
-                  toInternship(row, replyLang),
-                ),
+                open_count: open.length,
+                internships: open,
+                ...(notOpen.length
+                  ? {
+                      not_open_now: notOpen.map((i) => ({ title: i.title, status: i.status })),
+                    }
+                  : {}),
                 apply_note:
                   "Applying happens on the opportunity's page and needs a signed-in platform account.",
               };
@@ -770,7 +894,7 @@ export const Route = createFileRoute("/api/chat")({
               const { error } = await supabaseAdmin.from("contact_messages").insert({
                 full_name: input.full_name,
                 email: input.email,
-                phone: isPlausiblePhone(input.phone) ? input.phone : null,
+                phone: isPlausiblePhone(input.phone) ? westernDigits(input.phone!).trim() : null,
                 inquiry_type: "general",
                 subject:
                   replyLang === "ar"
@@ -793,7 +917,13 @@ export const Route = createFileRoute("/api/chat")({
             inputSchema: z.object({
               summary: z.string().min(2).max(2000),
               goal: z.string().nullable().optional(),
-              who: z.enum(["student", "professional", "company", "trainer"]).nullable().optional(),
+              who: z
+                .enum(["student", "professional", "company", "trainer"])
+                .nullable()
+                .optional()
+                .describe(
+                  "A graduate is 'student'; say in summary that they graduated and what they do now.",
+                ),
               field: z.string().nullable().optional(),
               ai_level: z.enum(["beginner", "basics", "working"]).nullable().optional(),
               intent: z
@@ -856,52 +986,100 @@ export const Route = createFileRoute("/api/chat")({
 
           submit_individual_lead: tool({
             description:
-              "Save an individual visitor's contact info after collecting it conversationally. Call ONLY when full_name and at least one contact (email or phone) are confirmed.",
+              "Save a person's contact info after collecting it conversationally: a learner, trainer or researcher asking for themself. Call ONLY when full_name and at least one contact (email or phone) are confirmed. Someone who speaks for a company or organisation, or offers a service, partnership or sponsorship, is a company lead: use submit_company_lead, and if you use this tool anyway, fill organization.",
             inputSchema: z.object({
               full_name: z.string().min(2),
+              organization: z
+                .string()
+                .nullable()
+                .optional()
+                .describe(
+                  "The company or organisation the person speaks for, if any (e.g. 'كاش موبايل MTN'). When set, the lead is saved as a company lead.",
+                ),
               email: z.string().email().nullable().optional(),
               phone: z.string().nullable().optional(),
               address: z.string().nullable().optional(),
               specialty: z.string().nullable().optional(),
               work_field: z.string().nullable().optional(),
               short_description: z.string().nullable().optional(),
+              reason: z
+                .string()
+                .nullable()
+                .optional()
+                .describe(
+                  "One short Arabic line for the team on why this is a lead: who they are and what they want (e.g. 'صيدلاني يريد دورات مجانية أونلاين في المعلوماتية الحيوية').",
+                ),
+              details: z
+                .string()
+                .nullable()
+                .optional()
+                .describe(
+                  "3-6 Arabic sentences for the team, from this conversation only: who they are (specialty, work, level), exactly what they asked for or offered, what you suggested or agreed, and the right next step. No phone or email.",
+                ),
             }),
             execute: async (input) => {
-              const phone = isPlausiblePhone(input.phone) ? input.phone : null;
+              const phone = isPlausiblePhone(input.phone)
+                ? westernDigits(input.phone!).trim()
+                : null;
               if (!input.email && !phone)
                 return {
                   ok: false,
                   error:
                     "No usable contact: the phone is not a real number and there is no email. Ask the visitor again; do not say the details were saved.",
                 };
-              const { error, data } = await supabaseAdmin
-                .from("individual_leads")
-                .insert({
-                  full_name: input.full_name,
-                  email: input.email ?? null,
-                  phone,
-                  address: input.address ?? null,
-                  specialty: input.specialty ?? null,
-                  work_field: input.work_field ?? null,
-                  short_description: input.short_description ?? null,
-                  raw: input,
-                  conversation_id: conversationId,
-                })
-                .select("id")
-                .single();
-              if (error) {
-                console.error("[chat] submit_individual_lead failed", error.message, {
+              // Someone speaking for a company is a company lead, whichever tool
+              // the model chose: a payments provider offering a partnership had
+              // been filed as a person.
+              const organization = input.organization?.trim();
+              if (
+                organization &&
+                organization.length >= 2 &&
+                !isPersonsOwnName(organization, input.full_name)
+              ) {
+                const company = await saveLeadOnce("company_leads", {
+                  company_name: organization,
+                  work_field: input.work_field ?? input.specialty ?? null,
+                  contact_name: input.full_name,
+                  contact_email: input.email ?? null,
+                  contact_phone: phone,
+                  reason: withoutContact(input.reason, input.phone, input.email),
+                  details: withoutContact(input.details, input.phone, input.email),
+                  raw: { ...input, saved_as_company_from: "submit_individual_lead" },
+                });
+                if (company.error) {
+                  console.error("[chat] company lead (from individual) failed", company.error, {
+                    conversationId,
+                  });
+                  return { ok: false, error: company.error };
+                }
+                console.log("[chat] company_lead saved", { ...company, conversationId });
+                return { ok: true, id: company.id, saved_as: "company" };
+              }
+              const saved = await saveLeadOnce("individual_leads", {
+                full_name: input.full_name,
+                email: input.email ?? null,
+                phone,
+                address: input.address ?? null,
+                specialty: input.specialty ?? null,
+                work_field: input.work_field ?? null,
+                short_description: input.short_description ?? null,
+                reason: withoutContact(input.reason, input.phone, input.email),
+                details: withoutContact(input.details, input.phone, input.email),
+                raw: input,
+              });
+              if (saved.error) {
+                console.error("[chat] submit_individual_lead failed", saved.error, {
                   conversationId,
                 });
-                return { ok: false, error: error.message };
+                return { ok: false, error: saved.error };
               }
-              console.log("[chat] individual_lead saved", { id: data?.id, conversationId });
-              return { ok: true, id: data?.id };
+              console.log("[chat] individual_lead saved", { ...saved, conversationId });
+              return { ok: true, id: saved.id };
             },
           }),
           submit_company_lead: tool({
             description:
-              "Save a company lead after collecting the company form info conversationally. Call ONLY when company_name and at least one contact field are confirmed.",
+              "Save a company lead: a company or organisation asking for training or consulting, or offering a service, partnership or sponsorship (e.g. a payments provider, a training centre, a sponsor). Call ONLY when the company's own name and a phone or email are confirmed. company_name: the company's name as the visitor gave it (never the person's name, never invented). work_field: what the company does. contact_name: the person's name and role. reason: one line, the company and what it wants. details: its need, what you suggested, and the next step.",
             inputSchema: z.object({
               company_name: z.string().min(2),
               work_field: z.string().nullable().optional(),
@@ -910,43 +1088,73 @@ export const Route = createFileRoute("/api/chat")({
               country: z.string().nullable().optional(),
               has_office: z.boolean().nullable().optional(),
               office_address: z.string().nullable().optional(),
-              employee_count: z.string().nullable().optional(),
+              employee_count: z
+                .string()
+                .nullable()
+                .optional()
+                .describe("How many people work there, whenever the visitor said it (e.g. '8')."),
               accepts_training_new_staff: z.boolean().nullable().optional(),
               uses_ai: z.boolean().nullable().optional(),
               contact_name: z.string().nullable().optional(),
               contact_email: z.string().email().nullable().optional(),
               contact_phone: z.string().nullable().optional(),
+              reason: z
+                .string()
+                .nullable()
+                .optional()
+                .describe(
+                  "One short Arabic line for the team on why this is a lead: who they are and what they want (e.g. 'صيدلاني يريد دورات مجانية أونلاين في المعلوماتية الحيوية').",
+                ),
+              details: z
+                .string()
+                .nullable()
+                .optional()
+                .describe(
+                  "3-6 Arabic sentences for the team, from this conversation only: who they are (specialty, work, level), exactly what they asked for or offered, what you suggested or agreed, and the right next step. No phone or email.",
+                ),
             }),
             execute: async (input) => {
-              const { error, data } = await supabaseAdmin
-                .from("company_leads")
-                .insert({
-                  company_name: input.company_name,
-                  work_field: input.work_field ?? null,
-                  licensed_in_syria: input.licensed_in_syria ?? null,
-                  licensed_outside_syria: input.licensed_outside_syria ?? null,
-                  country: input.country ?? null,
-                  has_office: input.has_office ?? null,
-                  office_address: input.office_address ?? null,
-                  employee_count: input.employee_count ?? null,
-                  accepts_training_new_staff: input.accepts_training_new_staff ?? null,
-                  uses_ai: input.uses_ai ?? null,
-                  contact_name: input.contact_name ?? null,
-                  contact_email: input.contact_email ?? null,
-                  contact_phone: input.contact_phone ?? null,
-                  raw: input,
-                  conversation_id: conversationId,
-                })
-                .select("id")
-                .single();
-              if (error) {
-                console.error("[chat] submit_company_lead failed", error.message, {
+              const phone = isPlausiblePhone(input.contact_phone)
+                ? westernDigits(input.contact_phone!).trim()
+                : null;
+              if (!input.contact_email && !phone)
+                return {
+                  ok: false,
+                  error:
+                    "No usable contact: there is no email and the phone is not a real number. Ask for their phone or email; do not say the request was recorded.",
+                };
+              if (isPersonsOwnName(input.company_name, input.contact_name))
+                return {
+                  ok: false,
+                  error:
+                    "company_name is the person's own name. Ask for the company's or organisation's name; do not invent one and do not say the request was recorded.",
+                };
+              const saved = await saveLeadOnce("company_leads", {
+                company_name: input.company_name,
+                work_field: input.work_field ?? null,
+                licensed_in_syria: input.licensed_in_syria ?? null,
+                licensed_outside_syria: input.licensed_outside_syria ?? null,
+                country: input.country ?? null,
+                has_office: input.has_office ?? null,
+                office_address: input.office_address ?? null,
+                employee_count: input.employee_count ?? null,
+                accepts_training_new_staff: input.accepts_training_new_staff ?? null,
+                uses_ai: input.uses_ai ?? null,
+                contact_name: input.contact_name ?? null,
+                contact_email: input.contact_email ?? null,
+                contact_phone: phone,
+                reason: withoutContact(input.reason, input.contact_phone, input.contact_email),
+                details: withoutContact(input.details, input.contact_phone, input.contact_email),
+                raw: input,
+              });
+              if (saved.error) {
+                console.error("[chat] submit_company_lead failed", saved.error, {
                   conversationId,
                 });
-                return { ok: false, error: error.message };
+                return { ok: false, error: saved.error };
               }
-              console.log("[chat] company_lead saved", { id: data?.id, conversationId });
-              return { ok: true, id: data?.id };
+              console.log("[chat] company_lead saved", { ...saved, conversationId });
+              return { ok: true, id: saved.id };
             },
           }),
         };
@@ -960,7 +1168,12 @@ export const Route = createFileRoute("/api/chat")({
 
         const result = streamText({
           model: chat.model,
-          system: SYSTEM_PROMPT + partnersContext(partnerNames) + extraContext + replyLanguageNote,
+          system:
+            SYSTEM_PROMPT +
+            partnersContext(partnerNames) +
+            extraContext +
+            visitorNote +
+            replyLanguageNote,
           tools,
           // Every step and every retry is another provider call, and the provider
           // bills and rate-limits per call. 50 steps with 3 attempts each could
@@ -974,7 +1187,14 @@ export const Route = createFileRoute("/api/chat")({
               firstTextMs = Date.now() - startedAt;
           },
           // Where the time goes, per reply. No message text or personal data.
-          onFinish: ({ steps, totalUsage, finishReason }) => {
+          onFinish: async ({ steps, totalUsage, finishReason }) => {
+            const tools = steps.flatMap((step) => step.toolCalls.map((call) => call.toolName));
+            const usage = {
+              input_tokens: totalUsage.inputTokens ?? null,
+              cached_input_tokens: totalUsage.inputTokenDetails?.cacheReadTokens ?? null,
+              output_tokens: totalUsage.outputTokens ?? null,
+              reasoning_tokens: totalUsage.outputTokenDetails?.reasoningTokens ?? null,
+            };
             console.log("[chat] timing", {
               conversationId,
               model: modelId,
@@ -985,11 +1205,32 @@ export const Route = createFileRoute("/api/chat")({
               firstTextMs,
               totalMs: Date.now() - startedAt,
               steps: steps.length,
-              tools: steps.flatMap((step) => step.toolCalls.map((call) => call.toolName)),
-              inputTokens: totalUsage.inputTokens,
-              outputTokens: totalUsage.outputTokens,
+              tools,
+              inputTokens: usage.input_tokens,
+              cachedInputTokens: usage.cached_input_tokens,
+              outputTokens: usage.output_tokens,
+              reasoningTokens: usage.reasoning_tokens,
               finishReason,
             });
+            // One row per answer, so the cost calculator can use real traffic.
+            // Best-effort: a missing table (migration not applied yet) or a
+            // failed insert never affects the visitor's answer.
+            try {
+              const { error } = await supabaseAdmin.from("chat_usage" as never).insert({
+                conversation_id: conversationId,
+                is_test: isTestSession,
+                model: modelId,
+                steps: steps.length,
+                tools,
+                searched_knowledge: needsKnowledge,
+                history_rows: history.length,
+                ...usage,
+                total_ms: Date.now() - startedAt,
+              } as never);
+              if (error) console.error("[chat] usage not recorded", error.message);
+            } catch (e) {
+              console.error("[chat] usage not recorded", e);
+            }
           },
         });
 

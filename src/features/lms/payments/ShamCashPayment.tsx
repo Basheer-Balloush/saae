@@ -115,13 +115,13 @@ export function ShamCashPayment({
           <div className="font-semibold">
             {ar ? SHAM_CASH.accountName.ar : SHAM_CASH.accountName.en}
           </div>
-          <div className="text-muted-foreground" dir="ltr">
+          <div className="break-all text-muted-foreground" dir="ltr">
             {SHAM_CASH.accountNumber}
           </div>
         </div>
         <div className="text-sm">
           {ar ? "المبلغ المطلوب: " : "Amount due: "}
-          <strong dir="ltr" className="whitespace-nowrap text-base">
+          <strong dir="ltr" className="lms-pay-amount whitespace-nowrap text-base">
             {amountText}
           </strong>
         </div>
@@ -132,11 +132,7 @@ export function ShamCashPayment({
           {ar ? "افتح تطبيق شام كاش وامسح الرمز." : "Open the Sham Cash app and scan the code."}
         </li>
         <li>{ar ? "حوّل المبلغ المطلوب كاملاً." : "Transfer the full amount."}</li>
-        <li>
-          {ar
-            ? `أرفق صورة إيصال التحويل (حتى ${MAX_RECEIPTS} صور).`
-            : `Attach the transfer receipt (up to ${MAX_RECEIPTS} images).`}
-        </li>
+        <li>{ar ? "أرفق صورة إيصال التحويل." : "Attach the transfer receipt."}</li>
       </ol>
 
       <div className="space-y-2">
@@ -213,11 +209,7 @@ export function ShamCashPayment({
             />
           </label>
         )}
-        <p className="text-xs text-muted-foreground">
-          {ar
-            ? `صور أو PDF، حتى ${MAX_RECEIPT_MB} ميجا لكل ملف.`
-            : `Images or PDF, up to ${MAX_RECEIPT_MB} MB each.`}
-        </p>
+        <p className="text-xs text-muted-foreground">{ar ? "صور أو PDF." : "Images or PDF."}</p>
       </div>
 
       <div className="flex gap-2 border-t border-border pt-3">

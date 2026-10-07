@@ -12,6 +12,7 @@ import {
   GraduationCap,
   ArrowLeft,
   ArrowRight,
+  Receipt,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n/i18n";
@@ -30,6 +31,8 @@ import logoArLight from "@/assets/brand/saae-logo-ar-light.png";
 
 type Props = {
   role: LmsRole;
+  /** Shows the link to the payment review page. */
+  paymentReviewer?: boolean;
   isAuthed: boolean;
   isGuest?: boolean;
   onSignOut: () => void;
@@ -37,7 +40,7 @@ type Props = {
 
 type NavLink = { to: string; label: string; icon?: React.ReactNode };
 
-export function LmsNavbar({ role, isAuthed, isGuest, onSignOut }: Props) {
+export function LmsNavbar({ role, paymentReviewer, isAuthed, isGuest, onSignOut }: Props) {
   const { lang, toggle: toggleLang } = useLang();
   const { theme, toggle: toggleTheme } = useTheme();
   const tr = lmsT[lang];
@@ -79,6 +82,13 @@ export function LmsNavbar({ role, isAuthed, isGuest, onSignOut }: Props) {
       to: "/learning-management-system/admin",
       label: tr.navAdmin,
       icon: <LayoutDashboard className="h-3.5 w-3.5" />,
+    });
+  }
+  if (paymentReviewer) {
+    links.push({
+      to: "/learning-management-system/payments",
+      label: lang === "ar" ? "مراجعة المدفوعات" : "Payment review",
+      icon: <Receipt className="h-3.5 w-3.5" />,
     });
   }
 

@@ -108,6 +108,12 @@ const RULES: Entry[] = [
     en: "The file is too large.",
   },
   {
+    // Before the file rule below, which would read it as a file type.
+    match: (l) => l.includes("unsupported_role"),
+    ar: "قاعدة البيانات لا تقبل هذا الدور بعد.",
+    en: "The database does not accept this role yet.",
+  },
+  {
     match: (l) => l.includes("invalid file") || l.includes("unsupported") || l.includes("mime"),
     ar: "نوع الملف غير مدعوم.",
     en: "Unsupported file type.",
