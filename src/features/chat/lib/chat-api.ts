@@ -22,7 +22,7 @@ export const API_LIMITS = {
   maxConversationMessages: 80,
   // Every key together, so the API can never use up the model quota the
   // website's visitors share (the site has peaked at ~130 messages an hour).
-  globalPerMinute: 30,
+  globalPerMinute: 50,
   globalPerDay: 2000,
   timeoutMs: 45_000,
 } as const;

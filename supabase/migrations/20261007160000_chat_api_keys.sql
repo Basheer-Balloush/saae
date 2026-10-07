@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS public.chat_api_keys (
   key_prefix text NOT NULL CHECK (char_length(key_prefix) BETWEEN 8 AND 16),
   key_hash text NOT NULL UNIQUE CHECK (key_hash ~ '^[0-9a-f]{64}$'),
   -- Requests per key, and per end user of the calling system when it names one.
-  per_minute integer NOT NULL DEFAULT 20 CHECK (per_minute BETWEEN 1 AND 600),
+  per_minute integer NOT NULL DEFAULT 50 CHECK (per_minute BETWEEN 1 AND 600),
   per_day integer NOT NULL DEFAULT 1000 CHECK (per_day BETWEEN 1 AND 100000),
   per_user_minute integer NOT NULL DEFAULT 6 CHECK (per_user_minute BETWEEN 1 AND 120),
   per_user_day integer NOT NULL DEFAULT 100 CHECK (per_user_day BETWEEN 1 AND 10000),

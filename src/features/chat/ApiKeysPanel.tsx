@@ -32,7 +32,7 @@ import {
    a partner's server) that talks to Abu Al-Joud, with its own limits. */
 
 const ENDPOINT_PATH = "/api/v1/abu-al-joud/chat";
-const DEFAULT_LIMITS = { per_minute: 20, per_day: 1000, per_user_minute: 6, per_user_day: 100 };
+const DEFAULT_LIMITS = { per_minute: 50, per_day: 1000, per_user_minute: 6, per_user_day: 100 };
 type Limits = typeof DEFAULT_LIMITS;
 type Expiry = "never" | "30" | "90" | "365";
 
@@ -344,8 +344,8 @@ function KeyForm({
           </div>
           <p className="text-[12.5px] text-[var(--cx-muted)]">
             {t(
-              "«المستخدم» هو الشخص الذي يحادث أبو الجود عبر ذلك النظام، إذا أرسل النظام معرّفه مع كل رسالة. تبدأ الأيام عند منتصف الليل بتوقيت UTC (الثالثة فجراً بدمشق). ولكل المفاتيح معاً سقف يحمي الموقع: 30 طلباً في الدقيقة و2000 في اليوم.",
-              "An “end user” is the person talking to Abu Al-Joud through that system, when it sends their id with each message. Days start at midnight UTC (3 am in Damascus). All keys together are also capped at 30 requests a minute and 2,000 a day, so the website always keeps its share.",
+              "«المستخدم» هو الشخص الذي يحادث أبو الجود عبر ذلك النظام، إذا أرسل النظام معرّفه مع كل رسالة. تبدأ الأيام عند منتصف الليل بتوقيت UTC (الثالثة فجراً بدمشق). ولكل المفاتيح معاً سقف يحمي الموقع: 50 طلباً في الدقيقة و2000 في اليوم.",
+              "An “end user” is the person talking to Abu Al-Joud through that system, when it sends their id with each message. Days start at midnight UTC (3 am in Damascus). All keys together are also capped at 50 requests a minute and 2,000 a day, so the website always keeps its share.",
             )}
           </p>
           {isNew && (

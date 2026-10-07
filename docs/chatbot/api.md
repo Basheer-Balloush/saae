@@ -91,7 +91,7 @@ with `scope` and `retry_after` (seconds, also sent as `Retry-After`).
 
 Each key has its own limits, set by the admin: requests a minute and a day for
 the whole key, and a minute and a day for each `user`. All keys together are
-capped at 30 requests a minute and 2,000 a day, so the API never takes the
+capped at 50 requests a minute and 2,000 a day, so the API never takes the
 model capacity the website's visitors need.
 
 ## What the API never returns
