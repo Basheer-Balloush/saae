@@ -25,6 +25,8 @@ export type ProfileContact = {
   emails: string[];
   whatsapp: string;
   phones: { type: string; number: string }[];
+  /** Telegram username without the @. */
+  telegram?: string;
 };
 
 // The cards live encrypted in the database table private_cards: the row key is
