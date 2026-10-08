@@ -7,6 +7,7 @@ import { useLang } from "@/lib/i18n";
 import { lmsT } from "@/lib/lms-i18n";
 import { localizeAuthError } from "@/lib/auth-error-i18n";
 import { signUpLmsUser, resendLmsConfirmationEmail } from "@/lib/lms-auth.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, MailCheck } from "lucide-react";
 import { PASSWORD_MIN, scorePasswordStrength } from "@/lib/password-policy";
@@ -147,6 +148,17 @@ function LmsSignup() {
       const res = await signUpUser({ data: { fullName: parsed.data.fullName, email: parsed.data.email, password: parsed.data.password, asInstructor, lang } });
       // The server is the single source of truth for whether confirmation is required.
       const confirmationRequired = res?.confirmationRequired !== false;
+      if (!confirmationRequired) {
+        // Already active: sign straight in; the effect above takes them on.
+        const { error } = await supabase.auth.signInWithPassword({
+          email: res?.email ?? parsed.data.email,
+          password: parsed.data.password,
+        });
+        if (!error) {
+          toast.success(tr.signedIn);
+          return;
+        }
+      }
       setResult({ email: res?.email ?? parsed.data.email, confirmationRequired });
       if (confirmationRequired) startResendWait(FIRST_RESEND_WAIT);
       toast.success(confirmationRequired ? tr.signedUp : tr.signedUpConfirmed);
