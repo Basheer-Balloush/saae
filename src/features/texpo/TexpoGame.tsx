@@ -534,9 +534,7 @@ export function TexpoGame({ link }: { link?: string }) {
                   <p className="tx-kicker">
                     {t("الجمعية السورية للذكاء الاصطناعي · تكسبو 2026", "SAAE at Texpo 2026")}
                   </p>
-                  <h1 className="tx-title">
-                    {t("العب وتعلّم مع أبو الجود", "Play and Learn with Abu Al-Joud")}
-                  </h1>
+                  <h1 className="tx-title">{t("تحدّي أبو الجود", "Abu Al-Joud's Challenge")}</h1>
                   <p className="tx-lead">
                     {t(
                       `${QUESTION_COUNT} أسئلة عن الذكاء الاصطناعي في حياتنا اليومية. العب واربح كوبون هدية من الجمعية بخصم يصل إلى 50٪.`,
@@ -823,8 +821,8 @@ export function TexpoGame({ link }: { link?: string }) {
                       onClick={() =>
                         openChat(
                           t(
-                            `أنهيت لعبة «العب وتعلّم مع أبو الجود» في تكسبو بنتيجة ${phase.result.score} من ${phase.result.total} (مستوى ${LEVELS[phase.result.level].name.ar}). كيف أطوّر استخدامي للذكاء الاصطناعي؟`,
-                            `I finished "Play and Learn with Abu Al-Joud" at Texpo with ${phase.result.score}/${phase.result.total} (${LEVELS[phase.result.level].name.en}). How can I get better at using AI?`,
+                            `أنهيت تحدّي أبو الجود في تكسبو بنتيجة ${phase.result.score} من ${phase.result.total} (مستوى ${LEVELS[phase.result.level].name.ar}). كيف أطوّر استخدامي للذكاء الاصطناعي؟`,
+                            `I finished Abu Al-Joud's Texpo challenge with ${phase.result.score}/${phase.result.total} (${LEVELS[phase.result.level].name.en}). How can I get better at using AI?`,
                           ),
                           phase.playId,
                         )

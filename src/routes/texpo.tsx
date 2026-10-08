@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TexpoGame } from "@/features/texpo/TexpoGame";
 
-const TITLE = "العب وتعلّم مع أبو الجود · Texpo 2026 — SAAE";
+const TITLE = "تحدّي أبو الجود · Texpo 2026 — SAAE";
 const DESCRIPTION =
   "7 أسئلة عن الذكاء الاصطناعي في حياتنا اليومية مع أبو الجود. العب واربح كوبون هدية من الجمعية بخصم يصل إلى 50٪.";
 
