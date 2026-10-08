@@ -5,6 +5,10 @@ The web platform of the Syrian Association for AI & Entrepreneurship. One app se
 - **Public website:** home, about, partners, news, communities, the One Million initiative and contact. The cinematic pages are HTML files rendered by `CinematicPage`, with their CSS and JS served from `public/cinematic/`.
 - **LMS** (`/learning-management-system`): the course catalogue, player, quizzes, certificates, internships, instructor area and LMS admin console.
 - **AMS** (`/attendance-management-system`): attendance, also installable as a phone web app.
+- **Events** (`/admin/events`): event information, days and sessions, linked tools,
+  optional profile badges, and reports by day in Damascus time. Published event
+  information pages live at `/events/<slug>` and are accessed through direct
+  links; they aren't added to public navigation or the sitemap. See `docs/events.md`.
 
 The admin areas (`/admin`, the LMS admin and AMS) share one design system: the `cx-*` classes in `src/components/console/`. Every screen supports English and Arabic (RTL).
 

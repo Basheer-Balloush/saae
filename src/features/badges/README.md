@@ -5,7 +5,19 @@ account. `ProfileBadgeStrip` renders their images in the cover beside the profil
 actions; `BadgesCard` renders the full details below. The strip wraps as more
 badges are earned and links to each detail tile. Both support Arabic and English.
 
-To add a badge:
+Event badges are now configured in **Admin → Events → Edit event**. Admins upload
+the image, enter both languages and select eligibility (chosen members,
+registration, confirmed attendance or a completed and claimed game). Awarding
+is an explicit admin action against a confirmed member account; the server checks
+eligibility. One snapshot per member/event is stored in `event_badge_awards`, so
+later edits don't change earned badges. Duplicate approvals are safe.
+
+Texpo's existing rewards continue to grant its badge automatically. Migration
+`20261008120000_events.sql` preserves existing awards and captures future claims
+with a database trigger. Account-scoped reads use `event_my_badges`; browsers
+cannot execute that RPC directly or select award tables.
+
+For a future badge unrelated to an event:
 
 1. Add its image to `public/badges/` and its image path, English/Arabic name and
    description to `BADGES` in `badges.ts`. `BadgeKey` follows the registry keys.

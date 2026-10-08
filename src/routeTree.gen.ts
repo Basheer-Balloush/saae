@@ -9,177 +9,186 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as AdminRouteRouteImport } from './routes/admin/route'
-import { Route as AttendanceManagementSystemRouteRouteImport } from './routes/attendance-management-system/route'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as EventSurveyRouteImport } from './routes/event-survey'
-import { Route as FeedbackRouteImport } from './routes/feedback'
-import { Route as InitiativeSurveyRouteImport } from './routes/initiative-survey'
-import { Route as InternationalBusinessBridgeRouteImport } from './routes/international-business-bridge'
-import { Route as LearningManagementSystemRouteRouteImport } from './routes/learning-management-system/route'
-import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-initiative'
-import { Route as OneMillionInitiativeDonorsRouteImport } from './routes/one-million-initiative-donors'
-import { Route as OneMillionInitiativeHomeRouteImport } from './routes/one-million-initiative-home'
-import { Route as PartnersRouteImport } from './routes/partners'
-import { Route as ProjectManagementRouteImport } from './routes/project-management'
-import { Route as RegistrationRouteImport } from './routes/registration'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as TexpoRouteImport } from './routes/texpo'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as AdminAttendanceRouteImport } from './routes/admin/attendance'
-import { Route as AdminChatbotRouteImport } from './routes/admin/chatbot'
-import { Route as AdminCrmRouteRouteImport } from './routes/admin/crm/route'
-import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
-import { Route as AdminEventSurveyRouteImport } from './routes/admin/event-survey'
-import { Route as AdminFeedbackSurveyRouteImport } from './routes/admin/feedback-survey'
-import { Route as AdminFormsRouteRouteImport } from './routes/admin/forms/route'
-import { Route as AdminInitiativeRouteImport } from './routes/admin/initiative'
-import { Route as AdminInitiativeSurveyRouteImport } from './routes/admin/initiative-survey'
-import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
-import { Route as AdminLocationsRouteImport } from './routes/admin/locations'
-import { Route as AdminLoginRouteImport } from './routes/admin/login'
-import { Route as AdminMembersRouteImport } from './routes/admin/members'
-import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
-import { Route as AdminPartnersRouteImport } from './routes/admin/partners'
-import { Route as AdminWebsiteRouteImport } from './routes/admin/website'
-import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as AttendanceManagementSystemIndexRouteImport } from './routes/attendance-management-system/index'
-import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system/login'
-import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
-import { Route as EventSignupTokenRouteImport } from './routes/event-signup.$token'
-import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
-import { Route as InitiativeIndexRouteImport } from './routes/initiative/index'
-import { Route as InitiativeClaimRouteImport } from './routes/initiative/claim'
-import { Route as InitiativeSponsorsRouteImport } from './routes/initiative/sponsors'
-import { Route as JoinTokenRouteImport } from './routes/join.$token'
-import { Route as LearningManagementSystemIndexRouteImport } from './routes/learning-management-system/index'
-import { Route as LearningManagementSystemAdminRouteRouteImport } from './routes/learning-management-system/admin/route'
-import { Route as LearningManagementSystemCatalogRouteImport } from './routes/learning-management-system/catalog'
-import { Route as LearningManagementSystemConfirmAccountRouteImport } from './routes/learning-management-system/confirm-account'
-import { Route as LearningManagementSystemForgotPasswordRouteImport } from './routes/learning-management-system/forgot-password'
-import { Route as LearningManagementSystemInstructorRouteRouteImport } from './routes/learning-management-system/instructor/route'
-import { Route as LearningManagementSystemLoginRouteImport } from './routes/learning-management-system/login'
-import { Route as LearningManagementSystemProfileRouteImport } from './routes/learning-management-system/profile'
-import { Route as LearningManagementSystemResetPasswordRouteImport } from './routes/learning-management-system/reset-password'
-import { Route as LearningManagementSystemSignupRouteImport } from './routes/learning-management-system/signup'
-import { Route as LearningManagementSystemStudentRouteRouteImport } from './routes/learning-management-system/student/route'
-import { Route as LearningManagementSystemTrainerApplyRouteImport } from './routes/learning-management-system/trainer-apply'
-import { Route as LearningManagementSystemVerifyRouteImport } from './routes/learning-management-system/verify'
+import { Route as SuperAdminRouteImport } from './routes/super-admin'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RegistrationRouteImport } from './routes/registration'
+import { Route as ProjectManagementRouteImport } from './routes/project-management'
+import { Route as PartnersRouteImport } from './routes/partners'
+import { Route as OneMillionInitiativeHomeRouteImport } from './routes/one-million-initiative-home'
+import { Route as OneMillionInitiativeDonorsRouteImport } from './routes/one-million-initiative-donors'
+import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-initiative'
+import { Route as InternationalBusinessBridgeRouteImport } from './routes/international-business-bridge'
+import { Route as InitiativeSurveyRouteImport } from './routes/initiative-survey'
+import { Route as FeedbackRouteImport } from './routes/feedback'
+import { Route as EventSurveyRouteImport } from './routes/event-survey'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as LearningManagementSystemRouteRouteImport } from './routes/learning-management-system/route'
+import { Route as AttendanceManagementSystemRouteRouteImport } from './routes/attendance-management-system/route'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewsIndexRouteImport } from './routes/news/index'
-import { Route as NewsIdRouteImport } from './routes/news/$id'
-import { Route as NewsBuildexAleppoRouteImport } from './routes/news/buildex-aleppo'
-import { Route as NewsInitiativeLaunchRouteImport } from './routes/news/initiative-launch'
-import { Route as NewsTrainersGraduationRouteImport } from './routes/news/trainers-graduation'
-import { Route as NewsTvInterviewRouteImport } from './routes/news/tv-interview'
-import { Route as ProfileSlugRouteImport } from './routes/profile.$slug'
+import { Route as LearningManagementSystemIndexRouteImport } from './routes/learning-management-system/index'
+import { Route as InitiativeIndexRouteImport } from './routes/initiative/index'
+import { Route as AttendanceManagementSystemIndexRouteImport } from './routes/attendance-management-system/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ResourcesAiToolsRouteImport } from './routes/resources.ai-tools'
-import { Route as AdminCrmIndexRouteImport } from './routes/admin/crm/index'
-import { Route as AdminCrmContactsRouteRouteImport } from './routes/admin/crm/contacts/route'
-import { Route as AdminCrmFeedbackRouteImport } from './routes/admin/crm/feedback'
-import { Route as AdminCrmFormsRouteRouteImport } from './routes/admin/crm/forms/route'
-import { Route as AdminCrmLeadsRouteRouteImport } from './routes/admin/crm/leads/route'
-import { Route as AdminCrmStudentsRouteImport } from './routes/admin/crm/students'
-import { Route as AdminCrmTexpoRouteImport } from './routes/admin/crm/texpo'
-import { Route as AdminFormsIndexRouteImport } from './routes/admin/forms/index'
-import { Route as AdminFormsNewRouteImport } from './routes/admin/forms/new'
-import { Route as AdminNewsIndexRouteImport } from './routes/admin/news/index'
-import { Route as AdminNewsIdRouteImport } from './routes/admin/news/$id'
-import { Route as ApiPublicBunnyWebhookRouteImport } from './routes/api/public/bunny-webhook'
-import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system/admin/index'
-import { Route as LearningManagementSystemAdminAnalyticsRouteImport } from './routes/learning-management-system/admin/analytics'
-import { Route as LearningManagementSystemAdminAttendanceLinkRouteImport } from './routes/learning-management-system/admin/attendance-link'
-import { Route as LearningManagementSystemAdminCouponsRouteImport } from './routes/learning-management-system/admin/coupons'
-import { Route as LearningManagementSystemAdminEnrollmentRequestsRouteImport } from './routes/learning-management-system/admin/enrollment-requests'
-import { Route as LearningManagementSystemAdminPeopleRouteImport } from './routes/learning-management-system/admin/people'
-import { Route as LearningManagementSystemAdminRequestsRouteImport } from './routes/learning-management-system/admin/requests'
-import { Route as LearningManagementSystemAdminReviewsRouteImport } from './routes/learning-management-system/admin/reviews'
-import { Route as LearningManagementSystemAdminSettingsRouteImport } from './routes/learning-management-system/admin/settings'
-import { Route as LearningManagementSystemAdminTrainerApplicationsRouteImport } from './routes/learning-management-system/admin/trainer-applications'
-import { Route as LearningManagementSystemAdminUsersRouteImport } from './routes/learning-management-system/admin/users'
-import { Route as LearningManagementSystemCertificateIdRouteImport } from './routes/learning-management-system/certificate/$id'
-import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/learning-management-system/courses/$id'
-import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system/instructor/index'
-import { Route as LearningManagementSystemInstructorProfileRouteImport } from './routes/learning-management-system/instructor/profile'
-import { Route as LearningManagementSystemInstructorsIdRouteImport } from './routes/learning-management-system/instructors/$id'
-import { Route as LearningManagementSystemInternshipsIndexRouteImport } from './routes/learning-management-system/internships/index'
+import { Route as ProfileSlugRouteImport } from './routes/profile.$slug'
+import { Route as NewsTvInterviewRouteImport } from './routes/news/tv-interview'
+import { Route as NewsTrainersGraduationRouteImport } from './routes/news/trainers-graduation'
+import { Route as NewsInitiativeLaunchRouteImport } from './routes/news/initiative-launch'
+import { Route as NewsBuildexAleppoRouteImport } from './routes/news/buildex-aleppo'
+import { Route as NewsIdRouteImport } from './routes/news/$id'
+import { Route as LearningManagementSystemVerifyRouteImport } from './routes/learning-management-system/verify'
+import { Route as LearningManagementSystemTrainerApplyRouteImport } from './routes/learning-management-system/trainer-apply'
+import { Route as LearningManagementSystemSignupRouteImport } from './routes/learning-management-system/signup'
+import { Route as LearningManagementSystemResetPasswordRouteImport } from './routes/learning-management-system/reset-password'
+import { Route as LearningManagementSystemProfileRouteImport } from './routes/learning-management-system/profile'
+import { Route as LearningManagementSystemLoginRouteImport } from './routes/learning-management-system/login'
+import { Route as LearningManagementSystemForgotPasswordRouteImport } from './routes/learning-management-system/forgot-password'
+import { Route as LearningManagementSystemConfirmAccountRouteImport } from './routes/learning-management-system/confirm-account'
+import { Route as LearningManagementSystemCatalogRouteImport } from './routes/learning-management-system/catalog'
+import { Route as JoinTokenRouteImport } from './routes/join.$token'
+import { Route as InitiativeSponsorsRouteImport } from './routes/initiative/sponsors'
+import { Route as InitiativeClaimRouteImport } from './routes/initiative/claim'
+import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
+import { Route as EventsSlugRouteImport } from './routes/events.$slug'
+import { Route as EventSignupTokenRouteImport } from './routes/event-signup.$token'
+import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
+import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system/login'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AdminWebsiteRouteImport } from './routes/admin/website'
+import { Route as AdminPartnersRouteImport } from './routes/admin/partners'
+import { Route as AdminMessagesRouteImport } from './routes/admin/messages'
+import { Route as AdminMembersRouteImport } from './routes/admin/members'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminLocationsRouteImport } from './routes/admin/locations'
+import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
+import { Route as AdminInitiativeSurveyRouteImport } from './routes/admin/initiative-survey'
+import { Route as AdminInitiativeRouteImport } from './routes/admin/initiative'
+import { Route as AdminFeedbackSurveyRouteImport } from './routes/admin/feedback-survey'
+import { Route as AdminEventSurveyRouteImport } from './routes/admin/event-survey'
+import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
+import { Route as AdminChatbotRouteImport } from './routes/admin/chatbot'
+import { Route as AdminAttendanceRouteImport } from './routes/admin/attendance'
+import { Route as LearningManagementSystemStudentRouteRouteImport } from './routes/learning-management-system/student/route'
+import { Route as LearningManagementSystemInstructorRouteRouteImport } from './routes/learning-management-system/instructor/route'
+import { Route as LearningManagementSystemAdminRouteRouteImport } from './routes/learning-management-system/admin/route'
+import { Route as AdminFormsRouteRouteImport } from './routes/admin/forms/route'
+import { Route as AdminCrmRouteRouteImport } from './routes/admin/crm/route'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system/student/index'
+import { Route as LearningManagementSystemInternshipsIndexRouteImport } from './routes/learning-management-system/internships/index'
+import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system/instructor/index'
+import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system/admin/index'
+import { Route as AdminNewsIndexRouteImport } from './routes/admin/news/index'
+import { Route as AdminFormsIndexRouteImport } from './routes/admin/forms/index'
+import { Route as AdminEventsIndexRouteImport } from './routes/admin/events/index'
+import { Route as AdminCrmIndexRouteImport } from './routes/admin/crm/index'
 import { Route as LearningManagementSystemStudentRequestsRouteImport } from './routes/learning-management-system/student/requests'
-import { Route as AdminCrmContactsContactIdRouteImport } from './routes/admin/crm/contacts/$contactId'
-import { Route as AdminCrmFormsIndexRouteImport } from './routes/admin/crm/forms/index'
-import { Route as AdminCrmFormsFormSlugRouteImport } from './routes/admin/crm/forms/$formSlug'
-import { Route as AdminCrmLeadsCompaniesRouteRouteImport } from './routes/admin/crm/leads/companies/route'
-import { Route as AdminCrmLeadsIndividualsRouteRouteImport } from './routes/admin/crm/leads/individuals/route'
-import { Route as AdminCrmRegistrationLinksIndexRouteImport } from './routes/admin/crm/registration-links/index'
-import { Route as AdminCrmRegistrationLinksIdRouteImport } from './routes/admin/crm/registration-links/$id'
-import { Route as AdminFormsFormIdIndexRouteImport } from './routes/admin/forms/$formId/index'
-import { Route as AdminFormsFormIdEditRouteImport } from './routes/admin/forms/$formId/edit'
-import { Route as ApiProfileCardSlugKindRouteImport } from './routes/api/profile-card.$slug.$kind'
-import { Route as ApiV1AbuAlJoudChatRouteImport } from './routes/api/v1/abu-al-joud/chat'
-import { Route as LearningManagementSystemAdminCoursesIndexRouteImport } from './routes/learning-management-system/admin/courses/index'
-import { Route as LearningManagementSystemAdminCoursesIdRouteImport } from './routes/learning-management-system/admin/courses/$id'
-import { Route as LearningManagementSystemAdminInternshipsIndexRouteImport } from './routes/learning-management-system/admin/internships/index'
-import { Route as LearningManagementSystemAdminInternshipsNewRouteImport } from './routes/learning-management-system/admin/internships/new'
-import { Route as LearningManagementSystemInstructorAssignmentsCourseIdRouteImport } from './routes/learning-management-system/instructor/assignments/$courseId'
-import { Route as LearningManagementSystemInstructorCoursesIdRouteImport } from './routes/learning-management-system/instructor/courses/$id'
-import { Route as LearningManagementSystemInstructorQuizResultsCourseIdRouteImport } from './routes/learning-management-system/instructor/quiz-results/$courseId'
+import { Route as LearningManagementSystemInstructorsIdRouteImport } from './routes/learning-management-system/instructors/$id'
+import { Route as LearningManagementSystemInstructorProfileRouteImport } from './routes/learning-management-system/instructor/profile'
+import { Route as LearningManagementSystemCoursesIdRouteImport } from './routes/learning-management-system/courses/$id'
+import { Route as LearningManagementSystemCertificateIdRouteImport } from './routes/learning-management-system/certificate/$id'
+import { Route as LearningManagementSystemAdminUsersRouteImport } from './routes/learning-management-system/admin/users'
+import { Route as LearningManagementSystemAdminTrainerApplicationsRouteImport } from './routes/learning-management-system/admin/trainer-applications'
+import { Route as LearningManagementSystemAdminSettingsRouteImport } from './routes/learning-management-system/admin/settings'
+import { Route as LearningManagementSystemAdminReviewsRouteImport } from './routes/learning-management-system/admin/reviews'
+import { Route as LearningManagementSystemAdminRequestsRouteImport } from './routes/learning-management-system/admin/requests'
+import { Route as LearningManagementSystemAdminPeopleRouteImport } from './routes/learning-management-system/admin/people'
+import { Route as LearningManagementSystemAdminEnrollmentRequestsRouteImport } from './routes/learning-management-system/admin/enrollment-requests'
+import { Route as LearningManagementSystemAdminCouponsRouteImport } from './routes/learning-management-system/admin/coupons'
+import { Route as LearningManagementSystemAdminAttendanceLinkRouteImport } from './routes/learning-management-system/admin/attendance-link'
+import { Route as LearningManagementSystemAdminAnalyticsRouteImport } from './routes/learning-management-system/admin/analytics'
+import { Route as ApiPublicBunnyWebhookRouteImport } from './routes/api/public/bunny-webhook'
+import { Route as AdminNewsIdRouteImport } from './routes/admin/news/$id'
+import { Route as AdminFormsNewRouteImport } from './routes/admin/forms/new'
+import { Route as AdminEventsIdRouteImport } from './routes/admin/events/$id'
+import { Route as AdminCrmTexpoRouteImport } from './routes/admin/crm/texpo'
+import { Route as AdminCrmStudentsRouteImport } from './routes/admin/crm/students'
+import { Route as AdminCrmFeedbackRouteImport } from './routes/admin/crm/feedback'
+import { Route as AdminCrmLeadsRouteRouteImport } from './routes/admin/crm/leads/route'
+import { Route as AdminCrmFormsRouteRouteImport } from './routes/admin/crm/forms/route'
+import { Route as AdminCrmContactsRouteRouteImport } from './routes/admin/crm/contacts/route'
 import { Route as LearningManagementSystemInternshipsSlugIndexRouteImport } from './routes/learning-management-system/internships/$slug/index'
-import { Route as LearningManagementSystemInternshipsSlugApplyRouteImport } from './routes/learning-management-system/internships/$slug/apply'
-import { Route as LearningManagementSystemStudentFeedbackCourseIdRouteImport } from './routes/learning-management-system/student/feedback/$courseId'
-import { Route as LearningManagementSystemStudentPlayerCourseIdRouteImport } from './routes/learning-management-system/student/player/$courseId'
-import { Route as LearningManagementSystemStudentQuizCourseIdRouteImport } from './routes/learning-management-system/student/quiz/$courseId'
-import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LearningManagementSystemAdminInternshipsIndexRouteImport } from './routes/learning-management-system/admin/internships/index'
+import { Route as LearningManagementSystemAdminCoursesIndexRouteImport } from './routes/learning-management-system/admin/courses/index'
+import { Route as AdminFormsFormIdIndexRouteImport } from './routes/admin/forms/$formId/index'
+import { Route as AdminCrmRegistrationLinksIndexRouteImport } from './routes/admin/crm/registration-links/index'
+import { Route as AdminCrmFormsIndexRouteImport } from './routes/admin/crm/forms/index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
-import { Route as AdminCrmLeadsCompaniesLeadIdRouteImport } from './routes/admin/crm/leads/companies/$leadId'
-import { Route as AdminCrmLeadsIndividualsLeadIdRouteImport } from './routes/admin/crm/leads/individuals/$leadId'
-import { Route as LearningManagementSystemAdminInternshipsIdApplicationsRouteRouteImport } from './routes/learning-management-system/admin/internships/$id/applications/route'
-import { Route as LearningManagementSystemAdminInternshipsIdEditRouteImport } from './routes/learning-management-system/admin/internships/$id/edit'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LearningManagementSystemStudentQuizCourseIdRouteImport } from './routes/learning-management-system/student/quiz/$courseId'
+import { Route as LearningManagementSystemStudentPlayerCourseIdRouteImport } from './routes/learning-management-system/student/player/$courseId'
+import { Route as LearningManagementSystemStudentFeedbackCourseIdRouteImport } from './routes/learning-management-system/student/feedback/$courseId'
+import { Route as LearningManagementSystemInternshipsSlugApplyRouteImport } from './routes/learning-management-system/internships/$slug/apply'
+import { Route as LearningManagementSystemInstructorQuizResultsCourseIdRouteImport } from './routes/learning-management-system/instructor/quiz-results/$courseId'
+import { Route as LearningManagementSystemInstructorCoursesIdRouteImport } from './routes/learning-management-system/instructor/courses/$id'
+import { Route as LearningManagementSystemInstructorAssignmentsCourseIdRouteImport } from './routes/learning-management-system/instructor/assignments/$courseId'
+import { Route as LearningManagementSystemAdminInternshipsNewRouteImport } from './routes/learning-management-system/admin/internships/new'
+import { Route as LearningManagementSystemAdminCoursesIdRouteImport } from './routes/learning-management-system/admin/courses/$id'
+import { Route as ApiV1AbuAlJoudChatRouteImport } from './routes/api/v1/abu-al-joud/chat'
+import { Route as ApiProfileCardSlugKindRouteImport } from './routes/api/profile-card.$slug.$kind'
+import { Route as AdminFormsFormIdEditRouteImport } from './routes/admin/forms/$formId/edit'
+import { Route as AdminCrmRegistrationLinksIdRouteImport } from './routes/admin/crm/registration-links/$id'
+import { Route as AdminCrmFormsFormSlugRouteImport } from './routes/admin/crm/forms/$formSlug'
+import { Route as AdminCrmContactsContactIdRouteImport } from './routes/admin/crm/contacts/$contactId'
+import { Route as AdminCrmLeadsIndividualsRouteRouteImport } from './routes/admin/crm/leads/individuals/route'
+import { Route as AdminCrmLeadsCompaniesRouteRouteImport } from './routes/admin/crm/leads/companies/route'
 import { Route as LearningManagementSystemAdminInternshipsIdSignupsRouteImport } from './routes/learning-management-system/admin/internships/$id/signups'
+import { Route as LearningManagementSystemAdminInternshipsIdEditRouteImport } from './routes/learning-management-system/admin/internships/$id/edit'
+import { Route as AdminCrmLeadsIndividualsLeadIdRouteImport } from './routes/admin/crm/leads/individuals/$leadId'
+import { Route as AdminCrmLeadsCompaniesLeadIdRouteImport } from './routes/admin/crm/leads/companies/$leadId'
+import { Route as LearningManagementSystemAdminInternshipsIdApplicationsRouteRouteImport } from './routes/learning-management-system/admin/internships/$id/applications/route'
 import { Route as LearningManagementSystemAdminInternshipsIdApplicationsIndexRouteImport } from './routes/learning-management-system/admin/internships/$id/applications/index'
 import { Route as LearningManagementSystemAdminInternshipsIdApplicationsAppIdRouteImport } from './routes/learning-management-system/admin/internships/$id/applications/$appId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const TexpoRoute = TexpoRouteImport.update({
+  id: '/texpo',
+  path: '/texpo',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const SuperAdminRoute = SuperAdminRouteImport.update({
+  id: '/super-admin',
+  path: '/super-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRouteRoute = AdminRouteRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AttendanceManagementSystemRouteRoute =
-  AttendanceManagementSystemRouteRouteImport.update({
-    id: '/attendance-management-system',
-    path: '/attendance-management-system',
+const RegistrationRoute = RegistrationRouteImport.update({
+  id: '/registration',
+  path: '/registration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectManagementRoute = ProjectManagementRouteImport.update({
+  id: '/project-management',
+  path: '/project-management',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnersRoute = PartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OneMillionInitiativeHomeRoute =
+  OneMillionInitiativeHomeRouteImport.update({
+    id: '/one-million-initiative-home',
+    path: '/one-million-initiative-home',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventSurveyRoute = EventSurveyRouteImport.update({
-  id: '/event-survey',
-  path: '/event-survey',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FeedbackRoute = FeedbackRouteImport.update({
-  id: '/feedback',
-  path: '/feedback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InitiativeSurveyRoute = InitiativeSurveyRouteImport.update({
-  id: '/initiative-survey',
-  path: '/initiative-survey',
+const OneMillionInitiativeDonorsRoute =
+  OneMillionInitiativeDonorsRouteImport.update({
+    id: '/one-million-initiative-donors',
+    path: '/one-million-initiative-donors',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OneMillionInitiativeRoute = OneMillionInitiativeRouteImport.update({
+  id: '/one-million-initiative',
+  path: '/one-million-initiative',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InternationalBusinessBridgeRoute =
@@ -188,194 +197,56 @@ const InternationalBusinessBridgeRoute =
     path: '/international-business-bridge',
     getParentRoute: () => rootRouteImport,
   } as any)
+const InitiativeSurveyRoute = InitiativeSurveyRouteImport.update({
+  id: '/initiative-survey',
+  path: '/initiative-survey',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventSurveyRoute = EventSurveyRouteImport.update({
+  id: '/event-survey',
+  path: '/event-survey',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearningManagementSystemRouteRoute =
   LearningManagementSystemRouteRouteImport.update({
     id: '/learning-management-system',
     path: '/learning-management-system',
     getParentRoute: () => rootRouteImport,
   } as any)
-const OneMillionInitiativeRoute = OneMillionInitiativeRouteImport.update({
-  id: '/one-million-initiative',
-  path: '/one-million-initiative',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OneMillionInitiativeDonorsRoute =
-  OneMillionInitiativeDonorsRouteImport.update({
-    id: '/one-million-initiative-donors',
-    path: '/one-million-initiative-donors',
+const AttendanceManagementSystemRouteRoute =
+  AttendanceManagementSystemRouteRouteImport.update({
+    id: '/attendance-management-system',
+    path: '/attendance-management-system',
     getParentRoute: () => rootRouteImport,
   } as any)
-const OneMillionInitiativeHomeRoute =
-  OneMillionInitiativeHomeRouteImport.update({
-    id: '/one-million-initiative-home',
-    path: '/one-million-initiative-home',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PartnersRoute = PartnersRouteImport.update({
-  id: '/partners',
-  path: '/partners',
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProjectManagementRoute = ProjectManagementRouteImport.update({
-  id: '/project-management',
-  path: '/project-management',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegistrationRoute = RegistrationRouteImport.update({
-  id: '/registration',
-  path: '/registration',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SuperAdminRoute = SuperAdminRouteImport.update({
-  id: '/super-admin',
-  path: '/super-admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TexpoRoute = TexpoRouteImport.update({
-  id: '/texpo',
-  path: '/texpo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminAttendanceRoute = AdminAttendanceRouteImport.update({
-  id: '/attendance',
-  path: '/attendance',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminChatbotRoute = AdminChatbotRouteImport.update({
-  id: '/chatbot',
-  path: '/chatbot',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminCrmRouteRoute = AdminCrmRouteRouteImport.update({
-  id: '/crm',
-  path: '/crm',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminDashboardRoute = AdminDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminEventSurveyRoute = AdminEventSurveyRouteImport.update({
-  id: '/event-survey',
-  path: '/event-survey',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminFeedbackSurveyRoute = AdminFeedbackSurveyRouteImport.update({
-  id: '/feedback-survey',
-  path: '/feedback-survey',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminFormsRouteRoute = AdminFormsRouteRouteImport.update({
-  id: '/forms',
-  path: '/forms',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminInitiativeRoute = AdminInitiativeRouteImport.update({
-  id: '/initiative',
-  path: '/initiative',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminInitiativeSurveyRoute = AdminInitiativeSurveyRouteImport.update({
-  id: '/initiative-survey',
-  path: '/initiative-survey',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminLeadsRoute = AdminLeadsRouteImport.update({
-  id: '/leads',
-  path: '/leads',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminLocationsRoute = AdminLocationsRouteImport.update({
-  id: '/locations',
-  path: '/locations',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminMembersRoute = AdminMembersRouteImport.update({
-  id: '/members',
-  path: '/members',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminMessagesRoute = AdminMessagesRouteImport.update({
-  id: '/messages',
-  path: '/messages',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminPartnersRoute = AdminPartnersRouteImport.update({
-  id: '/partners',
-  path: '/partners',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminWebsiteRoute = AdminWebsiteRouteImport.update({
-  id: '/website',
-  path: '/website',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const ApiChatRoute = ApiChatRouteImport.update({
-  id: '/api/chat',
-  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AttendanceManagementSystemIndexRoute =
-  AttendanceManagementSystemIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AttendanceManagementSystemRouteRoute,
-  } as any)
-const AttendanceManagementSystemLoginRoute =
-  AttendanceManagementSystemLoginRouteImport.update({
-    id: '/login',
-    path: '/login',
-    getParentRoute: () => AttendanceManagementSystemRouteRoute,
-  } as any)
-const CommunitiesKeyRoute = CommunitiesKeyRouteImport.update({
-  id: '/communities/$key',
-  path: '/communities/$key',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventSignupTokenRoute = EventSignupTokenRouteImport.update({
-  id: '/event-signup/$token',
-  path: '/event-signup/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FormsSlugRoute = FormsSlugRouteImport.update({
-  id: '/forms/$slug',
-  path: '/forms/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InitiativeIndexRoute = InitiativeIndexRouteImport.update({
-  id: '/initiative/',
-  path: '/initiative/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InitiativeClaimRoute = InitiativeClaimRouteImport.update({
-  id: '/initiative/claim',
-  path: '/initiative/claim',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InitiativeSponsorsRoute = InitiativeSponsorsRouteImport.update({
-  id: '/initiative/sponsors',
-  path: '/initiative/sponsors',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JoinTokenRoute = JoinTokenRouteImport.update({
-  id: '/join/$token',
-  path: '/join/$token',
+const NewsIndexRoute = NewsIndexRouteImport.update({
+  id: '/news/',
+  path: '/news/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearningManagementSystemIndexRoute =
@@ -384,64 +255,61 @@ const LearningManagementSystemIndexRoute =
     path: '/',
     getParentRoute: () => LearningManagementSystemRouteRoute,
   } as any)
-const LearningManagementSystemAdminRouteRoute =
-  LearningManagementSystemAdminRouteRouteImport.update({
-    id: '/admin',
-    path: '/admin',
-    getParentRoute: () => LearningManagementSystemRouteRoute,
+const InitiativeIndexRoute = InitiativeIndexRouteImport.update({
+  id: '/initiative/',
+  path: '/initiative/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AttendanceManagementSystemIndexRoute =
+  AttendanceManagementSystemIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AttendanceManagementSystemRouteRoute,
   } as any)
-const LearningManagementSystemCatalogRoute =
-  LearningManagementSystemCatalogRouteImport.update({
-    id: '/catalog',
-    path: '/catalog',
-    getParentRoute: () => LearningManagementSystemRouteRoute,
-  } as any)
-const LearningManagementSystemConfirmAccountRoute =
-  LearningManagementSystemConfirmAccountRouteImport.update({
-    id: '/confirm-account',
-    path: '/confirm-account',
-    getParentRoute: () => LearningManagementSystemRouteRoute,
-  } as any)
-const LearningManagementSystemForgotPasswordRoute =
-  LearningManagementSystemForgotPasswordRouteImport.update({
-    id: '/forgot-password',
-    path: '/forgot-password',
-    getParentRoute: () => LearningManagementSystemRouteRoute,
-  } as any)
-const LearningManagementSystemInstructorRouteRoute =
-  LearningManagementSystemInstructorRouteRouteImport.update({
-    id: '/instructor',
-    path: '/instructor',
-    getParentRoute: () => LearningManagementSystemRouteRoute,
-  } as any)
-const LearningManagementSystemLoginRoute =
-  LearningManagementSystemLoginRouteImport.update({
-    id: '/login',
-    path: '/login',
-    getParentRoute: () => LearningManagementSystemRouteRoute,
-  } as any)
-const LearningManagementSystemProfileRoute =
-  LearningManagementSystemProfileRouteImport.update({
-    id: '/profile',
-    path: '/profile',
-    getParentRoute: () => LearningManagementSystemRouteRoute,
-  } as any)
-const LearningManagementSystemResetPasswordRoute =
-  LearningManagementSystemResetPasswordRouteImport.update({
-    id: '/reset-password',
-    path: '/reset-password',
-    getParentRoute: () => LearningManagementSystemRouteRoute,
-  } as any)
-const LearningManagementSystemSignupRoute =
-  LearningManagementSystemSignupRouteImport.update({
-    id: '/signup',
-    path: '/signup',
-    getParentRoute: () => LearningManagementSystemRouteRoute,
-  } as any)
-const LearningManagementSystemStudentRouteRoute =
-  LearningManagementSystemStudentRouteRouteImport.update({
-    id: '/student',
-    path: '/student',
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const ResourcesAiToolsRoute = ResourcesAiToolsRouteImport.update({
+  id: '/resources/ai-tools',
+  path: '/resources/ai-tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileSlugRoute = ProfileSlugRouteImport.update({
+  id: '/profile/$slug',
+  path: '/profile/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsTvInterviewRoute = NewsTvInterviewRouteImport.update({
+  id: '/news/tv-interview',
+  path: '/news/tv-interview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsTrainersGraduationRoute = NewsTrainersGraduationRouteImport.update({
+  id: '/news/trainers-graduation',
+  path: '/news/trainers-graduation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsInitiativeLaunchRoute = NewsInitiativeLaunchRouteImport.update({
+  id: '/news/initiative-launch',
+  path: '/news/initiative-launch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsBuildexAleppoRoute = NewsBuildexAleppoRouteImport.update({
+  id: '/news/buildex-aleppo',
+  path: '/news/buildex-aleppo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsIdRoute = NewsIdRouteImport.update({
+  id: '/news/$id',
+  path: '/news/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearningManagementSystemVerifyRoute =
+  LearningManagementSystemVerifyRouteImport.update({
+    id: '/verify',
+    path: '/verify',
     getParentRoute: () => LearningManagementSystemRouteRoute,
   } as any)
 const LearningManagementSystemTrainerApplyRoute =
@@ -450,188 +318,202 @@ const LearningManagementSystemTrainerApplyRoute =
     path: '/trainer-apply',
     getParentRoute: () => LearningManagementSystemRouteRoute,
   } as any)
-const LearningManagementSystemVerifyRoute =
-  LearningManagementSystemVerifyRouteImport.update({
-    id: '/verify',
-    path: '/verify',
+const LearningManagementSystemSignupRoute =
+  LearningManagementSystemSignupRouteImport.update({
+    id: '/signup',
+    path: '/signup',
     getParentRoute: () => LearningManagementSystemRouteRoute,
   } as any)
-const NewsIndexRoute = NewsIndexRouteImport.update({
-  id: '/news/',
-  path: '/news/',
+const LearningManagementSystemResetPasswordRoute =
+  LearningManagementSystemResetPasswordRouteImport.update({
+    id: '/reset-password',
+    path: '/reset-password',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
+  } as any)
+const LearningManagementSystemProfileRoute =
+  LearningManagementSystemProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
+  } as any)
+const LearningManagementSystemLoginRoute =
+  LearningManagementSystemLoginRouteImport.update({
+    id: '/login',
+    path: '/login',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
+  } as any)
+const LearningManagementSystemForgotPasswordRoute =
+  LearningManagementSystemForgotPasswordRouteImport.update({
+    id: '/forgot-password',
+    path: '/forgot-password',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
+  } as any)
+const LearningManagementSystemConfirmAccountRoute =
+  LearningManagementSystemConfirmAccountRouteImport.update({
+    id: '/confirm-account',
+    path: '/confirm-account',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
+  } as any)
+const LearningManagementSystemCatalogRoute =
+  LearningManagementSystemCatalogRouteImport.update({
+    id: '/catalog',
+    path: '/catalog',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
+  } as any)
+const JoinTokenRoute = JoinTokenRouteImport.update({
+  id: '/join/$token',
+  path: '/join/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NewsIdRoute = NewsIdRouteImport.update({
-  id: '/news/$id',
-  path: '/news/$id',
+const InitiativeSponsorsRoute = InitiativeSponsorsRouteImport.update({
+  id: '/initiative/sponsors',
+  path: '/initiative/sponsors',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NewsBuildexAleppoRoute = NewsBuildexAleppoRouteImport.update({
-  id: '/news/buildex-aleppo',
-  path: '/news/buildex-aleppo',
+const InitiativeClaimRoute = InitiativeClaimRouteImport.update({
+  id: '/initiative/claim',
+  path: '/initiative/claim',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NewsInitiativeLaunchRoute = NewsInitiativeLaunchRouteImport.update({
-  id: '/news/initiative-launch',
-  path: '/news/initiative-launch',
+const FormsSlugRoute = FormsSlugRouteImport.update({
+  id: '/forms/$slug',
+  path: '/forms/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NewsTrainersGraduationRoute = NewsTrainersGraduationRouteImport.update({
-  id: '/news/trainers-graduation',
-  path: '/news/trainers-graduation',
+const EventsSlugRoute = EventsSlugRouteImport.update({
+  id: '/events/$slug',
+  path: '/events/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NewsTvInterviewRoute = NewsTvInterviewRouteImport.update({
-  id: '/news/tv-interview',
-  path: '/news/tv-interview',
+const EventSignupTokenRoute = EventSignupTokenRouteImport.update({
+  id: '/event-signup/$token',
+  path: '/event-signup/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileSlugRoute = ProfileSlugRouteImport.update({
-  id: '/profile/$slug',
-  path: '/profile/$slug',
+const CommunitiesKeyRoute = CommunitiesKeyRouteImport.update({
+  id: '/communities/$key',
+  path: '/communities/$key',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResourcesAiToolsRoute = ResourcesAiToolsRouteImport.update({
-  id: '/resources/ai-tools',
-  path: '/resources/ai-tools',
+const AttendanceManagementSystemLoginRoute =
+  AttendanceManagementSystemLoginRouteImport.update({
+    id: '/login',
+    path: '/login',
+    getParentRoute: () => AttendanceManagementSystemRouteRoute,
+  } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminCrmIndexRoute = AdminCrmIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminCrmRouteRoute,
+const AdminWebsiteRoute = AdminWebsiteRouteImport.update({
+  id: '/website',
+  path: '/website',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminCrmContactsRouteRoute = AdminCrmContactsRouteRouteImport.update({
-  id: '/contacts',
-  path: '/contacts',
-  getParentRoute: () => AdminCrmRouteRoute,
+const AdminPartnersRoute = AdminPartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminCrmFeedbackRoute = AdminCrmFeedbackRouteImport.update({
-  id: '/feedback',
-  path: '/feedback',
-  getParentRoute: () => AdminCrmRouteRoute,
+const AdminMessagesRoute = AdminMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminCrmFormsRouteRoute = AdminCrmFormsRouteRouteImport.update({
-  id: '/forms',
-  path: '/forms',
-  getParentRoute: () => AdminCrmRouteRoute,
+const AdminMembersRoute = AdminMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminCrmLeadsRouteRoute = AdminCrmLeadsRouteRouteImport.update({
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminLocationsRoute = AdminLocationsRouteImport.update({
+  id: '/locations',
+  path: '/locations',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminLeadsRoute = AdminLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
-  getParentRoute: () => AdminCrmRouteRoute,
-} as any)
-const AdminCrmStudentsRoute = AdminCrmStudentsRouteImport.update({
-  id: '/students',
-  path: '/students',
-  getParentRoute: () => AdminCrmRouteRoute,
-} as any)
-const AdminCrmTexpoRoute = AdminCrmTexpoRouteImport.update({
-  id: '/texpo',
-  path: '/texpo',
-  getParentRoute: () => AdminCrmRouteRoute,
-} as any)
-const AdminFormsIndexRoute = AdminFormsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminFormsRouteRoute,
-} as any)
-const AdminFormsNewRoute = AdminFormsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => AdminFormsRouteRoute,
-} as any)
-const AdminNewsIndexRoute = AdminNewsIndexRouteImport.update({
-  id: '/news/',
-  path: '/news/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminNewsIdRoute = AdminNewsIdRouteImport.update({
-  id: '/news/$id',
-  path: '/news/$id',
+const AdminInitiativeSurveyRoute = AdminInitiativeSurveyRouteImport.update({
+  id: '/initiative-survey',
+  path: '/initiative-survey',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const ApiPublicBunnyWebhookRoute = ApiPublicBunnyWebhookRouteImport.update({
-  id: '/api/public/bunny-webhook',
-  path: '/api/public/bunny-webhook',
-  getParentRoute: () => rootRouteImport,
+const AdminInitiativeRoute = AdminInitiativeRouteImport.update({
+  id: '/initiative',
+  path: '/initiative',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
-const LearningManagementSystemAdminIndexRoute =
-  LearningManagementSystemAdminIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemAdminAnalyticsRoute =
-  LearningManagementSystemAdminAnalyticsRouteImport.update({
-    id: '/analytics',
-    path: '/analytics',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemAdminAttendanceLinkRoute =
-  LearningManagementSystemAdminAttendanceLinkRouteImport.update({
-    id: '/attendance-link',
-    path: '/attendance-link',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemAdminCouponsRoute =
-  LearningManagementSystemAdminCouponsRouteImport.update({
-    id: '/coupons',
-    path: '/coupons',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemAdminEnrollmentRequestsRoute =
-  LearningManagementSystemAdminEnrollmentRequestsRouteImport.update({
-    id: '/enrollment-requests',
-    path: '/enrollment-requests',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemAdminPeopleRoute =
-  LearningManagementSystemAdminPeopleRouteImport.update({
-    id: '/people',
-    path: '/people',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemAdminRequestsRoute =
-  LearningManagementSystemAdminRequestsRouteImport.update({
-    id: '/requests',
-    path: '/requests',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemAdminReviewsRoute =
-  LearningManagementSystemAdminReviewsRouteImport.update({
-    id: '/reviews',
-    path: '/reviews',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemAdminSettingsRoute =
-  LearningManagementSystemAdminSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemAdminTrainerApplicationsRoute =
-  LearningManagementSystemAdminTrainerApplicationsRouteImport.update({
-    id: '/trainer-applications',
-    path: '/trainer-applications',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemAdminUsersRoute =
-  LearningManagementSystemAdminUsersRouteImport.update({
-    id: '/users',
-    path: '/users',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemCertificateIdRoute =
-  LearningManagementSystemCertificateIdRouteImport.update({
-    id: '/certificate/$id',
-    path: '/certificate/$id',
+const AdminFeedbackSurveyRoute = AdminFeedbackSurveyRouteImport.update({
+  id: '/feedback-survey',
+  path: '/feedback-survey',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminEventSurveyRoute = AdminEventSurveyRouteImport.update({
+  id: '/event-survey',
+  path: '/event-survey',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminChatbotRoute = AdminChatbotRouteImport.update({
+  id: '/chatbot',
+  path: '/chatbot',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAttendanceRoute = AdminAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const LearningManagementSystemStudentRouteRoute =
+  LearningManagementSystemStudentRouteRouteImport.update({
+    id: '/student',
+    path: '/student',
     getParentRoute: () => LearningManagementSystemRouteRoute,
   } as any)
-const LearningManagementSystemCoursesIdRoute =
-  LearningManagementSystemCoursesIdRouteImport.update({
-    id: '/courses/$id',
-    path: '/courses/$id',
+const LearningManagementSystemInstructorRouteRoute =
+  LearningManagementSystemInstructorRouteRouteImport.update({
+    id: '/instructor',
+    path: '/instructor',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
+  } as any)
+const LearningManagementSystemAdminRouteRoute =
+  LearningManagementSystemAdminRouteRouteImport.update({
+    id: '/admin',
+    path: '/admin',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
+  } as any)
+const AdminFormsRouteRoute = AdminFormsRouteRouteImport.update({
+  id: '/forms',
+  path: '/forms',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCrmRouteRoute = AdminCrmRouteRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const LearningManagementSystemStudentIndexRoute =
+  LearningManagementSystemStudentIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => LearningManagementSystemStudentRouteRoute,
+  } as any)
+const LearningManagementSystemInternshipsIndexRoute =
+  LearningManagementSystemInternshipsIndexRouteImport.update({
+    id: '/internships/',
+    path: '/internships/',
     getParentRoute: () => LearningManagementSystemRouteRoute,
   } as any)
 const LearningManagementSystemInstructorIndexRoute =
@@ -640,11 +522,37 @@ const LearningManagementSystemInstructorIndexRoute =
     path: '/',
     getParentRoute: () => LearningManagementSystemInstructorRouteRoute,
   } as any)
-const LearningManagementSystemInstructorProfileRoute =
-  LearningManagementSystemInstructorProfileRouteImport.update({
-    id: '/profile',
-    path: '/profile',
-    getParentRoute: () => LearningManagementSystemInstructorRouteRoute,
+const LearningManagementSystemAdminIndexRoute =
+  LearningManagementSystemAdminIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const AdminNewsIndexRoute = AdminNewsIndexRouteImport.update({
+  id: '/news/',
+  path: '/news/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminFormsIndexRoute = AdminFormsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminFormsRouteRoute,
+} as any)
+const AdminEventsIndexRoute = AdminEventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCrmIndexRoute = AdminCrmIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminCrmRouteRoute,
+} as any)
+const LearningManagementSystemStudentRequestsRoute =
+  LearningManagementSystemStudentRequestsRouteImport.update({
+    id: '/requests',
+    path: '/requests',
+    getParentRoute: () => LearningManagementSystemStudentRouteRoute,
   } as any)
 const LearningManagementSystemInstructorsIdRoute =
   LearningManagementSystemInstructorsIdRouteImport.update({
@@ -652,95 +560,139 @@ const LearningManagementSystemInstructorsIdRoute =
     path: '/instructors/$id',
     getParentRoute: () => LearningManagementSystemRouteRoute,
   } as any)
-const LearningManagementSystemInternshipsIndexRoute =
-  LearningManagementSystemInternshipsIndexRouteImport.update({
-    id: '/internships/',
-    path: '/internships/',
-    getParentRoute: () => LearningManagementSystemRouteRoute,
+const LearningManagementSystemInstructorProfileRoute =
+  LearningManagementSystemInstructorProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => LearningManagementSystemInstructorRouteRoute,
   } as any)
-const LearningManagementSystemStudentIndexRoute =
-  LearningManagementSystemStudentIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => LearningManagementSystemStudentRouteRoute,
-  } as any)
-const LearningManagementSystemStudentRequestsRoute =
-  LearningManagementSystemStudentRequestsRouteImport.update({
-    id: '/requests',
-    path: '/requests',
-    getParentRoute: () => LearningManagementSystemStudentRouteRoute,
-  } as any)
-const AdminCrmContactsContactIdRoute =
-  AdminCrmContactsContactIdRouteImport.update({
-    id: '/$contactId',
-    path: '/$contactId',
-    getParentRoute: () => AdminCrmContactsRouteRoute,
-  } as any)
-const AdminCrmFormsIndexRoute = AdminCrmFormsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminCrmFormsRouteRoute,
-} as any)
-const AdminCrmFormsFormSlugRoute = AdminCrmFormsFormSlugRouteImport.update({
-  id: '/$formSlug',
-  path: '/$formSlug',
-  getParentRoute: () => AdminCrmFormsRouteRoute,
-} as any)
-const AdminCrmLeadsCompaniesRouteRoute =
-  AdminCrmLeadsCompaniesRouteRouteImport.update({
-    id: '/companies',
-    path: '/companies',
-    getParentRoute: () => AdminCrmLeadsRouteRoute,
-  } as any)
-const AdminCrmLeadsIndividualsRouteRoute =
-  AdminCrmLeadsIndividualsRouteRouteImport.update({
-    id: '/individuals',
-    path: '/individuals',
-    getParentRoute: () => AdminCrmLeadsRouteRoute,
-  } as any)
-const AdminCrmRegistrationLinksIndexRoute =
-  AdminCrmRegistrationLinksIndexRouteImport.update({
-    id: '/registration-links/',
-    path: '/registration-links/',
-    getParentRoute: () => AdminCrmRouteRoute,
-  } as any)
-const AdminCrmRegistrationLinksIdRoute =
-  AdminCrmRegistrationLinksIdRouteImport.update({
-    id: '/registration-links/$id',
-    path: '/registration-links/$id',
-    getParentRoute: () => AdminCrmRouteRoute,
-  } as any)
-const AdminFormsFormIdIndexRoute = AdminFormsFormIdIndexRouteImport.update({
-  id: '/$formId/',
-  path: '/$formId/',
-  getParentRoute: () => AdminFormsRouteRoute,
-} as any)
-const AdminFormsFormIdEditRoute = AdminFormsFormIdEditRouteImport.update({
-  id: '/$formId/edit',
-  path: '/$formId/edit',
-  getParentRoute: () => AdminFormsRouteRoute,
-} as any)
-const ApiProfileCardSlugKindRoute = ApiProfileCardSlugKindRouteImport.update({
-  id: '/api/profile-card/$slug/$kind',
-  path: '/api/profile-card/$slug/$kind',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1AbuAlJoudChatRoute = ApiV1AbuAlJoudChatRouteImport.update({
-  id: '/api/v1/abu-al-joud/chat',
-  path: '/api/v1/abu-al-joud/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LearningManagementSystemAdminCoursesIndexRoute =
-  LearningManagementSystemAdminCoursesIndexRouteImport.update({
-    id: '/courses/',
-    path: '/courses/',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemAdminCoursesIdRoute =
-  LearningManagementSystemAdminCoursesIdRouteImport.update({
+const LearningManagementSystemCoursesIdRoute =
+  LearningManagementSystemCoursesIdRouteImport.update({
     id: '/courses/$id',
     path: '/courses/$id',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
+  } as any)
+const LearningManagementSystemCertificateIdRoute =
+  LearningManagementSystemCertificateIdRouteImport.update({
+    id: '/certificate/$id',
+    path: '/certificate/$id',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
+  } as any)
+const LearningManagementSystemAdminUsersRoute =
+  LearningManagementSystemAdminUsersRouteImport.update({
+    id: '/users',
+    path: '/users',
     getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const LearningManagementSystemAdminTrainerApplicationsRoute =
+  LearningManagementSystemAdminTrainerApplicationsRouteImport.update({
+    id: '/trainer-applications',
+    path: '/trainer-applications',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const LearningManagementSystemAdminSettingsRoute =
+  LearningManagementSystemAdminSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const LearningManagementSystemAdminReviewsRoute =
+  LearningManagementSystemAdminReviewsRouteImport.update({
+    id: '/reviews',
+    path: '/reviews',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const LearningManagementSystemAdminRequestsRoute =
+  LearningManagementSystemAdminRequestsRouteImport.update({
+    id: '/requests',
+    path: '/requests',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const LearningManagementSystemAdminPeopleRoute =
+  LearningManagementSystemAdminPeopleRouteImport.update({
+    id: '/people',
+    path: '/people',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const LearningManagementSystemAdminEnrollmentRequestsRoute =
+  LearningManagementSystemAdminEnrollmentRequestsRouteImport.update({
+    id: '/enrollment-requests',
+    path: '/enrollment-requests',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const LearningManagementSystemAdminCouponsRoute =
+  LearningManagementSystemAdminCouponsRouteImport.update({
+    id: '/coupons',
+    path: '/coupons',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const LearningManagementSystemAdminAttendanceLinkRoute =
+  LearningManagementSystemAdminAttendanceLinkRouteImport.update({
+    id: '/attendance-link',
+    path: '/attendance-link',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const LearningManagementSystemAdminAnalyticsRoute =
+  LearningManagementSystemAdminAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const ApiPublicBunnyWebhookRoute = ApiPublicBunnyWebhookRouteImport.update({
+  id: '/api/public/bunny-webhook',
+  path: '/api/public/bunny-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminNewsIdRoute = AdminNewsIdRouteImport.update({
+  id: '/news/$id',
+  path: '/news/$id',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminFormsNewRoute = AdminFormsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminFormsRouteRoute,
+} as any)
+const AdminEventsIdRoute = AdminEventsIdRouteImport.update({
+  id: '/events/$id',
+  path: '/events/$id',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCrmTexpoRoute = AdminCrmTexpoRouteImport.update({
+  id: '/texpo',
+  path: '/texpo',
+  getParentRoute: () => AdminCrmRouteRoute,
+} as any)
+const AdminCrmStudentsRoute = AdminCrmStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AdminCrmRouteRoute,
+} as any)
+const AdminCrmFeedbackRoute = AdminCrmFeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => AdminCrmRouteRoute,
+} as any)
+const AdminCrmLeadsRouteRoute = AdminCrmLeadsRouteRouteImport.update({
+  id: '/leads',
+  path: '/leads',
+  getParentRoute: () => AdminCrmRouteRoute,
+} as any)
+const AdminCrmFormsRouteRoute = AdminCrmFormsRouteRouteImport.update({
+  id: '/forms',
+  path: '/forms',
+  getParentRoute: () => AdminCrmRouteRoute,
+} as any)
+const AdminCrmContactsRouteRoute = AdminCrmContactsRouteRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => AdminCrmRouteRoute,
+} as any)
+const LearningManagementSystemInternshipsSlugIndexRoute =
+  LearningManagementSystemInternshipsSlugIndexRouteImport.update({
+    id: '/internships/$slug/',
+    path: '/internships/$slug/',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
   } as any)
 const LearningManagementSystemAdminInternshipsIndexRoute =
   LearningManagementSystemAdminInternshipsIndexRouteImport.update({
@@ -748,46 +700,48 @@ const LearningManagementSystemAdminInternshipsIndexRoute =
     path: '/internships/',
     getParentRoute: () => LearningManagementSystemAdminRouteRoute,
   } as any)
-const LearningManagementSystemAdminInternshipsNewRoute =
-  LearningManagementSystemAdminInternshipsNewRouteImport.update({
-    id: '/internships/new',
-    path: '/internships/new',
+const LearningManagementSystemAdminCoursesIndexRoute =
+  LearningManagementSystemAdminCoursesIndexRouteImport.update({
+    id: '/courses/',
+    path: '/courses/',
     getParentRoute: () => LearningManagementSystemAdminRouteRoute,
   } as any)
-const LearningManagementSystemInstructorAssignmentsCourseIdRoute =
-  LearningManagementSystemInstructorAssignmentsCourseIdRouteImport.update({
-    id: '/assignments/$courseId',
-    path: '/assignments/$courseId',
-    getParentRoute: () => LearningManagementSystemInstructorRouteRoute,
+const AdminFormsFormIdIndexRoute = AdminFormsFormIdIndexRouteImport.update({
+  id: '/$formId/',
+  path: '/$formId/',
+  getParentRoute: () => AdminFormsRouteRoute,
+} as any)
+const AdminCrmRegistrationLinksIndexRoute =
+  AdminCrmRegistrationLinksIndexRouteImport.update({
+    id: '/registration-links/',
+    path: '/registration-links/',
+    getParentRoute: () => AdminCrmRouteRoute,
   } as any)
-const LearningManagementSystemInstructorCoursesIdRoute =
-  LearningManagementSystemInstructorCoursesIdRouteImport.update({
-    id: '/courses/$id',
-    path: '/courses/$id',
-    getParentRoute: () => LearningManagementSystemInstructorRouteRoute,
+const AdminCrmFormsIndexRoute = AdminCrmFormsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminCrmFormsRouteRoute,
+} as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const LearningManagementSystemInstructorQuizResultsCourseIdRoute =
-  LearningManagementSystemInstructorQuizResultsCourseIdRouteImport.update({
-    id: '/quiz-results/$courseId',
-    path: '/quiz-results/$courseId',
-    getParentRoute: () => LearningManagementSystemInstructorRouteRoute,
-  } as any)
-const LearningManagementSystemInternshipsSlugIndexRoute =
-  LearningManagementSystemInternshipsSlugIndexRouteImport.update({
-    id: '/internships/$slug/',
-    path: '/internships/$slug/',
-    getParentRoute: () => LearningManagementSystemRouteRoute,
-  } as any)
-const LearningManagementSystemInternshipsSlugApplyRoute =
-  LearningManagementSystemInternshipsSlugApplyRouteImport.update({
-    id: '/internships/$slug/apply',
-    path: '/internships/$slug/apply',
-    getParentRoute: () => LearningManagementSystemRouteRoute,
-  } as any)
-const LearningManagementSystemStudentFeedbackCourseIdRoute =
-  LearningManagementSystemStudentFeedbackCourseIdRouteImport.update({
-    id: '/feedback/$courseId',
-    path: '/feedback/$courseId',
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearningManagementSystemStudentQuizCourseIdRoute =
+  LearningManagementSystemStudentQuizCourseIdRouteImport.update({
+    id: '/quiz/$courseId',
+    path: '/quiz/$courseId',
     getParentRoute: () => LearningManagementSystemStudentRouteRoute,
   } as any)
 const LearningManagementSystemStudentPlayerCourseIdRoute =
@@ -796,39 +750,115 @@ const LearningManagementSystemStudentPlayerCourseIdRoute =
     path: '/player/$courseId',
     getParentRoute: () => LearningManagementSystemStudentRouteRoute,
   } as any)
-const LearningManagementSystemStudentQuizCourseIdRoute =
-  LearningManagementSystemStudentQuizCourseIdRouteImport.update({
-    id: '/quiz/$courseId',
-    path: '/quiz/$courseId',
+const LearningManagementSystemStudentFeedbackCourseIdRoute =
+  LearningManagementSystemStudentFeedbackCourseIdRouteImport.update({
+    id: '/feedback/$courseId',
+    path: '/feedback/$courseId',
     getParentRoute: () => LearningManagementSystemStudentRouteRoute,
   } as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
-    getParentRoute: () => rootRouteImport,
+const LearningManagementSystemInternshipsSlugApplyRoute =
+  LearningManagementSystemInternshipsSlugApplyRouteImport.update({
+    id: '/internships/$slug/apply',
+    path: '/internships/$slug/apply',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
   } as any)
-const AdminCrmLeadsCompaniesLeadIdRoute =
-  AdminCrmLeadsCompaniesLeadIdRouteImport.update({
-    id: '/$leadId',
-    path: '/$leadId',
-    getParentRoute: () => AdminCrmLeadsCompaniesRouteRoute,
+const LearningManagementSystemInstructorQuizResultsCourseIdRoute =
+  LearningManagementSystemInstructorQuizResultsCourseIdRouteImport.update({
+    id: '/quiz-results/$courseId',
+    path: '/quiz-results/$courseId',
+    getParentRoute: () => LearningManagementSystemInstructorRouteRoute,
+  } as any)
+const LearningManagementSystemInstructorCoursesIdRoute =
+  LearningManagementSystemInstructorCoursesIdRouteImport.update({
+    id: '/courses/$id',
+    path: '/courses/$id',
+    getParentRoute: () => LearningManagementSystemInstructorRouteRoute,
+  } as any)
+const LearningManagementSystemInstructorAssignmentsCourseIdRoute =
+  LearningManagementSystemInstructorAssignmentsCourseIdRouteImport.update({
+    id: '/assignments/$courseId',
+    path: '/assignments/$courseId',
+    getParentRoute: () => LearningManagementSystemInstructorRouteRoute,
+  } as any)
+const LearningManagementSystemAdminInternshipsNewRoute =
+  LearningManagementSystemAdminInternshipsNewRouteImport.update({
+    id: '/internships/new',
+    path: '/internships/new',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const LearningManagementSystemAdminCoursesIdRoute =
+  LearningManagementSystemAdminCoursesIdRouteImport.update({
+    id: '/courses/$id',
+    path: '/courses/$id',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const ApiV1AbuAlJoudChatRoute = ApiV1AbuAlJoudChatRouteImport.update({
+  id: '/api/v1/abu-al-joud/chat',
+  path: '/api/v1/abu-al-joud/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProfileCardSlugKindRoute = ApiProfileCardSlugKindRouteImport.update({
+  id: '/api/profile-card/$slug/$kind',
+  path: '/api/profile-card/$slug/$kind',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFormsFormIdEditRoute = AdminFormsFormIdEditRouteImport.update({
+  id: '/$formId/edit',
+  path: '/$formId/edit',
+  getParentRoute: () => AdminFormsRouteRoute,
+} as any)
+const AdminCrmRegistrationLinksIdRoute =
+  AdminCrmRegistrationLinksIdRouteImport.update({
+    id: '/registration-links/$id',
+    path: '/registration-links/$id',
+    getParentRoute: () => AdminCrmRouteRoute,
+  } as any)
+const AdminCrmFormsFormSlugRoute = AdminCrmFormsFormSlugRouteImport.update({
+  id: '/$formSlug',
+  path: '/$formSlug',
+  getParentRoute: () => AdminCrmFormsRouteRoute,
+} as any)
+const AdminCrmContactsContactIdRoute =
+  AdminCrmContactsContactIdRouteImport.update({
+    id: '/$contactId',
+    path: '/$contactId',
+    getParentRoute: () => AdminCrmContactsRouteRoute,
+  } as any)
+const AdminCrmLeadsIndividualsRouteRoute =
+  AdminCrmLeadsIndividualsRouteRouteImport.update({
+    id: '/individuals',
+    path: '/individuals',
+    getParentRoute: () => AdminCrmLeadsRouteRoute,
+  } as any)
+const AdminCrmLeadsCompaniesRouteRoute =
+  AdminCrmLeadsCompaniesRouteRouteImport.update({
+    id: '/companies',
+    path: '/companies',
+    getParentRoute: () => AdminCrmLeadsRouteRoute,
+  } as any)
+const LearningManagementSystemAdminInternshipsIdSignupsRoute =
+  LearningManagementSystemAdminInternshipsIdSignupsRouteImport.update({
+    id: '/internships/$id/signups',
+    path: '/internships/$id/signups',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
+  } as any)
+const LearningManagementSystemAdminInternshipsIdEditRoute =
+  LearningManagementSystemAdminInternshipsIdEditRouteImport.update({
+    id: '/internships/$id/edit',
+    path: '/internships/$id/edit',
+    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
   } as any)
 const AdminCrmLeadsIndividualsLeadIdRoute =
   AdminCrmLeadsIndividualsLeadIdRouteImport.update({
     id: '/$leadId',
     path: '/$leadId',
     getParentRoute: () => AdminCrmLeadsIndividualsRouteRoute,
+  } as any)
+const AdminCrmLeadsCompaniesLeadIdRoute =
+  AdminCrmLeadsCompaniesLeadIdRouteImport.update({
+    id: '/$leadId',
+    path: '/$leadId',
+    getParentRoute: () => AdminCrmLeadsCompaniesRouteRoute,
   } as any)
 const LearningManagementSystemAdminInternshipsIdApplicationsRouteRoute =
   LearningManagementSystemAdminInternshipsIdApplicationsRouteRouteImport.update(
@@ -838,18 +868,6 @@ const LearningManagementSystemAdminInternshipsIdApplicationsRouteRoute =
       getParentRoute: () => LearningManagementSystemAdminRouteRoute,
     } as any,
   )
-const LearningManagementSystemAdminInternshipsIdEditRoute =
-  LearningManagementSystemAdminInternshipsIdEditRouteImport.update({
-    id: '/internships/$id/edit',
-    path: '/internships/$id/edit',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
-const LearningManagementSystemAdminInternshipsIdSignupsRoute =
-  LearningManagementSystemAdminInternshipsIdSignupsRouteImport.update({
-    id: '/internships/$id/signups',
-    path: '/internships/$id/signups',
-    getParentRoute: () => LearningManagementSystemAdminRouteRoute,
-  } as any)
 const LearningManagementSystemAdminInternshipsIdApplicationsIndexRoute =
   LearningManagementSystemAdminInternshipsIdApplicationsIndexRouteImport.update(
     {
@@ -912,6 +930,7 @@ export interface FileRoutesByFullPath {
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
   '/event-signup/$token': typeof EventSignupTokenRoute
+  '/events/$slug': typeof EventsSlugRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/initiative/sponsors': typeof InitiativeSponsorsRoute
@@ -943,6 +962,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm/feedback': typeof AdminCrmFeedbackRoute
   '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/crm/texpo': typeof AdminCrmTexpoRoute
+  '/admin/events/$id': typeof AdminEventsIdRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
   '/admin/news/$id': typeof AdminNewsIdRoute
   '/api/public/bunny-webhook': typeof ApiPublicBunnyWebhookRoute
@@ -962,6 +982,7 @@ export interface FileRoutesByFullPath {
   '/learning-management-system/instructors/$id': typeof LearningManagementSystemInstructorsIdRoute
   '/learning-management-system/student/requests': typeof LearningManagementSystemStudentRequestsRoute
   '/admin/crm/': typeof AdminCrmIndexRoute
+  '/admin/events/': typeof AdminEventsIndexRoute
   '/admin/forms/': typeof AdminFormsIndexRoute
   '/admin/news/': typeof AdminNewsIndexRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
@@ -1037,6 +1058,7 @@ export interface FileRoutesByTo {
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
   '/event-signup/$token': typeof EventSignupTokenRoute
+  '/events/$slug': typeof EventsSlugRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/initiative/sponsors': typeof InitiativeSponsorsRoute
@@ -1067,6 +1089,7 @@ export interface FileRoutesByTo {
   '/admin/crm/feedback': typeof AdminCrmFeedbackRoute
   '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/crm/texpo': typeof AdminCrmTexpoRoute
+  '/admin/events/$id': typeof AdminEventsIdRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
   '/admin/news/$id': typeof AdminNewsIdRoute
   '/api/public/bunny-webhook': typeof ApiPublicBunnyWebhookRoute
@@ -1086,6 +1109,7 @@ export interface FileRoutesByTo {
   '/learning-management-system/instructors/$id': typeof LearningManagementSystemInstructorsIdRoute
   '/learning-management-system/student/requests': typeof LearningManagementSystemStudentRequestsRoute
   '/admin/crm': typeof AdminCrmIndexRoute
+  '/admin/events': typeof AdminEventsIndexRoute
   '/admin/forms': typeof AdminFormsIndexRoute
   '/admin/news': typeof AdminNewsIndexRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminIndexRoute
@@ -1169,6 +1193,7 @@ export interface FileRoutesById {
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
   '/event-signup/$token': typeof EventSignupTokenRoute
+  '/events/$slug': typeof EventsSlugRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/initiative/sponsors': typeof InitiativeSponsorsRoute
@@ -1200,6 +1225,7 @@ export interface FileRoutesById {
   '/admin/crm/feedback': typeof AdminCrmFeedbackRoute
   '/admin/crm/students': typeof AdminCrmStudentsRoute
   '/admin/crm/texpo': typeof AdminCrmTexpoRoute
+  '/admin/events/$id': typeof AdminEventsIdRoute
   '/admin/forms/new': typeof AdminFormsNewRoute
   '/admin/news/$id': typeof AdminNewsIdRoute
   '/api/public/bunny-webhook': typeof ApiPublicBunnyWebhookRoute
@@ -1219,6 +1245,7 @@ export interface FileRoutesById {
   '/learning-management-system/instructors/$id': typeof LearningManagementSystemInstructorsIdRoute
   '/learning-management-system/student/requests': typeof LearningManagementSystemStudentRequestsRoute
   '/admin/crm/': typeof AdminCrmIndexRoute
+  '/admin/events/': typeof AdminEventsIndexRoute
   '/admin/forms/': typeof AdminFormsIndexRoute
   '/admin/news/': typeof AdminNewsIndexRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
@@ -1304,6 +1331,7 @@ export interface FileRouteTypes {
     | '/attendance-management-system/login'
     | '/communities/$key'
     | '/event-signup/$token'
+    | '/events/$slug'
     | '/forms/$slug'
     | '/initiative/claim'
     | '/initiative/sponsors'
@@ -1335,6 +1363,7 @@ export interface FileRouteTypes {
     | '/admin/crm/feedback'
     | '/admin/crm/students'
     | '/admin/crm/texpo'
+    | '/admin/events/$id'
     | '/admin/forms/new'
     | '/admin/news/$id'
     | '/api/public/bunny-webhook'
@@ -1354,6 +1383,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/instructors/$id'
     | '/learning-management-system/student/requests'
     | '/admin/crm/'
+    | '/admin/events/'
     | '/admin/forms/'
     | '/admin/news/'
     | '/learning-management-system/admin/'
@@ -1429,6 +1459,7 @@ export interface FileRouteTypes {
     | '/attendance-management-system/login'
     | '/communities/$key'
     | '/event-signup/$token'
+    | '/events/$slug'
     | '/forms/$slug'
     | '/initiative/claim'
     | '/initiative/sponsors'
@@ -1459,6 +1490,7 @@ export interface FileRouteTypes {
     | '/admin/crm/feedback'
     | '/admin/crm/students'
     | '/admin/crm/texpo'
+    | '/admin/events/$id'
     | '/admin/forms/new'
     | '/admin/news/$id'
     | '/api/public/bunny-webhook'
@@ -1478,6 +1510,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/instructors/$id'
     | '/learning-management-system/student/requests'
     | '/admin/crm'
+    | '/admin/events'
     | '/admin/forms'
     | '/admin/news'
     | '/learning-management-system/admin'
@@ -1560,6 +1593,7 @@ export interface FileRouteTypes {
     | '/attendance-management-system/login'
     | '/communities/$key'
     | '/event-signup/$token'
+    | '/events/$slug'
     | '/forms/$slug'
     | '/initiative/claim'
     | '/initiative/sponsors'
@@ -1591,6 +1625,7 @@ export interface FileRouteTypes {
     | '/admin/crm/feedback'
     | '/admin/crm/students'
     | '/admin/crm/texpo'
+    | '/admin/events/$id'
     | '/admin/forms/new'
     | '/admin/news/$id'
     | '/api/public/bunny-webhook'
@@ -1610,6 +1645,7 @@ export interface FileRouteTypes {
     | '/learning-management-system/instructors/$id'
     | '/learning-management-system/student/requests'
     | '/admin/crm/'
+    | '/admin/events/'
     | '/admin/forms/'
     | '/admin/news/'
     | '/learning-management-system/admin/'
@@ -1674,6 +1710,7 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
   EventSignupTokenRoute: typeof EventSignupTokenRoute
+  EventsSlugRoute: typeof EventsSlugRoute
   FormsSlugRoute: typeof FormsSlugRoute
   InitiativeClaimRoute: typeof InitiativeClaimRoute
   InitiativeSponsorsRoute: typeof InitiativeSponsorsRoute
@@ -1697,123 +1734,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/attendance-management-system': {
-      id: '/attendance-management-system'
-      path: '/attendance-management-system'
-      fullPath: '/attendance-management-system'
-      preLoaderRoute: typeof AttendanceManagementSystemRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/event-survey': {
-      id: '/event-survey'
-      path: '/event-survey'
-      fullPath: '/event-survey'
-      preLoaderRoute: typeof EventSurveyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/feedback': {
-      id: '/feedback'
-      path: '/feedback'
-      fullPath: '/feedback'
-      preLoaderRoute: typeof FeedbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/initiative-survey': {
-      id: '/initiative-survey'
-      path: '/initiative-survey'
-      fullPath: '/initiative-survey'
-      preLoaderRoute: typeof InitiativeSurveyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/international-business-bridge': {
-      id: '/international-business-bridge'
-      path: '/international-business-bridge'
-      fullPath: '/international-business-bridge'
-      preLoaderRoute: typeof InternationalBusinessBridgeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/learning-management-system': {
-      id: '/learning-management-system'
-      path: '/learning-management-system'
-      fullPath: '/learning-management-system'
-      preLoaderRoute: typeof LearningManagementSystemRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/one-million-initiative': {
-      id: '/one-million-initiative'
-      path: '/one-million-initiative'
-      fullPath: '/one-million-initiative'
-      preLoaderRoute: typeof OneMillionInitiativeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/one-million-initiative-donors': {
-      id: '/one-million-initiative-donors'
-      path: '/one-million-initiative-donors'
-      fullPath: '/one-million-initiative-donors'
-      preLoaderRoute: typeof OneMillionInitiativeDonorsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/one-million-initiative-home': {
-      id: '/one-million-initiative-home'
-      path: '/one-million-initiative-home'
-      fullPath: '/one-million-initiative-home'
-      preLoaderRoute: typeof OneMillionInitiativeHomeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/partners': {
-      id: '/partners'
-      path: '/partners'
-      fullPath: '/partners'
-      preLoaderRoute: typeof PartnersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/project-management': {
-      id: '/project-management'
-      path: '/project-management'
-      fullPath: '/project-management'
-      preLoaderRoute: typeof ProjectManagementRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/registration': {
-      id: '/registration'
-      path: '/registration'
-      fullPath: '/registration'
-      preLoaderRoute: typeof RegistrationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
+    '/texpo': {
+      id: '/texpo'
+      path: '/texpo'
+      fullPath: '/texpo'
+      preLoaderRoute: typeof TexpoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/super-admin': {
@@ -1823,200 +1748,130 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuperAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/texpo': {
-      id: '/texpo'
-      path: '/texpo'
-      fullPath: '/texpo'
-      preLoaderRoute: typeof TexpoRouteImport
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
+    '/registration': {
+      id: '/registration'
+      path: '/registration'
+      fullPath: '/registration'
+      preLoaderRoute: typeof RegistrationRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/attendance': {
-      id: '/admin/attendance'
-      path: '/attendance'
-      fullPath: '/admin/attendance'
-      preLoaderRoute: typeof AdminAttendanceRouteImport
-      parentRoute: typeof AdminRouteRoute
+    '/project-management': {
+      id: '/project-management'
+      path: '/project-management'
+      fullPath: '/project-management'
+      preLoaderRoute: typeof ProjectManagementRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/chatbot': {
-      id: '/admin/chatbot'
-      path: '/chatbot'
-      fullPath: '/admin/chatbot'
-      preLoaderRoute: typeof AdminChatbotRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/crm': {
-      id: '/admin/crm'
-      path: '/crm'
-      fullPath: '/admin/crm'
-      preLoaderRoute: typeof AdminCrmRouteRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/dashboard': {
-      id: '/admin/dashboard'
-      path: '/dashboard'
-      fullPath: '/admin/dashboard'
-      preLoaderRoute: typeof AdminDashboardRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/event-survey': {
-      id: '/admin/event-survey'
-      path: '/event-survey'
-      fullPath: '/admin/event-survey'
-      preLoaderRoute: typeof AdminEventSurveyRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/feedback-survey': {
-      id: '/admin/feedback-survey'
-      path: '/feedback-survey'
-      fullPath: '/admin/feedback-survey'
-      preLoaderRoute: typeof AdminFeedbackSurveyRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/forms': {
-      id: '/admin/forms'
-      path: '/forms'
-      fullPath: '/admin/forms'
-      preLoaderRoute: typeof AdminFormsRouteRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/initiative': {
-      id: '/admin/initiative'
-      path: '/initiative'
-      fullPath: '/admin/initiative'
-      preLoaderRoute: typeof AdminInitiativeRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/initiative-survey': {
-      id: '/admin/initiative-survey'
-      path: '/initiative-survey'
-      fullPath: '/admin/initiative-survey'
-      preLoaderRoute: typeof AdminInitiativeSurveyRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/leads': {
-      id: '/admin/leads'
-      path: '/leads'
-      fullPath: '/admin/leads'
-      preLoaderRoute: typeof AdminLeadsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/locations': {
-      id: '/admin/locations'
-      path: '/locations'
-      fullPath: '/admin/locations'
-      preLoaderRoute: typeof AdminLocationsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/login': {
-      id: '/admin/login'
-      path: '/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/members': {
-      id: '/admin/members'
-      path: '/members'
-      fullPath: '/admin/members'
-      preLoaderRoute: typeof AdminMembersRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/messages': {
-      id: '/admin/messages'
-      path: '/messages'
-      fullPath: '/admin/messages'
-      preLoaderRoute: typeof AdminMessagesRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/partners': {
-      id: '/admin/partners'
+    '/partners': {
+      id: '/partners'
       path: '/partners'
-      fullPath: '/admin/partners'
-      preLoaderRoute: typeof AdminPartnersRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/website': {
-      id: '/admin/website'
-      path: '/website'
-      fullPath: '/admin/website'
-      preLoaderRoute: typeof AdminWebsiteRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/api/chat': {
-      id: '/api/chat'
-      path: '/api/chat'
-      fullPath: '/api/chat'
-      preLoaderRoute: typeof ApiChatRouteImport
+      fullPath: '/partners'
+      preLoaderRoute: typeof PartnersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/attendance-management-system/': {
-      id: '/attendance-management-system/'
+    '/one-million-initiative-home': {
+      id: '/one-million-initiative-home'
+      path: '/one-million-initiative-home'
+      fullPath: '/one-million-initiative-home'
+      preLoaderRoute: typeof OneMillionInitiativeHomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/one-million-initiative-donors': {
+      id: '/one-million-initiative-donors'
+      path: '/one-million-initiative-donors'
+      fullPath: '/one-million-initiative-donors'
+      preLoaderRoute: typeof OneMillionInitiativeDonorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/one-million-initiative': {
+      id: '/one-million-initiative'
+      path: '/one-million-initiative'
+      fullPath: '/one-million-initiative'
+      preLoaderRoute: typeof OneMillionInitiativeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/international-business-bridge': {
+      id: '/international-business-bridge'
+      path: '/international-business-bridge'
+      fullPath: '/international-business-bridge'
+      preLoaderRoute: typeof InternationalBusinessBridgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/initiative-survey': {
+      id: '/initiative-survey'
+      path: '/initiative-survey'
+      fullPath: '/initiative-survey'
+      preLoaderRoute: typeof InitiativeSurveyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event-survey': {
+      id: '/event-survey'
+      path: '/event-survey'
+      fullPath: '/event-survey'
+      preLoaderRoute: typeof EventSurveyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learning-management-system': {
+      id: '/learning-management-system'
+      path: '/learning-management-system'
+      fullPath: '/learning-management-system'
+      preLoaderRoute: typeof LearningManagementSystemRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/attendance-management-system': {
+      id: '/attendance-management-system'
+      path: '/attendance-management-system'
+      fullPath: '/attendance-management-system'
+      preLoaderRoute: typeof AttendanceManagementSystemRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
       path: '/'
-      fullPath: '/attendance-management-system/'
-      preLoaderRoute: typeof AttendanceManagementSystemIndexRouteImport
-      parentRoute: typeof AttendanceManagementSystemRouteRoute
-    }
-    '/attendance-management-system/login': {
-      id: '/attendance-management-system/login'
-      path: '/login'
-      fullPath: '/attendance-management-system/login'
-      preLoaderRoute: typeof AttendanceManagementSystemLoginRouteImport
-      parentRoute: typeof AttendanceManagementSystemRouteRoute
-    }
-    '/communities/$key': {
-      id: '/communities/$key'
-      path: '/communities/$key'
-      fullPath: '/communities/$key'
-      preLoaderRoute: typeof CommunitiesKeyRouteImport
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/event-signup/$token': {
-      id: '/event-signup/$token'
-      path: '/event-signup/$token'
-      fullPath: '/event-signup/$token'
-      preLoaderRoute: typeof EventSignupTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forms/$slug': {
-      id: '/forms/$slug'
-      path: '/forms/$slug'
-      fullPath: '/forms/$slug'
-      preLoaderRoute: typeof FormsSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/initiative/': {
-      id: '/initiative/'
-      path: '/initiative'
-      fullPath: '/initiative/'
-      preLoaderRoute: typeof InitiativeIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/initiative/claim': {
-      id: '/initiative/claim'
-      path: '/initiative/claim'
-      fullPath: '/initiative/claim'
-      preLoaderRoute: typeof InitiativeClaimRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/initiative/sponsors': {
-      id: '/initiative/sponsors'
-      path: '/initiative/sponsors'
-      fullPath: '/initiative/sponsors'
-      preLoaderRoute: typeof InitiativeSponsorsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/join/$token': {
-      id: '/join/$token'
-      path: '/join/$token'
-      fullPath: '/join/$token'
-      preLoaderRoute: typeof JoinTokenRouteImport
+    '/news/': {
+      id: '/news/'
+      path: '/news'
+      fullPath: '/news/'
+      preLoaderRoute: typeof NewsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learning-management-system/': {
@@ -2026,130 +1881,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemIndexRouteImport
       parentRoute: typeof LearningManagementSystemRouteRoute
     }
-    '/learning-management-system/admin': {
-      id: '/learning-management-system/admin'
-      path: '/admin'
-      fullPath: '/learning-management-system/admin'
-      preLoaderRoute: typeof LearningManagementSystemAdminRouteRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/catalog': {
-      id: '/learning-management-system/catalog'
-      path: '/catalog'
-      fullPath: '/learning-management-system/catalog'
-      preLoaderRoute: typeof LearningManagementSystemCatalogRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/confirm-account': {
-      id: '/learning-management-system/confirm-account'
-      path: '/confirm-account'
-      fullPath: '/learning-management-system/confirm-account'
-      preLoaderRoute: typeof LearningManagementSystemConfirmAccountRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/forgot-password': {
-      id: '/learning-management-system/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/learning-management-system/forgot-password'
-      preLoaderRoute: typeof LearningManagementSystemForgotPasswordRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/instructor': {
-      id: '/learning-management-system/instructor'
-      path: '/instructor'
-      fullPath: '/learning-management-system/instructor'
-      preLoaderRoute: typeof LearningManagementSystemInstructorRouteRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/login': {
-      id: '/learning-management-system/login'
-      path: '/login'
-      fullPath: '/learning-management-system/login'
-      preLoaderRoute: typeof LearningManagementSystemLoginRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/profile': {
-      id: '/learning-management-system/profile'
-      path: '/profile'
-      fullPath: '/learning-management-system/profile'
-      preLoaderRoute: typeof LearningManagementSystemProfileRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/reset-password': {
-      id: '/learning-management-system/reset-password'
-      path: '/reset-password'
-      fullPath: '/learning-management-system/reset-password'
-      preLoaderRoute: typeof LearningManagementSystemResetPasswordRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/signup': {
-      id: '/learning-management-system/signup'
-      path: '/signup'
-      fullPath: '/learning-management-system/signup'
-      preLoaderRoute: typeof LearningManagementSystemSignupRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/student': {
-      id: '/learning-management-system/student'
-      path: '/student'
-      fullPath: '/learning-management-system/student'
-      preLoaderRoute: typeof LearningManagementSystemStudentRouteRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/trainer-apply': {
-      id: '/learning-management-system/trainer-apply'
-      path: '/trainer-apply'
-      fullPath: '/learning-management-system/trainer-apply'
-      preLoaderRoute: typeof LearningManagementSystemTrainerApplyRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/verify': {
-      id: '/learning-management-system/verify'
-      path: '/verify'
-      fullPath: '/learning-management-system/verify'
-      preLoaderRoute: typeof LearningManagementSystemVerifyRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/news/': {
-      id: '/news/'
-      path: '/news'
-      fullPath: '/news/'
-      preLoaderRoute: typeof NewsIndexRouteImport
+    '/initiative/': {
+      id: '/initiative/'
+      path: '/initiative'
+      fullPath: '/initiative/'
+      preLoaderRoute: typeof InitiativeIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/news/$id': {
-      id: '/news/$id'
-      path: '/news/$id'
-      fullPath: '/news/$id'
-      preLoaderRoute: typeof NewsIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/attendance-management-system/': {
+      id: '/attendance-management-system/'
+      path: '/'
+      fullPath: '/attendance-management-system/'
+      preLoaderRoute: typeof AttendanceManagementSystemIndexRouteImport
+      parentRoute: typeof AttendanceManagementSystemRouteRoute
     }
-    '/news/buildex-aleppo': {
-      id: '/news/buildex-aleppo'
-      path: '/news/buildex-aleppo'
-      fullPath: '/news/buildex-aleppo'
-      preLoaderRoute: typeof NewsBuildexAleppoRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
-    '/news/initiative-launch': {
-      id: '/news/initiative-launch'
-      path: '/news/initiative-launch'
-      fullPath: '/news/initiative-launch'
-      preLoaderRoute: typeof NewsInitiativeLaunchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/news/trainers-graduation': {
-      id: '/news/trainers-graduation'
-      path: '/news/trainers-graduation'
-      fullPath: '/news/trainers-graduation'
-      preLoaderRoute: typeof NewsTrainersGraduationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/news/tv-interview': {
-      id: '/news/tv-interview'
-      path: '/news/tv-interview'
-      fullPath: '/news/tv-interview'
-      preLoaderRoute: typeof NewsTvInterviewRouteImport
+    '/resources/ai-tools': {
+      id: '/resources/ai-tools'
+      path: '/resources/ai-tools'
+      fullPath: '/resources/ai-tools'
+      preLoaderRoute: typeof ResourcesAiToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/$slug': {
@@ -2159,186 +1916,312 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/resources/ai-tools': {
-      id: '/resources/ai-tools'
-      path: '/resources/ai-tools'
-      fullPath: '/resources/ai-tools'
-      preLoaderRoute: typeof ResourcesAiToolsRouteImport
+    '/news/tv-interview': {
+      id: '/news/tv-interview'
+      path: '/news/tv-interview'
+      fullPath: '/news/tv-interview'
+      preLoaderRoute: typeof NewsTvInterviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/crm/': {
-      id: '/admin/crm/'
-      path: '/'
-      fullPath: '/admin/crm/'
-      preLoaderRoute: typeof AdminCrmIndexRouteImport
-      parentRoute: typeof AdminCrmRouteRoute
+    '/news/trainers-graduation': {
+      id: '/news/trainers-graduation'
+      path: '/news/trainers-graduation'
+      fullPath: '/news/trainers-graduation'
+      preLoaderRoute: typeof NewsTrainersGraduationRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/crm/contacts': {
-      id: '/admin/crm/contacts'
-      path: '/contacts'
-      fullPath: '/admin/crm/contacts'
-      preLoaderRoute: typeof AdminCrmContactsRouteRouteImport
-      parentRoute: typeof AdminCrmRouteRoute
+    '/news/initiative-launch': {
+      id: '/news/initiative-launch'
+      path: '/news/initiative-launch'
+      fullPath: '/news/initiative-launch'
+      preLoaderRoute: typeof NewsInitiativeLaunchRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/crm/feedback': {
-      id: '/admin/crm/feedback'
-      path: '/feedback'
-      fullPath: '/admin/crm/feedback'
-      preLoaderRoute: typeof AdminCrmFeedbackRouteImport
-      parentRoute: typeof AdminCrmRouteRoute
+    '/news/buildex-aleppo': {
+      id: '/news/buildex-aleppo'
+      path: '/news/buildex-aleppo'
+      fullPath: '/news/buildex-aleppo'
+      preLoaderRoute: typeof NewsBuildexAleppoRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/crm/forms': {
-      id: '/admin/crm/forms'
-      path: '/forms'
-      fullPath: '/admin/crm/forms'
-      preLoaderRoute: typeof AdminCrmFormsRouteRouteImport
-      parentRoute: typeof AdminCrmRouteRoute
-    }
-    '/admin/crm/leads': {
-      id: '/admin/crm/leads'
-      path: '/leads'
-      fullPath: '/admin/crm/leads'
-      preLoaderRoute: typeof AdminCrmLeadsRouteRouteImport
-      parentRoute: typeof AdminCrmRouteRoute
-    }
-    '/admin/crm/students': {
-      id: '/admin/crm/students'
-      path: '/students'
-      fullPath: '/admin/crm/students'
-      preLoaderRoute: typeof AdminCrmStudentsRouteImport
-      parentRoute: typeof AdminCrmRouteRoute
-    }
-    '/admin/crm/texpo': {
-      id: '/admin/crm/texpo'
-      path: '/texpo'
-      fullPath: '/admin/crm/texpo'
-      preLoaderRoute: typeof AdminCrmTexpoRouteImport
-      parentRoute: typeof AdminCrmRouteRoute
-    }
-    '/admin/forms/': {
-      id: '/admin/forms/'
-      path: '/'
-      fullPath: '/admin/forms/'
-      preLoaderRoute: typeof AdminFormsIndexRouteImport
-      parentRoute: typeof AdminFormsRouteRoute
-    }
-    '/admin/forms/new': {
-      id: '/admin/forms/new'
-      path: '/new'
-      fullPath: '/admin/forms/new'
-      preLoaderRoute: typeof AdminFormsNewRouteImport
-      parentRoute: typeof AdminFormsRouteRoute
-    }
-    '/admin/news/': {
-      id: '/admin/news/'
-      path: '/news'
-      fullPath: '/admin/news/'
-      preLoaderRoute: typeof AdminNewsIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/news/$id': {
-      id: '/admin/news/$id'
+    '/news/$id': {
+      id: '/news/$id'
       path: '/news/$id'
-      fullPath: '/admin/news/$id'
-      preLoaderRoute: typeof AdminNewsIdRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/api/public/bunny-webhook': {
-      id: '/api/public/bunny-webhook'
-      path: '/api/public/bunny-webhook'
-      fullPath: '/api/public/bunny-webhook'
-      preLoaderRoute: typeof ApiPublicBunnyWebhookRouteImport
+      fullPath: '/news/$id'
+      preLoaderRoute: typeof NewsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/learning-management-system/admin/': {
-      id: '/learning-management-system/admin/'
-      path: '/'
-      fullPath: '/learning-management-system/admin/'
-      preLoaderRoute: typeof LearningManagementSystemAdminIndexRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
-    }
-    '/learning-management-system/admin/analytics': {
-      id: '/learning-management-system/admin/analytics'
-      path: '/analytics'
-      fullPath: '/learning-management-system/admin/analytics'
-      preLoaderRoute: typeof LearningManagementSystemAdminAnalyticsRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
-    }
-    '/learning-management-system/admin/attendance-link': {
-      id: '/learning-management-system/admin/attendance-link'
-      path: '/attendance-link'
-      fullPath: '/learning-management-system/admin/attendance-link'
-      preLoaderRoute: typeof LearningManagementSystemAdminAttendanceLinkRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
-    }
-    '/learning-management-system/admin/coupons': {
-      id: '/learning-management-system/admin/coupons'
-      path: '/coupons'
-      fullPath: '/learning-management-system/admin/coupons'
-      preLoaderRoute: typeof LearningManagementSystemAdminCouponsRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
-    }
-    '/learning-management-system/admin/enrollment-requests': {
-      id: '/learning-management-system/admin/enrollment-requests'
-      path: '/enrollment-requests'
-      fullPath: '/learning-management-system/admin/enrollment-requests'
-      preLoaderRoute: typeof LearningManagementSystemAdminEnrollmentRequestsRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
-    }
-    '/learning-management-system/admin/people': {
-      id: '/learning-management-system/admin/people'
-      path: '/people'
-      fullPath: '/learning-management-system/admin/people'
-      preLoaderRoute: typeof LearningManagementSystemAdminPeopleRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
-    }
-    '/learning-management-system/admin/requests': {
-      id: '/learning-management-system/admin/requests'
-      path: '/requests'
-      fullPath: '/learning-management-system/admin/requests'
-      preLoaderRoute: typeof LearningManagementSystemAdminRequestsRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
-    }
-    '/learning-management-system/admin/reviews': {
-      id: '/learning-management-system/admin/reviews'
-      path: '/reviews'
-      fullPath: '/learning-management-system/admin/reviews'
-      preLoaderRoute: typeof LearningManagementSystemAdminReviewsRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
-    }
-    '/learning-management-system/admin/settings': {
-      id: '/learning-management-system/admin/settings'
-      path: '/settings'
-      fullPath: '/learning-management-system/admin/settings'
-      preLoaderRoute: typeof LearningManagementSystemAdminSettingsRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
-    }
-    '/learning-management-system/admin/trainer-applications': {
-      id: '/learning-management-system/admin/trainer-applications'
-      path: '/trainer-applications'
-      fullPath: '/learning-management-system/admin/trainer-applications'
-      preLoaderRoute: typeof LearningManagementSystemAdminTrainerApplicationsRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
-    }
-    '/learning-management-system/admin/users': {
-      id: '/learning-management-system/admin/users'
-      path: '/users'
-      fullPath: '/learning-management-system/admin/users'
-      preLoaderRoute: typeof LearningManagementSystemAdminUsersRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
-    }
-    '/learning-management-system/certificate/$id': {
-      id: '/learning-management-system/certificate/$id'
-      path: '/certificate/$id'
-      fullPath: '/learning-management-system/certificate/$id'
-      preLoaderRoute: typeof LearningManagementSystemCertificateIdRouteImport
+    '/learning-management-system/verify': {
+      id: '/learning-management-system/verify'
+      path: '/verify'
+      fullPath: '/learning-management-system/verify'
+      preLoaderRoute: typeof LearningManagementSystemVerifyRouteImport
       parentRoute: typeof LearningManagementSystemRouteRoute
     }
-    '/learning-management-system/courses/$id': {
-      id: '/learning-management-system/courses/$id'
-      path: '/courses/$id'
-      fullPath: '/learning-management-system/courses/$id'
-      preLoaderRoute: typeof LearningManagementSystemCoursesIdRouteImport
+    '/learning-management-system/trainer-apply': {
+      id: '/learning-management-system/trainer-apply'
+      path: '/trainer-apply'
+      fullPath: '/learning-management-system/trainer-apply'
+      preLoaderRoute: typeof LearningManagementSystemTrainerApplyRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
+    }
+    '/learning-management-system/signup': {
+      id: '/learning-management-system/signup'
+      path: '/signup'
+      fullPath: '/learning-management-system/signup'
+      preLoaderRoute: typeof LearningManagementSystemSignupRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
+    }
+    '/learning-management-system/reset-password': {
+      id: '/learning-management-system/reset-password'
+      path: '/reset-password'
+      fullPath: '/learning-management-system/reset-password'
+      preLoaderRoute: typeof LearningManagementSystemResetPasswordRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
+    }
+    '/learning-management-system/profile': {
+      id: '/learning-management-system/profile'
+      path: '/profile'
+      fullPath: '/learning-management-system/profile'
+      preLoaderRoute: typeof LearningManagementSystemProfileRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
+    }
+    '/learning-management-system/login': {
+      id: '/learning-management-system/login'
+      path: '/login'
+      fullPath: '/learning-management-system/login'
+      preLoaderRoute: typeof LearningManagementSystemLoginRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
+    }
+    '/learning-management-system/forgot-password': {
+      id: '/learning-management-system/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/learning-management-system/forgot-password'
+      preLoaderRoute: typeof LearningManagementSystemForgotPasswordRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
+    }
+    '/learning-management-system/confirm-account': {
+      id: '/learning-management-system/confirm-account'
+      path: '/confirm-account'
+      fullPath: '/learning-management-system/confirm-account'
+      preLoaderRoute: typeof LearningManagementSystemConfirmAccountRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
+    }
+    '/learning-management-system/catalog': {
+      id: '/learning-management-system/catalog'
+      path: '/catalog'
+      fullPath: '/learning-management-system/catalog'
+      preLoaderRoute: typeof LearningManagementSystemCatalogRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
+    }
+    '/join/$token': {
+      id: '/join/$token'
+      path: '/join/$token'
+      fullPath: '/join/$token'
+      preLoaderRoute: typeof JoinTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/initiative/sponsors': {
+      id: '/initiative/sponsors'
+      path: '/initiative/sponsors'
+      fullPath: '/initiative/sponsors'
+      preLoaderRoute: typeof InitiativeSponsorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/initiative/claim': {
+      id: '/initiative/claim'
+      path: '/initiative/claim'
+      fullPath: '/initiative/claim'
+      preLoaderRoute: typeof InitiativeClaimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forms/$slug': {
+      id: '/forms/$slug'
+      path: '/forms/$slug'
+      fullPath: '/forms/$slug'
+      preLoaderRoute: typeof FormsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$slug': {
+      id: '/events/$slug'
+      path: '/events/$slug'
+      fullPath: '/events/$slug'
+      preLoaderRoute: typeof EventsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event-signup/$token': {
+      id: '/event-signup/$token'
+      path: '/event-signup/$token'
+      fullPath: '/event-signup/$token'
+      preLoaderRoute: typeof EventSignupTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/communities/$key': {
+      id: '/communities/$key'
+      path: '/communities/$key'
+      fullPath: '/communities/$key'
+      preLoaderRoute: typeof CommunitiesKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/attendance-management-system/login': {
+      id: '/attendance-management-system/login'
+      path: '/login'
+      fullPath: '/attendance-management-system/login'
+      preLoaderRoute: typeof AttendanceManagementSystemLoginRouteImport
+      parentRoute: typeof AttendanceManagementSystemRouteRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/website': {
+      id: '/admin/website'
+      path: '/website'
+      fullPath: '/admin/website'
+      preLoaderRoute: typeof AdminWebsiteRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/partners': {
+      id: '/admin/partners'
+      path: '/partners'
+      fullPath: '/admin/partners'
+      preLoaderRoute: typeof AdminPartnersRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/messages': {
+      id: '/admin/messages'
+      path: '/messages'
+      fullPath: '/admin/messages'
+      preLoaderRoute: typeof AdminMessagesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/members': {
+      id: '/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AdminMembersRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/locations': {
+      id: '/admin/locations'
+      path: '/locations'
+      fullPath: '/admin/locations'
+      preLoaderRoute: typeof AdminLocationsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/leads': {
+      id: '/admin/leads'
+      path: '/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminLeadsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/initiative-survey': {
+      id: '/admin/initiative-survey'
+      path: '/initiative-survey'
+      fullPath: '/admin/initiative-survey'
+      preLoaderRoute: typeof AdminInitiativeSurveyRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/initiative': {
+      id: '/admin/initiative'
+      path: '/initiative'
+      fullPath: '/admin/initiative'
+      preLoaderRoute: typeof AdminInitiativeRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/feedback-survey': {
+      id: '/admin/feedback-survey'
+      path: '/feedback-survey'
+      fullPath: '/admin/feedback-survey'
+      preLoaderRoute: typeof AdminFeedbackSurveyRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/event-survey': {
+      id: '/admin/event-survey'
+      path: '/event-survey'
+      fullPath: '/admin/event-survey'
+      preLoaderRoute: typeof AdminEventSurveyRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/chatbot': {
+      id: '/admin/chatbot'
+      path: '/chatbot'
+      fullPath: '/admin/chatbot'
+      preLoaderRoute: typeof AdminChatbotRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/attendance': {
+      id: '/admin/attendance'
+      path: '/attendance'
+      fullPath: '/admin/attendance'
+      preLoaderRoute: typeof AdminAttendanceRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/learning-management-system/student': {
+      id: '/learning-management-system/student'
+      path: '/student'
+      fullPath: '/learning-management-system/student'
+      preLoaderRoute: typeof LearningManagementSystemStudentRouteRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
+    }
+    '/learning-management-system/instructor': {
+      id: '/learning-management-system/instructor'
+      path: '/instructor'
+      fullPath: '/learning-management-system/instructor'
+      preLoaderRoute: typeof LearningManagementSystemInstructorRouteRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
+    }
+    '/learning-management-system/admin': {
+      id: '/learning-management-system/admin'
+      path: '/admin'
+      fullPath: '/learning-management-system/admin'
+      preLoaderRoute: typeof LearningManagementSystemAdminRouteRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
+    }
+    '/admin/forms': {
+      id: '/admin/forms'
+      path: '/forms'
+      fullPath: '/admin/forms'
+      preLoaderRoute: typeof AdminFormsRouteRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/crm': {
+      id: '/admin/crm'
+      path: '/crm'
+      fullPath: '/admin/crm'
+      preLoaderRoute: typeof AdminCrmRouteRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/learning-management-system/student/': {
+      id: '/learning-management-system/student/'
+      path: '/'
+      fullPath: '/learning-management-system/student/'
+      preLoaderRoute: typeof LearningManagementSystemStudentIndexRouteImport
+      parentRoute: typeof LearningManagementSystemStudentRouteRoute
+    }
+    '/learning-management-system/internships/': {
+      id: '/learning-management-system/internships/'
+      path: '/internships'
+      fullPath: '/learning-management-system/internships/'
+      preLoaderRoute: typeof LearningManagementSystemInternshipsIndexRouteImport
       parentRoute: typeof LearningManagementSystemRouteRoute
     }
     '/learning-management-system/instructor/': {
@@ -2348,33 +2231,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemInstructorIndexRouteImport
       parentRoute: typeof LearningManagementSystemInstructorRouteRoute
     }
-    '/learning-management-system/instructor/profile': {
-      id: '/learning-management-system/instructor/profile'
-      path: '/profile'
-      fullPath: '/learning-management-system/instructor/profile'
-      preLoaderRoute: typeof LearningManagementSystemInstructorProfileRouteImport
-      parentRoute: typeof LearningManagementSystemInstructorRouteRoute
-    }
-    '/learning-management-system/instructors/$id': {
-      id: '/learning-management-system/instructors/$id'
-      path: '/instructors/$id'
-      fullPath: '/learning-management-system/instructors/$id'
-      preLoaderRoute: typeof LearningManagementSystemInstructorsIdRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/internships/': {
-      id: '/learning-management-system/internships/'
-      path: '/internships'
-      fullPath: '/learning-management-system/internships/'
-      preLoaderRoute: typeof LearningManagementSystemInternshipsIndexRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
-    }
-    '/learning-management-system/student/': {
-      id: '/learning-management-system/student/'
+    '/learning-management-system/admin/': {
+      id: '/learning-management-system/admin/'
       path: '/'
-      fullPath: '/learning-management-system/student/'
-      preLoaderRoute: typeof LearningManagementSystemStudentIndexRouteImport
-      parentRoute: typeof LearningManagementSystemStudentRouteRoute
+      fullPath: '/learning-management-system/admin/'
+      preLoaderRoute: typeof LearningManagementSystemAdminIndexRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
+    }
+    '/admin/news/': {
+      id: '/admin/news/'
+      path: '/news'
+      fullPath: '/admin/news/'
+      preLoaderRoute: typeof AdminNewsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/forms/': {
+      id: '/admin/forms/'
+      path: '/'
+      fullPath: '/admin/forms/'
+      preLoaderRoute: typeof AdminFormsIndexRouteImport
+      parentRoute: typeof AdminFormsRouteRoute
+    }
+    '/admin/events/': {
+      id: '/admin/events/'
+      path: '/events'
+      fullPath: '/admin/events/'
+      preLoaderRoute: typeof AdminEventsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/crm/': {
+      id: '/admin/crm/'
+      path: '/'
+      fullPath: '/admin/crm/'
+      preLoaderRoute: typeof AdminCrmIndexRouteImport
+      parentRoute: typeof AdminCrmRouteRoute
     }
     '/learning-management-system/student/requests': {
       id: '/learning-management-system/student/requests'
@@ -2383,131 +2273,173 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemStudentRequestsRouteImport
       parentRoute: typeof LearningManagementSystemStudentRouteRoute
     }
-    '/admin/crm/contacts/$contactId': {
-      id: '/admin/crm/contacts/$contactId'
-      path: '/$contactId'
-      fullPath: '/admin/crm/contacts/$contactId'
-      preLoaderRoute: typeof AdminCrmContactsContactIdRouteImport
-      parentRoute: typeof AdminCrmContactsRouteRoute
+    '/learning-management-system/instructors/$id': {
+      id: '/learning-management-system/instructors/$id'
+      path: '/instructors/$id'
+      fullPath: '/learning-management-system/instructors/$id'
+      preLoaderRoute: typeof LearningManagementSystemInstructorsIdRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
     }
-    '/admin/crm/forms/': {
-      id: '/admin/crm/forms/'
-      path: '/'
-      fullPath: '/admin/crm/forms/'
-      preLoaderRoute: typeof AdminCrmFormsIndexRouteImport
-      parentRoute: typeof AdminCrmFormsRouteRoute
+    '/learning-management-system/instructor/profile': {
+      id: '/learning-management-system/instructor/profile'
+      path: '/profile'
+      fullPath: '/learning-management-system/instructor/profile'
+      preLoaderRoute: typeof LearningManagementSystemInstructorProfileRouteImport
+      parentRoute: typeof LearningManagementSystemInstructorRouteRoute
     }
-    '/admin/crm/forms/$formSlug': {
-      id: '/admin/crm/forms/$formSlug'
-      path: '/$formSlug'
-      fullPath: '/admin/crm/forms/$formSlug'
-      preLoaderRoute: typeof AdminCrmFormsFormSlugRouteImport
-      parentRoute: typeof AdminCrmFormsRouteRoute
+    '/learning-management-system/courses/$id': {
+      id: '/learning-management-system/courses/$id'
+      path: '/courses/$id'
+      fullPath: '/learning-management-system/courses/$id'
+      preLoaderRoute: typeof LearningManagementSystemCoursesIdRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
     }
-    '/admin/crm/leads/companies': {
-      id: '/admin/crm/leads/companies'
-      path: '/companies'
-      fullPath: '/admin/crm/leads/companies'
-      preLoaderRoute: typeof AdminCrmLeadsCompaniesRouteRouteImport
-      parentRoute: typeof AdminCrmLeadsRouteRoute
+    '/learning-management-system/certificate/$id': {
+      id: '/learning-management-system/certificate/$id'
+      path: '/certificate/$id'
+      fullPath: '/learning-management-system/certificate/$id'
+      preLoaderRoute: typeof LearningManagementSystemCertificateIdRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
     }
-    '/admin/crm/leads/individuals': {
-      id: '/admin/crm/leads/individuals'
-      path: '/individuals'
-      fullPath: '/admin/crm/leads/individuals'
-      preLoaderRoute: typeof AdminCrmLeadsIndividualsRouteRouteImport
-      parentRoute: typeof AdminCrmLeadsRouteRoute
+    '/learning-management-system/admin/users': {
+      id: '/learning-management-system/admin/users'
+      path: '/users'
+      fullPath: '/learning-management-system/admin/users'
+      preLoaderRoute: typeof LearningManagementSystemAdminUsersRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
     }
-    '/admin/crm/registration-links/': {
-      id: '/admin/crm/registration-links/'
-      path: '/registration-links'
-      fullPath: '/admin/crm/registration-links/'
-      preLoaderRoute: typeof AdminCrmRegistrationLinksIndexRouteImport
-      parentRoute: typeof AdminCrmRouteRoute
+    '/learning-management-system/admin/trainer-applications': {
+      id: '/learning-management-system/admin/trainer-applications'
+      path: '/trainer-applications'
+      fullPath: '/learning-management-system/admin/trainer-applications'
+      preLoaderRoute: typeof LearningManagementSystemAdminTrainerApplicationsRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
     }
-    '/admin/crm/registration-links/$id': {
-      id: '/admin/crm/registration-links/$id'
-      path: '/registration-links/$id'
-      fullPath: '/admin/crm/registration-links/$id'
-      preLoaderRoute: typeof AdminCrmRegistrationLinksIdRouteImport
-      parentRoute: typeof AdminCrmRouteRoute
+    '/learning-management-system/admin/settings': {
+      id: '/learning-management-system/admin/settings'
+      path: '/settings'
+      fullPath: '/learning-management-system/admin/settings'
+      preLoaderRoute: typeof LearningManagementSystemAdminSettingsRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
     }
-    '/admin/forms/$formId/': {
-      id: '/admin/forms/$formId/'
-      path: '/$formId'
-      fullPath: '/admin/forms/$formId/'
-      preLoaderRoute: typeof AdminFormsFormIdIndexRouteImport
-      parentRoute: typeof AdminFormsRouteRoute
+    '/learning-management-system/admin/reviews': {
+      id: '/learning-management-system/admin/reviews'
+      path: '/reviews'
+      fullPath: '/learning-management-system/admin/reviews'
+      preLoaderRoute: typeof LearningManagementSystemAdminReviewsRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
     }
-    '/admin/forms/$formId/edit': {
-      id: '/admin/forms/$formId/edit'
-      path: '/$formId/edit'
-      fullPath: '/admin/forms/$formId/edit'
-      preLoaderRoute: typeof AdminFormsFormIdEditRouteImport
-      parentRoute: typeof AdminFormsRouteRoute
+    '/learning-management-system/admin/requests': {
+      id: '/learning-management-system/admin/requests'
+      path: '/requests'
+      fullPath: '/learning-management-system/admin/requests'
+      preLoaderRoute: typeof LearningManagementSystemAdminRequestsRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
     }
-    '/api/profile-card/$slug/$kind': {
-      id: '/api/profile-card/$slug/$kind'
-      path: '/api/profile-card/$slug/$kind'
-      fullPath: '/api/profile-card/$slug/$kind'
-      preLoaderRoute: typeof ApiProfileCardSlugKindRouteImport
+    '/learning-management-system/admin/people': {
+      id: '/learning-management-system/admin/people'
+      path: '/people'
+      fullPath: '/learning-management-system/admin/people'
+      preLoaderRoute: typeof LearningManagementSystemAdminPeopleRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
+    }
+    '/learning-management-system/admin/enrollment-requests': {
+      id: '/learning-management-system/admin/enrollment-requests'
+      path: '/enrollment-requests'
+      fullPath: '/learning-management-system/admin/enrollment-requests'
+      preLoaderRoute: typeof LearningManagementSystemAdminEnrollmentRequestsRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
+    }
+    '/learning-management-system/admin/coupons': {
+      id: '/learning-management-system/admin/coupons'
+      path: '/coupons'
+      fullPath: '/learning-management-system/admin/coupons'
+      preLoaderRoute: typeof LearningManagementSystemAdminCouponsRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
+    }
+    '/learning-management-system/admin/attendance-link': {
+      id: '/learning-management-system/admin/attendance-link'
+      path: '/attendance-link'
+      fullPath: '/learning-management-system/admin/attendance-link'
+      preLoaderRoute: typeof LearningManagementSystemAdminAttendanceLinkRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
+    }
+    '/learning-management-system/admin/analytics': {
+      id: '/learning-management-system/admin/analytics'
+      path: '/analytics'
+      fullPath: '/learning-management-system/admin/analytics'
+      preLoaderRoute: typeof LearningManagementSystemAdminAnalyticsRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
+    }
+    '/api/public/bunny-webhook': {
+      id: '/api/public/bunny-webhook'
+      path: '/api/public/bunny-webhook'
+      fullPath: '/api/public/bunny-webhook'
+      preLoaderRoute: typeof ApiPublicBunnyWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/abu-al-joud/chat': {
-      id: '/api/v1/abu-al-joud/chat'
-      path: '/api/v1/abu-al-joud/chat'
-      fullPath: '/api/v1/abu-al-joud/chat'
-      preLoaderRoute: typeof ApiV1AbuAlJoudChatRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/news/$id': {
+      id: '/admin/news/$id'
+      path: '/news/$id'
+      fullPath: '/admin/news/$id'
+      preLoaderRoute: typeof AdminNewsIdRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
-    '/learning-management-system/admin/courses/': {
-      id: '/learning-management-system/admin/courses/'
-      path: '/courses'
-      fullPath: '/learning-management-system/admin/courses/'
-      preLoaderRoute: typeof LearningManagementSystemAdminCoursesIndexRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
+    '/admin/forms/new': {
+      id: '/admin/forms/new'
+      path: '/new'
+      fullPath: '/admin/forms/new'
+      preLoaderRoute: typeof AdminFormsNewRouteImport
+      parentRoute: typeof AdminFormsRouteRoute
     }
-    '/learning-management-system/admin/courses/$id': {
-      id: '/learning-management-system/admin/courses/$id'
-      path: '/courses/$id'
-      fullPath: '/learning-management-system/admin/courses/$id'
-      preLoaderRoute: typeof LearningManagementSystemAdminCoursesIdRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
+    '/admin/events/$id': {
+      id: '/admin/events/$id'
+      path: '/events/$id'
+      fullPath: '/admin/events/$id'
+      preLoaderRoute: typeof AdminEventsIdRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
-    '/learning-management-system/admin/internships/': {
-      id: '/learning-management-system/admin/internships/'
-      path: '/internships'
-      fullPath: '/learning-management-system/admin/internships/'
-      preLoaderRoute: typeof LearningManagementSystemAdminInternshipsIndexRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
+    '/admin/crm/texpo': {
+      id: '/admin/crm/texpo'
+      path: '/texpo'
+      fullPath: '/admin/crm/texpo'
+      preLoaderRoute: typeof AdminCrmTexpoRouteImport
+      parentRoute: typeof AdminCrmRouteRoute
     }
-    '/learning-management-system/admin/internships/new': {
-      id: '/learning-management-system/admin/internships/new'
-      path: '/internships/new'
-      fullPath: '/learning-management-system/admin/internships/new'
-      preLoaderRoute: typeof LearningManagementSystemAdminInternshipsNewRouteImport
-      parentRoute: typeof LearningManagementSystemAdminRouteRoute
+    '/admin/crm/students': {
+      id: '/admin/crm/students'
+      path: '/students'
+      fullPath: '/admin/crm/students'
+      preLoaderRoute: typeof AdminCrmStudentsRouteImport
+      parentRoute: typeof AdminCrmRouteRoute
     }
-    '/learning-management-system/instructor/assignments/$courseId': {
-      id: '/learning-management-system/instructor/assignments/$courseId'
-      path: '/assignments/$courseId'
-      fullPath: '/learning-management-system/instructor/assignments/$courseId'
-      preLoaderRoute: typeof LearningManagementSystemInstructorAssignmentsCourseIdRouteImport
-      parentRoute: typeof LearningManagementSystemInstructorRouteRoute
+    '/admin/crm/feedback': {
+      id: '/admin/crm/feedback'
+      path: '/feedback'
+      fullPath: '/admin/crm/feedback'
+      preLoaderRoute: typeof AdminCrmFeedbackRouteImport
+      parentRoute: typeof AdminCrmRouteRoute
     }
-    '/learning-management-system/instructor/courses/$id': {
-      id: '/learning-management-system/instructor/courses/$id'
-      path: '/courses/$id'
-      fullPath: '/learning-management-system/instructor/courses/$id'
-      preLoaderRoute: typeof LearningManagementSystemInstructorCoursesIdRouteImport
-      parentRoute: typeof LearningManagementSystemInstructorRouteRoute
+    '/admin/crm/leads': {
+      id: '/admin/crm/leads'
+      path: '/leads'
+      fullPath: '/admin/crm/leads'
+      preLoaderRoute: typeof AdminCrmLeadsRouteRouteImport
+      parentRoute: typeof AdminCrmRouteRoute
     }
-    '/learning-management-system/instructor/quiz-results/$courseId': {
-      id: '/learning-management-system/instructor/quiz-results/$courseId'
-      path: '/quiz-results/$courseId'
-      fullPath: '/learning-management-system/instructor/quiz-results/$courseId'
-      preLoaderRoute: typeof LearningManagementSystemInstructorQuizResultsCourseIdRouteImport
-      parentRoute: typeof LearningManagementSystemInstructorRouteRoute
+    '/admin/crm/forms': {
+      id: '/admin/crm/forms'
+      path: '/forms'
+      fullPath: '/admin/crm/forms'
+      preLoaderRoute: typeof AdminCrmFormsRouteRouteImport
+      parentRoute: typeof AdminCrmRouteRoute
+    }
+    '/admin/crm/contacts': {
+      id: '/admin/crm/contacts'
+      path: '/contacts'
+      fullPath: '/admin/crm/contacts'
+      preLoaderRoute: typeof AdminCrmContactsRouteRouteImport
+      parentRoute: typeof AdminCrmRouteRoute
     }
     '/learning-management-system/internships/$slug/': {
       id: '/learning-management-system/internships/$slug/'
@@ -2516,39 +2448,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemInternshipsSlugIndexRouteImport
       parentRoute: typeof LearningManagementSystemRouteRoute
     }
-    '/learning-management-system/internships/$slug/apply': {
-      id: '/learning-management-system/internships/$slug/apply'
-      path: '/internships/$slug/apply'
-      fullPath: '/learning-management-system/internships/$slug/apply'
-      preLoaderRoute: typeof LearningManagementSystemInternshipsSlugApplyRouteImport
-      parentRoute: typeof LearningManagementSystemRouteRoute
+    '/learning-management-system/admin/internships/': {
+      id: '/learning-management-system/admin/internships/'
+      path: '/internships'
+      fullPath: '/learning-management-system/admin/internships/'
+      preLoaderRoute: typeof LearningManagementSystemAdminInternshipsIndexRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
     }
-    '/learning-management-system/student/feedback/$courseId': {
-      id: '/learning-management-system/student/feedback/$courseId'
-      path: '/feedback/$courseId'
-      fullPath: '/learning-management-system/student/feedback/$courseId'
-      preLoaderRoute: typeof LearningManagementSystemStudentFeedbackCourseIdRouteImport
-      parentRoute: typeof LearningManagementSystemStudentRouteRoute
+    '/learning-management-system/admin/courses/': {
+      id: '/learning-management-system/admin/courses/'
+      path: '/courses'
+      fullPath: '/learning-management-system/admin/courses/'
+      preLoaderRoute: typeof LearningManagementSystemAdminCoursesIndexRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
     }
-    '/learning-management-system/student/player/$courseId': {
-      id: '/learning-management-system/student/player/$courseId'
-      path: '/player/$courseId'
-      fullPath: '/learning-management-system/student/player/$courseId'
-      preLoaderRoute: typeof LearningManagementSystemStudentPlayerCourseIdRouteImport
-      parentRoute: typeof LearningManagementSystemStudentRouteRoute
+    '/admin/forms/$formId/': {
+      id: '/admin/forms/$formId/'
+      path: '/$formId'
+      fullPath: '/admin/forms/$formId/'
+      preLoaderRoute: typeof AdminFormsFormIdIndexRouteImport
+      parentRoute: typeof AdminFormsRouteRoute
     }
-    '/learning-management-system/student/quiz/$courseId': {
-      id: '/learning-management-system/student/quiz/$courseId'
-      path: '/quiz/$courseId'
-      fullPath: '/learning-management-system/student/quiz/$courseId'
-      preLoaderRoute: typeof LearningManagementSystemStudentQuizCourseIdRouteImport
-      parentRoute: typeof LearningManagementSystemStudentRouteRoute
+    '/admin/crm/registration-links/': {
+      id: '/admin/crm/registration-links/'
+      path: '/registration-links'
+      fullPath: '/admin/crm/registration-links/'
+      preLoaderRoute: typeof AdminCrmRegistrationLinksIndexRouteImport
+      parentRoute: typeof AdminCrmRouteRoute
     }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+    '/admin/crm/forms/': {
+      id: '/admin/crm/forms/'
+      path: '/'
+      fullPath: '/admin/crm/forms/'
+      preLoaderRoute: typeof AdminCrmFormsIndexRouteImport
+      parentRoute: typeof AdminCrmFormsRouteRoute
+    }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/auth/webhook': {
@@ -2558,32 +2497,137 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/crm/leads/companies/$leadId': {
-      id: '/admin/crm/leads/companies/$leadId'
-      path: '/$leadId'
-      fullPath: '/admin/crm/leads/companies/$leadId'
-      preLoaderRoute: typeof AdminCrmLeadsCompaniesLeadIdRouteImport
-      parentRoute: typeof AdminCrmLeadsCompaniesRouteRoute
+    '/learning-management-system/student/quiz/$courseId': {
+      id: '/learning-management-system/student/quiz/$courseId'
+      path: '/quiz/$courseId'
+      fullPath: '/learning-management-system/student/quiz/$courseId'
+      preLoaderRoute: typeof LearningManagementSystemStudentQuizCourseIdRouteImport
+      parentRoute: typeof LearningManagementSystemStudentRouteRoute
     }
-    '/admin/crm/leads/individuals/$leadId': {
-      id: '/admin/crm/leads/individuals/$leadId'
-      path: '/$leadId'
-      fullPath: '/admin/crm/leads/individuals/$leadId'
-      preLoaderRoute: typeof AdminCrmLeadsIndividualsLeadIdRouteImport
-      parentRoute: typeof AdminCrmLeadsIndividualsRouteRoute
+    '/learning-management-system/student/player/$courseId': {
+      id: '/learning-management-system/student/player/$courseId'
+      path: '/player/$courseId'
+      fullPath: '/learning-management-system/student/player/$courseId'
+      preLoaderRoute: typeof LearningManagementSystemStudentPlayerCourseIdRouteImport
+      parentRoute: typeof LearningManagementSystemStudentRouteRoute
     }
-    '/learning-management-system/admin/internships/$id/applications': {
-      id: '/learning-management-system/admin/internships/$id/applications'
-      path: '/internships/$id/applications'
-      fullPath: '/learning-management-system/admin/internships/$id/applications'
-      preLoaderRoute: typeof LearningManagementSystemAdminInternshipsIdApplicationsRouteRouteImport
+    '/learning-management-system/student/feedback/$courseId': {
+      id: '/learning-management-system/student/feedback/$courseId'
+      path: '/feedback/$courseId'
+      fullPath: '/learning-management-system/student/feedback/$courseId'
+      preLoaderRoute: typeof LearningManagementSystemStudentFeedbackCourseIdRouteImport
+      parentRoute: typeof LearningManagementSystemStudentRouteRoute
+    }
+    '/learning-management-system/internships/$slug/apply': {
+      id: '/learning-management-system/internships/$slug/apply'
+      path: '/internships/$slug/apply'
+      fullPath: '/learning-management-system/internships/$slug/apply'
+      preLoaderRoute: typeof LearningManagementSystemInternshipsSlugApplyRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
+    }
+    '/learning-management-system/instructor/quiz-results/$courseId': {
+      id: '/learning-management-system/instructor/quiz-results/$courseId'
+      path: '/quiz-results/$courseId'
+      fullPath: '/learning-management-system/instructor/quiz-results/$courseId'
+      preLoaderRoute: typeof LearningManagementSystemInstructorQuizResultsCourseIdRouteImport
+      parentRoute: typeof LearningManagementSystemInstructorRouteRoute
+    }
+    '/learning-management-system/instructor/courses/$id': {
+      id: '/learning-management-system/instructor/courses/$id'
+      path: '/courses/$id'
+      fullPath: '/learning-management-system/instructor/courses/$id'
+      preLoaderRoute: typeof LearningManagementSystemInstructorCoursesIdRouteImport
+      parentRoute: typeof LearningManagementSystemInstructorRouteRoute
+    }
+    '/learning-management-system/instructor/assignments/$courseId': {
+      id: '/learning-management-system/instructor/assignments/$courseId'
+      path: '/assignments/$courseId'
+      fullPath: '/learning-management-system/instructor/assignments/$courseId'
+      preLoaderRoute: typeof LearningManagementSystemInstructorAssignmentsCourseIdRouteImport
+      parentRoute: typeof LearningManagementSystemInstructorRouteRoute
+    }
+    '/learning-management-system/admin/internships/new': {
+      id: '/learning-management-system/admin/internships/new'
+      path: '/internships/new'
+      fullPath: '/learning-management-system/admin/internships/new'
+      preLoaderRoute: typeof LearningManagementSystemAdminInternshipsNewRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
+    }
+    '/learning-management-system/admin/courses/$id': {
+      id: '/learning-management-system/admin/courses/$id'
+      path: '/courses/$id'
+      fullPath: '/learning-management-system/admin/courses/$id'
+      preLoaderRoute: typeof LearningManagementSystemAdminCoursesIdRouteImport
+      parentRoute: typeof LearningManagementSystemAdminRouteRoute
+    }
+    '/api/v1/abu-al-joud/chat': {
+      id: '/api/v1/abu-al-joud/chat'
+      path: '/api/v1/abu-al-joud/chat'
+      fullPath: '/api/v1/abu-al-joud/chat'
+      preLoaderRoute: typeof ApiV1AbuAlJoudChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/profile-card/$slug/$kind': {
+      id: '/api/profile-card/$slug/$kind'
+      path: '/api/profile-card/$slug/$kind'
+      fullPath: '/api/profile-card/$slug/$kind'
+      preLoaderRoute: typeof ApiProfileCardSlugKindRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/forms/$formId/edit': {
+      id: '/admin/forms/$formId/edit'
+      path: '/$formId/edit'
+      fullPath: '/admin/forms/$formId/edit'
+      preLoaderRoute: typeof AdminFormsFormIdEditRouteImport
+      parentRoute: typeof AdminFormsRouteRoute
+    }
+    '/admin/crm/registration-links/$id': {
+      id: '/admin/crm/registration-links/$id'
+      path: '/registration-links/$id'
+      fullPath: '/admin/crm/registration-links/$id'
+      preLoaderRoute: typeof AdminCrmRegistrationLinksIdRouteImport
+      parentRoute: typeof AdminCrmRouteRoute
+    }
+    '/admin/crm/forms/$formSlug': {
+      id: '/admin/crm/forms/$formSlug'
+      path: '/$formSlug'
+      fullPath: '/admin/crm/forms/$formSlug'
+      preLoaderRoute: typeof AdminCrmFormsFormSlugRouteImport
+      parentRoute: typeof AdminCrmFormsRouteRoute
+    }
+    '/admin/crm/contacts/$contactId': {
+      id: '/admin/crm/contacts/$contactId'
+      path: '/$contactId'
+      fullPath: '/admin/crm/contacts/$contactId'
+      preLoaderRoute: typeof AdminCrmContactsContactIdRouteImport
+      parentRoute: typeof AdminCrmContactsRouteRoute
+    }
+    '/admin/crm/leads/individuals': {
+      id: '/admin/crm/leads/individuals'
+      path: '/individuals'
+      fullPath: '/admin/crm/leads/individuals'
+      preLoaderRoute: typeof AdminCrmLeadsIndividualsRouteRouteImport
+      parentRoute: typeof AdminCrmLeadsRouteRoute
+    }
+    '/admin/crm/leads/companies': {
+      id: '/admin/crm/leads/companies'
+      path: '/companies'
+      fullPath: '/admin/crm/leads/companies'
+      preLoaderRoute: typeof AdminCrmLeadsCompaniesRouteRouteImport
+      parentRoute: typeof AdminCrmLeadsRouteRoute
+    }
+    '/learning-management-system/admin/internships/$id/signups': {
+      id: '/learning-management-system/admin/internships/$id/signups'
+      path: '/internships/$id/signups'
+      fullPath: '/learning-management-system/admin/internships/$id/signups'
+      preLoaderRoute: typeof LearningManagementSystemAdminInternshipsIdSignupsRouteImport
       parentRoute: typeof LearningManagementSystemAdminRouteRoute
     }
     '/learning-management-system/admin/internships/$id/edit': {
@@ -2593,11 +2637,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemAdminInternshipsIdEditRouteImport
       parentRoute: typeof LearningManagementSystemAdminRouteRoute
     }
-    '/learning-management-system/admin/internships/$id/signups': {
-      id: '/learning-management-system/admin/internships/$id/signups'
-      path: '/internships/$id/signups'
-      fullPath: '/learning-management-system/admin/internships/$id/signups'
-      preLoaderRoute: typeof LearningManagementSystemAdminInternshipsIdSignupsRouteImport
+    '/admin/crm/leads/individuals/$leadId': {
+      id: '/admin/crm/leads/individuals/$leadId'
+      path: '/$leadId'
+      fullPath: '/admin/crm/leads/individuals/$leadId'
+      preLoaderRoute: typeof AdminCrmLeadsIndividualsLeadIdRouteImport
+      parentRoute: typeof AdminCrmLeadsIndividualsRouteRoute
+    }
+    '/admin/crm/leads/companies/$leadId': {
+      id: '/admin/crm/leads/companies/$leadId'
+      path: '/$leadId'
+      fullPath: '/admin/crm/leads/companies/$leadId'
+      preLoaderRoute: typeof AdminCrmLeadsCompaniesLeadIdRouteImport
+      parentRoute: typeof AdminCrmLeadsCompaniesRouteRoute
+    }
+    '/learning-management-system/admin/internships/$id/applications': {
+      id: '/learning-management-system/admin/internships/$id/applications'
+      path: '/internships/$id/applications'
+      fullPath: '/learning-management-system/admin/internships/$id/applications'
+      preLoaderRoute: typeof LearningManagementSystemAdminInternshipsIdApplicationsRouteRouteImport
       parentRoute: typeof LearningManagementSystemAdminRouteRoute
     }
     '/learning-management-system/admin/internships/$id/applications/': {
@@ -2750,7 +2808,9 @@ interface AdminRouteRouteChildren {
   AdminPartnersRoute: typeof AdminPartnersRoute
   AdminWebsiteRoute: typeof AdminWebsiteRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminEventsIdRoute: typeof AdminEventsIdRoute
   AdminNewsIdRoute: typeof AdminNewsIdRoute
+  AdminEventsIndexRoute: typeof AdminEventsIndexRoute
   AdminNewsIndexRoute: typeof AdminNewsIndexRoute
 }
 
@@ -2772,7 +2832,9 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminPartnersRoute: AdminPartnersRoute,
   AdminWebsiteRoute: AdminWebsiteRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminEventsIdRoute: AdminEventsIdRoute,
   AdminNewsIdRoute: AdminNewsIdRoute,
+  AdminEventsIndexRoute: AdminEventsIndexRoute,
   AdminNewsIndexRoute: AdminNewsIndexRoute,
 }
 
@@ -3022,6 +3084,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,
   EventSignupTokenRoute: EventSignupTokenRoute,
+  EventsSlugRoute: EventsSlugRoute,
   FormsSlugRoute: FormsSlugRoute,
   InitiativeClaimRoute: InitiativeClaimRoute,
   InitiativeSponsorsRoute: InitiativeSponsorsRoute,

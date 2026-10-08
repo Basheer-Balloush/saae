@@ -144,14 +144,13 @@ export const NAV: Record<ConsoleSystem, NavGroup[]> = {
           icon: FileText,
           also: /^\/admin\/crm\/forms/,
         },
-        /* Every tool used at an event or a booth, one tab each: sign-up links
-           (people go straight into Leads) and the Texpo game. */
+        /* Event records contain their schedule, tools and daily reports. */
         {
-          to: "/admin/crm/registration-links",
+          to: "/admin/events",
           ar: "الفعاليات",
           en: "Events",
           icon: CalendarDays,
-          also: /^\/admin\/crm\/texpo/,
+          also: /^\/admin\/(events|crm\/(texpo|registration-links))/,
         },
         { to: "/admin/initiative", ar: "مبادرة المليون", en: "Initiative", icon: Sparkles },
         {

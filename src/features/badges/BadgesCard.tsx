@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { LEVELS } from "@/features/texpo/lib/texpo-shared";
-import { BADGES, type EarnedBadge } from "./badges";
+import { badgeDefinition, type EarnedBadge } from "./badges";
+import { EVENT_TIMEZONE } from "@/features/events/lib/events";
 
 /* The Badges card on the LMS profile (uses the profile's pro-card styles). */
 export function BadgesCard({
@@ -49,8 +50,10 @@ export function BadgesCard({
       ) : (
         <ul className="badge-list">
           {badges.map((b) => {
-            const badge = BADGES[b.key];
+            const badge = badgeDefinition(b);
+            if (!badge) return null;
             const date = new Date(b.earnedAt).toLocaleDateString(ar ? "ar-SY" : "en-GB", {
+              timeZone: EVENT_TIMEZONE,
               day: "numeric",
               month: "long",
               year: "numeric",

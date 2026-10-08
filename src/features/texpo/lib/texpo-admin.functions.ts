@@ -1,215 +1,78 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import {
-  LINK_SLUG_RE,
-  MAIN_LINK_SLUG,
-  TEXPO_GAME,
-  readProfile,
-  slugFromLabel,
-  type Level,
-} from "./texpo-shared";
+import { LINK_SLUG_RE, MAIN_LINK_SLUG, TEXPO_GAME, slugFromLabel } from "./texpo-shared";
+import { TEXPO_EVENT_ID, eventDateSchema } from "@/features/events/lib/events";
 
-/* The Texpo page in the admin CRM: tracked links, each link's funnel, who
-   played, and every player with their coupon once they claimed one. Admins only. */
-
-const db = async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return supabaseAdmin as unknown as SupabaseClient;
-};
-
-async function assertAdmin(sb: SupabaseClient, userId: string) {
-  const { data, error } = await sb
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .in("role", ["admin", "lms_admin"]);
-  if (error) throw new Error("Could not check your role");
-  if (!data?.length) throw new Error("Forbidden: admin role required");
-}
-
-export type Funnel = {
-  opened: number;
-  started: number;
-  finished: number;
-  levels: Record<Level, number>;
-  claimed: number;
-  newAccounts: number;
-  used: number;
-  chatted: number;
-};
-
-export type GameLink = {
-  id: string;
-  slug: string;
-  label: string;
-  is_active: boolean;
-  created_at: string;
-  funnel: Funnel;
-};
-
-export type Player = {
-  name: string | null;
-  email: string | null;
-  /** Null until the play is finished. */
-  level: Level | null;
-  score: number | null;
-  /** Questions answered: the whole set once finished. */
-  answered: number;
-  /** The two steps before the game, as stored (see readProfile). */
-  field: string | null;
-  code: string | null;
-  used: boolean;
-  account_new: boolean | null;
-  chatted: boolean;
-  link: string;
-  /** When they finished, or started if they stopped part way. */
-  played_at: string;
-  claimed_at: string | null;
-};
-
-export type TexpoOverview = {
-  total: Funnel;
-  links: GameLink[];
-  /** First step (status, or "earlier" for the old single question) -> level
-      -> count, over finished plays. */
-  byStatus: Record<string, Record<Level, number>>;
-  /** Second step -> count, over everyone who started. */
-  byField: Record<string, number>;
-  byInterest: Record<string, number>;
-  players: Player[];
-};
-
-type PlayRow = {
-  link_id: string | null;
-  field: string | null;
-  level: Level | null;
-  score: number | null;
-  current_q: number;
-  started_at: string;
-  finished_at: string | null;
-  claimed_at: string | null;
-  account_new: boolean | null;
-  chat_opened_at: string | null;
-  coupon_id: string | null;
-  player_name: string | null;
-  player_email: string | null;
-  lms_coupons: { code: string } | null;
-};
-
-const emptyFunnel = (): Funnel => ({
-  opened: 0,
-  started: 0,
-  finished: 0,
-  levels: { beginner: 0, intermediate: 0, professional: 0 },
-  claimed: 0,
-  newAccounts: 0,
-  used: 0,
-  chatted: 0,
+const levels = z.object({
+  beginner: z.number(),
+  intermediate: z.number(),
+  professional: z.number(),
 });
+const funnelSchema = z.object({
+  opened: z.number(),
+  started: z.number(),
+  finished: z.number(),
+  levels,
+  claimed: z.number(),
+  newAccounts: z.number(),
+  used: z.number(),
+  chatted: z.number(),
+});
+const gameLinkSchema = z.object({
+  id: z.string().uuid(),
+  slug: z.string(),
+  label: z.string(),
+  is_active: z.boolean(),
+  created_at: z.string(),
+});
+const playerSchema = z.object({
+  name: z.string().nullable(),
+  email: z.string().nullable(),
+  level: z.enum(["beginner", "intermediate", "professional"]).nullable(),
+  score: z.number().nullable(),
+  answered: z.number(),
+  field: z.string().nullable(),
+  code: z.string().nullable(),
+  used: z.boolean(),
+  account_new: z.boolean().nullable(),
+  chatted: z.boolean(),
+  link: z.string(),
+  played_at: z.string(),
+  claimed_at: z.string().nullable(),
+});
+export const texpoOverviewSchema = z.object({
+  total: funnelSchema,
+  links: z.array(gameLinkSchema.extend({ funnel: funnelSchema })),
+  byStatus: z.record(levels),
+  byField: z.record(z.number()),
+  byInterest: z.record(z.number()),
+  player_count: z.number(),
+  players: z.array(playerSchema),
+});
+export type Funnel = z.infer<typeof funnelSchema>;
+export type GameLink = z.infer<typeof gameLinkSchema> & { funnel: Funnel };
+export type Player = z.infer<typeof playerSchema>;
+export type TexpoOverview = z.infer<typeof texpoOverviewSchema>;
+
+async function adminDb(userId: string) {
+  const { eventsAdminDb } = await import("@/features/events/lib/events-db.server");
+  return eventsAdminDb(userId);
+}
 
 export const adminTexpoOverview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<TexpoOverview> => {
-    const sb = await db();
-    await assertAdmin(sb, context.userId);
-
-    const [links, opens, plays, redemptions] = await Promise.all([
-      sb
-        .from("game_links")
-        .select("id, slug, label, is_active, created_at")
-        .eq("game", TEXPO_GAME)
-        .order("created_at", { ascending: true }),
-      sb.from("game_link_opens").select("link_id").eq("game", TEXPO_GAME).limit(100000),
-      sb
-        .from("game_plays")
-        .select(
-          "link_id, field, level, score, current_q, started_at, finished_at, claimed_at, account_new, chat_opened_at, coupon_id, player_name, player_email, lms_coupons(code)",
-        )
-        .eq("game", TEXPO_GAME)
-        .order("started_at", { ascending: false })
-        .limit(50000),
-      sb
-        .from("lms_coupon_redemptions")
-        .select("coupon_id, status, lms_coupons!inner(label)")
-        .like("lms_coupons.label", "Texpo 2026%")
-        .in("status", ["pending", "applied"])
-        .limit(10000),
-    ]);
-    if (links.error || opens.error || plays.error || redemptions.error) {
-      throw new Error("Could not load the Texpo numbers");
-    }
-
-    const usedCoupons = new Set(
-      ((redemptions.data ?? []) as { coupon_id: string }[]).map((r) => r.coupon_id),
-    );
-    const linkRows = (links.data ?? []) as Omit<GameLink, "funnel">[];
-    // Visits without a link (before 2026-10-06, or a deleted link) count
-    // under the main link, like plain /texpo does now.
-    const mainId = linkRows.find((l) => l.slug === MAIN_LINK_SLUG)?.id ?? null;
-    const funnels = new Map<string | null, Funnel>();
-    const funnel = (id: string | null) => {
-      const key = id ?? mainId;
-      if (!funnels.has(key)) funnels.set(key, emptyFunnel());
-      return funnels.get(key)!;
-    };
-    const total = emptyFunnel();
-
-    for (const o of (opens.data ?? []) as { link_id: string | null }[]) {
-      funnel(o.link_id).opened++;
-      total.opened++;
-    }
-
-    const byStatus: TexpoOverview["byStatus"] = {};
-    const byField: Record<string, number> = {};
-    const byInterest: Record<string, number> = {};
-    const labelOf = new Map(linkRows.map((l) => [l.id, l.label]));
-    const players: Player[] = [];
-
-    for (const p of (plays.data ?? []) as unknown as PlayRow[]) {
-      for (const f of [funnel(p.link_id), total]) {
-        f.started++;
-        if (p.finished_at && p.level) {
-          f.finished++;
-          f.levels[p.level]++;
-        }
-        if (p.claimed_at) f.claimed++;
-        if (p.claimed_at && p.account_new) f.newAccounts++;
-        if (p.coupon_id && usedCoupons.has(p.coupon_id)) f.used++;
-        if (p.chat_opened_at) f.chatted++;
-      }
-      const profile = readProfile(p.field);
-      if (profile.field) byField[profile.field] = (byField[profile.field] ?? 0) + 1;
-      if (profile.interest) byInterest[profile.interest] = (byInterest[profile.interest] ?? 0) + 1;
-      const status = profile.status ?? (profile.legacy ? "earlier" : null);
-      if (p.finished_at && p.level && status) {
-        byStatus[status] ??= { beginner: 0, intermediate: 0, professional: 0 };
-        byStatus[status][p.level]++;
-      }
-      players.push({
-        name: p.player_name,
-        email: p.player_email,
-        level: p.finished_at ? p.level : null,
-        score: p.finished_at ? p.score : null,
-        answered: p.current_q,
-        field: p.field,
-        code: p.lms_coupons?.code ?? null,
-        used: !!p.coupon_id && usedCoupons.has(p.coupon_id),
-        account_new: p.account_new,
-        chatted: !!p.chat_opened_at,
-        link: labelOf.get(p.link_id ?? mainId ?? "") ?? "—",
-        played_at: p.finished_at ?? p.started_at,
-        claimed_at: p.claimed_at,
-      });
-    }
-    players.sort((a, b) => b.played_at.localeCompare(a.played_at));
-
-    const out: GameLink[] = linkRows.map((l) => ({
-      ...l,
-      funnel: funnels.get(l.id) ?? emptyFunnel(),
-    }));
-    return { total, links: out, byStatus, byField, byInterest, players };
+  .inputValidator((i: unknown) =>
+    z.object({ eventId: z.string().uuid(), date: eventDateSchema.nullable() }).parse(i),
+  )
+  .handler(async ({ data, context }): Promise<TexpoOverview> => {
+    const sb = await adminDb(context.userId);
+    const { data: result, error } = await sb.rpc("event_texpo_report", {
+      p_event_id: data.eventId,
+      p_date: data.date,
+    });
+    if (error) throw new Error("Could not load the game numbers");
+    return texpoOverviewSchema.parse(result);
   });
 
 export const adminTexpoCreateLink = createServerFn({ method: "POST" })
@@ -217,26 +80,26 @@ export const adminTexpoCreateLink = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) =>
     z
       .object({
+        eventId: z.string().uuid().default(TEXPO_EVENT_ID),
         label: z.string().trim().min(2).max(120),
         slug: z.string().trim().toLowerCase().regex(LINK_SLUG_RE).optional().or(z.literal("")),
       })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
-    const sb = await db();
-    await assertAdmin(sb, context.userId);
+    const sb = await adminDb(context.userId);
     const wanted = data.slug || slugFromLabel(data.label);
     for (let attempt = 0; attempt < 5; attempt++) {
       const slug = attempt === 0 ? wanted : `${wanted.slice(0, 34)}-${attempt + 1}`;
-      const { data: row, error } = await sb
-        .from("game_links")
-        .insert({ game: TEXPO_GAME, slug, label: data.label, created_by: context.userId })
-        .select("id, slug, label, is_active, created_at")
-        .single();
-      if (!error && row) return row as Omit<GameLink, "funnel">;
-      if ((error as { code?: string } | null)?.code !== "23505")
-        throw new Error("Could not create the link");
-      // A slug the admin typed is theirs to change; only generated ones get a number.
+      const { data: row, error } = await sb.rpc("event_create_link", {
+        p_event_id: data.eventId,
+        p_kind: "game",
+        p_label: data.label,
+        p_slug: slug,
+        p_user_id: context.userId,
+      });
+      if (!error) return gameLinkSchema.parse(row);
+      if (error.code !== "23505") throw new Error("Could not create the link");
       if (data.slug) throw new Error("slug_taken");
     }
     throw new Error("Could not create the link");
@@ -246,9 +109,7 @@ export const adminTexpoSetLinkActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ id: z.string().uuid(), active: z.boolean() }).parse(i))
   .handler(async ({ data, context }) => {
-    const sb = await db();
-    await assertAdmin(sb, context.userId);
-    // The main link takes every visit without a working link, so it stays on.
+    const sb = await adminDb(context.userId);
     const { data: row, error } = await sb
       .from("game_links")
       .update({ is_active: data.active })

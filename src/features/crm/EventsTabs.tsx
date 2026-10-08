@@ -1,12 +1,11 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Gamepad2, Link2, type LucideIcon } from "lucide-react";
+import { CalendarDays, Link2, type LucideIcon } from "lucide-react";
 import { useT } from "@/components/console/ui";
 
-/* The console's "Events" item: every tool used at an event or a booth, one tab
-   each. Each tab is its own page, so old links keep working. */
+/* Legacy sign-up link management remains accessible from Events. */
 const TABS: { to: string; ar: string; en: string; icon: LucideIcon }[] = [
   { to: "/admin/crm/registration-links", ar: "روابط التسجيل", en: "Sign-up links", icon: Link2 },
-  { to: "/admin/crm/texpo", ar: "لعبة تكسبو", en: "Texpo game", icon: Gamepad2 },
+  { to: "/admin/events", ar: "كل الفعاليات", en: "All events", icon: CalendarDays },
 ];
 
 export function EventsTabs() {
