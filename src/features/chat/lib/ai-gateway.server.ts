@@ -5,6 +5,8 @@ import { createChatModel } from "@/features/chat/lib/ai-gateway";
 
 export type ChatModelSelection = { kind: "direct"; model: LanguageModel };
 
-export function createChatModelForRequest(): ChatModelSelection {
-  return { kind: "direct", model: createChatModel() };
+export function createChatModelForRequest(
+  onFallback?: (error: unknown, fallbackModel: string) => void,
+): ChatModelSelection {
+  return { kind: "direct", model: createChatModel({ onFallback }) };
 }

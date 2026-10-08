@@ -78,3 +78,12 @@ export function visitorContext(read: VisitorRead): string {
   };
   return `\n\n# من يحادثك (تقدير من كلامه، ليس يقيناً)\n${what[read.kind]}\nالدلائل من كلامه: ${cues}.\nإذا ناقض كلامه اللاحق هذا التقدير، فاتبع كلامه.`;
 }
+
+const PATH_OFFER = /أسألك بضعة أسئلة|ask (you )?a few quick questions/i;
+
+/** Said once per conversation: the offer to ask a few questions and recommend
+    a path. The model was told so and still repeated it, two answers apart. */
+export function pathOfferNote(assistantTurns: string[]): string {
+  if (!assistantTurns.some((turn) => PATH_OFFER.test(turn))) return "";
+  return "\n\n# سبق أن عرضت الأسئلة\nعرضت عليه في هذه المحادثة أن تسأله بضعة أسئلة وترشّح له مساراً. لا تعرض ذلك مرة أخرى، إلا إذا طلبه هو.";
+}

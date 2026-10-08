@@ -20,12 +20,16 @@ async function assertAdmin(sb: SupabaseClient, userId: string) {
 }
 
 /* scripts/chat-eval.mjs asks the live bot real questions, one fresh session
-   each, under these session-id prefixes. Those runs are tests, not visitors:
+   each, under these session-id prefixes, and load tests open many sessions at
+   once ("s_loadtest_…", 84 on 7 Oct 2026). Those runs are tests, not visitors:
    the conversation list and its counts leave them out. */
 function withoutTestRuns<Q extends { not: (column: string, op: string, value: string) => Q }>(
   query: Q,
 ): Q {
-  return query.not("session_id", "like", "eval-%").not("session_id", "like", "claude-check%");
+  return query
+    .not("session_id", "like", "eval-%")
+    .not("session_id", "like", "claude-check%")
+    .not("session_id", "like", "s_loadtest%");
 }
 
 export const listConversations = createServerFn({ method: "GET" })

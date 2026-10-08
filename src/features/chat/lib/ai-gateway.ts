@@ -1,4 +1,7 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { wrapLanguageModel, type LanguageModelMiddleware } from "ai";
+
+type LanguageModelV3 = Parameters<typeof wrapLanguageModel>[0]["model"];
 
 /* The website chat talks to one OpenAI-compatible endpoint. Google's Gemini API
    offers one, so a Gemini key is used directly when it is set; OpenRouter is the
@@ -39,9 +42,25 @@ export function resolveChatProvider(
   return google ?? openrouter;
 }
 
-export function createChatModel() {
-  const provider = resolveChatProvider();
-  if (!provider) throw new Error("CHAT_CONFIGURATION_MISSING");
+/* The second model a request goes to when the first is refused. Google's free
+   plan limits each model's requests separately, and a model is sometimes
+   overloaded: five visitor messages on 7 Oct 2026 got no answer at all.
+   CHAT_FALLBACK_MODEL names it ("off" for none); with Google it defaults to
+   Gemini 3.5 Flash, which costs more per message but only answers when the
+   first model could not. */
+export const DEFAULT_GEMINI_FALLBACK_MODEL = "gemini-3.5-flash";
+
+export function resolveFallbackModel(
+  provider: ChatProvider,
+  env: Record<string, string | undefined> = process.env,
+): string | null {
+  const set = env.CHAT_FALLBACK_MODEL?.trim();
+  if (set?.toLowerCase() === "off") return null;
+  const model = set || (provider.name === "google" ? DEFAULT_GEMINI_FALLBACK_MODEL : "");
+  return model && model !== provider.model ? model : null;
+}
+
+function modelFor(provider: ChatProvider, modelId: string) {
   return createOpenAICompatible({
     name: provider.name,
     baseURL: provider.baseURL,
@@ -49,5 +68,51 @@ export function createChatModel() {
     // Streamed replies carry token counts only when asked for; without this every
     // answer's usage came back empty and the bot's cost could not be measured.
     includeUsage: true,
-  })(provider.model);
+  })(modelId);
+}
+
+/** The first model, and the fallback when the first one's request fails. A
+    request the visitor cancelled is not sent again. */
+export function withFallback(
+  primary: LanguageModelV3,
+  fallback: LanguageModelV3,
+  onFallback?: (error: unknown) => void,
+): LanguageModelV3 {
+  const giveUp = (aborted: boolean | undefined, error: unknown) => {
+    if (aborted) throw error;
+    onFallback?.(error);
+  };
+  const middleware: LanguageModelMiddleware = {
+    specificationVersion: "v3",
+    wrapGenerate: async ({ doGenerate, params }) => {
+      try {
+        return await doGenerate();
+      } catch (error) {
+        giveUp(params.abortSignal?.aborted, error);
+        return fallback.doGenerate(params);
+      }
+    },
+    wrapStream: async ({ doStream, params }) => {
+      try {
+        return await doStream();
+      } catch (error) {
+        giveUp(params.abortSignal?.aborted, error);
+        return fallback.doStream(params);
+      }
+    },
+  };
+  return wrapLanguageModel({ model: primary, middleware });
+}
+
+export function createChatModel(
+  options: { onFallback?: (error: unknown, fallbackModel: string) => void } = {},
+) {
+  const provider = resolveChatProvider();
+  if (!provider) throw new Error("CHAT_CONFIGURATION_MISSING");
+  const primary = modelFor(provider, provider.model);
+  const fallbackModel = resolveFallbackModel(provider);
+  if (!fallbackModel) return primary;
+  return withFallback(primary, modelFor(provider, fallbackModel), (error) =>
+    options.onFallback?.(error, fallbackModel),
+  );
 }

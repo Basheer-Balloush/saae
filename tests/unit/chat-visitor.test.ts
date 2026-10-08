@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readVisitor, visitorContext } from "@/features/chat/lib/chat-visitor";
+import { pathOfferNote, readVisitor, visitorContext } from "@/features/chat/lib/chat-visitor";
 
 const kind = (...turns: string[]) => readVisitor(turns)?.kind ?? null;
 
@@ -53,5 +53,20 @@ describe("visitorContext", () => {
     const note = visitorContext(readVisitor(["حابين نكون وسيلة دفع عندكم"]));
     expect(note).toContain("submit_company_lead");
     expect(note).toContain("«حابين نكون»");
+  });
+});
+
+describe("pathOfferNote", () => {
+  it("tells the model the offer was already made, once it has been", () => {
+    expect(pathOfferNote(["أهلاً بك. كيف أقدر أساعدك؟"])).toBe("");
+    const offered = [
+      "لا تحتاج لخبرة تقنية سابقة. إذا حبيت، أسألك بضعة أسئلة سريعة وأرشّح لك المسار الأنسب. [[choices: نعم، ابدأ | لاحقاً]]",
+    ];
+    expect(pathOfferNote(offered)).toContain("لا تعرض ذلك مرة أخرى");
+    expect(
+      pathOfferNote([
+        "If you like, I can ask a few quick questions and recommend the best path for you",
+      ]),
+    ).not.toBe("");
   });
 });
