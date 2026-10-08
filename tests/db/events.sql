@@ -122,6 +122,17 @@ INSERT INTO public.game_plays(link_id,started_at) VALUES('ee000000-0000-4000-800
 INSERT INTO public.game_link_opens(link_id,opened_at)
 SELECT s.source_id,'2026-10-07 20:00:00+00' FROM public.event_sources s
 WHERE s.event_id = 'ee000000-0000-4000-8000-000000000002' AND s.kind = 'game';
+-- Automatic (game) badge awards count only during the event days.
+CREATE TEMP TABLE badge_base AS SELECT (public.event_report('ee000000-0000-4000-8000-000000000002',NULL)->>'badges')::int AS n;
+GRANT SELECT ON badge_base TO service_role;
+INSERT INTO auth.users(id,email,email_confirmed_at) VALUES
+  ('ee000000-0000-4000-8000-00000000000a','early@example.test',now()),
+  ('ee000000-0000-4000-8000-00000000000b','during@example.test',now());
+INSERT INTO public.event_badge_awards(event_id,user_id,awarded_at,badge)
+SELECT e.id,u.id,u.at,e.badge FROM public.organization_events e CROSS JOIN (VALUES
+  ('ee000000-0000-4000-8000-00000000000a'::uuid,'2026-10-06 10:00:00+00'::timestamptz),
+  ('ee000000-0000-4000-8000-00000000000b'::uuid,'2026-10-08 10:00:00+00'::timestamptz)) u(id,at)
+WHERE e.id = 'ee000000-0000-4000-8000-000000000002';
 -- The server calls the reports as service_role, which cannot read auth.users.
 SET LOCAL ROLE service_role;
 DO $$ DECLARE r jsonb; BEGIN
@@ -131,6 +142,8 @@ DO $$ DECLARE r jsonb; BEGIN
   r := public.event_texpo_report('ee000000-0000-4000-8000-000000000002','2026-10-08');
   ASSERT (r#>>'{total,claimed}')::int = 0 AND (r#>>'{total,newAccounts}')::int = 0, 'A pre-event play claimed during the event is not counted';
   ASSERT public.event_report('ee000000-0000-4000-8000-000000000002',NULL) IS NOT NULL, 'The server role can load the event report';
+  ASSERT (public.event_report('ee000000-0000-4000-8000-000000000002',NULL)->>'badges')::int = (SELECT n FROM badge_base) + 1,
+    'A pre-event automatic badge is excluded; one earned during the event counts';
 END $$;
 RESET ROLE;
 ROLLBACK;

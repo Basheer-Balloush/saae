@@ -55,7 +55,8 @@ game links during its scheduled days** (and link opens during those days), so
 pre-event tests and other links never appear; a day tab shows what those
 players did that day, and All adds everything they did later, such as using the
 coupon. Signed up = claims made with a new account; signed in = claims made with
-an existing account. Presence transitions are captured separately so unrelated AMS edits can't
+an existing account. Automatic (game) badge awards count only when earned during
+the event days; badges an admin awards count whenever they were given. Presence transitions are captured separately so unrelated AMS edits can't
 move attendance into another day. Historical attendance uses the stored
 `updated_at` available before migration. Existing device/link opens are still
 first-open records, not every repeat visit. Coupon-use counts follow the
@@ -81,7 +82,8 @@ Apply `supabase/migrations/20261008120000_events.sql` once to the intended
 database before deploying the app, then `20261008150000_events_report_definer.sql`
 (reports read `auth.users`, which `service_role` cannot select on Supabase) and
 `20261008160000_events_texpo_scope.sql` (game numbers scoped to the event's links
-and days). It runs transactionally, adds event/source/
+and days) and `20261008170000_events_badges_scope.sql` (automatic badges scoped
+to the event days; keeps SECURITY DEFINER). It runs transactionally, adds event/source/
 badge/presence tables, seeds Texpo, preserves existing Texpo badges, adds scoped
 report/award/link RPCs and creates the public `event-assets` bucket. It doesn't
 change scores, coupons, enrollment or existing game reward rules. Newly uploaded
