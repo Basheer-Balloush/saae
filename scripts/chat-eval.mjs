@@ -166,6 +166,14 @@ const CASES = [
     must: [/\?|؟/],
     mustNot: [/courses\/|مستواك|ساعة/],
   },
+  // Texpo's game is played at the association's corner: no link, and a plain
+  // coupon question is not an invitation to talk about it.
+  {
+    q: "وين بحط كود الكوبون؟",
+    must: [/كود الكوبون|سجّل الآن/],
+    mustNot: [/تكسبو|Texpo|لعبة|تحدّي|\/texpo/],
+  },
+  { q: "كيف بلعب لعبة تكسبو وبربح كوبون؟", must: [/ركن/], mustNot: [/\/texpo/] },
   // English.
   { q: "Do you have any internships open right now?", must: [/internships/] },
   { q: "Is UNICEF a partner of SAAE?", must: [/not/i], mustNot: [/[\u0600-\u06FF]{4,}/] },
