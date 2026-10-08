@@ -231,6 +231,17 @@ function LmsSignup() {
       });
       // The server is the single source of truth for whether confirmation is required.
       const confirmationRequired = res?.confirmationRequired !== false;
+      if (!confirmationRequired) {
+        // Already active: sign straight in; the effect above takes them on.
+        const { error } = await supabase.auth.signInWithPassword({
+          email: res?.email ?? parsed.data.email,
+          password,
+        });
+        if (!error) {
+          toast.success(tr.signedIn);
+          return;
+        }
+      }
       setResult({ email: res?.email ?? parsed.data.email, confirmationRequired });
       if (confirmationRequired) startResendWait(FIRST_RESEND_WAIT);
       toast.success(confirmationRequired ? tr.signedUp : tr.signedUpConfirmed);
