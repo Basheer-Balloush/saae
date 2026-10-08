@@ -84,7 +84,7 @@ describe("lets through", () => {
 
   it("the association's reference facts, word for word", () => {
     expect(check(section("# الهوية"))).toBeNull();
-    expect(check(section("# تحدّي أبو الجود في معرض تكسبو"))).toBeNull();
+    expect(check(section("# العب وتعلّم مع أبو الجود في معرض تكسبو"))).toBeNull();
   });
 
   it("an offer to a company that borrows the prompt's wording", () => {

@@ -260,8 +260,8 @@ function TexpoAdminPage() {
         eyebrow={t("الفعاليات", "Events")}
         title={t("لعبة تكسبو", "Texpo game")}
         description={t(
-          "تحدّي أبو الجود في معرض تكسبو (8 إلى 11 تشرين الأول 2026): الروابط وأرقام كل رابط ومن لعب ومن استلم كوبوناً.",
-          "Abu Al-Joud's challenge at Texpo (8–11 October 2026): the links, each link's numbers, who played and who claimed a coupon.",
+          "العب وتعلّم مع أبو الجود في معرض تكسبو (8 إلى 11 تشرين الأول 2026): الروابط وأرقام كل رابط ومن لعب ومن استلم كوبوناً.",
+          "Play and Learn with Abu Al-Joud at Texpo (8–11 October 2026): the links, each link's numbers, who played and who claimed a coupon.",
         )}
         actions={
           <>
