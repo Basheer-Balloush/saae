@@ -60,9 +60,26 @@ async function rpc(fn: string, args: Record<string, unknown>): Promise<unknown> 
   return data;
 }
 
-/** The address the page uses for a card image; it only works with the right slug. */
-export function profileImagePath(slug: string, kind: "portrait" | "signature"): string {
-  return `/api/profile-card/${encodeURIComponent(slug)}/${kind}`;
+/**
+ * The address the page uses for a card image; it only works with the right slug.
+ * `version` changes whenever the image does, so browsers fetch a replaced photo
+ * at once instead of showing their cached copy for up to an hour.
+ */
+export function profileImagePath(
+  slug: string,
+  kind: "portrait" | "signature",
+  version?: string,
+): string {
+  const path = `/api/profile-card/${encodeURIComponent(slug)}/${kind}`;
+  return version ? `${path}?v=${version}` : path;
+}
+
+/** A short fingerprint of an image, for its address. */
+async function imageVersion(b64: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(b64));
+  return Array.from(new Uint8Array(digest).subarray(0, 5), (b) =>
+    b.toString(16).padStart(2, "0"),
+  ).join("");
 }
 
 let keysPromise: ReturnType<typeof deriveCardKeys> | null = null;
@@ -95,8 +112,8 @@ export async function findProfileCard(slug: string): Promise<ProfileCard | null>
     return {
       ...stored.card,
       slug,
-      portrait: profileImagePath(slug, "portrait"),
-      signature: profileImagePath(slug, "signature"),
+      portrait: profileImagePath(slug, "portrait", await imageVersion(stored.portrait.b64)),
+      signature: profileImagePath(slug, "signature", await imageVersion(stored.signature.b64)),
     };
   } catch (error) {
     console.error("Profile card lookup failed", error);
