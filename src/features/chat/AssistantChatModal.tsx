@@ -35,6 +35,7 @@ export function AssistantChatModal({
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
 
   // The conversation the visitor is in. It ends after CHAT_IDLE_MS without a
   // message, so each visit is its own conversation for the admin and for the model.
@@ -127,14 +128,88 @@ export function AssistantChatModal({
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
+    const prevPosition = document.body.style.position;
+    const prevTop = document.body.style.top;
+    const prevWidth = document.body.style.width;
+    const scrollY = window.scrollY;
+    const freezePage = window.matchMedia("(max-width: 760px)").matches;
+
     document.body.style.overflow = "hidden";
+    if (freezePage) {
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+    }
+
     return () => {
       document.body.style.overflow = prev;
+      document.body.style.position = prevPosition;
+      document.body.style.top = prevTop;
+      document.body.style.width = prevWidth;
+      if (freezePage) window.scrollTo(0, scrollY);
+    };
+  }, [open]);
+
+  // Mobile browsers expose the keyboard through the visual viewport. Keeping
+  // these measurements out of React avoids a render on every animation frame
+  // while the keyboard opens, and anchoring to offsetTop prevents iOS from
+  // pushing the whole dialog above the visible screen.
+  useEffect(() => {
+    if (!open) return;
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+
+    const viewport = window.visualViewport;
+    let frame = 0;
+    let keyboardWasOpen = false;
+    let baselineHeight = Math.max(window.innerHeight, viewport?.height ?? 0);
+
+    const applyViewport = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const height = viewport?.height ?? window.innerHeight;
+        const width = viewport?.width ?? window.innerWidth;
+        const top = viewport?.offsetTop ?? 0;
+        const left = viewport?.offsetLeft ?? 0;
+        const inputFocused = document.activeElement === inputRef.current;
+
+        if (!inputFocused) baselineHeight = Math.max(baselineHeight, height);
+        const keyboardOpen = inputFocused && baselineHeight - height > 80;
+
+        overlay.style.setProperty("--assistant-viewport-height", `${Math.round(height)}px`);
+        overlay.style.setProperty("--assistant-viewport-width", `${Math.round(width)}px`);
+        overlay.style.setProperty("--assistant-viewport-top", `${Math.round(top)}px`);
+        overlay.style.setProperty("--assistant-viewport-left", `${Math.round(left)}px`);
+        overlay.dataset.keyboardOpen = keyboardOpen ? "true" : "false";
+
+        if (keyboardOpen && !keyboardWasOpen) {
+          const thread = scrollRef.current;
+          if (thread) thread.scrollTop = thread.scrollHeight;
+        }
+        keyboardWasOpen = keyboardOpen;
+      });
+    };
+
+    applyViewport();
+    viewport?.addEventListener("resize", applyViewport);
+    viewport?.addEventListener("scroll", applyViewport);
+    window.addEventListener("resize", applyViewport);
+    window.addEventListener("orientationchange", applyViewport);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      viewport?.removeEventListener("resize", applyViewport);
+      viewport?.removeEventListener("scroll", applyViewport);
+      window.removeEventListener("resize", applyViewport);
+      window.removeEventListener("orientationchange", applyViewport);
     };
   }, [open]);
 
   useEffect(() => {
-    if (open && status !== "streaming") {
+    const supportsHover = window.matchMedia(
+      "(min-width: 761px) and (hover: hover) and (pointer: fine)",
+    ).matches;
+    if (open && status !== "streaming" && supportsHover) {
       const id = setTimeout(() => inputRef.current?.focus(), 80);
       return () => clearTimeout(id);
     }
@@ -195,6 +270,7 @@ export function AssistantChatModal({
     <AnimatePresence>
       {open && (
         <motion.div
+          ref={overlayRef}
           key="assistant-modal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
