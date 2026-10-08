@@ -1,29 +1,21 @@
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { LEVELS } from "@/features/texpo/lib/texpo-shared";
 import { BADGES, type EarnedBadge } from "./badges";
-import { getMyBadges } from "./badges.functions";
 
 /* The Badges card on the LMS profile (uses the profile's pro-card styles). */
-export function BadgesCard({ lang }: { lang: "ar" | "en" }) {
+export function BadgesCard({
+  lang,
+  badges,
+  failed,
+  onRetry,
+}: {
+  lang: "ar" | "en";
+  badges: EarnedBadge[] | undefined;
+  failed: boolean;
+  onRetry: () => void;
+}) {
   const ar = lang === "ar";
-  const fetchBadges = useServerFn(getMyBadges);
-  const [badges, setBadges] = useState<EarnedBadge[] | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchBadges()
-      .then((rows) => {
-        if (!cancelled) setBadges(rows);
-      })
-      .catch(() => {
-        if (!cancelled) setBadges([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [fetchBadges]);
 
   // The Texpo game links here (#profile-badges); the card only exists once the
   // profile has loaded, so the browser can't jump to it on its own.
@@ -36,8 +28,18 @@ export function BadgesCard({ lang }: { lang: "ar" | "en" }) {
   return (
     <article className="pro-card" id="profile-badges">
       <h2>{ar ? "الشارات" : "Badges"}</h2>
-      {badges === null ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
+      {!badges && failed ? (
+        <div className="state-box" role="alert">
+          <p>{ar ? "تعذّر تحميل الشارات." : "Could not load badges."}</p>
+          <button type="button" className="action action-secondary" onClick={onRetry}>
+            <span>{ar ? "حاول مجدداً" : "Try again"}</span>
+          </button>
+        </div>
+      ) : !badges ? (
+        <p role="status">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          <span className="sr-only">{ar ? "جارٍ تحميل الشارات" : "Loading badges"}</span>
+        </p>
       ) : badges.length === 0 ? (
         <p>
           {ar
@@ -54,7 +56,7 @@ export function BadgesCard({ lang }: { lang: "ar" | "en" }) {
               year: "numeric",
             });
             return (
-              <li key={b.key} className="badge-tile">
+              <li key={b.key} className="badge-tile" id={`profile-badge-${b.key}`}>
                 <img src={badge.image} alt="" width={84} height={84} decoding="async" />
                 <span className="badge-copy">
                   <strong>{ar ? badge.name.ar : badge.name.en}</strong>

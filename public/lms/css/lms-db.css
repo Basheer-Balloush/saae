@@ -140,8 +140,19 @@ html[dir] .lms-skin .lms-hero-copy h1.course-page-title { font-size: clamp(2rem,
 .lms-skin .apply-list small { color: var(--lms-muted); font-size: .78rem; }
 .lms-skin .attempt-chip { padding: 3px 10px; border-radius: 999px; background: rgba(184, 232, 240, .08); color: var(--lms-muted); font-size: .7rem; font-weight: 800; }
 .lms-skin #profile-badges { scroll-margin-block-start: 110px; }
+.lms-skin .profile-extras { display: grid; gap: 14px; flex: 0 1 420px; min-width: 0; margin-inline-start: auto; }
+.lms-skin .profile-extras .profile-actions { justify-content: flex-end; }
+.lms-skin .profile-badge-strip { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.lms-skin .profile-badge-strip a { display: grid; place-items: center; width: 72px; height: 72px; border: 1px solid rgba(184, 232, 240, .24); border-radius: 50%; background: rgba(2, 16, 20, .3); }
+.lms-skin .profile-badge-strip a:hover { border-color: var(--lms-cyan); }
+.lms-skin .profile-badge-strip a:focus-visible { outline: 3px solid var(--lms-cyan); outline-offset: 4px; }
+.lms-skin .profile-badge-strip img { width: 64px; height: 64px; border-radius: 50%; filter: drop-shadow(0 4px 12px rgba(87, 228, 238, .25)); }
+@media (max-width: 680px) {
+  .lms-skin .profile-extras { flex-basis: 100%; margin-inline-start: 0; }
+  .lms-skin .profile-extras .profile-actions, .lms-skin .profile-badge-strip { justify-content: flex-start; }
+}
 .lms-skin .badge-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
-.lms-skin .badge-tile { display: flex; align-items: center; gap: 16px; padding: 14px 18px; padding-inline-start: 14px; border: 1px solid var(--lms-border); border-radius: 18px; background: rgba(2, 16, 20, .3); }
+.lms-skin .badge-tile { display: flex; align-items: center; gap: 16px; padding: 14px 18px; padding-inline-start: 14px; border: 1px solid var(--lms-border); border-radius: 18px; background: rgba(2, 16, 20, .3); scroll-margin-block-start: 110px; }
 .lms-skin .badge-tile img { flex: none; width: 84px; height: 84px; border-radius: 50%; filter: drop-shadow(0 6px 18px rgba(87, 228, 238, .3)); transition: transform .6s var(--lms-ease); }
 .lms-skin .badge-tile:hover img { transform: rotate(-8deg) scale(1.05); }
 .lms-skin .badge-copy { display: grid; gap: 3px; min-width: 0; }

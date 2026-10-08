@@ -38,6 +38,8 @@ import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { resizedImage } from "@/lib/image-url";
 import { LocationCard } from "@/features/user-location/LocationCard";
 import { BadgesCard } from "@/features/badges/BadgesCard";
+import { ProfileBadgeStrip } from "@/features/badges/ProfileBadgeStrip";
+import { useMyBadges } from "@/features/badges/useMyBadges";
 
 export const Route = createFileRoute("/learning-management-system/profile")({
   head: () => ({
@@ -86,6 +88,7 @@ function ProfilePage() {
   const ar = lang === "ar";
   const t = lmsInternshipsT[lang];
   const { user, loading: authLoading, isGuest } = useLmsAuth();
+  const badgesQuery = useMyBadges(user?.id);
 
   const fetchOverview = useServerFn(getMyProfileOverview);
 
@@ -203,19 +206,22 @@ function ProfilePage() {
                 </span>
               )}
             </span>
-            <span className="profile-actions">
-              <a className="action action-primary" href="#profile-identity">
-                <span>{ar ? "تعديل الملف" : "Edit profile"}</span>
-              </a>
-              {!isGuest && (
-                <Link
-                  className="action action-secondary"
-                  to="/learning-management-system/trainer-apply"
-                >
-                  <span>{ar ? "كن مدرّباً" : "Be an instructor"}</span>
-                </Link>
-              )}
-            </span>
+            <div className="profile-extras">
+              <span className="profile-actions">
+                <a className="action action-primary" href="#profile-identity">
+                  <span>{ar ? "تعديل الملف" : "Edit profile"}</span>
+                </a>
+                {!isGuest && (
+                  <Link
+                    className="action action-secondary"
+                    to="/learning-management-system/trainer-apply"
+                  >
+                    <span>{ar ? "كن مدرّباً" : "Be an instructor"}</span>
+                  </Link>
+                )}
+              </span>
+              <ProfileBadgeStrip badges={badgesQuery.data ?? []} lang={lang} />
+            </div>
           </div>
           <dl className="profile-stats">
             <div>
@@ -253,7 +259,12 @@ function ProfilePage() {
             {!isGuest && <LocationCard lang={lang} />}
             <CoursesCard data={data} lang={lang} />
             <CertificatesCard data={data} lang={lang} />
-            <BadgesCard lang={lang} />
+            <BadgesCard
+              lang={lang}
+              badges={badgesQuery.data}
+              failed={badgesQuery.isError}
+              onRetry={() => void badgesQuery.refetch()}
+            />
             <ApplicationsCard lang={lang} />
           </div>
           <aside className="profile-side">
