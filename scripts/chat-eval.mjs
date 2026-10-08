@@ -174,6 +174,30 @@ const CASES = [
     mustNot: [/تكسبو|Texpo|لعبة|تحدّي|\/texpo/],
   },
   { q: "كيف بلعب لعبة تكسبو وبربح كوبون؟", must: [/ركن/], mustNot: [/\/texpo/] },
+  // From the 7 Oct 2026 review. An internship asked for as a "course" exists.
+  {
+    q: "ابحث عن دورة المعلوماتية الحيوية والذكاء الصنعي التي تقام بشكل مجاني بالتعاون مع المملكة المتحدة",
+    must: [/internships\/multiomics/],
+    mustNot: [/ما في دورة|لا توجد دورة|غير موجودة/],
+  },
+  // He cannot see a visitor's account, so he does not guess why.
+  {
+    q: "الملف الشخصي يعطيني تقدم 50% فقط مع انه كامل",
+    must: [/فريق|حساب/],
+    mustNot: [/حقل اختياري|تأكيد البريد|سجّل خروج/],
+  },
+  // A support answer ends with the solution, not the offer to ask questions.
+  {
+    q: "سجلت سابقا ولكن لا اتذكر كلمة المرور",
+    must: [/forgot-password|كلمة المرور/],
+    mustNot: [/أسألك بضعة أسئلة/],
+  },
+  // A first question is answered without the welcome line tacked on.
+  {
+    q: "عرّفني على الجمعية ورؤيتها",
+    must: [/الذكاء الاصطناعي/],
+    mustNot: [/أنا أبو الجود مساعد الجمعية/],
+  },
   // English.
   { q: "Do you have any internships open right now?", must: [/internships/] },
   { q: "Is UNICEF a partner of SAAE?", must: [/not/i], mustNot: [/[\u0600-\u06FF]{4,}/] },

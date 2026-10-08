@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { resolveChatProvider } from "../../src/features/chat/lib/ai-gateway";
+import { generateText } from "ai";
+import {
+  resolveChatProvider,
+  resolveFallbackModel,
+  withFallback,
+} from "../../src/features/chat/lib/ai-gateway";
 
 const gemini = "https://generativelanguage.googleapis.com/v1beta/openai";
 const openrouter = "https://openrouter.ai/api/v1";
@@ -106,5 +111,64 @@ describe("when both keys are configured", () => {
     expect(resolveChatProvider({ GEMINI_API_KEY: "g", CHAT_MODEL: "gemini-3.8-flash" })?.name).toBe(
       "google",
     );
+  });
+});
+
+describe("fallback model", () => {
+  const google = { name: "google", baseURL: gemini, apiKey: "k", model: "gemini-3.5-flash-lite" };
+
+  it("answers with Gemini 3.5 Flash when the first model is refused, unless told otherwise", () => {
+    expect(resolveFallbackModel(google, {})).toBe("gemini-3.5-flash");
+    expect(resolveFallbackModel(google, { CHAT_FALLBACK_MODEL: "gemini-3.8-flash" })).toBe(
+      "gemini-3.8-flash",
+    );
+    expect(resolveFallbackModel(google, { CHAT_FALLBACK_MODEL: "off" })).toBe(null);
+    expect(resolveFallbackModel({ ...google, model: "gemini-3.5-flash" }, {})).toBe(null);
+    expect(resolveFallbackModel({ ...google, name: "openrouter" }, {})).toBe(null);
+  });
+
+  // A minimal model: answers with its name, or fails like a refused request.
+  const model = (name: string, fails = false) => ({
+    specificationVersion: "v3" as const,
+    provider: "test",
+    modelId: name,
+    supportedUrls: {},
+    doGenerate: async () => {
+      if (fails) throw Object.assign(new Error("Too Many Requests"), { statusCode: 429 });
+      return {
+        content: [{ type: "text" as const, text: name }],
+        finishReason: { unified: "stop" as const, raw: "stop" },
+        usage: {
+          inputTokens: { total: 1, noCache: 1, cacheRead: 0, cacheWrite: 0 },
+          outputTokens: { total: 1, text: 1, reasoning: 0 },
+        },
+        warnings: [],
+      };
+    },
+    doStream: async () => {
+      throw new Error("not used");
+    },
+  });
+
+  it("sends the request to the fallback when the first model fails, and says so", async () => {
+    const failures: unknown[] = [];
+    const { text } = await generateText({
+      model: withFallback(model("first", true), model("second"), (e) => failures.push(e)),
+      prompt: "hi",
+      maxRetries: 0,
+    });
+    expect(text).toBe("second");
+    expect(failures).toHaveLength(1);
+  });
+
+  it("does not touch the fallback when the first model answers", async () => {
+    const failures: unknown[] = [];
+    const { text } = await generateText({
+      model: withFallback(model("first"), model("second", true), (e) => failures.push(e)),
+      prompt: "hi",
+      maxRetries: 0,
+    });
+    expect(text).toBe("first");
+    expect(failures).toHaveLength(0);
   });
 });

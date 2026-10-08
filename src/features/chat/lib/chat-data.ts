@@ -388,3 +388,98 @@ export function withoutContact(
     .trim();
   return out || null;
 }
+
+// ---------- A "course" that is really an internship ----------
+
+const searchForm = (text: string) =>
+  text
+    .replace(/[ً-ٰٟـ]/g, "")
+    .replace(/[أإآٱ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .toLowerCase();
+
+// Words every opportunity shares, or that only say what kind of thing is asked for.
+const TOPIC_NOISE = new Set(
+  [
+    "دوره",
+    "دورات",
+    "كورس",
+    "تدريب",
+    "تدريبي",
+    "تدريبيه",
+    "برنامج",
+    "فرصه",
+    "فرص",
+    "ورشه",
+    "ذكاء",
+    "الذكاء",
+    "اصطناعي",
+    "الاصطناعي",
+    "الصنعي",
+    "بالتعاون",
+    "تعاون",
+    "مع",
+    "في",
+    "على",
+    "عن",
+    "من",
+    "التي",
+    "الذي",
+    "تقام",
+    "بشكل",
+    "مجاني",
+    "مجانيه",
+    "ابحث",
+    "بدي",
+    "اريد",
+    "course",
+    "courses",
+    "training",
+    "program",
+    "programme",
+    "internship",
+    "with",
+    "the",
+    "and",
+    "for",
+    "free",
+    "ai",
+    "artificial",
+    "intelligence",
+  ].map(searchForm),
+);
+
+const topicWords = (topic: string) =>
+  searchForm(topic)
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((w) => w.length >= 3 && !TOPIC_NOISE.has(w))
+    .map((w) => (w.startsWith("ال") && w.length > 4 ? w.slice(2) : w));
+
+/** Published internships whose title or summary carry the topic's words. A
+    visitor asked for "دورة المعلوماتية الحيوية … مع المملكة المتحدة" and was
+    told it does not exist: it is the MultiOmics internship, and people call an
+    internship a course. */
+export function internshipsMatching(
+  topic: string,
+  rows: InternshipRow[],
+  lang: Lang,
+  now = new Date(),
+) {
+  const words = topicWords(topic);
+  if (words.length === 0) return [];
+  return rows
+    .map((row) => {
+      const text = searchForm(
+        [row.title_ar, row.title_en, row.summary_ar, row.summary_en].filter(Boolean).join(" "),
+      );
+      return { row, hits: words.filter((w) => text.includes(w)).length };
+    })
+    .filter((m) => m.hits > 0)
+    .sort((a, b) => b.hits - a.hits)
+    .slice(0, 3)
+    .map(({ row }) => {
+      const internship = toInternship(row, lang, now);
+      return { title: internship.title, url: internship.url, status: internship.status };
+    });
+}

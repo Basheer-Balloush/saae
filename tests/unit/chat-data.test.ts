@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   courseList,
   internshipStatus,
+  internshipsMatching,
   isPersonsOwnName,
   isPlausiblePhone,
   registrationStatus,
@@ -301,5 +302,56 @@ describe("lead contact clean-up", () => {
         null,
       ),
     ).toBe("يمثلها المدير التنفيذي سامر الخطيب. طلبت الشركة شراكة تقنية.");
+  });
+});
+
+describe("internshipsMatching", () => {
+  const row = (slug: string, title_ar: string, summary_ar: string): InternshipRow => ({
+    slug,
+    title_ar,
+    title_en: null,
+    summary_ar,
+    summary_en: null,
+    requirements_ar: null,
+    requirements_en: null,
+    location_ar: null,
+    location_en: null,
+    duration_ar: null,
+    duration_en: null,
+    stipend_ar: null,
+    stipend_en: null,
+    opens_at: null,
+    deadline_at: null,
+    starts_at: null,
+    capacity: null,
+    require_cv: false,
+  });
+  const rows = [
+    row(
+      "multiomics-bioinformatics-ai-internship-2026",
+      "تدريب بحثي في المعلوماتية الحيوية والذكاء الاصطناعي — MultiOmics Intelligence",
+      "تدريب عن بُعد بالتعاون مع MultiOmics Intelligence البريطانية لتحليل البيانات الحيوية.",
+    ),
+    row(
+      "practical-graphic-design-training-program",
+      "برنامج التدريب العملي في التصميم الغرافيكي",
+      "تدريب في دمشق.",
+    ),
+  ];
+
+  it("finds the internship a visitor called a course (7 Oct 2026)", () => {
+    const found = internshipsMatching(
+      "دورة المعلوماتية الحيوية والذكاء الصنعي التي تقام بشكل مجاني بالتعاون مع المملكة المتحدة",
+      rows,
+      "ar",
+    );
+    expect(found.map((f) => f.url)).toEqual([
+      "https://www.aisyria.org/learning-management-system/internships/multiomics-bioinformatics-ai-internship-2026",
+    ]);
+  });
+
+  it("finds nothing for a topic no internship is about, or for words every one shares", () => {
+    expect(internshipsMatching("دورة تسويق رقمي", rows, "ar")).toEqual([]);
+    expect(internshipsMatching("دورة تدريب الذكاء الاصطناعي", rows, "ar")).toEqual([]);
   });
 });

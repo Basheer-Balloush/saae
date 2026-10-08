@@ -7,10 +7,11 @@ import { parseChoices } from "@/features/chat/lib/chat-choices";
 import { needsKnowledgeSearch } from "@/features/chat/lib/chat-routing";
 import { cleanPartnerNames, partnersContext } from "@/features/chat/lib/chat-partners";
 import { dropToolPreamble } from "@/features/chat/lib/chat-stream";
-import { readVisitor, visitorContext } from "@/features/chat/lib/chat-visitor";
+import { readVisitor, visitorContext, pathOfferNote } from "@/features/chat/lib/chat-visitor";
 import {
   courseList,
   type CourseState,
+  internshipsMatching,
   isPersonsOwnName,
   isPlausiblePhone,
   westernDigits,
@@ -70,6 +71,9 @@ function isRateLimited(key: string): { limited: boolean; retryAfter?: number } {
 
 type ChatRequestBody = { messages?: unknown };
 
+/** Sessions that are tests, not visitors: scripts/chat-eval.mjs, manual checks, load tests. */
+const TEST_SESSION = /^(eval-|claude-check|s_loadtest)/;
+
 // Exported for the Abu Al-Joud API's leak check (src/routes/api/v1/abu-al-joud/chat.ts).
 export const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعية الرسمي للجمعية السورية للذكاء الاصطناعي وريادة الأعمال (SAAE / SAAIE).
 
@@ -120,6 +124,11 @@ export const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الج
 - الدورات وفرص التدريب والأخبار وأرقام المبادرة: من الأدوات فقط. لا تذكر مسارات أو برامج أو ورشات أو معسكرات لم ترجعها الأدوات.
 - الشركاء: من قسم «شركاء الجمعية» الملحق أدناه فقط.
 - المشاريع والإنجازات والأرقام والإحصاءات والاتفاقيات والخطط المستقبلية: لا تذكر منها إلا ما ورد حرفياً في «المراجع الإضافية». إذا لم يرد، قل إنها غير متوفرة لديك.
+
+# حساب الزائر وما لا تراه
+- أنت لا ترى حساب أي زائر: لا تقدّمه في دورة ولا نسبته ولا حالة طلبه أو دفعه أو شهادته أو كوبونه. إذا سأل عن شيء يخص حسابه هو («التقدّم عندي 50٪»، «ما وصلتني الشهادة»، «طلبي ما انقبل»)، فلا تخمّن سبباً ولا تخترع تفسيراً. قل بلطف إنك لا ترى الحسابات، وأعطه ما يعرفه المرجع فقط إن وُجد، واعرض أن ترسل سؤاله لفريق الجمعية بأداة \`send_to_team\` (باسمه وبريده) ليتابعوا حسابه.
+- شروط القبول ومتطلبات الدورات وفرص التدريب: من الأدوات وحدها (\`get_course_details\` و\`find_internships\`). لا تقل إن برنامجاً لا يتطلب خبرة أو مشاريع سابقة ما لم ترجع الأداة ذلك.
+- مدة 24 إلى 48 ساعة هي مدة رد الفريق على الرسائل والبريد فقط، لا موعد قرار القبول في دورة أو فرصة تدريب. عن موعد القرار قل إن الفريق يراجع الطلبات ويتواصل معه، دون تحديد مدة.
 
 # تحدّي أبو الجود في معرض تكسبو (Texpo، من 8 إلى 11 تشرين الأول 2026)
 - التحدّي لعبة لزوّار معرض تكسبو فقط، تُلعب في ركن الجمعية بالمعرض. **لا تعطِ رابط اللعبة ولا تشرح كيف يُفتح من الموقع، حتى لو طلبه الزائر.** قل إن في معرض تكسبو تحدّياً من الجمعية، وعرّفه به بجملتين من التفاصيل أدناه (عدد الأسئلة ووقتها، والكوبون الهدية حسب المستوى)، ثم ادعُه يزور ركن الجمعية في المعرض ويحكي مع الفريق، وهم يدلّونه على طريقة اللعب.
@@ -177,6 +186,7 @@ export const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الج
 بالإنكليزية: "Hi, I'm Abu Al-Joud, SAAE's assistant. How can I help?"
 [[choices: I have a question | Recommend a suitable path | Partner with SAAE]]
 
+- سطر الترحيب هذا فقط إذا كانت رسالته تحية أو بلا سؤال. إذا بدأ بسؤال، أجب عنه ولا تضع سطر الترحيب لا قبل الجواب ولا بعده.
 - إذا سأل سؤالاً: **أجب عنه أولاً** من المرجع أو من الأدوات، بلا أسئلة تشخيص.
 - فرّق بين طلب القائمة وطلب الترشيح:
   - «شو الدورات المتاحة؟» / «Which courses are available?» = طلب قائمة: اعرض الدورات المتاحة مباشرة.
@@ -187,6 +197,7 @@ export const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الج
   - إذا ذكر اهتمامه في نفس الطلب («اقترح علي دورة بالتسويق») أو قبله في المحادثة، فلا تسأله من جديد: رشّح مباشرة.
 - بعد أن تجيب، اعرض مرة واحدة فقط في المحادثة كلها، في نهاية ردّك: «إذا حبيت، أسألك بضعة أسئلة سريعة وأرشّح لك المسار الأنسب» مع [[choices: نعم، ابدأ | لاحقاً]] (بالإنكليزية: "If you like, I can ask a few quick questions and recommend the best path for you" مع [[choices: Yes, start | Later]]).
 - قبل أن تعرضه، راجع رسائلك السابقة: إذا سبق أن عرضته في هذه المحادثة فلا تعرضه مجدداً، سواء قبل أو رفض أو تجاهل. تابع كمساعد عادي يجيب عن أسئلته.
+- لا تعرضه بعد جواب عن مشكلة أو استفسار دعم (كلمة المرور، تسجيل الدخول، الحساب، الكوبون، الدفع، الشهادة، التقدّم في دورة): أنهِ جوابك بالحل فقط.
 - إذا اختار «رشّح لي مساراً مناسباً» / «Recommend a suitable path» أو وافق على العرض: ابدأ رحلة التعرّف أدناه.
 - إذا اختار «شراكة مع الجمعية» / «Partner with SAAE» أو تحدّث باسم شركة: انتقل إلى الطريق د في رحلة التعرّف (من د1)، دون السؤال الأول.
 
@@ -476,8 +487,18 @@ export const Route = createFileRoute("/api/chat")({
         }
         // Fail before persisting user messages if no chat provider is configured.
         let chat: ReturnType<typeof createChatModelForRequest>;
+        // Set when the first model refused this request and the fallback answered.
+        let fallback: { model: string; error: string } | null = null;
         try {
-          chat = createChatModelForRequest();
+          chat = createChatModelForRequest((error, model) => {
+            const message = error instanceof Error ? error.message : String(error);
+            fallback = { model, error: message.slice(0, 300) };
+            console.warn("[chat] first model failed, answering with the fallback", {
+              model,
+              message,
+              status: (error as { statusCode?: number })?.statusCode,
+            });
+          });
         } catch (err) {
           console.error(
             "[chat] provider init failed",
@@ -650,6 +671,11 @@ export const Route = createFileRoute("/api/chat")({
           .map((message) => message.content ?? "");
         if (!visitorTurns.includes(lastUserText)) visitorTurns.push(lastUserText);
         const visitorNote = visitorContext(readVisitor(visitorTurns));
+        const offerNote = pathOfferNote(
+          history
+            .filter((message) => message.role === "assistant")
+            .map((message) => message.content ?? ""),
+        );
 
         const replyLanguageNote =
           replyLang === "en"
@@ -659,9 +685,9 @@ export const Route = createFileRoute("/api/chat")({
         /* One lead per conversation. A visitor who adds their phone after their
            name was saved three times, twice without any contact; a second save
            now fills in the lead already made in this conversation. */
-        // Test runs (scripts/chat-eval.mjs) show the lead they would save in the
-        // log instead of adding a made-up person or company to the CRM.
-        const isTestSession = /^(eval-|claude-check)/.test(chatSessionId ?? "");
+        // Test runs (scripts/chat-eval.mjs, load tests) show the lead they would save
+        // in the log instead of adding a made-up person or company to the CRM.
+        const isTestSession = TEST_SESSION.test(chatSessionId ?? "");
         const saveLeadOnce = async (
           table: "individual_leads" | "company_leads",
           row: Record<string, unknown>,
@@ -753,7 +779,31 @@ export const Route = createFileRoute("/api/chat")({
               const joinable = (
                 await withStatus((all.data ?? []) as unknown as CatalogRow[])
               ).filter((c) => c.status === "open");
-              return { ok: true, matched: false, courses: joinable };
+              // People call an internship a course: before saying none exists,
+              // look for a published internship on the topic.
+              const { data: internshipRows } = await supabaseAdmin
+                .from("internship_opportunities")
+                .select(
+                  "slug,title_ar,title_en,summary_ar,summary_en,requirements_ar,requirements_en,location_ar,location_en,duration_ar,duration_en,stipend_ar,stipend_en,opens_at,deadline_at,starts_at,capacity,require_cv",
+                )
+                .eq("status", "published")
+                .limit(20);
+              const internships = internshipsMatching(
+                input.topic,
+                (internshipRows ?? []) as InternshipRow[],
+                replyLang,
+              );
+              return {
+                ok: true,
+                matched: false,
+                courses: joinable,
+                ...(internships.length
+                  ? {
+                      internships_on_this_topic: internships,
+                      note: "No course matches, but these internships do: the visitor most likely means one of them. Tell them it is an internship (practical or research training), give its link, and call find_internships for its details if they want them. Never say it does not exist.",
+                    }
+                  : {}),
+              };
             },
           }),
 
@@ -1174,6 +1224,7 @@ export const Route = createFileRoute("/api/chat")({
             partnersContext(partnerNames) +
             extraContext +
             visitorNote +
+            offerNote +
             replyLanguageNote,
           tools,
           // Every step and every retry is another provider call, and the provider
@@ -1217,10 +1268,13 @@ export const Route = createFileRoute("/api/chat")({
             // Best-effort: a missing table (migration not applied yet) or a
             // failed insert never affects the visitor's answer.
             try {
+              const usedFallback = fallback as { model: string; error: string } | null;
               const { error } = await supabaseAdmin.from("chat_usage" as never).insert({
                 conversation_id: conversationId,
                 is_test: isTestSession,
-                model: modelId,
+                model: usedFallback ? usedFallback.model : modelId,
+                // Only when there is one: the column comes with migration 20261008120000.
+                ...(usedFallback ? { error: `first model failed: ${usedFallback.error}` } : {}),
                 steps: steps.length,
                 tools,
                 searched_knowledge: needsKnowledge,
@@ -1246,6 +1300,19 @@ export const Route = createFileRoute("/api/chat")({
                 (error as { statusCode?: number; status?: number })?.statusCode ??
                 (error as { status?: number })?.status,
               body: (error as { responseBody?: string })?.responseBody,
+            });
+            // An answer that never came is recorded too, so failures can be counted.
+            void Promise.resolve(
+              supabaseAdmin.from("chat_usage" as never).insert({
+                conversation_id: conversationId,
+                is_test: isTestSession,
+                model: modelId,
+                steps: 0,
+                total_ms: Date.now() - startedAt,
+                error: (error instanceof Error ? error.message : String(error)).slice(0, 300),
+              } as never),
+            ).then(({ error: insertError }) => {
+              if (insertError) console.error("[chat] failure not recorded", insertError.message);
             });
             return providerBusyMessage(error, lang === "en" ? "en" : "ar");
           },
