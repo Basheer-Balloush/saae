@@ -6,12 +6,15 @@ export type AssistantPlacement = { mounted: boolean; launcher: boolean };
 
 export function assistantPlacement(pathname: string): AssistantPlacement {
   const isAms = pathname.startsWith("/attendance-management-system");
+  const isProjectManagement = pathname.startsWith("/project-management");
   const isAdmin =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/super-admin") ||
     pathname.startsWith("/learning-management-system/admin");
   const isStandaloneProfile = /^\/profile\//i.test(pathname) || pathname === "/feedback";
-  if (isAms || isAdmin || isStandaloneProfile) return { mounted: false, launcher: false };
+  if (isAms || isProjectManagement || isAdmin || isStandaloneProfile) {
+    return { mounted: false, launcher: false };
+  }
   // The homepage has its own Abu Al-Joud, and on /texpo he hosts the game
   // (which opens the chat itself); the LMS keeps its pages clear.
   const isLms = pathname.startsWith("/learning-management-system");
