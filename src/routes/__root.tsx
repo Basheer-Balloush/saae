@@ -194,7 +194,7 @@ const CINEMATIC_PATH = /^\/(about|contact|initiative|partners|news(\/[^/]+)?)?\/
 const DARK_GROUND = { backgroundColor: "#06232a", colorScheme: "dark" } as const;
 /* The admin console, the instructor workspace and the attendance app. */
 const CONSOLE_PATH =
-  /^\/(admin(\/|$)|attendance-management-system(\/|$)|learning-management-system\/(admin|instructor)(\/|$))/;
+  /^\/(admin(\/|$)|project-management(\/|$)|attendance-management-system(\/|$)|learning-management-system\/(admin|instructor)(\/|$))/;
 /* Private card pages. Case-insensitive: printed QR codes open them in capitals
    (/PROFILE/…), which keeps the code small. */
 const isProfilePath = (pathname: string) => /^\/profile\//i.test(pathname);
@@ -211,7 +211,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
   /* Private profile pages must never reach analytics: the slug in their
      address is the secret. */
   const analytics = !isProfilePath(pathname);
-  const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');if(/^\\/(admin(\\/|$)|attendance-management-system(\\/|$)|learning-management-system\\/(admin|instructor)(\\/|$))/.test(location.pathname))document.documentElement.classList.add('cx-dark','dark');var l=localStorage.getItem('saae-lang')==='en'?'en':'ar';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
+  const themeInit = `(function(){try{var t=localStorage.getItem('saae-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');if(/^\\/(admin(\\/|$)|project-management(\\/|$)|attendance-management-system(\\/|$)|learning-management-system\\/(admin|instructor)(\\/|$))/.test(location.pathname))document.documentElement.classList.add('cx-dark','dark');var l=localStorage.getItem('saae-lang')==='en'?'en':'ar';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();`;
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning style={ground}>
       <head>
@@ -425,7 +425,9 @@ function RootComponent() {
   const isConsole =
     /^\/admin(\/|$)/.test(location.pathname) && location.pathname !== "/admin/login"
       ? true
-      : /^\/learning-management-system\/(admin|instructor)(\/|$)/.test(location.pathname);
+      : /^\/(project-management(\/|$)|learning-management-system\/(admin|instructor)(\/|$))/.test(
+          location.pathname,
+        );
 
   return (
     <QueryClientProvider client={queryClient}>
