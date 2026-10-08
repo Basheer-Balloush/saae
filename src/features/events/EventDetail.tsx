@@ -239,8 +239,8 @@ export function EventDetail({ id }: { id: string }) {
         </nav>
         <p className="mt-2 text-xs text-[var(--cx-muted)]">
           {t(
-            "كل عملية تُحسب في يوم حدوثها بتوقيت دمشق. «الكل» يشمل التاريخ الكامل للفعالية.",
-            "Each action counts on the day it happened in Damascus time. All includes the event’s complete history.",
+            "كل عملية تُحسب في يوم حدوثها بتوقيت دمشق.",
+            "Each action counts on the day it happened in Damascus time.",
           )}
         </p>
       </div>

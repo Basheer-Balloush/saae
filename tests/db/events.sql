@@ -113,4 +113,24 @@ DO $$ DECLARE r jsonb; BEGIN
   ASSERT (r#>>'{total,started}')::int = 1101, 'All plays contribute to totals';
   ASSERT (r->>'player_count')::int = 1101 AND jsonb_array_length(r->'players') = 500, 'Displayed rows have an explicit cap';
 END $$;
+-- Game numbers come only from plays started on the event's links during its days.
+INSERT INTO public.game_links(id,game,slug,label) VALUES('ee000000-0000-4000-8000-000000000009','texpo','other-fixture','Unconnected link');
+INSERT INTO public.game_plays(link_id,started_at,claimed_at,account_new)
+SELECT s.source_id,'2026-10-07 20:00:00+00','2026-10-08 10:00:00+00',true FROM public.event_sources s
+WHERE s.event_id = 'ee000000-0000-4000-8000-000000000002' AND s.kind = 'game';
+INSERT INTO public.game_plays(link_id,started_at) VALUES('ee000000-0000-4000-8000-000000000009','2026-10-08 10:00:00+00');
+INSERT INTO public.game_link_opens(link_id,opened_at)
+SELECT s.source_id,'2026-10-07 20:00:00+00' FROM public.event_sources s
+WHERE s.event_id = 'ee000000-0000-4000-8000-000000000002' AND s.kind = 'game';
+-- The server calls the reports as service_role, which cannot read auth.users.
+SET LOCAL ROLE service_role;
+DO $$ DECLARE r jsonb; BEGIN
+  r := public.event_texpo_report('ee000000-0000-4000-8000-000000000002',NULL);
+  ASSERT (r#>>'{total,started}')::int = 1101, 'Plays before the event days or on other links are excluded';
+  ASSERT (r#>>'{total,opened}')::int = 1, 'Opens before the event days are excluded';
+  r := public.event_texpo_report('ee000000-0000-4000-8000-000000000002','2026-10-08');
+  ASSERT (r#>>'{total,claimed}')::int = 0 AND (r#>>'{total,newAccounts}')::int = 0, 'A pre-event play claimed during the event is not counted';
+  ASSERT public.event_report('ee000000-0000-4000-8000-000000000002',NULL) IS NOT NULL, 'The server role can load the event report';
+END $$;
+RESET ROLE;
 ROLLBACK;

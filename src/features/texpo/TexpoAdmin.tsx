@@ -10,6 +10,7 @@ import {
   Flag,
   Gamepad2,
   Loader2,
+  LogIn,
   MessageCircle,
   MousePointerClick,
   Plus,
@@ -243,8 +244,8 @@ export function TexpoAdmin({ eventId, date }: { eventId: string; date: string | 
         className="mb-5"
         title={t("تحدّي أبو الجود", "Abu Al-Joud challenge")}
         description={t(
-          "الروابط واللعب والمكافآت في الفترة المختارة.",
-          "Tracked links, participation and rewards for the selected period.",
+          "فقط من بدأ اللعب من رابط الفعالية خلال أيامها. «الكل» يضيف ما فعلوه لاحقاً، مثل استخدام الكوبون.",
+          "Only players who started on the event's link during its days. All also counts what they did later, such as using the coupon.",
         )}
         actions={
           <>
@@ -278,7 +279,7 @@ export function TexpoAdmin({ eventId, date }: { eventId: string; date: string | 
         <Loading />
       ) : (
         <div className="space-y-5">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <StatTile
               icon={MousePointerClick}
               label={t("فتحوا اللعبة", "Opened")}
@@ -300,10 +301,19 @@ export function TexpoAdmin({ eventId, date }: { eventId: string; date: string | 
               tone="green"
               label={t("استلموا كوبوناً", "Claimed a coupon")}
               value={fmtNum(data.total.claimed, lang)}
-              hint={t(
-                `${fmtNum(data.total.newAccounts, lang)} حساب جديد`,
-                `${fmtNum(data.total.newAccounts, lang)} new accounts`,
-              )}
+            />
+            <StatTile
+              icon={UserPlus}
+              tone="green"
+              label={t("أنشؤوا حساباً جديداً", "Signed up")}
+              value={fmtNum(data.total.newAccounts, lang)}
+              hint={t("حساب جديد لاستلام الكوبون", "New account to claim the coupon")}
+            />
+            <StatTile
+              icon={LogIn}
+              label={t("سجّلوا الدخول", "Signed in")}
+              value={fmtNum(Math.max(0, data.total.claimed - data.total.newAccounts), lang)}
+              hint={t("بحساب موجود لاستلام الكوبون", "Existing account to claim the coupon")}
             />
             <StatTile
               icon={CheckCircle2}
