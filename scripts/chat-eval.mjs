@@ -198,6 +198,8 @@ const CASES = [
     must: [/الذكاء الاصطناعي/],
     mustNot: [/أنا أبو الجود مساعد الجمعية/],
   },
+  // General interest is answered by asking who the visitor is, not with every list.
+  { q: "في عندكن تدريب ؟", must: [/\[\[choices:[^\]]*طالب/], mustNot: [/courses\/|internships\//] },
   // English.
   { q: "Do you have any internships open right now?", must: [/internships/] },
   { q: "Is UNICEF a partner of SAAE?", must: [/not/i], mustNot: [/[\u0600-\u06FF]{4,}/] },

@@ -394,7 +394,9 @@ export function AssistantChatModal({
                           <span className="assistant-chat-message-role">
                             {isUser ? (isRtl ? "أنت" : "You") : a.chat.name}
                           </span>
-                          <p>
+                          {/* The answer's own language sets its direction, not the site's:
+                              an Arabic answer on the English site was laid out left to right. */}
+                          <p dir="auto">
                             {isUser
                               ? text
                               : formatMessage(text).map((seg, si) =>
