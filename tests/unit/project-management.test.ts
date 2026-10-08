@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   addTaskComment,
   allowedTaskTransitions,
+  createEmptyState,
   createSeedState,
   createTask,
   dashboardNumbers,
@@ -24,6 +25,16 @@ function fixture() {
 }
 
 describe("project management permissions and workflow", () => {
+  it("starts the live workspace without sample records", () => {
+    const state = createEmptyState();
+
+    expect(state.users.map((user) => user.role)).toEqual(["admin", "mentor", "intern"]);
+    expect(state.projects).toEqual([]);
+    expect(state.tasks).toEqual([]);
+    expect(state.notifications).toEqual([]);
+    expect(state.activities).toEqual([]);
+  });
+
   it("keeps the public-site chat launcher out of the private workspace", () => {
     expect(assistantPlacement("/project-management")).toEqual({
       mounted: false,

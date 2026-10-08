@@ -76,7 +76,7 @@ export type PmActivity = {
 };
 
 export type PmState = {
-  version: 1;
+  version: 2;
   users: PmUser[];
   projects: PmProject[];
   tasks: PmTask[];
@@ -97,7 +97,7 @@ export type CreateTaskInput = Pick<
   | "acceptanceCriteria"
 >;
 
-export const PM_STORAGE_KEY = "saae-project-management-v1";
+export const PM_STORAGE_KEY = "saae-project-management-v2";
 
 export const STATUS_ORDER: TaskStatus[] = [
   "todo",
@@ -129,6 +129,49 @@ function isoTime(offsetDays: number, hour: number, now = new Date()) {
   const d = new Date(now.getTime() + offsetDays * DAY);
   d.setHours(hour, 0, 0, 0);
   return d.toISOString();
+}
+
+export function createEmptyState(): PmState {
+  return {
+    version: 2,
+    users: [
+      {
+        id: "admin-1",
+        name: "Administrator",
+        email: "admin@saae.org",
+        role: "admin",
+        title: "Workspace administrator",
+        initials: "AD",
+        color: "#048090",
+        active: true,
+      },
+      {
+        id: "mentor-2",
+        name: "Mentor",
+        email: "mentor@saae.org",
+        role: "mentor",
+        title: "Program mentor",
+        initials: "ME",
+        color: "#698f3f",
+        active: true,
+      },
+      {
+        id: "intern-1",
+        name: "Intern",
+        email: "intern@saae.org",
+        role: "intern",
+        title: "Program intern",
+        initials: "IN",
+        color: "#c77a12",
+        active: true,
+        mentorId: "mentor-2",
+      },
+    ],
+    projects: [],
+    tasks: [],
+    notifications: [],
+    activities: [],
+  };
 }
 
 export function createSeedState(now = new Date()): PmState {
@@ -457,7 +500,7 @@ export function createSeedState(now = new Date()): PmState {
   ];
 
   return {
-    version: 1,
+    version: 2,
     users,
     projects,
     tasks,
@@ -537,22 +580,22 @@ export function createSeedState(now = new Date()): PmState {
 }
 
 export function loadPmState(): PmState {
-  if (typeof window === "undefined") return createSeedState();
+  if (typeof window === "undefined") return createEmptyState();
   try {
     const raw = window.localStorage.getItem(PM_STORAGE_KEY);
-    if (!raw) return createSeedState();
+    if (!raw) return createEmptyState();
     const parsed = JSON.parse(raw) as Partial<PmState>;
     if (
-      parsed.version !== 1 ||
+      parsed.version !== 2 ||
       !Array.isArray(parsed.users) ||
       !Array.isArray(parsed.projects) ||
       !Array.isArray(parsed.tasks)
     ) {
-      return createSeedState();
+      return createEmptyState();
     }
     return parsed as PmState;
   } catch {
-    return createSeedState();
+    return createEmptyState();
   }
 }
 

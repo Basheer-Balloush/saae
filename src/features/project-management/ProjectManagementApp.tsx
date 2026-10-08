@@ -61,13 +61,11 @@ import "@/components/console/console.css";
 import "./project-management.css";
 import {
   BOARD_STATUSES,
-  PM_STORAGE_KEY,
   addTaskComment,
   allowedTaskTransitions,
   canCreateTask,
   canManageTask,
   canWorkTask,
-  createSeedState,
   createTask,
   dashboardNumbers,
   loadPmState,
@@ -212,18 +210,6 @@ export function ProjectManagementApp() {
     );
   };
 
-  const resetDemo = () => {
-    const next = createSeedState();
-    setState(next);
-    try {
-      localStorage.removeItem(PM_STORAGE_KEY);
-    } catch {
-      // Optional browser storage.
-    }
-    setSelectedTaskId(null);
-    toast.success(t("Demo data restored", "تمت استعادة البيانات التجريبية"));
-  };
-
   const openNotification = (taskId?: string) => {
     setState((current) => markNotificationsRead(current, actor.id));
     setNotificationsOpen(false);
@@ -315,10 +301,6 @@ export function ProjectManagementApp() {
               <Languages />
               {ar ? "EN" : "ع"}
             </button>
-            <button type="button" onClick={resetDemo} title={t("Reset demo", "إعادة البيانات")}>
-              <RotateCcw />
-              {t("Reset", "إعادة")}
-            </button>
           </div>
         </div>
       </aside>
@@ -346,7 +328,7 @@ export function ProjectManagementApp() {
                 {t("Internship program", "برنامج التدريب")}
               </div>
               <div className="truncate text-[11px] text-[var(--cx-muted)]">
-                {t("October 2026 cohort", "دفعة تشرين الأول 2026")}
+                {t("Project workspace", "مساحة عمل المشاريع")}
               </div>
             </div>
           </div>
