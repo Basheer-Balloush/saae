@@ -203,18 +203,18 @@ export const signUpWithResendConfirmation = createLmsAccount
 const RESEND_GAP_SECONDS = 60
 
 /**
- * Re-send the signup confirmation link.
+ * Re-send a confirmation link, through Resend like the first email.
+ * The link is a magic link: opening it confirms the email and signs the
+ * learner in, and it leaves the first email's link working. (Supabase's own
+ * resend replaced that token and its mailer limit refused sends at events.)
+ * Sent only to an account that still needs confirming, whatever the
+ * `email_confirmation_required` switch says: accounts made before it was
+ * turned off still need their link.
  * Enumeration-safe: the answer never depends on the account state; it only
  * says when the resend limit for this email was hit.
- * No-ops when the server-side switch has confirmation disabled (accounts are
- * already active in that mode). Delegates the send to Supabase Auth so the
- * user's password is never touched; native Supabase SMTP delivers the dashboard template. Configure SMTP and
- * templates separately; the old Lovable hook is not used.
  */
 export async function resendLmsConfirmation(input: ResetInput) {
   const email = input.email.trim().toLowerCase()
-
-  if (!(await isEmailConfirmationRequired())) return { sent: true as const }
 
   // One resend per 60 seconds, and at most 3 per 15 minutes. The database
   // counts atomically, so parallel clicks cannot slip past either limit.
@@ -222,29 +222,55 @@ export async function resendLmsConfirmation(input: ResetInput) {
     await enforceRateLimit('resend', email, 1, RESEND_GAP_SECONDS, 'resend-gap')
     await enforceRateLimit('resend', email, 3, 900)
   } catch (err) {
-    const retryAfter = err instanceof RateLimitedError ? err.retryAfterSeconds : RESEND_GAP_SECONDS
-    return { sent: false as const, reason: 'rate_limited' as const, retryAfter }
+    if (!(err instanceof RateLimitedError)) throw err
+    return { sent: false as const, reason: 'rate_limited' as const, retryAfter: err.retryAfterSeconds }
   }
 
-  // Native Supabase SMTP sends this message; enforce the staging guard first.
   try { assertEmailRecipientAllowed(email) } catch { return { sent: true as const } }
-  const { error } = await supabaseAdmin.auth.resend({
-    type: 'signup',
-    email,
-    options: { emailRedirectTo: `${getSiteUrl()}/learning-management-system/student` },
-  })
 
+  // A magic link for an unknown email would create an account, and one for a
+  // confirmed account would replace a pending password-reset link.
+  const { data: unconfirmed, error: lookupError } = await supabaseAdmin.rpc(
+    'lms_auth_email_unconfirmed' as never,
+    { _email: email } as never,
+  )
+  if (lookupError) {
+    console.error('resend confirmation lookup failed', { message: lookupError.message })
+    return { sent: true as const }
+  }
+  if (unconfirmed !== true) return { sent: true as const }
+
+  const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+    type: 'magiclink',
+    email,
+    options: { redirectTo: `${getSiteUrl()}/learning-management-system/student` },
+  })
   if (error) {
-    // Includes "already confirmed" / "not found" — never leak that to the client.
-    console.error('resend confirmation failed', { message: error.message })
+    console.error('resend confirmation generateLink failed', { message: error.message })
+    return { sent: true as const }
+  }
+
+  const rendered = await renderEmail(
+    React.createElement(SignupEmail, {
+      siteName: SITE_NAMES[input.lang],
+      siteUrl: getSiteUrl(),
+      recipient: email,
+      confirmationUrl: getActionLink(data),
+      lang: input.lang,
+    }),
+  )
+  try {
+    await sendViaResend({
+      to: email,
+      subject: input.lang === 'ar' ? 'تأكيد بريدك الإلكتروني' : 'Confirm your email',
+      ...rendered,
+    })
+  } catch (e) {
+    console.error('resend confirmation send failed', { message: e instanceof Error ? e.message : String(e) })
   }
 
   return { sent: true as const }
 }
-
-
-
-
 
 export async function sendPasswordResetWithResend(input: ResetInput) {
   const email = input.email.trim().toLowerCase()

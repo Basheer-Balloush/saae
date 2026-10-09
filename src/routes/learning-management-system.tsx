@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useSingleDeviceSession } from "@/hooks/useSingleDeviceSession";
@@ -7,6 +8,7 @@ import { Footer } from "@/components/site/Footer";
 import { LmsSkinShell } from "@/components/lms-skin/LmsSkinShell";
 import { isConsoleLmsPath, isSkinnedLmsPath, LMS_SKIN_LINKS } from "@/components/lms-skin/skin";
 import { useShownPathname } from "@/hooks/useShownPathname";
+import { emailLinkError } from "@/lib/lms-redirect";
 
 export const Route = createFileRoute("/learning-management-system")({
   head: () => ({
@@ -24,6 +26,18 @@ function LmsLayout() {
   const { user, role } = useLmsAuth();
   const pathname = useShownPathname();
   useSingleDeviceSession(user?.id ?? null);
+
+  // An email link that expired or was used already comes back with the error
+  // in the URL. Pages would drop it on their way to the login page, which
+  // explains it and offers a new link.
+  useEffect(() => {
+    if (emailLinkError())
+      navigate({
+        to: "/learning-management-system/login",
+        search: { link: "expired" },
+        replace: true,
+      });
+  }, [navigate]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
