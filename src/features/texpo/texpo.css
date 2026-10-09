@@ -933,6 +933,22 @@
 .tx-account-who {
   margin: -4px 0 2px;
 }
+.tx-chip:disabled {
+  cursor: progress;
+}
+.tx-chip:disabled:not([data-pending]) {
+  opacity: 0.45;
+}
+.tx-chip[data-pending] {
+  border-color: var(--cyan);
+  background: rgba(87, 228, 238, 0.16);
+  animation: tx-pending 0.9s ease-in-out infinite alternate;
+}
+@keyframes tx-pending {
+  to {
+    background: rgba(87, 228, 238, 0.3);
+  }
+}
 
 @media (max-width: 899px) {
   .tx[data-phase="question"] .tx-host-figure {

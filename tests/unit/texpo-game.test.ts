@@ -507,7 +507,8 @@ describe("the account inside the game", () => {
     expect(account).toContain("const askName = !isArabicTripleName(initial.name)");
     expect(account).toContain("const askEmail = !isEmailLike(initial.email)");
     expect(account).toMatch(/mode === "signup" && askName &&/);
-    expect(account).toMatch(/\{askEmail && \(/);
+    // Creating the account never shows the email field when the first screen gave it.
+    expect(account).toContain('(askEmail || mode === "signin") && (');
     // So the first screen takes the name the way the account needs it.
     expect(read("src/features/texpo/TexpoGame.tsx")).toContain("if (!isArabicTripleName(name))");
   });
@@ -516,6 +517,27 @@ describe("the account inside the game", () => {
     const game = read("src/features/texpo/TexpoGame.tsx");
     expect(game).toContain("<TexpoAccount");
     expect(game).not.toContain("signup?redirect=%2Ftexpo");
+  });
+});
+
+describe("one play per start", () => {
+  it("ignores a second tap on the phone, and a repeated start on the server", () => {
+    const game = read("src/features/texpo/TexpoGame.tsx");
+    expect(game).toMatch(/if \(startingRef\.current\) return;/);
+    expect(game).toContain("disabled={!!starting}");
+    const fns = read("src/features/texpo/lib/texpo.functions.ts");
+    expect(fns).toMatch(
+      /\.eq\("device_id", data\.device\)\s*\.is\("finished_at", null\)\s*\.eq\("current_q", 0\)/,
+    );
+    expect(fns).toContain("if (recent) return stateOf(sb, recent as PlayRow);");
+  });
+});
+
+describe("signing in to an existing account", () => {
+  it("asks for that account's email, prefilled with the one from the first screen", () => {
+    const account = read("src/features/texpo/TexpoAccount.tsx");
+    expect(account).toContain('(askEmail || mode === "signin") && (');
+    expect(account).toContain('mode === "signup" && !askEmail && (');
   });
 });
 

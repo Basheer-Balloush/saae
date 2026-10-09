@@ -177,7 +177,7 @@ export function TexpoAccount({
             )
           : t("سجّل دخولك لتستلم هديتك", "Sign in to claim your gift")}
       </p>
-      {!askEmail && (
+      {mode === "signup" && !askEmail && (
         <p className="tx-small tx-account-who">
           {t("الحساب:", "Account:")} <bdi dir="ltr">{email}</bdi>
         </p>
@@ -196,9 +196,14 @@ export function TexpoAccount({
           />
         </label>
       )}
-      {askEmail && (
+      {/* Signing in may use another email: the one the existing account has. */}
+      {(askEmail || mode === "signin") && (
         <label className="tx-field">
-          <span>{t("البريد الإلكتروني", "Email")}</span>
+          <span>
+            {mode === "signin"
+              ? t("بريد حسابك", "Your account's email")
+              : t("البريد الإلكتروني", "Email")}
+          </span>
           <input
             type="email"
             inputMode="email"

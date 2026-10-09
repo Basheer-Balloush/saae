@@ -171,6 +171,10 @@ export function TexpoGame({ link }: { link?: string }) {
   );
   const [playerError, setPlayerError] = useState<Bi | null>(null);
   const [registering, setRegistering] = useState(false);
+  /* The answer whose start is on its way: on a slow connection a second tap
+     used to start a second play that was never answered. */
+  const [starting, setStarting] = useState<string | null>(null);
+  const startingRef = useRef(false);
   const signedIn = !!user && !user.is_anonymous;
   const phaseName = useRef(phase.name);
   phaseName.current = phase.name;
@@ -370,6 +374,9 @@ export function TexpoGame({ link }: { link?: string }) {
   };
 
   const start = async (status: StatusId, answer: string) => {
+    if (startingRef.current) return;
+    startingRef.current = true;
+    setStarting(answer);
     setFailed(null);
     try {
       const s = await startFn({
@@ -400,6 +407,9 @@ export function TexpoGame({ link }: { link?: string }) {
       } else {
         setFailed(() => () => start(status, answer));
       }
+    } finally {
+      startingRef.current = false;
+      setStarting(null);
     }
   };
 
@@ -821,6 +831,9 @@ export function TexpoGame({ link }: { link?: string }) {
                         key={a.id}
                         type="button"
                         className="tx-chip"
+                        disabled={!!starting}
+                        data-pending={starting === a.id ? "" : undefined}
+                        aria-busy={starting === a.id}
                         onClick={() => start(phase.status, a.id)}
                       >
                         {ar ? a.ar : a.en}

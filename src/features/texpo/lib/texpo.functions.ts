@@ -406,6 +406,20 @@ export const texpoStart = createServerFn({ method: "POST" })
       throw new Error("rate_limited");
     }
     if (await deviceClaimed(sb, data.device)) throw new Error("device_claimed");
+    // A second start from this phone seconds after the first (a repeated tap,
+    // a retry) gets that play back instead of a twin that is never answered.
+    const { data: recent } = await sb
+      .from("game_plays")
+      .select(PLAY_COLUMNS)
+      .eq("game", TEXPO_GAME)
+      .eq("device_id", data.device)
+      .is("finished_at", null)
+      .eq("current_q", 0)
+      .gte("started_at", new Date(Date.now() - 15_000).toISOString())
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (recent) return stateOf(sb, recent as PlayRow);
     const { TEXPO_BANK } = await questions();
     const link = await resolveLink(sb, data.link);
     const now = new Date();
