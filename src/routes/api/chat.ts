@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
 import { createChatModelForRequest } from "@/features/chat/lib/ai-gateway.server";
+import { freeKeyInUse } from "@/features/chat/lib/ai-gateway";
 import { parseChoices } from "@/features/chat/lib/chat-choices";
 import { needsKnowledgeSearch } from "@/features/chat/lib/chat-routing";
 import { cleanPartnerNames, partnersContext } from "@/features/chat/lib/chat-partners";
@@ -1330,7 +1331,12 @@ export const Route = createFileRoute("/api/chat")({
               const { error } = await supabaseAdmin.from("chat_usage" as never).insert({
                 conversation_id: conversationId,
                 is_test: isTestSession,
-                model: usedFallback ? usedFallback.model : modelId,
+                // "free:" when the free key answered (ai-gateway.ts freeFirst).
+                model: usedFallback
+                  ? usedFallback.model
+                  : freeKeyInUse()
+                    ? `free:${modelId}`
+                    : modelId,
                 // Only when there is one: the column comes with migration 20261008120000.
                 ...(usedFallback
                   ? {
