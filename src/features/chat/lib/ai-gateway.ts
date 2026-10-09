@@ -164,6 +164,12 @@ export function freeFirst(
   return wrapLanguageModel({ model: free, middleware });
 }
 
+/** Whether a free key is in use, so the usage records can mark its answers. */
+export function freeKeyInUse(env: Record<string, string | undefined> = process.env): boolean {
+  const provider = resolveChatProvider(env);
+  return !!provider && !!resolveFreeKey(provider, env);
+}
+
 // Shared by every request this worker serves, so one refusal spares the next visitors the wait.
 const freePause: FreePause = { until: 0 };
 
@@ -181,7 +187,11 @@ export function createChatModel(
     : primary;
   const freeKey = resolveFreeKey(provider);
   if (!freeKey) return paid;
-  const free = modelFor({ ...provider, name: "google-free", apiKey: freeKey }, provider.model);
+  // Named "google" like the paid one: the library sends Gemini's tool-call
+  // signatures back only under that name, and without them Google refuses the
+  // request after every lookup (all answers that searched courses failed on
+  // 9 Oct 2026 while this was "google-free").
+  const free = modelFor({ ...provider, apiKey: freeKey }, provider.model);
   return freeFirst(
     free,
     paid,

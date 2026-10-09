@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { generateText } from "ai";
 import {
+  createChatModel,
   FREE_PAUSE_MS,
   freeFirst,
   resolveChatProvider,
@@ -128,6 +129,23 @@ describe("fallback model", () => {
     expect(resolveFallbackModel(google, { CHAT_FALLBACK_MODEL: "off" })).toBe(null);
     expect(resolveFallbackModel({ ...google, model: "gemini-3.5-flash" }, {})).toBe(null);
     expect(resolveFallbackModel({ ...google, name: "openrouter" }, {})).toBe(null);
+  });
+
+  it("names the free connection google, so tool-call signatures go back to Gemini", () => {
+    // The library returns Gemini's thought signatures only under the provider
+    // name "google"; as "google-free" every answer after a lookup was refused.
+    const saved = { ...process.env };
+    try {
+      process.env.GEMINI_API_KEY = "paid-key";
+      process.env.GEMINI_API_KEY_FREE = "free-key";
+      delete process.env.CHAT_MODEL;
+      delete process.env.CHAT_PROVIDER;
+      delete process.env.OPENROUTER_API_KEY;
+      const model = createChatModel() as { provider: string };
+      expect(model.provider.split(".")[0]).toBe("google");
+    } finally {
+      process.env = saved;
+    }
   });
 
   it("takes a free Gemini key only beside a different paid Gemini key", () => {
