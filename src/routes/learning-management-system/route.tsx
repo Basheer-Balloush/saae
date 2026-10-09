@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { confirmDialog } from "@/hooks/useConfirm";
@@ -10,6 +11,7 @@ import { LmsSkinShell } from "@/features/lms/skin/LmsSkinShell";
 import { isConsoleLmsPath, isSkinnedLmsPath, LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { LocationGate } from "@/features/user-location/LocationGate";
 import { useShownPathname } from "@/hooks/useShownPathname";
+import { emailLinkError } from "@/features/lms/lib/redirect";
 
 /* Signed-in users must say where they live before using the platform; the
    pages that sign them in, up or back are left alone. */
@@ -33,6 +35,18 @@ function LmsLayout() {
   const { lang } = useLang();
   const pathname = useShownPathname();
   useSingleDeviceSession(user?.id ?? null);
+
+  // An email link that expired or was used already comes back with the error
+  // in the URL. Pages would drop it on their way to the login page, which
+  // explains it and offers a new link.
+  useEffect(() => {
+    if (emailLinkError())
+      navigate({
+        to: "/learning-management-system/login",
+        search: { link: "expired" },
+        replace: true,
+      });
+  }, [navigate]);
 
   const handleSignOut = async () => {
     // A guest's progress lives only in this browser's session.

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useLang } from "@/lib/i18n/i18n";
 import { lmsT } from "@/features/lms/lib/i18n";
-import { currentLmsReturn } from "@/features/lms/lib/redirect";
+import { currentLmsReturn, emailLinkFailed } from "@/features/lms/lib/redirect";
 
 export const Route = createFileRoute("/learning-management-system/student")({
   component: StudentLayout,
@@ -19,7 +19,11 @@ function StudentLayout() {
     if (!loading && !user)
       navigate({
         to: "/learning-management-system/login",
-        search: { redirect: currentLmsReturn() },
+        search: {
+          redirect: currentLmsReturn(),
+          // Confirmation links land here; say so when one failed.
+          ...(emailLinkFailed() ? { link: "expired" as const } : {}),
+        },
       });
   }, [loading, user, navigate]);
 
