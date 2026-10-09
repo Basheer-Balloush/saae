@@ -15,13 +15,18 @@ import { PasswordInput } from "@/features/lms/skin/PasswordInput";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { ContinueAsGuest } from "@/features/lms/GuestAccess";
 import { mergeGuestIntoAccount } from "@/features/lms/lib/guest-account.functions";
+import { resendLmsConfirmationEmail } from "@/features/lms/lib/auth.functions";
 
 export const Route = createFileRoute("/learning-management-system/login")({
   head: () => ({
     meta: [{ title: "Sign in — SAAE Training and Learning Platform" }],
     links: LMS_SKIN_LINKS,
   }),
-  validateSearch: (raw: Record<string, unknown>) => lmsRedirectSearchSchema(raw),
+  // `link=expired`: a confirmation link failed (see the LMS layout).
+  validateSearch: (raw: Record<string, unknown>): { redirect?: string; link?: "expired" } => ({
+    ...lmsRedirectSearchSchema(raw),
+    ...(raw?.link === "expired" ? { link: "expired" as const } : {}),
+  }),
   component: LmsLogin,
 });
 
@@ -37,12 +42,17 @@ function LmsLogin() {
   const ar = lang === "ar";
   const tr = lmsT[lang];
   const mergeGuest = useServerFn(mergeGuestIntoAccount);
+  const resendConfirmation = useServerFn(resendLmsConfirmationEmail);
   // While a guest's progress moves into the account, stay on this page.
   const merging = useRef(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const search = Route.useSearch();
+  // Offer a new confirmation link after a failed one, or when sign-in says
+  // the email is not confirmed yet.
+  const [needsConfirm, setNeedsConfirm] = useState(search.link === "expired");
+  const [resending, setResending] = useState(false);
   const target = search.redirect ?? "/learning-management-system/profile";
 
   useEffect(() => {
@@ -70,6 +80,8 @@ function LmsLogin() {
       const { error } = await supabase.auth.signInWithPassword(parsed.data);
       if (error) {
         merging.current = false;
+        if (error.code === "email_not_confirmed" || /email not confirmed/i.test(error.message))
+          setNeedsConfirm(true);
         throw error;
       }
       if (!guestToken) {
@@ -98,6 +110,35 @@ function LmsLogin() {
     }
   };
 
+  const onResend = async () => {
+    const address = email.trim();
+    if (!z.string().email().safeParse(address).success) {
+      toast.error(tr.invalidEmail);
+      return;
+    }
+    setResending(true);
+    try {
+      const res = await resendConfirmation({ data: { email: address, lang } });
+      if (res.sent) {
+        toast.success(
+          ar
+            ? `أرسلنا رابط تأكيد جديداً إلى ${address} إن كان الحساب بحاجة إلى تأكيد. تفقّد مجلد الرسائل غير المرغوب فيها أيضاً.`
+            : `If this account still needs confirming, a new link is on its way to ${address}. Check your spam folder too.`,
+        );
+      } else {
+        toast.error(
+          ar
+            ? "طلبات كثيرة، انتظر قليلاً ثم حاول مجدداً"
+            : "Too many requests. Please wait before trying again",
+        );
+      }
+    } catch (err: unknown) {
+      toast.error(localizeAuthError(err, lang, tr.authFailed));
+    } finally {
+      setResending(false);
+    }
+  };
+
   return (
     <AuthLayout titleId="auth-title">
       <h1 id="auth-title">{tr.signInTitle}</h1>
@@ -107,6 +148,14 @@ function LmsLogin() {
           {ar
             ? "أنت تتصفّح كزائر. سجّل الدخول إلى حسابك وستنتقل إليه دوراتك وتقدّمك."
             : "You are browsing as a guest. Sign in to your account and your courses and progress move into it."}
+        </p>
+      )}
+
+      {search.link === "expired" && (
+        <p className="auth-guest-note" role="status">
+          {ar
+            ? "رابط التأكيد منتهي الصلاحية أو استُخدم من قبل. إن كنت أكّدت بريدك فسجّل الدخول، وإلا فاكتب بريدك واطلب رابطاً جديداً بالأسفل."
+            : "That confirmation link has expired or was already used. If you confirmed your email, just sign in. Otherwise enter your email and ask for a new link below."}
         </p>
       )}
 
@@ -139,6 +188,12 @@ function LmsLogin() {
           <span>{tr.signIn}</span>
         </button>
       </form>
+      {needsConfirm && (
+        <button type="button" className="auth-secondary" onClick={onResend} disabled={resending}>
+          {resending && <Loader2 className="h-4 w-4 animate-spin" />}
+          <span>{ar ? "أرسل لي رابط تأكيد جديداً" : "Send me a new confirmation link"}</span>
+        </button>
+      )}
       {!user && !loading && <ContinueAsGuest redirect={search.redirect} />}
       <p className="auth-alt">
         <Link to="/learning-management-system/signup" search={{ redirect: search.redirect }}>
