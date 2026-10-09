@@ -14,9 +14,11 @@ import {
   texpoAnswer,
   texpoChatOpened,
   texpoClaim,
+  texpoFindMine,
   texpoHint,
   texpoMyReward,
   texpoOpen,
+  texpoRegister,
   texpoShow,
   texpoStart,
   texpoState,
@@ -24,9 +26,13 @@ import {
 import {
   COUPON_CATEGORY_SLUG,
   LEVELS,
+  PLAYER_EMAIL_MAX,
+  PLAYER_NAME_MAX,
+  PLAYER_PHONE_MAX,
   QUESTION_COUNT,
   STATUSES,
   answersFor,
+  isEmailLike,
   type AnswerOutcome,
   type Bi,
   type PlayResult,
@@ -35,7 +41,17 @@ import {
   type ServedQuestion,
   type StatusId,
 } from "./lib/texpo-shared";
-import { chatSessionId, deviceId, savePlay, storedPlay } from "./lib/play-store";
+import {
+  chatSessionId,
+  deviceId,
+  forgetWaiting,
+  savePlay,
+  savePlayer,
+  storedPlay,
+  storedPlayer,
+  type StoredPlayer,
+} from "./lib/play-store";
+import { TexpoAccount } from "./TexpoAccount";
 import "./texpo.css";
 
 type Feedback = AnswerOutcome & { picked: number | null };
@@ -65,7 +81,6 @@ type Phase =
       earlier: boolean;
     };
 
-const SIGNUP = "/learning-management-system/signup?redirect=%2Ftexpo";
 const LOGIN = "/learning-management-system/login?redirect=%2Ftexpo";
 /** The courses a Texpo coupon works on. */
 const CATALOG = `/learning-management-system/catalog?category=${COUPON_CATEGORY_SLUG}`;
@@ -125,6 +140,8 @@ export function TexpoGame({ link }: { link?: string }) {
   const claimFn = useServerFn(texpoClaim);
   const myRewardFn = useServerFn(texpoMyReward);
   const chatFn = useServerFn(texpoChatOpened);
+  const registerFn = useServerFn(texpoRegister);
+  const findMineFn = useServerFn(texpoFindMine);
 
   // The page renders on the device only (ssr: false), so a new visitor starts
   // on the intro straight away: swapping the animated card and Abu Al-Joud's
@@ -147,6 +164,15 @@ export function TexpoGame({ link }: { link?: string }) {
   /* One gift per phone: a gift was already claimed on this device. */
   const [deviceUsed, setDeviceUsed] = useState(false);
   const device = useRef<string>("");
+  /* Who is playing, from the first screen; kept on the device for the account step. */
+  const [player, setPlayer] = useState<StoredPlayer>(
+    () => (typeof window !== "undefined" && storedPlayer()) || { name: "", email: "", phone: "" },
+  );
+  const [playerError, setPlayerError] = useState<Bi | null>(null);
+  const [registering, setRegistering] = useState(false);
+  const signedIn = !!user && !user.is_anonymous;
+  const phaseName = useRef(phase.name);
+  phaseName.current = phase.name;
 
   const say = useCallback((line: Bi, pose: Pose = "explain", mood: Mood = "idle") => {
     setHost((h) => ({ pose, mood, beat: h.beat + 1, line }));
@@ -212,6 +238,45 @@ export function TexpoGame({ link }: { link?: string }) {
       .finally(() => setRewardPending(false));
   }, [user, authLoading, myRewardFn]);
 
+  /* A signed-in player starts with their account's name and email filled in. */
+  useEffect(() => {
+    if (!signedIn || !user) return;
+    setPlayer((p) =>
+      p.name || p.email
+        ? p
+        : {
+            name: String(user.user_metadata?.full_name ?? ""),
+            email: user.email ?? "",
+            phone: "",
+          },
+    );
+  }, [signedIn, user]);
+
+  /* Signed in with no play on this device: a result started with this
+     account's email on another phone (or before the account existed) is
+     waiting here, ready to claim. */
+  useEffect(() => {
+    if (authLoading || !signedIn || storedPlay()) return;
+    let alive = true;
+    findMineFn({})
+      .then((found) => {
+        if (!alive || !found || phaseName.current !== "intro") return;
+        setPhase({ name: "result", playId: found.playId, result: found.result, claimed: false });
+        say(
+          {
+            ar: "وجدت نتيجتك من تكسبو! هديتك بانتظارك.",
+            en: "I found your Texpo result! Your gift is waiting.",
+          },
+          "celebrate",
+          "happy",
+        );
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [authLoading, signedIn, findMineFn, say]);
+
   const openChat = (prefill: string, playId?: string) => {
     window.dispatchEvent(new CustomEvent("assistant:open", { detail: { prefill } }));
     if (!playId) return;
@@ -220,6 +285,66 @@ export function TexpoGame({ link }: { link?: string }) {
         () => {},
       );
     }, 1500);
+  };
+
+  /* ---------- the first screen: name and email, then two steps ---------- */
+  const register = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (registering) return;
+    const name = player.name.replace(/\s+/g, " ").trim();
+    const email = player.email.trim().toLowerCase();
+    const phone = player.phone.trim();
+    const phoneDigits = phone.replace(/[٠-٩]/g, "0").replace(/[^\d]/g, "");
+    if (name.length < 2) {
+      setPlayerError({ ar: "اكتب اسمك الثلاثي.", en: "Enter your full name." });
+      return;
+    }
+    if (!isEmailLike(email)) {
+      setPlayerError({ ar: "تأكّد من بريدك الإلكتروني.", en: "Check your email address." });
+      return;
+    }
+    if (phone && (phoneDigits.length < 7 || phoneDigits.length > 15)) {
+      setPlayerError({
+        ar: "تأكّد من رقم الموبايل، أو اتركه فارغاً.",
+        en: "Check the mobile number, or leave it empty.",
+      });
+      return;
+    }
+    setPlayerError(null);
+    const next = { name, email, phone };
+    setPlayer(next);
+    savePlayer(next);
+    setRegistering(true);
+    try {
+      await registerFn({
+        data: {
+          device: device.current,
+          link: link ?? null,
+          lang,
+          name,
+          email,
+          phone: phone || null,
+        },
+      });
+    } catch (err) {
+      if (errorCode(err) === "rate_limited") {
+        toast.error(
+          t(
+            "محاولات كثيرة خلال وقت قصير. حاول بعد دقائق.",
+            "Too many tries in a short time. Try again in a few minutes.",
+          ),
+        );
+        return;
+      }
+      if (/"email"/.test(errorCode(err))) {
+        setPlayerError({ ar: "تأكّد من بريدك الإلكتروني.", en: "Check your email address." });
+        return;
+      }
+      // Anything else (the connection): the play itself carries the name and email.
+    } finally {
+      setRegistering(false);
+    }
+    askStatus();
   };
 
   /* ---------- the two steps before the game ---------- */
@@ -243,7 +368,16 @@ export function TexpoGame({ link }: { link?: string }) {
     setFailed(null);
     try {
       const s = await startFn({
-        data: { device: device.current, link: link ?? null, lang, status, answer },
+        data: {
+          device: device.current,
+          link: link ?? null,
+          lang,
+          status,
+          answer,
+          name: player.name || undefined,
+          email: player.email || undefined,
+          phone: player.phone || null,
+        },
       });
       applyState(s);
     } catch (e) {
@@ -372,6 +506,8 @@ export function TexpoGame({ link }: { link?: string }) {
       const out = await claimFn({ data: { playId, lang } });
       if (out.status === "claimed" || out.status === "already_claimed") {
         savePlay({ id: playId, finished: true, claimed: out.status === "claimed" });
+        savePlayer(null);
+        forgetWaiting();
         setPhase({
           name: "claimed",
           playId,
@@ -584,15 +720,67 @@ export function TexpoGame({ link }: { link?: string }) {
                       )}
                     </>
                   ) : (
-                    <button
-                      type="button"
-                      className="tx-btn tx-btn-primary tx-btn-big"
-                      disabled={authLoading || rewardPending}
-                      onClick={askStatus}
-                    >
-                      <Sparkles aria-hidden="true" />
-                      {t("ابدأ التحدّي", "Start the challenge")}
-                    </button>
+                    <form className="tx-player" onSubmit={register} noValidate>
+                      <label className="tx-field">
+                        <span>{t("اسمك الثلاثي", "Your full name")}</span>
+                        <input
+                          value={player.name}
+                          onChange={(e) => setPlayer({ ...player, name: e.target.value })}
+                          autoComplete="name"
+                          maxLength={PLAYER_NAME_MAX}
+                          dir="auto"
+                          placeholder={t("مثال: محمد أحمد خالد", "e.g. محمد أحمد خالد")}
+                        />
+                      </label>
+                      <label className="tx-field">
+                        <span>{t("بريدك الإلكتروني", "Your email")}</span>
+                        <input
+                          type="email"
+                          inputMode="email"
+                          dir="ltr"
+                          autoComplete="email"
+                          maxLength={PLAYER_EMAIL_MAX}
+                          value={player.email}
+                          onChange={(e) => setPlayer({ ...player, email: e.target.value })}
+                          placeholder="name@example.com"
+                        />
+                      </label>
+                      <label className="tx-field">
+                        <span>
+                          {t("رقم الموبايل", "Mobile number")}{" "}
+                          <small>{t("(اختياري)", "(optional)")}</small>
+                        </span>
+                        <input
+                          type="tel"
+                          inputMode="tel"
+                          dir="ltr"
+                          autoComplete="tel"
+                          maxLength={PLAYER_PHONE_MAX}
+                          value={player.phone}
+                          onChange={(e) => setPlayer({ ...player, phone: e.target.value })}
+                          placeholder="09xx xxx xxx"
+                        />
+                      </label>
+                      {playerError && (
+                        <p className="tx-note tx-note-warn" role="alert">
+                          {pick(playerError)}
+                        </p>
+                      )}
+                      <button
+                        type="submit"
+                        className="tx-btn tx-btn-primary tx-btn-big"
+                        disabled={authLoading || rewardPending || registering}
+                      >
+                        <Sparkles aria-hidden="true" />
+                        {t("ابدأ التحدّي", "Start the challenge")}
+                      </button>
+                      <p className="tx-small tx-player-note">
+                        {t(
+                          "نستخدم بياناتك لنرسل لك هديتك وأخبار الجمعية.",
+                          "We use your details to send your gift and SAAE news.",
+                        )}
+                      </p>
+                    </form>
                   )}
                 </div>
               )}
@@ -777,7 +965,7 @@ export function TexpoGame({ link }: { link?: string }) {
                         </button>
                       )}
                     </div>
-                  ) : authLoading ? null : user ? (
+                  ) : authLoading ? null : signedIn && user ? (
                     <div className="tx-claim">
                       <button
                         type="button"
@@ -799,18 +987,10 @@ export function TexpoGame({ link }: { link?: string }) {
                     </div>
                   ) : (
                     <div className="tx-claim">
-                      <p className="tx-small">
-                        {t(
-                          "أنشئ حساباً مجانياً لتستلم هديتك. نتيجتك محفوظة على هذا الجهاز.",
-                          "Create a free account to claim your gift. Your result is saved on this device.",
-                        )}
-                      </p>
-                      <a className="tx-btn tx-btn-primary tx-btn-big" href={SIGNUP}>
-                        {t("أنشئ حساباً واستلم هديتك", "Create an account and claim your gift")}
-                      </a>
-                      <a className="tx-btn tx-btn-ghost" href={LOGIN}>
-                        {t("لديّ حساب، سجّل دخولي", "I have an account, sign in")}
-                      </a>
+                      <TexpoAccount
+                        initial={{ name: player.name, email: player.email }}
+                        onReady={() => claim(phase.playId, phase.result)}
+                      />
                     </div>
                   )}
                   {claimNote && <p className="tx-note tx-note-warn">{pick(claimNote)}</p>}

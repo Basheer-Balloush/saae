@@ -18,6 +18,9 @@ import {
   DEVICE_ID_RE,
   LINK_SLUG_RE,
   MAIN_LINK_SLUG,
+  PLAYER_EMAIL_MAX,
+  PLAYER_NAME_MAX,
+  PLAYER_PHONE_MAX,
   QUESTION_COUNT,
   STATUSES,
   TEXPO_GAME,
@@ -27,8 +30,10 @@ import {
   type Bi,
   type ClaimOutcome,
   type Level,
+  type PlayResult,
   type PlayState,
   type Reward,
+  answersFor,
 } from "./texpo-shared";
 
 /* The Texpo game's server side. Every rule is decided here: which questions a
@@ -218,6 +223,119 @@ export const texpoOpen = createServerFn({ method: "POST" })
     return { link: link?.label ?? null, deviceClaimed: await deviceClaimed(sb, data.device) };
   });
 
+/* ---------- the first screen: who is playing ---------- */
+
+/** The CRM lead source for players; the Leads page shows it as-is. */
+const TEXPO_LEAD_SOURCE = "texpo";
+
+const playerName = z
+  .string()
+  .max(PLAYER_NAME_MAX * 2)
+  .transform((v) =>
+    v
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\u0000-\u001F\u007F<>]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, PLAYER_NAME_MAX),
+  )
+  .refine((v) => v.length >= 2);
+const playerEmail = z.string().trim().toLowerCase().email().max(PLAYER_EMAIL_MAX);
+/** Digits only (Arabic-Indic too), or null when it could not be a phone. */
+const playerPhone = z
+  .string()
+  .max(PLAYER_PHONE_MAX)
+  .optional()
+  .nullable()
+  .transform((v) => {
+    const d = (v ?? "")
+      .replace(/[٠-٩]/g, (c) => String(c.charCodeAt(0) - 0x660))
+      .replace(/[^\d]/g, "");
+    return d.length >= 7 && d.length <= 15 && !/^(\d)\1+$/.test(d) ? d : null;
+  });
+
+/** "أدرس · هندسة": the two answers before the game, for the lead's work field. */
+function profileLabel(status: string, answer: string): string | null {
+  const st = STATUSES.find((x) => x.id === status);
+  const a = st && answersFor(st.id).find((x) => x.id === answer);
+  return st && a ? `${st.ar} · ${a.ar}` : null;
+}
+
+/* The player as a CRM lead from the first screen on, so the team can follow
+   up even when they stop before the end or never make the account. One lead
+   per email; the database links it to the CRM contact. Typing someone else's
+   email only fills that lead's blanks, never overwrites it. A CRM failure
+   never stops the game. */
+async function saveLead(
+  sb: SupabaseClient,
+  player: { name: string; email: string; phone: string | null },
+  extra: { device: string; link: string | null; lang: string; profile?: string | null },
+) {
+  const { data: found, error: findError } = await sb
+    .from("individual_leads")
+    .select("id, phone, work_field")
+    .eq("source", TEXPO_LEAD_SOURCE)
+    .eq("email", player.email)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (findError) {
+    console.error("[texpo] lead lookup failed", findError.message);
+    return;
+  }
+  const lead = found as { id: string; phone: string | null; work_field: string | null } | null;
+  if (lead) {
+    const blanks = {
+      ...(player.phone && !lead.phone ? { phone: player.phone } : {}),
+      ...(extra.profile && !lead.work_field ? { work_field: extra.profile } : {}),
+    };
+    if (Object.keys(blanks).length === 0) return;
+    const { error } = await sb.from("individual_leads").update(blanks).eq("id", lead.id);
+    if (error) console.error("[texpo] lead update failed", error.message);
+    return;
+  }
+  const { error } = await sb.from("individual_leads").insert({
+    full_name: player.name,
+    email: player.email,
+    phone: player.phone,
+    work_field: extra.profile ?? null,
+    short_description: "Texpo 2026 · تحدّي أبو الجود",
+    source: TEXPO_LEAD_SOURCE,
+    tags: ["Texpo"],
+    raw: { event: "Texpo 2026", device: extra.device, link: extra.link, lang: extra.lang },
+  });
+  if (error) console.error("[texpo] lead insert failed", error.message);
+}
+
+export const texpoRegister = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) =>
+    z
+      .object({
+        device,
+        link: linkSlug,
+        lang: z.enum(["ar", "en"]),
+        name: playerName,
+        email: playerEmail,
+        phone: playerPhone,
+      })
+      .parse(i),
+  )
+  .handler(async ({ data }) => {
+    const sb = await db();
+    if (
+      (await overLimit(sb, `texpo:reg:${data.device}`, 10 * 60_000, 12)) ||
+      (await overLimit(sb, `texpo:regip:${clientIp()}`, 10 * 60_000, 400))
+    ) {
+      throw new Error("rate_limited");
+    }
+    await saveLead(
+      sb,
+      { name: data.name, email: data.email, phone: data.phone },
+      { device: data.device, link: data.link, lang: data.lang },
+    );
+    return { ok: true as const };
+  });
+
 /* ---------- start: after the two steps about the player ---------- */
 
 export const texpoStart = createServerFn({ method: "POST" })
@@ -229,6 +347,12 @@ export const texpoStart = createServerFn({ method: "POST" })
         lang: z.enum(["ar", "en"]),
         status: z.enum(STATUSES.map((st) => st.id) as [string, ...string[]]),
         answer: z.string().max(20),
+        // Optional, and never a reason to refuse the start: a page opened before
+        // the first screen asked for them, or a value the server reads
+        // differently, simply plays without them.
+        name: playerName.optional().catch(undefined),
+        email: playerEmail.optional().catch(undefined),
+        phone: playerPhone.catch(null),
       })
       .refine((d) => profileCode(d.status, d.answer) !== null, { path: ["answer"] })
       .parse(i),
@@ -260,10 +384,25 @@ export const texpoStart = createServerFn({ method: "POST" })
         option_orders: storeDeck(drawDeck(TEXPO_BANK)),
         question_shown_at: now.toISOString(),
         user_agent: ua,
+        // Who played, from the first screen; the claim replaces them with the account's.
+        player_name: data.name ?? null,
+        player_email: data.email ?? null,
       })
       .select(PLAY_COLUMNS)
       .single();
     if (error || !row) throw new Error("start_failed");
+    if (data.name && data.email) {
+      await saveLead(
+        sb,
+        { name: data.name, email: data.email, phone: data.phone },
+        {
+          device: data.device,
+          link: data.link,
+          lang: data.lang,
+          profile: profileLabel(data.status, data.answer),
+        },
+      );
+    }
     return stateOf(sb, row as PlayRow, now.getTime());
   });
 
@@ -530,4 +669,39 @@ export const texpoMyReward = createServerFn({ method: "POST" })
       score: row.score,
       used: (count ?? 0) > 0,
     };
+  });
+
+/* ---------- a result waiting for this account, from any device ---------- */
+
+/** The newest finished, unclaimed play started with this account's email, so
+    a player who comes back on another phone, or signs up later through the
+    normal pages, can still claim. Null once the account has its gift. */
+export const texpoFindMine = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ playId: string; result: PlayResult } | null> => {
+    const claims = context.claims as { email?: string; is_anonymous?: boolean };
+    const email = claims.email?.trim().toLowerCase();
+    if (!email || claims.is_anonymous) return null;
+    const sb = await db();
+    const { count } = await sb
+      .from("game_plays")
+      .select("id", { count: "exact", head: true })
+      .eq("game", TEXPO_GAME)
+      .eq("user_id", context.userId)
+      .not("claimed_at", "is", null);
+    if (count) return null;
+    const { data } = await sb
+      .from("game_plays")
+      .select(PLAY_COLUMNS)
+      .eq("game", TEXPO_GAME)
+      .eq("player_email", email)
+      .not("finished_at", "is", null)
+      .is("claimed_at", null)
+      .order("finished_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!data) return null;
+    const row = data as PlayRow;
+    const { deck } = await deckOf(row);
+    return { playId: row.id, result: buildResult(deck, row.answers ?? []) };
   });

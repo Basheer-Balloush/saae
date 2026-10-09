@@ -23,6 +23,8 @@ import {
   QUESTION_COUNT,
   STATUSES,
   answersFor,
+  isArabicTripleName,
+  isEmailLike,
   levelFor,
   profileCode,
   profileText,
@@ -32,7 +34,14 @@ import {
 } from "@/features/texpo/lib/texpo-shared";
 import { safeLmsRedirect } from "@/features/lms/lib/redirect";
 import { assistantPlacement } from "@/features/chat/lib/assistant-placement";
-import { cookieDomain } from "@/features/texpo/lib/play-store";
+import {
+  cookieDomain,
+  forgetWaiting,
+  knownWaiting,
+  rememberWaiting,
+  savePlayer,
+  storedPlayer,
+} from "@/features/texpo/lib/play-store";
 
 /** A random source that always returns zeros: the same deck every time. */
 const zeros = (n: number) => new Uint32Array(n);
@@ -410,5 +419,114 @@ describe("the answer key stays on the server", () => {
     );
     expect(fns).toMatch(/await import\("\.\/questions\.server"\)/);
     expect(fns).not.toMatch(/^import .*questions\.server/m);
+  });
+});
+
+describe("who is playing (the first screen)", () => {
+  it("checks the name the way the learning platform does: three Arabic words", () => {
+    expect(isArabicTripleName("محمد أحمد خالد")).toBe(true);
+    expect(isArabicTripleName("  محمد   أحمد   خالد ")).toBe(true);
+    expect(isArabicTripleName("محمد أحمد")).toBe(false);
+    expect(isArabicTripleName("Mohammad Ahmad Khaled")).toBe(false);
+    expect(isArabicTripleName("محمد Ahmad خالد")).toBe(false);
+  });
+
+  it("checks the email loosely on the phone (the server parses it again)", () => {
+    expect(isEmailLike("sara@example.com")).toBe(true);
+    expect(isEmailLike(" sara@example.co ")).toBe(true);
+    expect(isEmailLike("sara@example")).toBe(false);
+    expect(isEmailLike("sara example@x.com")).toBe(false);
+    expect(isEmailLike("")).toBe(false);
+  });
+
+  it("is saved as a lead and on the play, and never blocks the start", () => {
+    const fns = read("src/features/texpo/lib/texpo.functions.ts");
+    expect(fns).toMatch(/export const texpoRegister = createServerFn/);
+    expect(fns).toContain('.from("individual_leads")');
+    expect(fns).toContain("player_name: data.name ?? null");
+    expect(fns).toContain("player_email: data.email ?? null");
+    expect(fns).toContain("email: playerEmail.optional().catch(undefined)");
+    expect(fns).toContain("name: playerName.optional().catch(undefined)");
+  });
+
+  it("stays on the phone only, never in a cookie, and is cleared by a claim", () => {
+    const store = new Map<string, string>();
+    const fake = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+    };
+    const g = globalThis as { localStorage?: unknown };
+    const before = g.localStorage;
+    g.localStorage = fake;
+    try {
+      savePlayer({ name: "محمد أحمد خالد", email: "m@example.com", phone: "" });
+      expect(storedPlayer()).toEqual({ name: "محمد أحمد خالد", email: "m@example.com", phone: "" });
+      savePlayer(null);
+      expect(storedPlayer()).toBeNull();
+    } finally {
+      g.localStorage = before;
+    }
+    const playStore = read("src/features/texpo/lib/play-store.ts");
+    const savePlayerBody = playStore.slice(playStore.indexOf("export function savePlayer"));
+    expect(savePlayerBody.slice(0, 400)).not.toMatch(/writeCookie|write\(/);
+    expect(read("src/features/texpo/TexpoGame.tsx")).toMatch(
+      /savePlayer\(null\);\s+forgetWaiting\(\);/,
+    );
+  });
+});
+
+describe("the account inside the game", () => {
+  it("creates the same account as the sign-up page, with a password and where they live", () => {
+    const account = read("src/features/texpo/TexpoAccount.tsx");
+    expect(account).toContain("signUpLmsUser");
+    expect(account).toContain("checkLocation(place)");
+    expect(account).toContain("password !== confirm");
+    expect(account).toContain("EMAIL_ALREADY_REGISTERED");
+    expect(account).toContain("signInWithPassword");
+  });
+
+  it("replaces the trip to the sign-up page; the normal pages are untouched", () => {
+    const game = read("src/features/texpo/TexpoGame.tsx");
+    expect(game).toContain("<TexpoAccount");
+    expect(game).not.toContain("signup?redirect=%2Ftexpo");
+  });
+});
+
+describe("coming back later", () => {
+  it("finds a waiting result by the account's email, from any device", () => {
+    const fns = read("src/features/texpo/lib/texpo.functions.ts");
+    expect(fns).toMatch(/export const texpoFindMine = createServerFn[\s\S]*?requireSupabaseAuth/);
+    expect(fns).toMatch(/\.eq\("player_email", email\)[\s\S]*?\.is\("claimed_at", null\)/);
+    expect(read("src/features/texpo/TexpoClaimNudge.tsx")).toContain("texpoFindMine");
+  });
+
+  it("asks the server once per visit, per account", () => {
+    const store = new Map<string, string>();
+    const fake = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+    };
+    const g = globalThis as { sessionStorage?: unknown };
+    const before = g.sessionStorage;
+    g.sessionStorage = new Proxy(fake, {
+      ownKeys: () => [...store.keys()],
+      getOwnPropertyDescriptor: (_t, k) =>
+        store.has(String(k))
+          ? { enumerable: true, configurable: true, value: store.get(String(k)) }
+          : undefined,
+    });
+    try {
+      expect(knownWaiting("u1")).toBeNull();
+      rememberWaiting("u1", true);
+      rememberWaiting("u2", false);
+      expect(knownWaiting("u1")).toBe(true);
+      expect(knownWaiting("u2")).toBe(false);
+      forgetWaiting();
+      expect(knownWaiting("u1")).toBeNull();
+    } finally {
+      g.sessionStorage = before;
+    }
   });
 });

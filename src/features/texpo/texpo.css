@@ -863,6 +863,74 @@
 /* ---------- sizes ---------- */
 
 /* Phones while playing: a smaller host leaves room for the answers. */
+/* ---------- who is playing (first screen) and the account (result) ---------- */
+.tx-player,
+.tx-account {
+  display: grid;
+  gap: 12px;
+  margin-top: 6px;
+  text-align: start;
+}
+.tx-account-title {
+  margin: 4px 0 2px;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+.tx-field,
+.tx-place .field {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+.tx-field > span,
+.tx-place .field > label {
+  font-size: 14px;
+  font-weight: 700;
+}
+.tx-field small {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.tx-field input,
+.tx-place .field input,
+.tx-place .field select {
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: rgba(2, 20, 26, 0.72);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px; /* 16px stops phones zooming into the field */
+  color-scheme: dark;
+}
+.tx-field input::placeholder,
+.tx-place .field input::placeholder {
+  color: rgba(234, 252, 255, 0.38);
+}
+.tx-field input:focus-visible,
+.tx-place .field input:focus-visible,
+.tx-place .field select:focus-visible {
+  border-color: var(--cyan);
+  outline: 2px solid rgba(87, 228, 238, 0.35);
+  outline-offset: 1px;
+}
+.tx-place {
+  display: grid;
+  gap: 12px;
+}
+.tx-player .tx-btn-big,
+.tx-account .tx-btn-big {
+  margin-top: 4px;
+}
+.tx-player-note,
+.tx-account-switch {
+  text-align: center;
+}
+
 @media (max-width: 899px) {
   .tx[data-phase="question"] .tx-host-figure {
     width: clamp(62px, 16vw, 96px);

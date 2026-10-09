@@ -8,6 +8,7 @@
 
 const DEVICE_KEY = "saae_texpo_device";
 const PLAY_KEY = "saae_texpo_play";
+const PLAYER_KEY = "saae_texpo_player";
 const CHAT_SESSION_KEY = "saae_chat_session_v2";
 
 export type StoredPlay = { id: string; finished: boolean; claimed: boolean };
@@ -100,10 +101,74 @@ export function savePlay(play: StoredPlay | null) {
   write(PLAY_KEY, play ? JSON.stringify(play) : null);
 }
 
+/* Who is playing, as typed on the first screen: it fills the account form at
+   the end, and the same phone coming back later. Cleared once the gift is
+   claimed, so the next person on a shared device starts empty. */
+export type StoredPlayer = { name: string; email: string; phone: string };
+
+export function storedPlayer(): StoredPlayer | null {
+  let raw: string | null = null;
+  try {
+    raw = localStorage.getItem(PLAYER_KEY);
+  } catch {
+    return null;
+  }
+  if (!raw) return null;
+  try {
+    const p = JSON.parse(raw) as Partial<StoredPlayer>;
+    if (typeof p.name !== "string" || typeof p.email !== "string") return null;
+    return { name: p.name, email: p.email, phone: typeof p.phone === "string" ? p.phone : "" };
+  } catch {
+    return null;
+  }
+}
+
+/* localStorage only: a cookie would send the email with every request. */
+export function savePlayer(player: StoredPlayer | null) {
+  try {
+    if (player) localStorage.setItem(PLAYER_KEY, JSON.stringify(player));
+    else localStorage.removeItem(PLAYER_KEY);
+  } catch {
+    // Blocked storage: the account form simply starts empty.
+  }
+}
+
 /** A finished play on this device that still waits for its coupon. */
 export function hasUnclaimedResult(): boolean {
   const p = storedPlay();
   return !!p && p.finished && !p.claimed;
+}
+
+/* Whether the server found a result waiting for this account (played on
+   another device, or before the account existed). Asked once per visit, so the
+   nudge bar does not call the server on every page; forgotten on a claim. */
+const WAITING_PREFIX = "saae_texpo_waiting:";
+
+export function knownWaiting(userId: string): boolean | null {
+  try {
+    const v = sessionStorage.getItem(WAITING_PREFIX + userId);
+    return v === null ? null : v === "1";
+  } catch {
+    return null;
+  }
+}
+
+export function rememberWaiting(userId: string, waiting: boolean) {
+  try {
+    sessionStorage.setItem(WAITING_PREFIX + userId, waiting ? "1" : "0");
+  } catch {
+    // Blocked storage: the next page simply asks again.
+  }
+}
+
+export function forgetWaiting() {
+  try {
+    for (const key of Object.keys(sessionStorage)) {
+      if (key.startsWith(WAITING_PREFIX)) sessionStorage.removeItem(key);
+    }
+  } catch {
+    // Nothing stored.
+  }
 }
 
 /** The chat widget's current session id, to link the conversation to the play. */

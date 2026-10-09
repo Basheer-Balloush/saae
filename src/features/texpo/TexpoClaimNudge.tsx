@@ -1,33 +1,52 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "@tanstack/react-router";
 import { Gift, X } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n/i18n";
-import { hasUnclaimedResult } from "./lib/play-store";
+import { texpoFindMine } from "./lib/texpo.functions";
+import { hasUnclaimedResult, knownWaiting, rememberWaiting } from "./lib/play-store";
 
 /* After sign-up the confirmation link lands on the learning platform, not on
-   the game. A player with a finished, unclaimed Texpo result on this device
-   who is now signed in gets one bar that takes them back to claim it. */
+   the game. A signed-in player with a finished, unclaimed Texpo result gets
+   one bar that takes them back to claim it: a result saved on this device,
+   or one the server finds by the account's email (played on another phone,
+   or before the account existed). */
 export function TexpoClaimNudge() {
   const pathname = useLocation({ select: (l) => l.pathname });
   const { lang, dir } = useLang();
   const [show, setShow] = useState(false);
   const [closed, setClosed] = useState(false);
 
+  const findMine = useServerFn(texpoFindMine);
+
   useEffect(() => {
-    if (pathname === "/texpo" || closed || !hasUnclaimedResult()) {
+    if (pathname === "/texpo" || closed) {
       setShow(false);
       return;
     }
     let alive = true;
-    supabase.auth.getSession().then(({ data }) => {
+    void supabase.auth.getSession().then(async ({ data }) => {
       const u = data.session?.user;
-      if (alive) setShow(!!u && !u.is_anonymous);
+      if (!u || u.is_anonymous) {
+        if (alive) setShow(false);
+        return;
+      }
+      if (hasUnclaimedResult()) {
+        if (alive) setShow(true);
+        return;
+      }
+      let waiting = knownWaiting(u.id);
+      if (waiting === null) {
+        waiting = !!(await findMine({}).catch(() => null));
+        rememberWaiting(u.id, waiting);
+      }
+      if (alive) setShow(waiting);
     });
     return () => {
       alive = false;
     };
-  }, [pathname, closed]);
+  }, [pathname, closed, findMine]);
 
   if (!show) return null;
   const ar = lang === "ar";

@@ -292,6 +292,27 @@ function randomUint32(n: number): Uint32Array {
 
 /** Device ids and link codes as the server accepts them. */
 export const DEVICE_ID_RE = /^[A-Za-z0-9_-]{8,64}$/;
+
+/* ---------- who is playing (the first screen) ---------- */
+
+export const PLAYER_NAME_MAX = 120;
+export const PLAYER_EMAIL_MAX = 255;
+export const PLAYER_PHONE_MAX = 40;
+
+/** A plain address check for the form; the server parses it with zod again. */
+export function isEmailLike(v: string): boolean {
+  return v.length <= PLAYER_EMAIL_MAX && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
+}
+
+const ARABIC_NAME_RE = /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]+$/;
+
+/** The learning platform's name rule, as on certificates: three Arabic words.
+    Same check as the sign-up page and createLmsAccount. */
+export function isArabicTripleName(v: string): boolean {
+  const t = v.trim();
+  if (t.length < 5 || t.length > PLAYER_NAME_MAX || !ARABIC_NAME_RE.test(t)) return false;
+  return t.split(/\s+/).filter((part) => part.length >= 2).length >= 3;
+}
 export const LINK_SLUG_RE = /^[a-z0-9][a-z0-9-]{1,39}$/;
 
 /** The booth QR link. Plain /texpo, and a stopped or unknown link, count under it. */
