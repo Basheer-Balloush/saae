@@ -227,16 +227,15 @@ export const getInternshipApplyContext = createServerFn({ method: "POST" })
       }));
     }
 
-    // Existing application (latest)
-    const { data: existing } = await supabase
+    // Existing applications, latest first
+    const { data: existingRows } = await supabase
       .from("internship_applications")
       .select("id, status, attempt_number, submitted_at")
       .eq("opportunity_id", opp.id)
       .eq("user_id", userId)
-      .order("attempt_number", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const existing_application = (existing as any) ?? null;
+      .order("attempt_number", { ascending: false });
+    const existing = (existingRows ?? []) as NonNullable<ApplyContext["existing_application"]>[];
+    const existing_application = existing[0] ?? null;
 
     // Required profile fields
     const missing: string[] = [];
@@ -256,11 +255,12 @@ export const getInternshipApplyContext = createServerFn({ method: "POST" })
     else if (opp.opens_at && new Date(opp.opens_at).getTime() > now) block_reason = "not_open_yet";
     else if (opp.deadline_at && new Date(opp.deadline_at).getTime() < now)
       block_reason = "deadline_passed";
-    else if (existing_application) {
-      if (!opp.allow_reapply) block_reason = "duplicate";
-      else if (!["withdrawn", "rejected"].includes(existing_application.status))
-        block_reason = "active_application";
-    }
+    // Mirrors submit_internship_application: a withdrawal never blocks,
+    // allow_reapply only decides whether a rejected applicant may apply again.
+    else if (existing.some((a) => !["withdrawn", "rejected"].includes(a.status)))
+      block_reason = "active_application";
+    else if (!opp.allow_reapply && existing.some((a) => a.status === "rejected"))
+      block_reason = "duplicate";
     if (!block_reason && (missing.length || cv_missing)) block_reason = "profile_incomplete";
 
     return {
