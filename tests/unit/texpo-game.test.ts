@@ -459,6 +459,12 @@ describe("who is playing (the first screen)", () => {
     );
   });
 
+  it("shows in the Events players list before any claim", () => {
+    const admin = read("src/features/texpo/TexpoAdmin.tsx");
+    expect(admin).toContain("{p.name || p.email ? (");
+    expect(admin).not.toMatch(/\{p\.claimed_at \? \(\s*<>\s*<div className="font-bold">\{p\.name/);
+  });
+
   it("stays on the phone only, never in a cookie, and is cleared by a claim", () => {
     const store = new Map<string, string>();
     const fake = {

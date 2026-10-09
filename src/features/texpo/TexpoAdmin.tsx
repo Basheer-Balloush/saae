@@ -511,7 +511,9 @@ export function TexpoAdmin({ eventId, date }: { eventId: string; date: string | 
                         className="border-t border-[var(--cx-line-2)] align-top"
                       >
                         <td className="px-4 py-2.5">
-                          {p.claimed_at ? (
+                          {/* The first screen gives every player a name and email;
+                              only plays from before it show as visitors. */}
+                          {p.name || p.email ? (
                             <>
                               <div className="font-bold">{p.name || "—"}</div>
                               <div className="text-[12px] text-[var(--cx-muted)]" dir="ltr">
