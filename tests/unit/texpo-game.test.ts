@@ -486,6 +486,16 @@ describe("the account inside the game", () => {
     expect(account).toContain("signInWithPassword");
   });
 
+  it("does not ask again for the name and email from the first screen", () => {
+    const account = read("src/features/texpo/TexpoAccount.tsx");
+    expect(account).toContain("const askName = !isArabicTripleName(initial.name)");
+    expect(account).toContain("const askEmail = !isEmailLike(initial.email)");
+    expect(account).toMatch(/mode === "signup" && askName &&/);
+    expect(account).toMatch(/\{askEmail && \(/);
+    // So the first screen takes the name the way the account needs it.
+    expect(read("src/features/texpo/TexpoGame.tsx")).toContain("if (!isArabicTripleName(name))");
+  });
+
   it("replaces the trip to the sign-up page; the normal pages are untouched", () => {
     const game = read("src/features/texpo/TexpoGame.tsx");
     expect(game).toContain("<TexpoAccount");

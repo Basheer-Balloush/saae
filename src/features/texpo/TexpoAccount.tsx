@@ -23,8 +23,8 @@ import {
 const FORGOT = "/learning-management-system/forgot-password";
 
 /* The account, inside the game, once the result is in: the name and email
-   from the first screen are already filled in, so a new player adds only a
-   password, its confirmation, and where they live. It creates the same
+   come from the first screen and are not asked again, so a new player adds
+   only a password, its confirmation, and where they live. It creates the same
    account as the sign-up page (createLmsAccount), signs in, and hands over to
    the claim. An email that already has an account turns it into a sign-in. */
 export function TexpoAccount({
@@ -38,6 +38,10 @@ export function TexpoAccount({
   const ar = lang === "ar";
   const t = (a: string, e: string) => (ar ? a : e);
   const signUp = useServerFn(signUpLmsUser);
+  /* The first screen asked for both; they are typed here again only when the
+     game does not have them (a play started before that screen existed). */
+  const askName = !isArabicTripleName(initial.name);
+  const askEmail = !isEmailLike(initial.email);
 
   const [mode, setMode] = useState<"signup" | "signin">("signup");
   const [name, setName] = useState(initial.name);
@@ -173,9 +177,14 @@ export function TexpoAccount({
             )
           : t("سجّل دخولك لتستلم هديتك", "Sign in to claim your gift")}
       </p>
+      {!askEmail && (
+        <p className="tx-small tx-account-who">
+          {t("الحساب:", "Account:")} <bdi dir="ltr">{email}</bdi>
+        </p>
+      )}
       {notice && <p className="tx-note">{notice}</p>}
 
-      {mode === "signup" && (
+      {mode === "signup" && askName && (
         <label className="tx-field">
           <span>{t("الاسم الثلاثي", "Full name (three Arabic words)")}</span>
           <input
@@ -187,18 +196,20 @@ export function TexpoAccount({
           />
         </label>
       )}
-      <label className="tx-field">
-        <span>{t("البريد الإلكتروني", "Email")}</span>
-        <input
-          type="email"
-          inputMode="email"
-          dir="ltr"
-          autoComplete="email"
-          maxLength={PLAYER_EMAIL_MAX}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </label>
+      {askEmail && (
+        <label className="tx-field">
+          <span>{t("البريد الإلكتروني", "Email")}</span>
+          <input
+            type="email"
+            inputMode="email"
+            dir="ltr"
+            autoComplete="email"
+            maxLength={PLAYER_EMAIL_MAX}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </label>
+      )}
       <label className="tx-field">
         <span>{t("كلمة المرور", "Password")}</span>
         <input

@@ -930,6 +930,9 @@
 .tx-account-switch {
   text-align: center;
 }
+.tx-account-who {
+  margin: -4px 0 2px;
+}
 
 @media (max-width: 899px) {
   .tx[data-phase="question"] .tx-host-figure {

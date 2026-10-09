@@ -32,6 +32,7 @@ import {
   QUESTION_COUNT,
   STATUSES,
   answersFor,
+  isArabicTripleName,
   isEmailLike,
   type AnswerOutcome,
   type Bi,
@@ -295,8 +296,12 @@ export function TexpoGame({ link }: { link?: string }) {
     const email = player.email.trim().toLowerCase();
     const phone = player.phone.trim();
     const phoneDigits = phone.replace(/[٠-٩]/g, "0").replace(/[^\d]/g, "");
-    if (name.length < 2) {
-      setPlayerError({ ar: "اكتب اسمك الثلاثي.", en: "Enter your full name." });
+    // The account at the end needs it this way (as on certificates), and does not ask again.
+    if (!isArabicTripleName(name)) {
+      setPlayerError({
+        ar: "اكتب اسمك الثلاثي بالأحرف العربية، مثل: محمد أحمد خالد.",
+        en: "Write your full name as three Arabic words, e.g. محمد أحمد خالد.",
+      });
       return;
     }
     if (!isEmailLike(email)) {
