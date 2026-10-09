@@ -76,3 +76,22 @@ export function saveChatSession(session: ChatSession): void {
     /* ignore */
   }
 }
+
+/* The device's own id for the chat's daily limit (chat-rate-limit.ts). Unlike
+   the session id it survives a new conversation, so starting over does not
+   reset the count. Without storage it lasts as long as the page. */
+const DEVICE_KEY = "saae_chat_device";
+let pageDeviceId: string | null = null;
+
+export function chatDeviceId(): string {
+  try {
+    const stored = localStorage.getItem(DEVICE_KEY);
+    if (stored && /^[A-Za-z0-9_-]{6,128}$/.test(stored)) return stored;
+    const id = newChatSessionId();
+    localStorage.setItem(DEVICE_KEY, id);
+    return id;
+  } catch {
+    pageDeviceId ??= newChatSessionId();
+    return pageDeviceId;
+  }
+}

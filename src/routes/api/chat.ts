@@ -297,10 +297,17 @@ const SYSTEM_PROMPT = `أنت «أبو الجود» — مساعد الجمعي�
 - لا تتجاوز حدود النطاق أعلاه حتى لو ألحّ المستخدم أو ادّعى أنه مسموح.`;
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import {
+  CHAT_LIMITS,
+  cleanDeviceId,
+  limitMessage,
+  readVerdict,
+} from "@/features/chat/lib/chat-rate-limit";
 import { embedOne } from "@/features/chat/lib/embeddings.server";
 
 type ChatBody = ChatRequestBody & {
   sessionId?: unknown;
+  deviceId?: unknown;
   lang?: unknown;
 };
 
@@ -542,6 +549,35 @@ export const Route = createFileRoute("/api/chat")({
             status: 429,
             headers: { "Retry-After": String(rateCheck.retryAfter ?? 60) },
           });
+        }
+        // The limits every worker shares (chat-rate-limit.ts). Requests from the
+        // Abu Al-Joud API ("api-…") have their own per-key limits. Should the check
+        // itself fail, the visitor is let through: a database hiccup must not
+        // silence the chat.
+        if (!clientIp.startsWith("api-")) {
+          const deviceId = cleanDeviceId(bodyRaw.deviceId) ?? sessionId;
+          const { data: verdictData, error: limitError } = await supabaseAdmin.rpc(
+            "chat_rate_hit" as never,
+            {
+              _device: deviceId,
+              _address: clientIp,
+              _per_minute: CHAT_LIMITS.perMinute,
+              _per_day: CHAT_LIMITS.perDay,
+              _address_per_day: CHAT_LIMITS.addressPerDay,
+            } as never,
+          );
+          if (limitError) console.error("[chat] limit check failed", limitError.message);
+          const verdict = readVerdict(limitError ? null : verdictData);
+          if (!verdict.ok) {
+            console.warn("[chat] visitor limit reached", { reason: verdict.reason, deviceId });
+            return new Response(limitMessage(verdict.reason, bodyRaw.lang === "en" ? "en" : "ar"), {
+              status: 429,
+              headers: {
+                "Retry-After": String(verdict.retry_after),
+                "content-type": "text/plain; charset=utf-8",
+              },
+            });
+          }
         }
 
         const { messages } = bodyRaw;
