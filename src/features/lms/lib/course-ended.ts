@@ -10,7 +10,7 @@ export type CourseEndedInput = {
   delivery_mode?: string | null;
 };
 
-export function isCourseEnded(course: CourseEndedInput): boolean {
+export function isCourseEnded(course: CourseEndedInput, now = new Date()): boolean {
   // Explicit early exit: online courses are excluded from the ended state.
   if ((course.delivery_mode ?? "").toLowerCase() === "online") return false;
 
@@ -21,7 +21,6 @@ export function isCourseEnded(course: CourseEndedInput): boolean {
   const end = String(raw).slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(end)) return false;
 
-  const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
     now.getDate(),
   ).padStart(2, "0")}`;

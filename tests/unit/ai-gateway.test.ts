@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { generateText } from "ai";
 import {
+  FREE_PAUSE_MS,
+  freeFirst,
   resolveChatProvider,
   resolveFallbackModel,
+  resolveFreeKey,
   withFallback,
 } from "../../src/features/chat/lib/ai-gateway";
 
@@ -127,6 +130,15 @@ describe("fallback model", () => {
     expect(resolveFallbackModel({ ...google, name: "openrouter" }, {})).toBe(null);
   });
 
+  it("takes a free Gemini key only beside a different paid Gemini key", () => {
+    expect(resolveFreeKey(google, { GEMINI_API_KEY_FREE: " free-key " })).toBe("free-key");
+    expect(resolveFreeKey(google, {})).toBe(null);
+    expect(resolveFreeKey(google, { GEMINI_API_KEY_FREE: google.apiKey })).toBe(null);
+    expect(resolveFreeKey({ ...google, name: "openrouter" }, { GEMINI_API_KEY_FREE: "k" })).toBe(
+      null,
+    );
+  });
+
   // A minimal model: answers with its name, or fails like a refused request.
   const model = (name: string, fails = false) => ({
     specificationVersion: "v3" as const,
@@ -159,6 +171,37 @@ describe("fallback model", () => {
     });
     expect(text).toBe("second");
     expect(failures).toHaveLength(1);
+  });
+
+  it("uses the free key first and the paid key only when the free plan refuses", async () => {
+    const paidReasons: unknown[] = [];
+    const pause = { until: 0 };
+    let clock = 1_000;
+    const ask = (free: ReturnType<typeof model>) =>
+      generateText({
+        model: freeFirst(
+          free,
+          model("paid"),
+          (r) => paidReasons.push(r),
+          pause,
+          () => clock,
+        ),
+        prompt: "hi",
+        maxRetries: 0,
+      }).then((r) => r.text);
+
+    expect(await ask(model("free"))).toBe("free");
+    expect(paidReasons).toHaveLength(0);
+
+    // The free plan's limit is reached: the paid key answers, and the free key
+    // is skipped for the next five minutes without being asked.
+    expect(await ask(model("free", true))).toBe("paid");
+    expect(pause.until).toBe(clock + FREE_PAUSE_MS);
+    clock += FREE_PAUSE_MS - 1;
+    expect(await ask(model("free"))).toBe("paid");
+    clock += 2;
+    expect(await ask(model("free"))).toBe("free");
+    expect(paidReasons).toHaveLength(2);
   });
 
   it("does not touch the fallback when the first model answers", async () => {

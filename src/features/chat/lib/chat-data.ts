@@ -161,7 +161,7 @@ export function registrationStatus(
   >,
   now = new Date(),
 ): Registration {
-  if (isCourseEnded(c)) return "ended";
+  if (isCourseEnded(c, now)) return "ended";
   if (!c.enrollment_open) return "closed";
   if (c.enrollment_deadline && new Date(c.enrollment_deadline) < now) return "deadline_passed";
   if (c.max_students != null && (c.students_count ?? 0) >= c.max_students) return "full";

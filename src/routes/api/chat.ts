@@ -1297,7 +1297,13 @@ export const Route = createFileRoute("/api/chat")({
                 is_test: isTestSession,
                 model: usedFallback ? usedFallback.model : modelId,
                 // Only when there is one: the column comes with migration 20261008120000.
-                ...(usedFallback ? { error: `first model failed: ${usedFallback.error}` } : {}),
+                ...(usedFallback
+                  ? {
+                      error: usedFallback.model.startsWith("paid:")
+                        ? `free plan refused, paid key answered: ${usedFallback.error}`
+                        : `first model failed: ${usedFallback.error}`,
+                    }
+                  : {}),
                 steps: steps.length,
                 tools,
                 searched_knowledge: needsKnowledge,

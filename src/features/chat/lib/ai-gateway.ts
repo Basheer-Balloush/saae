@@ -104,6 +104,69 @@ export function withFallback(
   return wrapLanguageModel({ model: primary, middleware });
 }
 
+/* A Gemini key on Google's free plan, tried before the paid key. The free plan
+   costs nothing but limits requests per minute and per day; once it refuses, the
+   paid key (GEMINI_API_KEY) answers. On Texpo day, 8 Oct 2026, the paid key
+   alone answered 540 messages. GEMINI_API_KEY_FREE holds the free key. */
+export function resolveFreeKey(
+  provider: ChatProvider,
+  env: Record<string, string | undefined> = process.env,
+): string | null {
+  const key = env.GEMINI_API_KEY_FREE?.trim();
+  if (!key || provider.name !== "google" || key === provider.apiKey) return null;
+  return key;
+}
+
+const statusOf = (error: unknown) =>
+  (error as { statusCode?: number; status?: number })?.statusCode ??
+  (error as { status?: number })?.status;
+
+/** How long the free key is skipped after it says its limit is reached. */
+export const FREE_PAUSE_MS = 5 * 60 * 1000;
+
+export type FreePause = { until: number };
+
+/* The free model first, the paid one when it refuses. After a "limit reached"
+   (429) the free key is skipped for FREE_PAUSE_MS, so visitors do not wait for
+   a request that will fail; any other error (an overloaded model) only sends
+   that one request to the paid key. */
+export function freeFirst(
+  free: LanguageModelV3,
+  paid: LanguageModelV3,
+  onPaid?: (reason: unknown) => void,
+  pause: FreePause = { until: 0 },
+  now: () => number = Date.now,
+): LanguageModelV3 {
+  const run = async <T>(
+    params: { abortSignal?: AbortSignal },
+    viaFree: () => PromiseLike<T>,
+    viaPaid: () => PromiseLike<T>,
+  ): Promise<T> => {
+    if (now() < pause.until) {
+      onPaid?.(new Error("free plan limit reached earlier; paid key used"));
+      return viaPaid();
+    }
+    try {
+      return await viaFree();
+    } catch (error) {
+      if (params.abortSignal?.aborted) throw error;
+      if (statusOf(error) === 429) pause.until = now() + FREE_PAUSE_MS;
+      onPaid?.(error);
+      return viaPaid();
+    }
+  };
+  const middleware: LanguageModelMiddleware = {
+    specificationVersion: "v3",
+    wrapGenerate: ({ doGenerate, params }) =>
+      run(params, doGenerate, () => paid.doGenerate(params)),
+    wrapStream: ({ doStream, params }) => run(params, doStream, () => paid.doStream(params)),
+  };
+  return wrapLanguageModel({ model: free, middleware });
+}
+
+// Shared by every request this worker serves, so one refusal spares the next visitors the wait.
+const freePause: FreePause = { until: 0 };
+
 export function createChatModel(
   options: { onFallback?: (error: unknown, fallbackModel: string) => void } = {},
 ) {
@@ -111,8 +174,18 @@ export function createChatModel(
   if (!provider) throw new Error("CHAT_CONFIGURATION_MISSING");
   const primary = modelFor(provider, provider.model);
   const fallbackModel = resolveFallbackModel(provider);
-  if (!fallbackModel) return primary;
-  return withFallback(primary, modelFor(provider, fallbackModel), (error) =>
-    options.onFallback?.(error, fallbackModel),
+  const paid = fallbackModel
+    ? withFallback(primary, modelFor(provider, fallbackModel), (error) =>
+        options.onFallback?.(error, fallbackModel),
+      )
+    : primary;
+  const freeKey = resolveFreeKey(provider);
+  if (!freeKey) return paid;
+  const free = modelFor({ ...provider, name: "google-free", apiKey: freeKey }, provider.model);
+  return freeFirst(
+    free,
+    paid,
+    (reason) => options.onFallback?.(reason, `paid:${provider.model}`),
+    freePause,
   );
 }
