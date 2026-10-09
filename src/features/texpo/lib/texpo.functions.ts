@@ -261,19 +261,49 @@ function profileLabel(status: string, answer: string): string | null {
   return st && a ? `${st.ar} · ${a.ar}` : null;
 }
 
-/* The player as a CRM lead from the first screen on, so the team can follow
-   up even when they stop before the end or never make the account. One lead
-   per email; the database links it to the CRM contact. Typing someone else's
-   email only fills that lead's blanks, never overwrites it. A CRM failure
-   never stops the game. */
+/** The sign-up link of the event this game link belongs to (Admin → Events),
+    so the player counts in that event's "Registrations & leads" and its export,
+    like someone registered at the booth. Null when the link is in no event. */
+async function eventSignupLink(sb: SupabaseClient, gameLinkId: string | null) {
+  if (!gameLinkId) return null;
+  const { data: game } = await sb
+    .from("event_sources")
+    .select("event_id")
+    .eq("kind", "game")
+    .eq("source_id", gameLinkId)
+    .maybeSingle();
+  const eventId = (game as { event_id: string } | null)?.event_id;
+  if (!eventId) return null;
+  const { data: signup } = await sb
+    .from("event_sources")
+    .select("source_id")
+    .eq("event_id", eventId)
+    .eq("kind", "registration")
+    .limit(1)
+    .maybeSingle();
+  return (signup as { source_id: string } | null)?.source_id ?? null;
+}
+
+/* The player as a CRM lead from the first screen on, filed under the event's
+   sign-up link, so the team can follow up even when they stop before the end
+   or never make the account. One lead per email; the database links it to the
+   CRM contact. Typing someone else's email only fills that lead's blanks,
+   never overwrites it. A CRM failure never stops the game. */
 async function saveLead(
   sb: SupabaseClient,
   player: { name: string; email: string; phone: string | null },
-  extra: { device: string; link: string | null; lang: string; profile?: string | null },
+  extra: {
+    device: string;
+    link: string | null;
+    linkId: string | null;
+    lang: string;
+    profile?: string | null;
+  },
 ) {
+  const signupLink = await eventSignupLink(sb, extra.linkId);
   const { data: found, error: findError } = await sb
     .from("individual_leads")
-    .select("id, phone, work_field")
+    .select("id, phone, work_field, registration_link_id")
     .eq("source", TEXPO_LEAD_SOURCE)
     .eq("email", player.email)
     .order("created_at", { ascending: false })
@@ -283,11 +313,17 @@ async function saveLead(
     console.error("[texpo] lead lookup failed", findError.message);
     return;
   }
-  const lead = found as { id: string; phone: string | null; work_field: string | null } | null;
+  const lead = found as {
+    id: string;
+    phone: string | null;
+    work_field: string | null;
+    registration_link_id: string | null;
+  } | null;
   if (lead) {
     const blanks = {
       ...(player.phone && !lead.phone ? { phone: player.phone } : {}),
       ...(extra.profile && !lead.work_field ? { work_field: extra.profile } : {}),
+      ...(signupLink && !lead.registration_link_id ? { registration_link_id: signupLink } : {}),
     };
     if (Object.keys(blanks).length === 0) return;
     const { error } = await sb.from("individual_leads").update(blanks).eq("id", lead.id);
@@ -302,6 +338,7 @@ async function saveLead(
     short_description: "Texpo 2026 · تحدّي أبو الجود",
     source: TEXPO_LEAD_SOURCE,
     tags: ["Texpo"],
+    registration_link_id: signupLink,
     raw: { event: "Texpo 2026", device: extra.device, link: extra.link, lang: extra.lang },
   });
   if (error) console.error("[texpo] lead insert failed", error.message);
@@ -328,10 +365,11 @@ export const texpoRegister = createServerFn({ method: "POST" })
     ) {
       throw new Error("rate_limited");
     }
+    const link = await resolveLink(sb, data.link);
     await saveLead(
       sb,
       { name: data.name, email: data.email, phone: data.phone },
-      { device: data.device, link: data.link, lang: data.lang },
+      { device: data.device, link: data.link, linkId: link?.id ?? null, lang: data.lang },
     );
     return { ok: true as const };
   });
@@ -398,6 +436,7 @@ export const texpoStart = createServerFn({ method: "POST" })
         {
           device: data.device,
           link: data.link,
+          linkId: link?.id ?? null,
           lang: data.lang,
           profile: profileLabel(data.status, data.answer),
         },

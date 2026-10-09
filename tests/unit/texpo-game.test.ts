@@ -449,6 +449,16 @@ describe("who is playing (the first screen)", () => {
     expect(fns).toContain("name: playerName.optional().catch(undefined)");
   });
 
+  it("is filed under the event's sign-up link, so Admin → Events counts it", () => {
+    const fns = read("src/features/texpo/lib/texpo.functions.ts");
+    expect(fns).toMatch(/\.eq\("kind", "game"\)[\s\S]*?\.eq\("kind", "registration"\)/);
+    expect(fns).toContain("registration_link_id: signupLink");
+    // The Events report counts leads by that link (event_report, 20261008120000).
+    expect(read("supabase/migrations/20261008120000_events.sql")).toContain(
+      "JOIN sources s ON s.kind = 'registration' AND s.source_id = r.id",
+    );
+  });
+
   it("stays on the phone only, never in a cookie, and is cleared by a claim", () => {
     const store = new Map<string, string>();
     const fake = {
