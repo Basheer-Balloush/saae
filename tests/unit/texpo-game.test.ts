@@ -541,6 +541,21 @@ describe("signing in to an existing account", () => {
   });
 });
 
+describe("signing in fixes a made-up name", () => {
+  it("puts the account's own name on the play and the lead, whatever the claim answers", () => {
+    const fns = read("src/features/texpo/lib/texpo.functions.ts");
+    const claim = fns.slice(fns.indexOf("export const texpoClaim"));
+    // Right after the claim and before any early return (already_claimed, guest, …).
+    expect(claim.indexOf("await applyAccountName(")).toBeGreaterThan(0);
+    expect(claim.indexOf("await applyAccountName(")).toBeLessThan(claim.indexOf("return {"));
+    const helper = fns.slice(fns.indexOf("async function applyAccountName"));
+    expect(helper).toMatch(
+      /\.update\(\{ player_name: name \}\)[\s\S]*?\.eq\("player_email", email\)/,
+    );
+    expect(helper).toMatch(/\.update\(\{ full_name: name \}\)[\s\S]*?\.eq\("email", email\)/);
+  });
+});
+
 describe("coming back later", () => {
   it("finds a waiting result by the account's email, from any device", () => {
     const fns = read("src/features/texpo/lib/texpo.functions.ts");

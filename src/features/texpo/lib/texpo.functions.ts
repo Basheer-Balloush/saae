@@ -602,6 +602,40 @@ type ClaimRow = {
   score: number | null;
 };
 
+/* Signing in proves who played: the account's own name replaces whatever was
+   typed on the first screen, on this play and on the Texpo lead, when they
+   carry the account's email. It runs whatever the claim answers, because an
+   account that already has its gift (already_claimed) leaves the play as it
+   was. Best effort: it never changes the claim's answer. */
+async function applyAccountName(sb: SupabaseClient, userId: string, playId: string) {
+  try {
+    const { data } = await sb.auth.admin.getUserById(userId);
+    const user = data?.user;
+    if (!user || user.is_anonymous) return;
+    const email = user.email?.trim().toLowerCase();
+    const meta = (user.user_metadata ?? {}) as { full_name?: unknown; fullName?: unknown };
+    const name = String(meta.full_name ?? meta.fullName ?? "")
+      .trim()
+      .slice(0, PLAYER_NAME_MAX);
+    if (!email || name.length < 2) return;
+    const { error: playError } = await sb
+      .from("game_plays")
+      .update({ player_name: name })
+      .eq("id", playId)
+      .eq("game", TEXPO_GAME)
+      .eq("player_email", email);
+    if (playError) console.error("[texpo] play name not updated", playError.message);
+    const { error: leadError } = await sb
+      .from("individual_leads")
+      .update({ full_name: name })
+      .eq("source", TEXPO_LEAD_SOURCE)
+      .eq("email", email);
+    if (leadError) console.error("[texpo] lead name not updated", leadError.message);
+  } catch (e) {
+    console.error("[texpo] account name not applied", e instanceof Error ? e.message : e);
+  }
+}
+
 export const texpoClaim = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ playId, lang: z.enum(["ar", "en"]) }).parse(i))
@@ -614,6 +648,7 @@ export const texpoClaim = createServerFn({ method: "POST" })
     if (error) throw new Error("claim_failed");
     const row = (Array.isArray(rows) ? rows[0] : rows) as ClaimRow | undefined;
     if (!row) throw new Error("claim_failed");
+    await applyAccountName(sb, context.userId, data.playId);
     if (row.status !== "claimed" && row.status !== "already_claimed") {
       return {
         status: row.status as Exclude<ClaimOutcome["status"], "claimed" | "already_claimed">,
