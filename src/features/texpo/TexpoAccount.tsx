@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Gift } from "lucide-react";
 import { useLang } from "@/lib/i18n/i18n";
@@ -21,6 +21,7 @@ import {
 } from "./lib/texpo-shared";
 
 const FORGOT = "/learning-management-system/forgot-password";
+const SIGNUP_WAIT_MS = 20_000;
 
 /* The account, inside the game, once the result is in: the name and email
    come from the first screen and are not asked again, so a new player adds
@@ -50,6 +51,8 @@ export function TexpoAccount({
   const [confirm, setConfirm] = useState("");
   const [place, setPlace] = useState<LocationDraft>(EMPTY_LOCATION);
   const [busy, setBusy] = useState(false);
+  /* A second tap while the first is on its way is ignored. */
+  const busyRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -61,16 +64,17 @@ export function TexpoAccount({
     setConfirm("");
   };
 
-  const signIn = async (address: string) => {
+  /** Signs in with the password typed here; the error, or null when it worked. */
+  const trySignIn = async (address: string) => {
     const { error: e } = await supabase.auth.signInWithPassword({ email: address, password });
-    if (!e) return true;
-    setError(localizeAuthError(e, lang, t("تعذّر تسجيل الدخول.", "Couldn't sign in.")));
-    return false;
+    return e;
   };
+  const signInFailed = (e: unknown) =>
+    setError(localizeAuthError(e, lang, t("تعذّر تسجيل الدخول.", "Couldn't sign in.")));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (busy) return;
+    if (busyRef.current) return;
     setError(null);
     const address = email.trim().toLowerCase();
     if (!isEmailLike(address)) {
@@ -83,10 +87,14 @@ export function TexpoAccount({
         setError(t("اكتب كلمة المرور.", "Enter your password."));
         return;
       }
+      busyRef.current = true;
       setBusy(true);
       try {
-        if (await signIn(address)) onReady();
+        const failed = await trySignIn(address);
+        if (failed) signInFailed(failed);
+        else onReady();
       } finally {
+        busyRef.current = false;
         setBusy(false);
       }
       return;
@@ -121,19 +129,33 @@ export function TexpoAccount({
       return;
     }
 
+    busyRef.current = true;
     setBusy(true);
     try {
-      const res = await signUp({
-        data: {
-          fullName,
-          email: address,
-          password,
-          asInstructor: false,
-          lang,
-          location: where.location,
-        },
-      });
-      if (res.confirmationRequired) {
+      let res: { email?: string; confirmationRequired?: boolean } | undefined;
+      let failure: unknown = null;
+      try {
+        // A reply that never comes (a dropped connection) counts as no reply
+        // after 20 s; the sign-in below then finds the account if it exists.
+        res = await Promise.race([
+          signUp({
+            data: {
+              fullName,
+              email: address,
+              password,
+              asInstructor: false,
+              lang,
+              location: where.location,
+            },
+          }),
+          new Promise<never>((_, reject) =>
+            window.setTimeout(() => reject(new Error("SIGNUP_NO_REPLY")), SIGNUP_WAIT_MS),
+          ),
+        ]);
+      } catch (err) {
+        failure = err;
+      }
+      if (res?.confirmationRequired) {
         // Confirmation is on again: the saved result waits on this device.
         setNotice(
           t(
@@ -143,9 +165,17 @@ export function TexpoAccount({
         );
         return;
       }
-      if (await signIn(res.email ?? address)) onReady();
-    } catch (err) {
-      if (err instanceof Error && /EMAIL_ALREADY_REGISTERED/.test(err.message)) {
+      // Sign in with the password just typed, whatever the answer was: the
+      // account may exist although the answer never arrived (a slow venue
+      // connection lost it after the server made the account), or this email
+      // may have had one already. Either way the player goes straight on to
+      // the coupon; only when that fails is there something to show.
+      const signInError = await trySignIn(res?.email ?? address);
+      if (!signInError) {
+        onReady();
+        return;
+      }
+      if (failure instanceof Error && /EMAIL_ALREADY_REGISTERED/.test(failure.message)) {
         switchTo("signin");
         setNotice(
           t(
@@ -153,16 +183,19 @@ export function TexpoAccount({
             "This email already has an account. Enter its password to claim your gift.",
           ),
         );
-      } else {
+      } else if (failure) {
         setError(
           localizeAuthError(
-            err,
+            failure,
             lang,
             t("تعذّر إنشاء الحساب. حاول مجدداً.", "Couldn't create the account. Try again."),
           ),
         );
+      } else {
+        signInFailed(signInError);
       }
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
   };

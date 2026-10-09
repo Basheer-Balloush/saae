@@ -533,6 +533,20 @@ describe("one play per start", () => {
   });
 });
 
+describe("from creating the account straight to the coupon", () => {
+  it("signs in with the typed password whatever the sign-up answered", () => {
+    const account = read("src/features/texpo/TexpoAccount.tsx");
+    const signup = account.slice(account.indexOf("let failure: unknown = null;"));
+    // The sign-up's own error no longer stops the flow before the sign-in try.
+    expect(signup.indexOf("const signInError = await trySignIn(")).toBeGreaterThan(0);
+    expect(signup.indexOf("const signInError = await trySignIn(")).toBeLessThan(
+      signup.indexOf("EMAIL_ALREADY_REGISTERED"),
+    );
+    expect(signup).toMatch(/if \(!signInError\) \{\s*onReady\(\);/);
+    expect(account).toContain("if (busyRef.current) return;");
+  });
+});
+
 describe("signing in to an existing account", () => {
   it("asks for that account's email, prefilled with the one from the first screen", () => {
     const account = read("src/features/texpo/TexpoAccount.tsx");
