@@ -419,7 +419,10 @@ function InternshipEditor() {
             <ToggleRow
               id="i-re"
               label={t("السماح بإعادة التقديم", "Allow applying again")}
-              hint={t("بعد الرفض أو السحب.", "After a rejection or withdrawal.")}
+              hint={t(
+                "بعد الرفض. من سحب طلبه يستطيع التقديم مجدداً دائماً.",
+                "After a rejection. Anyone who withdrew can always apply again.",
+              )}
               checked={v.allow_reapply}
               onChange={(x) => set("allow_reapply", x)}
             />
