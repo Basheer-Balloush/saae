@@ -5,6 +5,7 @@ import { ArrowUp, Building2, GraduationCap, Handshake, Loader2, X } from "lucide
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import {
+  chatDeviceId,
   loadChatSession,
   saveChatSession,
   type ChatSession,
@@ -50,7 +51,7 @@ export function AssistantChatModal({
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: () => ({ sessionId: sessionIdRef.current, lang }),
+        body: () => ({ sessionId: sessionIdRef.current, deviceId: chatDeviceId(), lang }),
       }),
     [lang],
   );
