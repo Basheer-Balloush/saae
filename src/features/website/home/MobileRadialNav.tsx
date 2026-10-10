@@ -57,9 +57,11 @@ const ITEMS: Item[] = [
 export function MobileRadialNav({
   lang,
   onToggleLang,
+  homeHref = "#hero-sec",
 }: {
   lang: "ar" | "en";
   onToggleLang: () => void;
+  homeHref?: string;
 }) {
   const isArabic = lang === "ar";
   const [open, setOpen] = useState(false);
@@ -166,8 +168,10 @@ export function MobileRadialNav({
                   itemRefs.current[index] = el;
                 }}
                 className="radial-nav-item"
-                href={item.href}
-                aria-current={item.href === "#hero-sec" ? "page" : undefined}
+                href={item.href === "#hero-sec" ? homeHref : item.href}
+                aria-current={
+                  item.href === "#hero-sec" && homeHref === "#hero-sec" ? "page" : undefined
+                }
                 onClick={() => setOpen(false)}
                 style={
                   {

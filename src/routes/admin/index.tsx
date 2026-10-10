@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   ArrowLeft,
   BookOpen,
@@ -16,6 +17,7 @@ import {
   Briefcase,
   ShieldCheck,
   Globe,
+  FolderKanban,
   Mail,
   type LucideIcon,
 } from "lucide-react";
@@ -25,6 +27,7 @@ import { useLmsAuth } from "@/hooks/useLmsAuth";
 import { useConsoleCounts, type ConsoleCounts } from "@/components/console/useConsoleCounts";
 import { LMS_ADMIN } from "@/components/console/nav";
 import { Panel, fmtNum, useT } from "@/components/console/ui";
+import { loadPmState } from "@/features/project-management/model";
 
 export const Route = createFileRoute("/admin/")({
   ssr: false,
@@ -183,6 +186,7 @@ function AdminHome() {
   const { user } = useLmsAuth();
   const { data: counts } = useConsoleCounts(true);
   const { data: stats } = useHubStats();
+  const [pmState] = useState(loadPmState);
   const name =
     (user?.user_metadata?.full_name as string | undefined) || user?.email?.split("@")[0] || "";
   const waiting = ATTENTION.filter((a) => (counts?.[a.key] ?? 0) > 0);
@@ -201,6 +205,11 @@ function AdminHome() {
     (s, a) => s + (counts?.[a.key] ?? 0),
     0,
   );
+  const pmActive = pmState.tasks.filter(
+    (task) => task.status !== "done" && task.status !== "cancelled",
+  ).length;
+  const pmReview = pmState.tasks.filter((task) => task.status === "in_review").length;
+  const pmTeam = pmState.users.filter((member) => member.active).length;
 
   return (
     <div>
@@ -238,7 +247,7 @@ function AdminHome() {
         </p>
       </section>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <SystemCard
           to="/admin/website"
           icon={Globe}
@@ -293,14 +302,33 @@ function AdminHome() {
             { label: t("مسجَّل", "Registrants"), value: n(stats?.registrants) },
           ]}
         />
+        <SystemCard
+          to="/project-management"
+          icon={FolderKanban}
+          accent="#008b9d"
+          title={t("إدارة المشاريع", "Project management")}
+          desc={t(
+            "المشاريع، المهام، الفريق ومتابعة الإنجاز",
+            "Projects, tasks, team and delivery tracking",
+          )}
+          waiting={pmReview}
+          stats={[
+            {
+              label: t("مشروع", "Projects"),
+              value: fmtNum(pmState.projects.length, lang),
+            },
+            { label: t("مهمة نشطة", "Active tasks"), value: fmtNum(pmActive, lang) },
+            { label: t("عضو فريق", "Team members"), value: fmtNum(pmTeam, lang) },
+          ]}
+        />
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <Panel
           title={t("بانتظارك", "Needs your attention")}
           description={t(
-            "كل ما ينتظر قراراً في الأنظمة الثلاثة",
-            "Everything waiting for a decision, across the three systems",
+            "كل ما ينتظر قراراً في الأنظمة المتصلة",
+            "Everything waiting for a decision across the connected systems",
           )}
           flush
         >
@@ -358,6 +386,11 @@ function AdminHome() {
               to="/admin/attendance"
               icon={CalendarCheck}
               label={t("تسجيل الحضور", "Take attendance")}
+            />
+            <QuickAction
+              to="/project-management"
+              icon={FolderKanban}
+              label={t("إدارة المشاريع", "Manage projects")}
             />
           </div>
         </Panel>

@@ -9,9 +9,9 @@ import { useConsoleCounts, type ConsoleCounts } from "./useConsoleCounts";
 import { LocationGate } from "@/features/user-location/LocationGate";
 import "./console.css";
 
-/* The one frame around every management page: CMS, LMS admin, the
-   instructor workspace and the AMS dashboard. The system and its menu come
-   from the address, so each layout only has to wrap its outlet. */
+/* The one frame around the CMS, LMS admin, instructor workspace and AMS.
+   Standalone systems such as project management are launched from its system
+   switcher while keeping their own application shell. */
 export function ConsoleShell({ children }: { children: ReactNode }) {
   const { lang, dir, toggle } = useLang();
   const ar = lang === "ar";
@@ -69,7 +69,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
 
         {isAdmin && (
           <nav className="cx-switch" aria-label={ar ? "الأنظمة" : "Systems"}>
-            {(["cms", "lms", "ams"] as const).map((key) => {
+            {(["cms", "lms", "ams", "pm"] as const).map((key) => {
               const s = SYSTEM_ENTRY[key];
               const Icon = s.icon;
               return (

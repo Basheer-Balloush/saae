@@ -25,33 +25,7 @@ import { RouteProgress } from "@/components/app/RouteProgress";
 import { ScrollToHash } from "@/components/app/ScrollToHash";
 import { ConfirmProvider } from "@/hooks/useConfirm";
 import { isSkinnedLmsPath } from "@/features/lms/skin/skin";
-
-function NotFoundComponent() {
-  const isAr = typeof document !== "undefined" && document.documentElement.lang === "ar";
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">
-          {isAr ? "الصفحة غير موجودة" : "Page not found"}
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {isAr
-            ? "الصفحة التي تبحث عنها غير موجودة أو تم نقلها."
-            : "The page you're looking for doesn't exist or has been moved."}
-        </p>
-        <div className="mt-6">
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            {isAr ? "العودة للرئيسية" : "Go home"}
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
+import { NotFoundPage } from "@/features/website/not-found/NotFoundPage";
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
@@ -182,7 +156,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   }),
   shellComponent: RootShell,
   component: RootComponent,
-  notFoundComponent: NotFoundComponent,
+  notFoundComponent: NotFoundPage,
   errorComponent: ErrorComponent,
 });
 

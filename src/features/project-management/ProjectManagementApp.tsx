@@ -28,10 +28,10 @@ import {
   Languages,
   LayoutDashboard,
   ListTodo,
+  LogOut,
   Menu,
   MessageSquare,
   MoreHorizontal,
-  Plus,
   RotateCcw,
   Search,
   Send,
@@ -57,6 +57,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ConsoleAmbient, useConsoleRoot } from "@/components/console/ConsoleShell";
+import MotionButton from "@/features/website/motion/motion-button";
 import "@/components/console/console.css";
 import "./project-management.css";
 import {
@@ -87,12 +88,6 @@ import {
 } from "./model";
 
 type View = "overview" | "board" | "tasks" | "team" | "reports";
-
-const ROLE_DEFAULTS: Record<PmRole, string> = {
-  admin: "admin-1",
-  mentor: "mentor-2",
-  intern: "intern-1",
-};
 
 const STATUS_META: Record<TaskStatus, { en: string; ar: string; tone: string; icon: LucideIcon }> =
   {
@@ -158,13 +153,20 @@ function projectById(state: PmState, id: string) {
   return state.projects.find((project) => project.id === id);
 }
 
-export function ProjectManagementApp() {
+export function ProjectManagementApp({
+  actorId,
+  expectedRole,
+  onSignOut,
+}: {
+  actorId: string;
+  expectedRole: PmRole;
+  onSignOut: () => void;
+}) {
   useConsoleRoot();
   const { lang, dir, toggle } = useLang();
   const ar = lang === "ar";
   const t = (en: string, arabic: string) => (ar ? arabic : en);
   const [state, setState] = useState<PmState>(() => loadPmState());
-  const [actorId, setActorId] = useState(ROLE_DEFAULTS.admin);
   const [view, setView] = useState<View>("overview");
   const [menuOpen, setMenuOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -176,7 +178,10 @@ export function ProjectManagementApp() {
 
   useEffect(() => savePmState(state), [state]);
 
-  const actor = state.users.find((user) => user.id === actorId) ?? state.users[0];
+  const actor =
+    state.users.find((user) => user.id === actorId && user.role === expectedRole) ??
+    state.users.find((user) => user.role === expectedRole) ??
+    state.users[0];
   const role = actor.role;
   const tasks = useMemo(() => scopedTasks(state, actor), [state, actor]);
   const filteredTasks = useMemo(() => {
@@ -198,17 +203,6 @@ export function ProjectManagementApp() {
     .filter((item) => item.userId === actor.id)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const unread = notifications.filter((item) => !item.read).length;
-
-  const switchRole = (nextRole: PmRole) => {
-    const id = ROLE_DEFAULTS[nextRole];
-    setActorId(id);
-    setSelectedTaskId(null);
-    setNotificationsOpen(false);
-    setView("overview");
-    toast.success(
-      t(`Previewing as ${roleName(nextRole, false)}`, `العرض بدور ${roleName(nextRole, true)}`),
-    );
-  };
 
   const openNotification = (taskId?: string) => {
     setState((current) => markNotificationsRead(current, actor.id));
@@ -249,18 +243,9 @@ export function ProjectManagementApp() {
               </span>
             </div>
           </div>
-          <div className="pm-role-switch" aria-label={t("Preview role", "تجربة الأدوار")}>
-            {(["admin", "mentor", "intern"] as PmRole[]).map((item) => (
-              <button
-                key={item}
-                type="button"
-                data-active={role === item}
-                onClick={() => switchRole(item)}
-                title={roleName(item, ar)}
-              >
-                {item === "admin" ? "A" : item === "mentor" ? "M" : "I"}
-              </button>
-            ))}
+          <div className="pm-role-current">
+            <span>{t("Signed-in workspace", "مساحة العمل الحالية")}</span>
+            <strong>{roleName(role, ar)}</strong>
           </div>
         </div>
 
@@ -287,6 +272,10 @@ export function ProjectManagementApp() {
         </nav>
 
         <div className="pm-side-bottom">
+          <a className="pm-admin-link" href="/admin">
+            <LayoutDashboard />
+            <span>{t("Admin dashboard", "لوحة الإدارة")}</span>
+          </a>
           <div className="pm-progress-card">
             <div className="flex items-center justify-between gap-3 text-[12px]">
               <span className="text-[var(--cx-side-muted)]">
@@ -333,6 +322,15 @@ export function ProjectManagementApp() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              className="pm-icon-button"
+              type="button"
+              onClick={onSignOut}
+              title={t("Sign out", "تسجيل الخروج")}
+              aria-label={t("Sign out", "تسجيل الخروج")}
+            >
+              <LogOut />
+            </button>
             <div className="relative">
               <button
                 className="pm-icon-button"
@@ -355,10 +353,11 @@ export function ProjectManagementApp() {
               )}
             </div>
             {canCreateTask(actor) && (
-              <Button className="pm-primary-button" onClick={() => setCreateOpen(true)}>
-                <Plus />
-                <span className="hidden sm:inline">{t("New task", "مهمة جديدة")}</span>
-              </Button>
+              <MotionButton
+                label={t("New task", "مهمة جديدة")}
+                classes="pm-motion-button pm-motion-button-compact"
+                onClick={() => setCreateOpen(true)}
+              />
             )}
             <Avatar user={actor} size="sm" />
           </div>
@@ -588,9 +587,11 @@ function Overview({
           </p>
         </div>
         {canCreateTask(actor) && (
-          <Button className="pm-primary-button" onClick={onCreate}>
-            <Plus /> {t("Assign a task", "إسناد مهمة")}
-          </Button>
+          <MotionButton
+            label={t("Assign a task", "إسناد مهمة")}
+            classes="pm-motion-button"
+            onClick={onCreate}
+          />
         )}
       </section>
 
@@ -1297,9 +1298,11 @@ function CreateTaskDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t("Cancel", "إلغاء")}
             </Button>
-            <Button type="submit" className="pm-primary-button">
-              <Plus /> {t("Create task", "إنشاء المهمة")}
-            </Button>
+            <MotionButton
+              type="submit"
+              label={t("Create task", "إنشاء المهمة")}
+              classes="pm-motion-button pm-motion-button-compact"
+            />
           </DialogFooter>
         </form>
       </DialogContent>

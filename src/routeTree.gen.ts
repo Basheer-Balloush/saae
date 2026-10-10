@@ -14,7 +14,6 @@ import { Route as TexpoRouteImport } from './routes/texpo'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegistrationRouteImport } from './routes/registration'
-import { Route as ProjectManagementRouteImport } from './routes/project-management'
 import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as OneMillionInitiativeHomeRouteImport } from './routes/one-million-initiative-home'
 import { Route as OneMillionInitiativeDonorsRouteImport } from './routes/one-million-initiative-donors'
@@ -26,10 +25,12 @@ import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as EventSurveyRouteImport } from './routes/event-survey'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as ProjectManagementRouteRouteImport } from './routes/project-management/route'
 import { Route as LearningManagementSystemRouteRouteImport } from './routes/learning-management-system/route'
 import { Route as AttendanceManagementSystemRouteRouteImport } from './routes/attendance-management-system/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectManagementIndexRouteImport } from './routes/project-management/index'
 import { Route as NewsIndexRouteImport } from './routes/news/index'
 import { Route as LearningManagementSystemIndexRouteImport } from './routes/learning-management-system/index'
 import { Route as InternshipsIndexRouteImport } from './routes/internships/index'
@@ -38,6 +39,10 @@ import { Route as CoursesIndexRouteImport } from './routes/courses/index'
 import { Route as AttendanceManagementSystemIndexRouteImport } from './routes/attendance-management-system/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ResourcesAiToolsRouteImport } from './routes/resources.ai-tools'
+import { Route as ProjectManagementMentorRouteImport } from './routes/project-management/mentor'
+import { Route as ProjectManagementLoginRouteImport } from './routes/project-management/login'
+import { Route as ProjectManagementInternRouteImport } from './routes/project-management/intern'
+import { Route as ProjectManagementAdminRouteImport } from './routes/project-management/admin'
 import { Route as ProfileSlugRouteImport } from './routes/profile.$slug'
 import { Route as NewsTvInterviewRouteImport } from './routes/news/tv-interview'
 import { Route as NewsTrainersGraduationRouteImport } from './routes/news/trainers-graduation'
@@ -176,11 +181,6 @@ const RegistrationRoute = RegistrationRouteImport.update({
   path: '/registration',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProjectManagementRoute = ProjectManagementRouteImport.update({
-  id: '/project-management',
-  path: '/project-management',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PartnersRoute = PartnersRouteImport.update({
   id: '/partners',
   path: '/partners',
@@ -239,6 +239,11 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectManagementRouteRoute = ProjectManagementRouteRouteImport.update({
+  id: '/project-management',
+  path: '/project-management',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearningManagementSystemRouteRoute =
   LearningManagementSystemRouteRouteImport.update({
     id: '/learning-management-system',
@@ -260,6 +265,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectManagementIndexRoute = ProjectManagementIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProjectManagementRouteRoute,
 } as any)
 const NewsIndexRoute = NewsIndexRouteImport.update({
   id: '/news/',
@@ -302,6 +312,26 @@ const ResourcesAiToolsRoute = ResourcesAiToolsRouteImport.update({
   id: '/resources/ai-tools',
   path: '/resources/ai-tools',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectManagementMentorRoute = ProjectManagementMentorRouteImport.update({
+  id: '/mentor',
+  path: '/mentor',
+  getParentRoute: () => ProjectManagementRouteRoute,
+} as any)
+const ProjectManagementLoginRoute = ProjectManagementLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => ProjectManagementRouteRoute,
+} as any)
+const ProjectManagementInternRoute = ProjectManagementInternRouteImport.update({
+  id: '/intern',
+  path: '/intern',
+  getParentRoute: () => ProjectManagementRouteRoute,
+} as any)
+const ProjectManagementAdminRoute = ProjectManagementAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => ProjectManagementRouteRoute,
 } as any)
 const ProfileSlugRoute = ProfileSlugRouteImport.update({
   id: '/profile/$slug',
@@ -935,6 +965,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/attendance-management-system': typeof AttendanceManagementSystemRouteRouteWithChildren
   '/learning-management-system': typeof LearningManagementSystemRouteRouteWithChildren
+  '/project-management': typeof ProjectManagementRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
@@ -946,7 +977,6 @@ export interface FileRoutesByFullPath {
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
   '/partners': typeof PartnersRoute
-  '/project-management': typeof ProjectManagementRoute
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
@@ -997,6 +1027,10 @@ export interface FileRoutesByFullPath {
   '/news/trainers-graduation': typeof NewsTrainersGraduationRoute
   '/news/tv-interview': typeof NewsTvInterviewRoute
   '/profile/$slug': typeof ProfileSlugRoute
+  '/project-management/admin': typeof ProjectManagementAdminRoute
+  '/project-management/intern': typeof ProjectManagementInternRoute
+  '/project-management/login': typeof ProjectManagementLoginRoute
+  '/project-management/mentor': typeof ProjectManagementMentorRoute
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
@@ -1005,6 +1039,7 @@ export interface FileRoutesByFullPath {
   '/internships/': typeof InternshipsIndexRoute
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/project-management/': typeof ProjectManagementIndexRoute
   '/admin/crm/contacts': typeof AdminCrmContactsRouteRouteWithChildren
   '/admin/crm/forms': typeof AdminCrmFormsRouteRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteRouteWithChildren
@@ -1086,7 +1121,6 @@ export interface FileRoutesByTo {
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
   '/partners': typeof PartnersRoute
-  '/project-management': typeof ProjectManagementRoute
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
@@ -1132,6 +1166,10 @@ export interface FileRoutesByTo {
   '/news/trainers-graduation': typeof NewsTrainersGraduationRoute
   '/news/tv-interview': typeof NewsTvInterviewRoute
   '/profile/$slug': typeof ProfileSlugRoute
+  '/project-management/admin': typeof ProjectManagementAdminRoute
+  '/project-management/intern': typeof ProjectManagementInternRoute
+  '/project-management/login': typeof ProjectManagementLoginRoute
+  '/project-management/mentor': typeof ProjectManagementMentorRoute
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin': typeof AdminIndexRoute
   '/attendance-management-system': typeof AttendanceManagementSystemIndexRoute
@@ -1140,6 +1178,7 @@ export interface FileRoutesByTo {
   '/internships': typeof InternshipsIndexRoute
   '/learning-management-system': typeof LearningManagementSystemIndexRoute
   '/news': typeof NewsIndexRoute
+  '/project-management': typeof ProjectManagementIndexRoute
   '/admin/crm/contacts': typeof AdminCrmContactsRouteRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteRouteWithChildren
   '/admin/crm/feedback': typeof AdminCrmFeedbackRoute
@@ -1212,6 +1251,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/attendance-management-system': typeof AttendanceManagementSystemRouteRouteWithChildren
   '/learning-management-system': typeof LearningManagementSystemRouteRouteWithChildren
+  '/project-management': typeof ProjectManagementRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/event-survey': typeof EventSurveyRoute
@@ -1223,7 +1263,6 @@ export interface FileRoutesById {
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
   '/partners': typeof PartnersRoute
-  '/project-management': typeof ProjectManagementRoute
   '/registration': typeof RegistrationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
@@ -1274,6 +1313,10 @@ export interface FileRoutesById {
   '/news/trainers-graduation': typeof NewsTrainersGraduationRoute
   '/news/tv-interview': typeof NewsTvInterviewRoute
   '/profile/$slug': typeof ProfileSlugRoute
+  '/project-management/admin': typeof ProjectManagementAdminRoute
+  '/project-management/intern': typeof ProjectManagementInternRoute
+  '/project-management/login': typeof ProjectManagementLoginRoute
+  '/project-management/mentor': typeof ProjectManagementMentorRoute
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
@@ -1282,6 +1325,7 @@ export interface FileRoutesById {
   '/internships/': typeof InternshipsIndexRoute
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/project-management/': typeof ProjectManagementIndexRoute
   '/admin/crm/contacts': typeof AdminCrmContactsRouteRouteWithChildren
   '/admin/crm/forms': typeof AdminCrmFormsRouteRouteWithChildren
   '/admin/crm/leads': typeof AdminCrmLeadsRouteRouteWithChildren
@@ -1357,6 +1401,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/attendance-management-system'
     | '/learning-management-system'
+    | '/project-management'
     | '/about'
     | '/contact'
     | '/event-survey'
@@ -1368,7 +1413,6 @@ export interface FileRouteTypes {
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
     | '/partners'
-    | '/project-management'
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
@@ -1419,6 +1463,10 @@ export interface FileRouteTypes {
     | '/news/trainers-graduation'
     | '/news/tv-interview'
     | '/profile/$slug'
+    | '/project-management/admin'
+    | '/project-management/intern'
+    | '/project-management/login'
+    | '/project-management/mentor'
     | '/resources/ai-tools'
     | '/admin/'
     | '/attendance-management-system/'
@@ -1427,6 +1475,7 @@ export interface FileRouteTypes {
     | '/internships/'
     | '/learning-management-system/'
     | '/news/'
+    | '/project-management/'
     | '/admin/crm/contacts'
     | '/admin/crm/forms'
     | '/admin/crm/leads'
@@ -1508,7 +1557,6 @@ export interface FileRouteTypes {
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
     | '/partners'
-    | '/project-management'
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
@@ -1554,6 +1602,10 @@ export interface FileRouteTypes {
     | '/news/trainers-graduation'
     | '/news/tv-interview'
     | '/profile/$slug'
+    | '/project-management/admin'
+    | '/project-management/intern'
+    | '/project-management/login'
+    | '/project-management/mentor'
     | '/resources/ai-tools'
     | '/admin'
     | '/attendance-management-system'
@@ -1562,6 +1614,7 @@ export interface FileRouteTypes {
     | '/internships'
     | '/learning-management-system'
     | '/news'
+    | '/project-management'
     | '/admin/crm/contacts'
     | '/admin/crm/leads'
     | '/admin/crm/feedback'
@@ -1633,6 +1686,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/attendance-management-system'
     | '/learning-management-system'
+    | '/project-management'
     | '/about'
     | '/contact'
     | '/event-survey'
@@ -1644,7 +1698,6 @@ export interface FileRouteTypes {
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
     | '/partners'
-    | '/project-management'
     | '/registration'
     | '/sitemap.xml'
     | '/super-admin'
@@ -1695,6 +1748,10 @@ export interface FileRouteTypes {
     | '/news/trainers-graduation'
     | '/news/tv-interview'
     | '/profile/$slug'
+    | '/project-management/admin'
+    | '/project-management/intern'
+    | '/project-management/login'
+    | '/project-management/mentor'
     | '/resources/ai-tools'
     | '/admin/'
     | '/attendance-management-system/'
@@ -1703,6 +1760,7 @@ export interface FileRouteTypes {
     | '/internships/'
     | '/learning-management-system/'
     | '/news/'
+    | '/project-management/'
     | '/admin/crm/contacts'
     | '/admin/crm/forms'
     | '/admin/crm/leads'
@@ -1777,6 +1835,7 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AttendanceManagementSystemRouteRoute: typeof AttendanceManagementSystemRouteRouteWithChildren
   LearningManagementSystemRouteRoute: typeof LearningManagementSystemRouteRouteWithChildren
+  ProjectManagementRouteRoute: typeof ProjectManagementRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
   EventSurveyRoute: typeof EventSurveyRoute
@@ -1788,7 +1847,6 @@ export interface RootRouteChildren {
   OneMillionInitiativeDonorsRoute: typeof OneMillionInitiativeDonorsRoute
   OneMillionInitiativeHomeRoute: typeof OneMillionInitiativeHomeRoute
   PartnersRoute: typeof PartnersRoute
-  ProjectManagementRoute: typeof ProjectManagementRoute
   RegistrationRoute: typeof RegistrationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
@@ -1858,13 +1916,6 @@ declare module '@tanstack/react-router' {
       path: '/registration'
       fullPath: '/registration'
       preLoaderRoute: typeof RegistrationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/project-management': {
-      id: '/project-management'
-      path: '/project-management'
-      fullPath: '/project-management'
-      preLoaderRoute: typeof ProjectManagementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/partners': {
@@ -1944,6 +1995,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/project-management': {
+      id: '/project-management'
+      path: '/project-management'
+      fullPath: '/project-management'
+      preLoaderRoute: typeof ProjectManagementRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/learning-management-system': {
       id: '/learning-management-system'
       path: '/learning-management-system'
@@ -1971,6 +2029,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/project-management/': {
+      id: '/project-management/'
+      path: '/'
+      fullPath: '/project-management/'
+      preLoaderRoute: typeof ProjectManagementIndexRouteImport
+      parentRoute: typeof ProjectManagementRouteRoute
     }
     '/news/': {
       id: '/news/'
@@ -2027,6 +2092,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/resources/ai-tools'
       preLoaderRoute: typeof ResourcesAiToolsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/project-management/mentor': {
+      id: '/project-management/mentor'
+      path: '/mentor'
+      fullPath: '/project-management/mentor'
+      preLoaderRoute: typeof ProjectManagementMentorRouteImport
+      parentRoute: typeof ProjectManagementRouteRoute
+    }
+    '/project-management/login': {
+      id: '/project-management/login'
+      path: '/login'
+      fullPath: '/project-management/login'
+      preLoaderRoute: typeof ProjectManagementLoginRouteImport
+      parentRoute: typeof ProjectManagementRouteRoute
+    }
+    '/project-management/intern': {
+      id: '/project-management/intern'
+      path: '/intern'
+      fullPath: '/project-management/intern'
+      preLoaderRoute: typeof ProjectManagementInternRouteImport
+      parentRoute: typeof ProjectManagementRouteRoute
+    }
+    '/project-management/admin': {
+      id: '/project-management/admin'
+      path: '/admin'
+      fullPath: '/project-management/admin'
+      preLoaderRoute: typeof ProjectManagementAdminRouteImport
+      parentRoute: typeof ProjectManagementRouteRoute
     }
     '/profile/$slug': {
       id: '/profile/$slug'
@@ -3202,6 +3295,28 @@ const LearningManagementSystemRouteRouteWithChildren =
     LearningManagementSystemRouteRouteChildren,
   )
 
+interface ProjectManagementRouteRouteChildren {
+  ProjectManagementAdminRoute: typeof ProjectManagementAdminRoute
+  ProjectManagementInternRoute: typeof ProjectManagementInternRoute
+  ProjectManagementLoginRoute: typeof ProjectManagementLoginRoute
+  ProjectManagementMentorRoute: typeof ProjectManagementMentorRoute
+  ProjectManagementIndexRoute: typeof ProjectManagementIndexRoute
+}
+
+const ProjectManagementRouteRouteChildren: ProjectManagementRouteRouteChildren =
+  {
+    ProjectManagementAdminRoute: ProjectManagementAdminRoute,
+    ProjectManagementInternRoute: ProjectManagementInternRoute,
+    ProjectManagementLoginRoute: ProjectManagementLoginRoute,
+    ProjectManagementMentorRoute: ProjectManagementMentorRoute,
+    ProjectManagementIndexRoute: ProjectManagementIndexRoute,
+  }
+
+const ProjectManagementRouteRouteWithChildren =
+  ProjectManagementRouteRoute._addFileChildren(
+    ProjectManagementRouteRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
@@ -3209,6 +3324,7 @@ const rootRouteChildren: RootRouteChildren = {
     AttendanceManagementSystemRouteRouteWithChildren,
   LearningManagementSystemRouteRoute:
     LearningManagementSystemRouteRouteWithChildren,
+  ProjectManagementRouteRoute: ProjectManagementRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   EventSurveyRoute: EventSurveyRoute,
@@ -3220,7 +3336,6 @@ const rootRouteChildren: RootRouteChildren = {
   OneMillionInitiativeDonorsRoute: OneMillionInitiativeDonorsRoute,
   OneMillionInitiativeHomeRoute: OneMillionInitiativeHomeRoute,
   PartnersRoute: PartnersRoute,
-  ProjectManagementRoute: ProjectManagementRoute,
   RegistrationRoute: RegistrationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,

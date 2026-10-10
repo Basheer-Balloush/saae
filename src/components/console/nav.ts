@@ -9,6 +9,7 @@ import {
   CalendarCheck,
   CalendarDays,
   FileText,
+  FolderKanban,
   GraduationCap,
   Handshake,
   Home,
@@ -56,12 +57,13 @@ const HOME_ITEM: NavItem = {
 };
 
 export const SYSTEM_ENTRY: Record<
-  "cms" | "lms" | "ams",
+  "cms" | "lms" | "ams" | "pm",
   { to: string; ar: string; en: string; icon: LucideIcon }
 > = {
   cms: { to: "/admin/website", ar: "الموقع", en: "Website", icon: Globe },
   lms: { to: LMS_ADMIN, ar: "التعلّم", en: "Learning", icon: GraduationCap },
   ams: { to: "/admin/attendance", ar: "الحضور", en: "Attendance", icon: CalendarCheck },
+  pm: { to: "/project-management", ar: "المشاريع", en: "Projects", icon: FolderKanban },
 };
 
 export const LMS_ATTENTION: CountKey[] = [
@@ -93,6 +95,12 @@ export const NAV: Record<ConsoleSystem, NavGroup[]> = {
           count: LMS_ATTENTION,
         },
         { to: "/admin/attendance", ar: "نظام الحضور", en: "Attendance", icon: CalendarCheck },
+        {
+          to: "/project-management",
+          ar: "إدارة المشاريع",
+          en: "Project management",
+          icon: FolderKanban,
+        },
       ],
     },
   ],

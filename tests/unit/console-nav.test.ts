@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { NAV, isNavActive } from "@/components/console/nav";
+import { NAV, SYSTEM_ENTRY, isNavActive } from "@/components/console/nav";
 
 const cms = NAV.cms;
 const item = (en: string) => cms.flatMap((g) => g.items).find((i) => i.en === en)!;
 
 describe("website console menu", () => {
+  it("connects the standalone project workspace to the admin hub", () => {
+    expect(SYSTEM_ENTRY.pm.to).toBe("/project-management");
+    expect(
+      NAV.home.flatMap((group) => group.items).some((entry) => entry.to === SYSTEM_ENTRY.pm.to),
+    ).toBe(true);
+  });
+
   it("groups the website pages by what you do there", () => {
     expect(cms.map((g) => g.en ?? null)).toEqual([
       null,
