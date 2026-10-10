@@ -1,4 +1,11 @@
-import { createFileRoute, Link, useNavigate, useRouter, notFound } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  useNavigate,
+  useRouter,
+  notFound,
+  redirect,
+} from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { PlayCircle, Loader2, Lock, Clock, CheckCircle } from "lucide-react";
@@ -25,6 +32,7 @@ import { SubHero } from "@/features/lms/skin/SubHero";
 import { IconCategoryAI } from "@/features/lms/skin/icons";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { resizedImage, resizedSrcSet } from "@/lib/image-url";
+import { cleanSlug } from "@/features/lms/lib/link-slug";
 
 type Course = {
   id: string;
@@ -94,6 +102,15 @@ type CourseLoaderData = {
 
 export const Route = createFileRoute("/learning-management-system/courses/$id")({
   loader: async ({ params }): Promise<CourseLoaderData> => {
+    // A pasted link with a capital letter or a full stop on the end.
+    const ref = cleanSlug(params.id, 60);
+    if (ref && ref !== params.id) {
+      throw redirect({
+        to: "/learning-management-system/courses/$id",
+        params: { id: ref },
+        statusCode: 301,
+      });
+    }
     // Public, read-only projection of a published course (safe fields only).
     const { data, error } = await supabase.rpc("get_public_course", { _ref: params.id });
     if (error) throw new Error("course_load_failed");

@@ -856,13 +856,19 @@ function ApplicationsCard({ lang }: { lang: "ar" | "en" }) {
             return (
               <li key={r.id} className="req-card">
                 <span className="req-main">
-                  <Link
-                    to="/learning-management-system/internships/$slug"
-                    params={{ slug: r.opportunity_slug }}
-                    dir="auto"
-                  >
-                    {title}
-                  </Link>
+                  {r.opportunity_listed ? (
+                    <Link
+                      to="/learning-management-system/internships/$slug"
+                      params={{ slug: r.opportunity_slug }}
+                      dir="auto"
+                    >
+                      {title}
+                    </Link>
+                  ) : (
+                    <strong dir="auto">
+                      {title} <small>({t.internshipNoLongerListed})</small>
+                    </strong>
+                  )}
                   <span>
                     {new Date(r.submitted_at).toLocaleString(lang, {
                       dateStyle: "medium",

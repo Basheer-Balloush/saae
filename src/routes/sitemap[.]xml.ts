@@ -25,6 +25,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/resources/ai-tools", changefreq: "monthly", priority: "0.8" },
           { path: "/learning-management-system", changefreq: "weekly", priority: "0.8" },
           { path: "/learning-management-system/catalog", changefreq: "daily", priority: "0.8" },
+          { path: "/learning-management-system/internships", changefreq: "daily", priority: "0.8" },
           { path: "/learning-management-system/login", changefreq: "monthly", priority: "0.4" },
           { path: "/learning-management-system/signup", changefreq: "monthly", priority: "0.4" },
           {
@@ -64,6 +65,27 @@ export const Route = createFileRoute("/sitemap.xml")({
           }
         } catch (e) {
           console.warn("sitemap: failed to load lms_courses rows", e);
+        }
+
+        try {
+          // Published only: hidden and draft opportunities have no public page,
+          // and closed ones are no longer worth sending searchers to.
+          const { data } = await supabaseAdmin
+            .from("internship_opportunities")
+            .select("slug,updated_at")
+            .eq("status", "published")
+            .order("created_at", { ascending: false })
+            .limit(1000);
+          for (const row of data ?? []) {
+            entries.push({
+              path: `/learning-management-system/internships/${row.slug}`,
+              lastmod: row.updated_at ?? undefined,
+              changefreq: "weekly",
+              priority: "0.6",
+            });
+          }
+        } catch (e) {
+          console.warn("sitemap: failed to load internship_opportunities rows", e);
         }
 
         try {

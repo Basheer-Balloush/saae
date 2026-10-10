@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
@@ -15,20 +15,35 @@ import {
 import { SubHero } from "@/features/lms/skin/SubHero";
 import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { resizedImage, resizedSrcSet } from "@/lib/image-url";
+import { cleanSlug } from "@/features/lms/lib/link-slug";
 
 export const detailQueryKey = (slug: string) => ["public-internship", slug] as const;
 
+// Hidden, draft and unknown opportunities: old shared links and applicants'
+// profile links land on the current list, with a note, instead of a dead end.
+const toList = () =>
+  redirect({ to: "/learning-management-system/internships", search: { unavailable: 1 } });
+
 export const Route = createFileRoute("/learning-management-system/internships/$slug/")({
   loader: async ({ params, context }) => {
+    const slug = cleanSlug(params.slug, 80);
+    if (!slug) throw toList();
+    if (slug !== params.slug) {
+      throw redirect({
+        to: "/learning-management-system/internships/$slug",
+        params: { slug },
+        statusCode: 301,
+      });
+    }
     // TanStack Query cache via context.queryClient
     const detail = await context.queryClient.ensureQueryData(
       queryOptions({
-        queryKey: detailQueryKey(params.slug),
-        queryFn: () => getPublicInternshipBySlug({ data: { slug: params.slug } }),
+        queryKey: detailQueryKey(slug),
+        queryFn: () => getPublicInternshipBySlug({ data: { slug } }),
         staleTime: 60_000,
       }),
     );
-    if (!detail) throw notFound();
+    if (!detail) throw toList();
     return detail;
   },
   head: ({ params, loaderData }) => {

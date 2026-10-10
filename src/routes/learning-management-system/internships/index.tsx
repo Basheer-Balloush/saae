@@ -17,6 +17,9 @@ import { LMS_SKIN_LINKS } from "@/features/lms/skin/skin";
 import { resizedImage, resizedSrcSet } from "@/lib/image-url";
 
 export const Route = createFileRoute("/learning-management-system/internships/")({
+  // ?unavailable=1: sent here from an opportunity that is hidden, a draft or gone.
+  validateSearch: (search: Record<string, unknown>): { unavailable?: 1 } =>
+    search.unavailable ? { unavailable: 1 } : {},
   head: () => ({
     meta: [
       { title: "Internship Opportunities — SAAE" },
@@ -48,6 +51,7 @@ function PublicInternshipsList() {
   const { lang } = useLang();
   const ar = lang === "ar";
   const t = lmsInternshipsT[lang];
+  const { unavailable } = Route.useSearch();
   const listFn = useServerFn(listPublicInternships);
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
@@ -107,6 +111,12 @@ function PublicInternshipsList() {
 
       <section className="lms-section" aria-label={t.internshipsTitle}>
         <div className="page-shell">
+          {unavailable && (
+            <p className="opp-gone" role="status" dir="auto">
+              {t.internshipUnavailableNote}
+            </p>
+          )}
+
           {isLoading && (
             <div className="state-box">
               <Loader2 className="h-6 w-6 animate-spin" />

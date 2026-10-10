@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrainingRouteImport } from './routes/training'
 import { Route as TexpoRouteImport } from './routes/texpo'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -18,6 +19,7 @@ import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as OneMillionInitiativeHomeRouteImport } from './routes/one-million-initiative-home'
 import { Route as OneMillionInitiativeDonorsRouteImport } from './routes/one-million-initiative-donors'
 import { Route as OneMillionInitiativeRouteImport } from './routes/one-million-initiative'
+import { Route as LmsRouteImport } from './routes/lms'
 import { Route as InternationalBusinessBridgeRouteImport } from './routes/international-business-bridge'
 import { Route as InitiativeSurveyRouteImport } from './routes/initiative-survey'
 import { Route as FeedbackRouteImport } from './routes/feedback'
@@ -30,7 +32,9 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewsIndexRouteImport } from './routes/news/index'
 import { Route as LearningManagementSystemIndexRouteImport } from './routes/learning-management-system/index'
+import { Route as InternshipsIndexRouteImport } from './routes/internships/index'
 import { Route as InitiativeIndexRouteImport } from './routes/initiative/index'
+import { Route as CoursesIndexRouteImport } from './routes/courses/index'
 import { Route as AttendanceManagementSystemIndexRouteImport } from './routes/attendance-management-system/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ResourcesAiToolsRouteImport } from './routes/resources.ai-tools'
@@ -50,11 +54,13 @@ import { Route as LearningManagementSystemForgotPasswordRouteImport } from './ro
 import { Route as LearningManagementSystemConfirmAccountRouteImport } from './routes/learning-management-system/confirm-account'
 import { Route as LearningManagementSystemCatalogRouteImport } from './routes/learning-management-system/catalog'
 import { Route as JoinTokenRouteImport } from './routes/join.$token'
+import { Route as InternshipsSlugRouteImport } from './routes/internships/$slug'
 import { Route as InitiativeSponsorsRouteImport } from './routes/initiative/sponsors'
 import { Route as InitiativeClaimRouteImport } from './routes/initiative/claim'
 import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
 import { Route as EventsSlugRouteImport } from './routes/events.$slug'
 import { Route as EventSignupTokenRouteImport } from './routes/event-signup.$token'
+import { Route as CoursesIdRouteImport } from './routes/courses/$id'
 import { Route as CommunitiesKeyRouteImport } from './routes/communities.$key'
 import { Route as AttendanceManagementSystemLoginRouteImport } from './routes/attendance-management-system/login'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -80,6 +86,7 @@ import { Route as AdminCrmRouteRouteImport } from './routes/admin/crm/route'
 import { Route as LearningManagementSystemStudentIndexRouteImport } from './routes/learning-management-system/student/index'
 import { Route as LearningManagementSystemInternshipsIndexRouteImport } from './routes/learning-management-system/internships/index'
 import { Route as LearningManagementSystemInstructorIndexRouteImport } from './routes/learning-management-system/instructor/index'
+import { Route as LearningManagementSystemCoursesIndexRouteImport } from './routes/learning-management-system/courses/index'
 import { Route as LearningManagementSystemAdminIndexRouteImport } from './routes/learning-management-system/admin/index'
 import { Route as AdminNewsIndexRouteImport } from './routes/admin/news/index'
 import { Route as AdminFormsIndexRouteImport } from './routes/admin/forms/index'
@@ -144,6 +151,11 @@ import { Route as LearningManagementSystemAdminInternshipsIdApplicationsRouteRou
 import { Route as LearningManagementSystemAdminInternshipsIdApplicationsIndexRouteImport } from './routes/learning-management-system/admin/internships/$id/applications/index'
 import { Route as LearningManagementSystemAdminInternshipsIdApplicationsAppIdRouteImport } from './routes/learning-management-system/admin/internships/$id/applications/$appId'
 
+const TrainingRoute = TrainingRouteImport.update({
+  id: '/training',
+  path: '/training',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TexpoRoute = TexpoRouteImport.update({
   id: '/texpo',
   path: '/texpo',
@@ -189,6 +201,11 @@ const OneMillionInitiativeDonorsRoute =
 const OneMillionInitiativeRoute = OneMillionInitiativeRouteImport.update({
   id: '/one-million-initiative',
   path: '/one-million-initiative',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LmsRoute = LmsRouteImport.update({
+  id: '/lms',
+  path: '/lms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InternationalBusinessBridgeRoute =
@@ -255,9 +272,19 @@ const LearningManagementSystemIndexRoute =
     path: '/',
     getParentRoute: () => LearningManagementSystemRouteRoute,
   } as any)
+const InternshipsIndexRoute = InternshipsIndexRouteImport.update({
+  id: '/internships/',
+  path: '/internships/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InitiativeIndexRoute = InitiativeIndexRouteImport.update({
   id: '/initiative/',
   path: '/initiative/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoursesIndexRoute = CoursesIndexRouteImport.update({
+  id: '/courses/',
+  path: '/courses/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AttendanceManagementSystemIndexRoute =
@@ -365,6 +392,11 @@ const JoinTokenRoute = JoinTokenRouteImport.update({
   path: '/join/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InternshipsSlugRoute = InternshipsSlugRouteImport.update({
+  id: '/internships/$slug',
+  path: '/internships/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InitiativeSponsorsRoute = InitiativeSponsorsRouteImport.update({
   id: '/initiative/sponsors',
   path: '/initiative/sponsors',
@@ -388,6 +420,11 @@ const EventsSlugRoute = EventsSlugRouteImport.update({
 const EventSignupTokenRoute = EventSignupTokenRouteImport.update({
   id: '/event-signup/$token',
   path: '/event-signup/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoursesIdRoute = CoursesIdRouteImport.update({
+  id: '/courses/$id',
+  path: '/courses/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunitiesKeyRoute = CommunitiesKeyRouteImport.update({
@@ -521,6 +558,12 @@ const LearningManagementSystemInstructorIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => LearningManagementSystemInstructorRouteRoute,
+  } as any)
+const LearningManagementSystemCoursesIndexRoute =
+  LearningManagementSystemCoursesIndexRouteImport.update({
+    id: '/courses/',
+    path: '/courses/',
+    getParentRoute: () => LearningManagementSystemRouteRoute,
   } as any)
 const LearningManagementSystemAdminIndexRoute =
   LearningManagementSystemAdminIndexRouteImport.update({
@@ -898,6 +941,7 @@ export interface FileRoutesByFullPath {
   '/feedback': typeof FeedbackRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
   '/international-business-bridge': typeof InternationalBusinessBridgeRoute
+  '/lms': typeof LmsRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
@@ -907,6 +951,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
   '/texpo': typeof TexpoRoute
+  '/training': typeof TrainingRoute
   '/admin/crm': typeof AdminCrmRouteRouteWithChildren
   '/admin/forms': typeof AdminFormsRouteRouteWithChildren
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteRouteWithChildren
@@ -929,11 +974,13 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/courses/$id': typeof CoursesIdRoute
   '/event-signup/$token': typeof EventSignupTokenRoute
   '/events/$slug': typeof EventsSlugRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/initiative/sponsors': typeof InitiativeSponsorsRoute
+  '/internships/$slug': typeof InternshipsSlugRoute
   '/join/$token': typeof JoinTokenRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/confirm-account': typeof LearningManagementSystemConfirmAccountRoute
@@ -953,7 +1000,9 @@ export interface FileRoutesByFullPath {
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
+  '/courses/': typeof CoursesIndexRoute
   '/initiative/': typeof InitiativeIndexRoute
+  '/internships/': typeof InternshipsIndexRoute
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
   '/admin/crm/contacts': typeof AdminCrmContactsRouteRouteWithChildren
@@ -986,6 +1035,7 @@ export interface FileRoutesByFullPath {
   '/admin/forms/': typeof AdminFormsIndexRoute
   '/admin/news/': typeof AdminNewsIndexRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
+  '/learning-management-system/courses/': typeof LearningManagementSystemCoursesIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/internships/': typeof LearningManagementSystemInternshipsIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
@@ -1031,6 +1081,7 @@ export interface FileRoutesByTo {
   '/feedback': typeof FeedbackRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
   '/international-business-bridge': typeof InternationalBusinessBridgeRoute
+  '/lms': typeof LmsRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
@@ -1040,6 +1091,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
   '/texpo': typeof TexpoRoute
+  '/training': typeof TrainingRoute
   '/admin/attendance': typeof AdminAttendanceRoute
   '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -1057,11 +1109,13 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/courses/$id': typeof CoursesIdRoute
   '/event-signup/$token': typeof EventSignupTokenRoute
   '/events/$slug': typeof EventsSlugRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/initiative/sponsors': typeof InitiativeSponsorsRoute
+  '/internships/$slug': typeof InternshipsSlugRoute
   '/join/$token': typeof JoinTokenRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/confirm-account': typeof LearningManagementSystemConfirmAccountRoute
@@ -1081,7 +1135,9 @@ export interface FileRoutesByTo {
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin': typeof AdminIndexRoute
   '/attendance-management-system': typeof AttendanceManagementSystemIndexRoute
+  '/courses': typeof CoursesIndexRoute
   '/initiative': typeof InitiativeIndexRoute
+  '/internships': typeof InternshipsIndexRoute
   '/learning-management-system': typeof LearningManagementSystemIndexRoute
   '/news': typeof NewsIndexRoute
   '/admin/crm/contacts': typeof AdminCrmContactsRouteRouteWithChildren
@@ -1113,6 +1169,7 @@ export interface FileRoutesByTo {
   '/admin/forms': typeof AdminFormsIndexRoute
   '/admin/news': typeof AdminNewsIndexRoute
   '/learning-management-system/admin': typeof LearningManagementSystemAdminIndexRoute
+  '/learning-management-system/courses': typeof LearningManagementSystemCoursesIndexRoute
   '/learning-management-system/instructor': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/internships': typeof LearningManagementSystemInternshipsIndexRoute
   '/learning-management-system/student': typeof LearningManagementSystemStudentIndexRoute
@@ -1161,6 +1218,7 @@ export interface FileRoutesById {
   '/feedback': typeof FeedbackRoute
   '/initiative-survey': typeof InitiativeSurveyRoute
   '/international-business-bridge': typeof InternationalBusinessBridgeRoute
+  '/lms': typeof LmsRoute
   '/one-million-initiative': typeof OneMillionInitiativeRoute
   '/one-million-initiative-donors': typeof OneMillionInitiativeDonorsRoute
   '/one-million-initiative-home': typeof OneMillionInitiativeHomeRoute
@@ -1170,6 +1228,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/super-admin': typeof SuperAdminRoute
   '/texpo': typeof TexpoRoute
+  '/training': typeof TrainingRoute
   '/admin/crm': typeof AdminCrmRouteRouteWithChildren
   '/admin/forms': typeof AdminFormsRouteRouteWithChildren
   '/learning-management-system/admin': typeof LearningManagementSystemAdminRouteRouteWithChildren
@@ -1192,11 +1251,13 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/attendance-management-system/login': typeof AttendanceManagementSystemLoginRoute
   '/communities/$key': typeof CommunitiesKeyRoute
+  '/courses/$id': typeof CoursesIdRoute
   '/event-signup/$token': typeof EventSignupTokenRoute
   '/events/$slug': typeof EventsSlugRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/initiative/claim': typeof InitiativeClaimRoute
   '/initiative/sponsors': typeof InitiativeSponsorsRoute
+  '/internships/$slug': typeof InternshipsSlugRoute
   '/join/$token': typeof JoinTokenRoute
   '/learning-management-system/catalog': typeof LearningManagementSystemCatalogRoute
   '/learning-management-system/confirm-account': typeof LearningManagementSystemConfirmAccountRoute
@@ -1216,7 +1277,9 @@ export interface FileRoutesById {
   '/resources/ai-tools': typeof ResourcesAiToolsRoute
   '/admin/': typeof AdminIndexRoute
   '/attendance-management-system/': typeof AttendanceManagementSystemIndexRoute
+  '/courses/': typeof CoursesIndexRoute
   '/initiative/': typeof InitiativeIndexRoute
+  '/internships/': typeof InternshipsIndexRoute
   '/learning-management-system/': typeof LearningManagementSystemIndexRoute
   '/news/': typeof NewsIndexRoute
   '/admin/crm/contacts': typeof AdminCrmContactsRouteRouteWithChildren
@@ -1249,6 +1312,7 @@ export interface FileRoutesById {
   '/admin/forms/': typeof AdminFormsIndexRoute
   '/admin/news/': typeof AdminNewsIndexRoute
   '/learning-management-system/admin/': typeof LearningManagementSystemAdminIndexRoute
+  '/learning-management-system/courses/': typeof LearningManagementSystemCoursesIndexRoute
   '/learning-management-system/instructor/': typeof LearningManagementSystemInstructorIndexRoute
   '/learning-management-system/internships/': typeof LearningManagementSystemInternshipsIndexRoute
   '/learning-management-system/student/': typeof LearningManagementSystemStudentIndexRoute
@@ -1299,6 +1363,7 @@ export interface FileRouteTypes {
     | '/feedback'
     | '/initiative-survey'
     | '/international-business-bridge'
+    | '/lms'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
@@ -1308,6 +1373,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/super-admin'
     | '/texpo'
+    | '/training'
     | '/admin/crm'
     | '/admin/forms'
     | '/learning-management-system/admin'
@@ -1330,11 +1396,13 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/courses/$id'
     | '/event-signup/$token'
     | '/events/$slug'
     | '/forms/$slug'
     | '/initiative/claim'
     | '/initiative/sponsors'
+    | '/internships/$slug'
     | '/join/$token'
     | '/learning-management-system/catalog'
     | '/learning-management-system/confirm-account'
@@ -1354,7 +1422,9 @@ export interface FileRouteTypes {
     | '/resources/ai-tools'
     | '/admin/'
     | '/attendance-management-system/'
+    | '/courses/'
     | '/initiative/'
+    | '/internships/'
     | '/learning-management-system/'
     | '/news/'
     | '/admin/crm/contacts'
@@ -1387,6 +1457,7 @@ export interface FileRouteTypes {
     | '/admin/forms/'
     | '/admin/news/'
     | '/learning-management-system/admin/'
+    | '/learning-management-system/courses/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/internships/'
     | '/learning-management-system/student/'
@@ -1432,6 +1503,7 @@ export interface FileRouteTypes {
     | '/feedback'
     | '/initiative-survey'
     | '/international-business-bridge'
+    | '/lms'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
@@ -1441,6 +1513,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/super-admin'
     | '/texpo'
+    | '/training'
     | '/admin/attendance'
     | '/admin/chatbot'
     | '/admin/dashboard'
@@ -1458,11 +1531,13 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/courses/$id'
     | '/event-signup/$token'
     | '/events/$slug'
     | '/forms/$slug'
     | '/initiative/claim'
     | '/initiative/sponsors'
+    | '/internships/$slug'
     | '/join/$token'
     | '/learning-management-system/catalog'
     | '/learning-management-system/confirm-account'
@@ -1482,7 +1557,9 @@ export interface FileRouteTypes {
     | '/resources/ai-tools'
     | '/admin'
     | '/attendance-management-system'
+    | '/courses'
     | '/initiative'
+    | '/internships'
     | '/learning-management-system'
     | '/news'
     | '/admin/crm/contacts'
@@ -1514,6 +1591,7 @@ export interface FileRouteTypes {
     | '/admin/forms'
     | '/admin/news'
     | '/learning-management-system/admin'
+    | '/learning-management-system/courses'
     | '/learning-management-system/instructor'
     | '/learning-management-system/internships'
     | '/learning-management-system/student'
@@ -1561,6 +1639,7 @@ export interface FileRouteTypes {
     | '/feedback'
     | '/initiative-survey'
     | '/international-business-bridge'
+    | '/lms'
     | '/one-million-initiative'
     | '/one-million-initiative-donors'
     | '/one-million-initiative-home'
@@ -1570,6 +1649,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/super-admin'
     | '/texpo'
+    | '/training'
     | '/admin/crm'
     | '/admin/forms'
     | '/learning-management-system/admin'
@@ -1592,11 +1672,13 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/attendance-management-system/login'
     | '/communities/$key'
+    | '/courses/$id'
     | '/event-signup/$token'
     | '/events/$slug'
     | '/forms/$slug'
     | '/initiative/claim'
     | '/initiative/sponsors'
+    | '/internships/$slug'
     | '/join/$token'
     | '/learning-management-system/catalog'
     | '/learning-management-system/confirm-account'
@@ -1616,7 +1698,9 @@ export interface FileRouteTypes {
     | '/resources/ai-tools'
     | '/admin/'
     | '/attendance-management-system/'
+    | '/courses/'
     | '/initiative/'
+    | '/internships/'
     | '/learning-management-system/'
     | '/news/'
     | '/admin/crm/contacts'
@@ -1649,6 +1733,7 @@ export interface FileRouteTypes {
     | '/admin/forms/'
     | '/admin/news/'
     | '/learning-management-system/admin/'
+    | '/learning-management-system/courses/'
     | '/learning-management-system/instructor/'
     | '/learning-management-system/internships/'
     | '/learning-management-system/student/'
@@ -1698,6 +1783,7 @@ export interface RootRouteChildren {
   FeedbackRoute: typeof FeedbackRoute
   InitiativeSurveyRoute: typeof InitiativeSurveyRoute
   InternationalBusinessBridgeRoute: typeof InternationalBusinessBridgeRoute
+  LmsRoute: typeof LmsRoute
   OneMillionInitiativeRoute: typeof OneMillionInitiativeRoute
   OneMillionInitiativeDonorsRoute: typeof OneMillionInitiativeDonorsRoute
   OneMillionInitiativeHomeRoute: typeof OneMillionInitiativeHomeRoute
@@ -1707,13 +1793,16 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuperAdminRoute: typeof SuperAdminRoute
   TexpoRoute: typeof TexpoRoute
+  TrainingRoute: typeof TrainingRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunitiesKeyRoute: typeof CommunitiesKeyRoute
+  CoursesIdRoute: typeof CoursesIdRoute
   EventSignupTokenRoute: typeof EventSignupTokenRoute
   EventsSlugRoute: typeof EventsSlugRoute
   FormsSlugRoute: typeof FormsSlugRoute
   InitiativeClaimRoute: typeof InitiativeClaimRoute
   InitiativeSponsorsRoute: typeof InitiativeSponsorsRoute
+  InternshipsSlugRoute: typeof InternshipsSlugRoute
   JoinTokenRoute: typeof JoinTokenRoute
   NewsIdRoute: typeof NewsIdRoute
   NewsBuildexAleppoRoute: typeof NewsBuildexAleppoRoute
@@ -1722,7 +1811,9 @@ export interface RootRouteChildren {
   NewsTvInterviewRoute: typeof NewsTvInterviewRoute
   ProfileSlugRoute: typeof ProfileSlugRoute
   ResourcesAiToolsRoute: typeof ResourcesAiToolsRoute
+  CoursesIndexRoute: typeof CoursesIndexRoute
   InitiativeIndexRoute: typeof InitiativeIndexRoute
+  InternshipsIndexRoute: typeof InternshipsIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
   ApiPublicBunnyWebhookRoute: typeof ApiPublicBunnyWebhookRoute
   ApiProfileCardSlugKindRoute: typeof ApiProfileCardSlugKindRoute
@@ -1734,6 +1825,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/training': {
+      id: '/training'
+      path: '/training'
+      fullPath: '/training'
+      preLoaderRoute: typeof TrainingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/texpo': {
       id: '/texpo'
       path: '/texpo'
@@ -1795,6 +1893,13 @@ declare module '@tanstack/react-router' {
       path: '/one-million-initiative'
       fullPath: '/one-million-initiative'
       preLoaderRoute: typeof OneMillionInitiativeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lms': {
+      id: '/lms'
+      path: '/lms'
+      fullPath: '/lms'
+      preLoaderRoute: typeof LmsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/international-business-bridge': {
@@ -1881,11 +1986,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearningManagementSystemIndexRouteImport
       parentRoute: typeof LearningManagementSystemRouteRoute
     }
+    '/internships/': {
+      id: '/internships/'
+      path: '/internships'
+      fullPath: '/internships/'
+      preLoaderRoute: typeof InternshipsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/initiative/': {
       id: '/initiative/'
       path: '/initiative'
       fullPath: '/initiative/'
       preLoaderRoute: typeof InitiativeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/courses/': {
+      id: '/courses/'
+      path: '/courses'
+      fullPath: '/courses/'
+      preLoaderRoute: typeof CoursesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/attendance-management-system/': {
@@ -2021,6 +2140,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JoinTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/internships/$slug': {
+      id: '/internships/$slug'
+      path: '/internships/$slug'
+      fullPath: '/internships/$slug'
+      preLoaderRoute: typeof InternshipsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/initiative/sponsors': {
       id: '/initiative/sponsors'
       path: '/initiative/sponsors'
@@ -2054,6 +2180,13 @@ declare module '@tanstack/react-router' {
       path: '/event-signup/$token'
       fullPath: '/event-signup/$token'
       preLoaderRoute: typeof EventSignupTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/courses/$id': {
+      id: '/courses/$id'
+      path: '/courses/$id'
+      fullPath: '/courses/$id'
+      preLoaderRoute: typeof CoursesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/communities/$key': {
@@ -2230,6 +2363,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/learning-management-system/instructor/'
       preLoaderRoute: typeof LearningManagementSystemInstructorIndexRouteImport
       parentRoute: typeof LearningManagementSystemInstructorRouteRoute
+    }
+    '/learning-management-system/courses/': {
+      id: '/learning-management-system/courses/'
+      path: '/courses'
+      fullPath: '/learning-management-system/courses/'
+      preLoaderRoute: typeof LearningManagementSystemCoursesIndexRouteImport
+      parentRoute: typeof LearningManagementSystemRouteRoute
     }
     '/learning-management-system/admin/': {
       id: '/learning-management-system/admin/'
@@ -3013,6 +3153,7 @@ interface LearningManagementSystemRouteRouteChildren {
   LearningManagementSystemCertificateIdRoute: typeof LearningManagementSystemCertificateIdRoute
   LearningManagementSystemCoursesIdRoute: typeof LearningManagementSystemCoursesIdRoute
   LearningManagementSystemInstructorsIdRoute: typeof LearningManagementSystemInstructorsIdRoute
+  LearningManagementSystemCoursesIndexRoute: typeof LearningManagementSystemCoursesIndexRoute
   LearningManagementSystemInternshipsIndexRoute: typeof LearningManagementSystemInternshipsIndexRoute
   LearningManagementSystemInternshipsSlugApplyRoute: typeof LearningManagementSystemInternshipsSlugApplyRoute
   LearningManagementSystemInternshipsSlugIndexRoute: typeof LearningManagementSystemInternshipsSlugIndexRoute
@@ -3046,6 +3187,8 @@ const LearningManagementSystemRouteRouteChildren: LearningManagementSystemRouteR
       LearningManagementSystemCoursesIdRoute,
     LearningManagementSystemInstructorsIdRoute:
       LearningManagementSystemInstructorsIdRoute,
+    LearningManagementSystemCoursesIndexRoute:
+      LearningManagementSystemCoursesIndexRoute,
     LearningManagementSystemInternshipsIndexRoute:
       LearningManagementSystemInternshipsIndexRoute,
     LearningManagementSystemInternshipsSlugApplyRoute:
@@ -3072,6 +3215,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeedbackRoute: FeedbackRoute,
   InitiativeSurveyRoute: InitiativeSurveyRoute,
   InternationalBusinessBridgeRoute: InternationalBusinessBridgeRoute,
+  LmsRoute: LmsRoute,
   OneMillionInitiativeRoute: OneMillionInitiativeRoute,
   OneMillionInitiativeDonorsRoute: OneMillionInitiativeDonorsRoute,
   OneMillionInitiativeHomeRoute: OneMillionInitiativeHomeRoute,
@@ -3081,13 +3225,16 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuperAdminRoute: SuperAdminRoute,
   TexpoRoute: TexpoRoute,
+  TrainingRoute: TrainingRoute,
   ApiChatRoute: ApiChatRoute,
   CommunitiesKeyRoute: CommunitiesKeyRoute,
+  CoursesIdRoute: CoursesIdRoute,
   EventSignupTokenRoute: EventSignupTokenRoute,
   EventsSlugRoute: EventsSlugRoute,
   FormsSlugRoute: FormsSlugRoute,
   InitiativeClaimRoute: InitiativeClaimRoute,
   InitiativeSponsorsRoute: InitiativeSponsorsRoute,
+  InternshipsSlugRoute: InternshipsSlugRoute,
   JoinTokenRoute: JoinTokenRoute,
   NewsIdRoute: NewsIdRoute,
   NewsBuildexAleppoRoute: NewsBuildexAleppoRoute,
@@ -3096,7 +3243,9 @@ const rootRouteChildren: RootRouteChildren = {
   NewsTvInterviewRoute: NewsTvInterviewRoute,
   ProfileSlugRoute: ProfileSlugRoute,
   ResourcesAiToolsRoute: ResourcesAiToolsRoute,
+  CoursesIndexRoute: CoursesIndexRoute,
   InitiativeIndexRoute: InitiativeIndexRoute,
+  InternshipsIndexRoute: InternshipsIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
   ApiPublicBunnyWebhookRoute: ApiPublicBunnyWebhookRoute,
   ApiProfileCardSlugKindRoute: ApiProfileCardSlugKindRoute,

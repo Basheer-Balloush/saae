@@ -15,6 +15,8 @@ export type MyApplicationRow = {
   attempt_number: number;
   submitted_at: string;
   withdrawn_at: string | null;
+  /** The opportunity still has a public page (published or closed). */
+  opportunity_listed: boolean;
 };
 
 export type ApplyContextCourse = {
@@ -320,7 +322,18 @@ export const listMyInternshipApplications = createServerFn({ method: "GET" })
     const { supabase } = context as { supabase: any };
     const { data, error } = await supabase.rpc("list_my_internship_applications");
     if (error) throw new Error(error.message);
-    return (data ?? []) as MyApplicationRow[];
+    const rows = (data ?? []) as Omit<MyApplicationRow, "opportunity_listed">[];
+    if (rows.length === 0) return [];
+    // An opportunity an admin has since hidden has no public page; the profile
+    // shows its title without a link rather than sending the applicant to it.
+    const { data: listed, error: lErr } = await supabase
+      .from("internship_opportunities")
+      .select("id")
+      .in("id", [...new Set(rows.map((r) => r.opportunity_id))])
+      .in("status", ["published", "closed"]);
+    if (lErr) throw new Error(lErr.message);
+    const listedIds = new Set((listed ?? []).map((o: { id: string }) => o.id));
+    return rows.map((r) => ({ ...r, opportunity_listed: listedIds.has(r.opportunity_id) }));
   });
 
 // Map RPC error strings to user-facing localized keys.

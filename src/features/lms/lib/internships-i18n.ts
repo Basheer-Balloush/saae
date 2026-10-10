@@ -54,6 +54,8 @@ export const lmsInternshipsT: Record<Lang, Record<string, string>> = {
     internshipApplyLoginRequired: "سجّل الدخول للتقديم",
     internshipClosed: "التقديم مغلق",
     internshipHidden: "غير متاح",
+    internshipUnavailableNote: "الفرصة التي فتحتها لم تعد معروضة. هذه هي الفرص المتاحة الآن.",
+    internshipNoLongerListed: "لم تعد معروضة",
     internshipDeadlinePassed: "انتهى موعد التقديم",
     internshipOpensSoon: "يفتح التقديم قريبًا",
     internshipOpensOn: "يفتح التقديم في",
@@ -172,6 +174,9 @@ export const lmsInternshipsT: Record<Lang, Record<string, string>> = {
     internshipApplyLoginRequired: "Sign in to apply",
     internshipClosed: "Applications are closed",
     internshipHidden: "Not available",
+    internshipUnavailableNote:
+      "The opportunity you opened is no longer listed. These are the opportunities available now.",
+    internshipNoLongerListed: "No longer listed",
     internshipDeadlinePassed: "Application deadline has passed",
     internshipOpensSoon: "Opens soon",
     internshipOpensOn: "Applications open on",
